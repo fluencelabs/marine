@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-use std::path::PathBuf;
 use wasmer_wasi::WasiVersion;
+
+use std::path::PathBuf;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct WASIConfig {

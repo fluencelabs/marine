@@ -15,7 +15,10 @@
  */
 
 use crate::vm::{
-    config::Config, errors::FrankError, frank_result::FrankResult, prepare::prepare_module,
+    config::Config,
+    errors::FrankError,
+    frank_result::FrankResult,
+    prepare::prepare_module,
     service::FluenceService,
 };
 

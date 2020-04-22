@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-use std::error::Error;
 use wasmer_runtime::error::{
-    CallError, CompileError, CreationError, Error as WasmerError, ResolveError, RuntimeError,
+    CallError,
+    CompileError,
+    CreationError,
+    Error as WasmerError,
+    ResolveError,
+    RuntimeError,
 };
+
+use std::error::Error;
 
 #[derive(Debug)]
 pub enum FrankError {

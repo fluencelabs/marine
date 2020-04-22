@@ -16,6 +16,7 @@
 
 use crate::vm::errors::FrankError;
 use crate::vm::frank_result::FrankResult;
+
 use sha2::digest::generic_array::GenericArray;
 
 /// Describes a service behaviour in the Fluence network.

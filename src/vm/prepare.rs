@@ -18,12 +18,14 @@
 // https://github.com/paritytech/substrate/blob/master/srml/contracts/src/wasm/prepare.rs
 // https://github.com/nearprotocol/nearcore/blob/master/runtime/near-vm-runner/src/prepare.rs
 
-use parity_wasm::builder;
-use parity_wasm::elements;
-
 use crate::vm::config::Config;
 use crate::vm::errors::FrankError;
-use parity_wasm::elements::{MemorySection, MemoryType};
+
+use parity_wasm::{
+    elements::{MemorySection, MemoryType},
+    builder,
+    elements,
+};
 
 struct ModulePreparator {
     module: elements::Module,
