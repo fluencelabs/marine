@@ -19,11 +19,10 @@ use crate::vm::{
     service::FluenceService,
 };
 
-use failure::_core::marker::PhantomData;
 use sha2::{digest::generic_array::GenericArray, digest::FixedOutput, Digest, Sha256};
 use wasmer_runtime::{compile, func, imports, Ctx, Func, Instance};
 use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
-use wasmer_wasi::{generate_import_object_for_version, WasiVersion};
+use wasmer_wasi::generate_import_object_for_version;
 
 pub struct Frank {
     instance: &'static Instance,
