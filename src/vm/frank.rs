@@ -15,10 +15,7 @@
  */
 
 use crate::vm::{
-    config::Config,
-    errors::FrankError,
-    frank_result::FrankResult,
-    prepare::prepare_module,
+    config::Config, errors::FrankError, frank_result::FrankResult, prepare::prepare_module,
     service::FluenceService,
 };
 
@@ -88,7 +85,7 @@ impl Frank {
 
     /// Creates a new virtual machine executor.
     pub fn new(wasm_bytes: &[u8], config: Config) -> Result<Self, FrankError> {
-        let prepared_wasm_bytes = prepare_module(wasm_bytes, &config)?;
+        let prepared_wasm_bytes = prepare_module(wasm_bytes, config.mem_pages_count)?;
 
         let logger_imports = imports! {
             "logger" => {

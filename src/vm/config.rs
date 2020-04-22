@@ -46,9 +46,9 @@ impl Default for WASIConfig {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Config {
-    /// Count of Wasm memory pages that will be preallocated on the VM startup.
+    /// Maximum number of Wasm memory pages that loaded module can use.
     /// Each Wasm pages is 65536 bytes long.
-    pub mem_pages_count: i32,
+    pub mem_pages_count: u32,
 
     /// If true, registers the logger Wasm module with name 'logger'.
     /// This functionality is just for debugging, and this module will be disabled in future.

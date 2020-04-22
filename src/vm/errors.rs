@@ -15,21 +15,13 @@
  */
 
 use wasmer_runtime::error::{
-    CallError,
-    CompileError,
-    CreationError,
-    Error as WasmerError,
-    ResolveError,
-    RuntimeError,
+    CallError, CompileError, CreationError, Error as WasmerError, ResolveError, RuntimeError,
 };
 
 use std::error::Error;
 
 #[derive(Debug)]
 pub enum FrankError {
-    /// Errors related to the preparation (instrumentation and so on) and compilation by Wasmer steps.
-    InstantiationError(String),
-
     /// Errors for I/O errors raising while opening a file.
     IOError(String),
 
@@ -54,7 +46,6 @@ impl Error for FrankError {}
 impl std::fmt::Display for FrankError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
-            FrankError::InstantiationError(msg) => write!(f, "InstantiationError: {}", msg),
             FrankError::IOError(msg) => write!(f, "IOError: {}", msg),
             FrankError::WasmerResolveError(msg) => write!(f, "WasmerResolveError: {}", msg),
             FrankError::WasmerInvokeError(msg) => write!(f, "WasmerInvokeError: {}", msg),

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/*
 #![deny(
     nonstandard_style,
     unused_imports,
@@ -23,14 +22,12 @@
     unused_unsafe,
     unreachable_patterns
 )]
-*/
 
 /// Command-line tool intended to test Frank VM.
 mod vm;
 
 use crate::vm::config::Config;
 use crate::vm::frank::Frank;
-use crate::vm::prepare::prepare_module;
 
 use crate::vm::service::FluenceService;
 use clap::{App, AppSettings, Arg, SubCommand};
@@ -79,7 +76,6 @@ fn main() -> Result<(), ExitFailure> {
             let config = Config::default();
             let in_module_path = arg.value_of(IN_MODULE_PATH).unwrap();
             let wasm_code = fs::read(in_module_path)?;
-            let wasm_code = prepare_module(&wasm_code, &config)?;
 
             let invoke_arg = arg.value_of(INVOKE_ARG).unwrap();
             let mut frank = Frank::new(&wasm_code, config)?;

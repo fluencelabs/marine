@@ -18,13 +18,11 @@
 // https://github.com/paritytech/substrate/blob/master/srml/contracts/src/wasm/prepare.rs
 // https://github.com/nearprotocol/nearcore/blob/master/runtime/near-vm-runner/src/prepare.rs
 
-use crate::vm::config::Config;
 use crate::vm::errors::FrankError;
 
 use parity_wasm::{
+    builder, elements,
     elements::{MemorySection, MemoryType},
-    builder,
-    elements,
 };
 
 struct ModulePreparator {
@@ -75,8 +73,8 @@ impl<'a> ModulePreparator {
 
 /// Prepares a Wasm module:
 ///   - set memory page count
-pub fn prepare_module(module: &[u8], config: &Config) -> Result<Vec<u8>, FrankError> {
+pub fn prepare_module(module: &[u8], mem_pages_count: u32) -> Result<Vec<u8>, FrankError> {
     ModulePreparator::init(module)?
-        .set_mem_pages_count(config.mem_pages_count as _)
+        .set_mem_pages_count(mem_pages_count)
         .into_wasm()
 }
