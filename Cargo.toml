@@ -21,6 +21,7 @@ path = "src/main.rs"
 [dependencies]
 wasmer-runtime = {git = "http://github.com/fluencelabs/wasmer"}
 wasmer-runtime-core = {git = "http://github.com/fluencelabs/wasmer"}
+wasmer-wasi = {git = "http://github.com/fluencelabs/wasmer"}
 failure = "0.1.7"
 lazy_static = "1.4.0"
 sha2 = "0.8.1"

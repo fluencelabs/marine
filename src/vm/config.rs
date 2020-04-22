@@ -14,6 +14,35 @@
  * limitations under the License.
  */
 
+use std::path::PathBuf;
+use wasmer_wasi::WasiVersion;
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct WASIConfig {
+    /// Desired WASI version.
+    pub version: WasiVersion,
+
+    /// Environment variables for loaded modules.
+    pub envs: Vec<Vec<u8>>,
+
+    /// List of available directories for loaded modules.
+    pub preopened_files: Vec<PathBuf>,
+
+    /// Mapping between paths.
+    pub mapped_dirs: Vec<(String, PathBuf)>,
+}
+
+impl Default for WASIConfig {
+    fn default() -> Self {
+        Self {
+            version: WasiVersion::Latest,
+            envs: vec![],
+            preopened_files: vec![],
+            mapped_dirs: vec![],
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Config {
     /// Count of Wasm memory pages that will be preallocated on the VM startup.
@@ -34,6 +63,10 @@ pub struct Config {
     /// The name of function that should be called for deallocation of
     /// previously allocated memory by allocateFunction.
     pub deallocate_function_name: String,
+
+    /// Config for WASI subsystem initialization. None means that module should be loaded
+    /// without WASI.
+    pub wasi_config: Option<WASIConfig>,
 }
 
 impl Default for Config {
@@ -46,6 +79,7 @@ impl Default for Config {
             allocate_function_name: "allocate".to_string(),
             deallocate_function_name: "deallocate".to_string(),
             logger_enabled: true,
+            wasi_config: Some(WASIConfig::default()),
         }
     }
 }

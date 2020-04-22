@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-use crate::vm::service::FluenceService;
-use crate::{vm::config::Config, vm::errors::FrankError, vm::frank_result::FrankResult};
+use crate::vm::{
+    config::Config, errors::FrankError, frank_result::FrankResult, prepare::prepare_module,
+    service::FluenceService,
+};
 
 use failure::_core::marker::PhantomData;
 use sha2::{digest::generic_array::GenericArray, digest::FixedOutput, Digest, Sha256};
-use wasmer_runtime::{func, imports, instantiate, Ctx, Func, Instance};
+use wasmer_runtime::{compile, func, imports, Ctx, Func, Instance};
 use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
+use wasmer_wasi::{generate_import_object_for_version, WasiVersion};
 
 pub struct Frank {
     instance: &'static Instance,
@@ -55,7 +58,7 @@ impl Frank {
     fn write_to_mem(&mut self, address: usize, value: &[u8]) -> Result<(), FrankError> {
         let memory = self.instance.context().memory(0);
 
-        for (byte_id, cell) in memory.view::<u8>()[address as usize..(address + value.len())]
+        for (byte_id, cell) in memory.view::<u8>()[address..(address + value.len())]
             .iter()
             .enumerate()
         {
@@ -65,7 +68,7 @@ impl Frank {
         Ok(())
     }
 
-    /// Reads given count of bytes from given address.
+    /// Reads invocation result from specified address of memory.
     fn read_result_from_mem(&self, address: usize) -> Result<Vec<u8>, FrankError> {
         let memory = self.instance.context().memory(0);
 
@@ -84,16 +87,32 @@ impl Frank {
     }
 
     /// Creates a new virtual machine executor.
-    pub fn new(module: &[u8], config: Config) -> Result<Self, FrankError> {
-        let import_objects = imports! {
-            // this will enforce Wasmer to register EnvModule in the ctx.data field
+    pub fn new(wasm_bytes: &[u8], config: Config) -> Result<Self, FrankError> {
+        let prepared_wasm_bytes = prepare_module(wasm_bytes, &config)?;
+
+        let logger_imports = imports! {
             "logger" => {
                 "log_utf8_string" => func!(logger_log_utf8_string),
             },
         };
 
-        let instance: &'static mut Instance =
-            Box::leak(Box::new(instantiate(module, &import_objects)?));
+        let import_object = match config.wasi_config {
+            Some(wasi_config) => {
+                let mut wasi_import_object = generate_import_object_for_version(
+                    wasi_config.version,
+                    vec![],
+                    wasi_config.envs,
+                    wasi_config.preopened_files,
+                    wasi_config.mapped_dirs,
+                );
+                wasi_import_object.extend(logger_imports);
+                wasi_import_object
+            }
+            None => logger_imports,
+        };
+
+        let instance = compile(&prepared_wasm_bytes)?.instantiate(&import_object)?;
+        let instance: &'static mut Instance = Box::leak(Box::new(instance));
 
         Ok(Self {
             instance,

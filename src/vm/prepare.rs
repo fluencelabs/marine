@@ -22,7 +22,7 @@ use parity_wasm::builder;
 use parity_wasm::elements;
 
 use crate::vm::config::Config;
-use crate::vm::errors::InitializationError;
+use crate::vm::errors::FrankError;
 use parity_wasm::elements::{MemorySection, MemoryType};
 
 struct ModulePreparator {
@@ -30,7 +30,7 @@ struct ModulePreparator {
 }
 
 impl<'a> ModulePreparator {
-    fn init(module_code: &[u8]) -> Result<Self, InitializationError> {
+    fn init(module_code: &[u8]) -> Result<Self, FrankError> {
         let module = elements::deserialize_buffer(module_code)?;
 
         Ok(Self { module })
@@ -66,14 +66,14 @@ impl<'a> ModulePreparator {
         }
     }
 
-    fn into_wasm(self) -> Result<Vec<u8>, InitializationError> {
+    fn into_wasm(self) -> Result<Vec<u8>, FrankError> {
         elements::serialize(self.module).map_err(Into::into)
     }
 }
 
 /// Prepares a Wasm module:
 ///   - set memory page count
-pub fn prepare_module(module: &[u8], config: &Config) -> Result<Vec<u8>, InitializationError> {
+pub fn prepare_module(module: &[u8], config: &Config) -> Result<Vec<u8>, FrankError> {
     ModulePreparator::init(module)?
         .set_mem_pages_count(config.mem_pages_count as _)
         .into_wasm()

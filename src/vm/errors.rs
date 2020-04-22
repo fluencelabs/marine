@@ -19,19 +19,6 @@ use wasmer_runtime::error::{
     CallError, CompileError, CreationError, Error as WasmerError, ResolveError, RuntimeError,
 };
 
-/// Errors related to the preparation (instrumentation and so on) and compilation by Wasmer steps.
-#[derive(Debug)]
-pub enum InitializationError {
-    /// Error that raises during compilation Wasm code by Wasmer.
-    WasmerCreationError(String),
-
-    /// Error that raises during creation of some Wasm objects (like table and memory) by Wasmer.
-    WasmerCompileError(String),
-
-    /// Error that raises on the preparation step.
-    PrepareError(String),
-}
-
 #[derive(Debug)]
 pub enum FrankError {
     /// Errors related to the preparation (instrumentation and so on) and compilation by Wasmer steps.
@@ -46,22 +33,17 @@ pub enum FrankError {
     /// Error related to calling a main Wasm module.
     WasmerInvokeError(String),
 
-    /// Error indicates that smth really bad happened (like removing the global Frank state).
-    FrankNotInitialized,
+    /// Error that raises during compilation Wasm code by Wasmer.
+    WasmerCreationError(String),
+
+    /// Error that raises during creation of some Wasm objects (like table and memory) by Wasmer.
+    WasmerCompileError(String),
+
+    /// Error that raises on the preparation step.
+    PrepareError(String),
 }
 
-impl Error for InitializationError {}
 impl Error for FrankError {}
-
-impl std::fmt::Display for InitializationError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        match self {
-            InitializationError::WasmerCompileError(msg) => write!(f, "{}", msg),
-            InitializationError::WasmerCreationError(msg) => write!(f, "{}", msg),
-            InitializationError::PrepareError(msg) => write!(f, "{}", msg),
-        }
-    }
-}
 
 impl std::fmt::Display for FrankError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
@@ -70,36 +52,30 @@ impl std::fmt::Display for FrankError {
             FrankError::IOError(msg) => write!(f, "IOError: {}", msg),
             FrankError::WasmerResolveError(msg) => write!(f, "WasmerResolveError: {}", msg),
             FrankError::WasmerInvokeError(msg) => write!(f, "WasmerInvokeError: {}", msg),
-            FrankError::FrankNotInitialized => write!(
-                f,
-                "Attempt to use invoke virtual machine while it hasn't been initialized.\
-                 Please call the initialization method first."
-            ),
+            FrankError::WasmerCompileError(msg) => write!(f, "WasmerCompileError: {}", msg),
+            FrankError::WasmerCreationError(msg) => write!(f, "WasmerCreationError: {}", msg),
+            FrankError::PrepareError(msg) => {
+                write!(f, "Prepare error: {}, probably module is mailformed", msg)
+            }
         }
     }
 }
 
-impl From<CreationError> for InitializationError {
+impl From<CreationError> for FrankError {
     fn from(err: CreationError) -> Self {
-        InitializationError::WasmerCreationError(format!("{}", err))
+        FrankError::WasmerCreationError(format!("{}", err))
     }
 }
 
-impl From<CompileError> for InitializationError {
+impl From<CompileError> for FrankError {
     fn from(err: CompileError) -> Self {
-        InitializationError::WasmerCompileError(format!("{}", err))
+        FrankError::WasmerCompileError(format!("{}", err))
     }
 }
 
-impl From<parity_wasm::elements::Error> for InitializationError {
+impl From<parity_wasm::elements::Error> for FrankError {
     fn from(err: parity_wasm::elements::Error) -> Self {
-        InitializationError::PrepareError(format!("{}", err))
-    }
-}
-
-impl From<InitializationError> for FrankError {
-    fn from(err: InitializationError) -> Self {
-        FrankError::InstantiationError(format!("{}", err))
+        FrankError::PrepareError(format!("{}", err))
     }
 }
 

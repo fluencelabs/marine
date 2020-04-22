@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/*
 #![deny(
     nonstandard_style,
     unused_imports,
@@ -22,6 +23,7 @@
     unused_unsafe,
     unreachable_patterns
 )]
+*/
 
 /// Command-line tool intended to test Frank VM.
 mod vm;
