@@ -34,8 +34,6 @@ pub struct Frank {
     allocate: Option<Func<'static, i32, i32>>,
     deallocate: Option<Func<'static, (i32, i32), ()>>,
     invoke: Option<Func<'static, (i32, i32), i32>>,
-
-    _tag: PhantomData<&'static Instance>,
 }
 
 impl Drop for Frank {
@@ -119,7 +117,6 @@ impl Frank {
             allocate: Some(instance.exports.get(&config.allocate_function_name)?),
             deallocate: Some(instance.exports.get(&config.deallocate_function_name)?),
             invoke: Some(instance.exports.get(&config.invoke_function_name)?),
-            _tag: PhantomData,
         })
     }
 }
