@@ -93,29 +93,23 @@ impl Frank {
             },
         };
 
-        let import_object = match config.wasi_config {
-            Some(wasi_config) => {
-                let mut wasi_import_object = generate_import_object_for_version(
-                    wasi_config.version,
-                    vec![],
-                    wasi_config.envs,
-                    wasi_config.preopened_files,
-                    wasi_config.mapped_dirs,
-                );
-                wasi_import_object.extend(logger_imports);
-                wasi_import_object
-            }
-            None => logger_imports,
-        };
+        let mut import_object = generate_import_object_for_version(
+            config.wasi_config.version,
+            vec![],
+            config.wasi_config.envs,
+            config.wasi_config.preopened_files,
+            config.wasi_config.mapped_dirs,
+        );
+        import_object.extend(logger_imports);
 
         let instance = compile(&prepared_wasm_bytes)?.instantiate(&import_object)?;
         let instance: &'static mut Instance = Box::leak(Box::new(instance));
 
         Ok(Self {
             instance,
-            allocate: Some(instance.exports.get(&config.allocate_function_name)?),
-            deallocate: Some(instance.exports.get(&config.deallocate_function_name)?),
-            invoke: Some(instance.exports.get(&config.invoke_function_name)?),
+            allocate: Some(instance.exports.get(&config.allocate_fn_name)?),
+            deallocate: Some(instance.exports.get(&config.deallocate_fn_name)?),
+            invoke: Some(instance.exports.get(&config.invoke_fn_name)?),
         })
     }
 }

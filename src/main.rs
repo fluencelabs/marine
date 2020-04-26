@@ -34,6 +34,7 @@ use clap::{App, AppSettings, Arg, SubCommand};
 use exitfailure::ExitFailure;
 use failure::err_msg;
 use std::fs;
+use std::path::PathBuf;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
@@ -41,8 +42,9 @@ const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
 
 const IN_MODULE_PATH: &str = "in-wasm-path";
 const INVOKE_ARG: &str = "arg";
+const WASI_DIR: &str = "dir";
 
-fn prepare_args<'a, 'b>() -> [Arg<'a, 'b>; 2] {
+fn prepare_args<'a, 'b>() -> [Arg<'a, 'b>; 3] {
     [
         Arg::with_name(IN_MODULE_PATH)
             .required(true)
@@ -54,6 +56,13 @@ fn prepare_args<'a, 'b>() -> [Arg<'a, 'b>; 2] {
             .takes_value(true)
             .short("a")
             .help("argument for the invoke function in the Wasm module"),
+        Arg::with_name(WASI_DIR)
+            .required(true)
+            .takes_value(true)
+            .multiple(true)
+            .number_of_values(1)
+            .short("d")
+            .help("preopened directory for wasi subsystem"),
     ]
 }
 
@@ -73,11 +82,19 @@ fn main() -> Result<(), ExitFailure> {
 
     match app.get_matches().subcommand() {
         ("execute", Some(arg)) => {
-            let config = Config::default();
             let in_module_path = arg.value_of(IN_MODULE_PATH).unwrap();
             let wasm_code = fs::read(in_module_path)?;
 
             let invoke_arg = arg.value_of(INVOKE_ARG).unwrap();
+            let preopened_dirs: Vec<_> = arg.values_of(WASI_DIR).unwrap().collect();
+
+            let config = Config::default().with_wasi_preopened_files(
+                preopened_dirs
+                    .into_iter()
+                    .map(PathBuf::from)
+                    .collect::<Vec<PathBuf>>(),
+            );
+
             let mut frank = Frank::new(&wasm_code, config)?;
             let result = frank.invoke(invoke_arg.as_bytes())?;
 
