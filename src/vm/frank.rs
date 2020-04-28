@@ -78,9 +78,6 @@ impl FrankService for Frank {
         };
 
         let mut import_object = ImportObject::new_with_data(dispatcher);
-        for (_, module) in self.modules {
-
-        }
         //import_object.register();
 
         let module = FrankModule::new(&prepared_wasm_bytes, config, import_object)?;
