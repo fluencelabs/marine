@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use wasmer_runtime::Func;
+
 /// Application binary interface of a Frank module. Different module could use such scheme for
 /// communicate with each other.
 ///
@@ -26,30 +28,44 @@
 ///   4. read a result from the res by reading 4 bytes as little-endian result_size
 ///      and the read result_size bytes as the final result.
 ///   5. deallocate(res, strlen(sql)) to clean memory.
-pub trait ModuleABI {
+// TODO: make pub(crate)
+pub struct ModuleABI {
+    // It is safe to use unwrap() while calling these functions because Option is used here
+    // just to allow partially initialization. And all Option fields will contain Some if
+    // invoking Frank::new has been succeed.
     /// Allocates a region of memory inside a module. Used for passing argument inside the module.
-    ///   size a size of allocated memory region
-    ///   return a pointer to the allocated memory region
-    fn allocate(&mut self, size: i32) -> i32;
+    pub(crate) allocate: Option<Func<'static, i32, i32>>,
 
     /// Deallocates previously allocated memory region.
-    ///   ptr a pointer to the previously allocated memory region
-    //    size a size of the previously allocated memory region
-    fn deallocate(&mut self, ptr: i32, size: i32);
+    pub(crate) deallocate: Option<Func<'static, (i32, i32), ()>>,
 
     /// Calls the main entry point of a module called invoke.
-    ///   ptr a pointer to the supplied request
-    ///   size a size of the supplied request
-    ///   return a pointer to the struct contains result_size and result
-    fn invoke(&mut self, ptr: i32, size: i32) -> i32;
+    pub(crate) invoke: Option<Func<'static, (i32, i32), i32>>,
 
     /// Stores one given byte on provided address.
-    ///   ptr a address at which the needed byte is located
-    ///   return the byte at the given address
-    fn load(&self, ptr: i32) -> i32;
+    pub(crate) store: Option<Func<'static, (i32, i32)>>,
 
     /// Loads one bytes from provided address.
-    ///   ptr a address where byte should be stored
-    //    value a byte to be stored
-    fn store(&mut self, ptr: i32, value: i32);
+    pub(crate) load: Option<Func<'static, i32, i32>>,
+}
+
+impl Drop for ModuleABI {
+    // The manually drop is needed because at first we need to delete functions
+    // and only then instance.
+    fn drop(&mut self) {
+        #[allow(clippy::drop_copy)]
+        drop(self.allocate.as_ref());
+
+        #[allow(clippy::drop_copy)]
+        drop(self.deallocate.as_ref());
+
+        #[allow(clippy::drop_copy)]
+        drop(self.invoke.as_ref());
+
+        #[allow(clippy::drop_copy)]
+        drop(self.store.as_ref());
+
+        #[allow(clippy::drop_copy)]
+        drop(self.load.as_ref());
+    }
 }

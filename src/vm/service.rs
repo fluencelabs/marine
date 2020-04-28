@@ -25,7 +25,7 @@ pub trait FrankService {
     /// Invokes a module supplying byte array and expecting byte array with some outcome back.
     fn invoke(&mut self, module_name: String, argument: &[u8]) -> Result<FrankResult, FrankError>;
 
-    /// Registers new module inside in Frank Service.
+    /// Registers new module in the Frank Service.
     fn register_module(
         &mut self,
         module_name: String,

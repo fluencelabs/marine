@@ -16,9 +16,8 @@
 
 use crate::vm::config::Config;
 use crate::vm::errors::FrankError;
-use crate::vm::module::abi::ModuleABI;
 use crate::vm::module::frank_result::FrankResult;
-use crate::vm::module::ModuleAPI;
+use crate::vm::module::{ModuleABI, ModuleAPI};
 
 use sha2::digest::generic_array::GenericArray;
 use sha2::digest::FixedOutput;
@@ -41,12 +40,6 @@ pub struct FrankModule {
 
     /// Calls the main entry point of a module called invoke.
     invoke: Option<Func<'static, (i32, i32), i32>>,
-
-    /// Stores one given byte on provided address.
-    store: Option<Func<'static, (i32, i32)>>,
-
-    /// Loads one bytes from provided address.
-    load: Option<Func<'static, i32, i32>>,
 }
 
 impl FrankModule {
@@ -55,7 +48,7 @@ impl FrankModule {
         wasm_bytes: &[u8],
         config: Config,
         imports: ImportObject,
-    ) -> Result<Self, FrankError> {
+    ) -> Result<(Self, ModuleABI), FrankError> {
         let logger_imports = imports! {
             "logger" => {
                 "log_utf8_string" => func!(FrankModule::logger_log_utf8_string),
@@ -76,14 +69,21 @@ impl FrankModule {
         let instance = compile(&wasm_bytes)?.instantiate(&import_object)?;
         let instance: &'static mut Instance = Box::leak(Box::new(instance));
 
-        Ok(Self {
-            instance,
-            allocate: Some(instance.exports.get(&config.allocate_fn_name)?),
-            deallocate: Some(instance.exports.get(&config.deallocate_fn_name)?),
-            invoke: Some(instance.exports.get(&config.invoke_fn_name)?),
-            store: Some(instance.exports.get(&config.store_fn_name)?),
-            load: Some(instance.exports.get(&config.load_fn_name)?),
-        })
+        Ok((
+            Self {
+                instance,
+                allocate: Some(instance.exports.get(&config.allocate_fn_name)?),
+                deallocate: Some(instance.exports.get(&config.deallocate_fn_name)?),
+                invoke: Some(instance.exports.get(&config.invoke_fn_name)?),
+            },
+            ModuleABI {
+                allocate: Some(instance.exports.get(&config.allocate_fn_name)?),
+                deallocate: Some(instance.exports.get(&config.deallocate_fn_name)?),
+                invoke: Some(instance.exports.get(&config.invoke_fn_name)?),
+                store: Some(instance.exports.get(&config.store_fn_name)?),
+                load: Some(instance.exports.get(&config.load_fn_name)?),
+            },
+        ))
     }
 
     /// Prints utf8 string of the given size from the given offset. Called from the wasm.
@@ -125,44 +125,6 @@ impl FrankModule {
         }
 
         Ok(result)
-    }
-}
-
-impl ModuleABI for FrankModule {
-    fn allocate(&mut self, size: i32) -> i32 {
-        self.allocate
-            .as_ref()
-            .unwrap()
-            .call(size)
-            .expect("allocate failed")
-    }
-
-    fn deallocate(&mut self, ptr: i32, size: i32) {
-        self.deallocate
-            .as_ref()
-            .unwrap()
-            .call(ptr, size)
-            .expect("allocate failed");
-    }
-
-    fn invoke(&mut self, ptr: i32, size: i32) -> i32 {
-        self.invoke
-            .as_ref()
-            .unwrap()
-            .call(ptr, size)
-            .expect("invoke failed")
-    }
-
-    fn load(&self, ptr: i32) -> i32 {
-        self.load.as_ref().unwrap().call(ptr).expect("load failed")
-    }
-
-    fn store(&mut self, ptr: i32, value: i32) {
-        self.store
-            .as_ref()
-            .unwrap()
-            .call(ptr, value)
-            .expect("store failed");
     }
 }
 
@@ -214,27 +176,5 @@ impl ModuleAPI for FrankModule {
 }
 
 impl Drop for FrankModule {
-    // The manually drop is needed because at first we need to delete functions
-    // and only then instance.
-    fn drop(&mut self) {
-        #[allow(clippy::drop_copy)]
-        drop(self.allocate.as_ref());
-
-        #[allow(clippy::drop_copy)]
-        drop(self.deallocate.as_ref());
-
-        #[allow(clippy::drop_copy)]
-        drop(self.invoke.as_ref());
-
-        #[allow(clippy::drop_copy)]
-        drop(self.store.as_ref());
-
-        #[allow(clippy::drop_copy)]
-        drop(self.load.as_ref());
-
-        // delete instance
-        unsafe {
-            // let _ = Box::from_raw(self.instance as *mut FrankModule);
-        }
-    }
+    fn drop(&mut self) {}
 }

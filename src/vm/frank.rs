@@ -14,38 +14,58 @@
  * limitations under the License.
  */
 
-use crate::vm::module::{FrankModule, ModuleAPI};
-use crate::vm::{config::Config, errors::FrankError, service::FrankService};
 use crate::vm::module::frank_result::FrankResult;
+use crate::vm::module::{FrankModule, ModuleABI, ModuleAPI};
+use crate::vm::{config::Config, errors::FrankError, service::FrankService};
 
-use wasmer_runtime_core::import::ImportObject;
 use sha2::{digest::generic_array::GenericArray, digest::FixedOutput};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::os::raw::c_void;
+use std::sync::{Arc, Mutex};
+use wasmer_runtime::{func, Ctx};
+use wasmer_runtime_core::import::ImportObject;
 
+#[derive(Default)]
 pub struct Dispatcher {
-    api: HashMap<String, FrankModule>,
+    api: HashMap<String, ModuleABI>,
 }
 
 impl Dispatcher {
-    pub fn new(api: HashMap<String, FrankModule>) -> Self {
+    pub fn new() -> Self {
         Self {
-            api
+            api: HashMap::new(),
         }
     }
 }
 
+#[derive(Default)]
 pub struct Frank {
     modules: HashMap<String, FrankModule>,
+    dispatcher: Arc<Mutex<Dispatcher>>,
 }
 
 impl Frank {
     pub fn new() -> Self {
         Self {
             modules: HashMap::new(),
+            dispatcher: Arc::new(Mutex::new(Dispatcher::new())),
         }
     }
+
+    /*
+    fn out_invoke(ctx: &mut Ctx, offset: i32, size: i32) -> i32 {
+        let data = ctx.data as *mut Mutex<Dispatcher>;
+        let dispatcher: Arc<Mutex<Dispatcher>> = unsafe { Arc::from_raw(data) };
+
+        let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
+        match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
+            Some(msg) => print!("{}", msg),
+            None => print!("frank logger: incorrect UTF8 string's been supplied to logger"),
+        }
+        1
+    }
+    */
 }
 
 impl FrankService for Frank {
@@ -65,28 +85,91 @@ impl FrankService for Frank {
         let prepared_wasm_bytes =
             crate::vm::prepare::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
-        let modules_copy = self.modules.clone();
-        let dispatcher = move || {
-            let dispatcher = Dispatcher::new(modules_copy);
-            let dispatcher = Box::new(dispatcher);
-            let dtor = (|data: *mut c_void| unsafe {
-                drop(Box::from_raw(data as *mut Dispatcher));
-            }) as fn(*mut c_void);
-
-            // and then release corresponding Box object obtaining the raw pointer
-            (Box::leak(dispatcher) as *mut Dispatcher as *mut c_void, dtor)
+        let dispatcher = self.dispatcher.clone();
+        let dispatcher1 = move || {
+            let dtor = (|_: *mut c_void| {}) as fn(*mut c_void);
+            // TODO: try with Box
+            let dispatcher2: Arc<Mutex<Dispatcher>> = dispatcher.clone();
+            let raw_dispatcher =
+                Arc::into_raw(dispatcher2) as *mut Mutex<Dispatcher> as *mut c_void;
+            (raw_dispatcher, dtor)
         };
 
-        let mut import_object = ImportObject::new_with_data(dispatcher);
-        //import_object.register();
+        let mut import_object = ImportObject::new_with_data(dispatcher1);
+        let dispatcher = self.dispatcher.lock().unwrap();
+        for (module, abi) in dispatcher.api.iter() {
+            use wasmer_runtime_core::import::Namespace;
 
-        let module = FrankModule::new(&prepared_wasm_bytes, config, import_object)?;
-        match self.modules.entry(module_name) {
+            // TODO: introduce a macro for such things
+            let mut namespace = Namespace::new();
+            let allocate = abi.allocate.clone();
+            namespace.insert(
+                config.allocate_fn_name.clone(),
+                func!(move |_ctx: &mut Ctx, size: i32| -> i32 {
+                    allocate
+                        .as_ref()
+                        .unwrap()
+                        .call(size)
+                        .expect("allocate failed")
+                }),
+            );
+
+            let invoke = abi.invoke.clone();
+            namespace.insert(
+                config.invoke_fn_name.clone(),
+                func!(move |_ctx: &mut Ctx, offset: i32, size: i32| -> i32 {
+                    invoke
+                        .as_ref()
+                        .unwrap()
+                        .call(offset, size)
+                        .expect("invoke failed")
+                }),
+            );
+
+            let deallocate = abi.deallocate.clone();
+            namespace.insert(
+                config.deallocate_fn_name.clone(),
+                func!(move |_ctx: &mut Ctx, ptr: i32, size: i32| {
+                    deallocate
+                        .as_ref()
+                        .unwrap()
+                        .call(ptr, size)
+                        .expect("deallocate failed");
+                }),
+            );
+
+            let store = abi.store.clone();
+            namespace.insert(
+                config.store_fn_name.clone(),
+                func!(move |_ctx: &mut Ctx, offset: i32, value: i32| {
+                    store
+                        .as_ref()
+                        .unwrap()
+                        .call(offset, value)
+                        .expect("store failed")
+                }),
+            );
+
+            let load = abi.load.clone();
+            namespace.insert(
+                config.load_fn_name.clone(),
+                func!(move |_ctx: &mut Ctx, offset: i32| -> i32 {
+                    load.as_ref().unwrap().call(offset).expect("load failed")
+                }),
+            );
+
+            import_object.register(module, namespace);
+        }
+
+        let (module, module_abi) = FrankModule::new(&prepared_wasm_bytes, config, import_object)?;
+        match self.modules.entry(module_name.clone()) {
             Entry::Vacant(entry) => entry.insert(module),
             Entry::Occupied(_) => return Err(FrankError::NonUniqueModuleName),
         };
 
         // registers new abi in a dispatcher
+        let mut dispatcher = self.dispatcher.lock().unwrap();
+        dispatcher.api.insert(module_name, module_abi);
 
         Ok(())
     }
