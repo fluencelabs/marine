@@ -14,156 +14,109 @@
  * limitations under the License.
  */
 
-use crate::vm::{
-    config::Config, errors::FrankError, frank_result::FrankResult, prepare::prepare_module,
-    service::FluenceService,
-};
+use crate::vm::module::{FrankModule, ModuleAPI};
+use crate::vm::{config::Config, errors::FrankError, service::FrankService};
+use crate::vm::module::frank_result::FrankResult;
 
-use sha2::{digest::generic_array::GenericArray, digest::FixedOutput, Digest, Sha256};
-use wasmer_runtime::{compile, func, imports, Ctx, Func, Instance};
-use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
-use wasmer_wasi::generate_import_object_for_version;
+use wasmer_runtime_core::import::ImportObject;
+use sha2::{digest::generic_array::GenericArray, digest::FixedOutput};
+use std::collections::hash_map::Entry;
+use std::collections::HashMap;
+use std::os::raw::c_void;
 
-pub struct Frank {
-    instance: &'static Instance,
-
-    // It is safe to use unwrap() while calling these functions because Option is used here
-    // to allow partially initialization of the struct. And all Option fields will contain
-    // Some if invoking Frank::new is succeed.
-    allocate: Option<Func<'static, i32, i32>>,
-    deallocate: Option<Func<'static, (i32, i32), ()>>,
-    invoke: Option<Func<'static, (i32, i32), i32>>,
+pub struct Dispatcher {
+    api: HashMap<String, FrankModule>,
 }
 
-impl Drop for Frank {
-    // The manually drop is needed because at first we need to delete functions
-    // and only then instance.
-    fn drop(&mut self) {
-        #[allow(clippy::drop_copy)]
-        drop(self.allocate.as_ref());
-
-        #[allow(clippy::drop_copy)]
-        drop(self.deallocate.as_ref());
-
-        #[allow(clippy::drop_copy)]
-        drop(self.invoke.as_ref());
+impl Dispatcher {
+    pub fn new(api: HashMap<String, FrankModule>) -> Self {
+        Self {
+            api
+        }
     }
 }
 
-impl Frank {
-    /// Writes given value on the given address.
-    fn write_to_mem(&mut self, address: usize, value: &[u8]) -> Result<(), FrankError> {
-        let memory = self.instance.context().memory(0);
+pub struct Frank {
+    modules: HashMap<String, FrankModule>,
+}
 
-        for (byte_id, cell) in memory.view::<u8>()[address..(address + value.len())]
-            .iter()
-            .enumerate()
-        {
-            cell.set(value[byte_id]);
+impl Frank {
+    pub fn new() -> Self {
+        Self {
+            modules: HashMap::new(),
         }
+    }
+}
+
+impl FrankService for Frank {
+    fn invoke(&mut self, module_name: String, argument: &[u8]) -> Result<FrankResult, FrankError> {
+        match self.modules.entry(module_name) {
+            Entry::Vacant(_) => Err(FrankError::NoSuchModule),
+            Entry::Occupied(mut module) => module.get_mut().invoke(argument),
+        }
+    }
+
+    fn register_module(
+        &mut self,
+        module_name: String,
+        wasm_bytes: &[u8],
+        config: Config,
+    ) -> Result<(), FrankError> {
+        let prepared_wasm_bytes =
+            crate::vm::prepare::prepare_module(wasm_bytes, config.mem_pages_count)?;
+
+        let modules_copy = self.modules.clone();
+        let dispatcher = move || {
+            let dispatcher = Dispatcher::new(modules_copy);
+            let dispatcher = Box::new(dispatcher);
+            let dtor = (|data: *mut c_void| unsafe {
+                drop(Box::from_raw(data as *mut Dispatcher));
+            }) as fn(*mut c_void);
+
+            // and then release corresponding Box object obtaining the raw pointer
+            (Box::leak(dispatcher) as *mut Dispatcher as *mut c_void, dtor)
+        };
+
+        let mut import_object = ImportObject::new_with_data(dispatcher);
+        for (_, module) in self.modules {
+
+        }
+        //import_object.register();
+
+        let module = FrankModule::new(&prepared_wasm_bytes, config, import_object)?;
+        match self.modules.entry(module_name) {
+            Entry::Vacant(entry) => entry.insert(module),
+            Entry::Occupied(_) => return Err(FrankError::NonUniqueModuleName),
+        };
+
+        // registers new abi in a dispatcher
 
         Ok(())
     }
 
-    /// Reads invocation result from specified address of memory.
-    fn read_result_from_mem(&self, address: usize) -> Result<Vec<u8>, FrankError> {
-        let memory = self.instance.context().memory(0);
+    fn unregister_module(&mut self, module_name: &str) -> Result<(), FrankError> {
+        self.modules
+            .remove(module_name)
+            .ok_or_else(|| FrankError::NoSuchModule)?;
+        // unregister abi from a dispatcher
 
-        let mut result_size: usize = 0;
+        Ok(())
+    }
 
-        for (byte_id, cell) in memory.view::<u8>()[address..address + 4].iter().enumerate() {
-            result_size |= (cell.get() as usize) << (8 * byte_id);
+    fn compute_state_hash(
+        &mut self,
+    ) -> GenericArray<u8, <sha2::Sha256 as FixedOutput>::OutputSize> {
+        use sha2::Digest;
+
+        let mut hasher = sha2::Sha256::new();
+
+        let sha256_size = 256;
+        let mut hash_vec: Vec<u8> = Vec::with_capacity(self.modules.len() * sha256_size);
+        for (_, module) in self.modules.iter_mut() {
+            hash_vec.extend_from_slice(module.compute_state_hash().as_slice());
         }
 
-        let mut result = Vec::<u8>::with_capacity(result_size);
-        for cell in memory.view()[(address + 4) as usize..(address + result_size + 4)].iter() {
-            result.push(cell.get());
-        }
-
-        Ok(result)
-    }
-
-    /// Creates a new virtual machine executor.
-    pub fn new(wasm_bytes: &[u8], config: Config) -> Result<Self, FrankError> {
-        let prepared_wasm_bytes = prepare_module(wasm_bytes, config.mem_pages_count)?;
-
-        let logger_imports = imports! {
-            "logger" => {
-                "log_utf8_string" => func!(logger_log_utf8_string),
-            },
-        };
-
-        let mut import_object = generate_import_object_for_version(
-            config.wasi_config.version,
-            vec![],
-            config.wasi_config.envs,
-            config.wasi_config.preopened_files,
-            config.wasi_config.mapped_dirs,
-        );
-        import_object.extend(logger_imports);
-
-        let instance = compile(&prepared_wasm_bytes)?.instantiate(&import_object)?;
-        let instance: &'static mut Instance = Box::leak(Box::new(instance));
-
-        Ok(Self {
-            instance,
-            allocate: Some(instance.exports.get(&config.allocate_fn_name)?),
-            deallocate: Some(instance.exports.get(&config.deallocate_fn_name)?),
-            invoke: Some(instance.exports.get(&config.invoke_fn_name)?),
-        })
-    }
-}
-
-impl FluenceService for Frank {
-    /// Invokes a main module supplying byte array and expecting byte array with some outcome back.
-    fn invoke(&mut self, fn_argument: &[u8]) -> Result<FrankResult, FrankError> {
-        // allocate memory for the given argument and write it to memory
-        let argument_len = fn_argument.len() as i32;
-        let argument_address = if argument_len != 0 {
-            let address = self.allocate.as_ref().unwrap().call(argument_len)?;
-            self.write_to_mem(address as usize, fn_argument)?;
-            address
-        } else {
-            0
-        };
-
-        // invoke a main module, read a result and deallocate it
-        let result_address = self
-            .invoke
-            .as_ref()
-            .unwrap()
-            .call(argument_address, argument_len)?;
-        let result = self.read_result_from_mem(result_address as _)?;
-
-        self.deallocate
-            .as_ref()
-            .unwrap()
-            .call(result_address, result.len() as i32)?;
-
-        Ok(FrankResult::new(result))
-    }
-
-    /// Computes the virtual machine state.
-    fn compute_state_hash(&mut self) -> GenericArray<u8, <Sha256 as FixedOutput>::OutputSize> {
-        let mut hasher = Sha256::new();
-        let memory = self.instance.context().memory(0);
-
-        let wasm_ptr = WasmPtr::<u8, Array>::new(0 as _);
-        let raw_mem = wasm_ptr
-            .deref(memory, 0, (memory.size().bytes().0 - 1) as _)
-            .expect("frank: internal error in compute_vm_state_hash");
-        let raw_mem: &[u8] = unsafe { &*(raw_mem as *const [std::cell::Cell<u8>] as *const [u8]) };
-
-        hasher.input(raw_mem);
+        hasher.input(hash_vec);
         hasher.result()
-    }
-}
-
-// Prints utf8 string of the given size from the given offset.
-fn logger_log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
-    let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
-    match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
-        Some(msg) => print!("{}", msg),
-        None => print!("frank logger: incorrect UTF8 string's been supplied to logger"),
     }
 }

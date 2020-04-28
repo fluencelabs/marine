@@ -39,6 +39,12 @@ pub enum FrankError {
 
     /// Error that raises on the preparation step.
     PrepareError(String),
+
+    /// Indicates that there is already a module with such name.
+    NonUniqueModuleName,
+
+    /// Returns where there is no module with such name.
+    NoSuchModule,
 }
 
 impl Error for FrankError {}
@@ -54,6 +60,8 @@ impl std::fmt::Display for FrankError {
             FrankError::PrepareError(msg) => {
                 write!(f, "Prepare error: {}, probably module is mailformed", msg)
             }
+            FrankError::NonUniqueModuleName => write!(f, "Frank already has module with such name"),
+            FrankError::NoSuchModule => write!(f, "Frank doesn't have a module with such name"),
         }
     }
 }

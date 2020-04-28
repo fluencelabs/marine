@@ -17,6 +17,6 @@
 pub mod config;
 pub mod errors;
 pub mod frank;
-pub mod frank_result;
+pub mod module;
 pub mod prepare;
 pub mod service;

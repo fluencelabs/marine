@@ -1,6 +1,6 @@
 [package]
-name = "Frank"
-description = "Virtual machine based on Wasmer for the Fluence network"
+name = "FCE"
+description = "Fluence compute engine, virtual machine based on Wasmer for the Fluence network"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -10,12 +10,12 @@ categories = ["webassembly"]
 maintenance = { status = "actively-developed" }
 
 [lib]
-name = "frank"
+name = "fce"
 path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [[bin]]
-name = "frank"
+name = "fce"
 path = "src/main.rs"
 
 [dependencies]

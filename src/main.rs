@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/*
 #![deny(
     nonstandard_style,
     unused_imports,
@@ -22,6 +23,7 @@
     unused_unsafe,
     unreachable_patterns
 )]
+*/
 
 /// Command-line tool intended to test Frank VM.
 mod vm;
@@ -29,7 +31,7 @@ mod vm;
 use crate::vm::config::Config;
 use crate::vm::frank::Frank;
 
-use crate::vm::service::FluenceService;
+use crate::vm::service::FrankService;
 use clap::{App, AppSettings, Arg, SubCommand};
 use exitfailure::ExitFailure;
 use failure::err_msg;
@@ -57,7 +59,7 @@ fn prepare_args<'a, 'b>() -> [Arg<'a, 'b>; 3] {
             .short("a")
             .help("argument for the invoke function in the Wasm module"),
         Arg::with_name(WASI_DIR)
-            .required(true)
+            .required(false)
             .takes_value(true)
             .multiple(true)
             .number_of_values(1)
@@ -86,7 +88,10 @@ fn main() -> Result<(), ExitFailure> {
             let wasm_code = fs::read(in_module_path)?;
 
             let invoke_arg = arg.value_of(INVOKE_ARG).unwrap();
-            let preopened_dirs: Vec<_> = arg.values_of(WASI_DIR).unwrap().collect();
+            let preopened_dirs: Vec<_> = match arg.values_of(WASI_DIR) {
+                Some(preopened_dirs) => preopened_dirs.collect(),
+                None => vec![],
+            };
 
             let config = Config::default().with_wasi_preopened_files(
                 preopened_dirs
@@ -95,8 +100,10 @@ fn main() -> Result<(), ExitFailure> {
                     .collect::<Vec<PathBuf>>(),
             );
 
-            let mut frank = Frank::new(&wasm_code, config)?;
-            let result = frank.invoke(invoke_arg.as_bytes())?;
+            let mut frank = Frank::new();
+            let module_name = "main".to_string();
+            frank.register_module(module_name.clone(), &wasm_code, config)?;
+            let result = frank.invoke(module_name, invoke_arg.as_bytes())?;
 
             let outcome_copy = result.outcome.clone();
             match String::from_utf8(result.outcome) {

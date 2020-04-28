@@ -54,16 +54,22 @@ pub struct Config {
     /// This functionality is just for debugging, and this module will be disabled in future.
     pub logger_enabled: bool,
 
-    /// The name of the main module handler function.
+    /// Name of the main module handler function.
     pub invoke_fn_name: String,
 
-    /// The name of function that should be called for allocation memory. This function
+    /// Name of a function that should be called for allocation memory. This function
     /// is used for passing array of bytes to the main module.
     pub allocate_fn_name: String,
 
-    /// The name of function that should be called for deallocation of
+    /// Name of a function that should be called for deallocation of
     /// previously allocated memory by allocateFunction.
     pub deallocate_fn_name: String,
+
+    /// Name of a functions that could be used to store one byte in current module.
+    pub store_fn_name: String,
+
+    /// Name of a function that could be used to load one byte from current module.
+    pub load_fn_name: String,
 
     /// Config for WASI subsystem initialization. None means that module should be loaded
     /// without WASI.
@@ -79,6 +85,8 @@ impl Default for Config {
             invoke_fn_name: "invoke".to_string(),
             allocate_fn_name: "allocate".to_string(),
             deallocate_fn_name: "deallocate".to_string(),
+            store_fn_name: "store".to_string(),
+            load_fn_name: "load".to_string(),
             logger_enabled: true,
             wasi_config: WASIConfig::default(),
         }

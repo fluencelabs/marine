@@ -25,11 +25,11 @@ use parity_wasm::{
     elements::{MemorySection, MemoryType},
 };
 
-struct ModulePreparator {
+struct ModuleBootstrapper {
     module: elements::Module,
 }
 
-impl<'a> ModulePreparator {
+impl<'a> ModuleBootstrapper {
     fn init(module_code: &[u8]) -> Result<Self, FrankError> {
         let module = elements::deserialize_buffer(module_code)?;
 
@@ -74,7 +74,7 @@ impl<'a> ModulePreparator {
 /// Prepares a Wasm module:
 ///   - set memory page count
 pub fn prepare_module(module: &[u8], mem_pages_count: u32) -> Result<Vec<u8>, FrankError> {
-    ModulePreparator::init(module)?
+    ModuleBootstrapper::init(module)?
         .set_mem_pages_count(mem_pages_count)
         .into_wasm()
 }

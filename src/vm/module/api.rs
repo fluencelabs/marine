@@ -14,30 +14,18 @@
  * limitations under the License.
  */
 
-use crate::vm::config::Config;
 use crate::vm::errors::FrankError;
 use crate::vm::module::frank_result::FrankResult;
 
 use sha2::digest::generic_array::GenericArray;
+use sha2::digest::FixedOutput;
 
-/// Describes a service behaviour in the Fluence network.
-pub trait FrankService {
+/// Application interface of a Frank module. Intended to use by Frank instance itself.
+pub trait ModuleAPI {
     /// Invokes a module supplying byte array and expecting byte array with some outcome back.
-    fn invoke(&mut self, module_name: String, argument: &[u8]) -> Result<FrankResult, FrankError>;
-
-    /// Registers new module inside in Frank Service.
-    fn register_module(
-        &mut self,
-        module_name: String,
-        wasm_bytes: &[u8],
-        config: Config,
-    ) -> Result<(), FrankError>;
-
-    /// Unregisters previously registered module.
-    fn unregister_module(&mut self, module_name: &str) -> Result<(), FrankError>;
+    fn invoke(&mut self, argument: &[u8]) -> Result<FrankResult, FrankError>;
 
     /// Computes hash of the internal modules state.
-    fn compute_state_hash(
-        &mut self,
-    ) -> GenericArray<u8, <sha2::Sha256 as sha2::digest::FixedOutput>::OutputSize>;
+    fn compute_state_hash(&mut self)
+        -> GenericArray<u8, <sha2::Sha256 as FixedOutput>::OutputSize>;
 }

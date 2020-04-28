@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-/*
-#![deny(
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
-*/
+pub mod abi;
+pub mod api;
+pub mod frank_module;
+pub mod frank_result;
 
-pub mod vm;
+pub use abi::ModuleABI;
+pub use api::ModuleAPI;
+pub use frank_module::FrankModule;
