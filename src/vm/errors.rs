@@ -50,7 +50,7 @@ pub enum FrankError {
 impl Error for FrankError {}
 
 impl std::fmt::Display for FrankError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             FrankError::IOError(msg) => write!(f, "IOError: {}", msg),
             FrankError::WasmerResolveError(msg) => write!(f, "WasmerResolveError: {}", msg),
