@@ -21,8 +21,6 @@ use crate::vm::{config::Config, errors::FrankError, service::FrankService};
 use sha2::{digest::generic_array::GenericArray, digest::FixedOutput};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::os::raw::c_void;
-use std::sync::{Arc, Mutex};
 use wasmer_runtime::{func, Ctx};
 use wasmer_runtime_core::import::ImportObject;
 
@@ -42,30 +40,16 @@ impl Dispatcher {
 #[derive(Default)]
 pub struct Frank {
     modules: HashMap<String, FrankModule>,
-    dispatcher: Arc<Mutex<Dispatcher>>,
+    dispatcher: Dispatcher,
 }
 
 impl Frank {
     pub fn new() -> Self {
         Self {
             modules: HashMap::new(),
-            dispatcher: Arc::new(Mutex::new(Dispatcher::new())),
+            dispatcher: Dispatcher::new(),
         }
     }
-
-    /*
-    fn out_invoke(ctx: &mut Ctx, offset: i32, size: i32) -> i32 {
-        let data = ctx.data as *mut Mutex<Dispatcher>;
-        let dispatcher: Arc<Mutex<Dispatcher>> = unsafe { Arc::from_raw(data) };
-
-        let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
-        match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
-            Some(msg) => print!("{}", msg),
-            None => print!("frank logger: incorrect UTF8 string's been supplied to logger"),
-        }
-        1
-    }
-    */
 }
 
 impl FrankService for Frank {
@@ -85,19 +69,8 @@ impl FrankService for Frank {
         let prepared_wasm_bytes =
             crate::vm::prepare::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
-        let dispatcher = self.dispatcher.clone();
-        let dispatcher1 = move || {
-            let dtor = (|_: *mut c_void| {}) as fn(*mut c_void);
-            // TODO: try with Box
-            let dispatcher2: Arc<Mutex<Dispatcher>> = dispatcher.clone();
-            let raw_dispatcher =
-                Arc::into_raw(dispatcher2) as *mut Mutex<Dispatcher> as *mut c_void;
-            (raw_dispatcher, dtor)
-        };
-
-        let mut import_object = ImportObject::new_with_data(dispatcher1);
-        let dispatcher = self.dispatcher.lock().unwrap();
-        for (module, abi) in dispatcher.api.iter() {
+        let mut import_object = ImportObject::new();
+        for (module, abi) in self.dispatcher.api.iter() {
             use wasmer_runtime_core::import::Namespace;
 
             // TODO: introduce a macro for such things
@@ -168,8 +141,7 @@ impl FrankService for Frank {
         };
 
         // registers new abi in a dispatcher
-        let mut dispatcher = self.dispatcher.lock().unwrap();
-        dispatcher.api.insert(module_name, module_abi);
+        self.dispatcher.api.insert(module_name, module_abi);
 
         Ok(())
     }
