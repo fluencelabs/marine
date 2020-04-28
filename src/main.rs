@@ -29,90 +29,89 @@ mod vm;
 
 use crate::vm::config::Config;
 use crate::vm::frank::Frank;
-
 use crate::vm::service::FrankService;
-use clap::{App, AppSettings, Arg, SubCommand};
+
 use exitfailure::ExitFailure;
-use failure::err_msg;
 use std::fs;
-use std::path::PathBuf;
-
-const VERSION: &str = env!("CARGO_PKG_VERSION");
-const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
-const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
-
-const IN_MODULE_PATH: &str = "in-wasm-path";
-const INVOKE_ARG: &str = "arg";
-const WASI_DIR: &str = "dir";
-
-fn prepare_args<'a, 'b>() -> [Arg<'a, 'b>; 3] {
-    [
-        Arg::with_name(IN_MODULE_PATH)
-            .required(true)
-            .takes_value(true)
-            .short("i")
-            .help("path to the wasm file"),
-        Arg::with_name(INVOKE_ARG)
-            .required(true)
-            .takes_value(true)
-            .short("a")
-            .help("argument for the invoke function in the Wasm module"),
-        Arg::with_name(WASI_DIR)
-            .required(false)
-            .takes_value(true)
-            .multiple(true)
-            .number_of_values(1)
-            .short("d")
-            .help("preopened directory for wasi subsystem"),
-    ]
-}
-
-fn execute_wasm<'a, 'b>() -> App<'a, 'b> {
-    SubCommand::with_name("execute")
-        .about("Execute provided module on the Fluence Frank VM")
-        .args(&prepare_args())
-}
 
 fn main() -> Result<(), ExitFailure> {
-    let app = App::new("Fluence Frank Wasm execution environment for test purposes")
-        .version(VERSION)
-        .author(AUTHORS)
-        .about(DESCRIPTION)
-        .setting(AppSettings::ArgRequiredElseHelp)
-        .subcommand(execute_wasm());
+    println!("Welcome to the Frank CLI:");
+    let mut rl = rustyline::Editor::<()>::new();
+    let mut frank = Frank::new();
 
-    match app.get_matches().subcommand() {
-        ("execute", Some(arg)) => {
-            let in_module_path = arg.value_of(IN_MODULE_PATH).unwrap();
-            let wasm_code = fs::read(in_module_path)?;
+    loop {
+        let readline = rl.readline(">> ");
+        match readline {
+            Ok(line) => {
+                // TODO: improve argument parsing
+                let cmd: Vec<_> = line.split(' ').collect();
+                match cmd[0] {
+                    "add" => {
+                        let module_name = cmd[1].to_string();
+                        let wasm_bytes = fs::read(cmd[2]);
+                        if let None = wasm_bytes {
+                            println!("incorrect path provided");
+                            continue;
+                        }
 
-            let invoke_arg = arg.value_of(INVOKE_ARG).unwrap();
-            let preopened_dirs: Vec<_> = match arg.values_of(WASI_DIR) {
-                Some(preopened_dirs) => preopened_dirs.collect(),
-                None => vec![],
-            };
-
-            let config = Config::default().with_wasi_preopened_files(
-                preopened_dirs
-                    .into_iter()
-                    .map(PathBuf::from)
-                    .collect::<Vec<PathBuf>>(),
-            );
-
-            let mut frank = Frank::new();
-            let module_name = "main".to_string();
-            frank.register_module(module_name.clone(), &wasm_code, config)?;
-            let result = frank.invoke(module_name, invoke_arg.as_bytes())?;
-
-            let outcome_copy = result.outcome.clone();
-            match String::from_utf8(result.outcome) {
-                Ok(s) => println!("result: {}", s),
-                Err(_) => println!("result: {:?}", outcome_copy),
+                        let config = Config::default();
+                        let result_msg =
+                            match frank.register_module(module_name, &wasm_bytes.unwrap(), config) {
+                                Ok(_) => "module successfully registered in Frank".to_string(),
+                                Err(e) => format!("module registration failed with: {:?}", e),
+                            };
+                        println!("{}", result_msg);
+                    }
+                    "del" => {
+                        let module_name = cmd[1];
+                        let result_msg = match frank.unregister_module(module_name) {
+                            Ok(_) => "module successfully deleted from Frank".to_string(),
+                            Err(e) => format!("module deletion failed with: {:?}", e),
+                        };
+                        println!("{}", result_msg);
+                    }
+                    "execute" => {
+                        let module_name = cmd[1].to_string();
+                        let arg = cmd[2..].join(" ");
+                        let result = match frank.invoke(module_name, arg.as_bytes()) {
+                            Ok(result) => {
+                                let outcome_copy = result.outcome.clone();
+                                match String::from_utf8(result.outcome) {
+                                    Ok(s) => format!("result: {}", s),
+                                    Err(_) => format!("result: {:?}", outcome_copy),
+                                }
+                            }
+                            Err(e) => format!("execution failed with {:?}", e),
+                        };
+                        println!("{}", result);
+                    }
+                    "hash" => {
+                        let hash = frank.compute_state_hash();
+                        println!("vm state hash is {:?}", hash);
+                    }
+                    "help" => {
+                        println!(
+                            "Enter:\n\
+                                add <module_name> <module_path> - to add a new Wasm module to Frank\n\
+                                del <module_name>               - to delete Wasm module to Frank\n\
+                                execute <module_name> <arg>     - to call invoke on module with module_name\n\
+                                hash                            - to compute hash of internal Wasm state\n\
+                                help                            - to print this message\n\
+                                e/exit/q/quit                   - to exit"
+                        );
+                    }
+                    "e" | "exit" | "q" | "quit" => break,
+                    _ => {
+                        println!("unsupported command");
+                    }
+                }
             }
-
-            Ok(())
+            Err(e) => {
+                println!("a error occurred: {}", e);
+                break;
+            }
         }
-
-        c => Err(err_msg(format!("Unexpected command: {}", c.0)).into()),
     }
+
+    Ok(())
 }

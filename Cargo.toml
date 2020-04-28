@@ -25,7 +25,7 @@ wasmer-wasi = {git = "http://github.com/fluencelabs/wasmer"}
 failure = "0.1.7"
 lazy_static = "1.4.0"
 sha2 = "0.8.1"
-clap = "2.33.0"
+rustyline = "6.1.2"
 exitfailure = "0.5.1"
 boolinator = "2.4.0"
 parity-wasm = "0.41.0"
