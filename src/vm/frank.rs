@@ -115,7 +115,7 @@ impl FrankService for Frank {
     fn invoke(&mut self, module_name: &str, argument: &[u8]) -> Result<FrankResult, FrankError> {
         match self.modules.get_mut(module_name) {
             Some(module) => module.invoke(argument),
-            None => Err(FrankError::NoSuchModule)
+            None => Err(FrankError::NoSuchModule),
         }
     }
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-pub(crate) mod abi;
-pub(crate) mod api;
-pub(crate) mod frank_module;
+mod abi;
+mod api;
+mod frank_module;
 pub mod frank_result;
 
 pub(crate) use abi::ModuleABI;

@@ -21,7 +21,7 @@ use sha2::digest::generic_array::GenericArray;
 use sha2::digest::FixedOutput;
 
 /// Application interface of a Frank module. Intended to use by Frank instance itself.
-pub trait ModuleAPI {
+pub(crate) trait ModuleAPI {
     /// Invokes a module supplying byte array and expecting byte array with some outcome back.
     fn invoke(&mut self, argument: &[u8]) -> Result<FrankResult, FrankError>;
 

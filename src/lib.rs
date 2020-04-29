@@ -24,4 +24,8 @@
 )]
 #![warn(rust_2018_idioms)]
 
-pub mod vm;
+mod vm;
+
+pub use vm::config::Config;
+pub use vm::frank::Frank;
+pub use vm::service::FrankService;
