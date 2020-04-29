@@ -40,7 +40,7 @@ impl Frank {
         }
     }
 
-    /// Adds ABI of a module with provided module name to the abi_import_object.
+    /// Extracts ABI of a module into Namespace.
     fn create_import_object(module: &FrankModule, config: &Config) -> Namespace {
         let mut namespace = Namespace::new();
 
@@ -105,20 +105,29 @@ impl Frank {
     }
 }
 
+impl Default for Frank {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FrankService for Frank {
-    fn invoke(&mut self, module_name: String, argument: &[u8]) -> Result<FrankResult, FrankError> {
-        match self.modules.entry(module_name) {
-            Entry::Vacant(_) => Err(FrankError::NoSuchModule),
-            Entry::Occupied(mut module) => module.get_mut().invoke(argument),
+    fn invoke(&mut self, module_name: &str, argument: &[u8]) -> Result<FrankResult, FrankError> {
+        match self.modules.get_mut(module_name) {
+            Some(module) => module.invoke(argument),
+            None => Err(FrankError::NoSuchModule)
         }
     }
 
-    fn register_module(
+    fn register_module<S>(
         &mut self,
-        module_name: String,
+        module_name: S,
         wasm_bytes: &[u8],
         config: Config,
-    ) -> Result<(), FrankError> {
+    ) -> Result<(), FrankError>
+    where
+        S: Into<String>,
+    {
         let prepared_wasm_bytes =
             crate::vm::prepare::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
@@ -130,14 +139,16 @@ impl FrankService for Frank {
 
         // registers ABI of newly registered module in abi_import_object
         let namespace = Frank::create_import_object(&module, &config);
-        self.abi_import_object.register(module_name.clone(), namespace);
+        let module_name: String = module_name.into();
+        self.abi_import_object
+            .register(module_name.clone(), namespace);
 
         match self.modules.entry(module_name) {
             Entry::Vacant(entry) => {
                 entry.insert(module);
                 Ok(())
-            },
-            Entry::Occupied(_) => Err(FrankError::NonUniqueModuleName)
+            }
+            Entry::Occupied(_) => Err(FrankError::NonUniqueModuleName),
         }
     }
 

@@ -23,15 +23,17 @@ use sha2::digest::generic_array::GenericArray;
 /// Describes a service behaviour in the Fluence network.
 pub trait FrankService {
     /// Invokes a module supplying byte array and expecting byte array with some outcome back.
-    fn invoke(&mut self, module_name: String, argument: &[u8]) -> Result<FrankResult, FrankError>;
+    fn invoke(&mut self, module_name: &str, argument: &[u8]) -> Result<FrankResult, FrankError>;
 
     /// Registers new module in the Frank Service.
-    fn register_module(
+    fn register_module<S>(
         &mut self,
-        module_name: String,
+        module_name: S,
         wasm_bytes: &[u8],
         config: Config,
-    ) -> Result<(), FrankError>;
+    ) -> Result<(), FrankError>
+    where
+        S: Into<String>;
 
     /// Unregisters previously registered module.
     fn unregister_module(&mut self, module_name: &str) -> Result<(), FrankError>;

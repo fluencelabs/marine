@@ -74,7 +74,7 @@ fn main() -> Result<(), ExitFailure> {
                         println!("{}", result_msg);
                     }
                     "execute" => {
-                        let module_name = cmd[1].to_string();
+                        let module_name = cmd[1];
                         let arg = cmd[2..].join(" ");
                         let result = match frank.invoke(module_name, arg.as_bytes()) {
                             Ok(result) => {
