@@ -35,7 +35,7 @@ use exitfailure::ExitFailure;
 use std::fs;
 
 fn main() -> Result<(), ExitFailure> {
-    println!("Welcome to the Frank CLI:");
+    println!("Welcome to the FCE CLI:");
     let mut rl = rustyline::Editor::<()>::new();
     let mut frank = Frank::new();
 
@@ -49,17 +49,20 @@ fn main() -> Result<(), ExitFailure> {
                     "add" => {
                         let module_name = cmd[1].to_string();
                         let wasm_bytes = fs::read(cmd[2]);
-                        if let None = wasm_bytes {
-                            println!("incorrect path provided");
+                        if let Err(e) = wasm_bytes {
+                            println!("failed to read wasm module: {}", e);
                             continue;
                         }
 
                         let config = Config::default();
-                        let result_msg =
-                            match frank.register_module(module_name, &wasm_bytes.unwrap(), config) {
-                                Ok(_) => "module successfully registered in Frank".to_string(),
-                                Err(e) => format!("module registration failed with: {:?}", e),
-                            };
+                        let result_msg = match frank.register_module(
+                            module_name,
+                            &wasm_bytes.unwrap(),
+                            config,
+                        ) {
+                            Ok(_) => "module successfully registered in Frank".to_string(),
+                            Err(e) => format!("module registration failed with: {:?}", e),
+                        };
                         println!("{}", result_msg);
                     }
                     "del" => {

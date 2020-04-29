@@ -21,25 +21,14 @@ use crate::vm::module::{ModuleABI, ModuleAPI};
 
 use sha2::digest::generic_array::GenericArray;
 use sha2::digest::FixedOutput;
-use wasmer_runtime::{compile, func, imports, Ctx, Func, Instance};
+use wasmer_runtime::{compile, func, imports, Ctx, Instance};
 use wasmer_runtime_core::import::ImportObject;
 use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
 use wasmer_wasi::generate_import_object_for_version;
 
-pub struct FrankModule {
+pub(crate) struct FrankModule {
     instance: &'static Instance,
-
-    // It is safe to use unwrap() while calling these functions because Option is used here
-    // just to allow partially initialization. And all Option fields will contain Some if
-    // invoking Frank::new has been succeed.
-    /// Allocates a region of memory inside a module. Used for passing argument inside the module.
-    allocate: Option<Func<'static, i32, i32>>,
-
-    /// Deallocates previously allocated memory region.
-    deallocate: Option<Func<'static, (i32, i32), ()>>,
-
-    /// Calls the main entry point of a module called invoke.
-    invoke: Option<Func<'static, (i32, i32), i32>>,
+    pub(crate) abi: ModuleABI,
 }
 
 impl FrankModule {
@@ -48,7 +37,7 @@ impl FrankModule {
         wasm_bytes: &[u8],
         config: Config,
         imports: ImportObject,
-    ) -> Result<(Self, ModuleABI), FrankError> {
+    ) -> Result<Self, FrankError> {
         let logger_imports = imports! {
             "logger" => {
                 "log_utf8_string" => func!(FrankModule::logger_log_utf8_string),
@@ -68,22 +57,15 @@ impl FrankModule {
 
         let instance = compile(&wasm_bytes)?.instantiate(&import_object)?;
         let instance: &'static mut Instance = Box::leak(Box::new(instance));
+        let abi = ModuleABI {
+            allocate: Some(instance.exports.get(&config.allocate_fn_name)?),
+            deallocate: Some(instance.exports.get(&config.deallocate_fn_name)?),
+            invoke: Some(instance.exports.get(&config.invoke_fn_name)?),
+            store: Some(instance.exports.get(&config.store_fn_name)?),
+            load: Some(instance.exports.get(&config.load_fn_name)?),
+        };
 
-        Ok((
-            Self {
-                instance,
-                allocate: Some(instance.exports.get(&config.allocate_fn_name)?),
-                deallocate: Some(instance.exports.get(&config.deallocate_fn_name)?),
-                invoke: Some(instance.exports.get(&config.invoke_fn_name)?),
-            },
-            ModuleABI {
-                allocate: Some(instance.exports.get(&config.allocate_fn_name)?),
-                deallocate: Some(instance.exports.get(&config.deallocate_fn_name)?),
-                invoke: Some(instance.exports.get(&config.invoke_fn_name)?),
-                store: Some(instance.exports.get(&config.store_fn_name)?),
-                load: Some(instance.exports.get(&config.load_fn_name)?),
-            },
-        ))
+        Ok(Self { instance, abi })
     }
 
     /// Prints utf8 string of the given size from the given offset. Called from the wasm.
@@ -133,7 +115,7 @@ impl ModuleAPI for FrankModule {
         // allocate memory for the given argument and write it to memory
         let argument_len = argument.len() as i32;
         let argument_address = if argument_len != 0 {
-            let address = self.allocate.as_ref().unwrap().call(argument_len)?;
+            let address = self.abi.allocate.as_ref().unwrap().call(argument_len)?;
             self.write_to_mem(address as usize, argument)?;
             address
         } else {
@@ -142,13 +124,15 @@ impl ModuleAPI for FrankModule {
 
         // invoke a main module, read a result and deallocate it
         let result_address = self
+            .abi
             .invoke
             .as_ref()
             .unwrap()
             .call(argument_address, argument_len)?;
         let result = self.read_result_from_mem(result_address as _)?;
 
-        self.deallocate
+        self.abi
+            .deallocate
             .as_ref()
             .unwrap()
             .call(result_address, result.len() as i32)?;

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-pub mod abi;
-pub mod api;
-pub mod frank_module;
+pub(crate) mod abi;
+pub(crate) mod api;
+pub(crate) mod frank_module;
 pub mod frank_result;
 
-pub use abi::ModuleABI;
-pub use api::ModuleAPI;
-pub use frank_module::FrankModule;
+pub(crate) use abi::ModuleABI;
+pub(crate) use api::ModuleAPI;
+pub(crate) use frank_module::FrankModule;

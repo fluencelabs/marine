@@ -48,24 +48,3 @@ pub struct ModuleABI {
     /// Loads one bytes from provided address.
     pub(crate) load: Option<Func<'static, i32, i32>>,
 }
-
-impl Drop for ModuleABI {
-    // The manually drop is needed because at first we need to delete functions
-    // and only then instance.
-    fn drop(&mut self) {
-        #[allow(clippy::drop_copy)]
-        drop(self.allocate.as_ref());
-
-        #[allow(clippy::drop_copy)]
-        drop(self.deallocate.as_ref());
-
-        #[allow(clippy::drop_copy)]
-        drop(self.invoke.as_ref());
-
-        #[allow(clippy::drop_copy)]
-        drop(self.store.as_ref());
-
-        #[allow(clippy::drop_copy)]
-        drop(self.load.as_ref());
-    }
-}

@@ -15,40 +15,93 @@
  */
 
 use crate::vm::module::frank_result::FrankResult;
-use crate::vm::module::{FrankModule, ModuleABI, ModuleAPI};
+use crate::vm::module::{FrankModule, ModuleAPI};
 use crate::vm::{config::Config, errors::FrankError, service::FrankService};
 
 use sha2::{digest::generic_array::GenericArray, digest::FixedOutput};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use wasmer_runtime::{func, Ctx};
-use wasmer_runtime_core::import::ImportObject;
+use wasmer_runtime_core::import::{ImportObject, Namespace};
 
-#[derive(Default)]
-pub struct Dispatcher {
-    api: HashMap<String, ModuleABI>,
-}
-
-impl Dispatcher {
-    pub fn new() -> Self {
-        Self {
-            api: HashMap::new(),
-        }
-    }
-}
-
-#[derive(Default)]
 pub struct Frank {
+    // set of modules registered inside Frank
     modules: HashMap<String, FrankModule>,
-    dispatcher: Dispatcher,
+
+    // contains ABI of each registered module in specific format for Wasmer
+    abi_import_object: ImportObject,
 }
 
 impl Frank {
     pub fn new() -> Self {
         Self {
             modules: HashMap::new(),
-            dispatcher: Dispatcher::new(),
+            abi_import_object: ImportObject::new(),
         }
+    }
+
+    /// Adds ABI of a module with provided module name to the abi_import_object.
+    fn create_import_object(module: &FrankModule, config: &Config) -> Namespace {
+        let mut namespace = Namespace::new();
+
+        // TODO: introduce a macro for such things
+        let allocate = module.abi.allocate.clone();
+        namespace.insert(
+            config.allocate_fn_name.clone(),
+            func!(move |_ctx: &mut Ctx, size: i32| -> i32 {
+                allocate
+                    .as_ref()
+                    .unwrap()
+                    .call(size)
+                    .expect("allocate failed")
+            }),
+        );
+
+        let invoke = module.abi.invoke.clone();
+        namespace.insert(
+            config.invoke_fn_name.clone(),
+            func!(move |_ctx: &mut Ctx, offset: i32, size: i32| -> i32 {
+                invoke
+                    .as_ref()
+                    .unwrap()
+                    .call(offset, size)
+                    .expect("invoke failed")
+            }),
+        );
+
+        let deallocate = module.abi.deallocate.clone();
+        namespace.insert(
+            config.deallocate_fn_name.clone(),
+            func!(move |_ctx: &mut Ctx, ptr: i32, size: i32| {
+                deallocate
+                    .as_ref()
+                    .unwrap()
+                    .call(ptr, size)
+                    .expect("deallocate failed");
+            }),
+        );
+
+        let store = module.abi.store.clone();
+        namespace.insert(
+            config.store_fn_name.clone(),
+            func!(move |_ctx: &mut Ctx, offset: i32, value: i32| {
+                store
+                    .as_ref()
+                    .unwrap()
+                    .call(offset, value)
+                    .expect("store failed")
+            }),
+        );
+
+        let load = module.abi.load.clone();
+        namespace.insert(
+            config.load_fn_name.clone(),
+            func!(move |_ctx: &mut Ctx, offset: i32| -> i32 {
+                load.as_ref().unwrap().call(offset).expect("load failed")
+            }),
+        );
+
+        namespace
     }
 }
 
@@ -69,81 +122,23 @@ impl FrankService for Frank {
         let prepared_wasm_bytes =
             crate::vm::prepare::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
-        let mut import_object = ImportObject::new();
-        for (module, abi) in self.dispatcher.api.iter() {
-            use wasmer_runtime_core::import::Namespace;
+        let module = FrankModule::new(
+            &prepared_wasm_bytes,
+            config.clone(),
+            self.abi_import_object.clone_ref(),
+        )?;
 
-            // TODO: introduce a macro for such things
-            let mut namespace = Namespace::new();
-            let allocate = abi.allocate.clone();
-            namespace.insert(
-                config.allocate_fn_name.clone(),
-                func!(move |_ctx: &mut Ctx, size: i32| -> i32 {
-                    allocate
-                        .as_ref()
-                        .unwrap()
-                        .call(size)
-                        .expect("allocate failed")
-                }),
-            );
+        // registers ABI of newly registered module in abi_import_object
+        let namespace = Frank::create_import_object(&module, &config);
+        self.abi_import_object.register(module_name.clone(), namespace);
 
-            let invoke = abi.invoke.clone();
-            namespace.insert(
-                config.invoke_fn_name.clone(),
-                func!(move |_ctx: &mut Ctx, offset: i32, size: i32| -> i32 {
-                    invoke
-                        .as_ref()
-                        .unwrap()
-                        .call(offset, size)
-                        .expect("invoke failed")
-                }),
-            );
-
-            let deallocate = abi.deallocate.clone();
-            namespace.insert(
-                config.deallocate_fn_name.clone(),
-                func!(move |_ctx: &mut Ctx, ptr: i32, size: i32| {
-                    deallocate
-                        .as_ref()
-                        .unwrap()
-                        .call(ptr, size)
-                        .expect("deallocate failed");
-                }),
-            );
-
-            let store = abi.store.clone();
-            namespace.insert(
-                config.store_fn_name.clone(),
-                func!(move |_ctx: &mut Ctx, offset: i32, value: i32| {
-                    store
-                        .as_ref()
-                        .unwrap()
-                        .call(offset, value)
-                        .expect("store failed")
-                }),
-            );
-
-            let load = abi.load.clone();
-            namespace.insert(
-                config.load_fn_name.clone(),
-                func!(move |_ctx: &mut Ctx, offset: i32| -> i32 {
-                    load.as_ref().unwrap().call(offset).expect("load failed")
-                }),
-            );
-
-            import_object.register(module, namespace);
+        match self.modules.entry(module_name) {
+            Entry::Vacant(entry) => {
+                entry.insert(module);
+                Ok(())
+            },
+            Entry::Occupied(_) => Err(FrankError::NonUniqueModuleName)
         }
-
-        let (module, module_abi) = FrankModule::new(&prepared_wasm_bytes, config, import_object)?;
-        match self.modules.entry(module_name.clone()) {
-            Entry::Vacant(entry) => entry.insert(module),
-            Entry::Occupied(_) => return Err(FrankError::NonUniqueModuleName),
-        };
-
-        // registers new abi in a dispatcher
-        self.dispatcher.api.insert(module_name, module_abi);
-
-        Ok(())
     }
 
     fn unregister_module(&mut self, module_name: &str) -> Result<(), FrankError> {
