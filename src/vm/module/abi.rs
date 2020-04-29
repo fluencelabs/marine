@@ -28,22 +28,23 @@ use wasmer_runtime::Func;
 ///   4. read a result from the res by reading 4 bytes as little-endian result_size
 ///      and the read result_size bytes as the final result.
 ///   5. deallocate(res, strlen(sql)) to clean memory.
-pub(crate) struct ModuleABI {
+#[derive(Clone)]
+pub(crate) struct ModuleABI<'a> {
     // It is safe to use unwrap() while calling these functions because Option is used here
     // just to allow partially initialization. And all Option fields will contain Some if
     // invoking Frank::new has been succeed.
     /// Allocates a region of memory inside a module. Used for passing argument inside the module.
-    pub(crate) allocate: Option<Func<'static, i32, i32>>,
+    pub(crate) allocate: Option<Func<'a, i32, i32>>,
 
     /// Deallocates previously allocated memory region.
-    pub(crate) deallocate: Option<Func<'static, (i32, i32), ()>>,
+    pub(crate) deallocate: Option<Func<'a, (i32, i32), ()>>,
 
     /// Calls the main entry point of a module called invoke.
-    pub(crate) invoke: Option<Func<'static, (i32, i32), i32>>,
+    pub(crate) invoke: Option<Func<'a, (i32, i32), i32>>,
 
     /// Stores one given byte on provided address.
-    pub(crate) store: Option<Func<'static, (i32, i32)>>,
+    pub(crate) store: Option<Func<'a, (i32, i32)>>,
 
     /// Loads one bytes from provided address.
-    pub(crate) load: Option<Func<'static, i32, i32>>,
+    pub(crate) load: Option<Func<'a, i32, i32>>,
 }

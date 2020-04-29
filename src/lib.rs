@@ -23,7 +23,6 @@
     unreachable_patterns
 )]
 #![warn(rust_2018_idioms)]
-
 mod vm;
 
 pub use vm::config::Config;

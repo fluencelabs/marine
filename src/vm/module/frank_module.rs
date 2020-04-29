@@ -28,7 +28,7 @@ use wasmer_wasi::generate_import_object_for_version;
 
 pub(crate) struct FrankModule {
     instance: &'static Instance,
-    pub(crate) abi: ModuleABI,
+    abi: ModuleABI<'static>,
 }
 
 impl FrankModule {
@@ -66,6 +66,10 @@ impl FrankModule {
         };
 
         Ok(Self { instance, abi })
+    }
+
+    pub fn get_abi(&self) -> &ModuleABI<'static> {
+        &self.abi
     }
 
     /// Prints utf8 string of the given size from the given offset. Called from the wasm.

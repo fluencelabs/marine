@@ -43,61 +43,46 @@ impl Frank {
     /// Extracts ABI of a module into Namespace.
     fn create_import_object(module: &FrankModule, config: &Config) -> Namespace {
         let mut namespace = Namespace::new();
+        let module_abi = module.get_abi();
 
         // TODO: introduce a macro for such things
-        let allocate = module.abi.allocate.clone();
+        let allocate = module_abi.allocate.clone().unwrap();
         namespace.insert(
             config.allocate_fn_name.clone(),
             func!(move |_ctx: &mut Ctx, size: i32| -> i32 {
-                allocate
-                    .as_ref()
-                    .unwrap()
-                    .call(size)
-                    .expect("allocate failed")
+                allocate.call(size).expect("allocate failed")
             }),
         );
 
-        let invoke = module.abi.invoke.clone();
+        let invoke = module_abi.invoke.clone().unwrap();
         namespace.insert(
             config.invoke_fn_name.clone(),
             func!(move |_ctx: &mut Ctx, offset: i32, size: i32| -> i32 {
-                invoke
-                    .as_ref()
-                    .unwrap()
-                    .call(offset, size)
-                    .expect("invoke failed")
+                invoke.call(offset, size).expect("invoke failed")
             }),
         );
 
-        let deallocate = module.abi.deallocate.clone();
+        let deallocate = module_abi.deallocate.clone().unwrap();
         namespace.insert(
             config.deallocate_fn_name.clone(),
             func!(move |_ctx: &mut Ctx, ptr: i32, size: i32| {
-                deallocate
-                    .as_ref()
-                    .unwrap()
-                    .call(ptr, size)
-                    .expect("deallocate failed");
+                deallocate.call(ptr, size).expect("deallocate failed");
             }),
         );
 
-        let store = module.abi.store.clone();
+        let store = module_abi.store.clone().unwrap();
         namespace.insert(
             config.store_fn_name.clone(),
             func!(move |_ctx: &mut Ctx, offset: i32, value: i32| {
-                store
-                    .as_ref()
-                    .unwrap()
-                    .call(offset, value)
-                    .expect("store failed")
+                store.call(offset, value).expect("store failed")
             }),
         );
 
-        let load = module.abi.load.clone();
+        let load = module_abi.load.clone().unwrap();
         namespace.insert(
             config.load_fn_name.clone(),
             func!(move |_ctx: &mut Ctx, offset: i32| -> i32 {
-                load.as_ref().unwrap().call(offset).expect("load failed")
+                load.call(offset).expect("load failed")
             }),
         );
 
