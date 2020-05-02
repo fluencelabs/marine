@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-use crate::Config;
+use fce::{ Config, Frank, FrankService};
 
 #[cfg(test)]
 mod test {
-    use super::fce::{ Config, Frank, FrankService};
+    use fce::{Config, Frank, FrankService};
     use std::fs::File;
-    use std::io::copy;
+    use std::io::{copy, Read};
     use tempfile::Builder;
 
     const REDIS_DOWNLOAD_PATH: &str =
@@ -42,12 +42,14 @@ mod test {
             redis_path
         );
 
-        let mut response = reqwest::get(REDIS_DOWNLOAD_PATH)
-            .await
+        let mut response = async_std::task::block_on(reqwest::get(REDIS_DOWNLOAD_PATH))
             .expect("failed to download redis");
 
         copy(&mut response, &mut redis_path);
-        let wasm_bytes = std::fs::read(redis_path).expect("can't read redis.wasm");
+        let mut wasm_bytes = vec![];
+        redis_path
+            .read(wasm_bytes.as_mut_slice())
+            .expect("failed to read redis.wasm");
 
         let mut frank = Frank::new();
         let config = Config::default();
