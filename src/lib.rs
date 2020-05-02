@@ -23,8 +23,8 @@
     unreachable_patterns
 )]
 #![warn(rust_2018_idioms)]
-mod vm;
 mod misc;
+mod vm;
 
 pub use vm::config::Config;
 pub use vm::frank::Frank;

@@ -119,7 +119,7 @@ impl FrankService for Frank {
         let module = FrankModule::new(
             &prepared_wasm_bytes,
             config.clone(),
-            self.abi_import_object.clone_ref(),
+            self.abi_import_object.clone(),
         )?;
 
         // registers ABI of newly registered module in abi_import_object
