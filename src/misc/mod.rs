@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-#![deny(
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
-#![warn(rust_2018_idioms)]
-mod vm;
-mod misc;
+mod slice_pretty_printer;
 
-pub use vm::config::Config;
-pub use vm::frank::Frank;
-pub use vm::service::FrankService;
+pub use slice_pretty_printer::SlicePrettyPrinter;

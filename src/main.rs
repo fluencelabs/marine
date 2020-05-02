@@ -26,10 +26,12 @@
 
 /// Command-line tool intended to test Frank VM.
 mod vm;
+mod misc;
 
 use crate::vm::config::Config;
 use crate::vm::frank::Frank;
 use crate::vm::service::FrankService;
+use crate::misc::SlicePrettyPrinter;
 
 use exitfailure::ExitFailure;
 use std::fs;
@@ -90,7 +92,7 @@ fn main() -> Result<(), ExitFailure> {
                     }
                     "hash" => {
                         let hash = frank.compute_state_hash();
-                        println!("vm state hash is {:?}", hash);
+                        println!("vm state hash is {:2x}", SlicePrettyPrinter(hash.as_slice()));
                     }
                     "help" => {
                         println!(
