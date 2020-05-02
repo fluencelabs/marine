@@ -26,8 +26,8 @@ jobs:
           key: fce01-{{ checksum "Cargo.toml" }}
 
 workflows:
-  version: 2
-  arqada:
+  version: 2.1
+  fce:
     jobs:
       - fce
 
