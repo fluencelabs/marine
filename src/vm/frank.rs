@@ -21,7 +21,7 @@ use crate::vm::{config::Config, errors::FrankError, service::FrankService};
 use sha2::{digest::generic_array::GenericArray, digest::FixedOutput};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use wasmer_runtime::{func, Ctx};
+use wasmer_runtime::func;
 use wasmer_runtime_core::import::{ImportObject, Namespace};
 
 pub struct Frank {
@@ -49,15 +49,13 @@ impl Frank {
         let allocate = module_abi.allocate.clone().unwrap();
         namespace.insert(
             config.allocate_fn_name.clone(),
-            func!(move |_ctx: &mut Ctx, size: i32| -> i32 {
-                allocate.call(size).expect("allocate failed")
-            }),
+            func!(move |size: i32| -> i32 { allocate.call(size).expect("allocate failed") }),
         );
 
         let invoke = module_abi.invoke.clone().unwrap();
         namespace.insert(
             config.invoke_fn_name.clone(),
-            func!(move |_ctx: &mut Ctx, offset: i32, size: i32| -> i32 {
+            func!(move |offset: i32, size: i32| -> i32 {
                 invoke.call(offset, size).expect("invoke failed")
             }),
         );
@@ -65,7 +63,7 @@ impl Frank {
         let deallocate = module_abi.deallocate.clone().unwrap();
         namespace.insert(
             config.deallocate_fn_name.clone(),
-            func!(move |_ctx: &mut Ctx, ptr: i32, size: i32| {
+            func!(move |ptr: i32, size: i32| {
                 deallocate.call(ptr, size).expect("deallocate failed");
             }),
         );
@@ -73,7 +71,7 @@ impl Frank {
         let store = module_abi.store.clone().unwrap();
         namespace.insert(
             config.store_fn_name.clone(),
-            func!(move |_ctx: &mut Ctx, offset: i32, value: i32| {
+            func!(move |offset: i32, value: i32| {
                 store.call(offset, value).expect("store failed")
             }),
         );
@@ -81,9 +79,7 @@ impl Frank {
         let load = module_abi.load.clone().unwrap();
         namespace.insert(
             config.load_fn_name.clone(),
-            func!(move |_ctx: &mut Ctx, offset: i32| -> i32 {
-                load.call(offset).expect("load failed")
-            }),
+            func!(move |offset: i32| -> i32 { load.call(offset).expect("load failed") }),
         );
 
         namespace
