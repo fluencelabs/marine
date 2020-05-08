@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-use crate::vm::errors::FrankError;
-use crate::vm::module::frank_result::FrankResult;
+use crate::vm::errors::FCEError;
+use crate::vm::module::fce_result::FCEResult;
 
 use sha2::digest::generic_array::GenericArray;
 use sha2::digest::FixedOutput;
 
-/// Application interface of a Frank module. Intended to use by Frank instance itself.
+/// Application interface of a FCE module. Intended to use by FCE instance itself.
 pub(crate) trait ModuleAPI {
     /// Invokes a module supplying byte array and expecting byte array with some outcome back.
-    fn invoke(&mut self, argument: &[u8]) -> Result<FrankResult, FrankError>;
+    fn invoke(&mut self, argument: &[u8]) -> Result<FCEResult, FCEError>;
 
     /// Computes hash of the internal modules state.
     fn compute_state_hash(&mut self)

@@ -16,7 +16,7 @@
 
 use wasmer_runtime::Func;
 
-/// Application binary interface of a Frank module. Different module could use such scheme for
+/// Application binary interface of a FCE module. Different module could use such scheme for
 /// communicate with each other.
 ///
 /// Given char string req as a request, the general scheme to use this ABI by other module
@@ -32,7 +32,7 @@ use wasmer_runtime::Func;
 pub(crate) struct ModuleABI<'a> {
     // It is safe to use unwrap() while calling these functions because Option is used here
     // just to allow partially initialization. And all Option fields will contain Some if
-    // invoking Frank::new has been succeed.
+    // invoking FCE::new has been succeed.
     /// Allocates a region of memory inside a module. Used for passing argument inside the module.
     pub(crate) allocate: Option<Func<'a, i32, i32>>,
 

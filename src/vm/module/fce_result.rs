@@ -15,11 +15,11 @@
  */
 
 #[derive(Clone, Debug, PartialEq, Default)]
-pub struct FrankResult {
+pub struct FCEResult {
     pub outcome: Vec<u8>,
 }
 
-impl FrankResult {
+impl FCEResult {
     pub fn new(outcome: Vec<u8>) -> Self {
         Self { outcome }
     }

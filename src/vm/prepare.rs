@@ -18,7 +18,7 @@
 // https://github.com/paritytech/substrate/blob/master/srml/contracts/src/wasm/prepare.rs
 // https://github.com/nearprotocol/nearcore/blob/master/runtime/near-vm-runner/src/prepare.rs
 
-use crate::vm::errors::FrankError;
+use crate::vm::errors::FCEError;
 
 use parity_wasm::{
     builder, elements,
@@ -30,7 +30,7 @@ struct ModuleBootstrapper {
 }
 
 impl<'a> ModuleBootstrapper {
-    fn init(module_code: &[u8]) -> Result<Self, FrankError> {
+    fn init(module_code: &[u8]) -> Result<Self, FCEError> {
         let module = elements::deserialize_buffer(module_code)?;
 
         Ok(Self { module })
@@ -66,14 +66,14 @@ impl<'a> ModuleBootstrapper {
         }
     }
 
-    fn into_wasm(self) -> Result<Vec<u8>, FrankError> {
+    fn into_wasm(self) -> Result<Vec<u8>, FCEError> {
         elements::serialize(self.module).map_err(Into::into)
     }
 }
 
 /// Prepares a Wasm module:
 ///   - set memory page count
-pub fn prepare_module(module: &[u8], mem_pages_count: u32) -> Result<Vec<u8>, FrankError> {
+pub fn prepare_module(module: &[u8], mem_pages_count: u32) -> Result<Vec<u8>, FCEError> {
     ModuleBootstrapper::init(module)?
         .set_mem_pages_count(mem_pages_count)
         .into_wasm()

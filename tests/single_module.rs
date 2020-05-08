@@ -16,7 +16,7 @@
 
 mod downloader;
 
-use fce::{Config, Frank, FrankService};
+use fce::{Config, FCEService, FCE};
 
 const REDIS_DOWNLOAD_URL: &str =
     "https://github.com/fluencelabs/redis/releases/download/0.8.0_w/redis.wasm";
@@ -27,27 +27,26 @@ const SQLITE_DOWNLOAD_URL: &str =
 async fn redis() {
     let wasm_bytes = downloader::download(REDIS_DOWNLOAD_URL).await;
 
-    let mut frank = Frank::new();
+    let mut fce = FCE::new();
     let module_name = "redis";
     let config = Config::default();
 
-    frank
-        .register_module(module_name, wasm_bytes.as_ref(), config)
-        .unwrap_or_else(|e| panic!("can't create Frank: {:?}", e));
+    fce.register_module(module_name, wasm_bytes.as_ref(), config)
+        .unwrap_or_else(|e| panic!("can't create FCE: {:?}", e));
 
-    let result1 = frank
+    let result1 = fce
         .invoke(module_name, "SET A 10".as_bytes())
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result2 = frank
+    let result2 = fce
         .invoke(module_name, "SADD B 20".as_bytes())
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result3 = frank
+    let result3 = fce
         .invoke(module_name, "GET A".as_bytes())
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result4 = frank
+    let result4 = fce
         .invoke(module_name, "SMEMBERS B".as_bytes())
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result5 = frank
+    let result5 = fce
         .invoke(
             module_name,
             "eval \"redis.call('incr', 'A') return redis.call('get', 'A') * 8 + 5\"  0".as_bytes(),
@@ -71,27 +70,26 @@ async fn redis() {
 async fn sqlite() {
     let wasm_bytes = downloader::download(SQLITE_DOWNLOAD_URL).await;
 
-    let mut frank = Frank::new();
+    let mut fce = FCE::new();
     let module_name = "sqlite";
     let config = Config::default();
 
-    frank
-        .register_module(module_name, wasm_bytes.as_ref(), config)
-        .unwrap_or_else(|e| panic!("can't create Frank: {:?}", e));
+    fce.register_module(module_name, wasm_bytes.as_ref(), config)
+        .unwrap_or_else(|e| panic!("can't create FCE: {:?}", e));
 
-    let result1 = frank
+    let result1 = fce
         .invoke(
             module_name,
             "CREATE VIRTUAL TABLE users USING FTS5(body)".as_bytes(),
         )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result2 = frank
+    let result2 = fce
         .invoke(
             module_name,
             "INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')".as_bytes(),
         )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result3 = frank
+    let result3 = fce
         .invoke(
             module_name,
             "SELECT * FROM users WHERE users MATCH 'A* OR B*'".as_bytes(),

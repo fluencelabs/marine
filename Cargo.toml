@@ -37,9 +37,9 @@ bytes = "0.5.4"
 tokio = { version = "0.2.20", features = ["blocking", "macros"] }
 
 [profile.release]
-opt-level = 3
-debug = false
-lto = true
-debug-assertions = false
-overflow-checks = false
-panic = "abort"
+#opt-level = 3
+#debug = false
+#lto = true
+#debug-assertions = false
+#overflow-checks = false
+#panic = "abort"

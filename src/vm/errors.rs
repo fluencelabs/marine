@@ -21,7 +21,7 @@ use wasmer_runtime::error::{
 use std::error::Error;
 
 #[derive(Debug)]
-pub enum FrankError {
+pub enum FCEError {
     /// Errors for I/O errors raising while opening a file.
     IOError(String),
 
@@ -47,72 +47,72 @@ pub enum FrankError {
     NoSuchModule,
 }
 
-impl Error for FrankError {}
+impl Error for FCEError {}
 
-impl std::fmt::Display for FrankError {
+impl std::fmt::Display for FCEError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            FrankError::IOError(msg) => write!(f, "IOError: {}", msg),
-            FrankError::WasmerResolveError(msg) => write!(f, "WasmerResolveError: {}", msg),
-            FrankError::WasmerInvokeError(msg) => write!(f, "WasmerInvokeError: {}", msg),
-            FrankError::WasmerCompileError(msg) => write!(f, "WasmerCompileError: {}", msg),
-            FrankError::WasmerCreationError(msg) => write!(f, "WasmerCreationError: {}", msg),
-            FrankError::PrepareError(msg) => {
+            FCEError::IOError(msg) => write!(f, "IOError: {}", msg),
+            FCEError::WasmerResolveError(msg) => write!(f, "WasmerResolveError: {}", msg),
+            FCEError::WasmerInvokeError(msg) => write!(f, "WasmerInvokeError: {}", msg),
+            FCEError::WasmerCompileError(msg) => write!(f, "WasmerCompileError: {}", msg),
+            FCEError::WasmerCreationError(msg) => write!(f, "WasmerCreationError: {}", msg),
+            FCEError::PrepareError(msg) => {
                 write!(f, "Prepare error: {}, probably module is mailformed", msg)
             }
-            FrankError::NonUniqueModuleName => write!(f, "Frank already has module with such name"),
-            FrankError::NoSuchModule => write!(f, "Frank doesn't have a module with such name"),
+            FCEError::NonUniqueModuleName => write!(f, "FCE already has module with such name"),
+            FCEError::NoSuchModule => write!(f, "FCE doesn't have a module with such name"),
         }
     }
 }
 
-impl From<CreationError> for FrankError {
+impl From<CreationError> for FCEError {
     fn from(err: CreationError) -> Self {
-        FrankError::WasmerCreationError(format!("{}", err))
+        FCEError::WasmerCreationError(format!("{}", err))
     }
 }
 
-impl From<CompileError> for FrankError {
+impl From<CompileError> for FCEError {
     fn from(err: CompileError) -> Self {
-        FrankError::WasmerCompileError(format!("{}", err))
+        FCEError::WasmerCompileError(format!("{}", err))
     }
 }
 
-impl From<parity_wasm::elements::Error> for FrankError {
+impl From<parity_wasm::elements::Error> for FCEError {
     fn from(err: parity_wasm::elements::Error) -> Self {
-        FrankError::PrepareError(format!("{}", err))
+        FCEError::PrepareError(format!("{}", err))
     }
 }
 
-impl From<CallError> for FrankError {
+impl From<CallError> for FCEError {
     fn from(err: CallError) -> Self {
         match err {
-            CallError::Resolve(err) => FrankError::WasmerResolveError(format!("{}", err)),
-            CallError::Runtime(err) => FrankError::WasmerInvokeError(format!("{}", err)),
+            CallError::Resolve(err) => FCEError::WasmerResolveError(format!("{}", err)),
+            CallError::Runtime(err) => FCEError::WasmerInvokeError(format!("{}", err)),
         }
     }
 }
 
-impl From<ResolveError> for FrankError {
+impl From<ResolveError> for FCEError {
     fn from(err: ResolveError) -> Self {
-        FrankError::WasmerResolveError(format!("{}", err))
+        FCEError::WasmerResolveError(format!("{}", err))
     }
 }
 
-impl From<RuntimeError> for FrankError {
+impl From<RuntimeError> for FCEError {
     fn from(err: RuntimeError) -> Self {
-        FrankError::WasmerInvokeError(format!("{}", err))
+        FCEError::WasmerInvokeError(format!("{}", err))
     }
 }
 
-impl From<WasmerError> for FrankError {
+impl From<WasmerError> for FCEError {
     fn from(err: WasmerError) -> Self {
-        FrankError::WasmerInvokeError(format!("{}", err))
+        FCEError::WasmerInvokeError(format!("{}", err))
     }
 }
 
-impl From<std::io::Error> for FrankError {
+impl From<std::io::Error> for FCEError {
     fn from(err: std::io::Error) -> Self {
-        FrankError::IOError(format!("{}", err))
+        FCEError::IOError(format!("{}", err))
     }
 }

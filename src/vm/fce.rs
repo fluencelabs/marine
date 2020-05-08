@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use crate::vm::module::frank_result::FrankResult;
-use crate::vm::module::{FrankModule, ModuleAPI};
-use crate::vm::{config::Config, errors::FrankError, service::FrankService};
+use crate::vm::module::fce_result::FCEResult;
+use crate::vm::module::{FCEModule, ModuleAPI};
+use crate::vm::{config::Config, errors::FCEError, service::FCEService};
 
 use sha2::{digest::generic_array::GenericArray, digest::FixedOutput};
 use std::collections::hash_map::Entry;
@@ -24,15 +24,15 @@ use std::collections::HashMap;
 use wasmer_runtime::func;
 use wasmer_runtime_core::import::{ImportObject, Namespace};
 
-pub struct Frank {
-    // set of modules registered inside Frank
-    modules: HashMap<String, FrankModule>,
+pub struct FCE {
+    // set of modules registered inside FCE
+    modules: HashMap<String, FCEModule>,
 
     // contains ABI of each registered module in specific format for Wasmer
     abi_import_object: ImportObject,
 }
 
-impl Frank {
+impl FCE {
     pub fn new() -> Self {
         Self {
             modules: HashMap::new(),
@@ -41,7 +41,7 @@ impl Frank {
     }
 
     /// Extracts ABI of a module into Namespace.
-    fn create_import_object(module: &FrankModule, config: &Config) -> Namespace {
+    fn create_import_object(module: &FCEModule, config: &Config) -> Namespace {
         let mut namespace = Namespace::new();
         let module_abi = module.get_abi();
 
@@ -86,17 +86,17 @@ impl Frank {
     }
 }
 
-impl Default for Frank {
+impl Default for FCE {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl FrankService for Frank {
-    fn invoke(&mut self, module_name: &str, argument: &[u8]) -> Result<FrankResult, FrankError> {
+impl FCEService for FCE {
+    fn invoke(&mut self, module_name: &str, argument: &[u8]) -> Result<FCEResult, FCEError> {
         match self.modules.get_mut(module_name) {
             Some(module) => module.invoke(argument),
-            None => Err(FrankError::NoSuchModule),
+            None => Err(FCEError::NoSuchModule),
         }
     }
 
@@ -105,21 +105,21 @@ impl FrankService for Frank {
         module_name: S,
         wasm_bytes: &[u8],
         config: Config,
-    ) -> Result<(), FrankError>
+    ) -> Result<(), FCEError>
     where
         S: Into<String>,
     {
         let prepared_wasm_bytes =
             crate::vm::prepare::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
-        let module = FrankModule::new(
+        let module = FCEModule::new(
             &prepared_wasm_bytes,
             config.clone(),
             self.abi_import_object.clone(),
         )?;
 
         // registers ABI of newly registered module in abi_import_object
-        let namespace = Frank::create_import_object(&module, &config);
+        let namespace = FCE::create_import_object(&module, &config);
         let module_name: String = module_name.into();
         self.abi_import_object
             .register(module_name.clone(), namespace);
@@ -129,14 +129,14 @@ impl FrankService for Frank {
                 entry.insert(module);
                 Ok(())
             }
-            Entry::Occupied(_) => Err(FrankError::NonUniqueModuleName),
+            Entry::Occupied(_) => Err(FCEError::NonUniqueModuleName),
         }
     }
 
-    fn unregister_module(&mut self, module_name: &str) -> Result<(), FrankError> {
+    fn unregister_module(&mut self, module_name: &str) -> Result<(), FCEError> {
         self.modules
             .remove(module_name)
-            .ok_or_else(|| FrankError::NoSuchModule)?;
+            .ok_or_else(|| FCEError::NoSuchModule)?;
         // unregister abi from a dispatcher
 
         Ok(())

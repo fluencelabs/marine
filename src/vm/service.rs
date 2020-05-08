@@ -15,28 +15,28 @@
  */
 
 use crate::vm::config::Config;
-use crate::vm::errors::FrankError;
-use crate::vm::module::frank_result::FrankResult;
+use crate::vm::errors::FCEError;
+use crate::vm::module::fce_result::FCEResult;
 
 use sha2::digest::generic_array::GenericArray;
 
 /// Describes a service behaviour in the Fluence network.
-pub trait FrankService {
+pub trait FCEService {
     /// Invokes a module supplying byte array and expecting byte array with some outcome back.
-    fn invoke(&mut self, module_name: &str, argument: &[u8]) -> Result<FrankResult, FrankError>;
+    fn invoke(&mut self, module_name: &str, argument: &[u8]) -> Result<FCEResult, FCEError>;
 
-    /// Registers new module in the Frank Service.
+    /// Registers new module in the FCE Service.
     fn register_module<S>(
         &mut self,
         module_name: S,
         wasm_bytes: &[u8],
         config: Config,
-    ) -> Result<(), FrankError>
+    ) -> Result<(), FCEError>
     where
         S: Into<String>;
 
     /// Unregisters previously registered module.
-    fn unregister_module(&mut self, module_name: &str) -> Result<(), FrankError>;
+    fn unregister_module(&mut self, module_name: &str) -> Result<(), FCEError>;
 
     /// Computes hash of the internal modules state.
     fn compute_state_hash(

@@ -16,9 +16,9 @@
 
 mod abi;
 mod api;
-mod frank_module;
-pub mod frank_result;
+mod fce_module;
+pub mod fce_result;
 
 pub(crate) use abi::ModuleABI;
 pub(crate) use api::ModuleAPI;
-pub(crate) use frank_module::FrankModule;
+pub(crate) use fce_module::FCEModule;

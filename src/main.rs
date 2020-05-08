@@ -25,13 +25,13 @@
 #![warn(rust_2018_idioms)]
 
 mod misc;
-/// Command-line tool intended to test Frank VM.
+/// Command-line tool intended to test FCE VM.
 mod vm;
 
 use crate::misc::SlicePrettyPrinter;
 use crate::vm::config::Config;
-use crate::vm::frank::Frank;
-use crate::vm::service::FrankService;
+use crate::vm::fce::FCE;
+use crate::vm::service::FCEService;
 
 use exitfailure::ExitFailure;
 use std::fs;
@@ -39,7 +39,7 @@ use std::fs;
 fn main() -> Result<(), ExitFailure> {
     println!("Welcome to the FCE CLI:");
     let mut rl = rustyline::Editor::<()>::new();
-    let mut frank = Frank::new();
+    let mut fce = FCE::new();
 
     loop {
         let readline = rl.readline(">> ");
@@ -57,20 +57,17 @@ fn main() -> Result<(), ExitFailure> {
                         }
 
                         let config = Config::default();
-                        let result_msg = match frank.register_module(
-                            module_name,
-                            &wasm_bytes.unwrap(),
-                            config,
-                        ) {
-                            Ok(_) => "module successfully registered in Frank".to_string(),
-                            Err(e) => format!("module registration failed with: {:?}", e),
-                        };
+                        let result_msg =
+                            match fce.register_module(module_name, &wasm_bytes.unwrap(), config) {
+                                Ok(_) => "module successfully registered in FCE".to_string(),
+                                Err(e) => format!("module registration failed with: {:?}", e),
+                            };
                         println!("{}", result_msg);
                     }
                     "del" => {
                         let module_name = cmd[1];
-                        let result_msg = match frank.unregister_module(module_name) {
-                            Ok(_) => "module successfully deleted from Frank".to_string(),
+                        let result_msg = match fce.unregister_module(module_name) {
+                            Ok(_) => "module successfully deleted from FCE".to_string(),
                             Err(e) => format!("module deletion failed with: {:?}", e),
                         };
                         println!("{}", result_msg);
@@ -78,7 +75,7 @@ fn main() -> Result<(), ExitFailure> {
                     "execute" => {
                         let module_name = cmd[1];
                         let arg = cmd[2..].join(" ");
-                        let result = match frank.invoke(module_name, arg.as_bytes()) {
+                        let result = match fce.invoke(module_name, arg.as_bytes()) {
                             Ok(result) => {
                                 let outcome_copy = result.outcome.clone();
                                 match String::from_utf8(result.outcome) {
@@ -91,7 +88,7 @@ fn main() -> Result<(), ExitFailure> {
                         println!("{}", result);
                     }
                     "hash" => {
-                        let hash = frank.compute_state_hash();
+                        let hash = fce.compute_state_hash();
                         println!(
                             "vm state hash is {:2x}",
                             SlicePrettyPrinter(hash.as_slice())
@@ -100,8 +97,8 @@ fn main() -> Result<(), ExitFailure> {
                     "help" => {
                         println!(
                             "Enter:\n\
-                                add <module_name> <module_path> - to add a new Wasm module to Frank\n\
-                                del <module_name>               - to delete Wasm module to Frank\n\
+                                add <module_name> <module_path> - to add a new Wasm module to FCE\n\
+                                del <module_name>               - to delete Wasm module to FCE\n\
                                 execute <module_name> <arg>     - to call invoke on module with module_name\n\
                                 hash                            - to compute hash of internal Wasm state\n\
                                 help                            - to print this message\n\

@@ -15,8 +15,8 @@
  */
 
 use crate::vm::config::Config;
-use crate::vm::errors::FrankError;
-use crate::vm::module::frank_result::FrankResult;
+use crate::vm::errors::FCEError;
+use crate::vm::module::fce_result::FCEResult;
 use crate::vm::module::{ModuleABI, ModuleAPI};
 
 use sha2::digest::generic_array::GenericArray;
@@ -26,21 +26,17 @@ use wasmer_runtime_core::import::ImportObject;
 use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
 use wasmer_wasi::generate_import_object_for_version;
 
-pub(crate) struct FrankModule {
+pub(crate) struct FCEModule {
     instance: &'static Instance,
     abi: ModuleABI<'static>,
 }
 
-impl FrankModule {
+impl FCEModule {
     /// Creates a new virtual machine executor.
-    pub fn new(
-        wasm_bytes: &[u8],
-        config: Config,
-        imports: ImportObject,
-    ) -> Result<Self, FrankError> {
+    pub fn new(wasm_bytes: &[u8], config: Config, imports: ImportObject) -> Result<Self, FCEError> {
         let logger_imports = imports! {
             "logger" => {
-                "log_utf8_string" => func!(FrankModule::logger_log_utf8_string),
+                "log_utf8_string" => func!(FCEModule::logger_log_utf8_string),
             },
         };
 
@@ -77,12 +73,12 @@ impl FrankModule {
         let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
         match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
             Some(msg) => print!("{}", msg),
-            None => print!("frank logger: incorrect UTF8 string's been supplied to logger"),
+            None => print!("fce logger: incorrect UTF8 string's been supplied to logger"),
         }
     }
 
     /// Writes given value on the given address to module memory.
-    fn write_to_mem(&mut self, address: usize, value: &[u8]) -> Result<(), FrankError> {
+    fn write_to_mem(&mut self, address: usize, value: &[u8]) -> Result<(), FCEError> {
         let memory = self.instance.context().memory(0);
 
         for (byte_id, cell) in memory.view::<u8>()[address..(address + value.len())]
@@ -96,7 +92,7 @@ impl FrankModule {
     }
 
     /// Reads invocation result from specified address of memory.
-    fn read_result_from_mem(&self, address: usize) -> Result<Vec<u8>, FrankError> {
+    fn read_result_from_mem(&self, address: usize) -> Result<Vec<u8>, FCEError> {
         let memory = self.instance.context().memory(0);
 
         let mut result_size: usize = 0;
@@ -114,8 +110,8 @@ impl FrankModule {
     }
 }
 
-impl ModuleAPI for FrankModule {
-    fn invoke(&mut self, argument: &[u8]) -> Result<FrankResult, FrankError> {
+impl ModuleAPI for FCEModule {
+    fn invoke(&mut self, argument: &[u8]) -> Result<FCEResult, FCEError> {
         // allocate memory for the given argument and write it to memory
         let argument_len = argument.len() as i32;
         let argument_address = if argument_len != 0 {
@@ -141,7 +137,7 @@ impl ModuleAPI for FrankModule {
             .unwrap()
             .call(result_address, result.len() as i32)?;
 
-        Ok(FrankResult::new(result))
+        Ok(FCEResult::new(result))
     }
 
     fn compute_state_hash(
@@ -155,7 +151,7 @@ impl ModuleAPI for FrankModule {
         let wasm_ptr = WasmPtr::<u8, Array>::new(0 as _);
         let raw_mem = wasm_ptr
             .deref(memory, 0, (memory.size().bytes().0 - 1) as _)
-            .expect("frank: internal error in compute_vm_state_hash");
+            .expect("fce: internal error in compute_vm_state_hash");
         let raw_mem: &[u8] = unsafe { &*(raw_mem as *const [std::cell::Cell<u8>] as *const [u8]) };
 
         hasher.input(raw_mem);
@@ -163,6 +159,6 @@ impl ModuleAPI for FrankModule {
     }
 }
 
-impl Drop for FrankModule {
+impl Drop for FCEModule {
     fn drop(&mut self) {}
 }
