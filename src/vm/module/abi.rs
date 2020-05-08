@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use wasmer_runtime::Func;
+use crate::vm::errors::FCEError;
 
 /// Application binary interface of a FCE module. Different module could use such scheme for
 /// communicate with each other.
@@ -28,26 +28,19 @@ use wasmer_runtime::Func;
 ///   4. read a result from the res by reading 4 bytes as little-endian result_size
 ///      and the read result_size bytes as the final result.
 ///   5. deallocate(res, strlen(sql)) to clean memory.
-
-pub(crate) trait ModuleABI<'a> {}
-
-#[derive(Clone)]
-pub(crate) struct ABI<'a> {
-    // It is safe to use unwrap() while calling these functions because Option is used here
-    // just to allow partially initialization. And all Option fields will contain Some if
-    // invoking FCE::new has been succeed.
+pub(crate) trait ModuleABI {
     /// Allocates a region of memory inside a module. Used for passing argument inside the module.
-    pub(crate) allocate: Option<Func<'a, i32, i32>>,
+    fn allocate(&self, size: i32) -> Result<i32, FCEError>;
 
     /// Deallocates previously allocated memory region.
-    pub(crate) deallocate: Option<Func<'a, (i32, i32), ()>>,
+    fn deallocate(&self, ptr: i32, size: i32) -> Result<(), FCEError>;
 
     /// Calls the main entry point of a module called invoke.
-    pub(crate) invoke: Option<Func<'a, (i32, i32), i32>>,
+    fn invoke(&self, arg_address: i32, arg_size: i32) -> Result<i32, FCEError>;
 
-    /// Stores one given byte on provided address.
-    pub(crate) store: Option<Func<'a, (i32, i32)>>,
+    /// Stores one byte on given address.
+    fn store(&self, address: i32, value: i32) -> Result<(), FCEError>;
 
-    /// Loads one bytes from provided address.
-    pub(crate) load: Option<Func<'a, i32, i32>>,
+    /// Loads one byte from given address.
+    fn load(&self, address: i32) -> Result<i32, FCEError>;
 }

@@ -17,7 +17,7 @@
 use crate::vm::config::Config;
 use crate::vm::errors::FCEError;
 use crate::vm::module::fce_result::FCEResult;
-use crate::vm::module::{ModuleAPI, ABI};
+use crate::vm::module::{ModuleABI, ModuleAPI};
 
 use sha2::digest::generic_array::GenericArray;
 use sha2::digest::FixedOutput;
@@ -26,6 +26,22 @@ use wasmer_runtime_core::import::ImportObject;
 use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
 use wasmer_wasi::generate_import_object_for_version;
 
+/// Desribes Application Binary Interface of a module.
+/// For more details see comment in abi.rs.
+#[derive(Clone)]
+pub(crate) struct ABI<'a> {
+    // It is safe to use unwrap() while calling these functions because Option is used here
+    // just to allow partially initialization. And all Option fields will contain Some if
+    // invoking FCE::new has been succeed.
+    pub(crate) allocate: Option<Func<'a, i32, i32>>,
+    pub(crate) deallocate: Option<Func<'a, (i32, i32), ()>>,
+    pub(crate) invoke: Option<Func<'a, (i32, i32), i32>>,
+    pub(crate) store: Option<Func<'a, (i32, i32)>>,
+    pub(crate) load: Option<Func<'a, i32, i32>>,
+}
+
+/// A building block of multi-modules scheme of FCE, represents one module that corresponds
+/// to a one Wasm file.
 pub(crate) struct FCEModule {
     instance: Instance,
     abi: ABI<'static>,
@@ -39,6 +55,7 @@ impl FCEModule {
                 "log_utf8_string" => func!(FCEModule::logger_log_utf8_string),
             },
         };
+        let config_copy = config.clone();
 
         let mut import_object = generate_import_object_for_version(
             config.wasi_config.version,
@@ -52,42 +69,41 @@ impl FCEModule {
         import_object.allow_missing_functions = false;
 
         let instance = compile(&wasm_bytes)?.instantiate(&import_object)?;
+        let abi = FCEModule::create_abi(&instance, &config_copy)?;
 
+        Ok(Self { instance, abi })
+    }
+
+    #[rustfmt::skip]
+    fn create_abi(instance: &Instance, config: &Config) -> Result<ABI<'static>, FCEError> {
         unsafe {
-            #[rustfmt::skip]
             let allocate = std::mem::transmute::<Func<'_, i32, i32>, Func<'static, i32, i32>>(
                 instance.exports.get(&config.allocate_fn_name)?
             );
 
-            #[rustfmt::skip]
             let deallocate = std::mem::transmute::<Func<'_, (i32, i32)>, Func<'static, (i32, i32)>>(
                 instance.exports.get(&config.deallocate_fn_name)?
             );
 
-            #[rustfmt::skip]
             let invoke = std::mem::transmute::<Func<'_, (i32, i32), i32>, Func<'static, (i32, i32), i32>, >(
                 instance.exports.get(&config.invoke_fn_name)?
             );
 
-            #[rustfmt::skip]
             let store = std::mem::transmute::<Func<'_, (i32, i32)>, Func<'static, _, _>>(
                 instance.exports.get(&config.store_fn_name)?,
             );
 
-            #[rustfmt::skip]
             let load = std::mem::transmute::<Func<'_, i32, i32>, Func<'static, _, _>>(
                 instance.exports.get(&config.load_fn_name)?,
             );
 
-            let abi = ABI {
+            Ok(ABI {
                 allocate: Some(allocate),
                 deallocate: Some(deallocate),
                 invoke: Some(invoke),
                 store: Some(store),
                 load: Some(load),
-            };
-
-            Ok(Self { instance, abi })
+            })
         }
     }
 
@@ -139,10 +155,11 @@ impl FCEModule {
 
 impl ModuleAPI for FCEModule {
     fn invoke(&mut self, argument: &[u8]) -> Result<FCEResult, FCEError> {
-        // allocate memory for the given argument and write it to memory
         let argument_len = argument.len() as i32;
+
+        // allocate memory for the given argument and write it to memory
         let argument_address = if argument_len != 0 {
-            let address = self.abi.allocate.as_ref().unwrap().call(argument_len)?;
+            let address = self.allocate(argument_len)?;
             self.write_to_mem(address as usize, argument)?;
             address
         } else {
@@ -150,19 +167,9 @@ impl ModuleAPI for FCEModule {
         };
 
         // invoke a main module, read a result and deallocate it
-        let result_address = self
-            .abi
-            .invoke
-            .as_ref()
-            .unwrap()
-            .call(argument_address, argument_len)?;
+        let result_address = <Self as ModuleABI>::invoke(self, argument_address, argument_len)?;
         let result = self.read_result_from_mem(result_address as _)?;
-
-        self.abi
-            .deallocate
-            .as_ref()
-            .unwrap()
-            .call(result_address, result.len() as i32)?;
+        self.deallocate(result_address, result.len() as i32)?;
 
         Ok(FCEResult::new(result))
     }
@@ -183,6 +190,33 @@ impl ModuleAPI for FCEModule {
 
         hasher.input(raw_mem);
         hasher.result()
+    }
+}
+
+impl ModuleABI for FCEModule {
+    fn allocate(&self, size: i32) -> Result<i32, FCEError> {
+        Ok(self.abi.allocate.as_ref().unwrap().call(size)?)
+    }
+
+    fn deallocate(&self, ptr: i32, size: i32) -> Result<(), FCEError> {
+        Ok(self.abi.deallocate.as_ref().unwrap().call(ptr, size)?)
+    }
+
+    fn invoke(&self, arg_address: i32, arg_size: i32) -> Result<i32, FCEError> {
+        Ok(self
+            .abi
+            .invoke
+            .as_ref()
+            .unwrap()
+            .call(arg_address, arg_size)?)
+    }
+
+    fn store(&self, address: i32, value: i32) -> Result<(), FCEError> {
+        Ok(self.abi.store.as_ref().unwrap().call(address, value)?)
+    }
+
+    fn load(&self, address: i32) -> Result<i32, FCEError> {
+        Ok(self.abi.load.as_ref().unwrap().call(address)?)
     }
 }
 
