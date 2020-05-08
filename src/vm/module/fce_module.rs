@@ -26,25 +26,25 @@ use wasmer_runtime_core::import::ImportObject;
 use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
 use wasmer_wasi::generate_import_object_for_version;
 
-/// Desribes Application Binary Interface of a module.
+/// Describes Application Binary Interface of a module.
 /// For more details see comment in abi.rs.
 #[derive(Clone)]
-pub(crate) struct ABI<'a> {
+pub(crate) struct ABI {
     // It is safe to use unwrap() while calling these functions because Option is used here
     // just to allow partially initialization. And all Option fields will contain Some if
     // invoking FCE::new has been succeed.
-    pub(crate) allocate: Option<Func<'a, i32, i32>>,
-    pub(crate) deallocate: Option<Func<'a, (i32, i32), ()>>,
-    pub(crate) invoke: Option<Func<'a, (i32, i32), i32>>,
-    pub(crate) store: Option<Func<'a, (i32, i32)>>,
-    pub(crate) load: Option<Func<'a, i32, i32>>,
+    pub(crate) allocate: Option<Func<'static, i32, i32>>,
+    pub(crate) deallocate: Option<Func<'static, (i32, i32), ()>>,
+    pub(crate) invoke: Option<Func<'static, (i32, i32), i32>>,
+    pub(crate) store: Option<Func<'static, (i32, i32)>>,
+    pub(crate) load: Option<Func<'static, i32, i32>>,
 }
 
 /// A building block of multi-modules scheme of FCE, represents one module that corresponds
 /// to a one Wasm file.
 pub(crate) struct FCEModule {
     instance: Instance,
-    abi: ABI<'static>,
+    abi: ABI,
 }
 
 impl FCEModule {
@@ -75,7 +75,8 @@ impl FCEModule {
     }
 
     #[rustfmt::skip]
-    fn create_abi(instance: &Instance, config: &Config) -> Result<ABI<'static>, FCEError> {
+    /// Extracts ABI from a module.
+    fn create_abi(instance: &Instance, config: &Config) -> Result<ABI, FCEError> {
         unsafe {
             let allocate = std::mem::transmute::<Func<'_, i32, i32>, Func<'static, i32, i32>>(
                 instance.exports.get(&config.allocate_fn_name)?
@@ -107,7 +108,10 @@ impl FCEModule {
         }
     }
 
-    pub fn get_abi(&self) -> &ABI<'static> {
+    /// Returns ABI of a module.
+    /// (!) Be carefull and delete all instances of ABI before dropping corresponding module.
+    /// There is no any internal ref counter due to the internals of Wasmer.
+    pub fn get_abi(&self) -> &ABI {
         &self.abi
     }
 
@@ -193,6 +197,7 @@ impl ModuleAPI for FCEModule {
     }
 }
 
+#[rustfmt::skip]
 impl ModuleABI for FCEModule {
     fn allocate(&self, size: i32) -> Result<i32, FCEError> {
         Ok(self.abi.allocate.as_ref().unwrap().call(size)?)
@@ -203,12 +208,7 @@ impl ModuleABI for FCEModule {
     }
 
     fn invoke(&self, arg_address: i32, arg_size: i32) -> Result<i32, FCEError> {
-        Ok(self
-            .abi
-            .invoke
-            .as_ref()
-            .unwrap()
-            .call(arg_address, arg_size)?)
+        Ok(self.abi.invoke.as_ref().unwrap().call(arg_address, arg_size)?)
     }
 
     fn store(&self, address: i32, value: i32) -> Result<(), FCEError> {
