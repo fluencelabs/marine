@@ -28,8 +28,11 @@ use wasmer_runtime::Func;
 ///   4. read a result from the res by reading 4 bytes as little-endian result_size
 ///      and the read result_size bytes as the final result.
 ///   5. deallocate(res, strlen(sql)) to clean memory.
+
+pub(crate) trait ModuleABI<'a> {}
+
 #[derive(Clone)]
-pub(crate) struct ModuleABI<'a> {
+pub(crate) struct ABI<'a> {
     // It is safe to use unwrap() while calling these functions because Option is used here
     // just to allow partially initialization. And all Option fields will contain Some if
     // invoking FCE::new has been succeed.

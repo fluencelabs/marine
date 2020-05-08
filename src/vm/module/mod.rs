@@ -19,6 +19,6 @@ mod api;
 mod fce_module;
 pub mod fce_result;
 
-pub(crate) use abi::ModuleABI;
+pub(crate) use abi::ABI;
 pub(crate) use api::ModuleAPI;
 pub(crate) use fce_module::FCEModule;

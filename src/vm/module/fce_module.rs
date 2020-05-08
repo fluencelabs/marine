@@ -17,18 +17,18 @@
 use crate::vm::config::Config;
 use crate::vm::errors::FCEError;
 use crate::vm::module::fce_result::FCEResult;
-use crate::vm::module::{ModuleABI, ModuleAPI};
+use crate::vm::module::{ModuleAPI, ABI};
 
 use sha2::digest::generic_array::GenericArray;
 use sha2::digest::FixedOutput;
-use wasmer_runtime::{compile, func, imports, Ctx, Instance};
+use wasmer_runtime::{compile, func, imports, Ctx, Func, Instance};
 use wasmer_runtime_core::import::ImportObject;
 use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
 use wasmer_wasi::generate_import_object_for_version;
 
 pub(crate) struct FCEModule {
-    instance: &'static Instance,
-    abi: ModuleABI<'static>,
+    instance: Instance,
+    abi: ABI<'static>,
 }
 
 impl FCEModule {
@@ -52,19 +52,46 @@ impl FCEModule {
         import_object.allow_missing_functions = false;
 
         let instance = compile(&wasm_bytes)?.instantiate(&import_object)?;
-        let instance: &'static mut Instance = Box::leak(Box::new(instance));
-        let abi = ModuleABI {
-            allocate: Some(instance.exports.get(&config.allocate_fn_name)?),
-            deallocate: Some(instance.exports.get(&config.deallocate_fn_name)?),
-            invoke: Some(instance.exports.get(&config.invoke_fn_name)?),
-            store: Some(instance.exports.get(&config.store_fn_name)?),
-            load: Some(instance.exports.get(&config.load_fn_name)?),
-        };
 
-        Ok(Self { instance, abi })
+        unsafe {
+            #[rustfmt::skip]
+            let allocate = std::mem::transmute::<Func<'_, i32, i32>, Func<'static, i32, i32>>(
+                instance.exports.get(&config.allocate_fn_name)?
+            );
+
+            #[rustfmt::skip]
+            let deallocate = std::mem::transmute::<Func<'_, (i32, i32)>, Func<'static, (i32, i32)>>(
+                instance.exports.get(&config.deallocate_fn_name)?
+            );
+
+            #[rustfmt::skip]
+            let invoke = std::mem::transmute::<Func<'_, (i32, i32), i32>, Func<'static, (i32, i32), i32>, >(
+                instance.exports.get(&config.invoke_fn_name)?
+            );
+
+            #[rustfmt::skip]
+            let store = std::mem::transmute::<Func<'_, (i32, i32)>, Func<'static, _, _>>(
+                instance.exports.get(&config.store_fn_name)?,
+            );
+
+            #[rustfmt::skip]
+            let load = std::mem::transmute::<Func<'_, i32, i32>, Func<'static, _, _>>(
+                instance.exports.get(&config.load_fn_name)?,
+            );
+
+            let abi = ABI {
+                allocate: Some(allocate),
+                deallocate: Some(deallocate),
+                invoke: Some(invoke),
+                store: Some(store),
+                load: Some(load),
+            };
+
+            Ok(Self { instance, abi })
+        }
     }
 
-    pub fn get_abi(&self) -> &ModuleABI<'static> {
+    pub fn get_abi(&self) -> &ABI<'static> {
         &self.abi
     }
 
