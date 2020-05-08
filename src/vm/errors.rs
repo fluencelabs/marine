@@ -45,6 +45,9 @@ pub enum FCEError {
 
     /// Returns where there is no module with such name.
     NoSuchModule,
+
+    /// Indicates that modules currently in use and couldn't be deleted.
+    ModuleInUse,
 }
 
 impl Error for FCEError {}
@@ -62,6 +65,9 @@ impl std::fmt::Display for FCEError {
             }
             FCEError::NonUniqueModuleName => write!(f, "FCE already has module with such name"),
             FCEError::NoSuchModule => write!(f, "FCE doesn't have a module with such name"),
+            FCEError::ModuleInUse => {
+                write!(f, "Module is used by other modules and couldn't be deleted")
+            }
         }
     }
 }

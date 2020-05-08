@@ -41,18 +41,18 @@ impl FCE {
     }
 
     /// Extracts ABI of a module into Namespace.
-    fn create_import_object(module: &FCEModule, config: &Config) -> Namespace {
+    fn create_namespace_from_module(module: &FCEModule, config: &Config) -> Namespace {
         let mut namespace = Namespace::new();
-        let module_abi = module.get_abi();
+        let module_abi = module.acquire_abi();
 
         // TODO: introduce a macro for such things
-        let allocate = module_abi.allocate.clone().unwrap();
+        let allocate = module_abi.allocate.unwrap();
         namespace.insert(
             config.allocate_fn_name.clone(),
             func!(move |size: i32| -> i32 { allocate.call(size).expect("allocate failed") }),
         );
 
-        let invoke = module_abi.invoke.clone().unwrap();
+        let invoke = module_abi.invoke.unwrap();
         namespace.insert(
             config.invoke_fn_name.clone(),
             func!(move |offset: i32, size: i32| -> i32 {
@@ -60,7 +60,7 @@ impl FCE {
             }),
         );
 
-        let deallocate = module_abi.deallocate.clone().unwrap();
+        let deallocate = module_abi.deallocate.unwrap();
         namespace.insert(
             config.deallocate_fn_name.clone(),
             func!(move |ptr: i32, size: i32| {
@@ -68,7 +68,7 @@ impl FCE {
             }),
         );
 
-        let store = module_abi.store.clone().unwrap();
+        let store = module_abi.store.unwrap();
         namespace.insert(
             config.store_fn_name.clone(),
             func!(move |offset: i32, value: i32| {
@@ -76,7 +76,7 @@ impl FCE {
             }),
         );
 
-        let load = module_abi.load.clone().unwrap();
+        let load = module_abi.load.unwrap();
         namespace.insert(
             config.load_fn_name.clone(),
             func!(move |offset: i32| -> i32 { load.call(offset).expect("load failed") }),
@@ -119,7 +119,7 @@ impl FCEService for FCE {
         )?;
 
         // registers ABI of newly registered module in abi_import_object
-        let namespace = FCE::create_import_object(&module, &config);
+        let namespace = FCE::create_namespace_from_module(&module, &config);
         let module_name: String = module_name.into();
         self.abi_import_object
             .register(module_name.clone(), namespace);
@@ -134,12 +134,17 @@ impl FCEService for FCE {
     }
 
     fn unregister_module(&mut self, module_name: &str) -> Result<(), FCEError> {
-        self.modules
-            .remove(module_name)
-            .ok_or_else(|| FCEError::NoSuchModule)?;
-        // unregister abi from a dispatcher
+        match self.modules.entry(module_name.to_string()) {
+            Entry::Vacant(_) => Err(FCEError::NoSuchModule),
 
-        Ok(())
+            Entry::Occupied(module) => {
+                if module.get().get_abi_ref_counter() != 0 {
+                    return Err(FCEError::ModuleInUse)
+                }
+                module.remove_entry();
+                Ok(())
+            }
+        }
     }
 
     fn compute_state_hash(
