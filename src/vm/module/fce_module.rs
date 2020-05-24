@@ -21,7 +21,6 @@ use crate::vm::module::{ModuleABI, ModuleAPI};
 
 use sha2::digest::generic_array::GenericArray;
 use sha2::digest::FixedOutput;
-use std::cell::RefCell;
 use wasmer_runtime::{compile, func, imports, Ctx, Func, Instance};
 use wasmer_runtime_core::import::ImportObject;
 use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
@@ -46,8 +45,6 @@ pub(crate) struct ABI {
 pub(crate) struct FCEModule {
     instance: Instance,
     abi: ABI,
-    // due to the Wasmer architecture :(
-    abi_ref_counter: RefCell<i32>,
 }
 
 impl FCEModule {
@@ -74,11 +71,7 @@ impl FCEModule {
         let instance = compile(&wasm_bytes)?.instantiate(&import_object)?;
         let abi = FCEModule::create_abi(&instance, &config_copy)?;
 
-        Ok(Self {
-            instance,
-            abi,
-            abi_ref_counter: RefCell::new(0),
-        })
+        Ok(Self { instance, abi })
     }
 
     #[rustfmt::skip]
@@ -118,23 +111,8 @@ impl FCEModule {
     /// Returns ABI of a module.
     /// (!) Be carefull and delete all instances of ABI before dropping corresponding module.
     /// There is no any internal ref counter due to the internals of Wasmer.
-    pub fn acquire_abi(&self) -> ABI {
-        use std::ops::AddAssign;
-        self.abi_ref_counter.borrow_mut().add_assign(1);
-        self.abi.clone()
-    }
-
-    pub fn release_abi(&self) {
-        if *self.abi_ref_counter.borrow() < 0 {
-            return;
-        }
-
-        use std::ops::SubAssign;
-        self.abi_ref_counter.borrow_mut().sub_assign(1);
-    }
-
-    pub fn get_abi_ref_counter(&self) -> i32 {
-        *self.abi_ref_counter.borrow()
+    pub fn get_abi(&self) -> &ABI {
+        &self.abi
     }
 
     /// Prints utf8 string of the given size from the given offset. Called from the wasm.

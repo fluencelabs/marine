@@ -43,7 +43,7 @@ impl FCE {
     /// Extracts ABI of a module into Namespace.
     fn create_namespace_from_module(module: &FCEModule, config: &Config) -> Namespace {
         let mut namespace = Namespace::new();
-        let module_abi = module.acquire_abi();
+        let module_abi = module.get_abi().clone();
 
         // TODO: introduce a macro for such things
         let allocate = module_abi.allocate;
@@ -138,9 +138,6 @@ impl FCEService for FCE {
             Entry::Vacant(_) => Err(FCEError::NoSuchModule),
 
             Entry::Occupied(module) => {
-                if module.get().get_abi_ref_counter() != 0 {
-                    return Err(FCEError::ModuleInUse);
-                }
                 module.remove_entry();
                 Ok(())
             }
