@@ -78,15 +78,15 @@ impl FCEModule {
     /// Extracts ABI from a module.
     fn create_abi(instance: &Instance, config: &Config) -> Result<ABI, FCEError> {
         unsafe {
-            let allocate = std::mem::transmute::<Func<'_, i32, i32>, Func<'static, i32, i32>>(
+            let allocate = std::mem::transmute::<Func<'_, i32, i32>, Func<'static, _, _>>(
                 instance.exports.get(&config.allocate_fn_name)?
             );
 
-            let deallocate = std::mem::transmute::<Func<'_, (i32, i32)>, Func<'static, (i32, i32)>>(
+            let deallocate = std::mem::transmute::<Func<'_, (i32, i32)>, Func<'static, _, _>>(
                 instance.exports.get(&config.deallocate_fn_name)?
             );
 
-            let invoke = std::mem::transmute::<Func<'_, (i32, i32), i32>, Func<'static, (i32, i32), i32>, >(
+            let invoke = std::mem::transmute::<Func<'_, (i32, i32), i32>, Func<'static, _, _>, >(
                 instance.exports.get(&config.invoke_fn_name)?
             );
 
