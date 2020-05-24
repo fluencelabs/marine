@@ -34,11 +34,11 @@ pub(crate) struct ABI {
     // It is safe to use unwrap() while calling these functions because Option is used here
     // just to allow partially initialization. And all Option fields will contain Some if
     // invoking FCE::new has been succeed.
-    pub(crate) allocate: Option<Func<'static, i32, i32>>,
-    pub(crate) deallocate: Option<Func<'static, (i32, i32), ()>>,
-    pub(crate) invoke: Option<Func<'static, (i32, i32), i32>>,
-    pub(crate) store: Option<Func<'static, (i32, i32)>>,
-    pub(crate) load: Option<Func<'static, i32, i32>>,
+    pub(crate) allocate: Func<'static, i32, i32>,
+    pub(crate) deallocate: Func<'static, (i32, i32), ()>,
+    pub(crate) invoke: Func<'static, (i32, i32), i32>,
+    pub(crate) store: Func<'static, (i32, i32)>,
+    pub(crate) load: Func<'static, i32, i32>,
 }
 
 /// A building block of multi-modules scheme of FCE, represents one module that corresponds
@@ -106,11 +106,11 @@ impl FCEModule {
             );
 
             Ok(ABI {
-                allocate: Some(allocate),
-                deallocate: Some(deallocate),
-                invoke: Some(invoke),
-                store: Some(store),
-                load: Some(load),
+                allocate,
+                deallocate,
+                invoke,
+                store,
+                load,
             })
         }
     }
@@ -219,25 +219,24 @@ impl ModuleAPI for FCEModule {
     }
 }
 
-#[rustfmt::skip]
 impl ModuleABI for FCEModule {
-    fn allocate(&self, size: i32) -> Result<i32, FCEError> {
-        Ok(self.abi.allocate.as_ref().unwrap().call(size)?)
+    fn allocate(&mut self, size: i32) -> Result<i32, FCEError> {
+        Ok(self.abi.allocate.call(size)?)
     }
 
-    fn deallocate(&self, ptr: i32, size: i32) -> Result<(), FCEError> {
-        Ok(self.abi.deallocate.as_ref().unwrap().call(ptr, size)?)
+    fn deallocate(&mut self, ptr: i32, size: i32) -> Result<(), FCEError> {
+        Ok(self.abi.deallocate.call(ptr, size)?)
     }
 
-    fn invoke(&self, arg_address: i32, arg_size: i32) -> Result<i32, FCEError> {
-        Ok(self.abi.invoke.as_ref().unwrap().call(arg_address, arg_size)?)
+    fn invoke(&mut self, arg_address: i32, arg_size: i32) -> Result<i32, FCEError> {
+        Ok(self.abi.invoke.call(arg_address, arg_size)?)
     }
 
-    fn store(&self, address: i32, value: i32) -> Result<(), FCEError> {
-        Ok(self.abi.store.as_ref().unwrap().call(address, value)?)
+    fn store(&mut self, address: i32, value: i32) -> Result<(), FCEError> {
+        Ok(self.abi.store.call(address, value)?)
     }
 
-    fn load(&self, address: i32) -> Result<i32, FCEError> {
-        Ok(self.abi.load.as_ref().unwrap().call(address)?)
+    fn load(&mut self, address: i32) -> Result<i32, FCEError> {
+        Ok(self.abi.load.call(address)?)
     }
 }

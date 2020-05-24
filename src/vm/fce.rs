@@ -46,13 +46,13 @@ impl FCE {
         let module_abi = module.acquire_abi();
 
         // TODO: introduce a macro for such things
-        let allocate = module_abi.allocate.unwrap();
+        let allocate = module_abi.allocate;
         namespace.insert(
             config.allocate_fn_name.clone(),
             func!(move |size: i32| -> i32 { allocate.call(size).expect("allocate failed") }),
         );
 
-        let invoke = module_abi.invoke.unwrap();
+        let invoke = module_abi.invoke;
         namespace.insert(
             config.invoke_fn_name.clone(),
             func!(move |offset: i32, size: i32| -> i32 {
@@ -60,7 +60,7 @@ impl FCE {
             }),
         );
 
-        let deallocate = module_abi.deallocate.unwrap();
+        let deallocate = module_abi.deallocate;
         namespace.insert(
             config.deallocate_fn_name.clone(),
             func!(move |ptr: i32, size: i32| {
@@ -68,7 +68,7 @@ impl FCE {
             }),
         );
 
-        let store = module_abi.store.unwrap();
+        let store = module_abi.store;
         namespace.insert(
             config.store_fn_name.clone(),
             func!(move |offset: i32, value: i32| {
@@ -76,7 +76,7 @@ impl FCE {
             }),
         );
 
-        let load = module_abi.load.unwrap();
+        let load = module_abi.load;
         namespace.insert(
             config.load_fn_name.clone(),
             func!(move |offset: i32| -> i32 { load.call(offset).expect("load failed") }),
@@ -139,7 +139,7 @@ impl FCEService for FCE {
 
             Entry::Occupied(module) => {
                 if module.get().get_abi_ref_counter() != 0 {
-                    return Err(FCEError::ModuleInUse)
+                    return Err(FCEError::ModuleInUse);
                 }
                 module.remove_entry();
                 Ok(())

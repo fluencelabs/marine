@@ -30,17 +30,17 @@ use crate::vm::errors::FCEError;
 ///   5. deallocate(res, strlen(sql)) to clean memory.
 pub(crate) trait ModuleABI {
     /// Allocates a region of memory inside a module. Used for passing argument inside the module.
-    fn allocate(&self, size: i32) -> Result<i32, FCEError>;
+    fn allocate(&mut self, size: i32) -> Result<i32, FCEError>;
 
     /// Deallocates previously allocated memory region.
-    fn deallocate(&self, ptr: i32, size: i32) -> Result<(), FCEError>;
+    fn deallocate(&mut self, ptr: i32, size: i32) -> Result<(), FCEError>;
 
     /// Calls the main entry point of a module called invoke.
-    fn invoke(&self, arg_address: i32, arg_size: i32) -> Result<i32, FCEError>;
+    fn invoke(&mut self, arg_address: i32, arg_size: i32) -> Result<i32, FCEError>;
 
     /// Stores one byte on given address.
-    fn store(&self, address: i32, value: i32) -> Result<(), FCEError>;
+    fn store(&mut self, address: i32, value: i32) -> Result<(), FCEError>;
 
     /// Loads one byte from given address.
-    fn load(&self, address: i32) -> Result<i32, FCEError>;
+    fn load(&mut self, address: i32) -> Result<i32, FCEError>;
 }
