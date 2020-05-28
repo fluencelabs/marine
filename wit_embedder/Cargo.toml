@@ -1,0 +1,22 @@
+[package]
+name = "wit_embedder"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[dependencies]
+walrus = "0.17.0"
+wasmer-interface-types = { git = "https://github.com/fluencelabs/interface-types", branch = "master"}
+options = "0.5.1"
+either = "1.5.3"
+clap = "2.33.1"
+exitfailure = "0.5.1"
+failure = "0.1.5"
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = true
+debug-assertions = false
+overflow-checks = false
+panic = "abort"

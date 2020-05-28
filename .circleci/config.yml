@@ -10,11 +10,12 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - fce01-{{ checksum "Cargo.toml" }}
+            - fce01-{{ checksum "fce/Cargo.toml" }}
       - run: |
           rustup toolchain install stable
           rustup component add rustfmt
           rustup component add clippy
+          cd fce
           cargo fmt --all -- --check --color always
           cargo build -v --all-features
           cargo test -v --all-features
@@ -23,7 +24,7 @@ jobs:
           paths:
             - ~/.cargo
             - ~/.rustup
-          key: fce01-{{ checksum "Cargo.toml" }}
+          key: fce01-{{ checksum "fce/Cargo.toml" }}
 
 workflows:
   version: 2.1
