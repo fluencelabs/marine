@@ -25,10 +25,35 @@ jobs:
             - ~/.cargo
             - ~/.rustup
           key: fce01-{{ checksum "fce/Cargo.toml" }}
+  wit_embedder:
+    docker:
+      - image: circleci/rust:latest
+    environment:
+      RUST_BACKTRACE: 1
+      #RUST_TEST_THREADS: 1
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - wit_embedder01-{{ checksum "wit_embedder/Cargo.toml" }}
+      - run: |
+          rustup toolchain install stable
+          rustup component add rustfmt
+          rustup component add clippy
+          cd wit_embedder
+          cargo fmt --all -- --check --color always
+          cargo build -v --all-features
+          cargo test -v --all-features
+          cargo clippy -v
+      - save_cache:
+          paths:
+            - ~/.cargo
+            - ~/.rustup
+          key: wit_embedder01-{{ checksum "wit_embedder/Cargo.toml" }}
 
 workflows:
   version: 2.1
   fce:
     jobs:
       - fce
-
+      - wit_embedder

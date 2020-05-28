@@ -14,10 +14,16 @@ pub fn extract_wit(wasm_file: PathBuf) -> Result<String, String> {
         .collect::<Vec<_>>();
 
     if sections.is_empty() {
-        return Err(format!("Wasm binary doesn't contain {} section", WIT_SECTION_NAME));
+        return Err(format!(
+            "Wasm binary doesn't contain {} section",
+            WIT_SECTION_NAME
+        ));
     }
     if sections.len() > 1 {
-        return Err(format!("Wasm binary contains more than one {} section", WIT_SECTION_NAME));
+        return Err(format!(
+            "Wasm binary contains more than one {} section",
+            WIT_SECTION_NAME
+        ));
     }
 
     let default_ids = IdsToIndices::default();
