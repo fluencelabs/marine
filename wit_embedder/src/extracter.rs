@@ -1,3 +1,4 @@
+use crate::custom::WIT_SECTION_NAME;
 use std::path::PathBuf;
 use walrus::{IdsToIndices, ModuleConfig};
 
@@ -9,14 +10,14 @@ pub fn extract_wit(wasm_file: PathBuf) -> Result<String, String> {
     let sections = module
         .customs
         .iter()
-        .filter(|(_, section)| section.name() == "interface-types")
+        .filter(|(_, section)| section.name() == WIT_SECTION_NAME)
         .collect::<Vec<_>>();
 
     if sections.is_empty() {
-        return Err("Wasm binary doesn't contain interface types section".to_string());
+        return Err(format!("Wasm binary doesn't contain {} section", WIT_SECTION_NAME));
     }
     if sections.len() > 1 {
-        return Err("Wasm binary contains more than one interface-types section".to_string());
+        return Err(format!("Wasm binary contains more than one {} section", WIT_SECTION_NAME));
     }
 
     let default_ids = IdsToIndices::default();
