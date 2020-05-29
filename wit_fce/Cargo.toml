@@ -1,0 +1,10 @@
+[package]
+name = "wit_fce"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[dependencies]
+wasmer-runtime = "0.17.0"
+wasmer-runtime-core = "0.17.0"
+wasmer-interface-types = { git = "http://github.com/fluencelabs/interface-types" }

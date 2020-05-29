@@ -1,0 +1,46 @@
+;; allocate function type
+(@interface type (func (param i32) (result i32)))
+
+;; deallocate function
+(@interface type (func (param i32 i32)))
+
+;; invoke function
+(@interface type (func (param string) (result string)))
+
+;; result extractor functions
+(@interface type (func (result i32)))
+
+;; result setter functions
+(@interface type (func (param i32)))
+
+;; import ipfs put/get function
+(@interface type (func (param string) (param string)))
+
+(@interface export "allocate" (func  0))
+(@interface export "deallocate" (func 1))
+(@interface export "invoke" (func 2))
+(@interface export "get_result_size" (func 3))
+(@interface export "get_result_ptr" (func 3))
+(@interface export "set_result_size" (func 4))
+(@interface export "set_result_ptr" (func 4))
+
+(@interface import "node" "get" (func 5))
+(@interface import "node" "put" (func 5))
+
+(@interface func (type 2)
+    arg.get 0
+    string.size
+    call-core 0 ;; call allocate
+    arg.get 0
+    string.lower_memory
+    call-core 2 ;; call greeting
+    call-core 3 ;; call get_result_size
+    call-core 4 ;; call get_result_ptr
+    string.lift_memory
+    call-core 3 ;; call get_result_size
+    call-core 4 ;; call get_result_ptr
+    call-core 1 ;; call deallocate
+)
+
+;; Implementations
+(@interface implement (func 0) (func 2))

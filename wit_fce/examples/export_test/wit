@@ -1,0 +1,49 @@
+;; allocate function
+(@interface type (func (param i32) (result i32)))
+
+;; deallocate function
+(@interface type (func (param i32 i32)))
+
+;; greeting function
+(@interface type (func (param string) (result string)))
+
+;; strlen function
+(@interface type (func (param string) (result i32)))
+
+;; result extractor functions
+(@interface type (func (result i32)))
+
+(@interface export "allocate" (func  0))
+(@interface export "deallocate" (func 1))
+(@interface export "greeting" (func 2))
+(@interface export "strlen" (func 3))
+(@interface export "get_result_size" (func 4))
+(@interface export "get_result_ptr" (func 4))
+
+(@interface func (type 2)
+    arg.get 0
+    string.size
+    call-core 0 ;; call allocate
+    arg.get 0
+    string.lower_memory
+    call-core 2 ;; call greeting
+    call-core 5 ;; call get_result_ptr
+    call-core 4 ;; call get_result_size
+    string.lift_memory
+    call-core 5 ;; call get_result_ptr
+    call-core 4 ;; call get_result_size
+    call-core 1 ;; call deallocate
+)
+
+(@interface func (type 3)
+    arg.get 0
+    string.size
+    call-core 0 ;; call allocate
+    arg.get 0
+    string.lower_memory
+    call-core 3 ;; call strlen
+)
+
+;; Implementations
+(@interface implement (func 0) (func 2))
+(@interface implement (func 1) (func 3))

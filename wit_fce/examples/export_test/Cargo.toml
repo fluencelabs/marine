@@ -1,0 +1,10 @@
+[package]
+name = "export_test"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[lib]
+name = "export_test"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
