@@ -26,6 +26,7 @@ impl<'a> std::ops::Deref for WITMemoryView<'a> {
     }
 }
 
+#[derive(Clone)]
 pub struct WITMemory(pub Memory);
 impl std::ops::Deref for WITMemory {
     type Target = Memory;

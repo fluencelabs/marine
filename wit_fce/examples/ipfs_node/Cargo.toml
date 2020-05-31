@@ -1,0 +1,10 @@
+[package]
+name = "ipfs_node"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[lib]
+name = "ipfs_node"
+path = "src/lib.rs"
+crate-type = ["cdylib"]

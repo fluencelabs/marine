@@ -15,27 +15,19 @@
  */
 
 
-use std::sync::atomic::AtomicUsize;
+use std::alloc::{alloc as global_alloc, dealloc as global_dealloc, Layout};
+use std::ptr::NonNull;
 
-pub static mut RESULT_PTR: AtomicUsize = AtomicUsize::new(0);
-pub static mut RESULT_SIZE: AtomicUsize = AtomicUsize::new(0);
-
+/// Allocates memory area of specified size and returns its address.
 #[no_mangle]
-pub unsafe fn get_result_ptr() -> usize {
-    *RESULT_PTR.get_mut()
+pub unsafe fn allocate(size: usize) -> NonNull<u8> {
+    let layout: Layout = Layout::from_size_align(size, std::mem::align_of::<u8>()).unwrap();
+    NonNull::new_unchecked(global_alloc(layout))
 }
 
+/// Deallocates memory area for provided memory pointer and size.
 #[no_mangle]
-pub unsafe fn get_result_size() -> usize {
-    *RESULT_SIZE.get_mut()
-}
-
-#[no_mangle]
-pub unsafe fn set_result_ptr(ptr: usize) {
-    *RESULT_PTR.get_mut() = ptr;
-}
-
-#[no_mangle]
-pub unsafe fn set_result_size(size: usize) {
-    *RESULT_SIZE.get_mut() = size;
+pub unsafe fn deallocate(ptr: NonNull<u8>, size: usize) {
+    let layout = Layout::from_size_align(size, std::mem::align_of::<u8>()).unwrap();
+    global_dealloc(ptr.as_ptr(), layout);
 }

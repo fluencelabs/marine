@@ -4,5 +4,6 @@ members = [
     "wit_fce",
     "wit_embedder",
     "wit_fce/examples/export_test",
+    "wit_fce/examples/ipfs_node",
     "wit_fce/examples/ipfs_rpc",
 ]

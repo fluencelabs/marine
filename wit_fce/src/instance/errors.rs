@@ -45,7 +45,7 @@ pub enum WITFCEError {
     NonUniqueModuleName,
 
     /// Returns when there is no module with such name.
-    NoSuchFunction,
+    NoSuchFunction(String),
 
     /// Returns when there is no module with such name.
     NoSuchModule,
@@ -79,8 +79,13 @@ impl std::fmt::Display for WITFCEError {
             WITFCEError::PrepareError(msg) => {
                 write!(f, "Prepare error: {}, probably module is mailformed", msg)
             }
-            WITFCEError::NonUniqueModuleName => write!(f, "FCE already has module with such name"),
-            WITFCEError::NoSuchModule => write!(f, "FCE doesn't have a module with such name"),
+            WITFCEError::NonUniqueModuleName => {
+                write!(f, "FCE already has module with such a name")
+            }
+            WITFCEError::NoSuchFunction(msg) => {
+                write!(f, "FCE doesn't have a function with such a name: {}", msg)
+            }
+            WITFCEError::NoSuchModule => write!(f, "FCE doesn't have a module with such a name"),
             WITFCEError::ModuleInUse => {
                 write!(f, "Module is used by other modules and couldn't be deleted")
             }

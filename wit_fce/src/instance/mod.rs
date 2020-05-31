@@ -16,8 +16,8 @@
 
 pub mod errors;
 pub mod exports;
-pub mod locals_imports;
 pub mod memory;
+pub mod wit_function;
 pub mod wit_instance;
 pub mod wit_module;
 
@@ -32,6 +32,16 @@ pub fn wtype_to_itype(ty: &WType) -> IType {
         WType::F32 => IType::F32,
         WType::F64 => IType::F64,
         WType::V128 => unimplemented!(),
+    }
+}
+
+pub fn itype_to_wtype(ty: &IType) -> WType {
+    match ty {
+        IType::I32 => WType::I32,
+        IType::I64 => WType::I64,
+        IType::F32 => WType::F32,
+        IType::F64 => WType::F64,
+        _ => unimplemented!(),
     }
 }
 

@@ -14,28 +14,13 @@
  * limitations under the License.
  */
 
+use crate::instance::wit_module::WITModule;
 
-use std::sync::atomic::AtomicUsize;
+use std::collections::HashMap;
+use wasmer_interface_types::values::InterfaceValue;
+use wasmer_runtime::{func, imports, ImportObject};
+use wasmer_runtime_core::vm::Ctx;
 
-pub static mut RESULT_PTR: AtomicUsize = AtomicUsize::new(0);
-pub static mut RESULT_SIZE: AtomicUsize = AtomicUsize::new(0);
+pub struct WITFCE {
 
-#[no_mangle]
-pub unsafe fn get_result_ptr() -> usize {
-    *RESULT_PTR.get_mut()
-}
-
-#[no_mangle]
-pub unsafe fn get_result_size() -> usize {
-    *RESULT_SIZE.get_mut()
-}
-
-#[no_mangle]
-pub unsafe fn set_result_ptr(ptr: usize) {
-    *RESULT_PTR.get_mut() = ptr;
-}
-
-#[no_mangle]
-pub unsafe fn set_result_size(size: usize) {
-    *RESULT_SIZE.get_mut() = size;
 }

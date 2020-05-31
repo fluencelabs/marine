@@ -1,46 +1,69 @@
 ;; allocate function type
-(@interface type (func (param i32) (result i32)))
+(@interface type (func (param i32) (result i32)))       ;; 0
 
 ;; deallocate function
-(@interface type (func (param i32 i32)))
+(@interface type (func (param i32 i32)))                ;; 1
 
 ;; invoke function
-(@interface type (func (param string) (result string)))
+(@interface type (func (param string) (result string))) ;; 2
 
 ;; result extractor functions
-(@interface type (func (result i32)))
+(@interface type (func (result i32)))                   ;; 3
 
 ;; result setter functions
-(@interface type (func (param i32)))
+(@interface type (func (param i32)))                    ;; 4
 
 ;; import ipfs put/get function
-(@interface type (func (param string) (param string)))
+(@interface type (func (param i32 i32)))                ;; 5
 
-(@interface export "allocate" (func  0))
-(@interface export "deallocate" (func 1))
-(@interface export "invoke" (func 2))
-(@interface export "get_result_size" (func 3))
-(@interface export "get_result_ptr" (func 3))
-(@interface export "set_result_size" (func 4))
-(@interface export "set_result_ptr" (func 4))
+;; import ipfs put/get function
+(@interface type (func (param string) (result string))) ;; 6
 
-(@interface import "node" "get" (func 5))
-(@interface import "node" "put" (func 5))
+;; import ipfs put/get function
+(@interface type (func (param string) (result string))) ;; 7
+
+;; import ipfs put/get function
+(@interface type (func (param i64 i32) (result i64 i32))) ;; 8
+
+(@interface export "allocate" (func  0))               ;; 0
+(@interface export "deallocate" (func 1))              ;; 1
+(@interface export "invoke" (func 2))                  ;; 2
+(@interface export "get_result_size" (func 3))         ;; 3
+(@interface export "get_result_ptr" (func 3))          ;; 4
+(@interface export "set_result_size" (func 4))         ;; 5
+(@interface export "set_result_ptr" (func 4))          ;; 6
+
+(@interface import "node" "get" (func (type 5)))
+(@interface import "node" "put" (func (type 5)))
+
+(@interface import "node" "get" (func (type 7)))       ;; 7
+(@interface import "node" "put" (func (type 8)))       ;; 8
 
 (@interface func (type 2)
     arg.get 0
     string.size
-    call-core 0 ;; call allocate
+    call-core 0             ;; call allocate
     arg.get 0
     string.lower_memory
-    call-core 2 ;; call greeting
-    call-core 3 ;; call get_result_size
-    call-core 4 ;; call get_result_ptr
+    call-core 2             ;; call invoke
+    call-core 3             ;; call get_result_size
+    call-core 4             ;; call get_result_ptr
     string.lift_memory
-    call-core 3 ;; call get_result_size
-    call-core 4 ;; call get_result_ptr
-    call-core 1 ;; call deallocate
+    call-core 3             ;; call get_result_size
+    call-core 4             ;; call get_result_ptr
+    call-core 1             ;; call deallocate
+)
+
+(@interface func (type 5)
+    arg.get 0
+    arg.get 1
+    string.lift_memory
+    call-core 7             ;; call node.get that returns string
+    string.lower_memory
+    call-core 5             ;; call set_result_size
+    call-core 6             ;; call set_result_ptr
 )
 
 ;; Implementations
-(@interface implement (func 0) (func 2))
+(@interface implement (func 2) (func 2))
+(@interface implement (func 5) (func 5))

@@ -45,5 +45,5 @@
 )
 
 ;; Implementations
-(@interface implement (func 0) (func 2))
-(@interface implement (func 1) (func 3))
+(@interface implement (func 2) (func 2))
+(@interface implement (func 3) (func 3))
