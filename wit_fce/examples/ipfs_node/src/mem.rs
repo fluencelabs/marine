@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-
-use std::alloc::{alloc as global_alloc, dealloc as global_dealloc, Layout};
 use crate::log_utf8_string;
+use std::alloc::{alloc as global_alloc, dealloc as global_dealloc, Layout};
 use std::ptr::NonNull;
 
 /// Allocates memory area of specified size and returns its address.

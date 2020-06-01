@@ -30,6 +30,7 @@ enum WITFunctionInner {
         outputs: Vec<InterfaceType>,
     },
     Import {
+        // TODO: use WITInstance here instead of WITModule
         wit_module: Arc<WITModule>,
         func_name: String,
         inputs: Vec<InterfaceType>,

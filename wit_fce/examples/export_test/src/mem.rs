@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 use std::alloc::{alloc as global_alloc, dealloc as global_dealloc, Layout};
 use std::ptr::NonNull;
 

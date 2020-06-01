@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-
-use std::sync::atomic::AtomicUsize;
 use crate::log_utf8_string;
+use std::sync::atomic::AtomicUsize;
 
 pub static mut RESULT_PTR: AtomicUsize = AtomicUsize::new(0);
 pub static mut RESULT_SIZE: AtomicUsize = AtomicUsize::new(0);
 
 #[no_mangle]
 pub unsafe fn get_result_ptr() -> usize {
-    let msg = format!("wasm_rpc: calling get_result_ptr\n");
+    let msg = "wasm_rpc: calling get_result_ptr\n";
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     *RESULT_PTR.get_mut()
@@ -31,7 +30,7 @@ pub unsafe fn get_result_ptr() -> usize {
 
 #[no_mangle]
 pub unsafe fn get_result_size() -> usize {
-    let msg = format!("wasm_rpc: calling get_result_size\n");
+    let msg = "wasm_rpc: calling get_result_size\n";
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     *RESULT_SIZE.get_mut()

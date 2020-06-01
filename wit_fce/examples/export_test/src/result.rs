@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 use std::sync::atomic::AtomicUsize;
 
 pub static mut RESULT_PTR: AtomicUsize = AtomicUsize::new(0);

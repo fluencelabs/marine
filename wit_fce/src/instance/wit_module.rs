@@ -39,12 +39,13 @@ use wasmer_runtime_core::import::Namespace;
 const WIT_SECTION_NAME: &str = "interface-types";
 type WITInterpreter =
     Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
+type WITModuleFunc = (WITInterpreter, Vec<InterfaceType>, Vec<InterfaceType>);
 
 pub struct WITModule {
     #[allow(unused)]
     instance: WasmerInstance,
     wit_instance: Arc<WITInstance>,
-    funcs: HashMap<String, (WITInterpreter, Vec<InterfaceType>, Vec<InterfaceType>)>,
+    funcs: HashMap<String, WITModuleFunc>,
 }
 
 impl WITModule {
@@ -128,10 +129,7 @@ impl WITModule {
 
     fn extract_wit_exports(
         interfaces: &Interfaces,
-    ) -> Result<
-        HashMap<String, (WITInterpreter, Vec<InterfaceType>, Vec<InterfaceType>)>,
-        WITFCEError,
-    > {
+    ) -> Result<HashMap<String, WITModuleFunc>, WITFCEError> {
         let exports_type_to_names = interfaces
             .exports
             .iter()
@@ -254,29 +252,31 @@ impl WITModule {
                 let interpreter: WITInterpreter = instructions.try_into().unwrap();
 
                 let wit_instance = wit_instance.clone();
-                let inner_import = Box::new(move |_: &mut Ctx, inputs: &[Value]| -> Vec<Value> {
-                    // copy here to because otherwise wit_instance will be consumed by the closure
-                    let wit_instance_callable = wit_instance.clone();
-                    let converted_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
-                    unsafe {
-                        // error here will be propagated by the special error instruction
-                        let _ = interpreter.run(
-                            &converted_inputs,
-                            Arc::make_mut(&mut wit_instance_callable.assume_init()),
-                        );
-                    }
+                let wit_inner_import =
+                    Box::new(move |_: &mut Ctx, inputs: &[Value]| -> Vec<Value> {
+                        // copy here to because otherwise wit_instance will be consumed by the closure
+                        let wit_instance_callable = wit_instance.clone();
+                        let converted_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
+                        unsafe {
+                            // error here will be propagated by the special error instruction
+                            let _ = interpreter.run(
+                                &converted_inputs,
+                                Arc::make_mut(&mut wit_instance_callable.assume_init()),
+                            );
+                        }
 
-                    // wit import functions should only change the stack state -
-                    // the result will be returned by an export function
-                    vec![]
-                });
+                        // wit import functions should only change the stack state -
+                        // the result will be returned by an export function
+                        vec![]
+                    });
 
-                let linking_import = dyn_func_from_imports(inputs.clone(), inner_import);
+                let wit_import = dyn_func_from_imports(inputs.clone(), wit_inner_import);
 
-                let mut n = Namespace::new();
-                n.insert(func_name.clone(), linking_import);
+                // TODO: refactor this
+                let mut module_namespace = Namespace::new();
+                module_namespace.insert(func_name.clone(), wit_import);
 
-                import_namespaces.insert(namespace, n);
+                import_namespaces.insert(namespace, module_namespace);
             } else {
                 // TODO: change error type
                 return Err(WITFCEError::WasmerResolveError(format!(

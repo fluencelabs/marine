@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![allow(clippy::missing_safety_doc)]
 
 mod mem;
 mod result;

@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![allow(clippy::missing_safety_doc)]
 
 mod mem;
 mod result;
 
-use crate::result::{RESULT_PTR, RESULT_SIZE};
+// use crate::result::{RESULT_PTR, RESULT_SIZE};
 
 #[no_mangle]
 pub unsafe fn invoke(file_content_ptr: *mut u8, file_content_size: usize) {
-    let file_content = String::from_raw_parts(
-        file_content_ptr,
-        file_content_size,
-        file_content_size,
-    );
+    let file_content =
+        String::from_raw_parts(file_content_ptr, file_content_size, file_content_size);
     let msg = format!("from Wasm rpc: file_content is {}\n", file_content);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
@@ -54,6 +52,7 @@ extern "C" {
     /// Put a file to ipfs, returns ipfs hash of the file.
     fn put(ptr: i32, size: i32);
 
+    #[allow(unused)]
     /// Get file from ipfs by hash.
     fn get(ptr: i32, size: i32);
 }
