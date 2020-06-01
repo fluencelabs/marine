@@ -89,12 +89,7 @@ impl WITInstance {
                     let export_func =
                         std::mem::transmute::<DynFunc<'_>, DynFunc<'static>>(export_func);
                     let tt = WITFunction::from_export(export_func)?;
-                    println!(
-                        "{}, {} - {:?}",
-                        export_id,
-                        export.name,
-                        tt.inputs()
-                    );
+                    println!("{}, {} - {:?}", export_id, export.name, tt.inputs());
                     Ok((export_id, tt))
                 }
             })

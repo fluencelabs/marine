@@ -16,12 +16,17 @@
 
 
 use std::alloc::{alloc as global_alloc, dealloc as global_dealloc, Layout};
+use crate::log_utf8_string;
 use std::ptr::NonNull;
 
 /// Allocates memory area of specified size and returns its address.
 #[no_mangle]
 pub unsafe fn allocate(size: usize) -> NonNull<u8> {
     let layout: Layout = Layout::from_size_align(size, std::mem::align_of::<u8>()).unwrap();
+
+    let msg = format!("wasm_node: calling allocate with {}\n", size);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+
     NonNull::new_unchecked(global_alloc(layout))
 }
 
@@ -29,5 +34,9 @@ pub unsafe fn allocate(size: usize) -> NonNull<u8> {
 #[no_mangle]
 pub unsafe fn deallocate(ptr: NonNull<u8>, size: usize) {
     let layout = Layout::from_size_align(size, std::mem::align_of::<u8>()).unwrap();
+
+    let msg = format!("wasm_node: calling deallocate with {:?} {}\n", ptr, size);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+
     global_dealloc(ptr.as_ptr(), layout);
 }

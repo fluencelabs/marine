@@ -32,10 +32,16 @@ pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
 
     let cmd = format!("put {}", file_content);
     ipfs(file_content.as_ptr() as _, file_content.len() as _);
+
+    let result = "Hello from IPFS node, take your hash".to_string();
+
+    *RESULT_PTR.get_mut() = result.as_ptr() as _;
+    *RESULT_SIZE.get_mut() = result.len();
+    std::mem::forget(result);
 }
 
 #[no_mangle]
-pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize, t: i32) {
+pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
     let hash = String::from_raw_parts(
         hash_ptr,
         hash_size,
@@ -47,6 +53,12 @@ pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize, t: i32) {
 
     let cmd = format!("get {}", hash);
     ipfs(cmd.as_ptr() as _, cmd.len() as _);
+
+    let result = "Hello from IPFS node, take your file".to_string();
+
+    *RESULT_PTR.get_mut() = result.as_ptr() as _;
+    *RESULT_SIZE.get_mut() = result.len();
+    std::mem::forget(result);
 }
 
 #[link(wasm_import_module = "logger")]

@@ -11,10 +11,10 @@
 (@interface type (func (result i32)))                   ;; 3
 
 ;; result setter functions
-(@interface type (func (param string)))                    ;; 4
+(@interface type (func (param string)))                 ;; 4
 
 ;; import ipfs put/get function
-(@interface type (func (param string) (result string)))                ;; 5
+(@interface type (func (param i32 i32)))                ;; 5
 
 ;; import ipfs put/get function
 (@interface type (func (param string) (result string))) ;; 6
@@ -24,20 +24,27 @@
 
 (@interface export "allocate" (func  0))        ;; 0
 (@interface export "deallocate" (func 1))       ;; 1
-(@interface export "get_result_size" (func 3))  ;; 3
-(@interface export "get_result_ptr" (func 3))   ;; 4
-(@interface export "set_result_size" (func 4))  ;; 5
-(@interface export "set_result_ptr" (func 4))   ;; 6
+(@interface export "get_result_size" (func 3))  ;; 2
+(@interface export "get_result_ptr" (func 3))   ;; 3
+(@interface export "set_result_size" (func 4))  ;; 4
+(@interface export "set_result_ptr" (func 4))   ;; 5
 
-(@interface export "put" (func 5))              ;; 8
+(@interface export "put" (func 5))              ;; 6
 (@interface export "get" (func 5))              ;; 7
 
 (@interface func (type 6)
     arg.get 0
+    string.size
+    call-core 0 ;; call allocate
+    arg.get 0
     string.lower_memory
-    call-core 9  ;; call node.get
-    call-core 5  ;; call set_result_size
-    call-core 6  ;; call set_result_ptr
+    call-core 7         ;; call node.get
+    call-core 3         ;; call get_result_ptr
+    call-core 2         ;; call get_result_size
+    string.lift_memory
+    call-core 3         ;; call get_result_ptr
+    call-core 2         ;; call get_result_size
+    call-core 1         ;; call deallocate
 )
 
 ;; Implementations

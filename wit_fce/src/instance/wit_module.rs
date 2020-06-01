@@ -21,7 +21,7 @@ use crate::instance::wit_function::WITFunction;
 use crate::instance::wit_instance::WITInstance;
 
 use wasmer_interface_types as wit;
-use wasmer_interface_types::ast::Interfaces;
+use wasmer_interface_types::ast::{Interfaces, Type};
 use wasmer_interface_types::interpreter::Interpreter;
 use wasmer_interface_types::values::InterfaceValue;
 use wasmer_runtime::{compile, ImportObject};
@@ -43,8 +43,7 @@ type WITInterpreter =
 pub struct WITModule {
     instance: WasmerInstance,
     wit_instance: Arc<WITInstance>,
-    func_name_to_idx: HashMap<String, usize>,
-    funcs: HashMap<String, WITInterpreter>,
+    funcs: HashMap<String, (WITInterpreter, Vec<InterfaceType>, Vec<InterfaceType>)>,
 }
 
 impl WITModule {
@@ -71,7 +70,7 @@ impl WITModule {
 
         let mut wit_instance = Arc::new_uninit();
 
-        let callable_exports = Self::extract_exports(&interfaces)?;
+        let callable_exports = Self::extract_wit_exports(&interfaces)?;
         let mut import_object = Self::adjust_imports(&interfaces, wit_instance.clone())?;
         import_object.extend(imports);
 
@@ -86,7 +85,6 @@ impl WITModule {
         Ok(Self {
             instance: wasmer_instance,
             wit_instance,
-            func_name_to_idx: HashMap::new(),
             funcs: callable_exports,
         })
     }
@@ -96,17 +94,14 @@ impl WITModule {
         function_name: &str,
         args: &[InterfaceValue],
     ) -> Result<Vec<InterfaceValue>, WITFCEError> {
-        println!("here, func name is {}, args = {:?}", function_name, args);
         match self.funcs.get(function_name) {
             Some(func) => {
                 let tt = Arc::make_mut(&mut self.wit_instance);
 
-                let result = func.run(args, tt)?.as_slice().to_owned();
-                println!("here {:?}", result);
+                let result = func.0.run(args, tt)?.as_slice().to_owned();
                 Ok(result)
             }
             None => {
-                println!("no func");
                 Err(WITFCEError::NoSuchFunction(format!(
                     "{} hasn't been found while calling",
                     function_name
@@ -118,12 +113,9 @@ impl WITModule {
     pub fn get_func_signature(
         &self,
         function_name: &str,
-    ) -> Result<(Vec<InterfaceType>, Vec<InterfaceType>), WITFCEError> {
-        match self.func_name_to_idx.get(function_name) {
-            Some(func_idx) => {
-                println!("func_idx: {}", func_idx);
-                self.wit_instance.as_ref().get_func_signature(*func_idx)
-            },
+    ) -> Result<(&Vec<InterfaceType>, &Vec<InterfaceType>), WITFCEError> {
+        match self.funcs.get(function_name) {
+            Some((_, inputs, outputs)) => Ok((inputs, outputs)),
             None => Err(WITFCEError::NoSuchFunction(format!(
                 "{} has't been found during its signature looking up",
                 function_name
@@ -131,9 +123,12 @@ impl WITModule {
         }
     }
 
-    fn extract_exports(
+    fn extract_wit_exports(
         interfaces: &Interfaces,
-    ) -> Result<HashMap<String, WITInterpreter>, WITFCEError> {
+    ) -> Result<
+        HashMap<String, (WITInterpreter, Vec<InterfaceType>, Vec<InterfaceType>)>,
+        WITFCEError,
+    > {
         let exports_type_to_names = interfaces
             .exports
             .iter()
@@ -160,12 +155,32 @@ impl WITModule {
                     format!("adapter function with idx = {} hasn't been found during extracting exports by implementations", i.adapter_function_type)
                 ))?;
 
-            for export_function_name in export_function_names.iter() {
-                println!("export func name {}", export_function_name);
+            if i.adapter_function_type >= interfaces.types.len() as u32 {
+                // TODO: change error type
+                return Err(WITFCEError::NoSuchFunction(format!(
+                    "{} function id is bigger than WIT interface types count",
+                    i.adapter_function_type
+                )));
+            };
 
-                // TODO: handle errors
-                let interpreter: WITInterpreter = adapter_instructions.try_into().unwrap();
-                wit_callable_exports.insert(export_function_name.to_owned(), interpreter);
+            if let Type::Function { inputs, outputs } =
+                &interfaces.types[i.adapter_function_type as usize]
+            {
+                for export_function_name in export_function_names.iter() {
+                    println!("export func name {}", export_function_name);
+
+                    // TODO: handle errors
+                    let interpreter: WITInterpreter = adapter_instructions.try_into().unwrap();
+                    wit_callable_exports.insert(
+                        export_function_name.to_owned(),
+                        (interpreter, inputs.clone(), outputs.clone()),
+                    );
+                }
+            } else {
+                return Err(WITFCEError::NoSuchFunction(format!(
+                    "type with idx = {} isn't a function type",
+                    i.adapter_function_type
+                )));
             }
         }
 

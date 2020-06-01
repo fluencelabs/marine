@@ -68,7 +68,9 @@ impl WITFunction {
     }
 
     pub fn from_import(wit_module: Arc<WITModule>, func_name: String) -> Result<Self, WITFCEError> {
-        let (inputs, outputs) = wit_module.as_ref().get_func_signature(&func_name)?;
+        let func_type = wit_module.as_ref().get_func_signature(&func_name)?;
+        let inputs = func_type.0.clone();
+        let outputs = func_type.1.clone();
         println!("from_import: {:?}", inputs);
 
         let inner = WITFunctionInner::Import {
@@ -126,7 +128,6 @@ impl wasm::structures::LocalImport for WITFunction {
 
         match &self.inner {
             WITFunctionInner::Export { func, .. } => {
-                println!("calling with {:?}", arguments);
                 func.as_ref()
                     .call(&arguments.iter().map(ival_to_wval).collect::<Vec<Value>>())
                     .map(|results| results.iter().map(wval_to_ival).collect())
@@ -137,14 +138,13 @@ impl wasm::structures::LocalImport for WITFunction {
                 func_name,
                 ..
             } => {
-                println!("calling {} with {:?}", func_name, arguments);
                 let mut tt = wit_module.clone();
                 unsafe {
                     let result = Arc::get_mut_unchecked(&mut tt)
                         .call(func_name, arguments)
                         .map_err(|_| ());
 
-                    println!("result is {:?}", result);
+                    // println!("result is {:?}", result);
                     result
                 }
             }

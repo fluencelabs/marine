@@ -78,7 +78,7 @@ fn ipfs_call(ctx: &mut Ctx, ptr: i32, size: i32) {
 
     let wasm_ptr = WasmPtr::<u8, Array>::new(ptr as _);
     match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
-        Some(msg) => print!("ipfs_call {}", msg),
-        None => print!("fce logger: incorrect UTF8 string's been supplied to logger"),
+        Some(msg) => println!("host ipfs_call: {}", msg),
+        None => println!("fce logger: incorrect UTF8 string's been supplied to logger"),
     }
 }

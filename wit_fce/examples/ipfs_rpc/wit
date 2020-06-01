@@ -59,9 +59,13 @@
     arg.get 1
     string.lift_memory
     call-core 7             ;; call node.get that returns string
+    dup
+    string.size
+    call-core 0             ;; call allocate
+    swap2
     string.lower_memory
-    call-core 5             ;; call set_result_size
-    call-core 6             ;; call set_result_ptr
+    call-core 6             ;; call set_result_size
+    call-core 5             ;; call set_result_ptr
 )
 
 ;; Implementations
