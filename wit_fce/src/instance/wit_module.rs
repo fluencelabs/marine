@@ -41,6 +41,7 @@ type WITInterpreter =
     Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
 
 pub struct WITModule {
+    #[allow(unused)]
     instance: WasmerInstance,
     wit_instance: Arc<WITInstance>,
     funcs: HashMap<String, (WITInterpreter, Vec<InterfaceType>, Vec<InterfaceType>)>,
@@ -77,6 +78,8 @@ impl WITModule {
         let wasmer_instance = wasmer_instance.instantiate(&import_object)?;
 
         let wit_instance = unsafe {
+            // get_mut_unchecked here is safe because currently only this modules have reference to
+            // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
                 MaybeUninit::new(WITInstance::new(&wasmer_instance, &interfaces, modules)?);
             std::mem::transmute::<_, Arc<WITInstance>>(wit_instance)
@@ -96,17 +99,17 @@ impl WITModule {
     ) -> Result<Vec<InterfaceValue>, WITFCEError> {
         match self.funcs.get(function_name) {
             Some(func) => {
-                let tt = Arc::make_mut(&mut self.wit_instance);
-
-                let result = func.0.run(args, tt)?.as_slice().to_owned();
+                let result = func
+                    .0
+                    .run(args, Arc::make_mut(&mut self.wit_instance))?
+                    .as_slice()
+                    .to_owned();
                 Ok(result)
             }
-            None => {
-                Err(WITFCEError::NoSuchFunction(format!(
-                    "{} hasn't been found while calling",
-                    function_name
-                )))
-            }
+            None => Err(WITFCEError::NoSuchFunction(format!(
+                "{} hasn't been found while calling",
+                function_name
+            ))),
         }
     }
 
@@ -195,7 +198,7 @@ impl WITModule {
         use crate::instance::{itype_to_wtype, wval_to_ival};
         use wasmer_interface_types::ast::Type as IType;
         use wasmer_runtime_core::typed_func::DynamicFunc;
-        use wasmer_runtime_core::types::{FuncSig, Type as WType, Value};
+        use wasmer_runtime_core::types::{FuncSig, Value};
         use wasmer_runtime_core::vm::Ctx;
 
         // returns function that will be called from imports of Wasmer module

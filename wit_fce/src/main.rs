@@ -57,7 +57,7 @@ fn main() {
         .expect("module successfully created");
 
     let result1 = ipfs_rpc
-        .call("invoke", &[InterfaceValue::String("aaaaaa".to_string())])
+        .call("invoke", &[InterfaceValue::String("0xffffff".to_string())])
         .unwrap();
 
     println!("stack state {:?}", result1);

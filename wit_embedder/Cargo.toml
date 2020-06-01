@@ -12,11 +12,3 @@ either = "1.5.3"
 clap = "2.33.1"
 exitfailure = "0.5.1"
 failure = "0.1.5"
-
-[profile.release]
-opt-level = 3
-debug = false
-lto = true
-debug-assertions = false
-overflow-checks = false
-panic = "abort"

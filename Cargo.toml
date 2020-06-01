@@ -7,3 +7,11 @@ members = [
     "wit_fce/examples/ipfs_node",
     "wit_fce/examples/ipfs_rpc",
 ]
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = true
+debug-assertions = false
+overflow-checks = false
+panic = "abort"

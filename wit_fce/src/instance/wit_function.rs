@@ -127,25 +127,23 @@ impl wasm::structures::LocalImport for WITFunction {
         use super::{ival_to_wval, wval_to_ival};
 
         match &self.inner {
-            WITFunctionInner::Export { func, .. } => {
-                func.as_ref()
-                    .call(&arguments.iter().map(ival_to_wval).collect::<Vec<Value>>())
-                    .map(|results| results.iter().map(wval_to_ival).collect())
-                    .map_err(|_| ())
-            }
+            WITFunctionInner::Export { func, .. } => func
+                .as_ref()
+                .call(&arguments.iter().map(ival_to_wval).collect::<Vec<Value>>())
+                .map(|results| results.iter().map(wval_to_ival).collect())
+                .map_err(|_| ()),
             WITFunctionInner::Import {
                 wit_module,
                 func_name,
                 ..
             } => {
-                let mut tt = wit_module.clone();
+                let mut wit_module_caller = wit_module.clone();
                 unsafe {
-                    let result = Arc::get_mut_unchecked(&mut tt)
+                    // get_mut_unchecked here is safe because it is single-threaded environment
+                    // without cyclic reference between modules
+                    Arc::get_mut_unchecked(&mut wit_module_caller)
                         .call(func_name, arguments)
-                        .map_err(|_| ());
-
-                    // println!("result is {:?}", result);
-                    result
+                        .map_err(|_| ())
                 }
             }
         }

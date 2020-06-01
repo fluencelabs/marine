@@ -57,6 +57,7 @@ impl WITInstance {
         Ok(Self { funcs, memories })
     }
 
+    #[allow(unused)]
     pub fn get_func_signature(
         &self,
         func_idx: usize,
@@ -88,9 +89,7 @@ impl WITInstance {
                     // here it is safe because dyn func is never lives WITInstance
                     let export_func =
                         std::mem::transmute::<DynFunc<'_>, DynFunc<'static>>(export_func);
-                    let tt = WITFunction::from_export(export_func)?;
-                    println!("{}, {} - {:?}", export_id, export.name, tt.inputs());
-                    Ok((export_id, tt))
+                    Ok((export_id, WITFunction::from_export(export_func)?))
                 }
             })
             .collect()
@@ -112,19 +111,13 @@ impl WITInstance {
         let mut non_wit_callable_imports = HashMap::new();
 
         for import in interfaces.imports.iter() {
-            if let Some(_) = core_to_adapter.get(&import.function_type) {
+            if core_to_adapter.get(&import.function_type).is_some() {
                 continue;
             }
 
             match modules.get(import.namespace) {
                 Some(module) => {
                     let func = WITFunction::from_import(module.clone(), import.name.to_string())?;
-                    println!(
-                        "{}, {} - {:?}",
-                        start_index + non_wit_callable_imports.len(),
-                        import.name,
-                        func.inputs()
-                    );
                     non_wit_callable_imports
                         .insert(start_index + non_wit_callable_imports.len() as usize, func);
                 }
