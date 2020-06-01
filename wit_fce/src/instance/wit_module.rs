@@ -170,8 +170,6 @@ impl WITModule {
                 &interfaces.types[i.adapter_function_type as usize]
             {
                 for export_function_name in export_function_names.iter() {
-                    println!("export func name {}", export_function_name);
-
                     // TODO: handle errors
                     let interpreter: WITInterpreter = adapter_instructions.try_into().unwrap();
                     wit_callable_exports.insert(
@@ -257,17 +255,19 @@ impl WITModule {
 
                 let wit_instance = wit_instance.clone();
                 let inner_import = Box::new(move |_: &mut Ctx, inputs: &[Value]| -> Vec<Value> {
-                    println!("calling from import with {:?}", inputs);
-
-                    let tt = wit_instance.clone();
+                    // copy here to because otherwise wit_instance will be consumed by the closure
+                    let wit_instance_callable = wit_instance.clone();
                     let converted_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
-                    //let mut wit_instance_copy = Arc::make_mut(tt).unwrap();
                     unsafe {
-                        let r = interpreter
-                            .run(&converted_inputs, Arc::make_mut(&mut tt.assume_init()));
-                        println!("import interpreter result is {:?}", r);
+                        // error here will be propagated by the special error instruction
+                        let _ = interpreter.run(
+                            &converted_inputs,
+                            Arc::make_mut(&mut wit_instance_callable.assume_init()),
+                        );
                     }
 
+                    // wit import functions should only change the stack state -
+                    // the result will be returned by an export function
                     vec![]
                 });
 

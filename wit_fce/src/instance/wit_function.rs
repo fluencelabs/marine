@@ -71,7 +71,6 @@ impl WITFunction {
         let func_type = wit_module.as_ref().get_func_signature(&func_name)?;
         let inputs = func_type.0.clone();
         let outputs = func_type.1.clone();
-        println!("from_import: {:?}", inputs);
 
         let inner = WITFunctionInner::Import {
             wit_module,

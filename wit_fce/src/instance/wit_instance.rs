@@ -46,9 +46,7 @@ impl WITInstance {
         modules: &HashMap<String, Arc<WITModule>>,
     ) -> Result<Self, WITFCEError> {
         let mut exports = Self::extract_exports(&wasmer_instance, interfaces)?;
-        println!("exports count {}", exports.len());
         let imports = Self::extract_imports(modules, interfaces, exports.len())?;
-        println!("imports count {}", imports.len());
         let memories = Self::extract_memories(&wasmer_instance);
 
         exports.extend(imports);
