@@ -24,7 +24,6 @@ use wasmer_core::Module as WasmerModule;
 use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
 
-use multimap::MultiMap;
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
@@ -50,7 +49,7 @@ impl FCEModule {
         wasm_bytes: &[u8],
         imports: ImportObject,
         modules: &HashMap<String, Arc<FCEModule>>,
-    ) -> Result<Self, WITFCEError> {
+    ) -> Result<Self, FCEError> {
         let wasmer_module = compile(&wasm_bytes)?;
         let wit = Self::extract_wit(&wasmer_module)?;
         let wit_exports = Self::instantiate_wit_exports(&wit)?;
@@ -80,7 +79,7 @@ impl FCEModule {
         &mut self,
         function_name: &str,
         args: &[IValue],
-    ) -> Result<Vec<IValue>, WITFCEError> {
+    ) -> Result<Vec<IValue>, FCEError> {
         use wasmer_wit::interpreter::stack::Stackable;
 
         match self.exports_funcs.get(function_name) {
@@ -92,7 +91,7 @@ impl FCEModule {
                     .to_owned();
                 Ok(result)
             }
-            None => Err(WITFCEError::NoSuchFunction(format!(
+            None => Err(FCEError::NoSuchFunction(format!(
                 "{} hasn't been found while calling",
                 function_name
             ))),
@@ -102,38 +101,39 @@ impl FCEModule {
     pub fn get_func_signature(
         &self,
         function_name: &str,
-    ) -> Result<(&Vec<IType>, &Vec<IType>), WITFCEError> {
+    ) -> Result<(&Vec<IType>, &Vec<IType>), FCEError> {
         match self.exports_funcs.get(function_name) {
             Some((_, inputs, outputs)) => Ok((inputs, outputs)),
-            None => Err(WITFCEError::NoSuchFunction(format!(
+            None => Err(FCEError::NoSuchFunction(format!(
                 "{} has't been found during its signature looking up",
                 function_name
             ))),
         }
     }
 
-    fn extract_wit(wasmer_instance: &WasmerModule) -> Result<Interfaces, WITFCEError> {
-        let wit_sections = wasmer_instance
+    fn extract_wit(wasmer_module: &WasmerModule) -> Result<Interfaces<'_>, FCEError> {
+        let wit_sections = wasmer_module
             .custom_sections(WIT_SECTION_NAME)
-            .ok_or_else(|| WITFCEError::NoWITSection)?;
+            .ok_or_else(|| FCEError::NoWITSection)?;
 
         if wit_sections.len() > 1 {
-            return Err(WITFCEError::MultipleWITSections);
+            return Err(FCEError::MultipleWITSections);
         }
 
         let (remainder, interfaces) = wasmer_wit::decoders::binary::parse::<()>(&wit_sections[0])
-            .map_err(|_e| WITFCEError::WITParseError)?;
+            .map_err(|_e| FCEError::WITParseError)?;
         if remainder.len() > 1 {
-            return Err(WITFCEError::WITRemainderNotEmpty);
+            return Err(FCEError::WITRemainderNotEmpty);
         }
 
         Ok(interfaces)
     }
 
     fn instantiate_wit_exports(
-        wit: &Interfaces,
-    ) -> Result<HashMap<String, WITModuleFunc>, WITFCEError> {
+        wit: &Interfaces<'_>,
+    ) -> Result<HashMap<String, WITModuleFunc>, FCEError> {
         use super::IAstType;
+        use multimap::MultiMap;
 
         let exports_type_to_names = wit
             .exports
@@ -157,13 +157,13 @@ impl FCEModule {
             // * just to remove reference
             let adapter_instructions = *adapter_type_to_instructions
                 .get(&i.adapter_function_type)
-                .ok_or_else(|| WITFCEError::NoSuchFunction(
+                .ok_or_else(|| FCEError::NoSuchFunction(
                     format!("adapter function with idx = {} hasn't been found during extracting exports by implementations", i.adapter_function_type)
                 ))?;
 
             if i.adapter_function_type >= wit.types.len() as u32 {
                 // TODO: change error type
-                return Err(WITFCEError::NoSuchFunction(format!(
+                return Err(FCEError::NoSuchFunction(format!(
                     "{} function id is bigger than WIT interface types count",
                     i.adapter_function_type
                 )));
@@ -181,7 +181,7 @@ impl FCEModule {
                     );
                 }
             } else {
-                return Err(WITFCEError::NoSuchFunction(format!(
+                return Err(FCEError::NoSuchFunction(format!(
                     "type with idx = {} isn't a function type",
                     i.adapter_function_type
                 )));
@@ -193,9 +193,9 @@ impl FCEModule {
 
     // this function deals only with import functions that have an adaptor implementation
     fn adjust_imports(
-        interfaces: &Interfaces,
+        interfaces: &Interfaces<'_>,
         wit_instance: Arc<MaybeUninit<WITInstance>>,
-    ) -> Result<ImportObject, WITFCEError> {
+    ) -> Result<ImportObject, FCEError> {
         use super::IAstType;
         use super::type_converters::{itype_to_wtype, wval_to_ival};
         use wasmer_core::typed_func::DynamicFunc;
@@ -235,7 +235,7 @@ impl FCEModule {
         for adapter in interfaces.adapters.iter() {
             let core_function_idx = adapter_to_core
                 .get(&adapter.function_type)
-                .ok_or_else(|| WITFCEError::NoSuchFunction(format!("function with idx = {} hasn't been found during adjusting imports in WIT implementation", adapter.function_type)))?;
+                .ok_or_else(|| FCEError::NoSuchFunction(format!("function with idx = {} hasn't been found during adjusting imports in WIT implementation", adapter.function_type)))?;
 
             let (namespace, func_name) = match export_type_to_name.remove(core_function_idx) {
                 Some(v) => (v.0, v.1),
@@ -244,7 +244,7 @@ impl FCEModule {
 
             if adapter.function_type >= interfaces.types.len() as u32 {
                 // TODO: change error type
-                return Err(WITFCEError::NoSuchFunction(format!(
+                return Err(FCEError::NoSuchFunction(format!(
                     "{} function id is bigger than WIT interface types count",
                     adapter.function_type
                 )));
@@ -284,7 +284,7 @@ impl FCEModule {
                 import_namespaces.insert(namespace, module_namespace);
             } else {
                 // TODO: change error type
-                return Err(WITFCEError::WasmerResolveError(format!(
+                return Err(FCEError::WasmerResolveError(format!(
                     "WIT type with idx = {} doesn't refer to function",
                     adapter.function_type
                 )));

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::errors::WITFCEError;
+use super::wit_prelude::FCEError;
 use super::fce_module::FCEModule;
 use super::{IType, IValue, WValue};
 
@@ -47,7 +47,7 @@ pub(super) struct WITFunction {
 
 impl WITFunction {
     /// Creates functions from a "usual" (not WIT) module export.
-    pub(super) fn from_export(dyn_func: DynFunc<'static>) -> Result<Self, WITFCEError> {
+    pub(super) fn from_export(dyn_func: DynFunc<'static>) -> Result<Self, FCEError> {
         use super::type_converters::wtype_to_itype;
 
         let signature = dyn_func.signature();
@@ -72,7 +72,7 @@ impl WITFunction {
     }
 
     /// Creates function from a module import.
-    pub(super) fn from_import(wit_module: Arc<FCEModule>, func_name: String) -> Result<Self, WITFCEError> {
+    pub(super) fn from_import(wit_module: Arc<FCEModule>, func_name: String) -> Result<Self, FCEError> {
         let func_type = wit_module.as_ref().get_func_signature(&func_name)?;
         let inputs = func_type.0.clone();
         let outputs = func_type.1.clone();

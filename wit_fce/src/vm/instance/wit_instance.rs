@@ -38,9 +38,9 @@ pub(super) struct WITInstance {
 impl WITInstance {
     pub(super) fn new(
         wasmer_instance: &WasmerInstance,
-        interfaces: &Interfaces,
+        interfaces: &Interfaces<'_>,
         modules: &HashMap<String, Arc<FCEModule>>,
-    ) -> Result<Self, WITFCEError> {
+    ) -> Result<Self, FCEError> {
         let mut exports = Self::extract_raw_exports(&wasmer_instance, interfaces)?;
         let imports = Self::extract_imports(modules, interfaces, exports.len())?;
         let memories = Self::extract_memories(&wasmer_instance);
@@ -53,8 +53,8 @@ impl WITInstance {
 
     fn extract_raw_exports(
         wasmer_instance: &WasmerInstance,
-        interfaces: &Interfaces,
-    ) -> Result<HashMap<usize, WITFunction>, WITFCEError> {
+        interfaces: &Interfaces<'_>,
+    ) -> Result<HashMap<usize, WITFunction>, FCEError> {
         use wasmer_core::DynFunc;
 
         let module_exports = &wasmer_instance.exports;
@@ -79,9 +79,9 @@ impl WITInstance {
     /// Extracts only those imports that don't have implementations.
     fn extract_imports(
         modules: &HashMap<String, Arc<FCEModule>>,
-        interfaces: &Interfaces,
+        interfaces: &Interfaces<'_>,
         start_index: usize,
-    ) -> Result<HashMap<usize, WITFunction>, WITFCEError> {
+    ) -> Result<HashMap<usize, WITFunction>, FCEError> {
         // uses to filter import functions that have an adapter implementation
         let core_to_adapter = interfaces
             .implementations
@@ -102,7 +102,7 @@ impl WITInstance {
                     non_wit_callable_imports
                         .insert(start_index + non_wit_callable_imports.len() as usize, func);
                 }
-                None => return Err(WITFCEError::NoSuchModule),
+                None => return Err(FCEError::NoSuchModule),
             }
         }
 

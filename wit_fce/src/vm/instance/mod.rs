@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-mod errors;
 mod exports;
 mod memory;
 mod wit_function;
@@ -34,7 +33,7 @@ pub(self) use wasmer_core::types::Value as WValue;
 pub(self) mod wit_prelude {
     pub(super) use super::wit_instance::WITInstance;
     pub(super) use super::exports::WITExport;
-    pub(super) use super::errors::WITFCEError;
+    pub(super) use crate::vm::FCEError;
     pub(super) use super::wit_function::WITFunction;
     pub(super) use super::memory::WITMemoryView;
     pub(super) use super::memory::WITMemory;

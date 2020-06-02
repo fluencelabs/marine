@@ -45,7 +45,7 @@ impl FCEService for FCE {
         match self.modules.get_mut(module_name) {
             // TODO: refactor errors
             Some(mut module) => unsafe {
-                Ok(Arc::get_mut_unchecked(&mut module).call(func_name, argument).unwrap())
+                Ok(Arc::get_mut_unchecked(&mut module).call(func_name, argument)?)
             },
             None => Err(FCEError::NoSuchModule),
         }
@@ -60,14 +60,14 @@ impl FCEService for FCE {
         where
             S: Into<String>,
     {
-        let prepared_wasm_bytes =
+        let _prepared_wasm_bytes =
             super::prepare::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
         let module = FCEModule::new(
-            &prepared_wasm_bytes,
+            &wasm_bytes,
             config.import_object,
             &self.modules,
-        ).unwrap();
+        )?;
 
         match self.modules.entry(module_name.into()) {
             Entry::Vacant(entry) => {
