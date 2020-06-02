@@ -16,15 +16,13 @@
 #![feature(get_mut_unchecked)]
 #![feature(new_uninit)]
 
-mod instance;
+mod vm;
+mod misc;
 
-use crate::instance::wit_module::WITModule;
-
-use std::collections::HashMap;
-use std::sync::Arc;
-use wasmer_interface_types::values::InterfaceValue;
-use wasmer_runtime::{func, imports, ImportObject};
-use wasmer_runtime_core::vm::Ctx;
+use vm::IValue;
+use vm::FCE;
+use vm::FCEModuleConfig;
+use vm::FCEService;
 
 const IPFS_NODE: &str =
     "/Users/mike/dev/work/fluence/wasm/fce/target/wasm32-unknown-unknown/release/ipfs_node_wit.wasm";
@@ -35,34 +33,26 @@ const IPFS_RPC: &str =
 fn main() {
     let ipfs_node_bytes = std::fs::read(IPFS_NODE).unwrap();
     let ipfs_rpc_bytes = std::fs::read(IPFS_RPC).unwrap();
-    let imports = imports! {
-        "logger" => {
-            "log_utf8_string" => func!(logger_log_utf8_string),
-        },
-        "host" => {
-            "ipfs" => func!(ipfs_call),
-        }
-    };
-    let mut import_object = ImportObject::new();
-    import_object.extend(imports);
-    let mut modules = HashMap::new();
+
+    let mut fce = FCE::new();
+    let config = FCEModuleConfig::default();
 
     println!("loading ipfs node module");
-    let ipfs_node = WITModule::new(&ipfs_node_bytes, import_object.clone(), &modules)
+    fce.register_module("node", &ipfs_node_bytes, config.clone())
         .expect("module successfully created");
-    modules.insert("node".to_string(), Arc::new(ipfs_node));
 
     println!("loading ipfs rpc module");
-    let mut ipfs_rpc = WITModule::new(&ipfs_rpc_bytes, import_object, &modules)
+    fce.register_module("rpc", &ipfs_rpc_bytes, config.clone())
         .expect("module successfully created");
 
-    let result1 = ipfs_rpc
-        .call("invoke", &[InterfaceValue::String("0xffffff".to_string())])
+    let result = fce
+        .call("node_rpc", "invoke", &[IValue::String("aaaa".to_string())])
         .unwrap();
 
-    println!("stack state {:?}", result1);
+    println!("execution result {:?}", result);
 }
 
+/*
 fn logger_log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
     use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
 
@@ -73,6 +63,7 @@ fn logger_log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
     }
 }
 
+
 fn ipfs_call(ctx: &mut Ctx, ptr: i32, size: i32) {
     use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
 
@@ -82,3 +73,4 @@ fn ipfs_call(ctx: &mut Ctx, ptr: i32, size: i32) {
         None => println!("fce logger: incorrect UTF8 string's been supplied to logger"),
     }
 }
+*/

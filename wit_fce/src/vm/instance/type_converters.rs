@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-pub mod errors;
-pub mod exports;
-pub mod memory;
-pub mod wit_function;
-pub mod wit_instance;
-pub mod wit_module;
+/// Contains converters of types and values between Wasmer and wasmer_interface_types.
 
-use wasmer_interface_types::types::InterfaceType as IType;
-use wasmer_interface_types::values::InterfaceValue as IValue;
-use wasmer_runtime_core::types::{Type as WType, Value as WValue};
+use super::{WType, WValue, IType, IValue};
 
-pub fn wtype_to_itype(ty: &WType) -> IType {
+pub(super) fn wtype_to_itype(ty: &WType) -> IType {
     match ty {
         WType::I32 => IType::I32,
         WType::I64 => IType::I64,
@@ -35,7 +28,7 @@ pub fn wtype_to_itype(ty: &WType) -> IType {
     }
 }
 
-pub fn itype_to_wtype(ty: &IType) -> WType {
+pub(super) fn itype_to_wtype(ty: &IType) -> WType {
     match ty {
         IType::I32 => WType::I32,
         IType::I64 => WType::I64,
@@ -45,7 +38,7 @@ pub fn itype_to_wtype(ty: &IType) -> WType {
     }
 }
 
-pub fn ival_to_wval(value: &IValue) -> WValue {
+pub(super) fn ival_to_wval(value: &IValue) -> WValue {
     match value {
         IValue::I32(v) => WValue::I32(*v),
         IValue::I64(v) => WValue::I64(*v),
@@ -55,7 +48,7 @@ pub fn ival_to_wval(value: &IValue) -> WValue {
     }
 }
 
-pub fn wval_to_ival(value: &WValue) -> IValue {
+pub(super) fn wval_to_ival(value: &WValue) -> IValue {
     match value {
         WValue::I32(v) => IValue::I32(*v),
         WValue::I64(v) => IValue::I64(*v),

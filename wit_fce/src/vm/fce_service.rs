@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-use crate::vm::errors::FCEError;
-use crate::vm::module::fce_result::FCEResult;
+use super::config::FCEModuleConfig;
+use super::errors::FCEError;
+use super::IValue;
 
-use sha2::digest::generic_array::GenericArray;
-use sha2::digest::FixedOutput;
-
-/// Application interface of a FCE module. Intended to use by FCE vm.instance itself.
-pub(crate) trait ModuleAPI {
+/// Describes a service behaviour in the Fluence network.
+pub trait FCEService {
     /// Invokes a module supplying byte array and expecting byte array with some outcome back.
-    fn invoke(&mut self, argument: &[u8]) -> Result<FCEResult, FCEError>;
+    fn call(&mut self, module_name: &str, function_name: &str, arguments: &[IValue]) -> Result<Vec<IValue>, FCEError>;
 
-    /// Computes hash of the internal modules state.
-    fn compute_state_hash(&mut self)
-        -> GenericArray<u8, <sha2::Sha256 as FixedOutput>::OutputSize>;
+    /// Registers new module in the FCE Service.
+    fn register_module<S>(
+        &mut self,
+        module_name: S,
+        wasm_bytes: &[u8],
+        config: FCEModuleConfig,
+    ) -> Result<(), FCEError>
+    where
+        S: Into<String>;
+
+    /// Unregisters previously registered module.
+    fn unregister_module(&mut self, module_name: &str) -> Result<(), FCEError>;
 }

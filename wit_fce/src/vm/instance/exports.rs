@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-use wasmer_interface_types::interpreter::wasm;
-use wasmer_interface_types::{types::InterfaceType, values::InterfaceValue};
+use super::{IValue, IType};
+use wasmer_wit::interpreter::wasm;
 
-// In current implementation export simply does nothing.
+// In current implementation export simply does nothing, because there is no more
+// explicit instruction call-export in this version of wasmer-interface-types,
+// but explicit Exports is still required by wasmer-interface-types::Interpreter.
 #[derive(Clone)]
 pub(crate) struct WITExport {
-    pub(crate) inputs: Vec<InterfaceType>,
-    pub(crate) outputs: Vec<InterfaceType>,
-    pub(crate) function: fn(arguments: &[InterfaceValue]) -> Result<Vec<InterfaceValue>, ()>,
+    inputs: Vec<IType>,
+    outputs: Vec<IType>,
+    function: fn(arguments: &[IValue]) -> Result<Vec<IValue>, ()>,
 }
 
 impl WITExport {
@@ -45,15 +47,15 @@ impl wasm::structures::Export for WITExport {
         self.outputs.len()
     }
 
-    fn inputs(&self) -> &[InterfaceType] {
+    fn inputs(&self) -> &[IType] {
         &self.inputs
     }
 
-    fn outputs(&self) -> &[InterfaceType] {
+    fn outputs(&self) -> &[IType] {
         &self.outputs
     }
 
-    fn call(&self, arguments: &[InterfaceValue]) -> Result<Vec<InterfaceValue>, ()> {
+    fn call(&self, arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
         (self.function)(arguments)
     }
 }

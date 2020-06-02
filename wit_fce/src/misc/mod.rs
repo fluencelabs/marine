@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-use crate::instance::wit_module::WITModule;
+mod slice_pretty_printer;
 
-use std::collections::HashMap;
-use wasmer_interface_types::values::InterfaceValue;
-use wasmer_runtime::{func, imports, ImportObject};
-use wasmer_runtime_core::vm::Ctx;
-
-pub struct WITFCE {
-
-}
+pub use slice_pretty_printer::SlicePrettyPrinter;

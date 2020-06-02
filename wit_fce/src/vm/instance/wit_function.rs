@@ -14,38 +14,41 @@
  * limitations under the License.
  */
 
-use crate::instance::errors::WITFCEError;
-use crate::instance::wit_module::WITModule;
+use super::errors::WITFCEError;
+use super::fce_module::FCEModule;
+use super::{IType, IValue, WValue};
+
+use wasmer_wit::interpreter::wasm;
+use wasmer_core::instance::DynFunc;
+
 use std::sync::Arc;
-use wasmer_interface_types::interpreter::wasm;
-use wasmer_interface_types::{types::InterfaceType, values::InterfaceValue};
-use wasmer_runtime_core::instance::DynFunc;
-use wasmer_runtime_core::types::Value;
 
 #[derive(Clone)]
 enum WITFunctionInner {
     Export {
         func: Arc<DynFunc<'static>>,
-        inputs: Vec<InterfaceType>,
-        outputs: Vec<InterfaceType>,
+        inputs: Vec<IType>,
+        outputs: Vec<IType>,
     },
     Import {
-        // TODO: use WITInstance here instead of WITModule
-        wit_module: Arc<WITModule>,
+        // TODO: use dyn Callable here
+        wit_module: Arc<FCEModule>,
         func_name: String,
-        inputs: Vec<InterfaceType>,
-        outputs: Vec<InterfaceType>,
+        inputs: Vec<IType>,
+        outputs: Vec<IType>,
     },
 }
 
+/// Represents all import and export functions that could be called from WIT context by call-core.
 #[derive(Clone)]
-pub(crate) struct WITFunction {
+pub(super) struct WITFunction {
     inner: WITFunctionInner,
 }
 
 impl WITFunction {
-    pub fn from_export(dyn_func: DynFunc<'static>) -> Result<Self, WITFCEError> {
-        use super::wtype_to_itype;
+    /// Creates functions from a "usual" (not WIT) module export.
+    pub(super) fn from_export(dyn_func: DynFunc<'static>) -> Result<Self, WITFCEError> {
+        use super::type_converters::wtype_to_itype;
 
         let signature = dyn_func.signature();
         let inputs = signature
@@ -68,7 +71,8 @@ impl WITFunction {
         Ok(Self { inner })
     }
 
-    pub fn from_import(wit_module: Arc<WITModule>, func_name: String) -> Result<Self, WITFCEError> {
+    /// Creates function from a module import.
+    pub(super) fn from_import(wit_module: Arc<FCEModule>, func_name: String) -> Result<Self, WITFCEError> {
         let func_type = wit_module.as_ref().get_func_signature(&func_name)?;
         let inputs = func_type.0.clone();
         let outputs = func_type.1.clone();
@@ -83,16 +87,6 @@ impl WITFunction {
         Ok(Self { inner })
     }
 }
-
-/*
-impl std::ops::Deref for WITFuncs {
-    type Target = DynFunc<'static>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
- */
 
 impl wasm::structures::LocalImport for WITFunction {
     fn inputs_cardinality(&self) -> usize {
@@ -109,28 +103,28 @@ impl wasm::structures::LocalImport for WITFunction {
         }
     }
 
-    fn inputs(&self) -> &[InterfaceType] {
+    fn inputs(&self) -> &[IType] {
         match &self.inner {
             WITFunctionInner::Export { ref inputs, .. } => inputs,
             WITFunctionInner::Import { ref inputs, .. } => inputs,
         }
     }
 
-    fn outputs(&self) -> &[InterfaceType] {
+    fn outputs(&self) -> &[IType] {
         match &self.inner {
             WITFunctionInner::Export { ref outputs, .. } => outputs,
             WITFunctionInner::Import { ref outputs, .. } => outputs,
         }
     }
 
-    fn call(&self, arguments: &[InterfaceValue]) -> Result<Vec<InterfaceValue>, ()> {
-        use super::{ival_to_wval, wval_to_ival};
+    fn call(&self, arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
+        use super::type_converters::{ival_to_wval, wval_to_ival};
 
         match &self.inner {
             WITFunctionInner::Export { func, .. } => func
                 .as_ref()
-                .call(&arguments.iter().map(ival_to_wval).collect::<Vec<Value>>())
-                .map(|results| results.iter().map(wval_to_ival).collect())
+                .call(&arguments.iter().map(ival_to_wval).collect::<Vec<WValue>>())
+                .map(|result| result.iter().map(wval_to_ival).collect())
                 .map_err(|_| ()),
             WITFunctionInner::Import {
                 wit_module,

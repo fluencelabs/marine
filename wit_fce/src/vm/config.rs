@@ -1,0 +1,102 @@
+/*
+ * Copyright 2020 Fluence Labs Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+use wasmer_wasi::WasiVersion;
+
+use std::path::PathBuf;
+use wasmer_runtime::ImportObject;
+
+#[derive(Clone)]
+pub struct FCEModuleConfig {
+    /// Maximum number of Wasm memory pages that loaded module can use.
+    /// Each Wasm pages is 65536 bytes long.
+    pub mem_pages_count: u32,
+
+    /// If true, registers the logger Wasm module with name 'logger'.
+    /// This functionality is just for debugging, and this module will be disabled in future.
+    pub logger_enabled: bool,
+
+    /// Import object that will be used in module instantiation process.
+    pub import_object: ImportObject,
+
+    /// Desired WASI version.
+    pub wasi_version: WasiVersion,
+
+    /// Environment variables for loaded modules.
+    pub wasi_envs: Vec<Vec<u8>>,
+
+    /// List of available directories for loaded modules.
+    pub wasi_preopened_files: Vec<PathBuf>,
+
+    /// Mapping between paths.
+    pub wasi_mapped_dirs: Vec<(String, PathBuf)>,
+}
+
+impl Default for FCEModuleConfig {
+    fn default() -> Self {
+        // some reasonable defaults
+        Self {
+            // 65536*1600 ~ 100 Mb
+            mem_pages_count: 1600,
+            logger_enabled: true,
+            import_object: ImportObject::new(),
+            wasi_version: WasiVersion::Latest,
+            wasi_envs: vec![],
+            wasi_preopened_files: vec![],
+            wasi_mapped_dirs: vec![]
+        }
+    }
+}
+
+// TODO: implement debug for FCEModuleConfig
+
+impl FCEModuleConfig {
+    #[allow(dead_code)]
+    pub fn with_mem_pages_count(mut self, mem_pages_count: u32) -> Self {
+        self.mem_pages_count = mem_pages_count;
+        self
+    }
+
+    #[allow(dead_code)]
+    pub fn with_logger_enable(mut self, logger_enable: bool) -> Self {
+        self.logger_enabled = logger_enable;
+        self
+    }
+
+    #[allow(dead_code)]
+    pub fn with_wasi_version(mut self, wasi_version: WasiVersion) -> Self {
+        self.wasi_version = wasi_version;
+        self
+    }
+
+    #[allow(dead_code)]
+    pub fn with_wasi_envs(mut self, envs: Vec<Vec<u8>>) -> Self {
+        self.wasi_envs = envs;
+        self
+    }
+
+    #[allow(dead_code)]
+    pub fn with_wasi_preopened_files(mut self, preopened_files: Vec<PathBuf>) -> Self {
+        self.wasi_preopened_files = preopened_files;
+        self
+    }
+
+    #[allow(dead_code)]
+    pub fn with_wasi_mapped_dirs(mut self, mapped_dirs: Vec<(String, PathBuf)>) -> Self {
+        self.wasi_mapped_dirs = mapped_dirs;
+        self
+    }
+}

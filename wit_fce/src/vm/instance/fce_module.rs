@@ -14,91 +14,76 @@
  * limitations under the License.
  */
 
-use crate::instance::errors::WITFCEError;
-use crate::instance::exports::WITExport;
-use crate::instance::memory::{WITMemory, WITMemoryView};
-use crate::instance::wit_function::WITFunction;
-use crate::instance::wit_instance::WITInstance;
+use super::wit_prelude::*;
+use super::{IType, IValue, WValue};
 
-use wasmer_interface_types as wit;
-use wasmer_interface_types::ast::{Interfaces, Type};
-use wasmer_interface_types::interpreter::Interpreter;
-use wasmer_interface_types::values::InterfaceValue;
+use wasmer_wit::ast::Interfaces;
+use wasmer_wit::interpreter::Interpreter;
 use wasmer_runtime::{compile, ImportObject};
-use wasmer_runtime_core::Instance as WasmerInstance;
+use wasmer_core::Module as WasmerModule;
+use wasmer_core::Instance as WasmerInstance;
+use wasmer_core::import::Namespace;
 
 use multimap::MultiMap;
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
-use wasmer_interface_types::interpreter::stack::Stackable;
-use wasmer_interface_types::types::InterfaceType;
-use wasmer_runtime_core::import::Namespace;
 
 const WIT_SECTION_NAME: &str = "interface-types";
 type WITInterpreter =
     Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
-type WITModuleFunc = (WITInterpreter, Vec<InterfaceType>, Vec<InterfaceType>);
+// TODO: introduce new trait instead of type
+type WITModuleFunc = (WITInterpreter, Vec<IType>, Vec<IType>);
 
-pub struct WITModule {
+pub struct FCEModule {
+    // it is needed because of WITInstance contains dynamic functions
+    // that internally keep pointer to Wasmer instance.
     #[allow(unused)]
-    instance: WasmerInstance,
+    wamser_instance: WasmerInstance,
     wit_instance: Arc<WITInstance>,
-    funcs: HashMap<String, WITModuleFunc>,
+    exports_funcs: HashMap<String, WITModuleFunc>,
 }
 
-impl WITModule {
+impl FCEModule {
     pub fn new(
         wasm_bytes: &[u8],
         imports: ImportObject,
-        modules: &HashMap<String, Arc<WITModule>>,
+        modules: &HashMap<String, Arc<FCEModule>>,
     ) -> Result<Self, WITFCEError> {
-        let wasmer_instance = compile(&wasm_bytes)?;
-
-        let wit_sections = wasmer_instance
-            .custom_sections(WIT_SECTION_NAME)
-            .ok_or_else(|| WITFCEError::NoWITSection)?;
-
-        if wit_sections.len() > 1 {
-            return Err(WITFCEError::MultipleWITSections);
-        }
-
-        let (remainder, interfaces) = wit::decoders::binary::parse::<()>(&wit_sections[0])
-            .map_err(|_e| WITFCEError::WITParseError)?;
-        if remainder.len() > 1 {
-            return Err(WITFCEError::WITRemainderNotEmpty);
-        }
+        let wasmer_module = compile(&wasm_bytes)?;
+        let wit = Self::extract_wit(&wasmer_module)?;
+        let wit_exports = Self::instantiate_wit_exports(&wit)?;
 
         let mut wit_instance = Arc::new_uninit();
-
-        let callable_exports = Self::extract_wit_exports(&interfaces)?;
-        let mut import_object = Self::adjust_imports(&interfaces, wit_instance.clone())?;
+        let mut import_object = Self::adjust_imports(&wit, wit_instance.clone())?;
         import_object.extend(imports);
 
-        let wasmer_instance = wasmer_instance.instantiate(&import_object)?;
+        let wasmer_instance = wasmer_module.instantiate(&import_object)?;
 
         let wit_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
-                MaybeUninit::new(WITInstance::new(&wasmer_instance, &interfaces, modules)?);
+                MaybeUninit::new(WITInstance::new(&wasmer_instance, &wit, modules)?);
             std::mem::transmute::<_, Arc<WITInstance>>(wit_instance)
         };
 
         Ok(Self {
-            instance: wasmer_instance,
+            wamser_instance: wasmer_instance,
             wit_instance,
-            funcs: callable_exports,
+            exports_funcs: wit_exports,
         })
     }
 
     pub fn call(
         &mut self,
         function_name: &str,
-        args: &[InterfaceValue],
-    ) -> Result<Vec<InterfaceValue>, WITFCEError> {
-        match self.funcs.get(function_name) {
+        args: &[IValue],
+    ) -> Result<Vec<IValue>, WITFCEError> {
+        use wasmer_wit::interpreter::stack::Stackable;
+
+        match self.exports_funcs.get(function_name) {
             Some(func) => {
                 let result = func
                     .0
@@ -117,8 +102,8 @@ impl WITModule {
     pub fn get_func_signature(
         &self,
         function_name: &str,
-    ) -> Result<(&Vec<InterfaceType>, &Vec<InterfaceType>), WITFCEError> {
-        match self.funcs.get(function_name) {
+    ) -> Result<(&Vec<IType>, &Vec<IType>), WITFCEError> {
+        match self.exports_funcs.get(function_name) {
             Some((_, inputs, outputs)) => Ok((inputs, outputs)),
             None => Err(WITFCEError::NoSuchFunction(format!(
                 "{} has't been found during its signature looking up",
@@ -127,23 +112,43 @@ impl WITModule {
         }
     }
 
-    fn extract_wit_exports(
-        interfaces: &Interfaces,
+    fn extract_wit(wasmer_instance: &WasmerModule) -> Result<Interfaces, WITFCEError> {
+        let wit_sections = wasmer_instance
+            .custom_sections(WIT_SECTION_NAME)
+            .ok_or_else(|| WITFCEError::NoWITSection)?;
+
+        if wit_sections.len() > 1 {
+            return Err(WITFCEError::MultipleWITSections);
+        }
+
+        let (remainder, interfaces) = wasmer_wit::decoders::binary::parse::<()>(&wit_sections[0])
+            .map_err(|_e| WITFCEError::WITParseError)?;
+        if remainder.len() > 1 {
+            return Err(WITFCEError::WITRemainderNotEmpty);
+        }
+
+        Ok(interfaces)
+    }
+
+    fn instantiate_wit_exports(
+        wit: &Interfaces,
     ) -> Result<HashMap<String, WITModuleFunc>, WITFCEError> {
-        let exports_type_to_names = interfaces
+        use super::IAstType;
+
+        let exports_type_to_names = wit
             .exports
             .iter()
             .map(|export| (export.function_type, export.name.to_string()))
             .collect::<MultiMap<_, _>>();
 
-        let adapter_type_to_instructions = interfaces
+        let adapter_type_to_instructions = wit
             .adapters
             .iter()
             .map(|adapter| (adapter.function_type, &adapter.instructions))
             .collect::<HashMap<_, _>>();
 
         let mut wit_callable_exports = HashMap::new();
-        for i in interfaces.implementations.iter() {
+        for i in wit.implementations.iter() {
             let export_function_names = match exports_type_to_names.get_vec(&i.core_function_type) {
                 Some(export_function_names) => export_function_names,
                 None => continue,
@@ -156,7 +161,7 @@ impl WITModule {
                     format!("adapter function with idx = {} hasn't been found during extracting exports by implementations", i.adapter_function_type)
                 ))?;
 
-            if i.adapter_function_type >= interfaces.types.len() as u32 {
+            if i.adapter_function_type >= wit.types.len() as u32 {
                 // TODO: change error type
                 return Err(WITFCEError::NoSuchFunction(format!(
                     "{} function id is bigger than WIT interface types count",
@@ -164,8 +169,8 @@ impl WITModule {
                 )));
             };
 
-            if let Type::Function { inputs, outputs } =
-                &interfaces.types[i.adapter_function_type as usize]
+            if let IAstType::Function { inputs, outputs } =
+                &wit.types[i.adapter_function_type as usize]
             {
                 for export_function_name in export_function_names.iter() {
                     // TODO: handle errors
@@ -191,16 +196,16 @@ impl WITModule {
         interfaces: &Interfaces,
         wit_instance: Arc<MaybeUninit<WITInstance>>,
     ) -> Result<ImportObject, WITFCEError> {
-        use crate::instance::{itype_to_wtype, wval_to_ival};
-        use wasmer_interface_types::ast::Type as IType;
-        use wasmer_runtime_core::typed_func::DynamicFunc;
-        use wasmer_runtime_core::types::{FuncSig, Value};
-        use wasmer_runtime_core::vm::Ctx;
+        use super::IAstType;
+        use super::type_converters::{itype_to_wtype, wval_to_ival};
+        use wasmer_core::typed_func::DynamicFunc;
+        use wasmer_core::types::FuncSig;
+        use wasmer_core::vm::Ctx;
 
         // returns function that will be called from imports of Wasmer module
-        fn dyn_func_from_imports<F>(inputs: Vec<InterfaceType>, func: F) -> DynamicFunc<'static>
+        fn dyn_func_from_imports<F>(inputs: Vec<IType>, func: F) -> DynamicFunc<'static>
         where
-            F: Fn(&mut Ctx, &[Value]) -> Vec<Value> + 'static,
+            F: Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static,
         {
             let signature = inputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
             DynamicFunc::new(Arc::new(FuncSig::new(signature, vec![])), func)
@@ -245,7 +250,7 @@ impl WITModule {
                 )));
             }
 
-            if let IType::Function { inputs, .. } =
+            if let IAstType::Function { inputs, .. } =
                 &interfaces.types[adapter.function_type as usize]
             {
                 let instructions = &adapter.instructions;
@@ -253,7 +258,7 @@ impl WITModule {
 
                 let wit_instance = wit_instance.clone();
                 let wit_inner_import =
-                    Box::new(move |_: &mut Ctx, inputs: &[Value]| -> Vec<Value> {
+                    Box::new(move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
                         // copy here to because otherwise wit_instance will be consumed by the closure
                         let wit_instance_callable = wit_instance.clone();
                         let converted_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();

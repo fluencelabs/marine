@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use wasmer_interface_types::interpreter::wasm;
-use wasmer_runtime_core::memory::{Memory, MemoryView};
+use wasmer_wit::interpreter::wasm;
+use wasmer_core::memory::{Memory, MemoryView};
 
-pub struct WITMemoryView<'a>(pub MemoryView<'a, u8>);
+pub(super) struct WITMemoryView<'a>(pub(super) MemoryView<'a, u8>);
 impl<'a> std::ops::Deref for WITMemoryView<'a> {
     type Target = [std::cell::Cell<u8>];
 
@@ -27,7 +27,7 @@ impl<'a> std::ops::Deref for WITMemoryView<'a> {
 }
 
 #[derive(Clone)]
-pub struct WITMemory(pub Memory);
+pub(super) struct WITMemory(pub(super) Memory);
 impl std::ops::Deref for WITMemory {
     type Target = Memory;
 
@@ -40,7 +40,7 @@ impl wasm::structures::MemoryView for WITMemoryView<'_> {}
 
 impl<'a> wasm::structures::Memory<WITMemoryView<'a>> for WITMemory {
     fn view(&self) -> WITMemoryView<'a> {
-        use wasmer_runtime_core::vm::LocalMemory;
+        use wasmer_core::vm::LocalMemory;
 
         let LocalMemory { base, .. } = unsafe { *self.0.vm_local_memory() };
         let length = self.0.size().bytes().0 / std::mem::size_of::<u8>();

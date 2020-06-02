@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-use std::error::Error;
-use wasmer_interface_types::errors::InstructionError;
+use wasmer_wit::errors::InstructionError;
 use wasmer_runtime::error::{
     CallError, CompileError, CreationError, Error as WasmerError, ResolveError, RuntimeError,
 };
+
+use std::error::Error;
 
 #[derive(Debug)]
 #[allow(unused)]
