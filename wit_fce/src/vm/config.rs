@@ -56,7 +56,7 @@ impl Default for FCEModuleConfig {
             wasi_version: WasiVersion::Latest,
             wasi_envs: vec![],
             wasi_preopened_files: vec![],
-            wasi_mapped_dirs: vec![]
+            wasi_mapped_dirs: vec![],
         }
     }
 }

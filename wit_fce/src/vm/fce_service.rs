@@ -21,7 +21,12 @@ use super::IValue;
 /// Describes a service behaviour in the Fluence network.
 pub trait FCEService {
     /// Invokes a module supplying byte array and expecting byte array with some outcome back.
-    fn call(&mut self, module_name: &str, function_name: &str, arguments: &[IValue]) -> Result<Vec<IValue>, FCEError>;
+    fn call(
+        &mut self,
+        module_name: &str,
+        function_name: &str,
+        arguments: &[IValue],
+    ) -> Result<Vec<IValue>, FCEError>;
 
     /// Registers new module in the FCE Service.
     fn register_module<S>(

@@ -72,7 +72,10 @@ impl WITFunction {
     }
 
     /// Creates function from a module import.
-    pub(super) fn from_import(wit_module: Arc<FCEModule>, func_name: String) -> Result<Self, FCEError> {
+    pub(super) fn from_import(
+        wit_module: Arc<FCEModule>,
+        func_name: String,
+    ) -> Result<Self, FCEError> {
         let func_type = wit_module.as_ref().get_func_signature(&func_name)?;
         let inputs = func_type.0.clone();
         let outputs = func_type.1.clone();

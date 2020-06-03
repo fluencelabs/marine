@@ -75,11 +75,7 @@ impl FCEModule {
         })
     }
 
-    pub fn call(
-        &mut self,
-        function_name: &str,
-        args: &[IValue],
-    ) -> Result<Vec<IValue>, FCEError> {
+    pub fn call(&mut self, function_name: &str, args: &[IValue]) -> Result<Vec<IValue>, FCEError> {
         use wasmer_wit::interpreter::stack::Stackable;
 
         match self.exports_funcs.get(function_name) {

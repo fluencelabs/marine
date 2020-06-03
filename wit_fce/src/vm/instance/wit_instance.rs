@@ -20,9 +20,7 @@ use super::fce_module::FCEModule;
 use wasmer_wit::interpreter::wasm;
 use super::IAstType;
 use wasmer_wit::ast::Interfaces;
-use wasmer_wit::interpreter::wasm::structures::{
-    LocalImportIndex, TypedIndex,
-};
+use wasmer_wit::interpreter::wasm::structures::{LocalImportIndex, TypedIndex};
 use wasmer_core::Instance as WasmerInstance;
 
 use std::collections::HashMap;

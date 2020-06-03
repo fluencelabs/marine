@@ -72,16 +72,23 @@ impl std::fmt::Display for FCEError {
             FCEError::PrepareError(msg) => {
                 write!(f, "Prepare error: {}, probably module is mailformed", msg)
             }
-            FCEError::NonUniqueModuleName => {
-                write!(f, "FCE already has module with such a name")
-            }
+            FCEError::NonUniqueModuleName => write!(f, "FCE already has module with such a name"),
             FCEError::NoSuchFunction(msg) => {
                 write!(f, "FCE doesn't have a function with such a name: {}", msg)
             }
             FCEError::NoSuchModule => write!(f, "FCE doesn't have a module with such a name"),
-            FCEError::NoWITSection => write!(f, "Loaded module doesn't contain WIT section that is neccessary for instantiation"),
-            FCEError::MultipleWITSections => write!(f, "Loaded module contains multiple WIT sections that is unsupported now"),
-            FCEError::WITRemainderNotEmpty => write!(f, "WIT section remainder isn't empty - WIT section possibly corrupted"),
+            FCEError::NoWITSection => write!(
+                f,
+                "Loaded module doesn't contain WIT section that is neccessary for instantiation"
+            ),
+            FCEError::MultipleWITSections => write!(
+                f,
+                "Loaded module contains multiple WIT sections that is unsupported now"
+            ),
+            FCEError::WITRemainderNotEmpty => write!(
+                f,
+                "WIT section remainder isn't empty - WIT section possibly corrupted"
+            ),
             FCEError::WITParseError => write!(f, "WIT section is corrupted"),
         }
     }

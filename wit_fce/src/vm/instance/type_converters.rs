@@ -15,7 +15,6 @@
  */
 
 /// Contains converters of types and values between Wasmer and wasmer_interface_types.
-
 use super::{WType, WValue, IType, IValue};
 
 pub(super) fn wtype_to_itype(ty: &WType) -> IType {

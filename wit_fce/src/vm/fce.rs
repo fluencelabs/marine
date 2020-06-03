@@ -41,7 +41,12 @@ impl Default for FCE {
 }
 
 impl FCEService for FCE {
-    fn call(&mut self, module_name: &str, func_name: &str, argument: &[IValue]) -> Result<Vec<IValue>, FCEError> {
+    fn call(
+        &mut self,
+        module_name: &str,
+        func_name: &str,
+        argument: &[IValue],
+    ) -> Result<Vec<IValue>, FCEError> {
         match self.modules.get_mut(module_name) {
             // TODO: refactor errors
             Some(mut module) => unsafe {
@@ -57,23 +62,19 @@ impl FCEService for FCE {
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
     ) -> Result<(), FCEError>
-        where
-            S: Into<String>,
+    where
+        S: Into<String>,
     {
         let _prepared_wasm_bytes =
             super::prepare::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
-        let module = FCEModule::new(
-            &wasm_bytes,
-            config.import_object,
-            &self.modules,
-        )?;
+        let module = FCEModule::new(&wasm_bytes, config.import_object, &self.modules)?;
 
         match self.modules.entry(module_name.into()) {
             Entry::Vacant(entry) => {
                 entry.insert(Arc::new(module));
                 Ok(())
-            },
+            }
             Entry::Occupied(_) => Err(FCEError::NonUniqueModuleName),
         }
     }
