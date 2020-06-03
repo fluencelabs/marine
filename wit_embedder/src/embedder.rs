@@ -1,10 +1,12 @@
 use crate::custom::WITCustom;
-use std::path::PathBuf;
+
 use walrus::ModuleConfig;
-use wasmer_interface_types::{
+use wasmer_wit::{
     decoders::wat::{parse, Buffer},
     encoders::binary::ToBytes,
 };
+
+use std::path::PathBuf;
 
 pub struct Config {
     pub in_wasm_path: PathBuf,

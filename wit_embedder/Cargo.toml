@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 walrus = "0.17.0"
-wasmer-interface-types = { git = "https://github.com/fluencelabs/interface-types", branch = "master"}
+wasmer-wit = { package = "wasmer-interface-types", git = "https://github.com/fluencelabs/interface-types", branch = "master"}
 options = "0.5.1"
 either = "1.5.3"
 clap = "2.33.1"
