@@ -17,35 +17,10 @@
 use wasmer_wasi::WasiVersion;
 
 use std::path::PathBuf;
+use wasmer_runtime::ImportObject;
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct WASIConfig {
-    /// Desired WASI version.
-    pub version: WasiVersion,
-
-    /// Environment variables for loaded modules.
-    pub envs: Vec<Vec<u8>>,
-
-    /// List of available directories for loaded modules.
-    pub preopened_files: Vec<PathBuf>,
-
-    /// Mapping between paths.
-    pub mapped_dirs: Vec<(String, PathBuf)>,
-}
-
-impl Default for WASIConfig {
-    fn default() -> Self {
-        Self {
-            version: WasiVersion::Latest,
-            envs: vec![],
-            preopened_files: vec![],
-            mapped_dirs: vec![],
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Config {
+#[derive(Clone)]
+pub struct FCEModuleConfig {
     /// Maximum number of Wasm memory pages that loaded module can use.
     /// Each Wasm pages is 65536 bytes long.
     pub mem_pages_count: u32,
@@ -54,67 +29,44 @@ pub struct Config {
     /// This functionality is just for debugging, and this module will be disabled in future.
     pub logger_enabled: bool,
 
-    /// Name of the main module handler function.
-    pub invoke_fn_name: String,
+    /// Import object that will be used in module instantiation process.
+    pub import_object: ImportObject,
 
-    /// Name of a function that should be called for allocation memory. This function
-    /// is used for passing array of bytes to the main module.
-    pub allocate_fn_name: String,
+    /// Desired WASI version.
+    pub wasi_version: WasiVersion,
 
-    /// Name of a function that should be called for deallocation of
-    /// previously allocated memory by allocateFunction.
-    pub deallocate_fn_name: String,
+    /// Environment variables for loaded modules.
+    pub wasi_envs: Vec<Vec<u8>>,
 
-    /// Name of a functions that could be used to store one byte in current module.
-    pub store_fn_name: String,
+    /// List of available directories for loaded modules.
+    pub wasi_preopened_files: Vec<PathBuf>,
 
-    /// Name of a function that could be used to load one byte from current module.
-    pub load_fn_name: String,
-
-    /// Config for WASI subsystem initialization. None means that module should be loaded
-    /// without WASI.
-    pub wasi_config: WASIConfig,
+    /// Mapping between paths.
+    pub wasi_mapped_dirs: Vec<(String, PathBuf)>,
 }
 
-impl Default for Config {
+impl Default for FCEModuleConfig {
     fn default() -> Self {
         // some reasonable defaults
         Self {
             // 65536*1600 ~ 100 Mb
             mem_pages_count: 1600,
-            invoke_fn_name: "invoke".to_string(),
-            allocate_fn_name: "allocate".to_string(),
-            deallocate_fn_name: "deallocate".to_string(),
-            store_fn_name: "store".to_string(),
-            load_fn_name: "load".to_string(),
             logger_enabled: true,
-            wasi_config: WASIConfig::default(),
+            import_object: ImportObject::new(),
+            wasi_version: WasiVersion::Latest,
+            wasi_envs: vec![],
+            wasi_preopened_files: vec![],
+            wasi_mapped_dirs: vec![],
         }
     }
 }
 
-impl Config {
+// TODO: implement debug for FCEModuleConfig
+
+impl FCEModuleConfig {
     #[allow(dead_code)]
     pub fn with_mem_pages_count(mut self, mem_pages_count: u32) -> Self {
         self.mem_pages_count = mem_pages_count;
-        self
-    }
-
-    #[allow(dead_code)]
-    pub fn with_invoke_fn_name(mut self, invoke_fn_name: String) -> Self {
-        self.invoke_fn_name = invoke_fn_name;
-        self
-    }
-
-    #[allow(dead_code)]
-    pub fn with_allocate_fn_name(mut self, allocate_fn_name: String) -> Self {
-        self.allocate_fn_name = allocate_fn_name;
-        self
-    }
-
-    #[allow(dead_code)]
-    pub fn with_deallocate_fn_name(mut self, deallocate_fn_name: String) -> Self {
-        self.deallocate_fn_name = deallocate_fn_name;
         self
     }
 
@@ -126,25 +78,25 @@ impl Config {
 
     #[allow(dead_code)]
     pub fn with_wasi_version(mut self, wasi_version: WasiVersion) -> Self {
-        self.wasi_config.version = wasi_version;
+        self.wasi_version = wasi_version;
         self
     }
 
     #[allow(dead_code)]
     pub fn with_wasi_envs(mut self, envs: Vec<Vec<u8>>) -> Self {
-        self.wasi_config.envs = envs;
+        self.wasi_envs = envs;
         self
     }
 
     #[allow(dead_code)]
     pub fn with_wasi_preopened_files(mut self, preopened_files: Vec<PathBuf>) -> Self {
-        self.wasi_config.preopened_files = preopened_files;
+        self.wasi_preopened_files = preopened_files;
         self
     }
 
     #[allow(dead_code)]
     pub fn with_wasi_mapped_dirs(mut self, mapped_dirs: Vec<(String, PathBuf)>) -> Self {
-        self.wasi_config.mapped_dirs = mapped_dirs;
+        self.wasi_mapped_dirs = mapped_dirs;
         self
     }
 }

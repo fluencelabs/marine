@@ -13,110 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#![deny(
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
 #![warn(rust_2018_idioms)]
+#![feature(get_mut_unchecked)]
+#![feature(new_uninit)]
 
-mod misc;
-/// Command-line tool intended to test FCE VM.
 mod vm;
+mod misc;
 
-use crate::misc::SlicePrettyPrinter;
-use crate::vm::config::Config;
-use crate::vm::fce::FCE;
-use crate::vm::service::FCEService;
+use vm::IValue;
+use vm::FCE;
+use vm::FCEModuleConfig;
+use vm::FCEService;
 
-use exitfailure::ExitFailure;
-use std::fs;
+const IPFS_NODE: &str =
+    "/Users/mike/dev/work/fluence/wasm/fce/target/wasm32-unknown-unknown/release/ipfs_node_wit.wasm";
 
-fn main() -> Result<(), ExitFailure> {
-    println!("Welcome to the FCE CLI:");
-    let mut rl = rustyline::Editor::<()>::new();
+const IPFS_RPC: &str =
+    "/Users/mike/dev/work/fluence/wasm/fce/target/wasm32-unknown-unknown/release/ipfs_rpc_wit.wasm";
+
+fn main() {
+    let ipfs_node_bytes = std::fs::read(IPFS_NODE).unwrap();
+    let ipfs_rpc_bytes = std::fs::read(IPFS_RPC).unwrap();
+
     let mut fce = FCE::new();
+    let config = FCEModuleConfig::default();
 
-    loop {
-        let readline = rl.readline(">> ");
-        match readline {
-            Ok(line) => {
-                // TODO: improve argument parsing
-                let cmd: Vec<_> = line.split(' ').collect();
-                match cmd[0] {
-                    "add" => {
-                        let module_name = cmd[1].to_string();
-                        let wasm_bytes = fs::read(cmd[2]);
-                        if let Err(e) = wasm_bytes {
-                            println!("failed to read wasm module: {}", e);
-                            continue;
-                        }
+    println!("loading ipfs node module");
+    fce.register_module("node", &ipfs_node_bytes, config.clone())
+        .expect("module successfully created");
 
-                        let config = Config::default();
-                        let result_msg =
-                            match fce.register_module(module_name, &wasm_bytes.unwrap(), config) {
-                                Ok(_) => "module successfully registered in FCE".to_string(),
-                                Err(e) => format!("module registration failed with: {:?}", e),
-                            };
-                        println!("{}", result_msg);
-                    }
-                    "del" => {
-                        let module_name = cmd[1];
-                        let result_msg = match fce.unregister_module(module_name) {
-                            Ok(_) => "module successfully deleted from FCE".to_string(),
-                            Err(e) => format!("module deletion failed with: {:?}", e),
-                        };
-                        println!("{}", result_msg);
-                    }
-                    "execute" => {
-                        let module_name = cmd[1];
-                        let arg = cmd[2..].join(" ");
-                        let result = match fce.invoke(module_name, arg.as_bytes()) {
-                            Ok(result) => {
-                                let outcome_copy = result.outcome.clone();
-                                match String::from_utf8(result.outcome) {
-                                    Ok(s) => format!("result: {}", s),
-                                    Err(_) => format!("result: {:?}", outcome_copy),
-                                }
-                            }
-                            Err(e) => format!("execution failed with {:?}", e),
-                        };
-                        println!("{}", result);
-                    }
-                    "hash" => {
-                        let hash = fce.compute_state_hash();
-                        println!(
-                            "vm state hash is {:2x}",
-                            SlicePrettyPrinter(hash.as_slice())
-                        );
-                    }
-                    "help" => {
-                        println!(
-                            "Enter:\n\
-                                add <module_name> <module_path> - to add a new Wasm module to FCE\n\
-                                del <module_name>               - to delete Wasm module to FCE\n\
-                                execute <module_name> <arg>     - to call invoke on module with module_name\n\
-                                hash                            - to compute hash of internal Wasm state\n\
-                                help                            - to print this message\n\
-                                e/exit/q/quit                   - to exit"
-                        );
-                    }
-                    "e" | "exit" | "q" | "quit" => break,
-                    _ => {
-                        println!("unsupported command");
-                    }
-                }
-            }
-            Err(e) => {
-                println!("a error occurred: {}", e);
-                break;
-            }
-        }
-    }
+    println!("loading ipfs rpc module");
+    fce.register_module("rpc", &ipfs_rpc_bytes, config.clone())
+        .expect("module successfully created");
 
-    Ok(())
+    let result = fce
+        .call("node_rpc", "invoke", &[IValue::String("aaaa".to_string())])
+        .unwrap();
+
+    println!("execution result {:?}", result);
 }
+
+/*
+fn logger_log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
+    use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
+
+    let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
+    match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
+        Some(msg) => print!("{}", msg),
+        None => print!("fce logger: incorrect UTF8 string's been supplied to logger"),
+    }
+}
+
+
+fn ipfs_call(ctx: &mut Ctx, ptr: i32, size: i32) {
+    use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
+
+    let wasm_ptr = WasmPtr::<u8, Array>::new(ptr as _);
+    match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
+        Some(msg) => println!("host ipfs_call: {}", msg),
+        None => println!("fce logger: incorrect UTF8 string's been supplied to logger"),
+    }
+}
+*/

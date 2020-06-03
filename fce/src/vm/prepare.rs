@@ -18,7 +18,7 @@
 // https://github.com/paritytech/substrate/blob/master/srml/contracts/src/wasm/prepare.rs
 // https://github.com/nearprotocol/nearcore/blob/master/runtime/near-vm-runner/src/prepare.rs
 
-use crate::vm::errors::FCEError;
+use super::errors::FCEError;
 
 use parity_wasm::{
     builder, elements,

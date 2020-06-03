@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-pub mod config;
-pub mod errors;
-pub mod fce;
-pub mod service;
-
-mod module;
+mod fce;
+mod instance;
+mod fce_service;
+mod config;
 mod prepare;
+mod errors;
+
+pub use fce::FCE;
+pub use fce_service::FCEService;
+pub use config::FCEModuleConfig;
+pub use errors::FCEError;
+pub use instance::{IType, IValue};
