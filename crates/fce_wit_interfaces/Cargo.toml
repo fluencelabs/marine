@@ -1,12 +1,12 @@
 [package]
-name = "fce_interface"
+name = "fce_wit_interfaces"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [lib]
-name = "fce_interface"
-src = "src/lib.rs"
+name = "fce_wit_interfaces"
+path = "src/lib.rs"
 
 [dependencies]
 walrus = "0.17.0"

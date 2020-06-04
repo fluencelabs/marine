@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-mod custom;
-mod embedder;
-mod extracter;
+use fce_wit_interfaces::EmbedderConfig;
+use fce_wit_interfaces::embed_text_wit;
+use fce_wit_interfaces::extract_text_wit;
 
 use clap::{App, AppSettings, Arg, SubCommand};
-use embedder::Config;
 use failure::err_msg;
 use std::path::PathBuf;
 
@@ -82,13 +81,13 @@ pub fn main() -> Result<(), exitfailure::ExitFailure> {
 
             let wit = String::from_utf8(std::fs::read(wit_path)?).unwrap();
 
-            let options = Config {
+            let options = EmbedderConfig {
                 in_wasm_path: PathBuf::from(in_wasm_path),
                 wit,
                 out_wasm_path: PathBuf::from(out_wasm_path),
             };
 
-            match embedder::embed_wit(&options) {
+            match embed_text_wit(&options) {
                 Ok(_) => {
                     println!("WIT successfully embedded");
                 }
@@ -103,14 +102,8 @@ pub fn main() -> Result<(), exitfailure::ExitFailure> {
             let wasm_path = arg.value_of(IN_WASM_PATH).unwrap();
             let wasm_path = PathBuf::from(wasm_path);
 
-            match extracter::extract_wit(wasm_path) {
-                Ok(wat) => {
-                    println!("extracted WIT:\n{}", wat);
-                }
-                Err(e) => {
-                    println!("{}", e);
-                }
-            };
+            let result = extract_text_wit(wasm_path)?;
+            println!("{}", result);
 
             Ok(())
         }

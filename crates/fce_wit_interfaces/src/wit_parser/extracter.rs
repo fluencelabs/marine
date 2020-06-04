@@ -18,7 +18,7 @@ use super::custom::WIT_SECTION_NAME;
 use super::errors::WITParserError;
 use crate::fce_wit_interfaces::FCEWITInterfaces;
 
-use walrus::{IdsToIndices, Module, ModuleConfig};
+use walrus::{IdsToIndices, ModuleConfig};
 use wasmer_wit::ast::Interfaces;
 
 use std::path::PathBuf;
@@ -26,14 +26,14 @@ use std::path::PathBuf;
 pub fn extract_text_wit(wasm_file_path: PathBuf) -> Result<String, WITParserError> {
     extract_wit_with_fn(
         wasm_file_path,
-        |wit: Interfaces| -> Result<String, WITParserError> { Ok((&wit).to_string()) },
+        |wit: Interfaces<'_>| -> Result<String, WITParserError> { Ok((&wit).to_string()) },
     )
 }
 
 pub fn extract_fce_wit(wasm_file_path: PathBuf) -> Result<FCEWITInterfaces, WITParserError> {
     extract_wit_with_fn(
         wasm_file_path,
-        |wit: Interfaces| -> Result<FCEWITInterfaces, WITParserError> {
+        |wit: Interfaces<'_>| -> Result<FCEWITInterfaces, WITParserError> {
             Ok(FCEWITInterfaces::new(wit))
         },
     )
@@ -44,7 +44,7 @@ fn extract_wit_with_fn<F, FResultType>(
     func: F,
 ) -> Result<FResultType, WITParserError>
 where
-    F: FnOnce(Interfaces) -> Result<FResultType, WITParserError>,
+    F: FnOnce(Interfaces<'_>) -> Result<FResultType, WITParserError>,
 {
     let wit_section_bytes = extract_wit_section_bytes(wasm_file_path)?;
     let raw_wit = extract_raw_interfaces(&wit_section_bytes)?;
@@ -52,7 +52,7 @@ where
     func(raw_wit)
 }
 
-fn extract_raw_interfaces(wit_section_bytes: &[u8]) -> Result<Interfaces, WITParserError> {
+fn extract_raw_interfaces(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>, WITParserError> {
     let wit = match wasmer_wit::decoders::binary::parse::<()>(&wit_section_bytes) {
         Ok((remainder, wit)) if remainder.is_empty() => wit,
         Ok(_) => {

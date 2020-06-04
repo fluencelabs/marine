@@ -362,7 +362,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "fce_interface"
+name = "fce_wit_interfaces"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1207,8 +1207,7 @@ dependencies = [
  "clap",
  "exitfailure",
  "failure",
- "walrus",
- "wasmer-interface-types",
+ "fce_wit_interfaces",
 ]
 
 [[package]]

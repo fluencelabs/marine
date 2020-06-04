@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-use crate::types::*;
-
 use wasmer_wit::interpreter::Instruction;
 use wasmer_wit::ast::*;
 use multimap::MultiMap;
 
 use std::iter::Iterator;
 use std::collections::HashMap;
+
+pub type CoreFunctionType = u32;
+pub type AdapterFunctionType = u32;
+pub type ExportName = String;
+pub type ImportName = String;
+pub type ImportNamespace = String;
 
 pub struct FCEWITInterfaces {
     /// All the types.
@@ -41,9 +45,8 @@ pub struct FCEWITInterfaces {
     core_type_to_adapter: MultiMap<CoreFunctionType, AdapterFunctionType>,
 }
 
-#[allow(unused)]
 impl FCEWITInterfaces {
-    pub fn new(interfaces: Interfaces) -> Self {
+    pub fn new(interfaces: Interfaces<'_>) -> Self {
         let imports = interfaces
             .imports
             .into_iter()

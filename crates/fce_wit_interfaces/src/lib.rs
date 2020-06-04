@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
 
 mod fce_wit_interfaces;
 mod wit_parser;
 
-pub use fce_wit_interfaces::FCEWITInterfaces;
-
-pub mod types {
-    pub type CoreFunctionType = u32;
-    pub type AdapterFunctionType = u32;
-    pub type ExportName = String;
-    pub type ImportName = String;
-    pub type ImportNamespace = String;
-}
+pub use crate::wit_parser::*;
+pub use crate::fce_wit_interfaces::*;
