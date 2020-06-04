@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use super::errors::FCEWITInterfacesError;
+
 use wasmer_wit::interpreter::Instruction;
 use wasmer_wit::ast::*;
 use multimap::MultiMap;
@@ -98,12 +100,24 @@ impl<'a> FCEWITInterfaces<'a> {
         }
     }
 
+    pub fn types(&self) -> impl Iterator<Item = &Type> {
+        self.types.iter()
+    }
+
     pub fn type_by_idx(&self, idx: u32) -> Option<&Type> {
         self.types.get(idx as usize)
     }
 
-    pub fn types(&self) -> impl Iterator<Item = &Type> {
-        self.types.iter()
+    pub fn type_by_idx_r(&self, idx: u32) -> Result<&Type, FCEWITInterfacesError> {
+        self.types
+            .get(idx as usize)
+            .ok_or_else(|| FCEWITInterfacesError::NoSuchType(idx))
+    }
+
+    pub fn imports(
+        &self,
+    ) -> impl Iterator<Item = (&CoreFunctionType, &(ImportName<'a>, ImportNamespace<'a>))> {
+        self.imports.iter()
     }
 
     pub fn import_by_type(
@@ -113,23 +127,37 @@ impl<'a> FCEWITInterfaces<'a> {
         self.imports.get(&import_type)
     }
 
-    pub fn imports(
+    pub fn import_by_type_r(
         &self,
-    ) -> impl Iterator<Item = (&CoreFunctionType, &(ImportName<'a>, ImportNamespace<'a>))> {
-        self.imports.iter()
+        import_type: CoreFunctionType,
+    ) -> Result<&(ImportName<'a>, ImportNamespace<'a>), FCEWITInterfacesError> {
+        self.imports
+            .get(&import_type)
+            .ok_or_else(|| FCEWITInterfacesError::NoSuchImport(import_type))
+    }
+
+    pub fn adapters(&self) -> impl Iterator<Item = (&AdapterFunctionType, &Vec<Instruction>)> {
+        self.adapters.iter()
     }
 
     pub fn adapter_by_type(&self, adapter_type: AdapterFunctionType) -> Option<&Vec<Instruction>> {
         self.adapters.get(&adapter_type)
     }
 
+    pub fn adapter_by_type_r(
+        &self,
+        adapter_type: AdapterFunctionType,
+    ) -> Result<&Vec<Instruction>, FCEWITInterfacesError> {
+        self.adapters
+            .get(&adapter_type)
+            .ok_or_else(|| FCEWITInterfacesError::NoSuchAdapter(adapter_type))
+    }
+
     pub fn export_by_type(&self, export_type: u32) -> Option<&ExportName<'a>> {
         self.exports.get(&export_type)
     }
 
-    pub fn exports(
-        &self,
-    ) -> impl Iterator<Item = (&CoreFunctionType, &ExportName<'a>)> {
+    pub fn exports(&self) -> impl Iterator<Item = (&CoreFunctionType, &ExportName<'a>)> {
         self.exports.iter()
     }
 

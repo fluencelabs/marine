@@ -15,6 +15,8 @@
  */
 
 use fce_wit_interfaces::WITParserError;
+use fce_wit_interfaces::FCEWITInterfacesError;
+
 use wasmer_wit::errors::InstructionError;
 use wasmer_runtime::error::{
     CallError, CompileError, CreationError, Error as WasmerError, ResolveError, RuntimeError,
@@ -132,5 +134,17 @@ impl From<InstructionError> for FCEError {
 impl From<WITParserError> for FCEError {
     fn from(err: WITParserError) -> Self {
         FCEError::WITParseError(err)
+    }
+}
+
+impl From<FCEWITInterfacesError> for FCEError {
+    fn from(err: FCEWITInterfacesError) -> Self {
+        FCEError::IncorrectWIT(format!("{}", err))
+    }
+}
+
+impl From<()> for FCEError {
+    fn from(_err: ()) -> Self {
+        FCEError::IncorrectWIT(format!("failed to parse instructions for adapter type"))
     }
 }

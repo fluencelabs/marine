@@ -115,33 +115,25 @@ impl FCEModule {
     ) -> Result<HashMap<String, WITModuleFunc>, FCEError> {
         use fce_wit_interfaces::WITAstType;
 
-        wit
-            .implementations()
-            .filter_map(|(adapter_function_type, core_function_type)|
+        wit.implementations()
+            .filter_map(|(adapter_function_type, core_function_type)| {
                 match wit.export_by_type(*core_function_type) {
-                    Some(export_function_name) => Some((adapter_function_type, *export_function_name)),
+                    Some(export_function_name) => {
+                        Some((adapter_function_type, *export_function_name))
+                    }
                     // pass functions that aren't export
-                    None => None
+                    None => None,
                 }
-            )
+            })
             .map(|(adapter_function_type, export_function_name)| {
-                let adapter_instructions = wit.adapter_by_type(*adapter_function_type)
-                    .ok_or_else(|| FCEError::IncorrectWIT(
-                        format!("adapter function with idx = {} hasn't been found during extracting exports by implementations", adapter_function_type)
-                    ))?;
-
-                let wit_type = wit.type_by_idx(*adapter_function_type).ok_or_else(
-                // TODO: change error type
-                || FCEError::IncorrectWIT(format!(
-                    "{} function id is bigger than WIT interface types count",
-                    adapter_function_type
-                )))?;
+                let adapter_instructions = wit.adapter_by_type_r(*adapter_function_type)?;
+                let wit_type = wit.type_by_idx_r(*adapter_function_type)?;
 
                 match wit_type {
-                    WITAstType::Function { inputs, outputs, .. } => {
-                        let interpreter: WITInterpreter = adapter_instructions.try_into().map_err(|_| FCEError::IncorrectWIT(
-                            format!("failed to parse instructions for adapter type {}", adapter_function_type)
-                        ))?;
+                    WITAstType::Function {
+                        inputs, outputs, ..
+                    } => {
+                        let interpreter: WITInterpreter = adapter_instructions.try_into()?;
 
                         Ok((
                             export_function_name.to_string(),
@@ -149,13 +141,13 @@ impl FCEModule {
                                 interpreter,
                                 inputs: inputs.clone(),
                                 outputs: outputs.clone(),
-                            }
+                            },
                         ))
-                    },
+                    }
                     _ => Err(FCEError::IncorrectWIT(format!(
                         "type with idx = {} isn't a function type",
                         adapter_function_type
-                    )))
+                    ))),
                 }
             })
             .collect::<Result<HashMap<String, WITModuleFunc>, FCEError>>()
@@ -167,25 +159,29 @@ impl FCEModule {
         wit_instance: Arc<MaybeUninit<WITInstance>>,
     ) -> Result<ImportObject, FCEError> {
         use fce_wit_interfaces::WITAstType;
-        use super::type_converters::{itype_to_wtype, wval_to_ival};
         use wasmer_core::typed_func::DynamicFunc;
-        use wasmer_core::types::FuncSig;
         use wasmer_core::vm::Ctx;
 
         // returns function that will be called from imports of Wasmer module
-        fn dyn_func_from_imports(
+        fn dyn_func_from_raw_import(
             inputs: Vec<IType>,
             func: Box<dyn Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static>,
         ) -> DynamicFunc<'static> {
+            use wasmer_core::types::FuncSig;
+            use super::type_converters::itype_to_wtype;
+
             let signature = inputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
             DynamicFunc::new(Arc::new(FuncSig::new(signature, vec![])), func)
         }
 
+        // creates a closure that is represent a WIT module import
         fn create_raw_import(
             wit_instance: Arc<MaybeUninit<WITInstance>>,
             interpreter: WITInterpreter,
         ) -> Box<dyn for<'a, 'b> Fn(&'a mut Ctx, &'b [WValue]) -> Vec<WValue> + 'static> {
             Box::new(move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
+                use super::type_converters::wval_to_ival;
+
                 // copy here because otherwise wit_instance will be consumed by the closure
                 let wit_instance_callable = wit_instance.clone();
                 let converted_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
@@ -205,47 +201,35 @@ impl FCEModule {
 
         let namespaces = wit
             .implementations()
-            .filter_map(|(adapter_function_type, core_function_type)|
+            .filter_map(|(adapter_function_type, core_function_type)| {
                 match wit.import_by_type(*core_function_type) {
                     Some(import) => Some((adapter_function_type, *import)),
-                    // pass functions that aren't export
-                    None => None
+                    // skip functions that aren't export
+                    None => None,
                 }
-            )
+            })
             .map(|(adapter_function_type, (import_namespace, import_name))| {
-                let adapter_instructions = wit.adapter_by_type(*adapter_function_type)
-                    .ok_or_else(|| FCEError::IncorrectWIT(
-                        format!("adapter function with idx = {} hasn't been found during extracting adjusting wit imports", adapter_function_type)
-                    ))?;
-
-                let wit_type = wit.type_by_idx(*adapter_function_type).ok_or_else(
-                    || FCEError::IncorrectWIT(format!(
-                        "{} function id is bigger than WIT interface types count",
-                        adapter_function_type
-                    )))?;
+                let adapter_instructions = wit.adapter_by_type_r(*adapter_function_type)?;
+                let wit_type = wit.type_by_idx_r(*adapter_function_type)?;
 
                 match wit_type {
                     WITAstType::Function { inputs, .. } => {
-                        let interpreter: WITInterpreter = adapter_instructions.try_into().map_err(|_| FCEError::IncorrectWIT(
-                            format!("failed to parse instructions for adapter type {}", adapter_function_type)
-                        ))?;
-
+                        let interpreter: WITInterpreter = adapter_instructions.try_into()?;
                         let inner_import = create_raw_import(wit_instance.clone(), interpreter);
-                        let wit_import = dyn_func_from_imports(inputs.clone(), inner_import);
+                        let wit_import = dyn_func_from_raw_import(inputs.clone(), inner_import);
+
                         let mut namespace = Namespace::new();
                         namespace.insert(import_name, wit_import);
 
-                        Ok((
-                            import_namespace.to_string(),
-                            namespace
-                        ))
-                    },
+                        Ok((import_namespace.to_string(), namespace))
+                    }
                     _ => Err(FCEError::IncorrectWIT(format!(
                         "type with idx = {} isn't a function type",
                         adapter_function_type
-                    )))
+                    ))),
                 }
-            }).collect::<Result<HashMap<String, Namespace>, FCEError>>()?;
+            })
+            .collect::<Result<HashMap<String, Namespace>, FCEError>>()?;
 
         let mut import_object = ImportObject::new();
 
