@@ -1,12 +1,15 @@
 [package]
-name = "wit_embedder"
+name = "fce_interface"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
+[lib]
+name = "fce_interface"
+src = "src/lib.rs"
+
 [dependencies]
 walrus = "0.17.0"
 wasmer-wit = { package = "wasmer-interface-types", git = "https://github.com/fluencelabs/interface-types", branch = "master"}
-clap = "2.33.1"
-exitfailure = "0.5.1"
-failure = "0.1.5"
+multimap = "0.8.1"
+anyhow = "1.0.31"

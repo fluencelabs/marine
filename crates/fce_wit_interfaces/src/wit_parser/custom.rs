@@ -17,6 +17,8 @@
 use std::borrow::Cow;
 use walrus::{CustomSection, IdsToIndices};
 
+pub const WIT_SECTION_NAME: &str = "interface-types";
+
 #[derive(Debug, Clone)]
 pub(crate) struct WITCustom(pub Vec<u8>);
 

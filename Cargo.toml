@@ -1,10 +1,11 @@
 [workspace]
 members = [
-    "fce",
-    "tools/wit_embedder",
+    "crates/fce_wit_interfaces",
     "examples/export_test",
     "examples/ipfs_node",
     "examples/ipfs_rpc",
+    "fce",
+    "tools/wit_embedder",
 ]
 
 [profile.release]

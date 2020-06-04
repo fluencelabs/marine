@@ -362,6 +362,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "fce_interface"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "multimap",
+ "walrus",
+ "wasmer-interface-types",
+]
+
+[[package]]
 name = "gcc"
 version = "0.3.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -628,12 +638,6 @@ name = "object"
 version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9cbca9424c482ee628fa549d9c812e2cd22f1180b9222c9200fdfa6eb31aecb2"
-
-[[package]]
-name = "options"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7cae662c78308e9d468ee0548cd8852e66a9b4a945c16ddcc6eed3dd9ef14cb0"
 
 [[package]]
 name = "page_size"
@@ -1201,10 +1205,8 @@ name = "wit_embedder"
 version = "0.1.0"
 dependencies = [
  "clap",
- "either",
  "exitfailure",
  "failure",
- "options",
  "walrus",
  "wasmer-interface-types",
 ]

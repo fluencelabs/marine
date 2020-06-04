@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use crate::custom::WITCustom;
+use super::custom::WITCustom;
+use super::errors::WITParserError;
 
 use walrus::ModuleConfig;
 use wasmer_wit::{
@@ -24,30 +25,28 @@ use wasmer_wit::{
 
 use std::path::PathBuf;
 
-pub struct Config {
+pub struct EmbedderConfig {
     pub in_wasm_path: PathBuf,
     pub out_wasm_path: PathBuf,
     pub wit: String,
 }
 
-pub fn embed_wit(options: &Config) -> Result<(), String> {
+pub fn embed_text_wit(options: &EmbedderConfig) -> Result<(), WITParserError> {
     let mut module = ModuleConfig::new()
         .parse_file(&options.in_wasm_path)
-        .map_err(|e| format!("Failed to parse the Wasm module: {}", e))?;
+        .map_err(WITParserError::CorruptedWasmFile)?;
 
-    let buffer = Buffer::new(&options.wit)
-        .map_err(|e| format!("Can't parse provided Wasm module: {}", e))?;
-    let ast = parse(&buffer).map_err(|e| format!("Failed to parse the WIT description: {}", e))?;
+    let buffer = Buffer::new(&options.wit)?;
+    let ast = parse(&buffer)?;
 
     let mut bytes = vec![];
-    ast.to_bytes(&mut bytes)
-        .map_err(|_| "Failed to encode the AST into its binary representation.")?;
+    ast.to_bytes(&mut bytes)?;
 
     let custom = WITCustom(bytes);
     module.customs.add(custom);
     module
         .emit_wasm_file(&options.out_wasm_path)
-        .map_err(|e| format!("Failed to emit Wasm file with bindings: {}", e))?;
+        .map_err(WITParserError::WasmEmitError)?;
 
     Ok(())
 }

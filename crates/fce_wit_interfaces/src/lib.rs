@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-use std::borrow::Cow;
-use walrus::{CustomSection, IdsToIndices};
+mod fce_wit_interfaces;
+mod wit_parser;
 
-#[derive(Debug, Clone)]
-pub(crate) struct WITCustom(pub Vec<u8>);
+pub use fce_wit_interfaces::FCEWITInterfaces;
 
-impl CustomSection for WITCustom {
-    fn name(&self) -> &str {
-        WIT_SECTION_NAME
-    }
-
-    fn data(&self, _ids_to_indices: &IdsToIndices) -> Cow<[u8]> {
-        Cow::Borrowed(&self.0)
-    }
+pub mod types {
+    pub type CoreFunctionType = u32;
+    pub type AdapterFunctionType = u32;
+    pub type ExportName = String;
+    pub type ImportName = String;
+    pub type ImportNamespace = String;
 }
