@@ -25,7 +25,6 @@ pub(crate) use fce_module::FCEModule;
 
 pub use wasmer_wit::types::InterfaceType as IType;
 pub use wasmer_wit::values::InterfaceValue as IValue;
-pub(self) use wasmer_wit::ast::Type as IAstType;
 pub(self) use wasmer_core::types::Type as WType;
 pub(self) use wasmer_core::types::Value as WValue;
 

@@ -10,6 +10,8 @@ path = "src/lib.rs"
 
 [dependencies]
 walrus = "0.17.0"
+wasmer-core = { package = "wasmer-runtime-core", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
 wasmer-wit = { package = "wasmer-interface-types", git = "https://github.com/fluencelabs/interface-types", branch = "master"}
+
 multimap = "0.8.1"
 anyhow = "1.0.31"

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use fce_wit_interfaces::WITParserError;
 use wasmer_wit::errors::InstructionError;
 use wasmer_runtime::error::{
     CallError, CompileError, CreationError, Error as WasmerError, ResolveError, RuntimeError,
@@ -47,17 +48,11 @@ pub enum FCEError {
     /// Returns when there is no module with such name.
     NoSuchModule,
 
-    /// WIT section is absent.
-    NoWITSection,
+    /// WIT section parse error.
+    WITParseError(WITParserError),
 
-    /// Multiple WIT sections.
-    MultipleWITSections,
-
-    /// WIT section remainder isn't empty.
-    WITRemainderNotEmpty,
-
-    /// An error occurred while parsing WIT section.
-    WITParseError,
+    /// Incorrect WIT section.
+    IncorrectWIT(String),
 }
 
 impl Error for FCEError {}
@@ -77,19 +72,8 @@ impl std::fmt::Display for FCEError {
                 write!(f, "FCE doesn't have a function with such a name: {}", msg)
             }
             FCEError::NoSuchModule => write!(f, "FCE doesn't have a module with such a name"),
-            FCEError::NoWITSection => write!(
-                f,
-                "Loaded module doesn't contain WIT section that is neccessary for instantiation"
-            ),
-            FCEError::MultipleWITSections => write!(
-                f,
-                "Loaded module contains multiple WIT sections that is unsupported now"
-            ),
-            FCEError::WITRemainderNotEmpty => write!(
-                f,
-                "WIT section remainder isn't empty - WIT section possibly corrupted"
-            ),
-            FCEError::WITParseError => write!(f, "WIT section is corrupted"),
+            FCEError::WITParseError(err) => write!(f, "{}", err),
+            FCEError::IncorrectWIT(err_msg) => write!(f, "{}", err_msg),
         }
     }
 }
@@ -142,5 +126,11 @@ impl From<WasmerError> for FCEError {
 impl From<InstructionError> for FCEError {
     fn from(err: InstructionError) -> Self {
         FCEError::WasmerInvokeError(format!("{}", err))
+    }
+}
+
+impl From<WITParserError> for FCEError {
+    fn from(err: WITParserError) -> Self {
+        FCEError::WITParseError(err)
     }
 }

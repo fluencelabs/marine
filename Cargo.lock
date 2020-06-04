@@ -362,6 +362,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "fce"
+version = "0.2.0"
+dependencies = [
+ "fce_wit_interfaces",
+ "multimap",
+ "parity-wasm",
+ "pwasm-utils",
+ "wasmer-interface-types",
+ "wasmer-runtime",
+ "wasmer-runtime-core",
+ "wasmer-wasi",
+]
+
+[[package]]
 name = "fce_wit_interfaces"
 version = "0.1.0"
 dependencies = [
@@ -369,6 +383,7 @@ dependencies = [
  "multimap",
  "walrus",
  "wasmer-interface-types",
+ "wasmer-runtime-core",
 ]
 
 [[package]]
@@ -1208,17 +1223,4 @@ dependencies = [
  "exitfailure",
  "failure",
  "fce_wit_interfaces",
-]
-
-[[package]]
-name = "wit_fce"
-version = "0.2.0"
-dependencies = [
- "multimap",
- "parity-wasm",
- "pwasm-utils",
- "wasmer-interface-types",
- "wasmer-runtime",
- "wasmer-runtime-core",
- "wasmer-wasi",
 ]

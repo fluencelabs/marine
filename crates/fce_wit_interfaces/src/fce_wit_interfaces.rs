@@ -23,39 +23,35 @@ use std::collections::HashMap;
 
 pub type CoreFunctionType = u32;
 pub type AdapterFunctionType = u32;
-pub type ExportName = String;
-pub type ImportName = String;
-pub type ImportNamespace = String;
+pub type ExportName<'a> = &'a str;
+pub type ImportName<'a> = &'a str;
+pub type ImportNamespace<'a> = &'a str;
+pub type WITAstType = Type;
 
-pub struct FCEWITInterfaces {
+pub struct FCEWITInterfaces<'a> {
     /// All the types.
-    types: Vec<Type>,
+    types: Vec<WITAstType>,
 
     /// All the imported functions.
-    imports: HashMap<CoreFunctionType, (ImportName, ImportNamespace)>,
+    imports: HashMap<CoreFunctionType, (ImportName<'a>, ImportNamespace<'a>)>,
 
     /// All the adapters.
     adapters: HashMap<AdapterFunctionType, Vec<Instruction>>,
 
     /// All the exported functions.
-    exports: HashMap<CoreFunctionType, ExportName>,
+    exports: HashMap<CoreFunctionType, ExportName<'a>>,
 
     /// All the implementations.
     adapter_type_to_core: MultiMap<AdapterFunctionType, CoreFunctionType>,
     core_type_to_adapter: MultiMap<CoreFunctionType, AdapterFunctionType>,
 }
 
-impl FCEWITInterfaces {
-    pub fn new(interfaces: Interfaces<'_>) -> Self {
+impl<'a> FCEWITInterfaces<'a> {
+    pub fn new(interfaces: Interfaces<'a>) -> Self {
         let imports = interfaces
             .imports
             .into_iter()
-            .map(|import| {
-                (
-                    import.function_type,
-                    (import.namespace.to_owned(), import.name.to_owned()),
-                )
-            })
+            .map(|import| (import.function_type, (import.namespace, import.name)))
             .collect::<HashMap<_, _>>();
 
         let adapters = interfaces
@@ -67,7 +63,7 @@ impl FCEWITInterfaces {
         let exports = interfaces
             .exports
             .into_iter()
-            .map(|export| (export.function_type, export.name.to_owned()))
+            .map(|export| (export.function_type, export.name))
             .collect::<HashMap<_, _>>();
 
         let adapter_type_to_core = interfaces
@@ -102,8 +98,8 @@ impl FCEWITInterfaces {
         }
     }
 
-    pub fn type_by_idx(&self, idx: usize) -> Option<&Type> {
-        self.types.get(idx)
+    pub fn type_by_idx(&self, idx: u32) -> Option<&Type> {
+        self.types.get(idx as usize)
     }
 
     pub fn types(&self) -> impl Iterator<Item = &Type> {
@@ -113,13 +109,13 @@ impl FCEWITInterfaces {
     pub fn import_by_type(
         &self,
         import_type: CoreFunctionType,
-    ) -> Option<&(ImportName, ImportNamespace)> {
+    ) -> Option<&(ImportName<'a>, ImportNamespace<'a>)> {
         self.imports.get(&import_type)
     }
 
     pub fn imports(
         &self,
-    ) -> impl Iterator<Item = (&CoreFunctionType, &(ImportName, ImportNamespace))> {
+    ) -> impl Iterator<Item = (&CoreFunctionType, &(ImportName<'a>, ImportNamespace<'a>))> {
         self.imports.iter()
     }
 
@@ -127,20 +123,20 @@ impl FCEWITInterfaces {
         self.adapters.get(&adapter_type)
     }
 
-    pub fn export_by_type(&self, export_type: u32) -> Option<&ExportName> {
+    pub fn export_by_type(&self, export_type: u32) -> Option<&ExportName<'a>> {
         self.exports.get(&export_type)
     }
 
-    pub fn adapter_func_implementations(
+    pub fn exports(
+        &self,
+    ) -> impl Iterator<Item = (&CoreFunctionType, &ExportName<'a>)> {
+        self.exports.iter()
+    }
+
+    pub fn implementations(
         &self,
     ) -> impl Iterator<Item = (&AdapterFunctionType, &CoreFunctionType)> {
         self.adapter_type_to_core.iter()
-    }
-
-    pub fn core_func_implementations(
-        &self,
-    ) -> impl Iterator<Item = (&CoreFunctionType, &AdapterFunctionType)> {
-        self.core_type_to_adapter.iter()
     }
 
     pub fn adapter_types_by_core_type(
