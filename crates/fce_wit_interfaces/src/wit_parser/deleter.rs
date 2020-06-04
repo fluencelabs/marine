@@ -14,34 +14,37 @@
  * limitations under the License.
  */
 
-use super::custom::WITCustom;
 use super::errors::WITParserError;
+use super::custom::WIT_SECTION_NAME;
 
 use walrus::ModuleConfig;
-use wasmer_wit::{
-    decoders::wat::{parse, Buffer},
-    encoders::binary::ToBytes,
-};
 
 use std::path::PathBuf;
 
-pub fn embed_text_wit(
+pub fn delete_wit_section(
     in_wasm_path: PathBuf,
     out_wasm_path: PathBuf,
-    wit: &str,
 ) -> Result<(), WITParserError> {
     let mut module = ModuleConfig::new()
         .parse_file(&in_wasm_path)
         .map_err(WITParserError::CorruptedWasmFile)?;
 
-    let buffer = Buffer::new(wit)?;
-    let ast = parse(&buffer)?;
+    let wit_section_ids = module
+        .customs
+        .iter()
+        .filter_map(|(id, section)| {
+            if section.name() == WIT_SECTION_NAME {
+                Some(id)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
 
-    let mut bytes = vec![];
-    ast.to_bytes(&mut bytes)?;
+    for id in wit_section_ids {
+        module.customs.delete(id);
+    }
 
-    let custom = WITCustom(bytes);
-    module.customs.add(custom);
     module
         .emit_wasm_file(&out_wasm_path)
         .map_err(WITParserError::WasmEmitError)?;

@@ -18,8 +18,8 @@ use super::wit_prelude::*;
 use super::fce_module::FCEModule;
 
 use fce_wit_interfaces::FCEWITInterfaces;
-use wasmer_wit::interpreter::wasm;
 use fce_wit_interfaces::WITAstType;
+use wasmer_wit::interpreter::wasm;
 use wasmer_wit::interpreter::wasm::structures::{LocalImportIndex, TypedIndex};
 use wasmer_core::Instance as WasmerInstance;
 

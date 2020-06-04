@@ -13,53 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
 
-use fce_wit_interfaces::EmbedderConfig;
+mod args;
+
+use args::*;
+
 use fce_wit_interfaces::embed_text_wit;
 use fce_wit_interfaces::extract_text_wit;
+use fce_wit_interfaces::delete_wit_section;
 
-use clap::{App, AppSettings, Arg, SubCommand};
-use failure::err_msg;
+use clap::{App, AppSettings};
 use std::path::PathBuf;
-
-const VERSION: &str = env!("CARGO_PKG_VERSION");
-const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
-const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
-
-const IN_WASM_PATH: &str = "in-wasm-path";
-const WIT_PATH: &str = "wit-path";
-const OUT_WASM_PATH: &str = "out-wasm-path";
-
-fn embed_wit<'a, 'b>() -> App<'a, 'b> {
-    SubCommand::with_name("embed")
-        .about("embed WIT to provided Wasm file")
-        .args(&[
-            Arg::with_name(IN_WASM_PATH)
-                .required(true)
-                .takes_value(true)
-                .short("i")
-                .help("path to the wasm file"),
-            Arg::with_name(WIT_PATH)
-                .required(true)
-                .takes_value(true)
-                .short("w")
-                .help("path to file with WIT"),
-            Arg::with_name(OUT_WASM_PATH)
-                .takes_value(true)
-                .short("o")
-                .help("path to result file with embedded WIT"),
-        ])
-}
-
-fn show_wit<'a, 'b>() -> App<'a, 'b> {
-    SubCommand::with_name("show")
-        .about("show WIT in provided Wasm file")
-        .args(&[Arg::with_name(IN_WASM_PATH)
-            .required(true)
-            .takes_value(true)
-            .short("i")
-            .help("path to the wasm file")])
-}
 
 pub fn main() -> Result<(), exitfailure::ExitFailure> {
     let app = App::new("CLI tool for embedding WIT to provided Wasm file")
@@ -68,7 +42,8 @@ pub fn main() -> Result<(), exitfailure::ExitFailure> {
         .about(DESCRIPTION)
         .setting(AppSettings::ArgRequiredElseHelp)
         .subcommand(embed_wit())
-        .subcommand(show_wit());
+        .subcommand(show_wit())
+        .subcommand(delete_wit());
 
     match app.get_matches().subcommand() {
         ("embed", Some(arg)) => {
@@ -81,20 +56,11 @@ pub fn main() -> Result<(), exitfailure::ExitFailure> {
 
             let wit = String::from_utf8(std::fs::read(wit_path)?).unwrap();
 
-            let options = EmbedderConfig {
-                in_wasm_path: PathBuf::from(in_wasm_path),
-                wit,
-                out_wasm_path: PathBuf::from(out_wasm_path),
-            };
-
-            match embed_text_wit(&options) {
-                Ok(_) => {
-                    println!("WIT successfully embedded");
-                }
-                Err(e) => {
-                    println!("{}", e);
-                }
-            };
+            embed_text_wit(
+                PathBuf::from(in_wasm_path),
+                PathBuf::from(out_wasm_path),
+                &wit,
+            )?;
 
             Ok(())
         }
@@ -107,6 +73,17 @@ pub fn main() -> Result<(), exitfailure::ExitFailure> {
 
             Ok(())
         }
-        c => Err(err_msg(format!("Unexpected command: {}", c.0)).into()),
+        ("delete", Some(arg)) => {
+            let in_wasm_path = arg.value_of(IN_WASM_PATH).unwrap();
+            let out_wasm_path = match arg.value_of(OUT_WASM_PATH) {
+                Some(path) => path,
+                None => in_wasm_path,
+            };
+
+            delete_wit_section(PathBuf::from(in_wasm_path), PathBuf::from(out_wasm_path))?;
+
+            Ok(())
+        }
+        c => Err(failure::err_msg(format!("Unexpected command: {}", c.0)).into()),
     }
 }
