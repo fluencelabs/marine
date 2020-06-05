@@ -35,8 +35,7 @@ pub trait WasmProcess {
         arguments: &[IValue],
     ) -> Result<Vec<IValue>, FCEError>;
 
-    /// Registers new module in the FCE Service.
-    /// TODO:
+    /// Loads new module in the FCE Service.
     fn load_module<S>(
         &mut self,
         module_name: S,
@@ -46,7 +45,7 @@ pub trait WasmProcess {
     where
         S: Into<String>;
 
-    /// Unregisters previously registered module.
+    /// Unloads previously registered module.
     fn unload_module(&mut self, module_name: &str) -> Result<(), FCEError>;
 
     /// Returns signatures of all exported functions by this module.

@@ -17,7 +17,6 @@
 use super::custom::WIT_SECTION_NAME;
 use super::errors::WITParserError;
 
-use fce_wit_interfaces::FCEWITInterfaces;
 use walrus::{IdsToIndices, ModuleConfig};
 use wasmer_wit::ast::Interfaces;
 use wasmer_core::Module as WasmerModule;
@@ -27,16 +26,12 @@ use std::path::PathBuf;
 /// Extracts WIT section of provided Wasm binary and converts it to a string.
 pub fn extract_text_wit(wasm_file_path: PathBuf) -> Result<String, WITParserError> {
     let wit_section_bytes = extract_wit_section_bytes(wasm_file_path)?;
-    extract_wit_with_fn(
-        &wit_section_bytes,
-        |wit: Interfaces<'_>| -> Result<String, WITParserError> { Ok((&wit).to_string()) },
-    )
+    let wit = extract_wit_with_fn(&wit_section_bytes)?;
+    Ok((&wit).to_string())
 }
 
 /// Extracts WIT section of provided Wasm binary and converts it to a FCEWITInterfaces.
-pub fn extract_fce_wit(
-    wasmer_module: &WasmerModule,
-) -> Result<FCEWITInterfaces<'_>, WITParserError> {
+pub fn extract_wit(wasmer_module: &WasmerModule) -> Result<Interfaces<'_>, WITParserError> {
     let wit_sections = wasmer_module
         .custom_sections(WIT_SECTION_NAME)
         .ok_or_else(|| WITParserError::NoWITSection)?;
@@ -45,32 +40,15 @@ pub fn extract_fce_wit(
         return Err(WITParserError::MultipleWITSections);
     }
 
-    extract_wit_with_fn(
-        &wit_sections[0],
-        |wit: Interfaces<'_>| -> Result<FCEWITInterfaces<'_>, WITParserError> {
-            Ok(FCEWITInterfaces::new(wit))
-        },
-    )
+    extract_wit_with_fn(&wit_sections[0])
 }
 
-fn extract_wit_with_fn<'a, F, FResultType: 'a>(
-    wit_section_bytes: &'a [u8],
-    func: F,
-) -> Result<FResultType, WITParserError>
-where
-    F: FnOnce(Interfaces<'a>) -> Result<FResultType, WITParserError>,
-{
-    let raw_wit = match wasmer_wit::decoders::binary::parse::<()>(&wit_section_bytes) {
-        Ok((remainder, wit)) if remainder.is_empty() => wit,
-        Ok(_) => {
-            return Err(WITParserError::WITRemainderNotEmpty);
-        }
-        Err(_) => {
-            return Err(WITParserError::CorruptedWITSection);
-        }
-    };
-
-    func(raw_wit)
+fn extract_wit_with_fn(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>, WITParserError> {
+    match wasmer_wit::decoders::binary::parse::<()>(&wit_section_bytes) {
+        Ok((remainder, wit)) if remainder.is_empty() => Ok(wit),
+        Ok(_) => Err(WITParserError::WITRemainderNotEmpty),
+        Err(_) => Err(WITParserError::CorruptedWITSection),
+    }
 }
 
 fn extract_wit_section_bytes(wasm_file_path: PathBuf) -> Result<Vec<u8>, WITParserError> {

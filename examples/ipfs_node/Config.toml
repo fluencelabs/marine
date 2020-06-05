@@ -3,4 +3,4 @@
     ipfs = "/usr/bin/ipfs"
 
     [wasi]
-    preopened_dir = ["/tmp"]
+    preopened_dirs = ["/tmp"]

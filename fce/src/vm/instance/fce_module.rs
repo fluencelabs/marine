@@ -22,7 +22,7 @@ use wasmer_wit::interpreter::Interpreter;
 use wasmer_runtime::{compile, ImportObject};
 use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
-use wit_parser::extract_fce_wit;
+use wit_parser::extract_wit;
 
 use std::collections::HashMap;
 use std::convert::TryInto;
@@ -54,11 +54,12 @@ impl FCEModule {
         modules: &HashMap<String, Arc<FCEModule>>,
     ) -> Result<Self, FCEError> {
         let wasmer_module = compile(&wasm_bytes)?;
-        let wit = extract_fce_wit(&wasmer_module)?;
-        let wit_exports = Self::instantiate_wit_exports(&wit)?;
+        let wit = extract_wit(&wasmer_module)?;
+        let fce_wit = FCEWITInterfaces::new(wit);
+        let wit_exports = Self::instantiate_wit_exports(&fce_wit)?;
 
         let mut wit_instance = Arc::new_uninit();
-        let mut import_object = Self::adjust_wit_imports(&wit, wit_instance.clone())?;
+        let mut import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
         import_object.extend(imports);
 
         let wasmer_instance = wasmer_module.instantiate(&import_object)?;
@@ -67,7 +68,7 @@ impl FCEModule {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
-                MaybeUninit::new(WITInstance::new(&wasmer_instance, &wit, modules)?);
+                MaybeUninit::new(WITInstance::new(&wasmer_instance, &fce_wit, modules)?);
             std::mem::transmute::<_, Arc<WITInstance>>(wit_instance)
         };
 
