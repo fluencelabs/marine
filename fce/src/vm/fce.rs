@@ -16,6 +16,8 @@
 
 use super::instance::FCEModule;
 use super::*;
+use crate::WasmProcess;
+use crate::NodeFunction;
 
 use std::sync::Arc;
 use std::collections::hash_map::Entry;
@@ -40,7 +42,7 @@ impl Default for FCE {
     }
 }
 
-impl FCEService for FCE {
+impl WasmProcess for FCE {
     fn call(
         &mut self,
         module_name: &str,
@@ -56,7 +58,7 @@ impl FCEService for FCE {
         }
     }
 
-    fn register_module<S>(
+    fn load_module<S>(
         &mut self,
         module_name: S,
         wasm_bytes: &[u8],
@@ -79,7 +81,7 @@ impl FCEService for FCE {
         }
     }
 
-    fn unregister_module(&mut self, module_name: &str) -> Result<(), FCEError> {
+    fn unload_module(&mut self, module_name: &str) -> Result<(), FCEError> {
         match self.modules.entry(module_name.to_string()) {
             Entry::Vacant(_) => Err(FCEError::NoSuchModule),
 
@@ -87,6 +89,24 @@ impl FCEService for FCE {
                 module.remove_entry();
                 Ok(())
             }
+        }
+    }
+
+    fn get_interface(&self, module_name: &str) -> Result<Vec<NodeFunction<'_>>, FCEError> {
+        match self.modules.get(module_name) {
+            Some(module) => {
+                let signatures = module
+                    .as_ref()
+                    .get_exports_signatures()
+                    .map(|(name, inputs, outputs)| NodeFunction {
+                        name,
+                        inputs,
+                        outputs,
+                    })
+                    .collect::<Vec<_>>();
+                Ok(signatures)
+            }
+            None => Err(FCEError::NoSuchModule),
         }
     }
 }

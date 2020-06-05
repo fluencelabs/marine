@@ -145,6 +145,6 @@ impl From<FCEWITInterfacesError> for FCEError {
 
 impl From<()> for FCEError {
     fn from(_err: ()) -> Self {
-        FCEError::IncorrectWIT(format!("failed to parse instructions for adapter type"))
+        FCEError::IncorrectWIT("failed to parse instructions for adapter type".to_string())
     }
 }

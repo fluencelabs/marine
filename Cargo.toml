@@ -1,9 +1,10 @@
 [workspace]
 members = [
     "crates/fce_wit_interfaces",
-    "examples/export_test",
     "examples/ipfs_node",
-    "examples/ipfs_rpc",
+    "examples/ipfs_node/wasm/ipfs_node",
+    "examples/ipfs_node/wasm/ipfs_rpc",
+    "examples/simple_greeting",
     "fce",
     "tools/wit_embedder",
 ]

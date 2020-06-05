@@ -14,56 +14,62 @@
  * limitations under the License.
  */
 
-#![allow(clippy::missing_safety_doc)]
+mod node;
+mod errors;
 
-mod mem;
-mod result;
+use fce::IValue;
+use fce::FCE;
+use fce::FCEError;
+use fce::FCEModuleConfig;
+use fce::WasmProcess;
 
-use crate::result::{RESULT_PTR, RESULT_SIZE};
+const IPFS_NODE: &str =
+    "/Users/mike/dev/work/fluence/wasm/fce/target/wasm32-unknown-unknown/release/ipfs_node_wit.wasm";
 
-#[no_mangle]
-pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
-    let file_content =
-        String::from_raw_parts(file_content_ptr, file_content_size, file_content_size);
+const IPFS_RPC: &str =
+    "/Users/mike/dev/work/fluence/wasm/fce/target/wasm32-unknown-unknown/release/ipfs_rpc_wit.wasm";
 
-    let msg = format!("from Wasm node: file content is {}\n", file_content);
-    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+fn main() {
+    let ipfs_node_bytes = std::fs::read(IPFS_NODE).unwrap();
+    let ipfs_rpc_bytes = std::fs::read(IPFS_RPC).unwrap();
 
-    let cmd = format!("put {}", file_content);
-    ipfs(cmd.as_ptr() as _, cmd.len() as _);
+    let mut fce = FCE::new();
+    let config = FCEModuleConfig::default();
 
-    let result = "Hello from IPFS node, take your hash".to_string();
+    println!("loading ipfs node module");
+    fce.load_module("node", &ipfs_node_bytes, config.clone())
+        .expect("module successfully created");
 
-    *RESULT_PTR.get_mut() = result.as_ptr() as _;
-    *RESULT_SIZE.get_mut() = result.len();
-    std::mem::forget(result);
+    println!("loading ipfs rpc module");
+    fce.load_module("rpc", &ipfs_rpc_bytes, config.clone())
+        .expect("module successfully created");
+
+    let result = fce
+        .call("node_rpc", "invoke", &[IValue::String("aaaa".to_string())])
+        .unwrap();
+
+    println!("execution result {:?}", result);
 }
 
-#[no_mangle]
-pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
-    let hash = String::from_raw_parts(hash_ptr, hash_size, hash_size);
+/*
+fn logger_log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
+    use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
 
-    let msg = format!("from Wasm node: file content is {}\n", hash);
-    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
-
-    let cmd = format!("get {}", hash);
-    ipfs(cmd.as_ptr() as _, cmd.len() as _);
-
-    let result = "Hello from IPFS node, take your file".to_string();
-
-    *RESULT_PTR.get_mut() = result.as_ptr() as _;
-    *RESULT_SIZE.get_mut() = result.len();
-    std::mem::forget(result);
+    let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
+    match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
+        Some(msg) => print!("{}", msg),
+        None => print!("fce logger: incorrect UTF8 string's been supplied to logger"),
+    }
 }
 
-#[link(wasm_import_module = "logger")]
-extern "C" {
-    /// Writes a byte string of size bytes that starts from ptr to a logger.
-    fn log_utf8_string(ptr: i32, size: i32);
-}
 
-#[link(wasm_import_module = "host")]
-extern "C" {
-    /// Put a file to ipfs, returns ipfs hash of the file.
-    fn ipfs(ptr: i32, size: i32);
+fn ipfs_call(ctx: &mut Ctx, ptr: i32, size: i32) {
+    use wasmer_runtime_core::memory::ptr::{Array, WasmPtr};
+
+    let wasm_ptr = WasmPtr::<u8, Array>::new(ptr as _);
+    match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
+        Some(msg) => println!("host ipfs_call: {}", msg),
+        None => println!("fce logger: incorrect UTF8 string's been supplied to logger"),
+    }
 }
+*/

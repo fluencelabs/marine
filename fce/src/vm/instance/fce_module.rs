@@ -110,6 +110,14 @@ impl FCEModule {
         }
     }
 
+    pub fn get_exports_signatures(
+        &self,
+    ) -> impl Iterator<Item = (&String, &Vec<IType>, &Vec<IType>)> {
+        self.exports_funcs
+            .iter()
+            .map(|(func_name, func)| (func_name, &func.inputs, &func.outputs))
+    }
+
     fn instantiate_wit_exports(
         wit: &FCEWITInterfaces<'_>,
     ) -> Result<HashMap<String, WITModuleFunc>, FCEError> {

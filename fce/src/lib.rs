@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![warn(rust_2018_idioms)]
+#![feature(get_mut_unchecked)]
+#![feature(new_uninit)]
 
-mod fce;
-mod instance;
-mod config;
-mod prepare;
-mod errors;
+mod vm;
+mod misc;
+mod wasm_process;
 
-pub use fce::FCE;
-pub use config::FCEModuleConfig;
-pub use errors::FCEError;
-pub use instance::{IType, IValue};
+pub use vm::FCE;
+pub use vm::FCEError;
+pub use vm::FCEModuleConfig;
+pub use vm::IValue;
+pub use vm::IType;
+pub use wasm_process::WasmProcess;
+pub use wasm_process::NodeFunction;

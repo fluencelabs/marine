@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-use super::config::FCEModuleConfig;
-use super::errors::FCEError;
+use super::FCEModuleConfig;
+use super::FCEError;
 use super::IValue;
+use super::IType;
 
-/// Describes a service behaviour in the Fluence network.
-pub trait FCEService {
+pub struct NodeFunction<'a> {
+    pub name: &'a str,
+    pub inputs: &'a Vec<IType>,
+    pub outputs: &'a Vec<IType>,
+}
+
+/// Describes a run computation node behaviour in the Fluence network.
+pub trait WasmProcess {
     /// Invokes a module supplying byte array and expecting byte array with some outcome back.
     fn call(
         &mut self,
@@ -29,7 +36,8 @@ pub trait FCEService {
     ) -> Result<Vec<IValue>, FCEError>;
 
     /// Registers new module in the FCE Service.
-    fn register_module<S>(
+    /// TODO:
+    fn load_module<S>(
         &mut self,
         module_name: S,
         wasm_bytes: &[u8],
@@ -39,5 +47,8 @@ pub trait FCEService {
         S: Into<String>;
 
     /// Unregisters previously registered module.
-    fn unregister_module(&mut self, module_name: &str) -> Result<(), FCEError>;
+    fn unload_module(&mut self, module_name: &str) -> Result<(), FCEError>;
+
+    /// Returns signatures of all exported functions by this module.
+    fn get_interface(&self, module_name: &str) -> Result<Vec<NodeFunction<'_>>, FCEError>;
 }
