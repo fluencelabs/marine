@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::instance::FCEModule;
+use super::module::FCEModule;
 use super::*;
 use crate::WasmProcess;
 use crate::NodeFunction;

@@ -15,7 +15,7 @@
  */
 
 mod fce;
-mod instance;
+mod module;
 mod config;
 mod prepare;
 mod errors;
@@ -23,4 +23,4 @@ mod errors;
 pub use fce::FCE;
 pub use config::FCEModuleConfig;
 pub use errors::FCEError;
-pub use instance::{IType, IValue};
+pub use module::{IType, IValue};
