@@ -17,12 +17,12 @@
 use super::wit_prelude::*;
 use super::{IType, IValue, WValue};
 
-use fce_wit_interfaces::extract_fce_wit;
 use fce_wit_interfaces::FCEWITInterfaces;
 use wasmer_wit::interpreter::Interpreter;
 use wasmer_runtime::{compile, ImportObject};
 use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
+use wit_parser::extract_fce_wit;
 
 use std::collections::HashMap;
 use std::convert::TryInto;

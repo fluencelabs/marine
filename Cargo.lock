@@ -373,17 +373,15 @@ dependencies = [
  "wasmer-runtime",
  "wasmer-runtime-core",
  "wasmer-wasi",
+ "wit_parser",
 ]
 
 [[package]]
 name = "fce_wit_interfaces"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "multimap",
- "walrus",
  "wasmer-interface-types",
- "wasmer-runtime-core",
 ]
 
 [[package]]
@@ -516,6 +514,7 @@ name = "ipfs_node"
 version = "0.1.0"
 dependencies = [
  "fce",
+ "toml",
 ]
 
 [[package]]
@@ -937,6 +936,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "toml"
+version = "0.5.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ffc92d160b1eef40665be3a05630d003936a3bc7da7421277846c2613e92c71a"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "typenum"
 version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1229,5 +1237,16 @@ dependencies = [
  "clap",
  "exitfailure",
  "failure",
+ "wit_parser",
+]
+
+[[package]]
+name = "wit_parser"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
  "fce_wit_interfaces",
+ "walrus",
+ "wasmer-interface-types",
+ "wasmer-runtime-core",
 ]

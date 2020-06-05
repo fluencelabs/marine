@@ -13,9 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
 
+mod custom;
+mod deleter;
+mod embedder;
 mod errors;
-mod fce_wit_interfaces;
+mod extractor;
 
-pub use fce_wit_interfaces::*;
-pub use errors::*;
+pub use errors::WITParserError;
+
+pub use embedder::embed_text_wit;
+pub use deleter::delete_wit_section;
+pub use extractor::extract_fce_wit;
+pub use extractor::extract_text_wit;

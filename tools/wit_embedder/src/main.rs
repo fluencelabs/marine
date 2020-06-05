@@ -28,9 +28,9 @@ mod args;
 
 use args::*;
 
-use fce_wit_interfaces::embed_text_wit;
-use fce_wit_interfaces::extract_text_wit;
-use fce_wit_interfaces::delete_wit_section;
+use wit_parser::embed_text_wit;
+use wit_parser::extract_text_wit;
+use wit_parser::delete_wit_section;
 
 use clap::{App, AppSettings};
 use std::path::PathBuf;

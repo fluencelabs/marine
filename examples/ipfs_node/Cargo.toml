@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 fce = { path = "../../fce" }
+toml = "0.5.6"

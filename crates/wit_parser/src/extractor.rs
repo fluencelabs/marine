@@ -16,8 +16,8 @@
 
 use super::custom::WIT_SECTION_NAME;
 use super::errors::WITParserError;
-use crate::interfaces::FCEWITInterfaces;
 
+use fce_wit_interfaces::FCEWITInterfaces;
 use walrus::{IdsToIndices, ModuleConfig};
 use wasmer_wit::ast::Interfaces;
 use wasmer_core::Module as WasmerModule;

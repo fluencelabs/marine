@@ -5,7 +5,7 @@ authors = ["Fluence Labs"]
 edition = "2018"
 
 [dependencies]
-fce_wit_interfaces = { path = "../../crates/fce_wit_interfaces" }
+wit_parser = { path = "../../crates/wit_parser" }
 clap = "2.33.1"
 exitfailure = "0.5.1"
 failure = "0.1.5"

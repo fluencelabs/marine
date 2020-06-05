@@ -1,0 +1,6 @@
+[ipfs_node]
+    [imports]
+    ipfs = "/usr/bin/ipfs"
+
+    [wasi]
+    preopened_dir = ["/tmp"]

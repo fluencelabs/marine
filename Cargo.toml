@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "crates/fce_wit_interfaces",
+    "crates/wit_parser",
     "examples/ipfs_node",
     "examples/ipfs_node/wasm/ipfs_node",
     "examples/ipfs_node/wasm/ipfs_rpc",

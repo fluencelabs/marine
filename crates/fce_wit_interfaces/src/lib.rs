@@ -24,8 +24,8 @@
     unreachable_patterns
 )]
 
-mod interfaces;
-mod wit_parser;
+mod errors;
+mod fce_wit_interfaces;
 
-pub use crate::wit_parser::*;
-pub use crate::interfaces::*;
+pub use errors::*;
+pub use fce_wit_interfaces::*;
