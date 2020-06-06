@@ -35,13 +35,13 @@ pub struct FCEWITInterfaces<'a> {
     types: Vec<WITAstType>,
 
     /// All the imported functions.
-    imports: HashMap<CoreFunctionType, (ImportName<'a>, ImportNamespace<'a>)>,
+    imports: MultiMap<CoreFunctionType, (ImportName<'a>, ImportNamespace<'a>)>,
 
     /// All the adapters.
     adapters: HashMap<AdapterFunctionType, Vec<Instruction>>,
 
     /// All the exported functions.
-    exports: HashMap<CoreFunctionType, ExportName<'a>>,
+    exports: MultiMap<CoreFunctionType, ExportName<'a>>,
 
     /// All the implementations.
     adapter_type_to_core: MultiMap<AdapterFunctionType, CoreFunctionType>,
@@ -54,7 +54,7 @@ impl<'a> FCEWITInterfaces<'a> {
             .imports
             .into_iter()
             .map(|import| (import.function_type, (import.namespace, import.name)))
-            .collect::<HashMap<_, _>>();
+            .collect::<MultiMap<_, _>>();
 
         let adapters = interfaces
             .adapters
@@ -66,7 +66,7 @@ impl<'a> FCEWITInterfaces<'a> {
             .exports
             .into_iter()
             .map(|export| (export.function_type, export.name))
-            .collect::<HashMap<_, _>>();
+            .collect::<MultiMap<_, _>>();
 
         let adapter_type_to_core = interfaces
             .implementations
@@ -120,19 +120,19 @@ impl<'a> FCEWITInterfaces<'a> {
         self.imports.iter()
     }
 
-    pub fn import_by_type(
+    pub fn imports_by_type(
         &self,
         import_type: CoreFunctionType,
-    ) -> Option<&(ImportName<'a>, ImportNamespace<'a>)> {
-        self.imports.get(&import_type)
+    ) -> Option<&Vec<(ImportName<'a>, ImportNamespace<'a>)>> {
+        self.imports.get_vec(&import_type)
     }
 
-    pub fn import_by_type_r(
+    pub fn imports_by_type_r(
         &self,
         import_type: CoreFunctionType,
-    ) -> Result<&(ImportName<'a>, ImportNamespace<'a>), FCEWITInterfacesError> {
+    ) -> Result<&Vec<(ImportName<'a>, ImportNamespace<'a>)>, FCEWITInterfacesError> {
         self.imports
-            .get(&import_type)
+            .get_vec(&import_type)
             .ok_or_else(|| FCEWITInterfacesError::NoSuchImport(import_type))
     }
 
@@ -153,12 +153,21 @@ impl<'a> FCEWITInterfaces<'a> {
             .ok_or_else(|| FCEWITInterfacesError::NoSuchAdapter(adapter_type))
     }
 
-    pub fn export_by_type(&self, export_type: u32) -> Option<&ExportName<'a>> {
-        self.exports.get(&export_type)
-    }
-
     pub fn exports(&self) -> impl Iterator<Item = (&CoreFunctionType, &ExportName<'a>)> {
         self.exports.iter()
+    }
+
+    pub fn exports_by_type(&self, export_type: u32) -> Option<&Vec<ExportName<'a>>> {
+        self.exports.get_vec(&export_type)
+    }
+
+    pub fn exports_by_type_r(
+        &self,
+        export_type: CoreFunctionType,
+    ) -> Result<&Vec<ExportName<'a>>, FCEWITInterfacesError> {
+        self.exports
+            .get_vec(&export_type)
+            .ok_or_else(|| FCEWITInterfacesError::NoSuchImport(export_type))
     }
 
     pub fn implementations(

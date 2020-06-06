@@ -104,10 +104,16 @@ impl FCEModule {
     ) -> Result<(&Vec<IType>, &Vec<IType>), FCEError> {
         match self.exports_funcs.get(function_name) {
             Some(func) => Ok((&func.inputs, &func.outputs)),
-            None => Err(FCEError::NoSuchFunction(format!(
-                "{} has't been found during its signature looking up",
-                function_name
-            ))),
+            None => {
+                for func in self.exports_funcs.iter() {
+                    println!("{}", func.0);
+                }
+
+                Err(FCEError::NoSuchFunction(format!(
+                    "{} has't been found during its signature looking up",
+                    function_name
+                )))
+            }
         }
     }
 
@@ -126,17 +132,23 @@ impl FCEModule {
 
         wit.implementations()
             .filter_map(|(adapter_function_type, core_function_type)| {
-                match wit.export_by_type(*core_function_type) {
+                match wit.exports_by_type(*core_function_type) {
                     Some(export_function_name) => {
-                        Some((adapter_function_type, *export_function_name))
+                        Some((adapter_function_type, export_function_name))
                     }
                     // pass functions that aren't export
                     None => None,
                 }
             })
+            .map(|(adapter_function_type, export_function_names)| {
+                export_function_names
+                    .iter()
+                    .map(move |export_function_name| (*adapter_function_type, export_function_name))
+            })
+            .flatten()
             .map(|(adapter_function_type, export_function_name)| {
-                let adapter_instructions = wit.adapter_by_type_r(*adapter_function_type)?;
-                let wit_type = wit.type_by_idx_r(*adapter_function_type)?;
+                let adapter_instructions = wit.adapter_by_type_r(adapter_function_type)?;
+                let wit_type = wit.type_by_idx_r(adapter_function_type)?;
 
                 match wit_type {
                     WITAstType::Function {
@@ -211,15 +223,21 @@ impl FCEModule {
         let namespaces = wit
             .implementations()
             .filter_map(|(adapter_function_type, core_function_type)| {
-                match wit.import_by_type(*core_function_type) {
-                    Some(import) => Some((adapter_function_type, *import)),
-                    // skip functions that aren't export
+                match wit.imports_by_type(*core_function_type) {
+                    Some(import) => Some((adapter_function_type, import)),
+                    // skip functions that aren't import
                     None => None,
                 }
             })
+            .map(|(adapter_function_type, import_function_names)| {
+                import_function_names
+                    .iter()
+                    .map(move |import_function_name| (*adapter_function_type, import_function_name))
+            })
+            .flatten()
             .map(|(adapter_function_type, (import_namespace, import_name))| {
-                let adapter_instructions = wit.adapter_by_type_r(*adapter_function_type)?;
-                let wit_type = wit.type_by_idx_r(*adapter_function_type)?;
+                let adapter_instructions = wit.adapter_by_type_r(adapter_function_type)?;
+                let wit_type = wit.type_by_idx_r(adapter_function_type)?;
 
                 match wit_type {
                     WITAstType::Function { inputs, .. } => {
@@ -228,7 +246,7 @@ impl FCEModule {
                         let wit_import = dyn_func_from_raw_import(inputs.clone(), inner_import);
 
                         let mut namespace = Namespace::new();
-                        namespace.insert(import_name, wit_import);
+                        namespace.insert(*import_name, wit_import);
 
                         Ok((import_namespace.to_string(), namespace))
                     }
@@ -238,12 +256,23 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<HashMap<String, Namespace>, FCEError>>()?;
+            .collect::<Result<multimap::MultiMap<String, Namespace>, FCEError>>()?;
 
         let mut import_object = ImportObject::new();
 
-        for (namespace_name, namespace) in namespaces {
-            import_object.register(namespace_name, namespace);
+        // TODO: refactor it
+        for (namespace_name, namespaces) in namespaces.iter_all() {
+            let mut result_namespace = Namespace::new();
+            for namespace in namespaces {
+                use wasmer_core::import::LikeNamespace;
+
+                result_namespace.insert(
+                    namespace.get_exports()[0].0.clone(),
+                    namespace.get_exports()[0].1.clone(),
+                );
+            }
+
+            import_object.register(namespace_name, result_namespace);
         }
 
         Ok(import_object)

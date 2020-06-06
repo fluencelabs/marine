@@ -16,13 +16,16 @@
 
 use fce::FCEError;
 
-use std::io::{Error as IOError, IoSliceMut};
+use std::io::Error as IOError;
 use std::error::Error;
 
 #[derive(Debug)]
 pub enum NodeError {
+    /// An error related to config parsing.
+    ConfigParseError(String),
+
     /// Various errors related to file io.
-    IOError(IOError),
+    IOError(String),
 
     /// WIT doesn't contain such type.
     WasmProcessError(FCEError),
@@ -33,7 +36,8 @@ impl Error for NodeError {}
 impl std::fmt::Display for NodeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            NodeError::IOError(err) => write!(f, "{}", err),
+            NodeError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
+            NodeError::IOError(err_msg) => write!(f, "{}", err_msg),
             NodeError::WasmProcessError(err) => write!(f, "{}", err),
         }
     }
@@ -41,7 +45,7 @@ impl std::fmt::Display for NodeError {
 
 impl From<IOError> for NodeError {
     fn from(err: IOError) -> Self {
-        NodeError::IOError(err)
+        NodeError::IOError(format!("{}", err))
     }
 }
 

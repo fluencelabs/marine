@@ -33,11 +33,11 @@
 (@interface export "set_result_size" (func 4))         ;; 5
 (@interface export "set_result_ptr" (func 4))          ;; 6
 
-(@interface import "node" "get" (func (type 5)))
-(@interface import "node" "put" (func (type 5)))
+(@interface import "ipfs_node.wasm" "get" (func (type 5)))
+(@interface import "ipfs_node.wasm" "put" (func (type 5)))
 
-(@interface import "node" "get" (func (type 7)))       ;; 7
-(@interface import "node" "put" (func (type 8)))       ;; 8
+(@interface import "ipfs_node.wasm" "get" (func (type 7)))       ;; 7
+(@interface import "ipfs_node.wasm" "put" (func (type 8)))       ;; 8
 
 (@interface func (type 2)
     arg.get 0
@@ -58,7 +58,7 @@
     arg.get 0
     arg.get 1
     string.lift_memory
-    call-core 7             ;; call node.get that returns string
+    call-core 7             ;; call ipfs_node.get that returns string
     dup
     string.size
     call-core 0             ;; call allocate

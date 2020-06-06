@@ -91,7 +91,10 @@ impl WITInstance {
                             WITFunction::from_import(module.clone(), import_name.to_string())?;
                         Ok((start_index + idx as usize, func))
                     }
-                    None => Err(FCEError::NoSuchModule),
+                    None => {
+                        println!("no such module: {}", import_namespace);
+                        Err(FCEError::NoSuchModule)
+                    }
                 }
             })
             .collect::<Result<HashMap<_, _>, _>>()

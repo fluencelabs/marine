@@ -1,6 +1,17 @@
-[ipfs_node]
-    [imports]
+[[core_module]]
+    name = "ipfs_node.wasm"
+    mem_pages_count = 100
+    logger_enabled = true
+
+    [core_module.imports]
+    mysql = "/usr/bin/mysql"
     ipfs = "/usr/bin/ipfs"
 
-    [wasi]
-    preopened_dirs = ["/tmp"]
+    [core_module.wasi]
+    envs = ["asdsad=sdaasd"]
+    preopened_files = ["/tmp/file1"]
+    mapped_dirs = { tmp = "/tmp", tmp2 = "/tmp" }
+
+[rpc_module]
+    mem_pages_count = 100
+    logger_enabled = true

@@ -6,4 +6,11 @@ edition = "2018"
 
 [dependencies]
 fce = { path = "../../fce" }
+
+wasmer-core = { package = "wasmer-runtime-core", version = "0.17.0" }
+wasmer-runtime = "0.17.0"
+
 toml = "0.5.6"
+serde = { version = "1.0.111", features = ["derive"] }
+serde_json = "1.0.53"
+serde_derive = "1.0.111"

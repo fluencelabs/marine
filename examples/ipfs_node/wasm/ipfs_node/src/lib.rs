@@ -56,14 +56,11 @@ pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
     std::mem::forget(result);
 }
 
-#[link(wasm_import_module = "logger")]
+#[link(wasm_import_module = "host")]
 extern "C" {
     /// Writes a byte string of size bytes that starts from ptr to a logger.
     fn log_utf8_string(ptr: i32, size: i32);
-}
 
-#[link(wasm_import_module = "host")]
-extern "C" {
     /// Put a file to ipfs, returns ipfs hash of the file.
     fn ipfs(ptr: i32, size: i32);
 }

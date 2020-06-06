@@ -38,7 +38,7 @@
     call-core 0 ;; call allocate
     arg.get 0
     string.lower_memory
-    call-core 7         ;; call node.get
+    call-core 7         ;; call self.get
     call-core 3         ;; call get_result_ptr
     call-core 2         ;; call get_result_size
     string.lift_memory

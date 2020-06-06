@@ -19,6 +19,7 @@ use super::FCEError;
 use super::IValue;
 use super::IType;
 
+#[derive(Debug)]
 pub struct NodeFunction<'a> {
     pub name: &'a str,
     pub inputs: &'a Vec<IType>,

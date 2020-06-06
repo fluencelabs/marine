@@ -25,12 +25,8 @@ pub struct FCEModuleConfig {
     /// Each Wasm pages is 65536 bytes long.
     pub mem_pages_count: u32,
 
-    /// If true, registers the logger Wasm module with name 'logger'.
-    /// This functionality is just for debugging, and this module will be disabled in future.
-    pub logger_enabled: bool,
-
     /// Import object that will be used in module instantiation process.
-    pub import_object: ImportObject,
+    pub imports: ImportObject,
 
     /// Desired WASI version.
     pub wasi_version: WasiVersion,
@@ -51,8 +47,7 @@ impl Default for FCEModuleConfig {
         Self {
             // 65536*1600 ~ 100 Mb
             mem_pages_count: 1600,
-            logger_enabled: true,
-            import_object: ImportObject::new(),
+            imports: ImportObject::new(),
             wasi_version: WasiVersion::Latest,
             wasi_envs: vec![],
             wasi_preopened_files: vec![],
@@ -67,12 +62,6 @@ impl FCEModuleConfig {
     #[allow(dead_code)]
     pub fn with_mem_pages_count(mut self, mem_pages_count: u32) -> Self {
         self.mem_pages_count = mem_pages_count;
-        self
-    }
-
-    #[allow(dead_code)]
-    pub fn with_logger_enable(mut self, logger_enable: bool) -> Self {
-        self.logger_enabled = logger_enable;
         self
     }
 
