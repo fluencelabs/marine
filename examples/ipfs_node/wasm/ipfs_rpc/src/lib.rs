@@ -35,9 +35,11 @@ pub unsafe fn invoke(file_content_ptr: *mut u8, file_content_size: usize) {
         *RESULT_SIZE.get_mut(),
         *RESULT_SIZE.get_mut(),
     );
-    let msg = format!("from Wasm rpc: hash is {}\n", hash);
 
-    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+    let result_msg = format!("result from Wasm rpc: {}\n", hash);
+    *RESULT_PTR.get_mut() = result_msg.as_ptr() as _;
+    *RESULT_SIZE.get_mut() = result_msg.len();
+    std::mem::forget(result_msg);
 }
 
 #[link(wasm_import_module = "host")]

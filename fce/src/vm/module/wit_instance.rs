@@ -35,7 +35,7 @@ pub(super) struct WITInstance {
 
 impl Drop for WITInstance {
     fn drop(&mut self) {
-        // println!("WITInstance dropped");
+        println!("WITInstance dropped");
     }
 }
 
@@ -43,7 +43,7 @@ impl WITInstance {
     pub(super) fn new(
         wasmer_instance: &WasmerInstance,
         wit: &FCEWITInterfaces<'_>,
-        modules: &HashMap<String, Arc<FCEModule>>,
+        modules: &HashMap<String, FCEModule>,
     ) -> Result<Self, FCEError> {
         let mut exports = Self::extract_raw_exports(&wasmer_instance, wit)?;
         let imports = Self::extract_imports(modules, wit, exports.len())?;
@@ -80,7 +80,7 @@ impl WITInstance {
 
     /// Extracts only those imports that don't have implementations.
     fn extract_imports(
-        modules: &HashMap<String, Arc<FCEModule>>,
+        modules: &HashMap<String, FCEModule>,
         wit: &FCEWITInterfaces<'_>,
         start_index: usize,
     ) -> Result<HashMap<usize, WITFunction>, FCEError> {
@@ -92,7 +92,7 @@ impl WITInstance {
             .enumerate()
             .map(|(idx, import)| match modules.get(import.namespace) {
                 Some(module) => {
-                    let func = WITFunction::from_import(module.clone(), import.name.to_string())?;
+                    let func = WITFunction::from_import(module, import.name.to_string())?;
                     Ok((start_index + idx as usize, func))
                 }
                 None => Err(FCEError::NoSuchModule),

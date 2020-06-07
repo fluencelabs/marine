@@ -52,14 +52,15 @@
     arg.get 0
     string.lower_memory
     call-core 2             ;; call invoke
-    call-core 3             ;; call get_result_size
-    call-core 4             ;; call get_result_ptr
+    call-core 4             ;; call get_result_size
+    call-core 3             ;; call get_result_ptr
     string.lift_memory
-    call-core 3             ;; call get_result_size
-    call-core 4             ;; call get_result_ptr
+    call-core 4             ;; call get_result_size
+    call-core 3             ;; call get_result_ptr
     call-core 1             ;; call deallocate
 )
 
+;; adapter for import function ipfs.get
 (@interface func (type 9)
     arg.get 0
     arg.get 1
@@ -70,10 +71,11 @@
     call-core 0             ;; call allocate
     swap2
     string.lower_memory
-    call-core 6             ;; call set_result_size
-    call-core 5             ;; call set_result_ptr
+    call-core 5             ;; call set_result_size
+    call-core 6             ;; call set_result_ptr
 )
 
+;; adapter for import function ipfs.put
 (@interface func (type 10)
     arg.get 0
     arg.get 1
@@ -84,8 +86,8 @@
     call-core 0             ;; call allocate
     swap2
     string.lower_memory
-    call-core 6             ;; call set_result_size
-    call-core 5             ;; call set_result_ptr
+    call-core 5             ;; call set_result_size
+    call-core 6             ;; call set_result_ptr
 )
 
 ;; Implementations

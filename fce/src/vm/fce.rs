@@ -25,12 +25,12 @@ use std::collections::HashMap;
 
 pub struct FCE {
     // set of modules registered inside FCE
-    modules: HashMap<String, Arc<FCEModule>>,
+    modules: HashMap<String, FCEModule>,
 }
 
 impl Drop for FCE {
     fn drop(&mut self) {
-        // println!("FCE dropped");
+        println!("FCE dropped");
     }
 }
 
@@ -57,9 +57,7 @@ impl WasmProcess for FCE {
     ) -> Result<Vec<IValue>, FCEError> {
         match self.modules.get_mut(module_name) {
             // TODO: refactor errors
-            Some(mut module) => unsafe {
-                Ok(Arc::get_mut_unchecked(&mut module).call(func_name, argument)?)
-            },
+            Some(mut module) => module.call(func_name, argument),
             None => {
                 println!("no such module");
                 Err(FCEError::NoSuchModule)
@@ -83,7 +81,7 @@ impl WasmProcess for FCE {
 
         match self.modules.entry(module_name.into()) {
             Entry::Vacant(entry) => {
-                entry.insert(Arc::new(module));
+                entry.insert(module);
                 Ok(())
             }
             Entry::Occupied(_) => Err(FCEError::NonUniqueModuleName),
@@ -105,7 +103,6 @@ impl WasmProcess for FCE {
         match self.modules.get(module_name) {
             Some(module) => {
                 let signatures = module
-                    .as_ref()
                     .get_exports_signatures()
                     .map(|(name, inputs, outputs)| NodeFunction {
                         name,

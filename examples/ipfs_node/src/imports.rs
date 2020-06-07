@@ -27,13 +27,37 @@ pub(super) fn log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
     }
 }
 
+pub(super) fn ipfs(ctx: &mut Ctx, offset: i32, size: i32) -> i32 {
+    use wasmer_core::memory::ptr::{Array, WasmPtr};
+
+    let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
+    match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
+        Some(msg) => println!("ipfs"),
+        None => println!("ipfs\n"),
+    }
+
+    0x1337
+}
+
+#[derive(Clone)]
+struct T {}
+
+impl Drop for T {
+    fn drop(&mut self) {
+        println!("drop T");
+    }
+}
+
 pub(super) fn create_host_import_func(host_cmd: String) -> DynamicFunc<'static> {
     use wasmer_core::types::Value;
     use wasmer_core::types::Type;
     use wasmer_core::types::FuncSig;
+    let t = T{};
 
     let func = move |ctx: &mut Ctx, inputs: &[Value]| -> Vec<Value> {
         use wasmer_core::memory::ptr::{Array, WasmPtr};
+
+        let _t = t.clone();
 
         println!("inputs size is {}", inputs.len());
         // TODO: refactor this
@@ -44,9 +68,10 @@ pub(super) fn create_host_import_func(host_cmd: String) -> DynamicFunc<'static> 
         let wasm_ptr = WasmPtr::<u8, Array>::new(array_ptr as _);
         match wasm_ptr.get_utf8_string(ctx.memory(0), array_size as _) {
             Some(msg) => print!("{}", msg),
-            None => print!("ipfs node logger: incorrect UTF8 string's been supplied to logger"),
+            None => print!("callback: incorrect UTF8 string's been supplied to logger"),
         }
-        vec![]
+
+        vec![Value::I32(0x1337)]
     };
 
     DynamicFunc::new(

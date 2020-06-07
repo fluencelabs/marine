@@ -81,6 +81,7 @@ impl IpfsNode {
 
         self.process
             .load_module(rpc_module_name, wasm_rpc, self.rpc_module_config.clone())?;
+
         let call_result = self.process.call(
             rpc_module_name,
             "invoke",
@@ -131,9 +132,9 @@ impl IpfsNode {
 
         if let Some(imports) = module_config.imports {
             for (import_name, host_cmd) in imports {
-                println!("{} - {}", import_name, host_cmd);
                 let host_import = create_host_import_func(host_cmd);
                 namespace.insert(import_name, host_import);
+                //namespace.insert(import_name, func!(crate::imports::ipfs));
             }
         }
 

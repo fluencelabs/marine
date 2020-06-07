@@ -17,6 +17,7 @@
 use super::wit_prelude::FCEError;
 use super::fce_module::FCEModule;
 use super::{IType, IValue, WValue};
+use crate::vm::module::fce_module::Callable;
 
 use wasmer_wit::interpreter::wasm;
 use wasmer_core::instance::DynFunc;
@@ -32,10 +33,7 @@ enum WITFunctionInner {
     },
     Import {
         // TODO: use dyn Callable here
-        wit_module: Arc<FCEModule>,
-        func_name: String,
-        inputs: Vec<IType>,
-        outputs: Vec<IType>,
+        callable: Arc<Callable>,
     },
 }
 
@@ -49,10 +47,10 @@ impl Drop for WITFunction {
     fn drop(&mut self) {
         match &self.inner {
             WITFunctionInner::Export { func, .. } => {
-                // println!("WITFunction export dropped: {:?}", func.signature());
+                println!("WITFunction export dropped: {:?}", func.signature());
             }
-            WITFunctionInner::Import { func_name, .. } => {
-                // println!("WITFunction import dropped: {:?}", func_name);
+            WITFunctionInner::Import { callable } => {
+                println!("WITFunction import dropped: {:?}", callable.wit_module_func.inputs);
             }
         }
     }
@@ -86,18 +84,13 @@ impl WITFunction {
 
     /// Creates function from a module import.
     pub(super) fn from_import(
-        wit_module: Arc<FCEModule>,
+        wit_module: &FCEModule,
         func_name: String,
     ) -> Result<Self, FCEError> {
-        let func_type = wit_module.as_ref().get_func_signature(&func_name)?;
-        let inputs = func_type.0.clone();
-        let outputs = func_type.1.clone();
+        let callable = wit_module.exports_funcs.get(&func_name).unwrap().clone();
 
         let inner = WITFunctionInner::Import {
-            wit_module,
-            func_name,
-            inputs,
-            outputs,
+            callable
         };
 
         Ok(Self { inner })
@@ -108,28 +101,28 @@ impl wasm::structures::LocalImport for WITFunction {
     fn inputs_cardinality(&self) -> usize {
         match &self.inner {
             WITFunctionInner::Export { ref inputs, .. } => inputs.len(),
-            WITFunctionInner::Import { ref inputs, .. } => inputs.len(),
+            WITFunctionInner::Import { ref callable, .. } => callable.wit_module_func.inputs.len(),
         }
     }
 
     fn outputs_cardinality(&self) -> usize {
         match &self.inner {
             WITFunctionInner::Export { ref outputs, .. } => outputs.len(),
-            WITFunctionInner::Import { ref outputs, .. } => outputs.len(),
+            WITFunctionInner::Import { ref callable, .. } => callable.wit_module_func.outputs.len(),
         }
     }
 
     fn inputs(&self) -> &[IType] {
         match &self.inner {
             WITFunctionInner::Export { ref inputs, .. } => inputs,
-            WITFunctionInner::Import { ref inputs, .. } => inputs,
+            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.inputs,
         }
     }
 
     fn outputs(&self) -> &[IType] {
         match &self.inner {
             WITFunctionInner::Export { ref outputs, .. } => outputs,
-            WITFunctionInner::Import { ref outputs, .. } => outputs,
+            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.outputs,
         }
     }
 
@@ -143,18 +136,9 @@ impl wasm::structures::LocalImport for WITFunction {
                 .map(|result| result.iter().map(wval_to_ival).collect())
                 .map_err(|_| ()),
             WITFunctionInner::Import {
-                wit_module,
-                func_name,
-                ..
+                callable
             } => {
-                let mut wit_module_caller = wit_module.clone();
-                unsafe {
-                    // get_mut_unchecked here is safe because it is single-threaded environment
-                    // without cyclic reference between modules
-                    Arc::get_mut_unchecked(&mut wit_module_caller)
-                        .call(func_name, arguments)
-                        .map_err(|_| ())
-                }
+                Arc::make_mut(&mut callable.clone()).call(arguments).map_err(|_| ())
             }
         }
     }

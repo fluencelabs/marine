@@ -33,9 +33,9 @@ pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     let cmd = format!("put {}", file_content);
-    ipfs(cmd.as_ptr() as _, cmd.len() as _);
+    let ipfs_result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
 
-    let after_ipfs = format!("after ipfs call");
+    let after_ipfs = format!("after ipfs call: {} \n", ipfs_result);
     log_utf8_string(after_ipfs.as_ptr() as _, after_ipfs.len() as _);
 
     let result = "IPFS node: hash is asdasdsad".to_string();

@@ -28,14 +28,36 @@ use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
+use std::borrow::BorrowMut;
 
 type WITInterpreter =
     Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
 
-struct WITModuleFunc {
-    interpreter: WITInterpreter,
-    inputs: Vec<IType>,
-    outputs: Vec<IType>,
+#[derive(Clone)]
+pub(super) struct WITModuleFunc {
+    interpreter: Arc<WITInterpreter>,
+    pub(super) inputs: Vec<IType>,
+    pub(super) outputs: Vec<IType>,
+}
+
+#[derive(Clone)]
+pub(super) struct Callable {
+    pub(super) wit_instance: Arc<WITInstance>,
+    pub(super) wit_module_func: WITModuleFunc,
+}
+
+impl Callable {
+    pub fn call(&mut self, args: &[IValue]) -> Result<Vec<IValue>, FCEError> {
+        use wasmer_wit::interpreter::stack::Stackable;
+
+        let result = self.wit_module_func
+            .interpreter
+            .run(args, Arc::make_mut(&mut self.wit_instance))?
+            .as_slice()
+            .to_owned();
+
+        Ok(result)
+    }
 }
 
 pub struct FCEModule {
@@ -43,32 +65,36 @@ pub struct FCEModule {
     // that internally keep pointer to Wasmer instance.
     #[allow(unused)]
     wamser_instance: WasmerInstance,
-    wit_instance: Arc<WITInstance>,
-    exports_funcs: HashMap<String, WITModuleFunc>,
+    import_object: ImportObject,
+
+    // TODO: replace with dyn Trait
+    pub(super) exports_funcs: HashMap<String, Arc<Callable>>,
 }
 
 impl Drop for FCEModule {
     fn drop(&mut self) {
-        // println!("FCEModule dropped: {:?}", self.exports_funcs.keys());
+        println!("FCEModule dropped: {:?}", self.exports_funcs.keys());
     }
 }
 
 impl FCEModule {
     pub fn new(
         wasm_bytes: &[u8],
-        imports: ImportObject,
-        modules: &HashMap<String, Arc<FCEModule>>,
+        fce_imports: ImportObject,
+        modules: &HashMap<String, FCEModule>,
     ) -> Result<Self, FCEError> {
         let wasmer_module = compile(&wasm_bytes)?;
         let wit = extract_wit(&wasmer_module)?;
         let fce_wit = FCEWITInterfaces::new(wit);
-        let wit_exports = Self::instantiate_wit_exports(&fce_wit)?;
 
         let mut wit_instance = Arc::new_uninit();
         let mut import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
-        import_object.extend(imports);
+        let mut fce_imports = fce_imports;
 
-        let wasmer_instance = wasmer_module.instantiate(&import_object)?;
+        fce_imports.extend(import_object.clone());
+
+
+        let wasmer_instance = wasmer_module.instantiate(&fce_imports)?;
 
         let wit_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
@@ -78,24 +104,21 @@ impl FCEModule {
             std::mem::transmute::<_, Arc<WITInstance>>(wit_instance)
         };
 
+        let exports_funcs = Self::instantiate_wit_exports(wit_instance.clone(), &fce_wit)?;
+
         Ok(Self {
             wamser_instance: wasmer_instance,
-            wit_instance,
-            exports_funcs: wit_exports,
+            import_object,
+            exports_funcs,
         })
     }
 
     pub fn call(&mut self, function_name: &str, args: &[IValue]) -> Result<Vec<IValue>, FCEError> {
         use wasmer_wit::interpreter::stack::Stackable;
 
-        match self.exports_funcs.get(function_name) {
+        match self.exports_funcs.get_mut(function_name) {
             Some(func) => {
-                let result = func
-                    .interpreter
-                    .run(args, Arc::make_mut(&mut self.wit_instance))?
-                    .as_slice()
-                    .to_owned();
-                Ok(result)
+                Arc::make_mut(func).call(args)
             }
             None => Err(FCEError::NoSuchFunction(format!(
                 "{} hasn't been found while calling",
@@ -109,7 +132,7 @@ impl FCEModule {
         function_name: &str,
     ) -> Result<(&Vec<IType>, &Vec<IType>), FCEError> {
         match self.exports_funcs.get(function_name) {
-            Some(func) => Ok((&func.inputs, &func.outputs)),
+            Some(func) => Ok((&func.wit_module_func.inputs, &func.wit_module_func.outputs)),
             None => {
                 for func in self.exports_funcs.iter() {
                     println!("{}", func.0);
@@ -126,14 +149,19 @@ impl FCEModule {
     pub fn get_exports_signatures(
         &self,
     ) -> impl Iterator<Item = (&String, &Vec<IType>, &Vec<IType>)> {
-        self.exports_funcs
-            .iter()
-            .map(|(func_name, func)| (func_name, &func.inputs, &func.outputs))
+        self.exports_funcs.iter().map(|(func_name, func)| {
+            (
+                func_name,
+                &func.wit_module_func.inputs,
+                &func.wit_module_func.outputs,
+            )
+        })
     }
 
     fn instantiate_wit_exports(
+        wit_instance: Arc<WITInstance>,
         wit: &FCEWITInterfaces<'_>,
-    ) -> Result<HashMap<String, WITModuleFunc>, FCEError> {
+    ) -> Result<HashMap<String, Arc<Callable>>, FCEError> {
         use fce_wit_interfaces::WITAstType;
 
         wit.implementations()
@@ -161,14 +189,18 @@ impl FCEModule {
                         inputs, outputs, ..
                     } => {
                         let interpreter: WITInterpreter = adapter_instructions.try_into()?;
+                        let wit_module_func = WITModuleFunc {
+                            interpreter: Arc::new(interpreter),
+                            inputs: inputs.clone(),
+                            outputs: outputs.clone(),
+                        };
 
                         Ok((
                             export_function_name.to_string(),
-                            WITModuleFunc {
-                                interpreter,
-                                inputs: inputs.clone(),
-                                outputs: outputs.clone(),
-                            },
+                            Arc::new(Callable {
+                                wit_instance: wit_instance.clone(),
+                                wit_module_func,
+                            }),
                         ))
                     }
                     _ => Err(FCEError::IncorrectWIT(format!(
@@ -177,7 +209,7 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<HashMap<String, WITModuleFunc>, FCEError>>()
+            .collect::<Result<HashMap<String, Arc<Callable>>, FCEError>>()
     }
 
     // this function deals only with import functions that have an adaptor implementation
@@ -194,7 +226,7 @@ impl FCEModule {
 
         impl Drop for T {
             fn drop(&mut self) {
-                // println!("drop T");
+                println!("fce_module imports: drop T");
             }
         }
 
@@ -214,6 +246,8 @@ impl FCEModule {
                 move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
                     use super::type_converters::wval_to_ival;
                     let t_copied = t.clone();
+
+                    println!("dyn_func_from_raw_import: {:?}", inputs);
 
                     // copy here because otherwise wit_instance will be consumed by the closure
                     let wit_instance_callable = wit_instance.clone();
