@@ -45,6 +45,19 @@ pub(super) struct WITFunction {
     inner: WITFunctionInner,
 }
 
+impl Drop for WITFunction {
+    fn drop(&mut self) {
+        match &self.inner {
+            WITFunctionInner::Export { func, .. } => {
+                // println!("WITFunction export dropped: {:?}", func.signature());
+            }
+            WITFunctionInner::Import { func_name, .. } => {
+                // println!("WITFunction import dropped: {:?}", func_name);
+            }
+        }
+    }
+}
+
 impl WITFunction {
     /// Creates functions from a "usual" (not WIT) module export.
     pub(super) fn from_export(dyn_func: DynFunc<'static>) -> Result<Self, FCEError> {

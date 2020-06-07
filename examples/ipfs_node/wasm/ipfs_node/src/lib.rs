@@ -26,13 +26,19 @@ pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
     let file_content =
         String::from_raw_parts(file_content_ptr, file_content_size, file_content_size);
 
-    let msg = format!("from Wasm node: file content is {}\n", file_content);
+    let msg = format!(
+        "from Wasm ipfs_node.get: file content is {}\n",
+        file_content
+    );
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     let cmd = format!("put {}", file_content);
     ipfs(cmd.as_ptr() as _, cmd.len() as _);
 
-    let result = "Hello from IPFS node, take your hash".to_string();
+    let after_ipfs = format!("after ipfs call");
+    log_utf8_string(after_ipfs.as_ptr() as _, after_ipfs.len() as _);
+
+    let result = "IPFS node: hash is asdasdsad".to_string();
 
     *RESULT_PTR.get_mut() = result.as_ptr() as _;
     *RESULT_SIZE.get_mut() = result.len();
@@ -43,13 +49,13 @@ pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
 pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
     let hash = String::from_raw_parts(hash_ptr, hash_size, hash_size);
 
-    let msg = format!("from Wasm node: file content is {}\n", hash);
+    let msg = format!("from Wasm ipfs_node.get: file hash is {}\n", hash);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     let cmd = format!("get {}", hash);
     ipfs(cmd.as_ptr() as _, cmd.len() as _);
 
-    let result = "Hello from IPFS node, take your file".to_string();
+    let result = "IPFS node: file is hhhhaaa".to_string();
 
     *RESULT_PTR.get_mut() = result.as_ptr() as _;
     *RESULT_SIZE.get_mut() = result.len();
@@ -62,5 +68,5 @@ extern "C" {
     fn log_utf8_string(ptr: i32, size: i32);
 
     /// Put a file to ipfs, returns ipfs hash of the file.
-    fn ipfs(ptr: i32, size: i32);
+    fn ipfs(ptr: i32, size: i32) -> i32;
 }

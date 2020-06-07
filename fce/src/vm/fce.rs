@@ -28,6 +28,12 @@ pub struct FCE {
     modules: HashMap<String, Arc<FCEModule>>,
 }
 
+impl Drop for FCE {
+    fn drop(&mut self) {
+        // println!("FCE dropped");
+    }
+}
+
 impl FCE {
     pub fn new() -> Self {
         Self {

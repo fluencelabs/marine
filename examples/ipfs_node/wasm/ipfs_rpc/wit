@@ -17,13 +17,19 @@
 (@interface type (func (param i32 i32)))                ;; 5
 
 ;; import ipfs put/get function
-(@interface type (func (param string) (result string))) ;; 6
+(@interface type (func (param i32 i32)))                ;; 6
 
 ;; import ipfs put/get function
 (@interface type (func (param string) (result string))) ;; 7
 
 ;; import ipfs put/get function
-(@interface type (func (param i64 i32) (result i64 i32))) ;; 8
+(@interface type (func (param string) (result string))) ;; 8
+
+;; import ipfs put/get function
+(@interface type (func (param i32 i32))) ;; 9
+
+;; import ipfs put/get function
+(@interface type (func (param i32 i32))) ;; 10
 
 (@interface export "allocate" (func  0))               ;; 0
 (@interface export "deallocate" (func 1))              ;; 1
@@ -34,7 +40,7 @@
 (@interface export "set_result_ptr" (func 4))          ;; 6
 
 (@interface import "ipfs_node.wasm" "get" (func (type 5)))
-(@interface import "ipfs_node.wasm" "put" (func (type 5)))
+(@interface import "ipfs_node.wasm" "put" (func (type 6)))
 
 (@interface import "ipfs_node.wasm" "get" (func (type 7)))       ;; 7
 (@interface import "ipfs_node.wasm" "put" (func (type 8)))       ;; 8
@@ -54,7 +60,7 @@
     call-core 1             ;; call deallocate
 )
 
-(@interface func (type 5)
+(@interface func (type 9)
     arg.get 0
     arg.get 1
     string.lift_memory
@@ -68,6 +74,21 @@
     call-core 5             ;; call set_result_ptr
 )
 
+(@interface func (type 10)
+    arg.get 0
+    arg.get 1
+    string.lift_memory
+    call-core 8             ;; call ipfs_node.put that returns string
+    dup
+    string.size
+    call-core 0             ;; call allocate
+    swap2
+    string.lower_memory
+    call-core 6             ;; call set_result_size
+    call-core 5             ;; call set_result_ptr
+)
+
 ;; Implementations
 (@interface implement (func 2) (func 2))
-(@interface implement (func 5) (func 5))
+(@interface implement (func 5) (func 9))
+(@interface implement (func 6) (func 10))

@@ -23,7 +23,7 @@ pub(super) fn log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
     let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
     match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
         Some(msg) => print!("{}", msg),
-        None => print!("ipfs node logger: incorrect UTF8 string's been supplied to logger"),
+        None => print!("ipfs node logger: incorrect UTF8 string's been supplied to logger\n"),
     }
 }
 
@@ -32,12 +32,14 @@ pub(super) fn create_host_import_func(host_cmd: String) -> DynamicFunc<'static> 
     use wasmer_core::types::Type;
     use wasmer_core::types::FuncSig;
 
-    let func = Box::new(move |ctx: &mut Ctx, inputs: &[Value]| -> Vec<Value> {
+    let func = move |ctx: &mut Ctx, inputs: &[Value]| -> Vec<Value> {
         use wasmer_core::memory::ptr::{Array, WasmPtr};
 
+        println!("inputs size is {}", inputs.len());
         // TODO: refactor this
-        let array_ptr = inputs[0].to_u128() as i32;
-        let array_size = inputs[1].to_u128() as i32;
+        let array_ptr = inputs[1].to_u128() as i32;
+        let array_size = inputs[0].to_u128() as i32;
+        println!("ptr is {}, size is {}", array_ptr, array_size);
 
         let wasm_ptr = WasmPtr::<u8, Array>::new(array_ptr as _);
         match wasm_ptr.get_utf8_string(ctx.memory(0), array_size as _) {
@@ -45,10 +47,10 @@ pub(super) fn create_host_import_func(host_cmd: String) -> DynamicFunc<'static> 
             None => print!("ipfs node logger: incorrect UTF8 string's been supplied to logger"),
         }
         vec![]
-    });
+    };
 
     DynamicFunc::new(
-        std::sync::Arc::new(FuncSig::new(vec![Type::I32, Type::I32], vec![])),
+        std::sync::Arc::new(FuncSig::new(vec![Type::I32, Type::I32], vec![Type::I32])),
         func,
     )
 }

@@ -17,7 +17,7 @@
 use super::errors::NodeError;
 
 use wasmer_core::import::ImportObject;
-use wasmer_runtime::{imports, func};
+use wasmer_runtime::func;
 use fce::FCE;
 use fce::WasmProcess;
 use fce::NodeFunction;
@@ -131,6 +131,7 @@ impl IpfsNode {
 
         if let Some(imports) = module_config.imports {
             for (import_name, host_cmd) in imports {
+                println!("{} - {}", import_name, host_cmd);
                 let host_import = create_host_import_func(host_cmd);
                 namespace.insert(import_name, host_import);
             }
@@ -147,7 +148,7 @@ impl IpfsNode {
             if let Some(preopened_files) = wasi.preopened_files {
                 wasm_module_config.wasi_preopened_files = preopened_files
                     .iter()
-                    .map(|file| PathBuf::from(file))
+                    .map(PathBuf::from)
                     .collect::<Vec<_>>();
             }
 

@@ -22,6 +22,9 @@
 ;; import ipfs put/get function
 (@interface type (func (param string) (result string))) ;; 7
 
+;; import ipfs put/get function
+(@interface type (func (param string) (result string))) ;; 8
+
 (@interface export "allocate" (func  0))        ;; 0
 (@interface export "deallocate" (func 1))       ;; 1
 (@interface export "get_result_size" (func 3))  ;; 2
@@ -30,9 +33,24 @@
 (@interface export "set_result_ptr" (func 4))   ;; 5
 
 (@interface export "put" (func 5))              ;; 6
-(@interface export "get" (func 5))              ;; 7
+(@interface export "get" (func 6))              ;; 7
 
-(@interface func (type 6)
+(@interface func (type 7)
+    arg.get 0
+    string.size
+    call-core 0 ;; call allocate
+    arg.get 0
+    string.lower_memory
+    call-core 6         ;; call self.put
+    call-core 3         ;; call get_result_ptr
+    call-core 2         ;; call get_result_size
+    string.lift_memory
+    call-core 3         ;; call get_result_ptr
+    call-core 2         ;; call get_result_size
+    call-core 1         ;; call deallocate
+)
+
+(@interface func (type 8)
     arg.get 0
     string.size
     call-core 0 ;; call allocate
@@ -48,4 +66,5 @@
 )
 
 ;; Implementations
-(@interface implement (func 5) (func 6))
+(@interface implement (func 5) (func 7))
+(@interface implement (func 6) (func 8))

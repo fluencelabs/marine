@@ -47,6 +47,12 @@ pub struct FCEModule {
     exports_funcs: HashMap<String, WITModuleFunc>,
 }
 
+impl Drop for FCEModule {
+    fn drop(&mut self) {
+        // println!("FCEModule dropped: {:?}", self.exports_funcs.keys());
+    }
+}
+
 impl FCEModule {
     pub fn new(
         wasm_bytes: &[u8],
@@ -183,16 +189,48 @@ impl FCEModule {
         use wasmer_core::typed_func::DynamicFunc;
         use wasmer_core::vm::Ctx;
 
+        #[derive(Clone)]
+        struct T {}
+
+        impl Drop for T {
+            fn drop(&mut self) {
+                // println!("drop T");
+            }
+        }
+
         // returns function that will be called from imports of Wasmer module
         fn dyn_func_from_raw_import(
             inputs: Vec<IType>,
-            func: Box<dyn Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static>,
+            wit_instance: Arc<MaybeUninit<WITInstance>>,
+            interpreter: WITInterpreter,
         ) -> DynamicFunc<'static> {
             use wasmer_core::types::FuncSig;
             use super::type_converters::itype_to_wtype;
+            let t = T {};
 
             let signature = inputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
-            DynamicFunc::new(Arc::new(FuncSig::new(signature, vec![])), func)
+            DynamicFunc::new(
+                Arc::new(FuncSig::new(signature, vec![])),
+                move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
+                    use super::type_converters::wval_to_ival;
+                    let t_copied = t.clone();
+
+                    // copy here because otherwise wit_instance will be consumed by the closure
+                    let wit_instance_callable = wit_instance.clone();
+                    let converted_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
+                    unsafe {
+                        // error here will be propagated by the special error instruction
+                        let _ = interpreter.run(
+                            &converted_inputs,
+                            Arc::make_mut(&mut wit_instance_callable.assume_init()),
+                        );
+                    }
+
+                    // wit import functions should only change the stack state -
+                    // the result will be returned by an export function
+                    vec![]
+                },
+            )
         }
 
         // creates a closure that is represent a WIT module import
@@ -220,7 +258,7 @@ impl FCEModule {
             })
         }
 
-        let namespaces = wit
+        let wit_import_funcs = wit
             .implementations()
             .filter_map(|(adapter_function_type, core_function_type)| {
                 match wit.imports_by_type(*core_function_type) {
@@ -242,13 +280,14 @@ impl FCEModule {
                 match wit_type {
                     WITAstType::Function { inputs, .. } => {
                         let interpreter: WITInterpreter = adapter_instructions.try_into()?;
-                        let inner_import = create_raw_import(wit_instance.clone(), interpreter);
-                        let wit_import = dyn_func_from_raw_import(inputs.clone(), inner_import);
 
-                        let mut namespace = Namespace::new();
-                        namespace.insert(*import_name, wit_import);
+                        let wit_import = dyn_func_from_raw_import(
+                            inputs.clone(),
+                            wit_instance.clone(),
+                            interpreter,
+                        );
 
-                        Ok((import_namespace.to_string(), namespace))
+                        Ok((import_namespace.to_string(), (*import_name, wit_import)))
                     }
                     _ => Err(FCEError::IncorrectWIT(format!(
                         "type with idx = {} isn't a function type",
@@ -256,23 +295,17 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<multimap::MultiMap<String, Namespace>, FCEError>>()?;
+            .collect::<Result<multimap::MultiMap<_, _>, FCEError>>()?;
 
         let mut import_object = ImportObject::new();
 
         // TODO: refactor it
-        for (namespace_name, namespaces) in namespaces.iter_all() {
-            let mut result_namespace = Namespace::new();
-            for namespace in namespaces {
-                use wasmer_core::import::LikeNamespace;
-
-                result_namespace.insert(
-                    namespace.get_exports()[0].0.clone(),
-                    namespace.get_exports()[0].1.clone(),
-                );
+        for (namespace_name, funcs) in wit_import_funcs.into_iter() {
+            let mut namespace = Namespace::new();
+            for (import_name, import_func) in funcs.into_iter() {
+                namespace.insert(import_name.to_string(), import_func);
             }
-
-            import_object.register(namespace_name, result_namespace);
+            import_object.register(namespace_name, namespace);
         }
 
         Ok(import_object)

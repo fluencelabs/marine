@@ -33,6 +33,12 @@ pub(super) struct WITInstance {
     memories: Vec<WITMemory>,
 }
 
+impl Drop for WITInstance {
+    fn drop(&mut self) {
+        // println!("WITInstance dropped");
+    }
+}
+
 impl WITInstance {
     pub(super) fn new(
         wasmer_instance: &WasmerInstance,
@@ -59,8 +65,8 @@ impl WITInstance {
 
         wit.exports()
             .enumerate()
-            .map(|(export_id, (_, export_name))| {
-                let export_func = module_exports.get(*export_name)?;
+            .map(|(export_id, export)| {
+                let export_func = module_exports.get(export.name)?;
                 unsafe {
                     // TODO: refactor this with new Wasmer API when it is ready
                     // here it is safe because dyn func is never lives WITInstance
@@ -79,23 +85,17 @@ impl WITInstance {
         start_index: usize,
     ) -> Result<HashMap<usize, WITFunction>, FCEError> {
         wit.imports()
-            .filter(|(core_function_type, _)| {
+            .filter(|import| {
                 // filter out imports that have implementations
-                matches!(wit.adapter_by_type(**core_function_type), None)
+                matches!(wit.adapter_by_type(import.function_type), None)
             })
             .enumerate()
-            .map(|(idx, (_, (import_namespace, import_name)))| {
-                match modules.get(*import_namespace) {
-                    Some(module) => {
-                        let func =
-                            WITFunction::from_import(module.clone(), import_name.to_string())?;
-                        Ok((start_index + idx as usize, func))
-                    }
-                    None => {
-                        println!("no such module: {}", import_namespace);
-                        Err(FCEError::NoSuchModule)
-                    }
+            .map(|(idx, import)| match modules.get(import.namespace) {
+                Some(module) => {
+                    let func = WITFunction::from_import(module.clone(), import.name.to_string())?;
+                    Ok((start_index + idx as usize, func))
                 }
+                None => Err(FCEError::NoSuchModule),
             })
             .collect::<Result<HashMap<_, _>, _>>()
     }

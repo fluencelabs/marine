@@ -163,10 +163,12 @@ pub(crate) fn parse_config_from_file(
         }
     });
 
+    /*
     println!(
         "parsed modules config:\n{:?}\nparsed rpc config:\n{:?}",
         modules_config, rpc_module_config
     );
+     */
 
     Ok(NodeConfig {
         modules_config,

@@ -18,7 +18,7 @@
 mod mem;
 mod result;
 
-// use crate::result::{RESULT_PTR, RESULT_SIZE};
+use crate::result::{RESULT_PTR, RESULT_SIZE};
 
 #[no_mangle]
 pub unsafe fn invoke(file_content_ptr: *mut u8, file_content_size: usize) {
@@ -26,19 +26,18 @@ pub unsafe fn invoke(file_content_ptr: *mut u8, file_content_size: usize) {
         String::from_raw_parts(file_content_ptr, file_content_size, file_content_size);
     let msg = format!("from Wasm rpc: file_content is {}\n", file_content);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
-    put(file_content_ptr as _, file_content_size as _);
+    put(file_content.as_ptr() as _, file_content.len() as _);
 
-    /*
     let hash = String::from_raw_parts(
-        *RESULT_PTR.get_mut(),
+        *RESULT_PTR.get_mut() as _,
         *RESULT_SIZE.get_mut(),
         *RESULT_SIZE.get_mut(),
     );
     let msg = format!("from Wasm rpc: hash is {}\n", hash);
 
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
-    */
 }
 
 #[link(wasm_import_module = "host")]
