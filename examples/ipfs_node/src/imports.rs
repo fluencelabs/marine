@@ -45,7 +45,7 @@ pub(super) fn create_host_import_func(_host_cmd: String) -> DynamicFunc<'static>
         let wasm_ptr = WasmPtr::<u8, Array>::new(array_ptr as _);
         match wasm_ptr.get_utf8_string(ctx.memory(0), array_size as _) {
             Some(msg) => print!("{}", msg),
-            None => print!("callback: incorrect UTF8 string's been supplied to logger"),
+            None => println!("callback: incorrect UTF8 string's been supplied to logger"),
         }
 
         vec![Value::I32(0x1337)]

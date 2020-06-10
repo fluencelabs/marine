@@ -42,7 +42,11 @@ impl<'a> fmt::Display for NodeModulePublicInterface<'a> {
         write!(f, "{}\n", self.name)?;
 
         for function in self.functions.iter() {
-            write!(f, "  pub fn {}({:?}) -> {:?}\n", function.name, function.inputs, function.outputs)?;
+            write!(
+                f,
+                "  pub fn {}({:?}) -> {:?}\n",
+                function.name, function.inputs, function.outputs
+            )?;
         }
 
         Ok(())

@@ -19,16 +19,48 @@ mod mem;
 mod result;
 
 use crate::result::{RESULT_PTR, RESULT_SIZE};
+use std::fs;
+use std::path::PathBuf;
 
 #[no_mangle]
-pub unsafe fn invoke(file_content_ptr: *mut u8, file_content_size: usize) {
-    let file_content =
-        String::from_raw_parts(file_content_ptr, file_content_size, file_content_size);
-    let msg = format!("from Wasm rpc: file_content is {}\n", file_content);
-    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
+    let hash = String::from_raw_parts(hash_ptr, hash_size, hash_size);
+
+    let msg = format!("from Wasm rpc: getting file with hash {}\n", hash);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
-    put(file_content.as_ptr() as _, file_content.len() as _);
+    ipfs_get(hash.as_ptr() as _, hash.len() as _);
+
+    let file_path = String::from_raw_parts(
+        *RESULT_PTR.get_mut() as _,
+        *RESULT_SIZE.get_mut(),
+        *RESULT_SIZE.get_mut(),
+    );
+
+    let msg = format!("from Wasm rpc: reading file from {}\n", file_path);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+
+    let file_content = fs::read(file_path).unwrap_or_else(|_| b"error while reading file".to_vec());
+
+    *RESULT_PTR.get_mut() = file_content.as_ptr() as _;
+    *RESULT_SIZE.get_mut() = file_content.len();
+    std::mem::forget(file_content);
+}
+
+#[no_mangle]
+pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
+    let file_content =
+        String::from_raw_parts(file_content_ptr, file_content_size, file_content_size);
+
+    let msg = format!("from Wasm rpc: file_content is {}\n", file_content);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+
+    let rpc_tmp_filepath = "/tmp/ipfs_rpc.tmp".to_string();
+
+    let _ = fs::write(PathBuf::from(rpc_tmp_filepath.clone()), file_content);
+
+    ipfs_put(rpc_tmp_filepath.as_ptr() as _, rpc_tmp_filepath.len() as _);
+    std::mem::forget(rpc_tmp_filepath);
 
     let hash = String::from_raw_parts(
         *RESULT_PTR.get_mut() as _,
@@ -36,10 +68,12 @@ pub unsafe fn invoke(file_content_ptr: *mut u8, file_content_size: usize) {
         *RESULT_SIZE.get_mut(),
     );
 
-    let result_msg = format!("result from Wasm rpc: {}\n", hash);
-    *RESULT_PTR.get_mut() = result_msg.as_ptr() as _;
-    *RESULT_SIZE.get_mut() = result_msg.len();
-    std::mem::forget(result_msg);
+    let msg = format!("from Wasm rpc: file add with hash {}\n", hash);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+
+    *RESULT_PTR.get_mut() = hash.as_ptr() as _;
+    *RESULT_SIZE.get_mut() = hash.len();
+    std::mem::forget(hash);
 }
 
 #[link(wasm_import_module = "host")]
@@ -51,9 +85,10 @@ extern "C" {
 #[link(wasm_import_module = "ipfs_node.wasm")]
 extern "C" {
     /// Put a file to ipfs, returns ipfs hash of the file.
-    fn put(ptr: i32, size: i32);
+    #[link_name = "put"]
+    fn ipfs_put(ptr: i32, size: i32);
 
-    #[allow(unused)]
     /// Get file from ipfs by hash.
-    fn get(ptr: i32, size: i32);
+    #[link_name = "get"]
+    fn ipfs_get(ptr: i32, size: i32);
 }
