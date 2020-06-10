@@ -50,7 +50,10 @@ impl Drop for WITFunction {
                 println!("WITFunction export dropped: {:?}", func.signature());
             }
             WITFunctionInner::Import { callable } => {
-                println!("WITFunction import dropped: {:?}", callable.wit_module_func.inputs);
+                println!(
+                    "WITFunction import dropped: {:?}",
+                    callable.wit_module_func.inputs
+                );
             }
         }
     }
@@ -85,13 +88,11 @@ impl WITFunction {
     /// Creates function from a module import.
     pub(super) fn from_import(
         wit_module: &FCEModule,
-        func_name: String,
+        function_name: &str,
     ) -> Result<Self, FCEError> {
-        let callable = wit_module.exports_funcs.get(&func_name).unwrap().clone();
+        let callable = wit_module.get_callable(function_name)?;
 
-        let inner = WITFunctionInner::Import {
-            callable
-        };
+        let inner = WITFunctionInner::Import { callable };
 
         Ok(Self { inner })
     }
@@ -135,11 +136,9 @@ impl wasm::structures::LocalImport for WITFunction {
                 .call(&arguments.iter().map(ival_to_wval).collect::<Vec<WValue>>())
                 .map(|result| result.iter().map(wval_to_ival).collect())
                 .map_err(|_| ()),
-            WITFunctionInner::Import {
-                callable
-            } => {
-                Arc::make_mut(&mut callable.clone()).call(arguments).map_err(|_| ())
-            }
+            WITFunctionInner::Import { callable } => Arc::make_mut(&mut callable.clone())
+                .call(arguments)
+                .map_err(|_| ()),
         }
     }
 }

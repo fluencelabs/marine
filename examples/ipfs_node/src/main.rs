@@ -39,7 +39,9 @@ fn main() {
     )
     .unwrap();
 
-    let result = ipfs_node.rpc_call(&ipfs_rpc).unwrap();
+    println!("ipfs node interface is {:?}", ipfs_node.get_interface());
+
+    let result = ipfs_node.rpc_call(&ipfs_rpc, &[]).unwrap();
 
     println!("execution result {:?}", result);
 }

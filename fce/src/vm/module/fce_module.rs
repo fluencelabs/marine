@@ -28,7 +28,6 @@ use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
-use std::borrow::BorrowMut;
 
 type WITInterpreter =
     Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
@@ -50,7 +49,8 @@ impl Callable {
     pub fn call(&mut self, args: &[IValue]) -> Result<Vec<IValue>, FCEError> {
         use wasmer_wit::interpreter::stack::Stackable;
 
-        let result = self.wit_module_func
+        let result = self
+            .wit_module_func
             .interpreter
             .run(args, Arc::make_mut(&mut self.wit_instance))?
             .as_slice()
@@ -61,26 +61,24 @@ impl Callable {
 }
 
 pub struct FCEModule {
-    // it is needed because of WITInstance contains dynamic functions
+    // wasmer_instance is needed because WITInstance contains dynamic functions
     // that internally keep pointer to Wasmer instance.
     #[allow(unused)]
-    wamser_instance: WasmerInstance,
+    wamser_instance: Box<WasmerInstance>,
+
+    // import_object is needed because ImportObject::extend doesn't really deep copy
+    // imports, so we need to store imports of this module to prevent their removing.
+    #[allow(unused)]
     import_object: ImportObject,
 
     // TODO: replace with dyn Trait
-    pub(super) exports_funcs: HashMap<String, Arc<Callable>>,
-}
-
-impl Drop for FCEModule {
-    fn drop(&mut self) {
-        println!("FCEModule dropped: {:?}", self.exports_funcs.keys());
-    }
+    exports_funcs: HashMap<String, Arc<Callable>>,
 }
 
 impl FCEModule {
     pub fn new(
         wasm_bytes: &[u8],
-        fce_imports: ImportObject,
+        mut fce_imports: ImportObject,
         modules: &HashMap<String, FCEModule>,
     ) -> Result<Self, FCEError> {
         let wasmer_module = compile(&wasm_bytes)?;
@@ -88,14 +86,10 @@ impl FCEModule {
         let fce_wit = FCEWITInterfaces::new(wit);
 
         let mut wit_instance = Arc::new_uninit();
-        let mut import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
-        let mut fce_imports = fce_imports;
-
+        let import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
         fce_imports.extend(import_object.clone());
 
-
         let wasmer_instance = wasmer_module.instantiate(&fce_imports)?;
-
         let wit_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
@@ -104,45 +98,22 @@ impl FCEModule {
             std::mem::transmute::<_, Arc<WITInstance>>(wit_instance)
         };
 
-        let exports_funcs = Self::instantiate_wit_exports(wit_instance.clone(), &fce_wit)?;
+        let exports_funcs = Self::instantiate_wit_exports(wit_instance, &fce_wit)?;
 
         Ok(Self {
-            wamser_instance: wasmer_instance,
+            wamser_instance: Box::new(wasmer_instance),
             import_object,
             exports_funcs,
         })
     }
 
     pub fn call(&mut self, function_name: &str, args: &[IValue]) -> Result<Vec<IValue>, FCEError> {
-        use wasmer_wit::interpreter::stack::Stackable;
-
         match self.exports_funcs.get_mut(function_name) {
-            Some(func) => {
-                Arc::make_mut(func).call(args)
-            }
+            Some(func) => Arc::make_mut(func).call(args),
             None => Err(FCEError::NoSuchFunction(format!(
                 "{} hasn't been found while calling",
                 function_name
             ))),
-        }
-    }
-
-    pub fn get_func_signature(
-        &self,
-        function_name: &str,
-    ) -> Result<(&Vec<IType>, &Vec<IType>), FCEError> {
-        match self.exports_funcs.get(function_name) {
-            Some(func) => Ok((&func.wit_module_func.inputs, &func.wit_module_func.outputs)),
-            None => {
-                for func in self.exports_funcs.iter() {
-                    println!("{}", func.0);
-                }
-
-                Err(FCEError::NoSuchFunction(format!(
-                    "{} has't been found during its signature looking up",
-                    function_name
-                )))
-            }
         }
     }
 
@@ -156,6 +127,17 @@ impl FCEModule {
                 &func.wit_module_func.outputs,
             )
         })
+    }
+
+    // TODO: change the cloning Callable behaviour after changes of Wasmer API
+    pub(super) fn get_callable(&self, function_name: &str) -> Result<Arc<Callable>, FCEError> {
+        match self.exports_funcs.get(function_name) {
+            Some(func) => Ok(func.clone()),
+            None => Err(FCEError::NoSuchFunction(format!(
+                "{} hasn't been found while calling",
+                function_name
+            ))),
+        }
     }
 
     fn instantiate_wit_exports(
@@ -221,58 +203,24 @@ impl FCEModule {
         use wasmer_core::typed_func::DynamicFunc;
         use wasmer_core::vm::Ctx;
 
-        #[derive(Clone)]
-        struct T {}
-
-        impl Drop for T {
-            fn drop(&mut self) {
-                println!("fce_module imports: drop T");
-            }
-        }
-
         // returns function that will be called from imports of Wasmer module
-        fn dyn_func_from_raw_import(
-            inputs: Vec<IType>,
-            wit_instance: Arc<MaybeUninit<WITInstance>>,
-            interpreter: WITInterpreter,
-        ) -> DynamicFunc<'static> {
+        fn dyn_func_from_raw_import<F>(inputs: Vec<IType>, raw_import: F) -> DynamicFunc<'static>
+        where
+            F: Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static,
+        {
             use wasmer_core::types::FuncSig;
             use super::type_converters::itype_to_wtype;
-            let t = T {};
 
             let signature = inputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
-            DynamicFunc::new(
-                Arc::new(FuncSig::new(signature, vec![])),
-                move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
-                    use super::type_converters::wval_to_ival;
-                    let t_copied = t.clone();
-
-                    println!("dyn_func_from_raw_import: {:?}", inputs);
-
-                    // copy here because otherwise wit_instance will be consumed by the closure
-                    let wit_instance_callable = wit_instance.clone();
-                    let converted_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
-                    unsafe {
-                        // error here will be propagated by the special error instruction
-                        let _ = interpreter.run(
-                            &converted_inputs,
-                            Arc::make_mut(&mut wit_instance_callable.assume_init()),
-                        );
-                    }
-
-                    // wit import functions should only change the stack state -
-                    // the result will be returned by an export function
-                    vec![]
-                },
-            )
+            DynamicFunc::new(Arc::new(FuncSig::new(signature, vec![])), raw_import)
         }
 
         // creates a closure that is represent a WIT module import
         fn create_raw_import(
             wit_instance: Arc<MaybeUninit<WITInstance>>,
             interpreter: WITInterpreter,
-        ) -> Box<dyn for<'a, 'b> Fn(&'a mut Ctx, &'b [WValue]) -> Vec<WValue> + 'static> {
-            Box::new(move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
+        ) -> impl Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static {
+            move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
                 use super::type_converters::wval_to_ival;
 
                 // copy here because otherwise wit_instance will be consumed by the closure
@@ -289,7 +237,7 @@ impl FCEModule {
                 // wit import functions should only change the stack state -
                 // the result will be returned by an export function
                 vec![]
-            })
+            }
         }
 
         let wit_import_funcs = wit
@@ -315,11 +263,8 @@ impl FCEModule {
                     WITAstType::Function { inputs, .. } => {
                         let interpreter: WITInterpreter = adapter_instructions.try_into()?;
 
-                        let wit_import = dyn_func_from_raw_import(
-                            inputs.clone(),
-                            wit_instance.clone(),
-                            interpreter,
-                        );
+                        let raw_import = create_raw_import(wit_instance.clone(), interpreter);
+                        let wit_import = dyn_func_from_raw_import(inputs.clone(), raw_import);
 
                         Ok((import_namespace.to_string(), (*import_name, wit_import)))
                     }
@@ -333,7 +278,7 @@ impl FCEModule {
 
         let mut import_object = ImportObject::new();
 
-        // TODO: refactor it
+        // TODO: refactor this
         for (namespace_name, funcs) in wit_import_funcs.into_iter() {
             let mut namespace = Namespace::new();
             for (import_name, import_func) in funcs.into_iter() {

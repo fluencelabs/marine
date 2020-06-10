@@ -16,6 +16,15 @@
 #![warn(rust_2018_idioms)]
 #![feature(get_mut_unchecked)]
 #![feature(new_uninit)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
 
 mod vm;
 mod misc;

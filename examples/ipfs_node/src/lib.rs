@@ -21,4 +21,3 @@ mod imports;
 
 pub use node::IpfsNode;
 pub use node::NodeModule;
-pub(crate) use imports::log_utf8_string;

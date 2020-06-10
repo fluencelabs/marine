@@ -24,19 +24,12 @@ use wasmer_wit::interpreter::wasm::structures::{LocalImportIndex, TypedIndex};
 use wasmer_core::Instance as WasmerInstance;
 
 use std::collections::HashMap;
-use std::sync::Arc;
 
 /// Contains all import and export functions that could be called from WIT context by call-core.
 #[derive(Clone)]
 pub(super) struct WITInstance {
     funcs: HashMap<usize, WITFunction>,
     memories: Vec<WITMemory>,
-}
-
-impl Drop for WITInstance {
-    fn drop(&mut self) {
-        println!("WITInstance dropped");
-    }
 }
 
 impl WITInstance {
@@ -92,7 +85,7 @@ impl WITInstance {
             .enumerate()
             .map(|(idx, import)| match modules.get(import.namespace) {
                 Some(module) => {
-                    let func = WITFunction::from_import(module, import.name.to_string())?;
+                    let func = WITFunction::from_import(module, import.name)?;
                     Ok((start_index + idx as usize, func))
                 }
                 None => Err(FCEError::NoSuchModule),

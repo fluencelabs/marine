@@ -42,12 +42,12 @@ pub struct NodeModule<'a> {
 }
 
 impl IpfsNode {
-    pub fn new(core_modules_dir: PathBuf, config_file_path: PathBuf) -> Result<Self, NodeError> {
+    pub fn new<P: Into<PathBuf>>(core_modules_dir: P, config_file_path: P) -> Result<Self, NodeError> {
         let mut wasm_process = FCE::new();
         let mut module_names = Vec::new();
-        let mut core_modules_config = crate::config::parse_config_from_file(config_file_path)?;
+        let mut core_modules_config = crate::config::parse_config_from_file(config_file_path.into())?;
 
-        for entry in fs::read_dir(core_modules_dir)? {
+        for entry in fs::read_dir(core_modules_dir.into())? {
             let path = entry?.path();
             if path.is_dir() {
                 continue;
@@ -62,12 +62,12 @@ impl IpfsNode {
             let module_bytes = fs::read(path.clone())?;
 
             let core_module_config =
-                Self::make_wasm_config(core_modules_config.modules_config.remove(&module_name))?;
+                Self::make_wasm_process_config(core_modules_config.modules_config.remove(&module_name))?;
             wasm_process.load_module(module_name.clone(), &module_bytes, core_module_config)?;
             module_names.push(module_name);
         }
 
-        let rpc_module_config = Self::make_wasm_config(core_modules_config.rpc_module_config)?;
+        let rpc_module_config = Self::make_wasm_process_config(core_modules_config.rpc_module_config)?;
 
         Ok(Self {
             process: wasm_process,
@@ -76,7 +76,7 @@ impl IpfsNode {
         })
     }
 
-    pub fn rpc_call(&mut self, wasm_rpc: &[u8]) -> Result<Vec<IValue>, NodeError> {
+    pub fn rpc_call(&mut self, wasm_rpc: &[u8], args: &[IValue]) -> Result<Vec<IValue>, NodeError> {
         let rpc_module_name = "ipfs_rpc";
 
         self.process
@@ -85,7 +85,7 @@ impl IpfsNode {
         let call_result = self.process.call(
             rpc_module_name,
             "invoke",
-            &[IValue::String("test".to_string())],
+            args
         )?;
         self.process.unload_module(rpc_module_name)?;
 
@@ -106,7 +106,7 @@ impl IpfsNode {
         modules
     }
 
-    fn make_wasm_config(config: Option<ModuleConfig>) -> Result<FCEModuleConfig, NodeError> {
+    fn make_wasm_process_config(config: Option<ModuleConfig>) -> Result<FCEModuleConfig, NodeError> {
         use crate::imports::create_host_import_func;
         use crate::imports::log_utf8_string;
         use wasmer_core::import::Namespace;
@@ -134,7 +134,6 @@ impl IpfsNode {
             for (import_name, host_cmd) in imports {
                 let host_import = create_host_import_func(host_cmd);
                 namespace.insert(import_name, host_import);
-                //namespace.insert(import_name, func!(crate::imports::ipfs));
             }
         }
 

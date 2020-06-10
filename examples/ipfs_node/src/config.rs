@@ -108,23 +108,7 @@ pub(crate) fn parse_config_from_file(
                     .collect::<Vec<_>>()
             });
 
-            let wasi = module.wasi.map(|wasi| {
-                let envs = wasi
-                    .envs
-                    .map(|env| env.into_iter().map(|e| e.into_bytes()).collect::<Vec<_>>());
-
-                let mapped_dirs = wasi.mapped_dirs.map(|mapped_dir| {
-                    mapped_dir
-                        .into_iter()
-                        .map(|(from, to)| (from, to.try_into::<String>().unwrap()))
-                        .collect::<Vec<_>>()
-                });
-                WASIConfig {
-                    envs,
-                    preopened_files: wasi.preopened_files,
-                    mapped_dirs,
-                }
-            });
+            let wasi = module.wasi.map(parse_raw_wasi);
             (
                 module.name,
                 ModuleConfig {
@@ -138,23 +122,8 @@ pub(crate) fn parse_config_from_file(
         .collect::<HashMap<_, _>>();
 
     let rpc_module_config = config.rpc_module.map(|rpc_module| {
-        let wasi = rpc_module.wasi.map(|wasi| {
-            let envs = wasi
-                .envs
-                .map(|env| env.into_iter().map(|e| e.into_bytes()).collect::<Vec<_>>());
+        let wasi = rpc_module.wasi.map(parse_raw_wasi);
 
-            let mapped_dirs = wasi.mapped_dirs.map(|mapped_dir| {
-                mapped_dir
-                    .into_iter()
-                    .map(|(from, to)| (from, to.try_into::<String>().unwrap()))
-                    .collect::<Vec<_>>()
-            });
-            WASIConfig {
-                envs,
-                preopened_files: wasi.preopened_files,
-                mapped_dirs,
-            }
-        });
         ModuleConfig {
             mem_pages_count: rpc_module.mem_pages_count,
             logger_enabled: rpc_module.logger_enabled,
@@ -163,15 +132,27 @@ pub(crate) fn parse_config_from_file(
         }
     });
 
-    /*
-    println!(
-        "parsed modules config:\n{:?}\nparsed rpc config:\n{:?}",
-        modules_config, rpc_module_config
-    );
-     */
-
     Ok(NodeConfig {
         modules_config,
         rpc_module_config,
     })
+}
+
+fn parse_raw_wasi(wasi: RawWASIConfig) -> WASIConfig {
+    let envs = wasi
+        .envs
+        .map(|env| env.into_iter().map(|e| e.into_bytes()).collect::<Vec<_>>());
+
+    let mapped_dirs = wasi.mapped_dirs.map(|mapped_dir| {
+        mapped_dir
+            .into_iter()
+            .map(|(from, to)| (from, to.try_into::<String>().unwrap()))
+            .collect::<Vec<_>>()
+    });
+
+    WASIConfig {
+        envs,
+        preopened_files: wasi.preopened_files,
+        mapped_dirs,
+    }
 }

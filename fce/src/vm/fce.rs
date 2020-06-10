@@ -19,19 +19,13 @@ use super::*;
 use crate::WasmProcess;
 use crate::NodeFunction;
 
-use std::sync::Arc;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
+/// The base struct for the Fluence Compute Engine.
 pub struct FCE {
     // set of modules registered inside FCE
     modules: HashMap<String, FCEModule>,
-}
-
-impl Drop for FCE {
-    fn drop(&mut self) {
-        println!("FCE dropped");
-    }
 }
 
 impl FCE {
@@ -57,11 +51,8 @@ impl WasmProcess for FCE {
     ) -> Result<Vec<IValue>, FCEError> {
         match self.modules.get_mut(module_name) {
             // TODO: refactor errors
-            Some(mut module) => module.call(func_name, argument),
-            None => {
-                println!("no such module");
-                Err(FCEError::NoSuchModule)
-            }
+            Some(module) => module.call(func_name, argument),
+            None => Err(FCEError::NoSuchModule),
         }
     }
 

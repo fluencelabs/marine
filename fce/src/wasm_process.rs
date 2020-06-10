@@ -19,6 +19,7 @@ use super::FCEError;
 use super::IValue;
 use super::IType;
 
+/// Represent a function type inside wasm process.
 #[derive(Debug)]
 pub struct NodeFunction<'a> {
     pub name: &'a str,
@@ -26,9 +27,9 @@ pub struct NodeFunction<'a> {
     pub outputs: &'a Vec<IType>,
 }
 
-/// Describes a run computation node behaviour in the Fluence network.
+/// Describe a computation node behaviour in the Fluence network.
 pub trait WasmProcess {
-    /// Invokes a module supplying byte array and expecting byte array with some outcome back.
+    /// Invoke a function by given function name with given arguments of a module inside wasm process.
     fn call(
         &mut self,
         module_name: &str,
@@ -36,7 +37,7 @@ pub trait WasmProcess {
         arguments: &[IValue],
     ) -> Result<Vec<IValue>, FCEError>;
 
-    /// Loads new module in the FCE Service.
+    /// Load a new module inside wasm process.
     fn load_module<S>(
         &mut self,
         module_name: S,
@@ -46,9 +47,9 @@ pub trait WasmProcess {
     where
         S: Into<String>;
 
-    /// Unloads previously registered module.
+    /// Unload previously loaded module.
     fn unload_module(&mut self, module_name: &str) -> Result<(), FCEError>;
 
-    /// Returns signatures of all exported functions by this module.
+    /// Return signatures of all exported by this module functions.
     fn get_interface(&self, module_name: &str) -> Result<Vec<NodeFunction<'_>>, FCEError>;
 }
