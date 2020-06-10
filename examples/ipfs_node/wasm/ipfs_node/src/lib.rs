@@ -21,28 +21,34 @@ mod result;
 
 use crate::result::{RESULT_PTR, RESULT_SIZE};
 
-#[no_mangle]
-pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
-    let file_content =
-        String::from_raw_parts(file_content_ptr, file_content_size, file_content_size);
+const RESULT_PATH: &str = "/tmp/ipfs_rpc_file";
 
-    let msg = format!(
-        "from Wasm ipfs_node.get: file content is {}\n",
-        file_content
-    );
+#[no_mangle]
+pub unsafe fn put(file_path_ptr: *mut u8, file_path_size: usize) {
+    let file_path = String::from_raw_parts(file_path_ptr, file_path_size, file_path_size);
+
+    let msg = format!("from Wasm ipfs_node.put: file path is {}\n", file_path);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
-    let cmd = format!("put {}", file_content);
-    let ipfs_result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
+    let cmd = format!("add -Q {}", file_path);
+    let result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
 
-    let after_ipfs = format!("after ipfs call: {} \n", ipfs_result);
-    log_utf8_string(after_ipfs.as_ptr() as _, after_ipfs.len() as _);
+    let hash = if result {
+        String::from_raw_parts(
+            *RESULT_PTR.get_mut() as _,
+            *RESULT_SIZE.get_mut(),
+            *RESULT_SIZE.get_mut(),
+        )
+    } else {
+        "host ipfs call failed".to_string()
+    };
 
-    let result = "IPFS node: hash is asdasdsad".to_string();
+    let msg = format!("from Wasm ipfs_node.put: file add wtih hash is {} \n", hash);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
-    *RESULT_PTR.get_mut() = result.as_ptr() as _;
-    *RESULT_SIZE.get_mut() = result.len();
-    std::mem::forget(result);
+    *RESULT_PTR.get_mut() = hash.as_ptr() as _;
+    *RESULT_SIZE.get_mut() = hash.len();
+    std::mem::forget(hash);
 }
 
 #[no_mangle]
@@ -52,14 +58,24 @@ pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
     let msg = format!("from Wasm ipfs_node.get: file hash is {}\n", hash);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
-    let cmd = format!("get {}", hash);
-    ipfs(cmd.as_ptr() as _, cmd.len() as _);
+    let cmd = format!("get -o {}  {}", RESULT_PATH, hash);
+    let _result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
 
-    let result = "IPFS node: file is hhhhaaa".to_string();
+    let _output = String::from_raw_parts(
+        *RESULT_PTR.get_mut() as _,
+        *RESULT_SIZE.get_mut(),
+        *RESULT_SIZE.get_mut(),
+    );
 
-    *RESULT_PTR.get_mut() = result.as_ptr() as _;
-    *RESULT_SIZE.get_mut() = result.len();
-    std::mem::forget(result);
+    // TODO: check output
+
+    let file_path = RESULT_PATH.to_string();
+    let msg = format!("from Wasm ipfs_node.get: file path is {}", file_path);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+
+    *RESULT_PTR.get_mut() = file_path.as_ptr() as _;
+    *RESULT_SIZE.get_mut() = file_path.len();
+    std::mem::forget(file_path);
 }
 
 #[link(wasm_import_module = "host")]

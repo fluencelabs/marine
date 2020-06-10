@@ -5,7 +5,7 @@
 
     [core_module.imports]
     mysql = "/usr/bin/mysql"
-    ipfs = "/usr/bin/ipfs"
+    ipfs = "/usr/local/bin/ipfs"
 
     [core_module.wasi]
     envs = ["asdsad=sdaasd"]

@@ -23,31 +23,6 @@ use std::fs;
 use std::path::PathBuf;
 
 #[no_mangle]
-pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
-    let hash = String::from_raw_parts(hash_ptr, hash_size, hash_size);
-
-    let msg = format!("from Wasm rpc: getting file with hash {}\n", hash);
-    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
-
-    ipfs_get(hash.as_ptr() as _, hash.len() as _);
-
-    let file_path = String::from_raw_parts(
-        *RESULT_PTR.get_mut() as _,
-        *RESULT_SIZE.get_mut(),
-        *RESULT_SIZE.get_mut(),
-    );
-
-    let msg = format!("from Wasm rpc: reading file from {}\n", file_path);
-    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
-
-    let file_content = fs::read(file_path).unwrap_or_else(|_| b"error while reading file".to_vec());
-
-    *RESULT_PTR.get_mut() = file_content.as_ptr() as _;
-    *RESULT_SIZE.get_mut() = file_content.len();
-    std::mem::forget(file_content);
-}
-
-#[no_mangle]
 pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
     let file_content =
         String::from_raw_parts(file_content_ptr, file_content_size, file_content_size);
@@ -74,6 +49,31 @@ pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
     *RESULT_PTR.get_mut() = hash.as_ptr() as _;
     *RESULT_SIZE.get_mut() = hash.len();
     std::mem::forget(hash);
+}
+
+#[no_mangle]
+pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
+    let hash = String::from_raw_parts(hash_ptr, hash_size, hash_size);
+
+    let msg = format!("from Wasm rpc: getting file with hash {}\n", hash);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+
+    ipfs_get(hash.as_ptr() as _, hash.len() as _);
+
+    let file_path = String::from_raw_parts(
+        *RESULT_PTR.get_mut() as _,
+        *RESULT_SIZE.get_mut(),
+        *RESULT_SIZE.get_mut(),
+    );
+
+    let msg = format!("from Wasm rpc: reading file from {}\n", file_path);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+
+    let file_content = fs::read(file_path).unwrap_or_else(|_| b"error while reading file".to_vec());
+
+    *RESULT_PTR.get_mut() = file_content.as_ptr() as _;
+    *RESULT_SIZE.get_mut() = file_content.len();
+    std::mem::forget(file_content);
 }
 
 #[link(wasm_import_module = "host")]
