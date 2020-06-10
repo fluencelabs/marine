@@ -15,30 +15,25 @@
  */
 
 use super::errors::NodeError;
+use crate::config::ModuleConfig;
+use crate::node_public_interface::NodePublicInterface;
+use crate::node_public_interface::NodeModulePublicInterface;
 
 use wasmer_core::import::ImportObject;
 use wasmer_runtime::func;
 use fce::FCE;
 use fce::WasmProcess;
-use fce::NodeFunction;
 use fce::IValue;
 use fce::FCEModuleConfig;
 
 use std::fs;
 use std::path::PathBuf;
-use crate::config::ModuleConfig;
 
 pub struct IpfsNode {
     process: FCE,
     // names of core modules that is loaded to FCE
     module_names: Vec<String>,
     rpc_module_config: FCEModuleConfig,
-}
-
-#[derive(Debug)]
-pub struct NodeModule<'a> {
-    pub name: &'a str,
-    pub functions: Vec<NodeFunction<'a>>,
 }
 
 impl IpfsNode {
@@ -92,18 +87,18 @@ impl IpfsNode {
         Ok(call_result)
     }
 
-    pub fn get_interface(&self) -> Vec<NodeModule> {
+    pub fn get_interface(&self) -> NodePublicInterface {
         let mut modules = Vec::with_capacity(self.module_names.len());
 
         for module_name in self.module_names.iter() {
             let functions = self.process.get_interface(module_name).unwrap();
-            modules.push(NodeModule {
+            modules.push(NodeModulePublicInterface {
                 name: module_name,
                 functions,
             })
         }
 
-        modules
+        NodePublicInterface { modules }
     }
 
     fn make_wasm_process_config(config: Option<ModuleConfig>) -> Result<FCEModuleConfig, NodeError> {

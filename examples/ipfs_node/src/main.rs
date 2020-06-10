@@ -18,6 +18,7 @@ mod node;
 mod errors;
 mod config;
 mod imports;
+mod node_public_interface;
 
 use node::IpfsNode;
 
@@ -33,13 +34,14 @@ const IPFS_RPC: &str = "/Users/mike/dev/work/fluence/wasm/fce/bin/wasm_ipfs_rpc_
 fn main() {
     let ipfs_rpc = std::fs::read(IPFS_RPC).unwrap();
 
-    let mut ipfs_node = IpfsNode::new(
+    let mut ipfs_node = crate::IpfsNode::new(
         PathBuf::from(IPFS_MODULES_DIR),
         PathBuf::from(IPFS_MODULES_CONFIG_PATH),
     )
     .unwrap();
 
-    println!("ipfs node interface is {:?}", ipfs_node.get_interface());
+
+    println!("ipfs node interface is {}", ipfs_node.get_interface());
 
     let result = ipfs_node.rpc_call(&ipfs_rpc, &[]).unwrap();
 

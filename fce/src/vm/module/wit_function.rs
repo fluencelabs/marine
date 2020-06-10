@@ -43,6 +43,7 @@ pub(super) struct WITFunction {
     inner: WITFunctionInner,
 }
 
+/*
 impl Drop for WITFunction {
     fn drop(&mut self) {
         match &self.inner {
@@ -58,6 +59,7 @@ impl Drop for WITFunction {
         }
     }
 }
+ */
 
 impl WITFunction {
     /// Creates functions from a "usual" (not WIT) module export.
