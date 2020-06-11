@@ -225,20 +225,31 @@ impl FCEModule {
         fn create_raw_import(
             wit_instance: Arc<MaybeUninit<WITInstance>>,
             interpreter: WITInterpreter,
+            import_namespace: String,
+            import_name: String,
         ) -> impl Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static {
             move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
                 use super::type_converters::wval_to_ival;
 
+                println!(
+                    "raw import for {}.{} called with {:?}\n",
+                    import_namespace, import_name, inputs
+                );
+
                 // copy here because otherwise wit_instance will be consumed by the closure
                 let wit_instance_callable = wit_instance.clone();
-                let converted_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
+                let wit_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
                 unsafe {
                     // error here will be propagated by the special error instruction
                     let _ = interpreter.run(
-                        &converted_inputs,
+                        &wit_inputs,
                         Arc::make_mut(&mut wit_instance_callable.assume_init()),
                     );
                 }
+                println!(
+                    "\nraw import for {}.{} finished",
+                    import_namespace, import_name
+                );
 
                 // wit import functions should only change the stack state -
                 // the result will be returned by an export function
@@ -269,7 +280,12 @@ impl FCEModule {
                     WITAstType::Function { inputs, .. } => {
                         let interpreter: WITInterpreter = adapter_instructions.try_into()?;
 
-                        let raw_import = create_raw_import(wit_instance.clone(), interpreter);
+                        let raw_import = create_raw_import(
+                            wit_instance.clone(),
+                            interpreter,
+                            import_namespace.to_string(),
+                            import_name.to_string(),
+                        );
                         let wit_import = dyn_func_from_raw_import(inputs.clone(), raw_import);
 
                         Ok((import_namespace.to_string(), (*import_name, wit_import)))

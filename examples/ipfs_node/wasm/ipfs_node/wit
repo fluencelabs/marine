@@ -35,10 +35,11 @@
 (@interface export "put" (func 5))              ;; 6
 (@interface export "get" (func 6))              ;; 7
 
+;; adapter for export function put
 (@interface func (type 7)
     arg.get 0
     string.size
-    call-core 0 ;; call allocate
+    call-core 0         ;; call allocate
     arg.get 0
     string.lower_memory
     call-core 6         ;; call self.put
@@ -50,10 +51,11 @@
     call-core 1         ;; call deallocate
 )
 
+;; adapter for export function get
 (@interface func (type 8)
     arg.get 0
     string.size
-    call-core 0 ;; call allocate
+    call-core 0         ;; call allocate
     arg.get 0
     string.lower_memory
     call-core 7         ;; call self.get

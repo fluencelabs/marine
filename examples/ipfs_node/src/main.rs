@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![feature(pattern)]
 
 mod node;
 mod errors;
@@ -44,7 +45,7 @@ fn main() {
     println!("ipfs node interface is\n{}", ipfs_node.get_interface());
 
     let result = ipfs_node
-        .rpc_call(&ipfs_rpc, "put", &[IValue::String("asdsad".to_string())])
+        .rpc_call(&ipfs_rpc, "put", &[IValue::String("QmdHsYnAvbrvXg3iwr6bLaqooVT31E8CMpZRWc9wX2Fbt8".to_string())])
         .unwrap();
 
     println!("execution result {:?}", result);

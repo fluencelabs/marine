@@ -15,3 +15,4 @@ toml = "0.5.6"
 serde = { version = "1.0.111", features = ["derive"] }
 serde_json = "1.0.53"
 serde_derive = "1.0.111"
+cmd_lib = "0.7.8"

@@ -26,7 +26,12 @@ use wasmer_core::backend::SigRegistry;
 use wasmer_runtime::types::LocalOrImport;
 use wasmer_core::module::ExportIndex;
 
-const ALLOCATE_FUNC_NAME: &'static str = "allocate";
+use std::collections::HashMap;
+use cmd_lib::run_fun;
+
+const ALLOCATE_FUNC_NAME: &str = "allocate";
+const SET_PTR_FUNC_NAME: &str = "set_result_ptr";
+const SET_SIZE_FUNC_NAME: &str = "set_result_size";
 
 pub(super) fn log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
     use wasmer_core::memory::ptr::{Array, WasmPtr};
@@ -38,7 +43,7 @@ pub(super) fn log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
     }
 }
 
-// rewrited from Wasmer: https://github.com/wasmerio/wasmer/blob/081f6250e69b98b9f95a8f62ad6d8386534f3279/lib/runtime-core/src/instance.rs#L863
+// based on Wasmer: https://github.com/wasmerio/wasmer/blob/081f6250e69b98b9f95a8f62ad6d8386534f3279/lib/runtime-core/src/instance.rs#L863
 unsafe fn get_export_func_by_name<'a, Args, Rets>(
     ctx: &'a mut Ctx,
     name: &str,
@@ -108,68 +113,99 @@ where
     Ok(typed_func)
 }
 
-pub(super) fn create_host_import_func(host_cmd: String) -> DynamicFunc<'static> {
-    let allocate_func: Option<Func<'static, i32, i32>> = None;
-    let set_result_ptr: Option<Func<'static, i32, ()>> = None;
-    let set_result_size: Option<Func<'static, i32, ()>> = None;
+#[allow(dead_code)]
+fn to_full_path<S>(cmd: S, mapped_dirs: &HashMap<String, String>) -> String
+where
+    S: Into<String>,
+{
+    use std::str::pattern::Pattern;
+
+    fn find_start_at<'a, P: Pattern<'a>>(slice: &'a str, at: usize, pat: P) -> Option<usize> {
+        slice[at..].find(pat).map(|i| at + i)
+    }
+
+    let cmd = cmd.into();
+
+    if cmd.is_empty() || mapped_dirs.is_empty() {
+        return cmd;
+    }
+
+    // assume that string is started with /
+    let from_dir = if let Some(found_pos) = find_start_at(&cmd, 1, '/') {
+        // it is safe because we are splitting on the found position
+        cmd.split_at(found_pos)
+    } else {
+        (cmd.as_str(), "")
+    };
+
+    match mapped_dirs.get(from_dir.0) {
+        Some(to_dir) => {
+            let ret = format!("{}/{}", to_dir, from_dir.1);
+            println!("ret is {}", ret);
+            ret
+        }
+        None => cmd,
+    }
+}
+
+fn write_to_mem(context: &mut Ctx, address: usize, value: &[u8]) {
+    let memory = context.memory(0);
+
+    for (byte_id, cell) in memory.view::<u8>()[address as usize..(address + value.len())]
+        .iter()
+        .enumerate()
+    {
+        cell.set(value[byte_id]);
+    }
+}
+
+pub(super) fn create_host_import_func<S>(host_cmd: S) -> DynamicFunc<'static>
+where
+    S: Into<String>,
+{
+    /*
+    let mut allocate_func: Option<Func<'static, i32, i32>> = None;
+    let mut set_result_ptr: Option<Func<'static, i32, ()>> = None;
+    let mut set_result_size: Option<Func<'static, i32, ()>> = None;
+     */
+
+    let host_cmd = host_cmd.into();
 
     let func = move |ctx: &mut Ctx, inputs: &[Value]| -> Vec<Value> {
         use wasmer_core::memory::ptr::{Array, WasmPtr};
 
-        println!("inputs size is {}", inputs.len());
-
-        // TODO: refactor this
         let array_ptr = inputs[0].to_u128() as i32;
         let array_size = inputs[1].to_u128() as i32;
-        println!("ptr is {}, size is {}", array_ptr, array_size);
 
         let wasm_ptr = WasmPtr::<u8, Array>::new(array_ptr as _);
         let result = match wasm_ptr.get_utf8_string(ctx.memory(0), array_size as _) {
             Some(arg_value) => {
-                let output = std::process::Command::new(host_cmd.clone())
-                    .arg(arg_value)
-                    .output()
-                    .unwrap();
-                output.stdout
+                // let arg_value = " add -Q /Users/mike/dev/work/fluence/wasm/tmp/ipfs_rpc_file";
+                let output = run_fun!("{} {}", host_cmd, arg_value).unwrap();
+                output
             }
-            None => b"host callback: incorrect UTF8 string's been supplied to import".to_vec(),
+            None => return vec![Value::I32(1)],
         };
 
-        println!("from host import function: result is {:?}", result);
-
         unsafe {
-            if let mut allocate_func = None {
-                let func = match get_export_func_by_name::<i32, i32>(ctx, ALLOCATE_FUNC_NAME) {
-                    Ok(func) => func,
-                    Err(_) => return vec![Value::I32(0)],
-                };
-                allocate_func = Some(func);
-            }
+            let mem_address = match get_export_func_by_name::<i32, i32>(ctx, ALLOCATE_FUNC_NAME) {
+                Ok(func) => func.call(result.len() as i32).unwrap(),
+                Err(_) => return vec![Value::I32(2)],
+            };
 
-            if let mut set_result_ptr = None {
-                let func = match get_export_func_by_name::<i32, ()>(ctx, ALLOCATE_FUNC_NAME) {
-                    Ok(func) => func,
-                    Err(_) => return vec![Value::I32(0)],
-                };
-                set_result_ptr = Some(func);
-            }
+            write_to_mem(ctx, mem_address as usize, result.as_bytes());
 
-            if let mut set_result_size = None {
-                let func = match get_export_func_by_name::<i32, ()>(ctx, ALLOCATE_FUNC_NAME) {
-                    Ok(func) => func,
-                    Err(_) => return vec![Value::I32(0)],
-                };
-                set_result_size = Some(func);
-            }
-            let mem_address = allocate_func
-                .clone()
-                .unwrap()
-                .call(result.len() as i32)
-                .unwrap();
-            let _ = set_result_ptr.clone().unwrap().call(mem_address as i32);
-            let _ = set_result_size.clone().unwrap().call(result.len() as i32);
+            match get_export_func_by_name::<i32, ()>(ctx, SET_PTR_FUNC_NAME) {
+                Ok(func) => func.call(mem_address as i32).unwrap(),
+                Err(_) => return vec![Value::I32(3)],
+            };
 
-            vec![Value::I32(1)]
+            match get_export_func_by_name::<i32, ()>(ctx, SET_SIZE_FUNC_NAME) {
+                Ok(func) => func.call(result.len() as i32).unwrap(),
+                Err(_) => return vec![Value::I32(4)],
+            };
+
+            vec![Value::I32(0)]
         }
     };
 

@@ -39,12 +39,12 @@ impl<'a> fmt::Display for NodePublicInterface<'a> {
 
 impl<'a> fmt::Display for NodeModulePublicInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n", self.name)?;
+        writeln!(f, "{}", self.name)?;
 
         for function in self.functions.iter() {
-            write!(
+            writeln!(
                 f,
-                "  pub fn {}({:?}) -> {:?}\n",
+                "  pub fn {}({:?}) -> {:?}",
                 function.name, function.inputs, function.outputs
             )?;
         }

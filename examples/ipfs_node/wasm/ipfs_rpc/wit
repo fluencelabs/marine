@@ -50,8 +50,8 @@
 (@interface import "ipfs_node.wasm" "get" (func (type 5)))
 (@interface import "ipfs_node.wasm" "put" (func (type 6)))
 
-(@interface import "ipfs_node.wasm" "get" (func (type 7)))       ;; 7
-(@interface import "ipfs_node.wasm" "put" (func (type 8)))       ;; 8
+(@interface import "ipfs_node.wasm" "get" (func (type 7)))       ;; 9
+(@interface import "ipfs_node.wasm" "put" (func (type 8)))       ;; 10
 
 ;; adapter for export invoke function
 (@interface func (type 2)
@@ -106,7 +106,7 @@
     arg.get 0
     arg.get 1
     string.lift_memory
-    call-core 7             ;; call ipfs_node.get that returns string
+    call-core 9             ;; call ipfs_node.get that returns string
     dup
     string.size
     call-core 0             ;; call allocate
@@ -121,7 +121,7 @@
     arg.get 0
     arg.get 1
     string.lift_memory
-    call-core 8             ;; call ipfs_node.put that returns string
+    call-core 10             ;; call ipfs_node.put that returns string
     dup
     string.size
     call-core 0             ;; call allocate

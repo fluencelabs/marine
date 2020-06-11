@@ -21,7 +21,7 @@ mod result;
 
 use crate::result::{RESULT_PTR, RESULT_SIZE};
 
-const RESULT_PATH: &str = "/tmp/ipfs_rpc_file";
+const RESULT_PATH: &str = "/Users/mike/dev/work/fluence/wasm/tmp/ipfs_rpc_file";
 
 pub fn main() {
     println!("ipfs_node.main: WASI initialization finished");
@@ -31,12 +31,13 @@ pub fn main() {
 pub unsafe fn put(file_path_ptr: *mut u8, file_path_size: usize) {
     let file_path = String::from_raw_parts(file_path_ptr, file_path_size, file_path_size);
 
-    println!("ipfs_node.put: file path is {}\n", file_path);
+    let msg = format!("ipfs_node.put: file path is {}\n", file_path);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     let cmd = format!("add -Q {}", file_path);
     let result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
 
-    let hash = if result == 1 {
+    let hash = if result == 0 {
         String::from_raw_parts(
             *RESULT_PTR.get_mut() as _,
             *RESULT_SIZE.get_mut(),
@@ -46,7 +47,8 @@ pub unsafe fn put(file_path_ptr: *mut u8, file_path_size: usize) {
         "host ipfs call failed".to_string()
     };
 
-    println!("ipfs_node.put: file add wtih hash is {} \n", hash);
+    let msg = format!("ipfs_node.put: file add wtih hash is {} \n", hash);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     *RESULT_PTR.get_mut() = hash.as_ptr() as _;
     *RESULT_SIZE.get_mut() = hash.len();
@@ -57,7 +59,8 @@ pub unsafe fn put(file_path_ptr: *mut u8, file_path_size: usize) {
 pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
     let hash = String::from_raw_parts(hash_ptr, hash_size, hash_size);
 
-    println!("ipfs_node.get: file hash is {}\n", hash);
+    let msg = format!("ipfs_node.get: file hash is {}\n", hash);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     let cmd = format!("get -o {}  {}", RESULT_PATH, hash);
     let _result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
@@ -71,7 +74,8 @@ pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
     // TODO: check output
 
     let file_path = RESULT_PATH.to_string();
-    println!("ipfs_node.get: file path is {}", file_path);
+    let msg = format!("ipfs_node.get: file path is {}", file_path);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     *RESULT_PTR.get_mut() = file_path.as_ptr() as _;
     *RESULT_SIZE.get_mut() = file_path.len();

@@ -43,24 +43,6 @@ pub(super) struct WITFunction {
     inner: WITFunctionInner,
 }
 
-/*
-impl Drop for WITFunction {
-    fn drop(&mut self) {
-        match &self.inner {
-            WITFunctionInner::Export { func, .. } => {
-                println!("WITFunction export dropped: {:?}", func.signature());
-            }
-            WITFunctionInner::Import { callable } => {
-                println!(
-                    "WITFunction import dropped: {:?}",
-                    callable.wit_module_func.inputs
-                );
-            }
-        }
-    }
-}
- */
-
 impl WITFunction {
     /// Creates functions from a "usual" (not WIT) module export.
     pub(super) fn from_export(dyn_func: DynFunc<'static>) -> Result<Self, FCEError> {
@@ -131,6 +113,7 @@ impl wasm::structures::LocalImport for WITFunction {
 
     fn call(&self, arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
         use super::type_converters::{ival_to_wval, wval_to_ival};
+        // println!("wit_function called with {:?}", arguments);
 
         match &self.inner {
             WITFunctionInner::Export { func, .. } => func

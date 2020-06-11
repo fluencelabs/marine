@@ -26,9 +26,11 @@ use fce::WasmProcess;
 use fce::IValue;
 use fce::FCEModuleConfig;
 
+use wasmer_wasi::generate_import_object_for_version;
+
+use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
-use wasmer_wasi::generate_import_object_for_version;
 
 pub struct IpfsNode {
     process: FCE,
@@ -137,13 +139,6 @@ impl IpfsNode {
             }
         }
 
-        if let Some(imports) = module_config.imports {
-            for (import_name, host_cmd) in imports {
-                let host_import = create_host_import_func(host_cmd);
-                namespace.insert(import_name, host_import);
-            }
-        }
-
         let mut import_object = if let Some(wasi) = module_config.wasi {
             if let Some(envs) = wasi.envs {
                 wasm_module_config.wasi_envs = envs;
@@ -173,6 +168,19 @@ impl IpfsNode {
         } else {
             ImportObject::new()
         };
+
+        let _mapped_dirs = wasm_module_config
+            .wasi_mapped_dirs
+            .iter()
+            .map(|(from, to)| (from.clone(), to.as_path().to_str().unwrap().to_string()))
+            .collect::<HashMap<_, _>>();
+
+        if let Some(imports) = module_config.imports {
+            for (import_name, host_cmd) in imports {
+                let host_import = create_host_import_func(host_cmd);
+                namespace.insert(import_name, host_import);
+            }
+        }
 
         import_object.register("host", namespace);
 

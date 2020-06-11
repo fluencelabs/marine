@@ -19,4 +19,4 @@
     [rpc_module.wasi]
     envs = ["asdsad=sdaasd"]
     preopened_files = ["/Users/mike/dev/work/fluence/wasm/tmp"]
-    mapped_dirs = { "/tmp/" = "/Users/mike/dev/work/fluence/wasm/tmp" }
+    mapped_dirs = { "/tmp" = "/Users/mike/dev/work/fluence/wasm/tmp" }
