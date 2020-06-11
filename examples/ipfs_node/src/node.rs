@@ -19,14 +19,12 @@ use crate::config::ModuleConfig;
 use crate::node_public_interface::NodePublicInterface;
 use crate::node_public_interface::NodeModulePublicInterface;
 
-use wasmer_core::import::ImportObject;
-use wasmer_runtime::func;
 use fce::FCE;
 use fce::WasmProcess;
 use fce::IValue;
 use fce::FCEModuleConfig;
-
-use wasmer_wasi::generate_import_object_for_version;
+use wasmer_core::import::ImportObject;
+use wasmer_runtime::func;
 
 use std::collections::HashMap;
 use std::fs;
@@ -118,7 +116,6 @@ impl IpfsNode {
         use crate::imports::create_host_import_func;
         use crate::imports::log_utf8_string;
         use wasmer_core::import::Namespace;
-        use wasmer_wasi::WasiVersion;
 
         let mut wasm_module_config = FCEModuleConfig::default();
 
@@ -139,7 +136,7 @@ impl IpfsNode {
             }
         }
 
-        let mut import_object = if let Some(wasi) = module_config.wasi {
+        if let Some(wasi) = module_config.wasi {
             if let Some(envs) = wasi.envs {
                 wasm_module_config.wasi_envs = envs;
             }
@@ -157,16 +154,6 @@ impl IpfsNode {
                     .map(|(from, to)| (from, PathBuf::from(to)))
                     .collect::<Vec<_>>();
             }
-
-            generate_import_object_for_version(
-                WasiVersion::Latest,
-                vec![],
-                wasm_module_config.wasi_envs.clone(),
-                wasm_module_config.wasi_preopened_files.clone(),
-                wasm_module_config.wasi_mapped_dirs.clone(),
-            )
-        } else {
-            ImportObject::new()
         };
 
         let _mapped_dirs = wasm_module_config
@@ -182,10 +169,11 @@ impl IpfsNode {
             }
         }
 
+        let mut import_object = ImportObject::new();
         import_object.register("host", namespace);
 
         wasm_module_config.imports = import_object;
-        wasm_module_config.wasi_version = WasiVersion::Latest;
+        wasm_module_config.wasi_version = wasmer_wasi::WasiVersion::Latest;
 
         Ok(wasm_module_config)
     }

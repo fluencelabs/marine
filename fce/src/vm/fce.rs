@@ -68,7 +68,7 @@ impl WasmProcess for FCE {
         let _prepared_wasm_bytes =
             super::prepare::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
-        let module = FCEModule::new(&wasm_bytes, config.imports, &self.modules)?;
+        let module = FCEModule::new(&wasm_bytes, config, &self.modules)?;
 
         match self.modules.entry(module_name.into()) {
             Entry::Vacant(entry) => {

@@ -28,6 +28,7 @@ use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
+use crate::FCEModuleConfig;
 
 type WITInterpreter =
     Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
@@ -64,12 +65,17 @@ pub struct FCEModule {
     // wasmer_instance is needed because WITInstance contains dynamic functions
     // that internally keep pointer to Wasmer instance.
     #[allow(unused)]
-    wamser_instance: Box<WasmerInstance>,
+    wasmer_instance: Box<WasmerInstance>,
 
     // import_object is needed because ImportObject::extend doesn't really deep copy
     // imports, so we need to store imports of this module to prevent their removing.
     #[allow(unused)]
     import_object: ImportObject,
+
+    // host_import_object is needed because ImportObject::extend doesn't really deep copy
+    // imports, so we need to store imports of this module to prevent their removing.
+    #[allow(unused)]
+    host_import_object: ImportObject,
 
     // TODO: replace with dyn Trait
     exports_funcs: HashMap<String, Arc<Callable>>,
@@ -78,20 +84,28 @@ pub struct FCEModule {
 impl FCEModule {
     pub fn new(
         wasm_bytes: &[u8],
-        mut fce_imports: ImportObject,
+        fce_module_config: FCEModuleConfig,
         modules: &HashMap<String, FCEModule>,
     ) -> Result<Self, FCEError> {
-        use wasmer_runtime::Func;
-
         let wasmer_module = compile(&wasm_bytes)?;
         let wit = extract_wit(&wasmer_module)?;
         let fce_wit = FCEWITInterfaces::new(wit);
 
         let mut wit_instance = Arc::new_uninit();
         let import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
-        fce_imports.extend(import_object.clone());
 
-        let wasmer_instance = wasmer_module.instantiate(&fce_imports)?;
+        let mut wasi_import_object = wasmer_wasi::generate_import_object_for_version(
+            fce_module_config.wasi_version,
+            vec![],
+            fce_module_config.wasi_envs.clone(),
+            fce_module_config.wasi_preopened_files.clone(),
+            fce_module_config.wasi_mapped_dirs.clone(),
+        );
+
+        wasi_import_object.extend(import_object.clone());
+        wasi_import_object.extend(fce_module_config.imports.clone());
+
+        let wasmer_instance = wasmer_module.instantiate(&wasi_import_object)?;
         let wit_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
@@ -102,13 +116,16 @@ impl FCEModule {
 
         let exports_funcs = Self::instantiate_wit_exports(wit_instance, &fce_wit)?;
 
-        if let Ok(start_func) = wasmer_instance.exports.get::<Func<'_, (), ()>>("_start") {
+        // call _start to populate the WASI state of the module
+        #[rustfmt::skip]
+        if let Ok(start_func) = wasmer_instance.exports.get::<wasmer_runtime::Func<'_, (), ()>>("_start") {
             start_func.call()?;
         }
 
         Ok(Self {
-            wamser_instance: Box::new(wasmer_instance),
+            wasmer_instance: Box::new(wasmer_instance),
             import_object,
+            host_import_object: fce_module_config.imports,
             exports_funcs,
         })
     }
