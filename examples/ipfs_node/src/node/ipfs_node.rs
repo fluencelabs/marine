@@ -94,6 +94,17 @@ impl crate::node_wasm_service::NodeWasmService for IpfsNode {
         Ok(call_result)
     }
 
+    fn core_call(
+        &mut self,
+        module_name: &str,
+        func_name: &str,
+        args: &[IValue],
+    ) -> Result<Vec<IValue>, NodeError> {
+        self.process
+            .call(module_name, func_name, args)
+            .map_err(Into::into)
+    }
+
     fn get_interface(&self) -> NodePublicInterface {
         let mut modules = Vec::with_capacity(self.module_names.len());
 

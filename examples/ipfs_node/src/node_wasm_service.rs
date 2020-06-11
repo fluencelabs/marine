@@ -27,5 +27,12 @@ pub trait NodeWasmService {
         args: &[IValue],
     ) -> Result<Vec<IValue>, NodeError>;
 
+    fn core_call(
+        &mut self,
+        module_name: &str,
+        func_name: &str,
+        args: &[IValue],
+    ) -> Result<Vec<IValue>, NodeError>;
+
     fn get_interface(&self) -> NodePublicInterface;
 }
