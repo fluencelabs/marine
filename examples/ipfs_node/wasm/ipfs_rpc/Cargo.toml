@@ -4,7 +4,6 @@ version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
-[lib]
+[[bin]]
 name = "wasm_ipfs_rpc"
-path = "src/lib.rs"
-crate-type = ["cdylib"]
+path = "src/main.rs"

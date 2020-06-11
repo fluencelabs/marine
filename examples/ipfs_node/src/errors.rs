@@ -24,7 +24,7 @@ pub enum NodeError {
     /// An error related to config parsing.
     ConfigParseError(String),
 
-    /// Various errors related to file io.
+    /// Various errors related to file i/o.
     IOError(String),
 
     /// WIT doesn't contain such type.

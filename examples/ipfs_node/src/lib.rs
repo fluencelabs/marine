@@ -20,6 +20,8 @@ mod config;
 mod imports;
 mod node_public_interface;
 
+pub use fce::IValue;
+
 pub use node::IpfsNode;
 pub use node_public_interface::NodePublicInterface;
 pub use node_public_interface::NodeModulePublicInterface;

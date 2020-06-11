@@ -81,6 +81,8 @@ impl FCEModule {
         mut fce_imports: ImportObject,
         modules: &HashMap<String, FCEModule>,
     ) -> Result<Self, FCEError> {
+        use wasmer_runtime::Func;
+
         let wasmer_module = compile(&wasm_bytes)?;
         let wit = extract_wit(&wasmer_module)?;
         let fce_wit = FCEWITInterfaces::new(wit);
@@ -99,6 +101,10 @@ impl FCEModule {
         };
 
         let exports_funcs = Self::instantiate_wit_exports(wit_instance, &fce_wit)?;
+
+        if let Ok(start_func) = wasmer_instance.exports.get::<Func<'_, (), ()>>("_start") {
+            start_func.call()?;
+        }
 
         Ok(Self {
             wamser_instance: Box::new(wasmer_instance),

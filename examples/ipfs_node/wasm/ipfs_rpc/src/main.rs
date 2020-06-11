@@ -22,13 +22,17 @@ use crate::result::{RESULT_PTR, RESULT_SIZE};
 use std::fs;
 use std::path::PathBuf;
 
+const RPC_TMP_FILEPATH: &str = "/tmp/ipfs_rpc_file";
+
+pub fn main() {
+    println!("ipfs_rpc.main: WASI initialization finished");
+}
+
 #[no_mangle]
 pub unsafe fn invoke(_ptr: *mut u8, _size: usize) {
-    let msg = "ipfs_rpc.invoke: invoke called";
-    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+    println!("ipfs_rpc.invoke: invoke called");
 
-    let result = "IFPFS_RPC wasm example, it allow:\nput\nget".to_string();
-
+    let result = "IPFS_RPC wasm example, it allow:\nput\nget".to_string();
     *RESULT_PTR.get_mut() = result.as_ptr() as _;
     *RESULT_SIZE.get_mut() = result.len();
     std::mem::forget(result);
@@ -39,15 +43,13 @@ pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
     let file_content =
         String::from_raw_parts(file_content_ptr, file_content_size, file_content_size);
 
-    let msg = format!("ipfs_rpc.put: file_content is {}\n", file_content);
-    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+    println!("ipfs_rpc.put: file_content is {}\n", file_content);
 
-    let rpc_tmp_filepath = "/tmp/ipfs_rpc.tmp".to_string();
+    let rpc_tmp_filepath = RPC_TMP_FILEPATH.to_string();
 
     let r = fs::write(PathBuf::from(rpc_tmp_filepath.clone()), file_content);
     if let Err(e) = r {
-        let msg: String = e.to_string();
-        log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+        println!("{}", e);
     }
 
     ipfs_put(rpc_tmp_filepath.as_ptr() as _, rpc_tmp_filepath.len() as _);
@@ -59,8 +61,7 @@ pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
         *RESULT_SIZE.get_mut(),
     );
 
-    let msg = format!("ipfs_rpc.put: file add with hash {}\n", hash);
-    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+    println!("ipfs_rpc.put: file add with hash {}\n", hash);
 
     *RESULT_PTR.get_mut() = hash.as_ptr() as _;
     *RESULT_SIZE.get_mut() = hash.len();
@@ -71,8 +72,7 @@ pub unsafe fn put(file_content_ptr: *mut u8, file_content_size: usize) {
 pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
     let hash = String::from_raw_parts(hash_ptr, hash_size, hash_size);
 
-    let msg = format!("ipfs_rpc.get: getting file with hash {}\n", hash);
-    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+    println!("ipfs_rpc.get: getting file with hash {}\n", hash);
 
     ipfs_get(hash.as_ptr() as _, hash.len() as _);
 
@@ -82,8 +82,7 @@ pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
         *RESULT_SIZE.get_mut(),
     );
 
-    let msg = format!("ipfs_rpc.get: reading file from {}\n", file_path);
-    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+    println!("ipfs_rpc.get: reading file from {}\n", file_path);
 
     let file_content = fs::read(file_path).unwrap_or_else(|_| b"error while reading file".to_vec());
 
