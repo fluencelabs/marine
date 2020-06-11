@@ -5,3 +5,6 @@ target/
 # Wasm files
 *.wasm
 *.wat
+
+# Dir for compiled artifact
+bin/
