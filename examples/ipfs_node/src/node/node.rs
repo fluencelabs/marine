@@ -15,18 +15,14 @@
  */
 
 use super::errors::NodeError;
-use crate::config::ModuleConfig;
-use crate::node_public_interface::NodePublicInterface;
-use crate::node_public_interface::NodeModulePublicInterface;
+use super::node_public_interface::NodePublicInterface;
+use super::node_public_interface::NodeModulePublicInterface;
 
 use fce::FCE;
 use fce::WasmProcess;
 use fce::IValue;
 use fce::FCEModuleConfig;
-use wasmer_core::import::ImportObject;
-use wasmer_runtime::func;
 
-use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 
@@ -45,7 +41,7 @@ impl IpfsNode {
         let mut wasm_process = FCE::new();
         let mut module_names = Vec::new();
         let mut core_modules_config =
-            crate::config::parse_config_from_file(config_file_path.into())?;
+            super::config::parse_config_from_file(config_file_path.into())?;
 
         for entry in fs::read_dir(core_modules_dir.into())? {
             let path = entry?.path();
@@ -62,7 +58,7 @@ impl IpfsNode {
 
             let module_bytes = fs::read(path.clone())?;
 
-            let core_module_config = Self::make_wasm_process_config(
+            let core_module_config = super::utils::make_wasm_process_config(
                 core_modules_config.modules_config.remove(&module_name),
             )?;
             wasm_process.load_module(module_name.clone(), &module_bytes, core_module_config)?;
@@ -70,7 +66,7 @@ impl IpfsNode {
         }
 
         let rpc_module_config =
-            Self::make_wasm_process_config(core_modules_config.rpc_module_config)?;
+            super::utils::make_wasm_process_config(core_modules_config.rpc_module_config)?;
 
         Ok(Self {
             process: wasm_process,
@@ -108,73 +104,5 @@ impl IpfsNode {
         }
 
         NodePublicInterface { modules }
-    }
-
-    fn make_wasm_process_config(
-        config: Option<ModuleConfig>,
-    ) -> Result<FCEModuleConfig, NodeError> {
-        use crate::imports::create_host_import_func;
-        use crate::imports::log_utf8_string;
-        use wasmer_core::import::Namespace;
-
-        let mut wasm_module_config = FCEModuleConfig::default();
-
-        let module_config = match config {
-            Some(config) => config,
-            None => return Ok(wasm_module_config),
-        };
-
-        if let Some(mem_pages_count) = module_config.mem_pages_count {
-            wasm_module_config.mem_pages_count = mem_pages_count;
-        }
-
-        let mut namespace = Namespace::new();
-
-        if let Some(logger_enabled) = module_config.logger_enabled {
-            if logger_enabled {
-                namespace.insert("log_utf8_string", func!(log_utf8_string));
-            }
-        }
-
-        if let Some(wasi) = module_config.wasi {
-            if let Some(envs) = wasi.envs {
-                wasm_module_config.wasi_envs = envs;
-            }
-
-            if let Some(preopened_files) = wasi.preopened_files {
-                wasm_module_config.wasi_preopened_files = preopened_files
-                    .iter()
-                    .map(PathBuf::from)
-                    .collect::<Vec<_>>();
-            }
-
-            if let Some(mapped_dirs) = wasi.mapped_dirs {
-                wasm_module_config.wasi_mapped_dirs = mapped_dirs
-                    .into_iter()
-                    .map(|(from, to)| (from, PathBuf::from(to)))
-                    .collect::<Vec<_>>();
-            }
-        };
-
-        let _mapped_dirs = wasm_module_config
-            .wasi_mapped_dirs
-            .iter()
-            .map(|(from, to)| (from.clone(), to.as_path().to_str().unwrap().to_string()))
-            .collect::<HashMap<_, _>>();
-
-        if let Some(imports) = module_config.imports {
-            for (import_name, host_cmd) in imports {
-                let host_import = create_host_import_func(host_cmd);
-                namespace.insert(import_name, host_import);
-            }
-        }
-
-        let mut import_object = ImportObject::new();
-        import_object.register("host", namespace);
-
-        wasm_module_config.imports = import_object;
-        wasm_module_config.wasi_version = wasmer_wasi::WasiVersion::Latest;
-
-        Ok(wasm_module_config)
     }
 }

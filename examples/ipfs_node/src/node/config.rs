@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::errors::NodeError;
+use super::errors::NodeError;
 
 use serde_derive::Deserialize;
 use toml::from_slice;

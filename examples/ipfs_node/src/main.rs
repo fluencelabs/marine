@@ -13,13 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#![feature(pattern)]
 
 mod node;
-mod errors;
-mod config;
-mod imports;
-mod node_public_interface;
 
 use fce::IValue;
 use node::IpfsNode;
