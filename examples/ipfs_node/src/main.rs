@@ -30,7 +30,7 @@ const IPFS_MODULES_DIR: &str = "/Users/mike/dev/work/fluence/wasm/fce/bin/wasm_m
 const IPFS_MODULES_CONFIG_PATH: &str =
     "/Users/mike/dev/work/fluence/wasm/fce/examples/ipfs_node/Config.toml";
 
-const IPFS_RPC: &str = "/Users/mike/dev/work/fluence/wasm/fce/bin/wasm_ipfs_rpc_wit.wasm";
+const IPFS_RPC: &str = "/Users/mike/dev/work/fluence/wasm/fce/bin/wasm_ipfs_rpc_wit.wasi.wasm";
 
 fn main() {
     let ipfs_rpc = std::fs::read(IPFS_RPC).unwrap();
@@ -44,7 +44,7 @@ fn main() {
     println!("ipfs node interface is\n{}", ipfs_node.get_interface());
 
     let result = ipfs_node
-        .rpc_call(&ipfs_rpc, &[IValue::String("asdsad".to_string())])
+        .rpc_call(&ipfs_rpc, "put", &[IValue::String("asdsad".to_string())])
         .unwrap();
 
     println!("execution result {:?}", result);

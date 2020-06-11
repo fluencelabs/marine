@@ -9,9 +9,14 @@
 
     [core_module.wasi]
     envs = ["asdsad=sdaasd"]
-    preopened_files = ["/tmp/file1"]
-    mapped_dirs = { tmp = "/tmp", tmp2 = "/tmp" }
+    preopened_files = ["/Users/mike/dev/work/fluence/wasm/tmp/"]
+    mapped_dirs = { "/tmp" = "/Users/mike/dev/work/fluence/wasm/tmp" }
 
 [rpc_module]
     mem_pages_count = 100
     logger_enabled = true
+
+    [rpc_module.wasi]
+    envs = ["asdsad=sdaasd"]
+    preopened_files = ["/Users/mike/dev/work/fluence/wasm/tmp"]
+    mapped_dirs = { "/tmp/" = "/Users/mike/dev/work/fluence/wasm/tmp" }

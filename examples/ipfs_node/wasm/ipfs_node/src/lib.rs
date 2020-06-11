@@ -27,13 +27,13 @@ const RESULT_PATH: &str = "/tmp/ipfs_rpc_file";
 pub unsafe fn put(file_path_ptr: *mut u8, file_path_size: usize) {
     let file_path = String::from_raw_parts(file_path_ptr, file_path_size, file_path_size);
 
-    let msg = format!("from Wasm ipfs_node.put: file path is {}\n", file_path);
+    let msg = format!("ipfs_node.put: file path is {}\n", file_path);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     let cmd = format!("add -Q {}", file_path);
     let result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
 
-    let hash = if result {
+    let hash = if result == 1 {
         String::from_raw_parts(
             *RESULT_PTR.get_mut() as _,
             *RESULT_SIZE.get_mut(),
@@ -43,7 +43,7 @@ pub unsafe fn put(file_path_ptr: *mut u8, file_path_size: usize) {
         "host ipfs call failed".to_string()
     };
 
-    let msg = format!("from Wasm ipfs_node.put: file add wtih hash is {} \n", hash);
+    let msg = format!("ipfs_node.put: file add wtih hash is {} \n", hash);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     *RESULT_PTR.get_mut() = hash.as_ptr() as _;
@@ -55,7 +55,7 @@ pub unsafe fn put(file_path_ptr: *mut u8, file_path_size: usize) {
 pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
     let hash = String::from_raw_parts(hash_ptr, hash_size, hash_size);
 
-    let msg = format!("from Wasm ipfs_node.get: file hash is {}\n", hash);
+    let msg = format!("ipfs_node.get: file hash is {}\n", hash);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     let cmd = format!("get -o {}  {}", RESULT_PATH, hash);
@@ -70,7 +70,7 @@ pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
     // TODO: check output
 
     let file_path = RESULT_PATH.to_string();
-    let msg = format!("from Wasm ipfs_node.get: file path is {}", file_path);
+    let msg = format!("ipfs_node.get: file path is {}", file_path);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     *RESULT_PTR.get_mut() = file_path.as_ptr() as _;

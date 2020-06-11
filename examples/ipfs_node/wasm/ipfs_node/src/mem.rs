@@ -23,7 +23,7 @@ use std::ptr::NonNull;
 pub unsafe fn allocate(size: usize) -> NonNull<u8> {
     let layout: Layout = Layout::from_size_align(size, std::mem::align_of::<u8>()).unwrap();
 
-    let msg = format!("wasm_node: calling allocate with {}\n", size);
+    let msg = format!("ipfs_node.allocate: {}\n", size);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     NonNull::new_unchecked(global_alloc(layout))
@@ -34,7 +34,7 @@ pub unsafe fn allocate(size: usize) -> NonNull<u8> {
 pub unsafe fn deallocate(ptr: NonNull<u8>, size: usize) {
     let layout = Layout::from_size_align(size, std::mem::align_of::<u8>()).unwrap();
 
-    let msg = format!("wasm_node: calling deallocate with {:?} {}\n", ptr, size);
+    let msg = format!("ipfs_node.deallocate: {:?} {}\n", ptr, size);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     global_dealloc(ptr.as_ptr(), layout);

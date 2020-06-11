@@ -25,7 +25,6 @@ use wasmer_runtime::error::ResolveError;
 use wasmer_core::backend::SigRegistry;
 use wasmer_runtime::types::LocalOrImport;
 use wasmer_core::module::ExportIndex;
-use wasmer_core::structures::TypedIndex;
 
 const ALLOCATE_FUNC_NAME: &'static str = "allocate";
 

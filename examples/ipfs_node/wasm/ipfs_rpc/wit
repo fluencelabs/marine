@@ -26,10 +26,16 @@
 (@interface type (func (param string) (result string))) ;; 8
 
 ;; import ipfs put/get function
-(@interface type (func (param i32 i32))) ;; 9
+(@interface type (func (param i32 i32)))                ;; 9
 
 ;; import ipfs put/get function
-(@interface type (func (param i32 i32))) ;; 10
+(@interface type (func (param i32 i32)))                ;; 10
+
+;; export ipfs put/get function
+(@interface type (func (param string) (result string))) ;; 11
+
+;; export ipfs put/get function
+(@interface type (func (param string) (result string))) ;; 12
 
 (@interface export "allocate" (func  0))               ;; 0
 (@interface export "deallocate" (func 1))              ;; 1
@@ -38,6 +44,8 @@
 (@interface export "get_result_ptr" (func 3))          ;; 4
 (@interface export "set_result_size" (func 4))         ;; 5
 (@interface export "set_result_ptr" (func 4))          ;; 6
+(@interface export "put" (func 11))                    ;; 7
+(@interface export "get" (func 12))                    ;; 8
 
 (@interface import "ipfs_node.wasm" "get" (func (type 5)))
 (@interface import "ipfs_node.wasm" "put" (func (type 6)))
@@ -45,6 +53,7 @@
 (@interface import "ipfs_node.wasm" "get" (func (type 7)))       ;; 7
 (@interface import "ipfs_node.wasm" "put" (func (type 8)))       ;; 8
 
+;; adapter for export invoke function
 (@interface func (type 2)
     arg.get 0
     string.size
@@ -52,6 +61,38 @@
     arg.get 0
     string.lower_memory
     call-core 2             ;; call invoke
+    call-core 4             ;; call get_result_size
+    call-core 3             ;; call get_result_ptr
+    string.lift_memory
+    call-core 4             ;; call get_result_size
+    call-core 3             ;; call get_result_ptr
+    call-core 1             ;; call deallocate
+)
+
+;; adapter for export put function
+(@interface func (type 11)
+    arg.get 0
+    string.size
+    call-core 0             ;; call allocate
+    arg.get 0
+    string.lower_memory
+    call-core 7             ;; call put
+    call-core 4             ;; call get_result_size
+    call-core 3             ;; call get_result_ptr
+    string.lift_memory
+    call-core 4             ;; call get_result_size
+    call-core 3             ;; call get_result_ptr
+    call-core 1             ;; call deallocate
+)
+
+;; adapter for export get function
+(@interface func (type 12)
+    arg.get 0
+    string.size
+    call-core 0             ;; call allocate
+    arg.get 0
+    string.lower_memory
+    call-core 8             ;; call get
     call-core 4             ;; call get_result_size
     call-core 3             ;; call get_result_ptr
     string.lift_memory
@@ -94,3 +135,5 @@
 (@interface implement (func 2) (func 2))
 (@interface implement (func 5) (func 9))
 (@interface implement (func 6) (func 10))
+(@interface implement (func 11) (func 11))
+(@interface implement (func 12) (func 12))

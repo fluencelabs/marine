@@ -9,6 +9,7 @@ fce = { path = "../../fce" }
 
 wasmer-core = { package = "wasmer-runtime-core", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
 wasmer-runtime = "0.17.0"
+wasmer-wasi = "0.17.0"
 
 toml = "0.5.6"
 serde = { version = "1.0.111", features = ["derive"] }

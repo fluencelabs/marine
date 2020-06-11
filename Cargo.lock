@@ -520,6 +520,7 @@ dependencies = [
  "toml",
  "wasmer-runtime",
  "wasmer-runtime-core",
+ "wasmer-wasi",
 ]
 
 [[package]]

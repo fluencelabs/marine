@@ -28,6 +28,7 @@ use fce::FCEModuleConfig;
 
 use std::fs;
 use std::path::PathBuf;
+use wasmer_wasi::generate_import_object_for_version;
 
 pub struct IpfsNode {
     process: FCE,
@@ -78,13 +79,18 @@ impl IpfsNode {
         })
     }
 
-    pub fn rpc_call(&mut self, wasm_rpc: &[u8], args: &[IValue]) -> Result<Vec<IValue>, NodeError> {
+    pub fn rpc_call(
+        &mut self,
+        wasm_rpc: &[u8],
+        func_name: &str,
+        args: &[IValue],
+    ) -> Result<Vec<IValue>, NodeError> {
         let rpc_module_name = "ipfs_rpc";
 
         self.process
             .load_module(rpc_module_name, wasm_rpc, self.rpc_module_config.clone())?;
 
-        let call_result = self.process.call(rpc_module_name, "invoke", args)?;
+        let call_result = self.process.call(rpc_module_name, func_name, args)?;
         self.process.unload_module(rpc_module_name)?;
 
         Ok(call_result)
@@ -110,6 +116,7 @@ impl IpfsNode {
         use crate::imports::create_host_import_func;
         use crate::imports::log_utf8_string;
         use wasmer_core::import::Namespace;
+        use wasmer_wasi::WasiVersion;
 
         let mut wasm_module_config = FCEModuleConfig::default();
 
@@ -137,10 +144,7 @@ impl IpfsNode {
             }
         }
 
-        let mut import_object = ImportObject::new();
-        import_object.register("host", namespace);
-
-        if let Some(wasi) = module_config.wasi {
+        let mut import_object = if let Some(wasi) = module_config.wasi {
             if let Some(envs) = wasi.envs {
                 wasm_module_config.wasi_envs = envs;
             }
@@ -158,9 +162,22 @@ impl IpfsNode {
                     .map(|(from, to)| (from, PathBuf::from(to)))
                     .collect::<Vec<_>>();
             }
-        }
+
+            generate_import_object_for_version(
+                WasiVersion::Latest,
+                vec![],
+                wasm_module_config.wasi_envs.clone(),
+                wasm_module_config.wasi_preopened_files.clone(),
+                wasm_module_config.wasi_mapped_dirs.clone(),
+            )
+        } else {
+            ImportObject::new()
+        };
+
+        import_object.register("host", namespace);
 
         wasm_module_config.imports = import_object;
+        wasm_module_config.wasi_version = WasiVersion::Latest;
 
         Ok(wasm_module_config)
     }
