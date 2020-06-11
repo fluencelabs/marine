@@ -46,7 +46,7 @@ impl IpfsNode {
         for entry in fs::read_dir(core_modules_dir.into())? {
             let path = entry?.path();
             if path.is_dir() {
-                // just pass directories
+                // just skip directories
                 continue;
             }
 
@@ -74,8 +74,10 @@ impl IpfsNode {
             rpc_module_config,
         })
     }
+}
 
-    pub fn rpc_call(
+impl crate::node_wasm_service::NodeWasmService for IpfsNode {
+    fn rpc_call(
         &mut self,
         wasm_rpc: &[u8],
         func_name: &str,
@@ -92,7 +94,7 @@ impl IpfsNode {
         Ok(call_result)
     }
 
-    pub fn get_interface(&self) -> NodePublicInterface {
+    fn get_interface(&self) -> NodePublicInterface {
         let mut modules = Vec::with_capacity(self.module_names.len());
 
         for module_name in self.module_names.iter() {

@@ -17,11 +17,11 @@
 mod config;
 mod errors;
 mod imports;
-mod node;
+mod ipfs_node;
 mod node_public_interface;
 mod utils;
 
-pub use node::IpfsNode;
+pub use ipfs_node::IpfsNode;
 pub use errors::NodeError;
 pub use node_public_interface::NodePublicInterface;
 pub use node_public_interface::NodeModulePublicInterface;

@@ -1,6 +1,6 @@
 [package]
-name = "ipfs_node"
-version = "0.1.0"
+name = "ipfs_node_service"
+version = "0.2.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 

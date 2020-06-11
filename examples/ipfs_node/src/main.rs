@@ -15,9 +15,15 @@
  */
 
 mod node;
+mod node_wasm_service;
+
+pub use node::IpfsNode;
+pub use node::NodeError;
+pub use node::NodePublicInterface;
+pub use node::NodeModulePublicInterface;
+pub use node_wasm_service::NodeWasmService;
 
 use fce::IValue;
-use node::IpfsNode;
 
 use std::path::PathBuf;
 

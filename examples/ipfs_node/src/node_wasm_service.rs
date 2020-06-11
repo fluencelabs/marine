@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-mod node;
-mod node_wasm_service;
+use crate::NodeError;
+use crate::NodePublicInterface;
 
-pub use fce::IValue;
+use fce::IValue;
 
-pub use node::IpfsNode;
-pub use node::NodeError;
-pub use node::NodePublicInterface;
-pub use node::NodeModulePublicInterface;
-pub use node_wasm_service::NodeWasmService;
+pub trait NodeWasmService {
+    fn rpc_call(
+        &mut self,
+        wasm_rpc: &[u8],
+        func_name: &str,
+        args: &[IValue],
+    ) -> Result<Vec<IValue>, NodeError>;
+
+    fn get_interface(&self) -> NodePublicInterface;
+}
