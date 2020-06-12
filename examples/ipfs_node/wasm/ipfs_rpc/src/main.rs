@@ -22,7 +22,7 @@ use crate::result::{RESULT_PTR, RESULT_SIZE};
 use std::fs;
 use std::path::PathBuf;
 
-const RPC_TMP_FILEPATH: &str = "/Users/mike/dev/work/fluence/wasm/tmp/ipfs_rpc_file";
+const RPC_TMP_FILEPATH: &str = "/tmp/ipfs_rpc_file";
 
 pub fn main() {
     println!("ipfs_rpc.main: WASI initialization finished");

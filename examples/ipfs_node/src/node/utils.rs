@@ -29,7 +29,6 @@ use wasmer_core::backend::SigRegistry;
 use wasmer_runtime::types::LocalOrImport;
 use wasmer_core::module::ExportIndex;
 
-use std::collections::HashMap;
 use std::path::PathBuf;
 
 // based on Wasmer: https://github.com/wasmerio/wasmer/blob/081f6250e69b98b9f95a8f62ad6d8386534f3279/lib/runtime-core/src/instance.rs#L863
@@ -146,13 +145,15 @@ pub(super) fn make_wasm_process_config(
                 .map(|(from, to)| (from, PathBuf::from(to)))
                 .collect::<Vec<_>>();
         }
-    };
 
-    let _mapped_dirs = wasm_module_config
-        .wasi_mapped_dirs
-        .iter()
-        .map(|(from, to)| (from.clone(), to.as_path().to_str().unwrap().to_string()))
-        .collect::<HashMap<_, _>>();
+        let mapped_dirs = wasm_module_config
+            .wasi_mapped_dirs
+            .iter()
+            .map(|(from, to)| (format!("{}={}", from, to.as_path().to_str().unwrap()).into_bytes()))
+            .collect::<Vec<_>>();
+
+        wasm_module_config.wasi_envs.extend(mapped_dirs);
+    };
 
     if let Some(imports) = module_config.imports {
         for (import_name, host_cmd) in imports {

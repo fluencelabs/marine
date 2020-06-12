@@ -8,15 +8,15 @@
     ipfs = "/usr/local/bin/ipfs"
 
     [core_module.wasi]
-    envs = ["asdsad=sdaasd"]
+    envs = []
     preopened_files = ["/Users/mike/dev/work/fluence/wasm/tmp/"]
-    mapped_dirs = { "/tmp" = "/Users/mike/dev/work/fluence/wasm/tmp" }
+    mapped_dirs = { "tmp" = "/Users/mike/dev/work/fluence/wasm/tmp" }
 
 [rpc_module]
     mem_pages_count = 100
     logger_enabled = true
 
     [rpc_module.wasi]
-    envs = ["asdsad=sdaasd"]
+    envs = []
     preopened_files = ["/Users/mike/dev/work/fluence/wasm/tmp"]
-    mapped_dirs = { "/tmp" = "/Users/mike/dev/work/fluence/wasm/tmp" }
+    mapped_dirs = { "tmp" = "/Users/mike/dev/work/fluence/wasm/tmp" }

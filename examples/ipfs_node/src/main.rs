@@ -46,23 +46,13 @@ fn main() {
     println!("ipfs node interface is\n{}", ipfs_node.get_interface());
 
     let node_addresses = ipfs_node
-        .core_call(
-            "ipfs_node.wasm",
-            "get_addresses",
-            &[],
-        )
+        .core_call("ipfs_node.wasm", "get_addresses", &[])
         .unwrap();
 
     println!("ipfs node addresses are:\n{:?}", node_addresses);
 
     let result = ipfs_node
-        .rpc_call(
-            &ipfs_rpc,
-            "get",
-            &[IValue::String(
-                "Qmf412jQZiuVUtdgnB36FXFX7xg5V6KEbSJ4dpQuhkLyfD".to_string(),
-            )],
-        )
+        .rpc_call(&ipfs_rpc, "put", &[IValue::String("asdasdasd".to_string())])
         .unwrap();
 
     println!("execution result {:?}", result);

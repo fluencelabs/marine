@@ -18,13 +18,19 @@
 
 mod mem;
 mod result;
+mod path;
 
 use crate::result::{RESULT_PTR, RESULT_SIZE};
+use crate::path::to_full_path;
 
-const RESULT_PATH: &str = "/Users/mike/dev/work/fluence/wasm/tmp/ipfs_rpc_file";
+const RESULT_FILE_PATH: &str = "/tmp/ipfs_rpc_file";
 
 pub fn main() {
-    println!("ipfs_node.main: WASI initialization finished");
+    let env_variable = std::env::var("tmp").unwrap();
+    println!(
+        "ipfs_node.main: WASI initialization finished, env {}",
+        env_variable
+    );
 }
 
 #[no_mangle]
@@ -33,6 +39,8 @@ pub unsafe fn put(file_path_ptr: *mut u8, file_path_size: usize) {
 
     let msg = format!("ipfs_node.put: file path is {}\n", file_path);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+
+    let file_path = to_full_path(file_path);
 
     let cmd = format!("add -Q {}", file_path);
     let result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
@@ -62,7 +70,9 @@ pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
     let msg = format!("ipfs_node.get: file hash is {}\n", hash);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
-    let cmd = format!("get -o {}  {}", RESULT_PATH, hash);
+    let result_file_path = to_full_path(RESULT_FILE_PATH);
+
+    let cmd = format!("get -o {}  {}", result_file_path, hash);
     let _result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
 
     let _output = String::from_raw_parts(
@@ -73,7 +83,7 @@ pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
 
     // TODO: check output
 
-    let file_path = RESULT_PATH.to_string();
+    let file_path = RESULT_FILE_PATH.to_string();
     let msg = format!("ipfs_node.get: file path is {}", file_path);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
@@ -100,7 +110,10 @@ pub unsafe fn get_addresses() {
         "host ipfs call failed".to_string()
     };
 
-    let msg = format!("ipfs_node.get_addresses: node addresses are {} \n", multiaddrs);
+    let msg = format!(
+        "ipfs_node.get_addresses: node addresses are {} \n",
+        multiaddrs
+    );
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     *RESULT_PTR.get_mut() = multiaddrs.as_ptr() as _;
