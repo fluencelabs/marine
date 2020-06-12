@@ -47,7 +47,7 @@ pub unsafe fn put(file_path_ptr: *mut u8, file_path_size: usize) {
         "host ipfs call failed".to_string()
     };
 
-    let msg = format!("ipfs_node.put: file add wtih hash is {} \n", hash);
+    let msg = format!("ipfs_node.put: file add with hash is {} \n", hash);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     *RESULT_PTR.get_mut() = hash.as_ptr() as _;
@@ -80,6 +80,32 @@ pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
     *RESULT_PTR.get_mut() = file_path.as_ptr() as _;
     *RESULT_SIZE.get_mut() = file_path.len();
     std::mem::forget(file_path);
+}
+
+#[no_mangle]
+pub unsafe fn get_addresses() {
+    let msg = "ipfs_node.get_addresses".to_string();
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+
+    let cmd = "id -f'<addrs>'";
+    let result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
+
+    let multiaddrs = if result == 0 {
+        String::from_raw_parts(
+            *RESULT_PTR.get_mut() as _,
+            *RESULT_SIZE.get_mut(),
+            *RESULT_SIZE.get_mut(),
+        )
+    } else {
+        "host ipfs call failed".to_string()
+    };
+
+    let msg = format!("ipfs_node.get_addresses: node addresses are {} \n", multiaddrs);
+    log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+
+    *RESULT_PTR.get_mut() = multiaddrs.as_ptr() as _;
+    *RESULT_SIZE.get_mut() = multiaddrs.len();
+    std::mem::forget(multiaddrs);
 }
 
 #[link(wasm_import_module = "host")]

@@ -15,9 +15,9 @@
  */
 
 use wasmer_wasi::WasiVersion;
+use wasmer_runtime::ImportObject;
 
 use std::path::PathBuf;
-use wasmer_runtime::ImportObject;
 
 #[derive(Clone)]
 pub struct FCEModuleConfig {

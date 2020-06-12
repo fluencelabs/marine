@@ -20,6 +20,7 @@
 (@interface export "get_result_size" (func 4))
 (@interface export "get_result_ptr" (func 4))
 
+;; greeting export adapter
 (@interface func (type 2)
     arg.get 0
     string.size
@@ -35,6 +36,7 @@
     call-core 1 ;; call deallocate
 )
 
+;; strlen export adapter
 (@interface func (type 3)
     arg.get 0
     string.size
