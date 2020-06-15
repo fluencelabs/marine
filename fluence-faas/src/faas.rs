@@ -27,8 +27,11 @@ use std::path::PathBuf;
 
 pub struct FluenceFaaS {
     process: FCE,
+
     // names of core modules loaded to FCE
     module_names: Vec<String>,
+
+    // config for code loaded by call_code function
     faas_code_config: FCEModuleConfig,
 }
 
@@ -73,6 +76,7 @@ impl FluenceFaaS {
         })
     }
 
+    /// Executes provided Wasm code in the internal environment (with access to module exports).
     pub fn call_code(
         &mut self,
         wasm_rpc: &[u8],
@@ -90,6 +94,7 @@ impl FluenceFaaS {
         Ok(call_result)
     }
 
+    /// Call a specified function of loaded on a startup module by its name.
     pub fn call_module(
         &mut self,
         module_name: &str,
@@ -101,6 +106,7 @@ impl FluenceFaaS {
             .map_err(Into::into)
     }
 
+    /// Return all export functions (name and signatures) of loaded on a startup modules.
     pub fn get_interface(&self) -> FaaSInterface {
         let mut modules = Vec::with_capacity(self.module_names.len());
 

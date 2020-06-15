@@ -5,8 +5,8 @@ authors = ["Fluence Labs"]
 edition = "2018"
 
 [dependencies]
-fce_wit_interfaces = { path = "../crates/fce_wit_interfaces" }
-wit_parser = { path = "../crates/wit_parser" }
+fce_wit_interfaces = { path = "../crates/fce_wit_interfaces", version = "0.1.0" }
+wit_parser = { path = "../crates/wit_parser", version = "0.1.0" }
 
 wasmer-runtime = "0.17.0"
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
