@@ -32,6 +32,7 @@ use wasmer_core::module::ExportIndex;
 use std::path::PathBuf;
 
 // based on Wasmer: https://github.com/wasmerio/wasmer/blob/081f6250e69b98b9f95a8f62ad6d8386534f3279/lib/runtime-core/src/instance.rs#L863
+/// Extract export function from Wasmer instance by name.
 pub(super) unsafe fn get_export_func_by_name<'a, Args, Rets>(
     ctx: &'a mut Ctx,
     name: &str,
@@ -101,6 +102,7 @@ where
     Ok(typed_func)
 }
 
+/// Make FCE config based on parsed raw config.
 pub(super) fn make_wasm_process_config(
     config: Option<ModuleConfig>,
 ) -> Result<FCEModuleConfig, NodeError> {
@@ -169,4 +171,32 @@ pub(super) fn make_wasm_process_config(
     wasm_module_config.wasi_version = wasmer_wasi::WasiVersion::Latest;
 
     Ok(wasm_module_config)
+}
+
+#[macro_export] // https://github.com/rust-lang/rust/issues/57966#issuecomment-461077932
+/// Initialize Wasm function in form of Box<RefCell<Option<Func<'static, args, rets>>>> only once.
+macro_rules! init_wasm_func_once {
+    ($func:ident, $ctx:ident, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
+        if $func.borrow().is_none() {
+            let raw_func =
+                match super::utils::get_export_func_by_name::<$args, $rets>($ctx, $func_name) {
+                    Ok(func) => func,
+                    Err(_) => return vec![Value::I32($ret_error_code)],
+                };
+
+            // assumed that this function will be used only in the context of closure
+            // linked to a corresponding Wasm import - os it is safe to make is static
+            let raw_func = std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_func);
+
+            *$func.borrow_mut() = Some(raw_func);
+        }
+    };
+}
+
+#[macro_export]
+/// Call Wasm function that have Box<RefCell<Option<Func<'static, args, rets>>>> type.
+macro_rules! call_wasm_func {
+    ($func:ident, $arg:expr) => {
+        $func.borrow().as_ref().unwrap().call($arg).unwrap()
+    };
 }

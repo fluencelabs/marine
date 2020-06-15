@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use super::utils::get_export_func_by_name;
+use crate::init_wasm_func_once;
+use crate::call_wasm_func;
 
 use wasmer_core::vm::Ctx;
 use wasmer_core::typed_func::DynamicFunc;
@@ -54,6 +55,7 @@ where
     use wasmer_core::Func;
     use std::cell::RefCell;
 
+    //#[rustfmt:skip]
     let allocate_func: Box<RefCell<Option<Func<'static, i32, i32>>>> = Box::new(RefCell::new(None));
     let set_result_ptr_func: Box<RefCell<Option<Func<'static, i32, ()>>>> =
         Box::new(RefCell::new(None));
@@ -75,65 +77,14 @@ where
         };
 
         unsafe {
-            if allocate_func.borrow().is_none() {
-                let raw_allocate_func =
-                    match get_export_func_by_name::<i32, i32>(ctx, ALLOCATE_FUNC_NAME) {
-                        Ok(func) => func,
-                        Err(_) => return vec![Value::I32(4)],
-                    };
+            init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 4);
+            init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 5);
+            init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 6);
 
-                let raw_allocate_func =
-                    std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_allocate_func);
-                *allocate_func.borrow_mut() = Some(raw_allocate_func);
-            }
-
-            if set_result_ptr_func.borrow().is_none() {
-                let raw_set_result_ptr_func =
-                    match get_export_func_by_name::<i32, ()>(ctx, SET_PTR_FUNC_NAME) {
-                        Ok(func) => func,
-                        Err(_) => return vec![Value::I32(5)],
-                    };
-
-                let raw_set_result_ptr_func = std::mem::transmute::<
-                    Func<'_, _, _>,
-                    Func<'static, _, _>,
-                >(raw_set_result_ptr_func);
-                *set_result_ptr_func.borrow_mut() = Some(raw_set_result_ptr_func);
-            }
-
-            if set_result_size_func.borrow().is_none() {
-                let raw_set_result_size_func =
-                    match get_export_func_by_name::<i32, ()>(ctx, SET_SIZE_FUNC_NAME) {
-                        Ok(func) => func,
-                        Err(_) => return vec![Value::I32(6)],
-                    };
-
-                let raw_set_result_size_func = std::mem::transmute::<
-                    Func<'_, _, _>,
-                    Func<'static, _, _>,
-                >(raw_set_result_size_func);
-                *set_result_size_func.borrow_mut() = Some(raw_set_result_size_func);
-            }
-
-            let mem_address = allocate_func
-                .borrow()
-                .as_ref()
-                .unwrap()
-                .call(result.len() as i32)
-                .unwrap();
+            let mem_address = call_wasm_func!(allocate_func, result.len() as i32);
             write_to_mem(ctx, mem_address as usize, result.as_bytes());
-            set_result_ptr_func
-                .borrow()
-                .as_ref()
-                .unwrap()
-                .call(mem_address as i32)
-                .unwrap();
-            set_result_size_func
-                .borrow()
-                .as_ref()
-                .unwrap()
-                .call(result.len() as i32)
-                .unwrap();
+            call_wasm_func!(set_result_ptr_func, mem_address);
+            call_wasm_func!(set_result_size_func, result.len() as i32);
 
             vec![Value::I32(0)]
         }
