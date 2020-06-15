@@ -16,8 +16,6 @@
 
 use super::module::FCEModule;
 use super::*;
-use crate::WasmProcess;
-use crate::NodeFunction;
 
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -28,22 +26,23 @@ pub struct FCE {
     modules: HashMap<String, FCEModule>,
 }
 
+/// Represent a function type inside FCE.
+#[derive(Debug)]
+pub struct FCEFunction<'a> {
+    pub name: &'a str,
+    pub inputs: &'a Vec<IType>,
+    pub outputs: &'a Vec<IType>,
+}
+
 impl FCE {
     pub fn new() -> Self {
         Self {
             modules: HashMap::new(),
         }
     }
-}
 
-impl Default for FCE {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl WasmProcess for FCE {
-    fn call(
+    /// Invoke a function of a module inside FCE by given function name with given arguments.
+    pub fn call(
         &mut self,
         module_name: &str,
         func_name: &str,
@@ -56,7 +55,8 @@ impl WasmProcess for FCE {
         }
     }
 
-    fn load_module<S>(
+    /// Load a new module inside FCE.
+    pub fn load_module<S>(
         &mut self,
         module_name: S,
         wasm_bytes: &[u8],
@@ -65,8 +65,7 @@ impl WasmProcess for FCE {
     where
         S: Into<String>,
     {
-        let _prepared_wasm_bytes =
-            super::prepare::prepare_module(wasm_bytes, config.mem_pages_count)?;
+        let _prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
         let module = FCEModule::new(&wasm_bytes, config, &self.modules)?;
 
@@ -79,7 +78,8 @@ impl WasmProcess for FCE {
         }
     }
 
-    fn unload_module(&mut self, module_name: &str) -> Result<(), FCEError> {
+    /// Unload previously loaded module.
+    pub fn unload_module(&mut self, module_name: &str) -> Result<(), FCEError> {
         match self.modules.entry(module_name.to_string()) {
             Entry::Vacant(_) => Err(FCEError::NoSuchModule),
 
@@ -90,12 +90,13 @@ impl WasmProcess for FCE {
         }
     }
 
-    fn get_interface(&self, module_name: &str) -> Result<Vec<NodeFunction<'_>>, FCEError> {
+    /// Return signatures of all exported by this module functions.
+    pub fn get_interface(&self, module_name: &str) -> Result<Vec<FCEFunction<'_>>, FCEError> {
         match self.modules.get(module_name) {
             Some(module) => {
                 let signatures = module
                     .get_exports_signatures()
-                    .map(|(name, inputs, outputs)| NodeFunction {
+                    .map(|(name, inputs, outputs)| FCEFunction {
                         name,
                         inputs,
                         outputs,
@@ -105,5 +106,11 @@ impl WasmProcess for FCE {
             }
             None => Err(FCEError::NoSuchModule),
         }
+    }
+}
+
+impl Default for FCE {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -17,7 +17,7 @@
 use super::wit_prelude::FCEError;
 use super::fce_module::FCEModule;
 use super::{IType, IValue, WValue};
-use crate::vm::module::fce_module::Callable;
+use super::fce_module::Callable;
 
 use wasmer_wit::interpreter::wasm;
 use wasmer_core::instance::DynFunc;

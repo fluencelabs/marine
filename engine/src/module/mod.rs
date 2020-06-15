@@ -32,7 +32,7 @@ pub(self) use wasmer_core::types::Value as WValue;
 pub(self) mod wit_prelude {
     pub(super) use super::wit_instance::WITInstance;
     pub(super) use super::exports::WITExport;
-    pub(super) use crate::vm::FCEError;
+    pub(super) use crate::FCEError;
     pub(super) use super::wit_function::WITFunction;
     pub(super) use super::memory::WITMemoryView;
     pub(super) use super::memory::WITMemory;

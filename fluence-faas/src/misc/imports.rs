@@ -67,6 +67,8 @@ where
     let func = move |ctx: &mut Ctx, inputs: &[Value]| -> Vec<Value> {
         use wasmer_core::memory::ptr::{Array, WasmPtr};
 
+        // this closure is linked to import function that have (i32, i32) -> i32 type -
+        // it is safe to access input slice without its size checking
         let array_ptr = inputs[0].to_u128() as i32;
         let array_size = inputs[1].to_u128() as i32;
 
@@ -77,9 +79,9 @@ where
         };
 
         unsafe {
-            init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 4);
-            init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 5);
-            init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 6);
+            init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 2);
+            init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 3);
+            init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
 
             let mem_address = call_wasm_func!(allocate_func, result.len() as i32);
             write_to_mem(ctx, mem_address as usize, result.as_bytes());

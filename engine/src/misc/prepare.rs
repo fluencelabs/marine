@@ -18,7 +18,7 @@
 // https://github.com/paritytech/substrate/blob/master/srml/contracts/src/wasm/prepare.rs
 // https://github.com/nearprotocol/nearcore/blob/master/runtime/near-vm-runner/src/prepare.rs
 
-use super::errors::FCEError;
+use crate::FCEError;
 
 use parity_wasm::{
     builder, elements,
@@ -73,7 +73,7 @@ impl<'a> ModuleBootstrapper {
 
 /// Prepares a Wasm module:
 ///   - set memory page count
-pub fn prepare_module(module: &[u8], mem_pages_count: u32) -> Result<Vec<u8>, FCEError> {
+pub(crate) fn prepare_module(module: &[u8], mem_pages_count: u32) -> Result<Vec<u8>, FCEError> {
     ModuleBootstrapper::init(module)?
         .set_mem_pages_count(mem_pages_count)
         .into_wasm()

@@ -15,7 +15,7 @@
  */
 
 use wasmer_core::vm::Ctx;
-use super::errors::NodeError;
+use crate::FaaSError;
 use super::config::ModuleConfig;
 
 use fce::FCEModuleConfig;
@@ -33,7 +33,7 @@ use std::path::PathBuf;
 
 // based on Wasmer: https://github.com/wasmerio/wasmer/blob/081f6250e69b98b9f95a8f62ad6d8386534f3279/lib/runtime-core/src/instance.rs#L863
 /// Extract export function from Wasmer instance by name.
-pub(super) unsafe fn get_export_func_by_name<'a, Args, Rets>(
+pub(crate) unsafe fn get_export_func_by_name<'a, Args, Rets>(
     ctx: &'a mut Ctx,
     name: &str,
 ) -> Result<Func<'a, Args, Rets>, ResolveError>
@@ -103,9 +103,9 @@ where
 }
 
 /// Make FCE config based on parsed raw config.
-pub(super) fn make_wasm_process_config(
+pub(crate) fn make_wasm_process_config(
     config: Option<ModuleConfig>,
-) -> Result<FCEModuleConfig, NodeError> {
+) -> Result<FCEModuleConfig, FaaSError> {
     use super::imports::create_host_import_func;
     use super::imports::log_utf8_string;
     use wasmer_core::import::Namespace;

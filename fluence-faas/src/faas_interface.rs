@@ -17,17 +17,17 @@
 use std::fmt;
 
 #[derive(Debug)]
-pub struct NodePublicInterface<'a> {
-    pub modules: Vec<NodeModulePublicInterface<'a>>,
+pub struct FaaSInterface<'a> {
+    pub modules: Vec<FaaSModuleInterface<'a>>,
 }
 
 #[derive(Debug)]
-pub struct NodeModulePublicInterface<'a> {
+pub struct FaaSModuleInterface<'a> {
     pub name: &'a str,
-    pub functions: Vec<fce::NodeFunction<'a>>,
+    pub functions: Vec<fce::FCEFunction<'a>>,
 }
 
-impl<'a> fmt::Display for NodePublicInterface<'a> {
+impl<'a> fmt::Display for FaaSInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for module in self.modules.iter() {
             write!(f, "{}", module)?;
@@ -37,7 +37,7 @@ impl<'a> fmt::Display for NodePublicInterface<'a> {
     }
 }
 
-impl<'a> fmt::Display for NodeModulePublicInterface<'a> {
+impl<'a> fmt::Display for FaaSModuleInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", self.name)?;
 

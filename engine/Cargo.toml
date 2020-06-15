@@ -1,6 +1,6 @@
 [package]
 name = "fce"
-version = "0.2.0"
+version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 

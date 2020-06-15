@@ -2,11 +2,12 @@
 members = [
     "crates/fce_wit_interfaces",
     "crates/wit_parser",
+    "engine",
     "examples/ipfs_node",
     "examples/ipfs_node/wasm/ipfs_node",
     "examples/ipfs_node/wasm/ipfs_rpc",
     "examples/simple_greeting",
-    "fce",
+    "fluence-faas",
     "tools/wit_embedder",
 ]
 

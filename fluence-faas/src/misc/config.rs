@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::errors::NodeError;
+use crate::FaaSError;
 
 use serde_derive::Deserialize;
 use toml::from_slice;
@@ -22,20 +22,30 @@ use toml::from_slice;
 use std::collections::HashMap;
 
 /*
-An example of a config:
+An example of the config:
 
-[ipfs_node]
-    mem_pages_count_count = 100
+[[core_module]]
+    name = "ipfs_node.wasm"
+    mem_pages_count = 100
     logger_enabled = true
 
-    [imports]
-    ipfs = "/usr/bin/ipfs"
+    [core_module.imports]
     mysql = "/usr/bin/mysql"
+    ipfs = "/usr/local/bin/ipfs"
 
-    [wasi]
-    preopened_files = ["/tmp/file1"]
-        [mapped_dirs]
-        tmp = "/tmp"
+    [core_module.wasi]
+    envs = []
+    preopened_files = ["/Users/user/tmp/"]
+    mapped_dirs = { "tmp" = "/Users/user/tmp" }
+
+[rpc_module]
+    mem_pages_count = 100
+    logger_enabled = true
+
+    [rpc_module.wasi]
+    envs = []
+    preopened_files = ["/Users/user/tmp"]
+    mapped_dirs = { "tmp" = "/Users/user/tmp" }
  */
 
 #[derive(Deserialize, Debug)]
@@ -90,10 +100,10 @@ pub(crate) struct WASIConfig {
 
 pub(crate) fn parse_config_from_file(
     config_file_path: std::path::PathBuf,
-) -> Result<NodeConfig, NodeError> {
+) -> Result<NodeConfig, FaaSError> {
     let file_content = std::fs::read(config_file_path)?;
     let config: RawCoreModulesConfig =
-        from_slice(&file_content).map_err(|err| NodeError::ConfigParseError(format!("{}", err)))?;
+        from_slice(&file_content).map_err(|err| FaaSError::ConfigParseError(format!("{}", err)))?;
 
     let modules_config = config
         .core_module

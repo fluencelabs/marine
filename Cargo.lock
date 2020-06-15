@@ -370,7 +370,7 @@ dependencies = [
 
 [[package]]
 name = "fce"
-version = "0.2.0"
+version = "0.1.0"
 dependencies = [
  "fce_wit_interfaces",
  "multimap",
@@ -389,6 +389,21 @@ version = "0.1.0"
 dependencies = [
  "multimap",
  "wasmer-interface-types",
+]
+
+[[package]]
+name = "fluence-faas"
+version = "0.1.0"
+dependencies = [
+ "cmd_lib",
+ "fce",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "toml",
+ "wasmer-runtime",
+ "wasmer-runtime-core",
+ "wasmer-wasi",
 ]
 
 [[package]]
@@ -517,18 +532,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ipfs_node_service"
-version = "0.2.0"
+name = "ipfs_node"
+version = "0.1.0"
 dependencies = [
- "cmd_lib",
- "fce",
- "serde",
- "serde_derive",
- "serde_json",
- "toml",
- "wasmer-runtime",
- "wasmer-runtime-core",
- "wasmer-wasi",
+ "fluence-faas",
 ]
 
 [[package]]

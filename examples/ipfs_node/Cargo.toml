@@ -1,18 +1,8 @@
 [package]
-name = "ipfs_node_service"
-version = "0.2.0"
+name = "ipfs_node"
+version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [dependencies]
-fce = { path = "../../fce" }
-
-wasmer-core = { package = "wasmer-runtime-core", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
-wasmer-runtime = "0.17.0"
-wasmer-wasi = "0.17.0"
-
-toml = "0.5.6"
-serde = { version = "1.0.111", features = ["derive"] }
-serde_json = "1.0.53"
-serde_derive = "1.0.111"
-cmd_lib = "0.7.8"
+fluence-faas = { path = "../../fluence-faas" }

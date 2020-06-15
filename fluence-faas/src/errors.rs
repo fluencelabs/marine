@@ -20,7 +20,7 @@ use std::io::Error as IOError;
 use std::error::Error;
 
 #[derive(Debug)]
-pub enum NodeError {
+pub enum FaaSError {
     /// An error related to config parsing.
     ConfigParseError(String),
 
@@ -28,29 +28,29 @@ pub enum NodeError {
     IOError(String),
 
     /// WIT doesn't contain such type.
-    WasmProcessError(FCEError),
+    EngineError(FCEError),
 }
 
-impl Error for NodeError {}
+impl Error for FaaSError {}
 
-impl std::fmt::Display for NodeError {
+impl std::fmt::Display for FaaSError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            NodeError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
-            NodeError::IOError(err_msg) => write!(f, "{}", err_msg),
-            NodeError::WasmProcessError(err) => write!(f, "{}", err),
+            FaaSError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
+            FaaSError::IOError(err_msg) => write!(f, "{}", err_msg),
+            FaaSError::EngineError(err) => write!(f, "{}", err),
         }
     }
 }
 
-impl From<IOError> for NodeError {
+impl From<IOError> for FaaSError {
     fn from(err: IOError) -> Self {
-        NodeError::IOError(format!("{}", err))
+        FaaSError::IOError(format!("{}", err))
     }
 }
 
-impl From<FCEError> for NodeError {
+impl From<FCEError> for FaaSError {
     fn from(err: FCEError) -> Self {
-        NodeError::WasmProcessError(err)
+        FaaSError::EngineError(err)
     }
 }

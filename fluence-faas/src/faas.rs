@@ -14,34 +14,32 @@
  * limitations under the License.
  */
 
-use super::errors::NodeError;
-use super::node_public_interface::NodePublicInterface;
-use super::node_public_interface::NodeModulePublicInterface;
+use super::FaaSError;
+use super::faas_interface::FaaSInterface;
+use super::faas_interface::FaaSModuleInterface;
 
 use fce::FCE;
-use fce::WasmProcess;
-use fce::IValue;
+use super::IValue;
 use fce::FCEModuleConfig;
 
 use std::fs;
 use std::path::PathBuf;
 
-pub struct IpfsNode {
+pub struct FluenceFaaS {
     process: FCE,
-    // names of core modules that is loaded to FCE
+    // names of core modules loaded to FCE
     module_names: Vec<String>,
-    rpc_module_config: FCEModuleConfig,
+    faas_code_config: FCEModuleConfig,
 }
 
-impl IpfsNode {
+impl FluenceFaaS {
     pub fn new<P: Into<PathBuf>>(
         core_modules_dir: P,
         config_file_path: P,
-    ) -> Result<Self, NodeError> {
+    ) -> Result<Self, FaaSError> {
         let mut wasm_process = FCE::new();
         let mut module_names = Vec::new();
-        let mut core_modules_config =
-            super::config::parse_config_from_file(config_file_path.into())?;
+        let mut core_modules_config = crate::misc::parse_config_from_file(config_file_path.into())?;
 
         for entry in fs::read_dir(core_modules_dir.into())? {
             let path = entry?.path();
@@ -54,11 +52,11 @@ impl IpfsNode {
             let module_name = module_name
                 .to_os_string()
                 .into_string()
-                .map_err(|e| NodeError::IOError(format!("failed to read from {:?} file", e)))?;
+                .map_err(|e| FaaSError::IOError(format!("failed to read from {:?} file", e)))?;
 
             let module_bytes = fs::read(path.clone())?;
 
-            let core_module_config = super::utils::make_wasm_process_config(
+            let core_module_config = crate::misc::make_wasm_process_config(
                 core_modules_config.modules_config.remove(&module_name),
             )?;
             wasm_process.load_module(module_name.clone(), &module_bytes, core_module_config)?;
@@ -66,27 +64,25 @@ impl IpfsNode {
         }
 
         let rpc_module_config =
-            super::utils::make_wasm_process_config(core_modules_config.rpc_module_config)?;
+            crate::misc::make_wasm_process_config(core_modules_config.rpc_module_config)?;
 
         Ok(Self {
             process: wasm_process,
             module_names,
-            rpc_module_config,
+            faas_code_config: rpc_module_config,
         })
     }
-}
 
-impl crate::node_wasm_service::NodeWasmService for IpfsNode {
-    fn rpc_call(
+    pub fn call_code(
         &mut self,
         wasm_rpc: &[u8],
         func_name: &str,
         args: &[IValue],
-    ) -> Result<Vec<IValue>, NodeError> {
+    ) -> Result<Vec<IValue>, FaaSError> {
         let rpc_module_name = "ipfs_rpc";
 
         self.process
-            .load_module(rpc_module_name, wasm_rpc, self.rpc_module_config.clone())?;
+            .load_module(rpc_module_name, wasm_rpc, self.faas_code_config.clone())?;
 
         let call_result = self.process.call(rpc_module_name, func_name, args)?;
         self.process.unload_module(rpc_module_name)?;
@@ -94,28 +90,28 @@ impl crate::node_wasm_service::NodeWasmService for IpfsNode {
         Ok(call_result)
     }
 
-    fn core_call(
+    pub fn call_module(
         &mut self,
         module_name: &str,
         func_name: &str,
         args: &[IValue],
-    ) -> Result<Vec<IValue>, NodeError> {
+    ) -> Result<Vec<IValue>, FaaSError> {
         self.process
             .call(module_name, func_name, args)
             .map_err(Into::into)
     }
 
-    fn get_interface(&self) -> NodePublicInterface {
+    pub fn get_interface(&self) -> FaaSInterface {
         let mut modules = Vec::with_capacity(self.module_names.len());
 
         for module_name in self.module_names.iter() {
             let functions = self.process.get_interface(module_name).unwrap();
-            modules.push(NodeModulePublicInterface {
+            modules.push(FaaSModuleInterface {
                 name: module_name,
                 functions,
             })
         }
 
-        NodePublicInterface { modules }
+        FaaSInterface { modules }
     }
 }

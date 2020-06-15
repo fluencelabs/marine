@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-mod node;
-mod node_wasm_service;
+mod errors;
+mod faas;
+mod faas_interface;
+mod misc;
 
 pub use fce::IValue;
+pub use fce::IType;
 
-pub use node::IpfsNode;
-pub use node::NodeError;
-pub use node::NodePublicInterface;
-pub use node::NodeModulePublicInterface;
-pub use node_wasm_service::NodeWasmService;
+pub use errors::FaaSError;
+pub use faas::FluenceFaaS;
+pub use faas_interface::FaaSInterface;
+pub use faas_interface::FaaSModuleInterface;

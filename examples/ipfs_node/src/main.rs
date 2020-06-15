@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-mod node;
-mod node_wasm_service;
-
-pub use node::IpfsNode;
-pub use node::NodeError;
-pub use node::NodePublicInterface;
-pub use node::NodeModulePublicInterface;
-pub use node_wasm_service::NodeWasmService;
-
-use fce::IValue;
+use fluence_faas::FluenceFaaS;
+use fluence_faas::IValue;
 
 use std::path::PathBuf;
 
@@ -37,7 +29,7 @@ const IPFS_RPC: &str = "/Users/mike/dev/work/fluence/wasm/fce/bin/wasm_ipfs_rpc_
 fn main() {
     let ipfs_rpc = std::fs::read(IPFS_RPC).unwrap();
 
-    let mut ipfs_node = IpfsNode::new(
+    let mut ipfs_node = FluenceFaaS::new(
         PathBuf::from(IPFS_MODULES_DIR),
         PathBuf::from(IPFS_MODULES_CONFIG_PATH),
     )
@@ -46,13 +38,13 @@ fn main() {
     println!("ipfs node interface is\n{}", ipfs_node.get_interface());
 
     let node_addresses = ipfs_node
-        .core_call("ipfs_node.wasm", "get_addresses", &[])
+        .call_module("ipfs_node.wasm", "get_addresses", &[])
         .unwrap();
 
     println!("ipfs node addresses are:\n{:?}", node_addresses);
 
     let result = ipfs_node
-        .rpc_call(&ipfs_rpc, "put", &[IValue::String("asdasdasd".to_string())])
+        .call_code(&ipfs_rpc, "put", &[IValue::String("asdasdasd".to_string())])
         .unwrap();
 
     println!("execution result {:?}", result);

@@ -61,7 +61,7 @@ impl Callable {
     }
 }
 
-pub struct FCEModule {
+pub(crate) struct FCEModule {
     // wasmer_instance is needed because WITInstance contains dynamic functions
     // that internally keep pointer to Wasmer instance.
     #[allow(unused)]
@@ -82,7 +82,7 @@ pub struct FCEModule {
 }
 
 impl FCEModule {
-    pub fn new(
+    pub(crate) fn new(
         wasm_bytes: &[u8],
         fce_module_config: FCEModuleConfig,
         modules: &HashMap<String, FCEModule>,
@@ -130,7 +130,11 @@ impl FCEModule {
         })
     }
 
-    pub fn call(&mut self, function_name: &str, args: &[IValue]) -> Result<Vec<IValue>, FCEError> {
+    pub(crate) fn call(
+        &mut self,
+        function_name: &str,
+        args: &[IValue],
+    ) -> Result<Vec<IValue>, FCEError> {
         match self.exports_funcs.get_mut(function_name) {
             Some(func) => Arc::make_mut(func).call(args),
             None => Err(FCEError::NoSuchFunction(format!(
@@ -140,7 +144,7 @@ impl FCEModule {
         }
     }
 
-    pub fn get_exports_signatures(
+    pub(crate) fn get_exports_signatures(
         &self,
     ) -> impl Iterator<Item = (&String, &Vec<IType>, &Vec<IType>)> {
         self.exports_funcs.iter().map(|(func_name, func)| {

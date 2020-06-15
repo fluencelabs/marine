@@ -13,7 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![warn(rust_2018_idioms)]
+#![feature(get_mut_unchecked)]
+#![feature(new_uninit)]
+#![feature(stmt_expr_attributes)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
 
-mod slice_pretty_printer;
+mod config;
+mod engine;
+mod errors;
+mod module;
+mod misc;
 
-pub use slice_pretty_printer::SlicePrettyPrinter;
+pub use config::FCEModuleConfig;
+pub use engine::FCE;
+pub use engine::FCEFunction;
+pub use errors::FCEError;
+pub use module::IValue;
+pub use module::IType;
