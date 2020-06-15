@@ -51,11 +51,14 @@ pub(super) fn create_host_import_func<S>(host_cmd: S) -> DynamicFunc<'static>
 where
     S: Into<String>,
 {
-    /*
-    let mut allocate_func: Option<Func<'static, i32, i32>> = None;
-    let mut set_result_ptr: Option<Func<'static, i32, ()>> = None;
-    let mut set_result_size: Option<Func<'static, i32, ()>> = None;
-     */
+    use wasmer_core::Func;
+    use std::cell::RefCell;
+
+    let allocate_func: Box<RefCell<Option<Func<'static, i32, i32>>>> = Box::new(RefCell::new(None));
+    let set_result_ptr_func: Box<RefCell<Option<Func<'static, i32, ()>>>> =
+        Box::new(RefCell::new(None));
+    let set_result_size_func: Box<RefCell<Option<Func<'static, i32, ()>>>> =
+        Box::new(RefCell::new(None));
 
     let host_cmd = host_cmd.into();
 
@@ -72,22 +75,65 @@ where
         };
 
         unsafe {
-            let mem_address = match get_export_func_by_name::<i32, i32>(ctx, ALLOCATE_FUNC_NAME) {
-                Ok(func) => func.call(result.len() as i32).unwrap(),
-                Err(_) => return vec![Value::I32(2)],
-            };
+            if allocate_func.borrow().is_none() {
+                let raw_allocate_func =
+                    match get_export_func_by_name::<i32, i32>(ctx, ALLOCATE_FUNC_NAME) {
+                        Ok(func) => func,
+                        Err(_) => return vec![Value::I32(4)],
+                    };
 
+                let raw_allocate_func =
+                    std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_allocate_func);
+                *allocate_func.borrow_mut() = Some(raw_allocate_func);
+            }
+
+            if set_result_ptr_func.borrow().is_none() {
+                let raw_set_result_ptr_func =
+                    match get_export_func_by_name::<i32, ()>(ctx, SET_PTR_FUNC_NAME) {
+                        Ok(func) => func,
+                        Err(_) => return vec![Value::I32(5)],
+                    };
+
+                let raw_set_result_ptr_func = std::mem::transmute::<
+                    Func<'_, _, _>,
+                    Func<'static, _, _>,
+                >(raw_set_result_ptr_func);
+                *set_result_ptr_func.borrow_mut() = Some(raw_set_result_ptr_func);
+            }
+
+            if set_result_size_func.borrow().is_none() {
+                let raw_set_result_size_func =
+                    match get_export_func_by_name::<i32, ()>(ctx, SET_SIZE_FUNC_NAME) {
+                        Ok(func) => func,
+                        Err(_) => return vec![Value::I32(6)],
+                    };
+
+                let raw_set_result_size_func = std::mem::transmute::<
+                    Func<'_, _, _>,
+                    Func<'static, _, _>,
+                >(raw_set_result_size_func);
+                *set_result_size_func.borrow_mut() = Some(raw_set_result_size_func);
+            }
+
+            let mem_address = allocate_func
+                .borrow()
+                .as_ref()
+                .unwrap()
+                .call(result.len() as i32)
+                .unwrap();
             write_to_mem(ctx, mem_address as usize, result.as_bytes());
-
-            match get_export_func_by_name::<i32, ()>(ctx, SET_PTR_FUNC_NAME) {
-                Ok(func) => func.call(mem_address as i32).unwrap(),
-                Err(_) => return vec![Value::I32(3)],
-            };
-
-            match get_export_func_by_name::<i32, ()>(ctx, SET_SIZE_FUNC_NAME) {
-                Ok(func) => func.call(result.len() as i32).unwrap(),
-                Err(_) => return vec![Value::I32(4)],
-            };
+            set_result_ptr_func
+                .borrow()
+                .as_ref()
+                .unwrap()
+                .call(mem_address as i32)
+                .unwrap();
+            set_result_size_func
+                .borrow()
+                .as_ref()
+                .unwrap()
+                .call(result.len() as i32)
+                .unwrap();
 
             vec![Value::I32(0)]
         }
