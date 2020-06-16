@@ -27,7 +27,7 @@ pub enum FaaSError {
     /// Various errors related to file i/o.
     IOError(String),
 
-    /// WIT doesn't contain such type.
+    /// FCE errors.
     EngineError(FCEError),
 }
 

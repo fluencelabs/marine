@@ -41,7 +41,11 @@ fn main() {
     println!("ipfs node addresses are:\n{:?}", node_addresses);
 
     let result = ipfs_node
-        .call_code(&ipfs_rpc, "put", &[IValue::String("Hello, world".to_string())])
+        .call_code(
+            &ipfs_rpc,
+            "put",
+            &[IValue::String("Hello, world".to_string())],
+        )
         .unwrap();
 
     println!("execution result {:?}", result);
