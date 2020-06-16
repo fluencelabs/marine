@@ -13,17 +13,17 @@ jobs:
             - fce01-{{ checksum "engine/Cargo.toml" }}-{{ checksum "fluence-faas/Cargo.toml" }}
       - run: |
           rustup toolchain install nightly
-          rustup component add rustfmt
-          rustup component add clippy
+          rustup component add rustfmt --toolchain nightly
+          rustup component add clippy --toolchain nightly
 
           cd engine
-          cargo fmt --all -- --check --color always
+          cargo +nightly fmt --all -- --check --color always
           cargo +nightly build -v --all-features
           cargo +nightly test -v --all-features
           cargo +nightly clippy -v
 
           cd fluence-faas
-          cargo fmt --all -- --check --color always
+          cargo +nightly fmt --all -- --check --color always
           cargo +nightly build -v --all-features
           cargo +nightly test -v --all-features
           cargo +nightly clippy -v
@@ -61,7 +61,7 @@ jobs:
           cargo wasi build -v --all-features
           cargo clippy -v
 
-          cd ../../../tools/wit_embedder
+          cd ../../../../tools/wit_embedder
           cargo fmt --all -- --check --color always
           cargo wasi build -v --all-features
           cargo clippy -v
