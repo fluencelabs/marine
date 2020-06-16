@@ -6,9 +6,6 @@ target/
 *.wasm
 *.wat
 
-# Dir for compiled artifact
-bin/
-
 # Allowed Wasm files for the example
-!/bin/wasm_ipfs_rpc_wit.wasi.wasm
-!/bin/wasm_modules/*
+!bin/wasm_ipfs_rpc_wit.wasi.wasm
+!bin/wasm_modules/*
