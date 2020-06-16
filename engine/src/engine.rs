@@ -20,7 +20,7 @@ use super::*;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-/// The base struct for the Fluence Compute Engine.
+/// The base struct of the Fluence Compute Engine.
 pub struct FCE {
     // set of modules registered inside FCE
     modules: HashMap<String, FCEModule>,

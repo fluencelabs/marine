@@ -26,7 +26,7 @@ use std::fs;
 use std::path::PathBuf;
 
 pub struct FluenceFaaS {
-    process: FCE,
+    fce: FCE,
 
     // names of core modules loaded to FCE
     module_names: Vec<String>,
@@ -40,7 +40,7 @@ impl FluenceFaaS {
         core_modules_dir: P,
         config_file_path: P,
     ) -> Result<Self, FaaSError> {
-        let mut wasm_process = FCE::new();
+        let mut fce = FCE::new();
         let mut module_names = Vec::new();
         let mut core_modules_config = crate::misc::parse_config_from_file(config_file_path.into())?;
 
@@ -59,18 +59,18 @@ impl FluenceFaaS {
 
             let module_bytes = fs::read(path.clone())?;
 
-            let core_module_config = crate::misc::make_wasm_process_config(
+            let core_module_config = crate::misc::make_fce_config(
                 core_modules_config.modules_config.remove(&module_name),
             )?;
-            wasm_process.load_module(module_name.clone(), &module_bytes, core_module_config)?;
+            fce.load_module(module_name.clone(), &module_bytes, core_module_config)?;
             module_names.push(module_name);
         }
 
         let rpc_module_config =
-            crate::misc::make_wasm_process_config(core_modules_config.rpc_module_config)?;
+            crate::misc::make_fce_config(core_modules_config.rpc_module_config)?;
 
         Ok(Self {
-            process: wasm_process,
+            fce,
             module_names,
             faas_code_config: rpc_module_config,
         })
@@ -85,11 +85,11 @@ impl FluenceFaaS {
     ) -> Result<Vec<IValue>, FaaSError> {
         let rpc_module_name = "ipfs_rpc";
 
-        self.process
+        self.fce
             .load_module(rpc_module_name, wasm_rpc, self.faas_code_config.clone())?;
 
-        let call_result = self.process.call(rpc_module_name, func_name, args)?;
-        self.process.unload_module(rpc_module_name)?;
+        let call_result = self.fce.call(rpc_module_name, func_name, args)?;
+        self.fce.unload_module(rpc_module_name)?;
 
         Ok(call_result)
     }
@@ -101,7 +101,7 @@ impl FluenceFaaS {
         func_name: &str,
         args: &[IValue],
     ) -> Result<Vec<IValue>, FaaSError> {
-        self.process
+        self.fce
             .call(module_name, func_name, args)
             .map_err(Into::into)
     }
@@ -111,7 +111,7 @@ impl FluenceFaaS {
         let mut modules = Vec::with_capacity(self.module_names.len());
 
         for module_name in self.module_names.iter() {
-            let functions = self.process.get_interface(module_name).unwrap();
+            let functions = self.fce.get_interface(module_name).unwrap();
             modules.push(FaaSModuleInterface {
                 name: module_name,
                 functions,

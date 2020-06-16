@@ -103,7 +103,7 @@ where
 }
 
 /// Make FCE config based on parsed raw config.
-pub(crate) fn make_wasm_process_config(
+pub(crate) fn make_fce_config(
     config: Option<ModuleConfig>,
 ) -> Result<FCEModuleConfig, FaaSError> {
     use super::imports::create_host_import_func;
