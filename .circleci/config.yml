@@ -22,7 +22,7 @@ jobs:
           cargo +nightly test -v --all-features
           cargo +nightly clippy -v
 
-          cd fluence-faas
+          cd ../fluence-faas
           cargo fmt --all -- --check --color always
           cargo +nightly build -v --all-features
           cargo +nightly test -v --all-features
