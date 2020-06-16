@@ -66,7 +66,6 @@ jobs:
           cargo build -v --all-features
           cargo clippy -v
 
-
       - save_cache:
           paths:
             - ~/.cargo
