@@ -8,12 +8,15 @@ edition = "2018"
 fce_wit_interfaces = { path = "../crates/fce_wit_interfaces", version = "0.1.0" }
 wit_parser = { path = "../crates/wit_parser", version = "0.1.0" }
 
-wasmer-runtime = "0.17.0"
+wasmer-runtime = { git = "https://github.com/fluencelabs/wasmer", branch = "fluence" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
-wasmer-core = { package = "wasmer-runtime-core", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
-wasmer-wit = { package = "wasmer-interface-types", git = "http://github.com/fluencelabs/interface-types" }
-wasmer-wasi = "0.17.0"
+wasmer-core = { package = "wasmer-runtime-core", git = "http://github.com/fluencelabs/wasmer", branch = "fluence", features = ["dynamicfunc-fat-closures"] }
+wasmer-wit = { package = "wasmer-interface-types", git = "http://github.com/fluencelabs/interface-types", branch = "master" }
+wasmer-wasi = { git = "https://github.com/fluencelabs/wasmer", branch = "fluence" }
 
 multimap = "0.8.1"
 parity-wasm = "0.41.0"
 pwasm-utils = "0.12.0"
+
+[patch.'https://github.com/fluencelabs/wasmer']
+wasmer-wasi = { path = "lib/wasi" }
