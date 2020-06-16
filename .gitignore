@@ -6,6 +6,9 @@ target/
 *.wasm
 *.wat
 
-# Allowed Wasm files for the example
+# Temporary file of ipfs node example
+/examples/ipfs_node/wasm/artifacts/ipfs_rpc_file
+
+# Allowed Wasm files for examples
 !/examples/ipfs_node/wasm/artifacts/wasm_ipfs_rpc_wit.wasi.wasm
 !/examples/ipfs_node/wasm/artifacts/wasm_modules/*

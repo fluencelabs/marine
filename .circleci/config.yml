@@ -1,59 +1,80 @@
-#version: 2.1
-#jobs:
-#  fce:
-#    docker:
-#      - image: circleci/rust:latest
-#    environment:
-#      RUST_BACKTRACE: 1
-#      #RUST_TEST_THREADS: 1
-#    steps:
-#      - checkout
-#      - restore_cache:
-#          keys:
-#            - fce01-{{ checksum "fce/Cargo.toml" }}
-#      - run: |
-#          rustup toolchain install stable
-#          rustup component add rustfmt
-#          rustup component add clippy
-#          cd fce
-#          cargo fmt --all -- --check --color always
-#          cargo build -v --all-features
-#          cargo test -v --all-features
-#          cargo clippy -v
-#      - save_cache:
-#          paths:
-#            - ~/.cargo
-#            - ~/.rustup
-#          key: fce01-{{ checksum "fce/Cargo.toml" }}
-#  wit_embedder:
-#    docker:
-#      - image: circleci/rust:latest
-#    environment:
-#      RUST_BACKTRACE: 1
-#      #RUST_TEST_THREADS: 1
-#    steps:
-#      - checkout
-#      - restore_cache:
-#          keys:
-#            - wit_embedder01-{{ checksum "wit_embedder/Cargo.toml" }}
-#      - run: |
-#          rustup toolchain install stable
-#          rustup component add rustfmt
-#          rustup component add clippy
-#          cd wit_embedder
-#          cargo fmt --all -- --check --color always
-#          cargo build -v --all-features
-#          cargo test -v --all-features
-#          cargo clippy -v
-#      - save_cache:
-#          paths:
-#            - ~/.cargo
-#            - ~/.rustup
-#          key: wit_embedder01-{{ checksum "wit_embedder/Cargo.toml" }}
-#
-#workflows:
-#  version: 2.1
-#  fce:
-#    jobs:
-#      - fce
-#      - wit_embedder
+version: 2.1
+jobs:
+  fce:
+    docker:
+      - image: circleci/rust:latest
+    environment:
+      RUST_BACKTRACE: 1
+      #RUST_TEST_THREADS: 1
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - fce01-{{ checksum "engine/Cargo.lock" }}-{{ checksum "fluence-faas/Cargo.lock" }}
+      - run: |
+          rustup toolchain install nightly
+          rustup component add rustfmt
+          rustup component add clippy
+
+          cd engine
+          cargo fmt --all -- --check --color always
+          cargo build -v --all-features
+          cargo test -v --all-features
+          cargo clippy -v
+
+          cd fluence-faas
+          cargo fmt --all -- --check --color always
+          cargo build -v --all-features
+          cargo test -v --all-features
+          cargo clippy -v
+      - save_cache:
+          paths:
+            - ~/.cargo
+            - ~/.rustup
+          key: fce01-{{ checksum "engine/Cargo.lock" }}-{{ checksum "fluence-faas/Cargo.lock" }}
+
+  examples:
+    docker:
+      - image: circleci/rust:latest
+    environment:
+      RUST_BACKTRACE: 1
+      #RUST_TEST_THREADS: 1
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - examples01-{{ checksum "examples/ipfs_node/wasm/ipfs_node/Cargo.toml" }}-{{ checksum "examples/ipfs_node/wasm/ipfs_rpc/Cargo.toml" }}-{{ checksum "examples/ipfs_node/Cargo.toml" }}
+      - run: |
+          rustup toolchain install nightly
+          rustup component add rustfmt
+          rustup component add clippy
+          cargo install cargo-wasi
+
+          cd examples/ipfs_node/ipfs_node
+          cargo fmt --all -- --check --color always
+          cargo wasi build -v --all-features
+          cargo clippy -v
+
+          cd ../ipfs_rpc
+          cargo fmt --all -- --check --color always
+          cargo wasi build -v --all-features
+          cargo clippy -v
+
+          cd ../../tools/wit_embedder
+          cargo fmt --all -- --check --color always
+          cargo wasi build -v --all-features
+          cargo clippy -v
+
+
+      - save_cache:
+          paths:
+            - ~/.cargo
+            - ~/.rustup
+          key: examples01-{{ checksum "examples/ipfs_node/wasm/ipfs_node/Cargo.toml" }}-{{ checksum "examples/ipfs_node/wasm/ipfs_rpc/Cargo.toml" }}-{{ checksum "examples/ipfs_node/Cargo.toml" }}
+
+workflows:
+  version: 2.1
+  fce:
+    jobs:
+      - fce
+      - examples
