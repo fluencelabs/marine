@@ -7,5 +7,5 @@ target/
 *.wat
 
 # Allowed Wasm files for the example
-!bin/wasm_ipfs_rpc_wit.wasi.wasm
-!bin/wasm_modules/*
+!/examples/ipfs_node/wasm/artifacts/wasm_ipfs_rpc_wit.wasi.wasm
+!/examples/ipfs_node/wasm/artifacts/wasm_modules/*

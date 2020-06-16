@@ -19,9 +19,9 @@ use fluence_faas::IValue;
 
 use std::path::PathBuf;
 
-const IPFS_MODULES_DIR: &str = "../../bin/wasm_modules";
+const IPFS_MODULES_DIR: &str = "wasm/artifacts/wasm_modules";
 const IPFS_MODULES_CONFIG_PATH: &str = "Config.toml";
-const IPFS_RPC: &str = "../../bin/wasm_ipfs_rpc_wit.wasi.wasm";
+const IPFS_RPC: &str = "wasm/artifacts/wasm_ipfs_rpc_wit.wasi.wasm";
 
 fn main() {
     let ipfs_rpc = std::fs::read(IPFS_RPC).unwrap();
@@ -41,7 +41,7 @@ fn main() {
     println!("ipfs node addresses are:\n{:?}", node_addresses);
 
     let result = ipfs_node
-        .call_code(&ipfs_rpc, "put", &[IValue::String("hello, world!".to_string())])
+        .call_code(&ipfs_rpc, "put", &[IValue::String("Hello, world".to_string())])
         .unwrap();
 
     println!("execution result {:?}", result);
