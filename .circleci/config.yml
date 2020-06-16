@@ -10,7 +10,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - fce01-{{ checksum "engine/Cargo.lock" }}-{{ checksum "fluence-faas/Cargo.lock" }}
+            - fce01-{{ checksum "engine/Cargo.toml" }}-{{ checksum "fluence-faas/Cargo.toml" }}
       - run: |
           rustup toolchain install nightly
           rustup component add rustfmt
@@ -18,20 +18,21 @@ jobs:
 
           cd engine
           cargo fmt --all -- --check --color always
-          cargo build -v --all-features
-          cargo test -v --all-features
-          cargo clippy -v
+          cargo +nighly build -v --all-features
+          cargo +nightly test -v --all-features
+          cargo +nightly clippy -v
 
           cd fluence-faas
           cargo fmt --all -- --check --color always
-          cargo build -v --all-features
-          cargo test -v --all-features
-          cargo clippy -v
+          cargo +nightly build -v --all-features
+          cargo +nightly test -v --all-features
+          cargo +nightly clippy -v
+
       - save_cache:
           paths:
             - ~/.cargo
             - ~/.rustup
-          key: fce01-{{ checksum "engine/Cargo.lock" }}-{{ checksum "fluence-faas/Cargo.lock" }}
+          key: fce01-{{ checksum "engine/Cargo.toml" }}-{{ checksum "fluence-faas/Cargo.toml" }}
 
   examples:
     docker:
@@ -50,7 +51,7 @@ jobs:
           rustup component add clippy
           cargo install cargo-wasi
 
-          cd examples/ipfs_node/ipfs_node
+          cd examples/ipfs_node/wasm/ipfs_node
           cargo fmt --all -- --check --color always
           cargo wasi build -v --all-features
           cargo clippy -v
