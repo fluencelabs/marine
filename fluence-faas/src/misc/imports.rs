@@ -32,8 +32,8 @@ pub(super) fn log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
 
     let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
     match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
-        Some(msg) => print!("{}", msg),
-        None => println!("ipfs node logger: incorrect UTF8 string's been supplied to logger"),
+        Some(msg) => log::info!("{}", msg),
+        None => log::warn!("ipfs node logger: incorrect UTF8 string's been supplied to logger"),
     }
 }
 
