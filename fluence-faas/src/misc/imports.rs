@@ -23,8 +23,6 @@ use wasmer_core::types::Value;
 use wasmer_core::types::Type;
 use wasmer_core::types::FuncSig;
 
-use log;
-
 const ALLOCATE_FUNC_NAME: &str = "allocate";
 const SET_PTR_FUNC_NAME: &str = "set_result_ptr";
 const SET_SIZE_FUNC_NAME: &str = "set_result_size";
