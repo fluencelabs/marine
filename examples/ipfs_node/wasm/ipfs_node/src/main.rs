@@ -26,11 +26,10 @@ use crate::path::to_full_path;
 const RESULT_FILE_PATH: &str = "/tmp/ipfs_rpc_file";
 
 pub fn main() {
-    let env_variable = std::env::var("tmp").unwrap();
-    println!(
-        "ipfs_node.main: WASI initialization finished, env {}",
-        env_variable
-    );
+    let msg = "ipfs_node.main: WASI initialization finished, env {}";
+    unsafe {
+        log_utf8_string(msg.as_ptr() as _, msg.len() as _);
+    }
 }
 
 #[no_mangle]
