@@ -24,6 +24,8 @@ use std::collections::HashMap;
 /*
 An example of the config:
 
+core_modules_dir = "wasm/artifacts/wasm_modules"
+
 [[core_module]]
     name = "ipfs_node.wasm"
     mem_pages_count = 100
@@ -52,6 +54,7 @@ An example of the config:
 pub(crate) struct RawCoreModulesConfig {
     pub core_module: Vec<RawModuleConfig>,
     pub rpc_module: Option<RawRPCModuleConfig>,
+    pub core_modules_dir: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -79,6 +82,7 @@ pub(crate) struct RawRPCModuleConfig {
 
 #[derive(Debug)]
 pub(crate) struct NodeConfig {
+    pub core_modules_dir: String,
     pub modules_config: HashMap<String, ModuleConfig>,
     pub rpc_module_config: Option<ModuleConfig>,
 }
@@ -143,6 +147,7 @@ pub(crate) fn parse_config_from_file(
     });
 
     Ok(NodeConfig {
+        core_modules_dir: config.core_modules_dir,
         modules_config,
         rpc_module_config,
     })

@@ -37,14 +37,13 @@ pub struct FluenceFaaS {
 
 impl FluenceFaaS {
     pub fn new<P: Into<PathBuf>>(
-        core_modules_dir: P,
         config_file_path: P,
     ) -> Result<Self, FaaSError> {
         let mut fce = FCE::new();
         let mut module_names = Vec::new();
         let mut core_modules_config = crate::misc::parse_config_from_file(config_file_path.into())?;
 
-        for entry in fs::read_dir(core_modules_dir.into())? {
+        for entry in fs::read_dir(core_modules_config.core_modules_dir)? {
             let path = entry?.path();
             if path.is_dir() {
                 // just skip directories

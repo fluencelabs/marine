@@ -1,3 +1,5 @@
+core_modules_dir = "wasm/artifacts/wasm_modules"
+
 [[core_module]]
     name = "ipfs_node.wasm"
     mem_pages_count = 100
