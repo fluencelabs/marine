@@ -24,6 +24,8 @@ use fce::FCEModuleConfig;
 
 use std::fs;
 use std::path::PathBuf;
+use crate::RawCoreModulesConfig;
+use crate::misc::CoreModulesConfig;
 
 pub struct FluenceFaaS {
     fce: FCE,
@@ -36,12 +38,24 @@ pub struct FluenceFaaS {
 }
 
 impl FluenceFaaS {
+    /// Creates FaaS from config on filesystem
     pub fn new<P: Into<PathBuf>>(
         config_file_path: P,
     ) -> Result<Self, FaaSError> {
+        let core_modules_config = crate::misc::parse_config_from_file(config_file_path.into())?;
+        Self::with_config(core_modules_config)
+    }
+
+    /// Creates FaaS from config deserialized from TOML
+    pub fn with_raw_config(config: RawCoreModulesConfig) -> Result<Self, FaaSError> {
+        let core_modules_config = crate::misc::from_raw_config(config)?;
+        Self::with_config(core_modules_config)
+    }
+
+    /// Creates FaaS from prepared config
+    pub(crate) fn with_config(mut core_modules_config: CoreModulesConfig) -> Result<Self, FaaSError> {
         let mut fce = FCE::new();
         let mut module_names = Vec::new();
-        let mut core_modules_config = crate::misc::parse_config_from_file(config_file_path.into())?;
 
         for entry in fs::read_dir(core_modules_config.core_modules_dir)? {
             let path = entry?.path();

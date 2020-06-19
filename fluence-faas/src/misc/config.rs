@@ -21,6 +21,8 @@ use toml::from_slice;
 
 use std::collections::HashMap;
 
+type Result<T> = std::result::Result<T, FaaSError>;
+
 /*
 An example of the config:
 
@@ -51,14 +53,14 @@ core_modules_dir = "wasm/artifacts/wasm_modules"
  */
 
 #[derive(Deserialize, Debug)]
-pub(crate) struct RawCoreModulesConfig {
+pub struct RawCoreModulesConfig {
+    pub core_modules_dir: String,
     pub core_module: Vec<RawModuleConfig>,
     pub rpc_module: Option<RawRPCModuleConfig>,
-    pub core_modules_dir: String,
 }
 
 #[derive(Deserialize, Debug)]
-pub(crate) struct RawModuleConfig {
+pub struct RawModuleConfig {
     pub name: String,
     pub mem_pages_count: Option<u32>,
     pub logger_enabled: Option<bool>,
@@ -67,21 +69,21 @@ pub(crate) struct RawModuleConfig {
 }
 
 #[derive(Deserialize, Debug)]
-pub(crate) struct RawWASIConfig {
+pub struct RawWASIConfig {
     pub envs: Option<Vec<String>>,
     pub preopened_files: Option<Vec<String>>,
     pub mapped_dirs: Option<toml::value::Table>,
 }
 
 #[derive(Deserialize, Debug)]
-pub(crate) struct RawRPCModuleConfig {
+pub struct RawRPCModuleConfig {
     pub mem_pages_count: Option<u32>,
     pub logger_enabled: Option<bool>,
     pub wasi: Option<RawWASIConfig>,
 }
 
 #[derive(Debug)]
-pub(crate) struct NodeConfig {
+pub(crate) struct CoreModulesConfig {
     pub core_modules_dir: String,
     pub modules_config: HashMap<String, ModuleConfig>,
     pub rpc_module_config: Option<ModuleConfig>,
@@ -102,28 +104,24 @@ pub(crate) struct WASIConfig {
     pub mapped_dirs: Option<Vec<(String, String)>>,
 }
 
-pub(crate) fn parse_config_from_file(
-    config_file_path: std::path::PathBuf,
-) -> Result<NodeConfig, FaaSError> {
-    let file_content = std::fs::read(config_file_path)?;
-    let config: RawCoreModulesConfig =
-        from_slice(&file_content).map_err(|err| FaaSError::ConfigParseError(format!("{}", err)))?;
-
+/// Prepare config after parsing it from TOML
+pub(crate) fn from_raw_config(config: RawCoreModulesConfig) -> Result<CoreModulesConfig> {
     let modules_config = config
         .core_module
         .into_iter()
         .map(|module| {
-            let imports: Option<Vec<(String, String)>> = module.imports.map(|import| {
-                import
+            let imports = module.imports.map(|import| {
+                Ok(import
                     .into_iter()
                     .map(|(import_func_name, host_cmd)| {
-                        (import_func_name, host_cmd.try_into::<String>().unwrap())
+                        let host_cmd = host_cmd.try_into::<String>()?;
+                        Ok((import_func_name, host_cmd))
                     })
-                    .collect::<Vec<_>>()
-            });
+                    .collect::<Result<Vec<_>>>()?)
+            }).map_or(Ok(None), |r: Result<_>| r.map(Some))?;
 
             let wasi = module.wasi.map(parse_raw_wasi);
-            (
+            Ok((
                 module.name,
                 ModuleConfig {
                     mem_pages_count: module.mem_pages_count,
@@ -131,9 +129,9 @@ pub(crate) fn parse_config_from_file(
                     imports,
                     wasi,
                 },
-            )
+            ))
         })
-        .collect::<HashMap<_, _>>();
+        .collect::<Result<HashMap<_, _>>>()?;
 
     let rpc_module_config = config.rpc_module.map(|rpc_module| {
         let wasi = rpc_module.wasi.map(parse_raw_wasi);
@@ -146,11 +144,22 @@ pub(crate) fn parse_config_from_file(
         }
     });
 
-    Ok(NodeConfig {
+    Ok(CoreModulesConfig {
         core_modules_dir: config.core_modules_dir,
         modules_config,
         rpc_module_config,
     })
+}
+
+/// Parse config from TOML file and prepare it
+pub(crate) fn parse_config_from_file(
+    config_file_path: std::path::PathBuf,
+) -> Result<CoreModulesConfig> {
+    let file_content = std::fs::read(config_file_path)?;
+    let config: RawCoreModulesConfig =
+        from_slice(&file_content)?;
+
+    from_raw_config(config)
 }
 
 fn parse_raw_wasi(wasi: RawWASIConfig) -> WASIConfig {

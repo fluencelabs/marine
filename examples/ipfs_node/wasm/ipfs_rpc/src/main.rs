@@ -36,7 +36,7 @@ pub unsafe fn invoke(_ptr: *mut u8, _size: usize) {
     let msg = "ipfs_rpc.invoke: invoke called\n";
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
-    let result = "IFPFS_RPC wasm example, it allows to:\ninvoke\nput\nget".to_string();
+    let result = "IPFS_RPC wasm example, it allows to:\ninvoke\nput\nget".to_string();
 
     *RESULT_PTR.get_mut() = result.as_ptr() as _;
     *RESULT_SIZE.get_mut() = result.len();
