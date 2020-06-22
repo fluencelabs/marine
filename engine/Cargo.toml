@@ -13,6 +13,7 @@ wasmer-runtime = { git = "https://github.com/fluencelabs/wasmer", branch = "flue
 wasmer-core = { package = "wasmer-runtime-core", git = "http://github.com/fluencelabs/wasmer", branch = "fluence", features = ["dynamicfunc-fat-closures"] }
 wasmer-wit = { package = "wasmer-interface-types", git = "http://github.com/fluencelabs/interface-types", branch = "master" }
 wasmer-wasi = { git = "https://github.com/fluencelabs/wasmer", branch = "fluence" }
+serde = { version = "1.0.114", default-features = false, features = [ "derive" ] }
 
 multimap = "0.8.1"
 parity-wasm = "0.41.0"

@@ -374,6 +374,7 @@ dependencies = [
  "multimap",
  "parity-wasm",
  "pwasm-utils",
+ "serde",
  "wasmer-interface-types",
  "wasmer-runtime",
  "wasmer-runtime-core",
