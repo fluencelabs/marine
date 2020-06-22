@@ -27,6 +27,9 @@ use std::path::PathBuf;
 use crate::RawCoreModulesConfig;
 use crate::misc::CoreModulesConfig;
 
+/// FluenceFaas isn't thread safe.
+// impl !Sync for FluenceFaaS {}
+
 pub struct FluenceFaaS {
     fce: FCE,
 
@@ -38,7 +41,7 @@ pub struct FluenceFaaS {
 }
 
 impl FluenceFaaS {
-    /// Creates FaaS from config on filesystem
+    /// Creates FaaS from config on filesystem.
     pub fn new<P: Into<PathBuf>>(
         config_file_path: P,
     ) -> Result<Self, FaaSError> {
@@ -46,13 +49,13 @@ impl FluenceFaaS {
         Self::with_config(core_modules_config)
     }
 
-    /// Creates FaaS from config deserialized from TOML
+    /// Creates FaaS from config deserialized from TOML.
     pub fn with_raw_config(config: RawCoreModulesConfig) -> Result<Self, FaaSError> {
         let core_modules_config = crate::misc::from_raw_config(config)?;
         Self::with_config(core_modules_config)
     }
 
-    /// Creates FaaS from prepared config
+    /// Creates FaaS from prepared config.
     pub(crate) fn with_config(mut core_modules_config: CoreModulesConfig) -> Result<Self, FaaSError> {
         let mut fce = FCE::new();
         let mut module_names = Vec::new();
@@ -92,17 +95,18 @@ impl FluenceFaaS {
     /// Executes provided Wasm code in the internal environment (with access to module exports).
     pub fn call_code(
         &mut self,
-        wasm_rpc: &[u8],
+        wasm: &[u8],
         func_name: &str,
         args: &[IValue],
     ) -> Result<Vec<IValue>, FaaSError> {
-        let rpc_module_name = "ipfs_rpc";
+        // We need this because every wasm code loaded into VM needs a module name
+        let anonymous_module = "anonymous_module_name";
 
         self.fce
-            .load_module(rpc_module_name, wasm_rpc, self.faas_code_config.clone())?;
+            .load_module(anonymous_module, wasm, self.faas_code_config.clone())?;
 
-        let call_result = self.fce.call(rpc_module_name, func_name, args)?;
-        self.fce.unload_module(rpc_module_name)?;
+        let call_result = self.fce.call(anonymous_module, func_name, args)?;
+        self.fce.unload_module(anonymous_module)?;
 
         Ok(call_result)
     }

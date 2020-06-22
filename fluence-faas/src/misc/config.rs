@@ -156,8 +156,7 @@ pub(crate) fn parse_config_from_file(
     config_file_path: std::path::PathBuf,
 ) -> Result<CoreModulesConfig> {
     let file_content = std::fs::read(config_file_path)?;
-    let config: RawCoreModulesConfig =
-        from_slice(&file_content)?;
+    let config: RawCoreModulesConfig = from_slice(&file_content)?;
 
     from_raw_config(config)
 }
