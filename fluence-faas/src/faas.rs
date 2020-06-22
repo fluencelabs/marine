@@ -30,6 +30,8 @@ use crate::misc::CoreModulesConfig;
 /// FluenceFaas isn't thread safe.
 // impl !Sync for FluenceFaaS {}
 
+unsafe impl Send for FluenceFaaS {}
+
 pub struct FluenceFaaS {
     fce: FCE,
 
