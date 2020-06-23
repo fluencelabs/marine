@@ -58,7 +58,7 @@ impl FluenceFaaS {
         Self::with_config(core_modules_config)
     }
 
-    /// Creates FaaS with given modules
+    /// Creates FaaS with given modules.
     pub fn with_modules<I, C>(modules: I, config: C) -> Result<Self, FaaSError>
     where
         I: IntoIterator<Item = (String, Vec<u8>)>,
