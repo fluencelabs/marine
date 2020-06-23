@@ -30,6 +30,8 @@ use std::fs;
 use std::fs::DirEntry;
 use std::path::PathBuf;
 
+type Result<T> = std::result::Result<T, FaaSError>;
+
 /// FluenceFaas isn't thread safe.
 // impl !Sync for FluenceFaaS {}
 
@@ -48,19 +50,19 @@ pub struct FluenceFaaS {
 
 impl FluenceFaaS {
     /// Creates FaaS from config on filesystem.
-    pub fn new<P: Into<PathBuf>>(config_file_path: P) -> Result<Self, FaaSError> {
+    pub fn new<P: Into<PathBuf>>(config_file_path: P) -> Result<Self> {
         let core_modules_config = crate::misc::parse_config_from_file(config_file_path.into())?;
         Self::with_config(core_modules_config)
     }
 
     /// Creates FaaS from config deserialized from TOML.
-    pub fn with_raw_config(config: RawCoreModulesConfig) -> Result<Self, FaaSError> {
+    pub fn with_raw_config(config: RawCoreModulesConfig) -> Result<Self> {
         let core_modules_config = crate::misc::from_raw_config(config)?;
         Self::with_config(core_modules_config)
     }
 
     /// Creates FaaS with given modules.
-    pub fn with_modules<I, C>(modules: I, config: C) -> Result<Self, FaaSError>
+    pub fn with_modules<I, C>(modules: I, config: C) -> Result<Self>
     where
         I: IntoIterator<Item = (String, Vec<u8>)>,
         C: TryInto<CoreModulesConfig>,
@@ -86,14 +88,15 @@ impl FluenceFaaS {
     }
 
     /// Creates FaaS from prepared config.
-    pub(crate) fn with_config(config: CoreModulesConfig) -> Result<Self, FaaSError> {
-        let entries = fs::read_dir(&config.core_modules_dir)?.collect::<Result<Vec<_>, _>>()?;
+    pub(crate) fn with_config(config: CoreModulesConfig) -> Result<Self> {
+        let entries =
+            fs::read_dir(&config.core_modules_dir)?.collect::<std::result::Result<Vec<_>, _>>()?;
 
         let modules = entries
             .into_iter()
             // skip directories
             .filter(|e| !e.path().is_dir())
-            .map::<Result<(String, Vec<u8>), FaaSError>, _>(|entry: DirEntry| {
+            .map::<Result<_>, _>(|entry: DirEntry| {
                 let module_name = entry.path().file_name().unwrap().to_os_string();
                 let module_name = module_name
                     .into_string()
@@ -101,7 +104,7 @@ impl FluenceFaaS {
                 let module_bytes = fs::read(entry.path())?;
                 Ok((module_name, module_bytes))
             })
-            .collect::<Result<Vec<(String, Vec<u8>)>, _>>()?;
+            .collect::<Result<Vec<_>>>()?;
 
         Self::with_modules(modules, config)
     }
@@ -112,7 +115,7 @@ impl FluenceFaaS {
         wasm: &[u8],
         func_name: &str,
         args: &[IValue],
-    ) -> Result<Vec<IValue>, FaaSError> {
+    ) -> Result<Vec<IValue>> {
         // We need this because every wasm code loaded into VM needs a module name
         let anonymous_module = "anonymous_module_name";
 
@@ -131,7 +134,7 @@ impl FluenceFaaS {
         module_name: &str,
         func_name: &str,
         args: &[IValue],
-    ) -> Result<Vec<IValue>, FaaSError> {
+    ) -> Result<Vec<IValue>> {
         self.fce
             .call(module_name, func_name, args)
             .map_err(Into::into)
