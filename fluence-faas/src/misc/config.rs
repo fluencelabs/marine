@@ -20,6 +20,7 @@ use serde_derive::Deserialize;
 use toml::from_slice;
 
 use std::collections::HashMap;
+use std::convert::TryInto;
 
 type Result<T> = std::result::Result<T, FaaSError>;
 
@@ -59,6 +60,14 @@ pub struct RawCoreModulesConfig {
     pub rpc_module: Option<RawRPCModuleConfig>,
 }
 
+impl TryInto<CoreModulesConfig> for RawCoreModulesConfig {
+    type Error = FaaSError;
+
+    fn try_into(self) -> Result<CoreModulesConfig> {
+        from_raw_config(self)
+    }
+}
+
 #[derive(Deserialize, Debug)]
 pub struct RawModuleConfig {
     pub name: String,
@@ -83,14 +92,14 @@ pub struct RawRPCModuleConfig {
 }
 
 #[derive(Debug)]
-pub(crate) struct CoreModulesConfig {
+pub struct CoreModulesConfig {
     pub core_modules_dir: String,
     pub modules_config: HashMap<String, ModuleConfig>,
     pub rpc_module_config: Option<ModuleConfig>,
 }
 
 #[derive(Debug)]
-pub(crate) struct ModuleConfig {
+pub struct ModuleConfig {
     pub mem_pages_count: Option<u32>,
     pub logger_enabled: Option<bool>,
     pub imports: Option<Vec<(String, String)>>,
@@ -98,7 +107,7 @@ pub(crate) struct ModuleConfig {
 }
 
 #[derive(Debug)]
-pub(crate) struct WASIConfig {
+pub struct WASIConfig {
     pub envs: Option<Vec<Vec<u8>>>,
     pub preopened_files: Option<Vec<String>>,
     pub mapped_dirs: Option<Vec<(String, String)>>,

@@ -25,11 +25,14 @@ use fce::FCEModuleConfig;
 use std::fs;
 use std::path::PathBuf;
 use crate::RawCoreModulesConfig;
-use crate::misc::CoreModulesConfig;
+use crate::misc::{CoreModulesConfig, make_fce_config};
+use std::convert::TryInto;
+use std::fs::DirEntry;
 
 /// FluenceFaas isn't thread safe.
 // impl !Sync for FluenceFaaS {}
 
+// TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
 
 pub struct FluenceFaaS {
@@ -55,43 +58,51 @@ impl FluenceFaaS {
         Self::with_config(core_modules_config)
     }
 
-    /// Creates FaaS from prepared config.
-    pub(crate) fn with_config(
-        mut core_modules_config: CoreModulesConfig,
-    ) -> Result<Self, FaaSError> {
+    /// Creates FaaS with given modules
+    pub fn with_modules<I, C>(modules: I, config: C) -> Result<Self, FaaSError>
+    where
+        I: IntoIterator<Item = (String, Vec<u8>)>,
+        C: TryInto<CoreModulesConfig>,
+        FaaSError: From<C::Error>,
+    {
         let mut fce = FCE::new();
         let mut module_names = Vec::new();
+        let mut config = config.try_into()?;
 
-        for entry in fs::read_dir(core_modules_config.core_modules_dir)? {
-            let path = entry?.path();
-            if path.is_dir() {
-                // just skip directories
-                continue;
-            }
-
-            let module_name = path.file_name().unwrap();
-            let module_name = module_name
-                .to_os_string()
-                .into_string()
-                .map_err(|e| FaaSError::IOError(format!("failed to read from {:?} file", e)))?;
-
-            let module_bytes = fs::read(path.clone())?;
-
-            let core_module_config = crate::misc::make_fce_config(
-                core_modules_config.modules_config.remove(&module_name),
-            )?;
-            fce.load_module(module_name.clone(), &module_bytes, core_module_config)?;
-            module_names.push(module_name);
+        for (name, bytes) in modules {
+            let module_config = crate::misc::make_fce_config(config.modules_config.remove(&name))?;
+            fce.load_module(name.clone(), &bytes, module_config)?;
+            module_names.push(name);
         }
 
-        let rpc_module_config =
-            crate::misc::make_fce_config(core_modules_config.rpc_module_config)?;
+        let faas_code_config = make_fce_config(config.rpc_module_config)?;
 
         Ok(Self {
             fce,
             module_names,
-            faas_code_config: rpc_module_config,
+            faas_code_config,
         })
+    }
+
+    /// Creates FaaS from prepared config.
+    pub(crate) fn with_config(config: CoreModulesConfig) -> Result<Self, FaaSError> {
+        let entries = fs::read_dir(&config.core_modules_dir)?.collect::<Result<Vec<_>, _>>()?;
+
+        let modules = entries
+            .into_iter()
+            // skip directories
+            .filter(|e| !e.path().is_dir())
+            .map::<Result<(String, Vec<u8>), FaaSError>, _>(|entry: DirEntry| {
+                let module_name = entry.path().file_name().unwrap().to_os_string();
+                let module_name = module_name
+                    .into_string()
+                    .map_err(|name| FaaSError::IOError(format!("invalid file name: {:?}", name)))?;
+                let module_bytes = fs::read(entry.path())?;
+                Ok((module_name, module_bytes))
+            })
+            .collect::<Result<Vec<(String, Vec<u8>)>, _>>()?;
+
+        Self::with_modules(modules, config)
     }
 
     /// Executes provided Wasm code in the internal environment (with access to module exports).

@@ -60,3 +60,9 @@ impl From<toml::de::Error> for FaaSError {
         FaaSError::ConfigParseError(format!("{}", err))
     }
 }
+
+impl From<std::convert::Infallible> for FaaSError {
+    fn from(inf: std::convert::Infallible) -> Self {
+        match inf {}
+    }
+}
