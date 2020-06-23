@@ -26,23 +26,19 @@ const IPFS_RPC: &str = "wasm/artifacts/wasm_ipfs_rpc_wit.wasi.wasm";
 fn main() -> Result<(), anyhow::Error> {
     let ipfs_rpc = std::fs::read(IPFS_RPC).context(format!("{} wasn't found", IPFS_RPC))?;
 
-    let mut ipfs_node = FluenceFaaS::new(
-        PathBuf::from(IPFS_MODULES_CONFIG_PATH),
-    )?;
+    let mut ipfs_node = FluenceFaaS::new(PathBuf::from(IPFS_MODULES_CONFIG_PATH))?;
 
     println!("ipfs node interface is\n{}", ipfs_node.get_interface());
 
-    let node_addresses = ipfs_node
-        .call_module("ipfs_node.wasm", "get_addresses", &[])?;
+    let node_addresses = ipfs_node.call_module("ipfs_node.wasm", "get_addresses", &[])?;
 
     println!("ipfs node addresses are:\n{:?}", node_addresses);
 
-    let result = ipfs_node
-        .call_code(
-            &ipfs_rpc,
-            "put",
-            &[IValue::String("Hello, world".to_string())],
-        )?;
+    let result = ipfs_node.call_code(
+        &ipfs_rpc,
+        "put",
+        &[IValue::String("Hello, world".to_string())],
+    )?;
 
     println!("execution result {:?}", result);
 

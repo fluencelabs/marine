@@ -110,15 +110,18 @@ pub(crate) fn from_raw_config(config: RawCoreModulesConfig) -> Result<CoreModule
         .core_module
         .into_iter()
         .map(|module| {
-            let imports = module.imports.map(|import| {
-                Ok(import
-                    .into_iter()
-                    .map(|(import_func_name, host_cmd)| {
-                        let host_cmd = host_cmd.try_into::<String>()?;
-                        Ok((import_func_name, host_cmd))
-                    })
-                    .collect::<Result<Vec<_>>>()?)
-            }).map_or(Ok(None), |r: Result<_>| r.map(Some))?;
+            let imports = module
+                .imports
+                .map(|import| {
+                    Ok(import
+                        .into_iter()
+                        .map(|(import_func_name, host_cmd)| {
+                            let host_cmd = host_cmd.try_into::<String>()?;
+                            Ok((import_func_name, host_cmd))
+                        })
+                        .collect::<Result<Vec<_>>>()?)
+                })
+                .map_or(Ok(None), |r: Result<_>| r.map(Some))?;
 
             let wasi = module.wasi.map(parse_raw_wasi);
             Ok((

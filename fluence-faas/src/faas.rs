@@ -44,9 +44,7 @@ pub struct FluenceFaaS {
 
 impl FluenceFaaS {
     /// Creates FaaS from config on filesystem.
-    pub fn new<P: Into<PathBuf>>(
-        config_file_path: P,
-    ) -> Result<Self, FaaSError> {
+    pub fn new<P: Into<PathBuf>>(config_file_path: P) -> Result<Self, FaaSError> {
         let core_modules_config = crate::misc::parse_config_from_file(config_file_path.into())?;
         Self::with_config(core_modules_config)
     }
@@ -58,7 +56,9 @@ impl FluenceFaaS {
     }
 
     /// Creates FaaS from prepared config.
-    pub(crate) fn with_config(mut core_modules_config: CoreModulesConfig) -> Result<Self, FaaSError> {
+    pub(crate) fn with_config(
+        mut core_modules_config: CoreModulesConfig,
+    ) -> Result<Self, FaaSError> {
         let mut fce = FCE::new();
         let mut module_names = Vec::new();
 
