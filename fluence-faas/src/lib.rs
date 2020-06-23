@@ -20,7 +20,7 @@ mod faas_interface;
 mod misc;
 
 pub use fce::IValue;
-pub use fce::to_interface_value;
+pub use fce::{to_interface_value, from_interface_values};
 pub use fce::IType;
 
 pub use errors::FaaSError;

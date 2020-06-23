@@ -39,4 +39,4 @@ pub use engine::FCEFunction;
 pub use errors::FCEError;
 pub use module::IValue;
 pub use module::IType;
-pub use module::to_interface_value;
+pub use module::{to_interface_value, from_interface_values};
