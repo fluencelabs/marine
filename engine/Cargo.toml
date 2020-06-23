@@ -17,6 +17,7 @@ wasmer-wasi = { git = "https://github.com/fluencelabs/wasmer", branch = "fluence
 multimap = "0.8.1"
 parity-wasm = "0.41.0"
 pwasm-utils = "0.12.0"
+log = "0.4.8"
 
 [patch.'https://github.com/fluencelabs/wasmer']
 wasmer-wasi = { path = "lib/wasi" }

@@ -252,7 +252,7 @@ impl FCEModule {
             move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
                 use super::type_converters::wval_to_ival;
 
-                println!(
+                log::info!(
                     "raw import for {}.{} called with {:?}\n",
                     import_namespace, import_name, inputs
                 );
@@ -267,7 +267,8 @@ impl FCEModule {
                         Arc::make_mut(&mut wit_instance_callable.assume_init()),
                     );
                 }
-                println!(
+
+                log::info!(
                     "\nraw import for {}.{} finished",
                     import_namespace, import_name
                 );
