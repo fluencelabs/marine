@@ -254,7 +254,9 @@ impl FCEModule {
 
                 log::info!(
                     "raw import for {}.{} called with {:?}\n",
-                    import_namespace, import_name, inputs
+                    import_namespace,
+                    import_name,
+                    inputs
                 );
 
                 // copy here because otherwise wit_instance will be consumed by the closure
@@ -270,7 +272,8 @@ impl FCEModule {
 
                 log::info!(
                     "\nraw import for {}.{} finished",
-                    import_namespace, import_name
+                    import_namespace,
+                    import_name
                 );
 
                 // wit import functions should only change the stack state -

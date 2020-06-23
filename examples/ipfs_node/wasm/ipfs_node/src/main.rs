@@ -26,7 +26,7 @@ use crate::path::to_full_path;
 const RESULT_FILE_PATH: &str = "/tmp/ipfs_rpc_file";
 
 pub fn main() {
-    let msg = "ipfs_node.main: WASI initialization finished, env {}";
+    let msg = "ipfs_node.main: WASI initialization finished";
     unsafe {
         log_utf8_string(msg.as_ptr() as _, msg.len() as _);
     }
