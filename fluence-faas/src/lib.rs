@@ -28,4 +28,4 @@ pub use faas::FluenceFaaS;
 pub use faas_interface::FaaSInterface;
 pub use faas_interface::FaaSModuleInterface;
 
-pub use misc::RawCoreModulesConfig;
+pub use misc::{RawCoreModulesConfig, RawModuleConfig};
