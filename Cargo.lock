@@ -1147,7 +1147,7 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types"
 version = "0.17.0"
-source = "git+https://github.com/fluencelabs/interface-types#add53640f107ce2e638191e677547846cb2ce53a"
+source = "git+https://github.com/fluencelabs/interface-types#a87cf1f52825f5885ea5de77eaac2a06534ec3da"
 dependencies = [
  "nom",
  "serde",

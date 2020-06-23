@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-use super::FaaSError;
+use crate::misc::{CoreModulesConfig, make_fce_config};
+use crate::RawCoreModulesConfig;
+
 use super::faas_interface::FaaSInterface;
 use super::faas_interface::FaaSModuleInterface;
+use super::FaaSError;
+use super::IValue;
 
 use fce::FCE;
-use super::IValue;
 use fce::FCEModuleConfig;
 
-use std::fs;
-use std::path::PathBuf;
-use crate::RawCoreModulesConfig;
-use crate::misc::{CoreModulesConfig, make_fce_config};
 use std::convert::TryInto;
+use std::fs;
 use std::fs::DirEntry;
+use std::path::PathBuf;
 
 /// FluenceFaas isn't thread safe.
 // impl !Sync for FluenceFaaS {}

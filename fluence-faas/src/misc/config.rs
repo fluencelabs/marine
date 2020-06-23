@@ -77,6 +77,18 @@ pub struct RawModuleConfig {
     pub wasi: Option<RawWASIConfig>,
 }
 
+impl RawModuleConfig {
+    pub fn new(name: String) -> Self {
+        Self {
+            name,
+            mem_pages_count: None,
+            logger_enabled: None,
+            imports: None,
+            wasi: None,
+        }
+    }
+}
+
 #[derive(Deserialize, Debug)]
 pub struct RawWASIConfig {
     pub envs: Option<Vec<String>>,
