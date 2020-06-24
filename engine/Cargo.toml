@@ -11,7 +11,7 @@ wit_parser = { path = "../crates/wit_parser", version = "0.1.0" }
 wasmer-runtime = { git = "https://github.com/fluencelabs/wasmer", branch = "fluence" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
 wasmer-core = { package = "wasmer-runtime-core", git = "http://github.com/fluencelabs/wasmer", branch = "fluence", features = ["dynamicfunc-fat-closures"] }
-wasmer-wit = { package = "wasmer-interface-types", git = "http://github.com/fluencelabs/interface-types", branch = "master", features = ["serde"] }
+wasmer-wit = { package = "wasmer-interface-types", git = "http://github.com/fluencelabs/interface-types", branch = "serde", features = ["serde"] }
 wasmer-wasi = { git = "https://github.com/fluencelabs/wasmer", branch = "fluence" }
 serde = { version = "1.0.114", default-features = false, features = [ "derive" ] }
 
