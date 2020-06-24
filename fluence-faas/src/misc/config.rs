@@ -53,7 +53,7 @@ core_modules_dir = "wasm/artifacts/wasm_modules"
     mapped_dirs = { "tmp" = "/Users/user/tmp" }
  */
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct RawCoreModulesConfig {
     pub core_modules_dir: String,
     pub core_module: Vec<RawModuleConfig>,
@@ -68,7 +68,7 @@ impl TryInto<CoreModulesConfig> for RawCoreModulesConfig {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct RawModuleConfig {
     pub name: String,
     pub mem_pages_count: Option<u32>,
@@ -89,14 +89,14 @@ impl RawModuleConfig {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct RawWASIConfig {
     pub envs: Option<Vec<String>>,
     pub preopened_files: Option<Vec<String>>,
     pub mapped_dirs: Option<toml::value::Table>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct RawRPCModuleConfig {
     pub mem_pages_count: Option<u32>,
     pub logger_enabled: Option<bool>,
