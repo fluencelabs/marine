@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
+[[bin]]
+name = "wit_embedder"
+path = "src/main.rs"
+
 [dependencies]
 wit_parser = { path = "../../crates/wit_parser" }
 clap = "2.33.1"

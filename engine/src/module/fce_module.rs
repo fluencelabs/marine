@@ -252,9 +252,11 @@ impl FCEModule {
             move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
                 use super::type_converters::wval_to_ival;
 
-                println!(
+                log::info!(
                     "raw import for {}.{} called with {:?}\n",
-                    import_namespace, import_name, inputs
+                    import_namespace,
+                    import_name,
+                    inputs
                 );
 
                 // copy here because otherwise wit_instance will be consumed by the closure
@@ -267,9 +269,11 @@ impl FCEModule {
                         Arc::make_mut(&mut wit_instance_callable.assume_init()),
                     );
                 }
-                println!(
+
+                log::info!(
                     "\nraw import for {}.{} finished",
-                    import_namespace, import_name
+                    import_namespace,
+                    import_name
                 );
 
                 // wit import functions should only change the stack state -

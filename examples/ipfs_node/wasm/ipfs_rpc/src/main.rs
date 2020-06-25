@@ -25,7 +25,7 @@ use std::path::PathBuf;
 const RPC_TMP_FILEPATH: &str = "/tmp/ipfs_rpc_file";
 
 pub fn main() {
-    let msg = "ipfs_rpc.main: WASI initialization finished, env {}";
+    let msg = "ipfs_rpc.main: WASI initialization finished";
     unsafe {
         log_utf8_string(msg.as_ptr() as _, msg.len() as _);
     }

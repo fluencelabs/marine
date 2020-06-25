@@ -371,6 +371,7 @@ name = "fce"
 version = "0.1.0"
 dependencies = [
  "fce_wit_interfaces",
+ "log",
  "multimap",
  "parity-wasm",
  "pwasm-utils",
