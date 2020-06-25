@@ -51,14 +51,18 @@ pub struct FluenceFaaS {
 impl FluenceFaaS {
     /// Creates FaaS from config on filesystem.
     pub fn new<P: Into<PathBuf>>(config_file_path: P) -> Result<Self> {
-        let core_modules_config = crate::misc::parse_config_from_file(config_file_path.into())?;
-        Self::with_config(core_modules_config)
+        let config = crate::misc::load_config(config_file_path.into())?;
+        Self::with_raw_config(config)
     }
 
     /// Creates FaaS from config deserialized from TOML.
     pub fn with_raw_config(config: RawCoreModulesConfig) -> Result<Self> {
-        let core_modules_config = crate::misc::from_raw_config(config)?;
-        Self::with_config(core_modules_config)
+        let config = crate::misc::from_raw_config(config)?;
+        let modules = config
+            .core_modules_dir
+            .as_ref()
+            .map_or(Ok(vec![]), |dir| Self::load_modules(dir))?;
+        Self::with_modules(modules, config)
     }
 
     /// Creates FaaS with given modules.
@@ -88,9 +92,9 @@ impl FluenceFaaS {
     }
 
     /// Creates FaaS from prepared config.
-    pub(crate) fn with_config(config: CoreModulesConfig) -> Result<Self> {
+    fn load_modules(core_modules_dir: &str) -> Result<Vec<(String, Vec<u8>)>> {
         let entries =
-            fs::read_dir(&config.core_modules_dir)?.collect::<std::result::Result<Vec<_>, _>>()?;
+            fs::read_dir(&core_modules_dir)?.collect::<std::result::Result<Vec<_>, _>>()?;
 
         let modules = entries
             .into_iter()
@@ -106,7 +110,7 @@ impl FluenceFaaS {
             })
             .collect::<Result<Vec<_>>>()?;
 
-        Self::with_modules(modules, config)
+        Ok(modules)
     }
 
     /// Executes provided Wasm code in the internal environment (with access to module exports).

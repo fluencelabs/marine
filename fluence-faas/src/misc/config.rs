@@ -55,7 +55,7 @@ core_modules_dir = "wasm/artifacts/wasm_modules"
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct RawCoreModulesConfig {
-    pub core_modules_dir: String,
+    pub core_modules_dir: Option<String>,
     pub core_module: Vec<RawModuleConfig>,
     pub rpc_module: Option<RawRPCModuleConfig>,
 }
@@ -105,7 +105,7 @@ pub struct RawRPCModuleConfig {
 
 #[derive(Debug, Clone, Default)]
 pub struct CoreModulesConfig {
-    pub core_modules_dir: String,
+    pub core_modules_dir: Option<String>,
     pub modules_config: HashMap<String, ModuleConfig>,
     pub rpc_module_config: Option<ModuleConfig>,
 }
@@ -175,14 +175,10 @@ pub(crate) fn from_raw_config(config: RawCoreModulesConfig) -> Result<CoreModule
     })
 }
 
-/// Parse config from TOML file and prepare it
-pub(crate) fn parse_config_from_file(
-    config_file_path: std::path::PathBuf,
-) -> Result<CoreModulesConfig> {
+/// Parse config from TOML
+pub(crate) fn load_config(config_file_path: std::path::PathBuf) -> Result<RawCoreModulesConfig> {
     let file_content = std::fs::read(config_file_path)?;
-    let config: RawCoreModulesConfig = from_slice(&file_content)?;
-
-    from_raw_config(config)
+    Ok(from_slice(&file_content)?)
 }
 
 fn parse_raw_wasi(wasi: RawWASIConfig) -> WASIConfig {
