@@ -93,8 +93,9 @@ impl FluenceFaaS {
 
     /// Creates FaaS from prepared config.
     fn load_modules(core_modules_dir: &str) -> Result<Vec<(String, Vec<u8>)>> {
-        let entries =
-            fs::read_dir(&core_modules_dir)?.collect::<std::result::Result<Vec<_>, _>>()?;
+        let dir = fs::read_dir(&core_modules_dir)
+            .map_err(|e| FaaSError::ModuleDirError(core_modules_dir.into(), e))?;
+        let entries = dir.collect::<std::result::Result<Vec<_>, _>>()?;
 
         let modules = entries
             .into_iter()
