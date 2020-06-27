@@ -24,8 +24,8 @@ use std::collections::HashMap;
 #[derive(Debug)]
 pub struct FCEFunction<'a> {
     pub name: &'a str,
-    pub inputs: &'a Vec<super::IType>,
-    pub outputs: &'a Vec<super::IType>,
+    pub inputs: &'a Vec<IType>,
+    pub outputs: &'a Vec<IType>,
 }
 
 /// The base struct of the Fluence Compute Engine.
