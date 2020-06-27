@@ -42,18 +42,15 @@ impl FCE {
     }
 
     /// Invoke a function of a module inside FCE by given function name with given arguments.
-    pub fn call<S: AsRef<str>>(
+    pub fn call<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
-        module_name: S,
-        func_name: S,
+        module_name: MN,
+        func_name: FN,
         argument: &[IValue],
     ) -> Result<Vec<IValue>, FCEError> {
-        let module_name: &str = module_name.as_ref();
-        let func_name: &str = func_name.as_ref();
-
-        match self.modules.get_mut(module_name) {
+        match self.modules.get_mut(module_name.as_ref()) {
             // TODO: refactor errors
-            Some(module) => module.call(func_name, argument),
+            Some(module) => module.call(func_name.as_ref(), argument),
             None => Err(FCEError::NoSuchModule),
         }
     }
@@ -83,13 +80,9 @@ impl FCE {
 
     /// Unload previously loaded module.
     pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<(), FCEError> {
-        match self.modules.entry(module_name.as_ref().to_string()) {
-            Entry::Vacant(_) => Err(FCEError::NoSuchModule),
-
-            Entry::Occupied(module) => {
-                module.remove_entry();
-                Ok(())
-            }
+        match self.modules.remove(module_name.as_ref()) {
+            Some(_) => Ok(()),
+            None => Err(FCEError::NoSuchModule),
         }
     }
 
