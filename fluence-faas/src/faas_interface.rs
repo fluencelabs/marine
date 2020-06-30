@@ -15,39 +15,26 @@
  */
 
 use std::fmt;
+use std::collections::HashMap;
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 pub struct FaaSInterface<'a> {
-    pub modules: Vec<FaaSModuleInterface<'a>>,
-}
-
-#[derive(Debug, Serialize)]
-pub struct FaaSModuleInterface<'a> {
-    pub name: &'a str,
-    pub functions: Vec<fce::FCEFunction<'a>>,
+    pub modules: HashMap<&'a str, Vec<fce::FCEFunction<'a>>>,
 }
 
 impl<'a> fmt::Display for FaaSInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for module in self.modules.iter() {
-            write!(f, "{}", module)?;
-        }
+        for (name, functions) in self.modules.iter() {
+            writeln!(f, "{}", *name)?;
 
-        Ok(())
-    }
-}
-
-impl<'a> fmt::Display for FaaSModuleInterface<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", self.name)?;
-
-        for function in self.functions.iter() {
-            writeln!(
-                f,
-                "  pub fn {}({:?}) -> {:?}",
-                function.name, function.inputs, function.outputs
-            )?;
+            for function in functions.iter() {
+                writeln!(
+                    f,
+                    "  pub fn {}({:?}) -> {:?}",
+                    function.name, function.inputs, function.outputs
+                )?;
+            }
         }
 
         Ok(())

@@ -20,18 +20,18 @@ use super::*;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-/// The base struct of the Fluence Compute Engine.
-pub struct FCE {
-    // set of modules registered inside FCE
-    modules: HashMap<String, FCEModule>,
-}
-
 /// Represent a function type inside FCE.
 #[derive(Debug, serde::Serialize)]
 pub struct FCEFunction<'a> {
     pub name: &'a str,
     pub inputs: &'a Vec<IType>,
     pub outputs: &'a Vec<IType>,
+}
+
+/// The base struct of the Fluence Compute Engine.
+pub struct FCE {
+    // set of modules registered inside FCE
+    modules: HashMap<String, FCEModule>,
 }
 
 impl FCE {
@@ -42,15 +42,15 @@ impl FCE {
     }
 
     /// Invoke a function of a module inside FCE by given function name with given arguments.
-    pub fn call(
+    pub fn call<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
-        module_name: &str,
-        func_name: &str,
+        module_name: MN,
+        func_name: FN,
         argument: &[IValue],
     ) -> Result<Vec<IValue>, FCEError> {
-        match self.modules.get_mut(module_name) {
+        match self.modules.get_mut(module_name.as_ref()) {
             // TODO: refactor errors
-            Some(module) => module.call(func_name, argument),
+            Some(module) => module.call(func_name.as_ref(), argument),
             None => Err(FCEError::NoSuchModule),
         }
     }
@@ -79,33 +79,43 @@ impl FCE {
     }
 
     /// Unload previously loaded module.
-    pub fn unload_module(&mut self, module_name: &str) -> Result<(), FCEError> {
-        match self.modules.entry(module_name.to_string()) {
-            Entry::Vacant(_) => Err(FCEError::NoSuchModule),
-
-            Entry::Occupied(module) => {
-                module.remove_entry();
-                Ok(())
-            }
+    pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<(), FCEError> {
+        match self.modules.remove(module_name.as_ref()) {
+            Some(_) => Ok(()),
+            None => Err(FCEError::NoSuchModule),
         }
     }
 
-    /// Return signatures of all exported by this module functions.
-    pub fn get_interface(&self, module_name: &str) -> Result<Vec<FCEFunction<'_>>, FCEError> {
-        match self.modules.get(module_name) {
-            Some(module) => {
-                let signatures = module
-                    .get_exports_signatures()
-                    .map(|(name, inputs, outputs)| FCEFunction {
-                        name,
-                        inputs,
-                        outputs,
-                    })
-                    .collect::<Vec<_>>();
-                Ok(signatures)
-            }
+    /// Return function signatures of all loaded info FCE modules with their names.
+    pub fn interface(&self) -> impl Iterator<Item = (&str, Vec<FCEFunction<'_>>)> {
+        self.modules.iter().map(|(module_name, module)| {
+            (
+                module_name.as_str(),
+                Self::get_module_function_signatures(module),
+            )
+        })
+    }
+
+    /// Return function signatures exported by module with given name.
+    pub fn module_interface<S: AsRef<str>>(
+        &self,
+        module_name: S,
+    ) -> Result<Vec<FCEFunction<'_>>, FCEError> {
+        match self.modules.get(module_name.as_ref()) {
+            Some(module) => Ok(Self::get_module_function_signatures(module)),
             None => Err(FCEError::NoSuchModule),
         }
+    }
+
+    fn get_module_function_signatures(module: &FCEModule) -> Vec<FCEFunction<'_>> {
+        module
+            .get_exports_signatures()
+            .map(|(name, inputs, outputs)| FCEFunction {
+                name,
+                inputs,
+                outputs,
+            })
+            .collect::<Vec<_>>()
     }
 }
 

@@ -19,7 +19,6 @@ use crate::RawCoreModulesConfig;
 use crate::Result;
 
 use super::faas_interface::FaaSInterface;
-use super::faas_interface::FaaSModuleInterface;
 use super::FaaSError;
 use super::IValue;
 
@@ -35,9 +34,6 @@ unsafe impl Send for FluenceFaaS {}
 
 pub struct FluenceFaaS {
     fce: FCE,
-
-    // names of core modules loaded to FCE
-    module_names: Vec<String>,
 
     // config for code loaded by call_code function
     faas_code_config: FCEModuleConfig,
@@ -68,20 +64,17 @@ impl FluenceFaaS {
         FaaSError: From<C::Error>,
     {
         let mut fce = FCE::new();
-        let mut module_names = Vec::new();
         let mut config = config.try_into()?;
 
         for (name, bytes) in modules {
             let module_config = crate::misc::make_fce_config(config.modules_config.remove(&name))?;
             fce.load_module(name.clone(), &bytes, module_config)?;
-            module_names.push(name);
         }
 
         let faas_code_config = make_fce_config(config.rpc_module_config)?;
 
         Ok(Self {
             fce,
-            module_names,
             faas_code_config,
         })
     }
@@ -144,15 +137,7 @@ impl FluenceFaaS {
 
     /// Return all export functions (name and signatures) of loaded on a startup modules.
     pub fn get_interface(&self) -> FaaSInterface {
-        let mut modules = Vec::with_capacity(self.module_names.len());
-
-        for module_name in self.module_names.iter() {
-            let functions = self.fce.get_interface(module_name).unwrap();
-            modules.push(FaaSModuleInterface {
-                name: module_name,
-                functions,
-            })
-        }
+        let modules = self.fce.interface().collect();
 
         FaaSInterface { modules }
     }

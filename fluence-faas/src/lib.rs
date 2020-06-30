@@ -28,6 +28,5 @@ pub use fce::IType;
 pub use errors::FaaSError;
 pub use faas::FluenceFaaS;
 pub use faas_interface::FaaSInterface;
-pub use faas_interface::FaaSModuleInterface;
 
 pub use misc::{RawCoreModulesConfig, RawModuleConfig};
