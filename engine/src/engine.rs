@@ -21,7 +21,7 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 /// Represent a function type inside FCE.
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct FCEFunction<'a> {
     pub name: &'a str,
     pub inputs: &'a Vec<IType>,

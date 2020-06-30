@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 fluence-faas = { path = "../../fluence-faas" }
+anyhow = "1.0.31"

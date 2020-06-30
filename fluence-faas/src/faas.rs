@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-use super::FaaSError;
+use crate::misc::{CoreModulesConfig, make_fce_config};
+use crate::RawCoreModulesConfig;
+use crate::Result;
+
 use super::faas_interface::FaaSInterface;
+use super::FaaSError;
 use super::IValue;
 
 use fce::FCE;
 use fce::FCEModuleConfig;
 
+use std::convert::TryInto;
 use std::fs;
 use std::path::PathBuf;
+
+// TODO: remove and use mutex instead
+unsafe impl Send for FluenceFaaS {}
 
 pub struct FluenceFaaS {
     fce: FCE,
@@ -32,57 +40,85 @@ pub struct FluenceFaaS {
 }
 
 impl FluenceFaaS {
-    pub fn new<P: Into<PathBuf>>(
-        core_modules_dir: P,
-        config_file_path: P,
-    ) -> Result<Self, FaaSError> {
+    /// Creates FaaS from config on filesystem.
+    pub fn new<P: Into<PathBuf>>(config_file_path: P) -> Result<Self> {
+        let config = crate::misc::load_config(config_file_path.into())?;
+        Self::with_raw_config(config)
+    }
+
+    /// Creates FaaS from config deserialized from TOML.
+    pub fn with_raw_config(config: RawCoreModulesConfig) -> Result<Self> {
+        let config = crate::misc::from_raw_config(config)?;
+        let modules = config
+            .core_modules_dir
+            .as_ref()
+            .map_or(Ok(vec![]), |dir| Self::load_modules(dir))?;
+        Self::with_modules(modules, config)
+    }
+
+    /// Creates FaaS with given modules.
+    pub fn with_modules<I, C>(modules: I, config: C) -> Result<Self>
+    where
+        I: IntoIterator<Item = (String, Vec<u8>)>,
+        C: TryInto<CoreModulesConfig>,
+        FaaSError: From<C::Error>,
+    {
         let mut fce = FCE::new();
-        let mut core_modules_config = crate::misc::parse_config_from_file(config_file_path.into())?;
+        let mut config = config.try_into()?;
 
-        for entry in fs::read_dir(core_modules_dir.into())? {
-            let path = entry?.path();
-            if path.is_dir() {
-                // just skip directories
-                continue;
-            }
-
-            let module_name = path.file_name().unwrap();
-            let module_name = module_name
-                .to_os_string()
-                .into_string()
-                .map_err(|e| FaaSError::IOError(format!("failed to read from {:?} file", e)))?;
-
-            let module_bytes = fs::read(path.clone())?;
-
-            let core_module_config = crate::misc::make_fce_config(
-                core_modules_config.modules_config.remove(&module_name),
-            )?;
-            fce.load_module(module_name.clone(), &module_bytes, core_module_config)?;
+        for (name, bytes) in modules {
+            let module_config = crate::misc::make_fce_config(config.modules_config.remove(&name))?;
+            fce.load_module(name.clone(), &bytes, module_config)?;
         }
 
-        let rpc_module_config =
-            crate::misc::make_fce_config(core_modules_config.rpc_module_config)?;
+        let faas_code_config = make_fce_config(config.rpc_module_config)?;
 
         Ok(Self {
             fce,
-            faas_code_config: rpc_module_config,
+            faas_code_config,
+        })
+    }
+
+    /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
+    fn load_modules(core_modules_dir: &str) -> Result<Vec<(String, Vec<u8>)>> {
+        use FaaSError::IOError;
+
+        let mut dir_entries = fs::read_dir(core_modules_dir)
+            .map_err(|e| IOError(format!("{}: {}", core_modules_dir, e)))?;
+
+        dir_entries.try_fold(vec![], |mut vec, entry| {
+            let entry = entry?;
+            let path = entry.path();
+            if !path.is_dir() {
+                let module_name = path
+                    .file_name()
+                    .ok_or(IOError(format!("No file name in path {:?}", path)))?
+                    .to_os_string()
+                    .into_string()
+                    .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
+                let module_bytes = fs::read(path)?;
+                vec.push((module_name, module_bytes))
+            }
+
+            Ok(vec)
         })
     }
 
     /// Executes provided Wasm code in the internal environment (with access to module exports).
     pub fn call_code(
         &mut self,
-        wasm_rpc: &[u8],
+        wasm: &[u8],
         func_name: &str,
         args: &[IValue],
-    ) -> Result<Vec<IValue>, FaaSError> {
-        let rpc_module_name = "ipfs_rpc";
+    ) -> Result<Vec<IValue>> {
+        // We need this because every wasm code loaded into VM needs a module name
+        let anonymous_module = "anonymous_module_name";
 
         self.fce
-            .load_module(rpc_module_name, wasm_rpc, self.faas_code_config.clone())?;
+            .load_module(anonymous_module, wasm, self.faas_code_config.clone())?;
 
-        let call_result = self.fce.call(rpc_module_name, func_name, args)?;
-        self.fce.unload_module(rpc_module_name)?;
+        let call_result = self.fce.call(anonymous_module, func_name, args)?;
+        self.fce.unload_module(anonymous_module)?;
 
         Ok(call_result)
     }
@@ -93,7 +129,7 @@ impl FluenceFaaS {
         module_name: &str,
         func_name: &str,
         args: &[IValue],
-    ) -> Result<Vec<IValue>, FaaSError> {
+    ) -> Result<Vec<IValue>> {
         self.fce
             .call(module_name, func_name, args)
             .map_err(Into::into)

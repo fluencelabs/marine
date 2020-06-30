@@ -16,8 +16,9 @@
 
 use std::fmt;
 use std::collections::HashMap;
+use serde::Serialize;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct FaaSInterface<'a> {
     pub modules: HashMap<&'a str, Vec<fce::FCEFunction<'a>>>,
 }
