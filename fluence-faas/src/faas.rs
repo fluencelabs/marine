@@ -30,9 +30,6 @@ use std::convert::TryInto;
 use std::fs;
 use std::path::PathBuf;
 
-/// FluenceFaas isn't thread safe.
-// impl !Sync for FluenceFaaS {}
-
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
 
