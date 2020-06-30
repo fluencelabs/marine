@@ -29,9 +29,6 @@ pub enum FaaSError {
 
     /// FCE errors.
     EngineError(FCEError),
-
-    /// Core modules directory read error.
-    ModuleDirError(String, IOError),
 }
 
 impl Error for FaaSError {}
@@ -42,7 +39,6 @@ impl std::fmt::Display for FaaSError {
             FaaSError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
             FaaSError::IOError(err_msg) => write!(f, "{}", err_msg),
             FaaSError::EngineError(err) => write!(f, "{}", err),
-            FaaSError::ModuleDirError(dir, err) => write!(f, "{}: {}", dir, err),
         }
     }
 }

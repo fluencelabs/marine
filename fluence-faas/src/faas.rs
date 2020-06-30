@@ -16,6 +16,7 @@
 
 use crate::misc::{CoreModulesConfig, make_fce_config};
 use crate::RawCoreModulesConfig;
+use crate::Result;
 
 use super::faas_interface::FaaSInterface;
 use super::faas_interface::FaaSModuleInterface;
@@ -27,10 +28,7 @@ use fce::FCEModuleConfig;
 
 use std::convert::TryInto;
 use std::fs;
-use std::fs::DirEntry;
 use std::path::PathBuf;
-
-type Result<T> = std::result::Result<T, FaaSError>;
 
 /// FluenceFaas isn't thread safe.
 // impl !Sync for FluenceFaaS {}
@@ -91,27 +89,29 @@ impl FluenceFaaS {
         })
     }
 
-    /// Creates FaaS from prepared config.
+    /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
     fn load_modules(core_modules_dir: &str) -> Result<Vec<(String, Vec<u8>)>> {
-        let dir = fs::read_dir(&core_modules_dir)
-            .map_err(|e| FaaSError::ModuleDirError(core_modules_dir.into(), e))?;
-        let entries = dir.collect::<std::result::Result<Vec<_>, _>>()?;
+        use FaaSError::IOError;
 
-        let modules = entries
-            .into_iter()
-            // skip directories
-            .filter(|e| !e.path().is_dir())
-            .map::<Result<_>, _>(|entry: DirEntry| {
-                let module_name = entry.path().file_name().unwrap().to_os_string();
-                let module_name = module_name
+        let mut dir_entries = fs::read_dir(core_modules_dir)
+            .map_err(|e| IOError(format!("{}: {}", core_modules_dir, e)))?;
+
+        dir_entries.try_fold(vec![], |mut vec, entry| {
+            let entry = entry?;
+            let path = entry.path();
+            if !path.is_dir() {
+                let module_name = path
+                    .file_name()
+                    .ok_or(IOError(format!("No file name in path {:?}", path)))?
+                    .to_os_string()
                     .into_string()
-                    .map_err(|name| FaaSError::IOError(format!("invalid file name: {:?}", name)))?;
-                let module_bytes = fs::read(entry.path())?;
-                Ok((module_name, module_bytes))
-            })
-            .collect::<Result<Vec<_>>>()?;
+                    .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
+                let module_bytes = fs::read(path)?;
+                vec.push((module_name, module_bytes))
+            }
 
-        Ok(modules)
+            Ok(vec)
+        })
     }
 
     /// Executes provided Wasm code in the internal environment (with access to module exports).

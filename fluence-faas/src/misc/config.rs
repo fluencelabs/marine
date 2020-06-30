@@ -15,14 +15,13 @@
  */
 
 use crate::FaaSError;
+use crate::Result;
 
 use serde_derive::{Serialize, Deserialize};
 use toml::from_slice;
 
 use std::collections::HashMap;
 use std::convert::TryInto;
-
-type Result<T> = std::result::Result<T, FaaSError>;
 
 /*
 An example of the config:
@@ -140,9 +139,9 @@ pub(crate) fn from_raw_config(config: RawCoreModulesConfig) -> Result<CoreModule
                             let host_cmd = host_cmd.try_into::<String>()?;
                             Ok((import_func_name, host_cmd))
                         })
-                        .collect::<Result<Vec<_>>>()?)
+                        .collect::<Result<Vec<_>>>()?) as Result<_>
                 })
-                .map_or(Ok(None), |r: Result<_>| r.map(Some))?;
+                .transpose()?;
 
             let wasi = module.wasi.map(parse_raw_wasi);
             Ok((
