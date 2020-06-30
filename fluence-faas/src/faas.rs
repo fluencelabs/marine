@@ -141,8 +141,8 @@ impl FluenceFaaS {
         let modules = self
             .fce
             .interface()
-            .map(|(name, function)| {
-                let function = function
+            .map(|(name, signatures)| {
+                let signatures = signatures
                     .iter()
                     .map(|f| {
                         (
@@ -154,7 +154,7 @@ impl FluenceFaaS {
                         )
                     })
                     .collect();
-                (name, function)
+                (name, signatures)
             })
             .collect();
 
