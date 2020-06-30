@@ -24,8 +24,8 @@ use std::collections::HashMap;
 #[derive(Debug, serde::Serialize)]
 pub struct FCEFunction<'a> {
     pub name: &'a str,
-    pub inputs: &'a Vec<IType>,
-    pub outputs: &'a Vec<IType>,
+    pub input_types: &'a Vec<IType>,
+    pub output_types: &'a Vec<IType>,
 }
 
 /// The base struct of the Fluence Compute Engine.
@@ -112,8 +112,8 @@ impl FCE {
             .get_exports_signatures()
             .map(|(name, inputs, outputs)| FCEFunction {
                 name,
-                inputs,
-                outputs,
+                input_types: inputs,
+                output_types: outputs,
             })
             .collect::<Vec<_>>()
     }
