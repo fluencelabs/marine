@@ -54,3 +54,15 @@ impl From<FCEError> for FaaSError {
         FaaSError::EngineError(err)
     }
 }
+
+impl From<toml::de::Error> for FaaSError {
+    fn from(err: toml::de::Error) -> Self {
+        FaaSError::ConfigParseError(format!("{}", err))
+    }
+}
+
+impl From<std::convert::Infallible> for FaaSError {
+    fn from(inf: std::convert::Infallible) -> Self {
+        match inf {}
+    }
+}

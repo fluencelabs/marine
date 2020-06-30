@@ -15,13 +15,14 @@
  */
 
 use std::fmt;
+use serde::Serialize;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct FaaSInterface<'a> {
     pub modules: Vec<FaaSModuleInterface<'a>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct FaaSModuleInterface<'a> {
     pub name: &'a str,
     pub functions: Vec<fce::FCEFunction<'a>>,

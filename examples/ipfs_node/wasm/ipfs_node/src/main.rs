@@ -99,13 +99,13 @@ pub unsafe fn get_address() {
 
     let ipfs_address = match std::env::var(IPFS_ADDR_ENV_NAME) {
         Ok(addr) => addr,
-        Err(e) => format!("getting {} env variable failed with error {:?}", IPFS_ADDR_ENV_NAME, e)
+        Err(e) => format!(
+            "getting {} env variable failed with error {:?}",
+            IPFS_ADDR_ENV_NAME, e
+        ),
     };
 
-    let msg = format!(
-        "ipfs_node.get_address: node address is {} \n",
-        ipfs_address
-    );
+    let msg = format!("ipfs_node.get_address: node address is {} \n", ipfs_address);
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
     *RESULT_PTR.get_mut() = ipfs_address.as_ptr() as _;

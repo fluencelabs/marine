@@ -27,7 +27,7 @@ pub struct FCE {
 }
 
 /// Represent a function type inside FCE.
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct FCEFunction<'a> {
     pub name: &'a str,
     pub inputs: &'a Vec<IType>,

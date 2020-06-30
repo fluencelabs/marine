@@ -19,10 +19,15 @@ mod faas;
 mod faas_interface;
 mod misc;
 
+pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
+
 pub use fce::IValue;
+pub use fce::{to_interface_value, from_interface_values};
 pub use fce::IType;
 
 pub use errors::FaaSError;
 pub use faas::FluenceFaaS;
 pub use faas_interface::FaaSInterface;
 pub use faas_interface::FaaSModuleInterface;
+
+pub use misc::{RawCoreModulesConfig, RawModuleConfig};
