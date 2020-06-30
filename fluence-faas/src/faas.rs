@@ -28,6 +28,7 @@ use fce::FCEModuleConfig;
 use std::convert::TryInto;
 use std::fs;
 use std::path::PathBuf;
+use crate::faas_interface::FaaSFunctionSignature;
 
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
@@ -92,7 +93,7 @@ impl FluenceFaaS {
             if !path.is_dir() {
                 let module_name = path
                     .file_name()
-                    .ok_or(IOError(format!("No file name in path {:?}", path)))?
+                    .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?
                     .to_os_string()
                     .into_string()
                     .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
@@ -137,7 +138,25 @@ impl FluenceFaaS {
 
     /// Return all export functions (name and signatures) of loaded on a startup modules.
     pub fn get_interface(&self) -> FaaSInterface {
-        let modules = self.fce.interface().collect();
+        let modules = self
+            .fce
+            .interface()
+            .map(|(name, signatures)| {
+                let signatures = signatures
+                    .iter()
+                    .map(|f| {
+                        (
+                            f.name,
+                            FaaSFunctionSignature {
+                                input_types: f.input_types,
+                                output_types: f.output_types,
+                            },
+                        )
+                    })
+                    .collect();
+                (name, signatures)
+            })
+            .collect();
 
         FaaSInterface { modules }
     }

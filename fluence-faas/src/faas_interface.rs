@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
+use super::IType;
+use serde::Serialize;
+
 use std::fmt;
 use std::collections::HashMap;
-use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 pub struct FaaSInterface<'a> {
-    pub modules: HashMap<&'a str, Vec<fce::FCEFunction<'a>>>,
+    pub modules: HashMap<&'a str, HashMap<&'a str, FaaSFunctionSignature<'a>>>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct FaaSFunctionSignature<'a> {
+    pub input_types: &'a Vec<IType>,
+    pub output_types: &'a Vec<IType>,
 }
 
 impl<'a> fmt::Display for FaaSInterface<'a> {
@@ -28,11 +36,11 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
         for (name, functions) in self.modules.iter() {
             writeln!(f, "{}", *name)?;
 
-            for function in functions.iter() {
+            for (name, signature) in functions.iter() {
                 writeln!(
                     f,
                     "  pub fn {}({:?}) -> {:?}",
-                    function.name, function.inputs, function.outputs
+                    name, signature.input_types, signature.output_types
                 )?;
             }
         }

@@ -35,7 +35,7 @@ mod misc;
 
 pub use config::FCEModuleConfig;
 pub use engine::FCE;
-pub use engine::FCEFunction;
+pub use engine::FCEFunctionSignature;
 pub use errors::FCEError;
 pub use module::IValue;
 pub use module::IType;
