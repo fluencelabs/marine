@@ -25,10 +25,10 @@
 ;; import ipfs put/get function
 (@interface type (func (param string) (result string))) ;; 8
 
-;; export ipfs.get_addresses function
+;; export ipfs.get_address function
 (@interface type (func (result string)))                ;; 9
 
-;; export ipfs.get_addresses function
+;; export ipfs.get_address function
 (@interface type (func ))                               ;; 10
 
 (@interface export "allocate" (func  0))        ;; 0
@@ -40,7 +40,7 @@
 
 (@interface export "put" (func 5))              ;; 6
 (@interface export "get" (func 6))              ;; 7
-(@interface export "get_addresses" (func 10))   ;; 8
+(@interface export "get_address" (func 10))   ;; 8
 
 ;; adapter for export function put
 (@interface func (type 7)
@@ -74,7 +74,7 @@
     call-core 1         ;; call deallocate
 )
 
-;; adapter for export function get_addresses
+;; adapter for export function get_address
 (@interface func (type 9)
     call-core 8         ;; call self.get
     call-core 3         ;; call get_result_ptr

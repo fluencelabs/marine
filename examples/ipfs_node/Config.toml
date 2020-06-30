@@ -10,7 +10,7 @@ core_modules_dir = "wasm/artifacts/wasm_modules"
     ipfs = "/usr/local/bin/ipfs"
 
     [core_module.wasi]
-    envs = []
+    envs = ["IPFS_ADDR=/dns4/relay02.fluence.dev/tcp/15001"]
     preopened_files = ["./wasm/artifacts"]
     mapped_dirs = { "tmp" = "./wasm/artifacts" }
 
