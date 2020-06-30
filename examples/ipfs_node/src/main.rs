@@ -34,11 +34,11 @@ fn main() {
 
     println!("ipfs node interface is\n{}", ipfs_node.get_interface());
 
-    let node_addresses = ipfs_node
-        .call_module("ipfs_node.wasm", "get_addresses", &[])
+    let node_address = ipfs_node
+        .call_module("ipfs_node.wasm", "get_address", &[])
         .unwrap();
 
-    println!("ipfs node addresses are:\n{:?}", node_addresses);
+    println!("ipfs node address is:\n{:?}", node_address);
 
     let result = ipfs_node
         .call_code(

@@ -24,6 +24,7 @@ use crate::result::{RESULT_PTR, RESULT_SIZE};
 use crate::path::to_full_path;
 
 const RESULT_FILE_PATH: &str = "/tmp/ipfs_rpc_file";
+const IPFS_ADDR_ENV_NAME: &str = "IPFS_ADDR";
 
 pub fn main() {
     let msg = "ipfs_node.main: WASI initialization finished";
@@ -92,32 +93,24 @@ pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
 }
 
 #[no_mangle]
-pub unsafe fn get_addresses() {
-    let msg = "ipfs_node.get_addresses".to_string();
+pub unsafe fn get_address() {
+    let msg = "ipfs_node.get_address".to_string();
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
-    let cmd = "id -f'<addrs>'";
-    let result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
-
-    let multiaddrs = if result == 0 {
-        String::from_raw_parts(
-            *RESULT_PTR.get_mut() as _,
-            *RESULT_SIZE.get_mut(),
-            *RESULT_SIZE.get_mut(),
-        )
-    } else {
-        "host ipfs call failed".to_string()
+    let ipfs_address = match std::env::var(IPFS_ADDR_ENV_NAME) {
+        Ok(addr) => addr,
+        Err(e) => format!("getting {} env variable failed with error {:?}", IPFS_ADDR_ENV_NAME, e)
     };
 
     let msg = format!(
-        "ipfs_node.get_addresses: node addresses are {} \n",
-        multiaddrs
+        "ipfs_node.get_address: node address is {} \n",
+        ipfs_address
     );
     log_utf8_string(msg.as_ptr() as _, msg.len() as _);
 
-    *RESULT_PTR.get_mut() = multiaddrs.as_ptr() as _;
-    *RESULT_SIZE.get_mut() = multiaddrs.len();
-    std::mem::forget(multiaddrs);
+    *RESULT_PTR.get_mut() = ipfs_address.as_ptr() as _;
+    *RESULT_SIZE.get_mut() = ipfs_address.len();
+    std::mem::forget(ipfs_address);
 }
 
 #[link(wasm_import_module = "host")]
