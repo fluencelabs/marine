@@ -22,7 +22,7 @@ use std::collections::HashMap;
 
 /// Represent a function type inside FCE.
 #[derive(Debug, serde::Serialize)]
-pub struct FCEFunction<'a> {
+pub struct FCEFunctionSignature<'a> {
     pub name: &'a str,
     pub input_types: &'a Vec<IType>,
     pub output_types: &'a Vec<IType>,
@@ -87,7 +87,7 @@ impl FCE {
     }
 
     /// Return function signatures of all loaded info FCE modules with their names.
-    pub fn interface(&self) -> impl Iterator<Item = (&str, Vec<FCEFunction<'_>>)> {
+    pub fn interface(&self) -> impl Iterator<Item = (&str, Vec<FCEFunctionSignature<'_>>)> {
         self.modules.iter().map(|(module_name, module)| {
             (
                 module_name.as_str(),
@@ -100,20 +100,20 @@ impl FCE {
     pub fn module_interface<S: AsRef<str>>(
         &self,
         module_name: S,
-    ) -> Result<Vec<FCEFunction<'_>>, FCEError> {
+    ) -> Result<Vec<FCEFunctionSignature<'_>>, FCEError> {
         match self.modules.get(module_name.as_ref()) {
             Some(module) => Ok(Self::get_module_function_signatures(module)),
             None => Err(FCEError::NoSuchModule),
         }
     }
 
-    fn get_module_function_signatures(module: &FCEModule) -> Vec<FCEFunction<'_>> {
+    fn get_module_function_signatures(module: &FCEModule) -> Vec<FCEFunctionSignature<'_>> {
         module
             .get_exports_signatures()
-            .map(|(name, inputs, outputs)| FCEFunction {
+            .map(|(name, input_types, output_types)| FCEFunctionSignature {
                 name,
-                input_types: inputs,
-                output_types: outputs,
+                input_types,
+                output_types,
             })
             .collect::<Vec<_>>()
     }
