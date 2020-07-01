@@ -25,6 +25,7 @@ use crate::path::to_full_path;
 
 const RESULT_FILE_PATH: &str = "/tmp/ipfs_rpc_file";
 const IPFS_ADDR_ENV_NAME: &str = "IPFS_ADDR";
+const TIMEOUT_ENV_NAME: &str = "timeout";
 
 pub fn main() {
     let msg = "ipfs_node.main: WASI initialization finished";
@@ -42,7 +43,8 @@ pub unsafe fn put(file_path_ptr: *mut u8, file_path_size: usize) {
 
     let file_path = to_full_path(file_path);
 
-    let cmd = format!("add -Q {}", file_path);
+    let timeout = std::env::var(TIMEOUT_ENV_NAME).unwrap_or_else(|_| "1s".to_string());
+    let cmd = format!("add --timeout {} -Q {}", timeout, file_path);
     let result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
 
     let hash = if result == 0 {
@@ -72,7 +74,11 @@ pub unsafe fn get(hash_ptr: *mut u8, hash_size: usize) {
 
     let result_file_path = to_full_path(RESULT_FILE_PATH);
 
-    let cmd = format!("get -o {}  {}", result_file_path, hash);
+    let timeout = std::env::var(TIMEOUT_ENV_NAME).unwrap_or_else(|_| "1s".to_string());
+    let cmd = format!(
+        "get --timeout {} -o {}  {}",
+        timeout, result_file_path, hash
+    );
     let _result = ipfs(cmd.as_ptr() as _, cmd.len() as _);
 
     let _output = String::from_raw_parts(
