@@ -113,7 +113,6 @@ impl wasm::structures::LocalImport for WITFunction {
 
     fn call(&self, arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
         use super::type_converters::{ival_to_wval, wval_to_ival};
-        // println!("wit_function called with {:?}", arguments);
 
         match &self.inner {
             WITFunctionInner::Export { func, .. } => func

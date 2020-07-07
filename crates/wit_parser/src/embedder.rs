@@ -19,6 +19,7 @@ use super::errors::WITParserError;
 
 use walrus::ModuleConfig;
 use wasmer_wit::{
+    ast::Interfaces,
     decoders::wat::{parse, Buffer},
     encoders::binary::ToBytes,
 };
@@ -39,6 +40,27 @@ pub fn embed_text_wit(
 
     let mut bytes = vec![];
     ast.to_bytes(&mut bytes)?;
+
+    let custom = WITCustom(bytes);
+    module.customs.add(custom);
+    module
+        .emit_wasm_file(&out_wasm_path)
+        .map_err(WITParserError::WasmEmitError)?;
+
+    Ok(())
+}
+
+pub fn embed_wit(
+    in_wasm_path: PathBuf,
+    out_wasm_path: PathBuf,
+    interfaces: &Interfaces<'_>,
+) -> Result<(), WITParserError> {
+    let mut module = ModuleConfig::new()
+        .parse_file(&in_wasm_path)
+        .map_err(WITParserError::CorruptedWasmFile)?;
+
+    let mut bytes = vec![];
+    interfaces.to_bytes(&mut bytes)?;
 
     let custom = WITCustom(bytes);
     module.customs.add(custom);
