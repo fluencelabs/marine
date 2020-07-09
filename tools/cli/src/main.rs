@@ -27,28 +27,29 @@
 
 mod args;
 mod build;
+mod errors;
 
 use clap::App;
 use clap::AppSettings;
 
-pub fn main() -> Result<(), exitfailure::ExitFailure> {
+pub(crate) type Result<T> = std::result::Result<T, crate::errors::CLIError>;
+
+pub fn main() -> Result<()> {
     let app = App::new("CLI tool for embedding WIT to provided Wasm file")
         .version(args::VERSION)
         .author(args::AUTHORS)
         .about(args::DESCRIPTION)
         .setting(AppSettings::ArgRequiredElseHelp)
         .subcommand(args::build())
-        .subcommand(args::show_wit())
-        .subcommand(args::validate());
+        .subcommand(args::show_wit());
 
     match app.get_matches().subcommand() {
         ("build", Some(arg)) => {
             let manifest_path = arg
                 .value_of(args::IN_WASM_PATH)
                 .map(std::path::PathBuf::from);
-            crate::build::build(manifest_path);
 
-            Ok(())
+            crate::build::build(manifest_path)
         }
         ("show", Some(arg)) => {
             let wasm_path = arg.value_of(args::IN_WASM_PATH).unwrap();
@@ -59,11 +60,6 @@ pub fn main() -> Result<(), exitfailure::ExitFailure> {
 
             Ok(())
         }
-        ("validate", Some(arg)) => {
-            let _wasm_path = arg.value_of(args::IN_WASM_PATH).unwrap();
-
-            Ok(())
-        }
-        c => Err(failure::err_msg(format!("Unexpected command: {}", c.0)).into()),
+        c => Err(crate::errors::CLIError::NoSuchCommand(c.0.to_string())),
     }
 }

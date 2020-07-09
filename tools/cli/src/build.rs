@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+use crate::Result;
+use crate::errors::CLIError;
+
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -22,12 +25,11 @@ use std::process::Command;
 enum DiagnosticMessage {
     BuildScriptExecuted,
     BuildFinished,
-    CompilerArtifact { executable: String },
+    CompilerArtifact { filenames: Vec<String> },
     RunWithArgs,
 }
 
-// TODO: add error handling
-pub(crate) fn build(manifest_path: Option<PathBuf>) {
+pub(crate) fn build(manifest_path: Option<PathBuf>) -> Result<()> {
     use std::io::Read;
 
     let mut cargo = Command::new("cargo");
@@ -37,25 +39,45 @@ pub(crate) fn build(manifest_path: Option<PathBuf>) {
         cargo.arg("--manifest-path").arg(wasm_path);
     }
 
-    let mut process = cargo.stdout(std::process::Stdio::piped()).spawn().unwrap();
+    let mut process = cargo.stdout(std::process::Stdio::piped()).spawn()?;
 
     let mut output = String::new();
-
     process
         .stdout
         .take()
-        .unwrap()
-        .read_to_string(&mut output)
-        .unwrap();
-    let _status = process.wait().unwrap();
+        .ok_or_else(|| CLIError::WasmCompilationError("Compilation failed: no output".to_string()))?
+        .read_to_string(&mut output)?;
 
-    let mut wasms = Vec::new();
+    let status = process.wait()?;
+    if !status.success() {
+        return Err(CLIError::WasmCompilationError(format!(
+            "Compilation failed with status {}",
+            status
+        )));
+    }
+
+    let mut wasms: Vec<String> = Vec::new();
     for line in output.lines() {
-        if let Ok(DiagnosticMessage::CompilerArtifact { executable }) = serde_json::from_str(line) {
-            wasms.push(executable)
+        if let Ok(DiagnosticMessage::CompilerArtifact { filenames }) = serde_json::from_str(line) {
+            wasms.extend(
+                filenames
+                    .into_iter()
+                    .filter(|name| name.ends_with(".wasm"))
+                    .collect::<Vec<_>>(),
+            )
         }
     }
 
-    let wasm_path = std::path::PathBuf::from(wasms.first().unwrap());
-    wit_generator::embed_wit(wasm_path);
+    if wasms.is_empty() {
+        return Err(CLIError::WasmCompilationError(
+            "Compilation failed: no .wasm files was generated".to_string(),
+        ));
+    }
+
+    for wasm in wasms {
+        let wasm_path = std::path::PathBuf::from(wasm);
+        wit_generator::embed_wit(wasm_path)?;
+    }
+
+    Ok(())
 }

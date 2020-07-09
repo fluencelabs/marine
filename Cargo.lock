@@ -341,10 +341,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "export_test"
-version = "0.1.0"
-
-[[package]]
 name = "failure"
 version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -405,6 +401,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "fluence"
+version = "0.2.0"
+source = "git+https://github.com/fluencelabs/rust-sdk#cc2b8249fc43d9667a4ec82a2e767f27df100c55"
+dependencies = [
+ "fluence-sdk-macro",
+ "fluence-sdk-main",
+]
+
+[[package]]
 name = "fluence-faas"
 version = "0.1.0"
 dependencies = [
@@ -421,9 +426,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "fluence-sdk-macro"
+version = "0.2.0"
+source = "git+https://github.com/fluencelabs/rust-sdk#cc2b8249fc43d9667a4ec82a2e767f27df100c55"
+dependencies = [
+ "fluence-sdk-wit",
+]
+
+[[package]]
+name = "fluence-sdk-main"
+version = "0.2.0"
+source = "git+https://github.com/fluencelabs/rust-sdk#cc2b8249fc43d9667a4ec82a2e767f27df100c55"
+dependencies = [
+ "log",
+]
+
+[[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#d5d1207a3db623876bdd6697ca9b1171b46f0813"
+source = "git+https://github.com/fluencelabs/rust-sdk#cc2b8249fc43d9667a4ec82a2e767f27df100c55"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -495,6 +516,13 @@ name = "gimli"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aaf91faf136cb47367fa430cd46e37a788775e7fa104f8b4bcb3861dc389b724"
+
+[[package]]
+name = "greeting"
+version = "0.1.0"
+dependencies = [
+ "fluence",
+]
 
 [[package]]
 name = "heck"

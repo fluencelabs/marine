@@ -1,10 +1,13 @@
 [package]
-name = "export_test"
+name = "greeting"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [lib]
-name = "export_test"
+name = "greeting"
 path = "src/lib.rs"
 crate-type = ["cdylib"]
+
+[dependencies]
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }

@@ -15,7 +15,11 @@
  */
 
 mod default_export_api_config;
+mod errors;
 mod instructions_generator;
 mod interface_generator;
 
 pub use interface_generator::embed_wit;
+pub use errors::WITGeneratorError;
+
+pub(crate) type Result<T> = std::result::Result<T, WITGeneratorError>;
