@@ -9,7 +9,7 @@ name = "wit_embedder"
 path = "src/main.rs"
 
 [dependencies]
-wit_parser = { path = "../../crates/wit_parser" }
+wit-parser = { path = "../../crates/wit-parser" }
 clap = "2.33.1"
 exitfailure = "0.5.1"
 failure = "0.1.5"

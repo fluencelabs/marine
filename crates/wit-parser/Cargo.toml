@@ -1,5 +1,5 @@
 [package]
-name = "wit_parser"
+name = "wit-parser"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -12,6 +12,6 @@ path = "src/lib.rs"
 walrus = "0.17.0"
 wasmer-core = { package = "wasmer-runtime-core", git = "https://github.com/fluencelabs/wasmer", branch = "fluence" }
 wasmer-wit = { package = "wasmer-interface-types", git = "https://github.com/fluencelabs/interface-types", branch = "master" }
-fce_wit_interfaces = { path = "../fce_wit_interfaces" }
+fce-wit-interfaces = { path = "../fce-wit-interfaces" }
 
 anyhow = "1.0.31"

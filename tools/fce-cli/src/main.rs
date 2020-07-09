@@ -29,7 +29,6 @@ mod args;
 use args::*;
 
 use clap::{App, AppSettings};
-// use std::path::PathBuf;
 use std::process::Command;
 
 #[derive(serde::Deserialize)]
@@ -37,17 +36,8 @@ use std::process::Command;
 enum DiagnosticMessage {
     BuildScriptExecuted,
     BuildFinished,
-    CompilerArtifact {
-        executable: String,
-        /*
-               filenames: Vec<String>,
-               profile: Profile,
-               fresh: bool,
-        */
-    },
-    RunWithArgs {
-        //        args: Vec<String>,
-    },
+    CompilerArtifact { executable: String },
+    RunWithArgs,
 }
 
 pub fn main() -> Result<(), exitfailure::ExitFailure> {
@@ -94,7 +84,7 @@ pub fn main() -> Result<(), exitfailure::ExitFailure> {
             }
 
             let wasm_path = std::path::PathBuf::from(wasms.first().unwrap());
-            wit::embed_wit(wasm_path);
+            wit_generator::embed_wit(wasm_path);
 
             Ok(())
         }

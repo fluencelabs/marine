@@ -9,10 +9,11 @@ name = "fce_cli"
 path = "src/main.rs"
 
 [dependencies]
-wit_parser = { path = "../../crates/wit_parser" }
+wit-generator = { path = "../../crates/wit-generator" }
+wit-parser = { path = "../../crates/wit-parser" }
+
 clap = "2.33.1"
 exitfailure = "0.5.1"
 failure = "0.1.5"
-wit = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk/crates/wit" }
 serde = "1.0.114"
 serde_json = "1.0.56"

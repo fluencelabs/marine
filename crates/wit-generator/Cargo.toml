@@ -1,0 +1,13 @@
+[package]
+name = "wit-generator"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[dependencies]
+wit-parser = { path = "../wit-parser" }
+walrus = "0.17.0"
+fluence-sdk-wit = { git = "https://github.com/fluencelabs/rust-sdk" }
+wasmer-wit = { package = "wasmer-interface-types", git = "http://github.com/fluencelabs/interface-types", branch = "master", features = ["serde"] }
+serde = { version = "1.0.110", features = ["derive"] }
+serde_json = "1.0.56"
