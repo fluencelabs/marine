@@ -61,10 +61,10 @@ jobs:
           cargo wasi build
           cargo clippy -v
 
-          cd ../../../../tools/wit_embedder
-          cargo fmt --all -- --check --color always
-          cargo build -v --all-features
-          cargo clippy -v
+#          cd ../../../../tools/wit_embedder
+#          cargo fmt --all -- --check --color always
+#          cargo build -v --all-features
+#          cargo clippy -v
 
       - save_cache:
           paths:

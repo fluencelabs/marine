@@ -27,13 +27,15 @@ enum DiagnosticMessage {
 }
 
 // TODO: add error handling
-pub(crate) fn build<P: Into<PathBuf>>(wasm_path: P) {
+pub(crate) fn build(manifest_path: Option<PathBuf>) {
     use std::io::Read;
 
     let mut cargo = Command::new("cargo");
     cargo.arg("build").arg("--target").arg("wasm32-wasi");
     cargo.arg("--message-format").arg("json-render-diagnostics");
-    cargo.arg("--manifest-path").arg(wasm_path.into());
+    if let Some(wasm_path) = manifest_path {
+        cargo.arg("--manifest-path").arg(wasm_path);
+    }
 
     let mut process = cargo.stdout(std::process::Stdio::piped()).spawn().unwrap();
 

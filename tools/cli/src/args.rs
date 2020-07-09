@@ -10,10 +10,9 @@ pub fn build<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("build")
         .about("build provided Rust project to Wasm")
         .args(&[Arg::with_name(IN_WASM_PATH)
-            .required(true)
             .takes_value(true)
             .short("i")
-            .help("path to the wasm file")])
+            .help("path to a Cargo.toml file")])
 }
 
 pub fn show_wit<'a, 'b>() -> App<'a, 'b> {
@@ -23,7 +22,7 @@ pub fn show_wit<'a, 'b>() -> App<'a, 'b> {
             .required(true)
             .takes_value(true)
             .short("i")
-            .help("path to the wasm file")])
+            .help("path to the Wasm file")])
 }
 
 pub fn validate<'a, 'b>() -> App<'a, 'b> {

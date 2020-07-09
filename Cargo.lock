@@ -376,7 +376,7 @@ dependencies = [
  "parity-wasm",
  "pwasm-utils",
  "serde",
- "wasmer-interface-types 0.17.0 (git+https://github.com/fluencelabs/interface-types)",
+ "wasmer-interface-types",
  "wasmer-runtime",
  "wasmer-runtime-core",
  "wasmer-wasi",
@@ -388,7 +388,7 @@ name = "fce-wit-interfaces"
 version = "0.1.0"
 dependencies = [
  "multimap",
- "wasmer-interface-types 0.17.0 (git+https://github.com/fluencelabs/interface-types)",
+ "wasmer-interface-types",
 ]
 
 [[package]]
@@ -423,7 +423,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#bee1983d97da6acc53fecf8b6695810410502b8d"
+source = "git+https://github.com/fluencelabs/rust-sdk#d5d1207a3db623876bdd6697ca9b1171b46f0813"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1236,17 +1236,7 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types"
 version = "0.17.0"
-source = "git+http://github.com/fluencelabs/interface-types?branch=byte_array#bb9e4dbdfc0da6e6803392664a1c34284e418a58"
-dependencies = [
- "nom",
- "serde",
- "wast",
-]
-
-[[package]]
-name = "wasmer-interface-types"
-version = "0.17.0"
-source = "git+https://github.com/fluencelabs/interface-types#689c6757fb5713495586085e53d51ecb2e8759b7"
+source = "git+https://github.com/fluencelabs/interface-types?branch=byte_array#bb9e4dbdfc0da6e6803392664a1c34284e418a58"
 dependencies = [
  "nom",
  "serde",
@@ -1376,7 +1366,7 @@ dependencies = [
  "serde",
  "serde_json",
  "walrus",
- "wasmer-interface-types 0.17.0 (git+http://github.com/fluencelabs/interface-types?branch=byte_array)",
+ "wasmer-interface-types",
  "wit-parser",
 ]
 
@@ -1387,6 +1377,6 @@ dependencies = [
  "anyhow",
  "fce-wit-interfaces",
  "walrus",
- "wasmer-interface-types 0.17.0 (git+http://github.com/fluencelabs/interface-types?branch=byte_array)",
+ "wasmer-interface-types",
  "wasmer-runtime-core",
 ]

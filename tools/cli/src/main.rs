@@ -43,9 +43,10 @@ pub fn main() -> Result<(), exitfailure::ExitFailure> {
 
     match app.get_matches().subcommand() {
         ("build", Some(arg)) => {
-            let wasm_path = arg.value_of(args::IN_WASM_PATH).unwrap();
-            let wasm_path = std::path::PathBuf::from(wasm_path);
-            crate::build::build(wasm_path);
+            let manifest_path = arg
+                .value_of(args::IN_WASM_PATH)
+                .map(std::path::PathBuf::from);
+            crate::build::build(manifest_path);
 
             Ok(())
         }
