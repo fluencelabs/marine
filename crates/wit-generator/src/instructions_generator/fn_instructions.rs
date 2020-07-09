@@ -1,7 +1,24 @@
+/*
+ * Copyright 2020 Fluence Labs Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 use super::WITGenerator;
 use super::Interfaces;
-use super::utils::ptype_to_itype;
 use super::FnInstructionGenerator;
+use super::utils::ptype_to_itype;
+use crate::default_export_api_config::*;
 
 use fluence_sdk_wit::AstFunctionItem;
 use fluence_sdk_wit::ParsedType;
@@ -75,6 +92,7 @@ impl WITGenerator for AstFunctionItem {
 }
 
 impl FnInstructionGenerator for ParsedType {
+    #[rustfmt::skip]
     fn generate_instructions_for_input_type(&self, index: u32) -> Vec<Instruction> {
         match self {
             ParsedType::I8 => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS8],
@@ -90,14 +108,14 @@ impl FnInstructionGenerator for ParsedType {
             ParsedType::Utf8String => vec![
                 Instruction::ArgumentGet { index },
                 Instruction::StringSize,
-                Instruction::CallCore { function_index: 0 },
+                Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
                 Instruction::ArgumentGet { index },
                 Instruction::StringLowerMemory,
             ],
             ParsedType::ByteVector => vec![
                 Instruction::ArgumentGet { index },
                 Instruction::StringSize,
-                Instruction::CallCore { function_index: 0 },
+                Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
                 Instruction::ArgumentGet { index },
                 Instruction::StringLowerMemory,
             ],
@@ -105,6 +123,7 @@ impl FnInstructionGenerator for ParsedType {
         }
     }
 
+    #[rustfmt::skip]
     fn generate_instructions_for_output_type(&self) -> Vec<Instruction> {
         match self {
             ParsedType::I8 => vec![Instruction::S8FromI32],
@@ -118,20 +137,20 @@ impl FnInstructionGenerator for ParsedType {
             ParsedType::F32 => vec![],
             ParsedType::F64 => vec![],
             ParsedType::Utf8String => vec![
-                Instruction::CallCore { function_index: 3 },
-                Instruction::CallCore { function_index: 2 },
+                Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
+                Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
                 Instruction::StringLiftMemory,
-                Instruction::CallCore { function_index: 3 },
-                Instruction::CallCore { function_index: 2 },
-                Instruction::CallCore { function_index: 1 },
+                Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
+                Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
+                Instruction::CallCore { function_index: DEALLOCATE_FUNC.id },
             ],
             ParsedType::ByteVector => vec![
-                Instruction::CallCore { function_index: 3 },
-                Instruction::CallCore { function_index: 2 },
-                Instruction::StringLiftMemory,
-                Instruction::CallCore { function_index: 3 },
-                Instruction::CallCore { function_index: 2 },
-                Instruction::CallCore { function_index: 1 },
+                Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
+                Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
+                Instruction::ByteArrayLiftMemory,
+                Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
+                Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
+                Instruction::CallCore { function_index: DEALLOCATE_FUNC.id },
             ],
             _ => unimplemented!(),
         }

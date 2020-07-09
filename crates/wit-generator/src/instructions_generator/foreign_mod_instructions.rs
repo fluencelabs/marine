@@ -1,7 +1,24 @@
+/*
+ * Copyright 2020 Fluence Labs Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 use super::WITGenerator;
 use super::Interfaces;
 use super::utils::ptype_to_itype;
 use super::ForeignModInstructionGenerator;
+use crate::default_export_api_config::*;
 
 use fluence_sdk_wit::AstExternModItem;
 use fluence_sdk_wit::AstExternFnItem;
@@ -18,7 +35,7 @@ impl WITGenerator for AstExternModItem {
 
 fn generate_wit_for_import<'a>(
     import: &'a AstExternFnItem,
-    namespace: &'a String,
+    namespace: &'a str,
     interfaces: &mut Interfaces<'a>,
 ) {
     use wasmer_wit::ast::Type;
@@ -111,6 +128,7 @@ impl ForeignModInstructionGenerator for ParsedType {
         }
     }
 
+    #[rustfmt::skip]
     fn generate_instructions_for_output_type(&self) -> Vec<Instruction> {
         match self {
             ParsedType::I8 => vec![Instruction::I32FromS8],
@@ -126,20 +144,20 @@ impl ForeignModInstructionGenerator for ParsedType {
             ParsedType::Utf8String => vec![
                 Instruction::Dup,
                 Instruction::StringSize,
-                Instruction::CallCore { function_index: 0 },
+                Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
                 Instruction::Swap2,
                 Instruction::StringLowerMemory,
-                Instruction::CallCore { function_index: 4 },
-                Instruction::CallCore { function_index: 5 },
+                Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
+                Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
             ],
             ParsedType::ByteVector => vec![
                 Instruction::Dup,
-                Instruction::StringSize,
-                Instruction::CallCore { function_index: 0 },
+                Instruction::ByteArraySize,
+                Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
                 Instruction::Swap2,
-                Instruction::StringLowerMemory,
-                Instruction::CallCore { function_index: 4 },
-                Instruction::CallCore { function_index: 5 },
+                Instruction::ByteArrayLowerMemory,
+                Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
+                Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
             ],
             _ => unimplemented!(),
         }

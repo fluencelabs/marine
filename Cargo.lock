@@ -376,7 +376,7 @@ dependencies = [
  "parity-wasm",
  "pwasm-utils",
  "serde",
- "wasmer-interface-types",
+ "wasmer-interface-types 0.17.0 (git+https://github.com/fluencelabs/interface-types)",
  "wasmer-runtime",
  "wasmer-runtime-core",
  "wasmer-wasi",
@@ -388,7 +388,7 @@ name = "fce-wit-interfaces"
 version = "0.1.0"
 dependencies = [
  "multimap",
- "wasmer-interface-types",
+ "wasmer-interface-types 0.17.0 (git+https://github.com/fluencelabs/interface-types)",
 ]
 
 [[package]]
@@ -423,7 +423,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#d3f5a15730f97f642f07d64f50efab061218cc9f"
+source = "git+https://github.com/fluencelabs/rust-sdk#bee1983d97da6acc53fecf8b6695810410502b8d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -431,7 +431,6 @@ dependencies = [
  "serde_json",
  "syn",
  "uuid",
- "wasmer-interface-types",
 ]
 
 [[package]]
@@ -710,6 +709,12 @@ name = "object"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ab52be62400ca80aa00285d25253d7f7c437b7375c4de678f5405d3afe82ca5"
+
+[[package]]
+name = "once_cell"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b631f7e854af39a1739f401cf34a8a013dfe09eac4fa4dba91e9768bd28168d"
 
 [[package]]
 name = "page_size"
@@ -1231,6 +1236,16 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types"
 version = "0.17.0"
+source = "git+http://github.com/fluencelabs/interface-types?branch=byte_array#bb9e4dbdfc0da6e6803392664a1c34284e418a58"
+dependencies = [
+ "nom",
+ "serde",
+ "wast",
+]
+
+[[package]]
+name = "wasmer-interface-types"
+version = "0.17.0"
 source = "git+https://github.com/fluencelabs/interface-types#689c6757fb5713495586085e53d51ecb2e8759b7"
 dependencies = [
  "nom",
@@ -1357,10 +1372,11 @@ name = "wit-generator"
 version = "0.1.0"
 dependencies = [
  "fluence-sdk-wit",
+ "once_cell",
  "serde",
  "serde_json",
  "walrus",
- "wasmer-interface-types",
+ "wasmer-interface-types 0.17.0 (git+http://github.com/fluencelabs/interface-types?branch=byte_array)",
  "wit-parser",
 ]
 
@@ -1371,16 +1387,6 @@ dependencies = [
  "anyhow",
  "fce-wit-interfaces",
  "walrus",
- "wasmer-interface-types",
+ "wasmer-interface-types 0.17.0 (git+http://github.com/fluencelabs/interface-types?branch=byte_array)",
  "wasmer-runtime-core",
-]
-
-[[package]]
-name = "wit_embedder"
-version = "0.1.0"
-dependencies = [
- "clap",
- "exitfailure",
- "failure",
- "wit-parser",
 ]

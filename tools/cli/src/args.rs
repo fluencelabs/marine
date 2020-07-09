@@ -16,6 +16,16 @@ pub fn build<'a, 'b>() -> App<'a, 'b> {
             .help("path to the wasm file")])
 }
 
+pub fn show_wit<'a, 'b>() -> App<'a, 'b> {
+    SubCommand::with_name("show")
+        .about("show WIT in provided Wasm file")
+        .args(&[Arg::with_name(IN_WASM_PATH)
+            .required(true)
+            .takes_value(true)
+            .short("i")
+            .help("path to the wasm file")])
+}
+
 pub fn validate<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("validate")
         .about("validates provided Wasm file to suite Fluence network requirements")

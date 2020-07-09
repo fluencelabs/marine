@@ -9,8 +9,7 @@ members = [
     "examples/ipfs_node/wasm/ipfs_rpc",
     "examples/simple_greeting",
     "fluence-faas",
-    "tools/fce-cli",
-    "tools/wit_embedder",
+    "tools/cli",
 ]
 
 [profile.release]
