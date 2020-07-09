@@ -29,6 +29,7 @@ use std::convert::TryInto;
 use std::fs;
 use std::path::PathBuf;
 use crate::faas_interface::FaaSFunctionSignature;
+use std::collections::HashSet;
 
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
@@ -53,7 +54,7 @@ impl FluenceFaaS {
         let modules = config
             .core_modules_dir
             .as_ref()
-            .map_or(Ok(vec![]), |dir| Self::load_modules(dir))?;
+            .map_or(Ok(vec![]), |dir| Self::load_modules(dir, |_| true))?;
         Self::with_modules(modules, config)
     }
 
@@ -80,8 +81,28 @@ impl FluenceFaaS {
         })
     }
 
+    /// Searches for modules in `config.core_modules_dir`, loads only those in the `names` set
+    pub fn with_module_names<C>(names: &mut HashSet<String>, config: C) -> Result<Self>
+    where
+        C: TryInto<CoreModulesConfig>,
+        FaaSError: From<C::Error>,
+    {
+        let config = config.try_into()?;
+        let modules = config.core_modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
+            Self::load_modules(dir, |m| names.remove(m))
+        })?;
+        Self::with_modules::<_, CoreModulesConfig>(modules, config)
+    }
+
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
-    fn load_modules(core_modules_dir: &str) -> Result<Vec<(String, Vec<u8>)>> {
+    /// If `filter_module` returns true on a module name, that module is skipped
+    fn load_modules<P>(
+        core_modules_dir: &str,
+        mut filter_module: P,
+    ) -> Result<Vec<(String, Vec<u8>)>>
+    where
+        P: FnMut(&str) -> bool,
+    {
         use FaaSError::IOError;
 
         let mut dir_entries = fs::read_dir(core_modules_dir)
@@ -90,16 +111,25 @@ impl FluenceFaaS {
         dir_entries.try_fold(vec![], |mut vec, entry| {
             let entry = entry?;
             let path = entry.path();
-            if !path.is_dir() {
-                let module_name = path
-                    .file_name()
-                    .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?
-                    .to_os_string()
-                    .into_string()
-                    .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
-                let module_bytes = fs::read(path)?;
-                vec.push((module_name, module_bytes))
+            // Skip directories
+            if path.is_dir() {
+                return Ok(vec);
             }
+
+            let module_name = path
+                .file_name()
+                .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?
+                .to_os_string()
+                .into_string()
+                .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
+
+            // Skip filtered modules
+            if filter_module(&module_name) {
+                return Ok(vec);
+            }
+
+            let module_bytes = fs::read(path)?;
+            vec.push((module_name, module_bytes));
 
             Ok(vec)
         })
