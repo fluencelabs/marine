@@ -1,0 +1,9 @@
+[package]
+name = "greeting"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[dependencies]
+fluence-faas = { path = "../../fluence-faas" }
+anyhow = "1.0.31"

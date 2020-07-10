@@ -51,7 +51,7 @@ impl FCE {
         match self.modules.get_mut(module_name.as_ref()) {
             // TODO: refactor errors
             Some(module) => module.call(func_name.as_ref(), argument),
-            None => Err(FCEError::NoSuchModule),
+            None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
         }
     }
 
@@ -82,7 +82,7 @@ impl FCE {
     pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<(), FCEError> {
         match self.modules.remove(module_name.as_ref()) {
             Some(_) => Ok(()),
-            None => Err(FCEError::NoSuchModule),
+            None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
         }
     }
 
@@ -103,7 +103,7 @@ impl FCE {
     ) -> Result<Vec<FCEFunctionSignature<'_>>, FCEError> {
         match self.modules.get(module_name.as_ref()) {
             Some(module) => Ok(Self::get_module_function_signatures(module)),
-            None => Err(FCEError::NoSuchModule),
+            None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
         }
     }
 

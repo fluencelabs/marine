@@ -403,7 +403,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#cc2b8249fc43d9667a4ec82a2e767f27df100c55"
+source = "git+https://github.com/fluencelabs/rust-sdk#5dc680c0460018b89a8bc76909b386d40b89aa22"
 dependencies = [
  "fluence-sdk-macro",
  "fluence-sdk-main",
@@ -428,7 +428,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#cc2b8249fc43d9667a4ec82a2e767f27df100c55"
+source = "git+https://github.com/fluencelabs/rust-sdk#5dc680c0460018b89a8bc76909b386d40b89aa22"
 dependencies = [
  "fluence-sdk-wit",
 ]
@@ -436,7 +436,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#cc2b8249fc43d9667a4ec82a2e767f27df100c55"
+source = "git+https://github.com/fluencelabs/rust-sdk#5dc680c0460018b89a8bc76909b386d40b89aa22"
 dependencies = [
  "log",
 ]
@@ -444,7 +444,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#cc2b8249fc43d9667a4ec82a2e767f27df100c55"
+source = "git+https://github.com/fluencelabs/rust-sdk#5dc680c0460018b89a8bc76909b386d40b89aa22"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -521,7 +521,8 @@ checksum = "aaf91faf136cb47367fa430cd46e37a788775e7fa104f8b4bcb3861dc389b724"
 name = "greeting"
 version = "0.1.0"
 dependencies = [
- "fluence",
+ "anyhow",
+ "fluence-faas",
 ]
 
 [[package]]
@@ -1203,12 +1204,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cccddf32554fecc6acb585f82a32a72e28b48f8c4c1883ddfeeeaa96f7d8e519"
 
 [[package]]
+name = "wasm_greeting"
+version = "0.1.0"
+dependencies = [
+ "fluence",
+]
+
+[[package]]
 name = "wasm_ipfs_node"
 version = "0.1.0"
+dependencies = [
+ "fluence",
+]
 
 [[package]]
 name = "wasm_ipfs_rpc"
 version = "0.1.0"
+dependencies = [
+ "fluence",
+]
 
 [[package]]
 name = "wasmer-clif-backend"

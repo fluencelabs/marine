@@ -1,0 +1,6 @@
+core_modules_dir = "wasm/artifacts/"
+
+[[core_module]]
+    name = "greeting.wasm"
+    mem_pages_count = 1
+    logger_enabled = false

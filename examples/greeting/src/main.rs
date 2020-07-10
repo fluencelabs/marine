@@ -14,9 +14,27 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use fluence_faas::FluenceFaaS;
+use fluence_faas::IValue;
 
-#[fce]
-pub fn greeting(name: String) -> String {
-    format!("Hi, {}\n", name)
+use std::path::PathBuf;
+
+const GREETING_MODULE_CONFIG_PATH: &str = "Config.toml";
+
+fn main() -> Result<(), anyhow::Error> {
+    let mut greeting_node = FluenceFaaS::new(PathBuf::from(GREETING_MODULE_CONFIG_PATH))?;
+    println!(
+        "greeting node interface is\n{}",
+        greeting_node.get_interface()
+    );
+
+    let result = greeting_node.call_module(
+        "greeting.wasm",
+        "greeting",
+        &[IValue::String("Fluence".to_string()), IValue::I32(1)],
+    )?;
+
+    println!("execution result {:?}", result);
+
+    Ok(())
 }

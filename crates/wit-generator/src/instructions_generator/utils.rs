@@ -16,6 +16,7 @@
 
 use super::IType;
 use fluence_sdk_wit::ParsedType;
+use fluence_sdk_wit::WasmType;
 
 pub(crate) fn ptype_to_itype(pty: &ParsedType) -> IType {
     match pty {
@@ -33,5 +34,14 @@ pub(crate) fn ptype_to_itype(pty: &ParsedType) -> IType {
         ParsedType::Utf8String => IType::String,
         ParsedType::ByteVector => IType::String,
         ParsedType::Record(_) => unimplemented!(),
+    }
+}
+
+pub(crate) fn wtype_to_itype(pty: &WasmType) -> IType {
+    match pty {
+        WasmType::I32 => IType::I32,
+        WasmType::I64 => IType::I64,
+        WasmType::F32 => IType::F32,
+        WasmType::F64 => IType::F64,
     }
 }

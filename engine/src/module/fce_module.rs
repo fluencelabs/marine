@@ -231,15 +231,20 @@ impl FCEModule {
         use wasmer_core::vm::Ctx;
 
         // returns function that will be called from imports of Wasmer module
-        fn dyn_func_from_raw_import<F>(inputs: Vec<IType>, raw_import: F) -> DynamicFunc<'static>
+        fn dyn_func_from_raw_import<F>(
+            inputs: Vec<IType>,
+            outputs: Vec<IType>,
+            raw_import: F,
+        ) -> DynamicFunc<'static>
         where
             F: Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static,
         {
             use wasmer_core::types::FuncSig;
             use super::type_converters::itype_to_wtype;
 
-            let signature = inputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
-            DynamicFunc::new(Arc::new(FuncSig::new(signature, vec![])), raw_import)
+            let inputs = inputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
+            let outputs = outputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
+            DynamicFunc::new(Arc::new(FuncSig::new(inputs, outputs)), raw_import)
         }
 
         // creates a closure that is represent a WIT module import
@@ -302,7 +307,7 @@ impl FCEModule {
                 let wit_type = wit.type_by_idx_r(adapter_function_type)?;
 
                 match wit_type {
-                    WITAstType::Function { inputs, .. } => {
+                    WITAstType::Function { inputs, outputs } => {
                         let interpreter: WITInterpreter = adapter_instructions.try_into()?;
 
                         let raw_import = create_raw_import(
@@ -311,7 +316,8 @@ impl FCEModule {
                             import_namespace.to_string(),
                             import_name.to_string(),
                         );
-                        let wit_import = dyn_func_from_raw_import(inputs.clone(), raw_import);
+                        let wit_import =
+                            dyn_func_from_raw_import(inputs.clone(), outputs.clone(), raw_import);
 
                         Ok((import_namespace.to_string(), (*import_name, wit_import)))
                     }
