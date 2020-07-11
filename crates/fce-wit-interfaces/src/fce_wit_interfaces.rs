@@ -182,13 +182,13 @@ impl<'a> FCEWITInterfaces<'a> {
         &self,
         core_function_type: CoreFunctionType,
     ) -> Option<&Vec<AdapterFunctionType>> {
-        self.adapter_type_to_core.get_vec(&core_function_type)
+        self.core_type_to_adapter.get_vec(&core_function_type)
     }
 
     pub fn core_types_by_adapter_type(
         &self,
         adapter_function_type: AdapterFunctionType,
     ) -> Option<&Vec<CoreFunctionType>> {
-        self.core_type_to_adapter.get_vec(&adapter_function_type)
+        self.adapter_type_to_core.get_vec(&adapter_function_type)
     }
 }

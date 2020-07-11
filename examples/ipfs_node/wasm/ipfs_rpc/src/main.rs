@@ -15,13 +15,16 @@
  */
 
 use fluence::fce;
+use fluence::WasmLogger;
 
 use std::fs;
 use std::path::PathBuf;
 
 const RPC_TMP_FILEPATH: &str = "/tmp/ipfs_rpc_file";
 
-pub fn main() {}
+pub fn main() {
+    WasmLogger::init_with_level(log::Level::Info).unwrap();
+}
 
 #[fce]
 pub fn invoke() -> String {
@@ -30,6 +33,8 @@ pub fn invoke() -> String {
 
 #[fce]
 pub fn put(file_content: Vec<u8>) -> String {
+    log::info!("put called with {:?}", file_content);
+
     let rpc_tmp_filepath = RPC_TMP_FILEPATH.to_string();
 
     let r = fs::write(PathBuf::from(rpc_tmp_filepath.clone()), file_content);
@@ -42,6 +47,8 @@ pub fn put(file_content: Vec<u8>) -> String {
 
 #[fce]
 pub fn get(hash: String) -> Vec<u8> {
+    log::info!("get called with hash: {}", hash);
+
     let file_path = ipfs_get(hash);
     fs::read(file_path).unwrap_or_else(|_| b"error while reading file".to_vec())
 }

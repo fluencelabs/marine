@@ -34,8 +34,10 @@ fn main() -> Result<(), anyhow::Error> {
 
     let result = ipfs_node.call_code(
         &ipfs_rpc,
-        "put",
-        &[IValue::ByteArray("Hello, world".as_bytes().to_vec())],
+        "get",
+        &[IValue::String(
+            "QmXdC36pX1B1sdHdbri859vMYctQjAhvTmkWyG9xzhShxb".to_string(),
+        )],
     )?;
     println!("execution result {:?}", result);
 

@@ -16,6 +16,7 @@
 
 use super::wit_prelude::*;
 use super::{IType, IValue, WValue};
+use crate::FCEModuleConfig;
 
 use fce_wit_interfaces::FCEWITInterfaces;
 use wasmer_wit::interpreter::Interpreter;
@@ -28,7 +29,6 @@ use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
-use crate::FCEModuleConfig;
 
 type WITInterpreter =
     Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;

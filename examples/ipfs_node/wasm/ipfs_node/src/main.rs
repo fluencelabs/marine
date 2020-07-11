@@ -19,16 +19,21 @@ mod path;
 use crate::path::to_full_path;
 
 use fluence::fce;
+use fluence::WasmLogger;
 
 const RESULT_FILE_PATH: &str = "/tmp/ipfs_rpc_file";
 const IPFS_ADDR_ENV_NAME: &str = "IPFS_ADDR";
 const TIMEOUT_ENV_NAME: &str = "timeout";
 
-pub fn main() {}
+pub fn main() {
+    WasmLogger::init_with_level(log::Level::Info).unwrap();
+}
 
 /// Put file from specified path to IPFS and return its hash.
 #[fce]
 pub fn put(file_path: String) -> String {
+    log::info!("put called with file path {}", file_path);
+
     let file_path = to_full_path(file_path);
 
     let timeout = std::env::var(TIMEOUT_ENV_NAME).unwrap_or_else(|_| "1s".to_string());
@@ -40,6 +45,8 @@ pub fn put(file_path: String) -> String {
 /// Get file by provided hash from IPFS, saves it to a temporary file and returns a path to it.
 #[fce]
 pub fn get(hash: String) -> String {
+    log::info!("get called with hash {}", hash);
+
     let result_file_path = to_full_path(RESULT_FILE_PATH);
 
     let timeout = std::env::var(TIMEOUT_ENV_NAME).unwrap_or_else(|_| "1s".to_string());
