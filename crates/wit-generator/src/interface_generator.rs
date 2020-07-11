@@ -31,7 +31,9 @@ pub fn embed_wit(path: std::path::PathBuf) -> Result<()> {
     let ast_set = wasm_ast_extractor(&wasm_module)?;
     let interfaces = generate_interfaces(&ast_set);
 
+    let wasm_module = wit_parser::delete_wit_section(wasm_module);
     let mut wasm_module = wit_parser::embed_wit(wasm_module, &interfaces);
+
     wasm_module.emit_wasm_file(path).map_err(|e| {
         WITGeneratorError::IOError(format!("resulted Wasm fule can't be emitted: {:?}", e))
     })
@@ -68,10 +70,11 @@ fn generate_interfaces(ast_set: &[FCEAst]) -> Interfaces<'_> {
 }
 
 fn generate_default_export_api(interfaces: &mut Interfaces) {
+    // TODO: the order is matter
     ALLOCATE_FUNC.update_interfaces(interfaces);
     DEALLOCATE_FUNC.update_interfaces(interfaces);
-    SET_RESULT_SIZE_FUNC.update_interfaces(interfaces);
-    SET_RESULT_PTR_FUNC.update_interfaces(interfaces);
     GET_RESULT_SIZE_FUNC.update_interfaces(interfaces);
     GET_RESULT_PTR_FUNC.update_interfaces(interfaces);
+    SET_RESULT_SIZE_FUNC.update_interfaces(interfaces);
+    SET_RESULT_PTR_FUNC.update_interfaces(interfaces);
 }

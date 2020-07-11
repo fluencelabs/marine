@@ -1,5 +1,5 @@
 [package]
-name = "greeting"
+name = "wasm_greeting"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
@@ -10,4 +10,4 @@ path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["debug"] }

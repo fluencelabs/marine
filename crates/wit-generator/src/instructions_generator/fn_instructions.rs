@@ -61,14 +61,14 @@ impl WITGenerator for AstFunctionItem {
             .signature
             .input_types
             .iter()
-            .rev()
             .enumerate()
             .map(|(id, input_type)| input_type.generate_instructions_for_input_type(id as _))
             .flatten()
             .collect();
 
+        let export_function_index = (interfaces.exports.len() - 1) as u32;
         instructions.push(Instruction::CallCore {
-            function_index: export_idx,
+            function_index: export_function_index,
         });
 
         instructions.extend(match &self.signature.output_type {
@@ -114,10 +114,10 @@ impl FnInstructionGenerator for ParsedType {
             ],
             ParsedType::ByteVector => vec![
                 Instruction::ArgumentGet { index },
-                Instruction::StringSize,
+                Instruction::ByteArraySize,
                 Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
                 Instruction::ArgumentGet { index },
-                Instruction::StringLowerMemory,
+                Instruction::ByteArrayLowerMemory,
             ],
             _ => unimplemented!(),
         }

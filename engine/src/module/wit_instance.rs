@@ -78,17 +78,16 @@ impl WITInstance {
         start_index: usize,
     ) -> Result<HashMap<usize, WITFunction>, FCEError> {
         wit.imports()
-            .filter(|import| {
+            .filter(|import|
                 // filter out imports that have implementations
-                matches!(wit.adapter_by_type(import.function_type), None)
-            })
+                matches!(wit.adapter_types_by_core_type(import.function_type), Some(_)))
             .enumerate()
             .map(|(idx, import)| match modules.get(import.namespace) {
                 Some(module) => {
                     let func = WITFunction::from_import(module, import.name)?;
                     Ok((start_index + idx as usize, func))
                 }
-                None => Err(FCEError::NoSuchModule),
+                None => Err(FCEError::NoSuchModule(import.namespace.to_string())),
             })
             .collect::<Result<HashMap<_, _>, _>>()
     }
