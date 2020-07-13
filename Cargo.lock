@@ -272,7 +272,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b584a330336237c1eecd3e94266efb216c56ed91225d634cb2991c5f3fd1aeab"
 dependencies = [
- "generic-array 0.14.2",
+ "generic-array 0.14.3",
  "subtle",
 ]
 
@@ -301,7 +301,7 @@ version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3dd60d1080a57a05ab032377049e0591415d2b31afd7028356dbf3cc6dcb066"
 dependencies = [
- "generic-array 0.14.2",
+ "generic-array 0.14.3",
 ]
 
 [[package]]
@@ -412,7 +412,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#9775ca6144b67b96aa70ad8020336cd264063316"
+source = "git+https://github.com/fluencelabs/rust-sdk#40774a1107573fc85f49fef6267721fbe32f599a"
 dependencies = [
  "fluence-sdk-macro",
  "fluence-sdk-main",
@@ -437,7 +437,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#9775ca6144b67b96aa70ad8020336cd264063316"
+source = "git+https://github.com/fluencelabs/rust-sdk#40774a1107573fc85f49fef6267721fbe32f599a"
 dependencies = [
  "fluence-sdk-wit",
 ]
@@ -445,7 +445,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#9775ca6144b67b96aa70ad8020336cd264063316"
+source = "git+https://github.com/fluencelabs/rust-sdk#40774a1107573fc85f49fef6267721fbe32f599a"
 dependencies = [
  "log",
 ]
@@ -453,7 +453,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#9775ca6144b67b96aa70ad8020336cd264063316"
+source = "git+https://github.com/fluencelabs/rust-sdk#40774a1107573fc85f49fef6267721fbe32f599a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -490,9 +490,9 @@ dependencies = [
 
 [[package]]
 name = "generic-array"
-version = "0.14.2"
+version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac746a5f3bbfdadd6106868134545e684693d54d9d44f6e9588a7d54af0bf980"
+checksum = "60fb4bb6bba52f78a471264d9a3b7d026cc0af47b22cd2cffbc0b787ca003e63"
 dependencies = [
  "typenum",
  "version_check",
@@ -1040,9 +1040,9 @@ checksum = "502d53007c02d7605a05df1c1a73ee436952781653da5d0bf57ad608f66932c1"
 
 [[package]]
 name = "syn"
-version = "1.0.33"
+version = "1.0.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8d5d96e8cbb005d6959f119f773bfaebb5684296108fb32600c00cde305b2cd"
+checksum = "936cae2873c940d92e697597c5eee105fb570cd5689c695806f672883653349b"
 dependencies = [
  "proc-macro2",
  "quote",
