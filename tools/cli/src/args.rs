@@ -26,10 +26,6 @@ pub fn build<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("build")
         .about("build provided Rust project to Wasm")
         .setting(clap::AppSettings::AllowExternalSubcommands)
-        .args(&[Arg::with_name(IN_WASM_PATH)
-            .takes_value(true)
-            .short("i")
-            .help("path to a Cargo.toml file")])
 }
 
 pub fn show_wit<'a, 'b>() -> App<'a, 'b> {
