@@ -29,27 +29,21 @@ mod args;
 mod build;
 mod errors;
 
-use clap::App;
-use clap::AppSettings;
-
 pub(crate) type Result<T> = std::result::Result<T, crate::errors::CLIError>;
 
 pub fn main() -> Result<()> {
-    let app = App::new("CLI tool for embedding WIT to provided Wasm file")
+    let app = clap::App::new("CLI tool for embedding WIT to provided Wasm file")
         .version(args::VERSION)
         .author(args::AUTHORS)
         .about(args::DESCRIPTION)
-        .setting(AppSettings::ArgRequiredElseHelp)
         .subcommand(args::build())
         .subcommand(args::show_wit());
 
     match app.get_matches().subcommand() {
-        ("build", Some(arg)) => {
-            let manifest_path = arg
-                .value_of(args::IN_WASM_PATH)
-                .map(std::path::PathBuf::from);
+        ("build", Some(args)) => {
+            let trailing_args: Vec<&str> = args.values_of("").unwrap().collect();
 
-            crate::build::build(manifest_path)
+            crate::build::build(trailing_args)
         }
         ("show", Some(arg)) => {
             let wasm_path = arg.value_of(args::IN_WASM_PATH).unwrap();
