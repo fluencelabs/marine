@@ -257,7 +257,7 @@ impl FCEModule {
             move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
                 use super::type_converters::wval_to_ival;
 
-                log::info!(
+                log::trace!(
                     "raw import for {}.{} called with {:?}\n",
                     import_namespace,
                     import_name,
@@ -275,7 +275,7 @@ impl FCEModule {
                     );
                 }
 
-                log::info!(
+                log::trace!(
                     "\nraw import for {}.{} finished",
                     import_namespace,
                     import_name
