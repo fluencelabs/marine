@@ -25,13 +25,15 @@ pub const IN_WASM_PATH: &str = "in-wasm-path";
 pub fn build<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("build")
         .about("build provided Rust project to Wasm")
-        .setting(clap::AppSettings::AllowExternalSubcommands)
+        .setting(clap::AppSettings::TrailingVarArg)
+        .setting(clap::AppSettings::AllowLeadingHyphen)
+        .arg(Arg::from_usage("[optional]... 'cargo build arguments'").multiple(true))
 }
 
 pub fn show_wit<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("show")
         .about("show WIT in provided Wasm file")
-        .setting(clap::AppSettings::AllowExternalSubcommands)
+        .setting(clap::AppSettings::ArgRequiredElseHelp)
         .args(&[Arg::with_name(IN_WASM_PATH)
             .required(true)
             .takes_value(true)

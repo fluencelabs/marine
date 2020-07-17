@@ -38,10 +38,11 @@ pub fn main() -> Result<()> {
         .about(args::DESCRIPTION)
         .subcommand(args::build())
         .subcommand(args::show_wit());
+    let arg_matches = app.get_matches();
 
-    match app.get_matches().subcommand() {
+    match arg_matches.subcommand() {
         ("build", Some(args)) => {
-            let trailing_args: Vec<&str> = args.values_of("").unwrap().collect();
+            let trailing_args: Vec<&str> = args.values_of("optional").unwrap_or_default().collect();
 
             crate::build::build(trailing_args)
         }
