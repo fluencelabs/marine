@@ -32,7 +32,7 @@ pub(crate) fn ptype_to_itype(pty: &ParsedType) -> IType {
         ParsedType::F64 => IType::F64,
         ParsedType::Boolean => IType::I32,
         ParsedType::Utf8String => IType::String,
-        ParsedType::ByteVector => IType::String,
+        ParsedType::ByteVector => IType::ByteArray,
         ParsedType::Record(_) => unimplemented!(),
     }
 }
