@@ -21,11 +21,12 @@ mod wit_instance;
 mod type_converters;
 mod fce_module;
 
-pub(crate) use fce_module::FCEModule;
-
 pub use wasmer_wit::types::InterfaceType as IType;
 pub use wasmer_wit::values::InterfaceValue as IValue;
-pub use wasmer_wit::values::{to_interface_value, from_interface_values};
+pub use wasmer_wit::values::from_interface_values;
+pub use wasmer_wit::values::to_interface_value;
+
+pub(crate) use fce_module::FCEModule;
 pub(self) use wasmer_core::types::Type as WType;
 pub(self) use wasmer_core::types::Value as WValue;
 

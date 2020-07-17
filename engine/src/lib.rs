@@ -39,4 +39,7 @@ pub use engine::FCEFunctionSignature;
 pub use errors::FCEError;
 pub use module::IValue;
 pub use module::IType;
-pub use module::{to_interface_value, from_interface_values};
+pub use module::from_interface_values;
+pub use module::to_interface_value;
+
+pub(crate) type Result<T> = std::result::Result<T, FCEError>;

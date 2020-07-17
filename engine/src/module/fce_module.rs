@@ -16,13 +16,15 @@
 
 use super::wit_prelude::*;
 use super::{IType, IValue, WValue};
+use crate::Result;
 use crate::FCEModuleConfig;
 
 use fce_wit_interfaces::FCEWITInterfaces;
-use wasmer_wit::interpreter::Interpreter;
-use wasmer_runtime::{compile, ImportObject};
 use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
+use wasmer_runtime::compile;
+use wasmer_runtime::ImportObject;
+use wasmer_wit::interpreter::Interpreter;
 use wit_parser::extract_wit;
 
 use std::collections::HashMap;
@@ -47,7 +49,7 @@ pub(super) struct Callable {
 }
 
 impl Callable {
-    pub fn call(&mut self, args: &[IValue]) -> Result<Vec<IValue>, FCEError> {
+    pub fn call(&mut self, args: &[IValue]) -> Result<Vec<IValue>> {
         use wasmer_wit::interpreter::stack::Stackable;
 
         let result = self
@@ -86,7 +88,7 @@ impl FCEModule {
         wasm_bytes: &[u8],
         fce_module_config: FCEModuleConfig,
         modules: &HashMap<String, FCEModule>,
-    ) -> Result<Self, FCEError> {
+    ) -> Result<Self> {
         let wasmer_module = compile(&wasm_bytes)?;
         let wit = extract_wit(&wasmer_module)?;
         let fce_wit = FCEWITInterfaces::new(wit);
@@ -130,11 +132,7 @@ impl FCEModule {
         })
     }
 
-    pub(crate) fn call(
-        &mut self,
-        function_name: &str,
-        args: &[IValue],
-    ) -> Result<Vec<IValue>, FCEError> {
+    pub(crate) fn call(&mut self, function_name: &str, args: &[IValue]) -> Result<Vec<IValue>> {
         match self.exports_funcs.get_mut(function_name) {
             Some(func) => Arc::make_mut(func).call(args),
             None => Err(FCEError::NoSuchFunction(format!(
@@ -157,7 +155,7 @@ impl FCEModule {
     }
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
-    pub(super) fn get_callable(&self, function_name: &str) -> Result<Arc<Callable>, FCEError> {
+    pub(super) fn get_callable(&self, function_name: &str) -> Result<Arc<Callable>> {
         match self.exports_funcs.get(function_name) {
             Some(func) => Ok(func.clone()),
             None => Err(FCEError::NoSuchFunction(format!(
@@ -170,7 +168,7 @@ impl FCEModule {
     fn instantiate_wit_exports(
         wit_instance: Arc<WITInstance>,
         wit: &FCEWITInterfaces<'_>,
-    ) -> Result<HashMap<String, Arc<Callable>>, FCEError> {
+    ) -> Result<HashMap<String, Arc<Callable>>> {
         use fce_wit_interfaces::WITAstType;
 
         wit.implementations()
@@ -218,14 +216,14 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<HashMap<String, Arc<Callable>>, FCEError>>()
+            .collect::<Result<HashMap<String, Arc<Callable>>>>()
     }
 
     // this function deals only with import functions that have an adaptor implementation
     fn adjust_wit_imports(
         wit: &FCEWITInterfaces<'_>,
         wit_instance: Arc<MaybeUninit<WITInstance>>,
-    ) -> Result<ImportObject, FCEError> {
+    ) -> Result<ImportObject> {
         use fce_wit_interfaces::WITAstType;
         use wasmer_core::typed_func::DynamicFunc;
         use wasmer_core::vm::Ctx;
@@ -327,7 +325,7 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<multimap::MultiMap<_, _>, FCEError>>()?;
+            .collect::<Result<multimap::MultiMap<_, _>>>()?;
 
         let mut import_object = ImportObject::new();
 

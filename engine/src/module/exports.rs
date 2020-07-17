@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use super::{IValue, IType};
+use super::IValue;
+use super::IType;
 use wasmer_wit::interpreter::wasm;
 
 // In current implementation export simply does nothing, because there is no more
