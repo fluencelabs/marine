@@ -75,7 +75,9 @@ impl FluenceFaaS {
             println!("loaded module {}", name);
         }
 
+        println!("making fce config");
         let faas_code_config = make_fce_config(config.rpc_module_config)?;
+        println!("made fce config");
 
         Ok(Self {
             fce,
