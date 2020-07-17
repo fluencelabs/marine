@@ -89,7 +89,11 @@ impl FluenceFaaS {
     {
         let config = config.try_into()?;
         let modules = config.core_modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
-            Self::load_modules(dir, |m| !names.remove(m))
+            Self::load_modules(dir, |m| {
+                let skip = !names.remove(m);
+                println!("looking at module {}, skip? {}", m, skip);
+                skip
+            })
         })?;
         Self::with_modules::<_, CoreModulesConfig>(modules, config)
     }
