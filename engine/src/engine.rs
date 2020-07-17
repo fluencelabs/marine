@@ -65,18 +65,13 @@ impl FCE {
     where
         S: Into<String>,
     {
-        let module_name = module_name.into();
-        println!("preparing module {}", module_name);
         let _prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.mem_pages_count)?;
-        println!("prepared module {}", module_name);
 
         let module = FCEModule::new(&wasm_bytes, config, &self.modules)?;
-        println!("created module {}", module_name);
 
-        match self.modules.entry(module_name.clone()) {
+        match self.modules.entry(module_name.into()) {
             Entry::Vacant(entry) => {
                 entry.insert(module);
-                println!("inserted module {}", module_name);
                 Ok(())
             }
             Entry::Occupied(_) => Err(FCEError::NonUniqueModuleName),

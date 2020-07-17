@@ -69,15 +69,11 @@ impl FluenceFaaS {
         let mut config = config.try_into()?;
 
         for (name, bytes) in modules {
-            println!("loading module {}", name);
             let module_config = crate::misc::make_fce_config(config.modules_config.remove(&name))?;
             fce.load_module(name.clone(), &bytes, module_config)?;
-            println!("loaded module {}", name);
         }
 
-        println!("making fce config");
         let faas_code_config = make_fce_config(config.rpc_module_config)?;
-        println!("made fce config");
 
         Ok(Self {
             fce,
@@ -93,11 +89,7 @@ impl FluenceFaaS {
     {
         let config = config.try_into()?;
         let modules = config.core_modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
-            Self::load_modules(dir, |m| {
-                let skip = !names.remove(m);
-                println!("looking at module {}, skip? {}", m, skip);
-                skip
-            })
+            Self::load_modules(dir, |m| !names.remove(m))
         })?;
         Self::with_modules::<_, CoreModulesConfig>(modules, config)
     }
