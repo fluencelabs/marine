@@ -91,6 +91,12 @@ impl FluenceFaaS {
         let modules = config.core_modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
             Self::load_modules(dir, |m| !names.remove(m))
         })?;
+        if !names.is_empty() {
+            return Err(FaaSError::ConfigParseError(format!(
+                "the following modules were not found: {:?}",
+                names
+            )));
+        }
         Self::with_modules::<_, CoreModulesConfig>(modules, config)
     }
 
