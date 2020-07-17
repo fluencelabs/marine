@@ -69,8 +69,10 @@ impl FluenceFaaS {
         let mut config = config.try_into()?;
 
         for (name, bytes) in modules {
+            println!("loading module {}", name);
             let module_config = crate::misc::make_fce_config(config.modules_config.remove(&name))?;
             fce.load_module(name.clone(), &bytes, module_config)?;
+            println!("loaded module {}", name);
         }
 
         let faas_code_config = make_fce_config(config.rpc_module_config)?;
