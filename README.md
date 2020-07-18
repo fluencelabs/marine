@@ -23,10 +23,9 @@ FCE is intended to run various Wasm binaries. At now, it is in the heavily devel
 
 - `Config.toml`:
 ```
-[lib]
+[[bin]]
 name = "wasm_application"
-path = "src/lib.rs"
-crate-type = ["cdylib"]
+path = "src/main.rs"
 
 [dependencies]
 // logger - if you'll use logging

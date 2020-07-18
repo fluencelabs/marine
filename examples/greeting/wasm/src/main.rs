@@ -16,6 +16,10 @@
 
 use fluence::fce;
 
+pub fn main() {
+
+}
+
 #[fce]
 pub fn greeting(name: String) -> String {
     format!("Hi, {}", name)
