@@ -26,8 +26,15 @@ use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
 use crate::instructions_generator::utils::wtype_to_itype;
 
+const HOST_NAMESPACE_NAME: &str = "host";
+
 impl WITGenerator for AstExternModItem {
     fn generate_wit<'a>(&'a self, interfaces: &mut Interfaces<'a>) {
+        // host imports should be left as is
+        if self.namespace == HOST_NAMESPACE_NAME {
+            return;
+        }
+
         for import in &self.imports {
             generate_wit_for_import(import, &self.namespace, interfaces);
         }

@@ -93,7 +93,7 @@ where
     };
 
     DynamicFunc::new(
-        std::sync::Arc::new(FuncSig::new(vec![Type::I32, Type::I32], vec![Type::I32])),
+        std::sync::Arc::new(FuncSig::new(vec![Type::I32, Type::I32], vec![])),
         func,
     )
 }
