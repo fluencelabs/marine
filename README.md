@@ -13,7 +13,7 @@ FCE is intended to run various Wasm binaries. At now, it is in the heavily devel
 
 ## Recommendations:
 
-- Modules architecture should be upwards from `effectors` (WASI modules) that will work with local binaries, local storage and syscalls to `pure modules` that perform business logic.
+- Modules architecture should be upwards from `effectors` (modules that persist data and WASI modules) that will work with local binaries, local storage and syscalls to `pure modules` that perform business logic.
 - Splitting app to small FCE modules are easier to support, reuse and distribute
 - Each module for its own task (npm like)
 
@@ -32,7 +32,7 @@ path = "src/main.rs"
 fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
 ```
 
-- Methods that will be used outside this module marked with `#[fce]`
+- Methods that will be exported from this module marked with `#[fce]`
 ```
 use fluence::fce;
 
@@ -41,9 +41,9 @@ pub fn get(url: String) -> String {
 ...
 }
 ```
-- Multiple arguments with primitive Rust types and only one return argument could be used
+- Multiple arguments with primitive Rust types (`bool, u8, u16, u32, u64, i8, i16, i32, i64, f32, f64, String, Vec<u8>`) and only one return argument could be used
 
-- Build project with `fce build`
+- Build project with `fce build` (supports --release and all other cargo flags now)
 
 - Copy wasm file from `target/wasm32-wasi/debug` to directory with other modules
 
@@ -100,26 +100,11 @@ Import example:
 ```
 #[link(wasm_import_module = "host")]
 extern "C" {
-    fn curl(ptr: i32, size: i32) -> i32;
+    fn curl(args: String) -> String;
 }
 ```
-It is not possible for now to use `String` as arguments. Use tweek for this:
-```
-fn call_curl(cmd: String) -> String {
-    unsafe {
-        // TODO: better error handling
-        match curl(cmd.as_ptr() as _, cmd.len() as _) {
-            0 => String::from_raw_parts(
-                fluence::internal::get_result_ptr() as _,
-                fluence::internal::get_result_size(),
-                fluence::internal::get_result_size(),
-            ),
-            _ => "host ipfs call failed".to_string(),
-        }
-    }
-}
-```
-Call binary with arguments: `call_curl("-vvv ya.ru")`
+
+Call binary with arguments: `curl("-vvv ya.ru")`
 
 `[core_module.wasi]` - this block manages communication with the "outside" world
 `env` - environment variables. Usage: `std::env::var("IPFS_ADDR")`
