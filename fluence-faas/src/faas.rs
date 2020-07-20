@@ -61,15 +61,14 @@ impl<'a> ModulesLoadStrategy<'a> {
 
     #[inline]
     /// Returns difference between required and loaded modules.
-    pub fn missing_modules<'s>(&self, loaded: impl Iterator<Item = &'s String>) -> HashSet<String> {
+    pub fn missing_modules<'s>(&self, loaded: impl Iterator<Item = &'s String>) -> Vec<&'s String> {
         match self {
-            ModulesLoadStrategy::Named(set) => {
-                let set = (*set).clone();
-                loaded.fold(set, |mut set, module| {
-                    set.remove(module);
-                    set
-                })
-            }
+            ModulesLoadStrategy::Named(set) => loaded.fold(vec![], |mut vec, module| {
+                if !set.contains(module) {
+                    vec.push(module)
+                }
+                vec
+            }),
             _ => <_>::default(),
         }
     }
