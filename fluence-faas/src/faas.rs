@@ -35,34 +35,35 @@ use std::collections::HashSet;
 unsafe impl Send for FluenceFaaS {}
 
 /// Strategy for module loading: either `All`, or only those specified in `Named`
-pub enum Modules<'a> {
+pub enum ModulesLoadStrategy<'a> {
     All,
     Named(&'a HashSet<String>),
 }
 
-impl<'a> Modules<'a> {
+impl<'a> ModulesLoadStrategy<'a> {
     #[inline]
-    /// Returns true if `module` should be loaded
+    /// Returns true if `module` should be loaded.
     pub fn should_load(&self, module: &str) -> bool {
         match self {
-            Modules::All => true,
-            Modules::Named(set) => set.contains(module),
+            ModulesLoadStrategy::All => true,
+            ModulesLoadStrategy::Named(set) => set.contains(module),
         }
     }
 
     #[inline]
-    pub fn required_modules(&self) -> usize {
+    /// Returns the number of modules that must be loaded.
+    pub fn required_modules_len(&self) -> usize {
         match self {
-            Modules::Named(set) => set.len(),
+            ModulesLoadStrategy::Named(set) => set.len(),
             _ => 0,
         }
     }
 
     #[inline]
-    /// Returns difference between required and loaded modules
+    /// Returns difference between required and loaded modules.
     pub fn missing_modules<'s>(&self, loaded: impl Iterator<Item = &'s String>) -> HashSet<String> {
         match self {
-            Modules::Named(set) => {
+            ModulesLoadStrategy::Named(set) => {
                 let set = (*set).clone();
                 loaded.fold(set, |mut set, module| {
                     set.remove(module);
@@ -91,10 +92,9 @@ impl FluenceFaaS {
     /// Creates FaaS from config deserialized from TOML.
     pub fn with_raw_config(config: RawCoreModulesConfig) -> Result<Self> {
         let config = crate::misc::from_raw_config(config)?;
-        let modules = config
-            .core_modules_dir
-            .as_ref()
-            .map_or(Ok(vec![]), |dir| Self::load_modules(dir, Modules::All))?;
+        let modules = config.core_modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
+            Self::load_modules(dir, ModulesLoadStrategy::All)
+        })?;
         Self::with_modules(modules, config)
     }
 
@@ -129,14 +129,17 @@ impl FluenceFaaS {
     {
         let config = config.try_into()?;
         let modules = config.core_modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
-            Self::load_modules(dir, Modules::Named(names))
+            Self::load_modules(dir, ModulesLoadStrategy::Named(names))
         })?;
 
         Self::with_modules::<_, CoreModulesConfig>(modules, config)
     }
 
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
-    fn load_modules(core_modules_dir: &str, modules: Modules) -> Result<Vec<(String, Vec<u8>)>> {
+    fn load_modules(
+        core_modules_dir: &str,
+        modules: ModulesLoadStrategy,
+    ) -> Result<Vec<(String, Vec<u8>)>> {
         use FaaSError::IOError;
 
         let mut dir_entries = fs::read_dir(core_modules_dir)
@@ -165,7 +168,7 @@ impl FluenceFaaS {
             Result::Ok(vec)
         })?;
 
-        if modules.required_modules() > loaded.len() {
+        if modules.required_modules_len() > loaded.len() {
             let loaded = loaded.iter().map(|(n, _)| n);
             let not_found = modules.missing_modules(loaded);
             return Err(FaaSError::ConfigParseError(format!(
