@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-use wasmer_core::vm::Ctx;
-use crate::FaaSError;
 use super::config::ModuleConfig;
 
 use fce::FCEModuleConfig;
 
+use wasmer_core::backend::SigRegistry;
+use wasmer_core::module::ExportIndex;
+use wasmer_core::vm::Ctx;
 use wasmer_core::import::ImportObject;
-use wasmer_runtime::func;
 use wasmer_core::typed_func::WasmTypeList;
+use wasmer_runtime::func;
 use wasmer_runtime::Func;
 use wasmer_runtime::error::ResolveError;
-use wasmer_core::backend::SigRegistry;
 use wasmer_runtime::types::LocalOrImport;
-use wasmer_core::module::ExportIndex;
 
 use std::path::PathBuf;
 
@@ -103,7 +102,7 @@ where
 }
 
 /// Make FCE config based on parsed raw config.
-pub(crate) fn make_fce_config(config: Option<ModuleConfig>) -> Result<FCEModuleConfig, FaaSError> {
+pub(crate) fn make_fce_config(config: Option<ModuleConfig>) -> crate::Result<FCEModuleConfig> {
     use super::imports::create_host_import_func;
     use super::imports::log_utf8_string;
     use wasmer_core::import::Namespace;

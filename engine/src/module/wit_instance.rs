@@ -16,6 +16,7 @@
 
 use super::wit_prelude::*;
 use super::fce_module::FCEModule;
+use crate::Result;
 
 use fce_wit_interfaces::FCEWITInterfaces;
 use fce_wit_interfaces::WITAstType;
@@ -37,7 +38,7 @@ impl WITInstance {
         wasmer_instance: &WasmerInstance,
         wit: &FCEWITInterfaces<'_>,
         modules: &HashMap<String, FCEModule>,
-    ) -> Result<Self, FCEError> {
+    ) -> Result<Self> {
         let mut exports = Self::extract_raw_exports(&wasmer_instance, wit)?;
         let imports = Self::extract_imports(modules, wit, exports.len())?;
         let memories = Self::extract_memories(&wasmer_instance);
@@ -51,7 +52,7 @@ impl WITInstance {
     fn extract_raw_exports(
         wasmer_instance: &WasmerInstance,
         wit: &FCEWITInterfaces<'_>,
-    ) -> Result<HashMap<usize, WITFunction>, FCEError> {
+    ) -> Result<HashMap<usize, WITFunction>> {
         use wasmer_core::DynFunc;
 
         let module_exports = &wasmer_instance.exports;
@@ -76,7 +77,7 @@ impl WITInstance {
         modules: &HashMap<String, FCEModule>,
         wit: &FCEWITInterfaces<'_>,
         start_index: usize,
-    ) -> Result<HashMap<usize, WITFunction>, FCEError> {
+    ) -> Result<HashMap<usize, WITFunction>> {
         wit.imports()
             .filter(|import|
                 // filter out imports that have implementations
@@ -89,7 +90,7 @@ impl WITInstance {
                 }
                 None => Err(FCEError::NoSuchModule(import.namespace.to_string())),
             })
-            .collect::<Result<HashMap<_, _>, _>>()
+            .collect::<Result<HashMap<_, _>>>()
     }
 
     fn extract_memories(wasmer_instance: &WasmerInstance) -> Vec<WITMemory> {

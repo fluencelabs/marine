@@ -39,7 +39,7 @@ pub fn put(file_path: String) -> String {
     let timeout = std::env::var(TIMEOUT_ENV_NAME).unwrap_or_else(|_| "1s".to_string());
     let cmd = format!("add --timeout {} -Q {}", timeout, file_path);
 
-    call_ipfs(cmd)
+    ipfs(cmd)
 }
 
 /// Get file by provided hash from IPFS, saves it to a temporary file and returns a path to it.
@@ -55,7 +55,7 @@ pub fn get(hash: String) -> String {
         timeout, result_file_path, hash
     );
 
-    call_ipfs(cmd);
+    ipfs(cmd);
 
     RESULT_FILE_PATH.to_string()
 }
@@ -71,22 +71,9 @@ pub fn get_address() -> String {
     }
 }
 
-fn call_ipfs(cmd: String) -> String {
-    unsafe {
-        // TODO: better error handling
-        match ipfs(cmd.as_ptr() as _, cmd.len() as _) {
-            0 => String::from_raw_parts(
-                fluence::internal::get_result_ptr() as _,
-                fluence::internal::get_result_size(),
-                fluence::internal::get_result_size(),
-            ),
-            _ => "host ipfs call failed".to_string(),
-        }
-    }
-}
-
+#[fce]
 #[link(wasm_import_module = "host")]
 extern "C" {
-    /// Put a file to ipfs, returns ipfs hash of the file.
-    fn ipfs(ptr: i32, size: i32) -> i32;
+    /// Execute provided cmd as a parameters of ipfs cli, return result.
+    pub fn ipfs(cmd: String) -> String;
 }

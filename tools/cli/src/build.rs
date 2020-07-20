@@ -17,7 +17,6 @@
 use crate::Result;
 use crate::errors::CLIError;
 
-use std::path::PathBuf;
 use std::process::Command;
 
 #[derive(serde::Deserialize)]
@@ -29,15 +28,13 @@ enum DiagnosticMessage {
     RunWithArgs,
 }
 
-pub(crate) fn build(manifest_path: Option<PathBuf>) -> Result<()> {
+pub(crate) fn build(trailing_args: Vec<&str>) -> Result<()> {
     use std::io::Read;
 
     let mut cargo = Command::new("cargo");
     cargo.arg("build").arg("--target").arg("wasm32-wasi");
     cargo.arg("--message-format").arg("json-render-diagnostics");
-    if let Some(wasm_path) = manifest_path {
-        cargo.arg("--manifest-path").arg(wasm_path);
-    }
+    cargo.args(trailing_args);
 
     let mut process = cargo.stdout(std::process::Stdio::piped()).spawn()?;
 

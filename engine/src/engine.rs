@@ -47,29 +47,44 @@ impl FCE {
         module_name: MN,
         func_name: FN,
         argument: &[IValue],
-    ) -> Result<Vec<IValue>, FCEError> {
-        match self.modules.get_mut(module_name.as_ref()) {
+    ) -> Result<Vec<IValue>> {
+        self.call_(module_name.as_ref(), func_name.as_ref(), argument)
+    }
+
+    pub fn call_(
+        &mut self,
+        module_name: &str,
+        func_name: &str,
+        argument: &[IValue],
+    ) -> Result<Vec<IValue>> {
+        match self.modules.get_mut(module_name) {
             // TODO: refactor errors
             Some(module) => module.call(func_name.as_ref(), argument),
-            None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
+            None => Err(FCEError::NoSuchModule(module_name.to_string())),
         }
     }
 
     /// Load a new module inside FCE.
-    pub fn load_module<S>(
+    pub fn load_module<S: Into<String>>(
         &mut self,
         module_name: S,
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
-    ) -> Result<(), FCEError>
-    where
-        S: Into<String>,
-    {
+    ) -> Result<()> {
+        self.load_module_(module_name.into(), wasm_bytes, config)
+    }
+
+    pub fn load_module_(
+        &mut self,
+        module_name: String,
+        wasm_bytes: &[u8],
+        config: FCEModuleConfig,
+    ) -> Result<()> {
         let _prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
         let module = FCEModule::new(&wasm_bytes, config, &self.modules)?;
 
-        match self.modules.entry(module_name.into()) {
+        match self.modules.entry(module_name) {
             Entry::Vacant(entry) => {
                 entry.insert(module);
                 Ok(())
@@ -79,10 +94,14 @@ impl FCE {
     }
 
     /// Unload previously loaded module.
-    pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<(), FCEError> {
-        match self.modules.remove(module_name.as_ref()) {
+    pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
+        self.unload_module_(module_name.as_ref())
+    }
+
+    pub fn unload_module_(&mut self, module_name: &str) -> Result<()> {
+        match self.modules.remove(module_name) {
             Some(_) => Ok(()),
-            None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
+            None => Err(FCEError::NoSuchModule(module_name.to_string())),
         }
     }
 
@@ -100,7 +119,7 @@ impl FCE {
     pub fn module_interface<S: AsRef<str>>(
         &self,
         module_name: S,
-    ) -> Result<Vec<FCEFunctionSignature<'_>>, FCEError> {
+    ) -> Result<Vec<FCEFunctionSignature<'_>>> {
         match self.modules.get(module_name.as_ref()) {
             Some(module) => Ok(Self::get_module_function_signatures(module)),
             None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),

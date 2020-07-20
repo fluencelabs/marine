@@ -54,12 +54,12 @@ jobs:
           cd examples/ipfs_node/wasm/ipfs_node
           cargo fmt --all -- --check --color always
           cargo wasi build
-          cargo clippy -v
+          cargo clippy -v --target wasm32-wasi
 
           cd ../ipfs_rpc
           cargo fmt --all -- --check --color always
           cargo wasi build
-          cargo clippy -v
+          cargo clippy -v --target wasm32-wasi
 
 #          cd ../../../../tools/wit_embedder
 #          cargo fmt --all -- --check --color always
