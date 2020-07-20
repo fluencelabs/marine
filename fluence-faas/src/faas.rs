@@ -29,9 +29,50 @@ use std::convert::TryInto;
 use std::fs;
 use std::path::PathBuf;
 use crate::faas_interface::FaaSFunctionSignature;
+use std::collections::HashSet;
 
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
+
+/// Strategy for module loading: either `All`, or only those specified in `Named`
+pub enum ModulesLoadStrategy<'a> {
+    All,
+    Named(&'a HashSet<String>),
+}
+
+impl<'a> ModulesLoadStrategy<'a> {
+    #[inline]
+    /// Returns true if `module` should be loaded.
+    pub fn should_load(&self, module: &str) -> bool {
+        match self {
+            ModulesLoadStrategy::All => true,
+            ModulesLoadStrategy::Named(set) => set.contains(module),
+        }
+    }
+
+    #[inline]
+    /// Returns the number of modules that must be loaded.
+    pub fn required_modules_len(&self) -> usize {
+        match self {
+            ModulesLoadStrategy::Named(set) => set.len(),
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    /// Returns difference between required and loaded modules.
+    pub fn missing_modules<'s>(&self, loaded: impl Iterator<Item = &'s String>) -> Vec<&'s String> {
+        match self {
+            ModulesLoadStrategy::Named(set) => loaded.fold(vec![], |mut vec, module| {
+                if !set.contains(module) {
+                    vec.push(module)
+                }
+                vec
+            }),
+            _ => <_>::default(),
+        }
+    }
+}
 
 pub struct FluenceFaaS {
     fce: FCE,
@@ -50,10 +91,9 @@ impl FluenceFaaS {
     /// Creates FaaS from config deserialized from TOML.
     pub fn with_raw_config(config: RawCoreModulesConfig) -> Result<Self> {
         let config = crate::misc::from_raw_config(config)?;
-        let modules = config
-            .core_modules_dir
-            .as_ref()
-            .map_or(Ok(vec![]), |dir| Self::load_modules(dir))?;
+        let modules = config.core_modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
+            Self::load_modules(dir, ModulesLoadStrategy::All)
+        })?;
         Self::with_modules(modules, config)
     }
 
@@ -80,29 +120,63 @@ impl FluenceFaaS {
         })
     }
 
+    /// Searches for modules in `config.core_modules_dir`, loads only those in the `names` set
+    pub fn with_module_names<C>(names: &HashSet<String>, config: C) -> Result<Self>
+    where
+        C: TryInto<CoreModulesConfig>,
+        FaaSError: From<C::Error>,
+    {
+        let config = config.try_into()?;
+        let modules = config.core_modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
+            Self::load_modules(dir, ModulesLoadStrategy::Named(names))
+        })?;
+
+        Self::with_modules::<_, CoreModulesConfig>(modules, config)
+    }
+
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
-    fn load_modules(core_modules_dir: &str) -> Result<Vec<(String, Vec<u8>)>> {
+    fn load_modules(
+        core_modules_dir: &str,
+        modules: ModulesLoadStrategy,
+    ) -> Result<Vec<(String, Vec<u8>)>> {
         use FaaSError::IOError;
 
         let mut dir_entries = fs::read_dir(core_modules_dir)
             .map_err(|e| IOError(format!("{}: {}", core_modules_dir, e)))?;
 
-        dir_entries.try_fold(vec![], |mut vec, entry| {
+        let loaded = dir_entries.try_fold(vec![], |mut vec, entry| {
             let entry = entry?;
             let path = entry.path();
-            if !path.is_dir() {
-                let module_name = path
-                    .file_name()
-                    .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?
-                    .to_os_string()
-                    .into_string()
-                    .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
-                let module_bytes = fs::read(path)?;
-                vec.push((module_name, module_bytes))
+            // Skip directories
+            if path.is_dir() {
+                return Ok(vec);
             }
 
-            Ok(vec)
-        })
+            let module_name = path
+                .file_name()
+                .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?
+                .to_os_string()
+                .into_string()
+                .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
+
+            if modules.should_load(&module_name) {
+                let module_bytes = fs::read(path)?;
+                vec.push((module_name, module_bytes));
+            }
+
+            Result::Ok(vec)
+        })?;
+
+        if modules.required_modules_len() > loaded.len() {
+            let loaded = loaded.iter().map(|(n, _)| n);
+            let not_found = modules.missing_modules(loaded);
+            return Err(FaaSError::ConfigParseError(format!(
+                "the following modules were not found: {:?}",
+                not_found
+            )));
+        }
+
+        Ok(loaded)
     }
 
     /// Executes provided Wasm code in the internal environment (with access to module exports).
