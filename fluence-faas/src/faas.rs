@@ -31,9 +31,6 @@ use std::path::PathBuf;
 use crate::faas_interface::FaaSFunctionSignature;
 use std::collections::HashSet;
 
-// TODO: remove and use mutex instead
-unsafe impl Send for FluenceFaaS {}
-
 /// Strategy for module loading: either `All`, or only those specified in `Named`
 pub enum ModulesLoadStrategy<'a> {
     All,
