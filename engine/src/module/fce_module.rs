@@ -16,19 +16,21 @@
 
 use super::wit_prelude::*;
 use super::{IType, IValue, WValue};
+use crate::Result;
+use crate::FCEModuleConfig;
 
 use fce_wit_interfaces::FCEWITInterfaces;
-use wasmer_wit::interpreter::Interpreter;
-use wasmer_runtime::{compile, ImportObject};
 use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
+use wasmer_runtime::compile;
+use wasmer_runtime::ImportObject;
+use wasmer_wit::interpreter::Interpreter;
 use wit_parser::extract_wit;
 
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
-use crate::FCEModuleConfig;
 
 type WITInterpreter =
     Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
@@ -47,7 +49,7 @@ pub(super) struct Callable {
 }
 
 impl Callable {
-    pub fn call(&mut self, args: &[IValue]) -> Result<Vec<IValue>, FCEError> {
+    pub fn call(&mut self, args: &[IValue]) -> Result<Vec<IValue>> {
         use wasmer_wit::interpreter::stack::Stackable;
 
         let result = self
@@ -86,7 +88,7 @@ impl FCEModule {
         wasm_bytes: &[u8],
         fce_module_config: FCEModuleConfig,
         modules: &HashMap<String, FCEModule>,
-    ) -> Result<Self, FCEError> {
+    ) -> Result<Self> {
         let wasmer_module = compile(&wasm_bytes)?;
         let wit = extract_wit(&wasmer_module)?;
         let fce_wit = FCEWITInterfaces::new(wit);
@@ -130,11 +132,7 @@ impl FCEModule {
         })
     }
 
-    pub(crate) fn call(
-        &mut self,
-        function_name: &str,
-        args: &[IValue],
-    ) -> Result<Vec<IValue>, FCEError> {
+    pub(crate) fn call(&mut self, function_name: &str, args: &[IValue]) -> Result<Vec<IValue>> {
         match self.exports_funcs.get_mut(function_name) {
             Some(func) => Arc::make_mut(func).call(args),
             None => Err(FCEError::NoSuchFunction(format!(
@@ -157,7 +155,7 @@ impl FCEModule {
     }
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
-    pub(super) fn get_callable(&self, function_name: &str) -> Result<Arc<Callable>, FCEError> {
+    pub(super) fn get_callable(&self, function_name: &str) -> Result<Arc<Callable>> {
         match self.exports_funcs.get(function_name) {
             Some(func) => Ok(func.clone()),
             None => Err(FCEError::NoSuchFunction(format!(
@@ -170,7 +168,7 @@ impl FCEModule {
     fn instantiate_wit_exports(
         wit_instance: Arc<WITInstance>,
         wit: &FCEWITInterfaces<'_>,
-    ) -> Result<HashMap<String, Arc<Callable>>, FCEError> {
+    ) -> Result<HashMap<String, Arc<Callable>>> {
         use fce_wit_interfaces::WITAstType;
 
         wit.implementations()
@@ -218,28 +216,33 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<HashMap<String, Arc<Callable>>, FCEError>>()
+            .collect::<Result<HashMap<String, Arc<Callable>>>>()
     }
 
     // this function deals only with import functions that have an adaptor implementation
     fn adjust_wit_imports(
         wit: &FCEWITInterfaces<'_>,
         wit_instance: Arc<MaybeUninit<WITInstance>>,
-    ) -> Result<ImportObject, FCEError> {
+    ) -> Result<ImportObject> {
         use fce_wit_interfaces::WITAstType;
         use wasmer_core::typed_func::DynamicFunc;
         use wasmer_core::vm::Ctx;
 
         // returns function that will be called from imports of Wasmer module
-        fn dyn_func_from_raw_import<F>(inputs: Vec<IType>, raw_import: F) -> DynamicFunc<'static>
+        fn dyn_func_from_raw_import<F>(
+            inputs: Vec<IType>,
+            outputs: Vec<IType>,
+            raw_import: F,
+        ) -> DynamicFunc<'static>
         where
             F: Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static,
         {
             use wasmer_core::types::FuncSig;
             use super::type_converters::itype_to_wtype;
 
-            let signature = inputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
-            DynamicFunc::new(Arc::new(FuncSig::new(signature, vec![])), raw_import)
+            let inputs = inputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
+            let outputs = outputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
+            DynamicFunc::new(Arc::new(FuncSig::new(inputs, outputs)), raw_import)
         }
 
         // creates a closure that is represent a WIT module import
@@ -252,7 +255,7 @@ impl FCEModule {
             move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
                 use super::type_converters::wval_to_ival;
 
-                log::info!(
+                log::trace!(
                     "raw import for {}.{} called with {:?}\n",
                     import_namespace,
                     import_name,
@@ -270,7 +273,7 @@ impl FCEModule {
                     );
                 }
 
-                log::info!(
+                log::trace!(
                     "\nraw import for {}.{} finished",
                     import_namespace,
                     import_name
@@ -302,7 +305,7 @@ impl FCEModule {
                 let wit_type = wit.type_by_idx_r(adapter_function_type)?;
 
                 match wit_type {
-                    WITAstType::Function { inputs, .. } => {
+                    WITAstType::Function { inputs, outputs } => {
                         let interpreter: WITInterpreter = adapter_instructions.try_into()?;
 
                         let raw_import = create_raw_import(
@@ -311,7 +314,8 @@ impl FCEModule {
                             import_namespace.to_string(),
                             import_name.to_string(),
                         );
-                        let wit_import = dyn_func_from_raw_import(inputs.clone(), raw_import);
+                        let wit_import =
+                            dyn_func_from_raw_import(inputs.clone(), outputs.clone(), raw_import);
 
                         Ok((import_namespace.to_string(), (*import_name, wit_import)))
                     }
@@ -321,7 +325,7 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<multimap::MultiMap<_, _>, FCEError>>()?;
+            .collect::<Result<multimap::MultiMap<_, _>>>()?;
 
         let mut import_object = ImportObject::new();
 

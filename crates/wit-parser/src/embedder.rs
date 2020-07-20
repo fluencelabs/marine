@@ -26,23 +26,20 @@ use wasmer_wit::{
 
 use std::path::PathBuf;
 
+/// Embed provided WIT to a Wasm file by path.
 pub fn embed_text_wit(
     in_wasm_path: PathBuf,
     out_wasm_path: PathBuf,
     wit: &str,
 ) -> Result<(), WITParserError> {
-    let mut module = ModuleConfig::new()
+    let module = ModuleConfig::new()
         .parse_file(&in_wasm_path)
         .map_err(WITParserError::CorruptedWasmFile)?;
 
     let buffer = Buffer::new(wit)?;
     let ast = parse(&buffer)?;
 
-    let mut bytes = vec![];
-    ast.to_bytes(&mut bytes)?;
-
-    let custom = WITCustom(bytes);
-    module.customs.add(custom);
+    let mut module = embed_wit(module, &ast);
     module
         .emit_wasm_file(&out_wasm_path)
         .map_err(WITParserError::WasmEmitError)?;
@@ -50,23 +47,14 @@ pub fn embed_text_wit(
     Ok(())
 }
 
-pub fn embed_wit(
-    in_wasm_path: PathBuf,
-    out_wasm_path: PathBuf,
-    interfaces: &Interfaces<'_>,
-) -> Result<(), WITParserError> {
-    let mut module = ModuleConfig::new()
-        .parse_file(&in_wasm_path)
-        .map_err(WITParserError::CorruptedWasmFile)?;
-
+/// Embed provided WIT to a Wasm module.
+pub fn embed_wit(mut wasm_module: walrus::Module, interfaces: &Interfaces<'_>) -> walrus::Module {
     let mut bytes = vec![];
-    interfaces.to_bytes(&mut bytes)?;
+    // TODO: think about possible errors here
+    interfaces.to_bytes(&mut bytes).unwrap();
 
     let custom = WITCustom(bytes);
-    module.customs.add(custom);
-    module
-        .emit_wasm_file(&out_wasm_path)
-        .map_err(WITParserError::WasmEmitError)?;
+    wasm_module.customs.add(custom);
 
-    Ok(())
+    wasm_module
 }

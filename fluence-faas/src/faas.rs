@@ -142,7 +142,16 @@ impl FluenceFaaS {
     }
 
     /// Executes provided Wasm code in the internal environment (with access to module exports).
-    pub fn call_code(
+    pub fn call_code<S: AsRef<str>>(
+        &mut self,
+        wasm: &[u8],
+        func_name: S,
+        args: &[IValue],
+    ) -> Result<Vec<IValue>> {
+        self.call_code_(wasm, func_name.as_ref(), args)
+    }
+
+    pub fn call_code_(
         &mut self,
         wasm: &[u8],
         func_name: &str,
@@ -161,10 +170,10 @@ impl FluenceFaaS {
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub fn call_module(
+    pub fn call_module<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
-        module_name: &str,
-        func_name: &str,
+        module_name: MN,
+        func_name: FN,
         args: &[IValue],
     ) -> Result<Vec<IValue>> {
         self.fce

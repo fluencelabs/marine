@@ -18,28 +18,22 @@ use fluence_faas::FluenceFaaS;
 use fluence_faas::IValue;
 
 use std::path::PathBuf;
-use anyhow::Context;
 
-const IPFS_MODULES_CONFIG_PATH: &str = "Config.toml";
-const IPFS_RPC: &str = "wasm/artifacts/ipfs_rpc.wasm";
+const GREETING_MODULE_CONFIG_PATH: &str = "Config.toml";
 
 fn main() -> Result<(), anyhow::Error> {
-    env_logger::init();
-    let ipfs_rpc = std::fs::read(IPFS_RPC).with_context(|| format!("{} wasn't found", IPFS_RPC))?;
+    let mut greeting_node = FluenceFaaS::new(PathBuf::from(GREETING_MODULE_CONFIG_PATH))?;
+    println!(
+        "greeting node interface is\n{}",
+        greeting_node.get_interface()
+    );
 
-    let mut ipfs_node = FluenceFaaS::new(PathBuf::from(IPFS_MODULES_CONFIG_PATH))?;
-    println!("ipfs node interface is\n{}", ipfs_node.get_interface());
-
-    let node_address = ipfs_node.call_module("ipfs_node.wasm", "get_address", &[])?;
-    println!("ipfs node address is:\n{:?}", node_address);
-
-    let result = ipfs_node.call_code(
-        &ipfs_rpc,
-        "get",
-        &[IValue::String(
-            "QmXdC36pX1B1sdHdbri859vMYctQjAhvTmkWyG9xzhShxb".to_string(),
-        )],
+    let result = greeting_node.call_module(
+        "greeting.wasm",
+        "greeting",
+        &[IValue::String("Fluence".to_string()), IValue::I32(1)],
     )?;
+
     println!("execution result {:?}", result);
 
     Ok(())

@@ -5,5 +5,9 @@ authors = ["Fluence Labs"]
 edition = "2018"
 
 [[bin]]
-name = "wasm_ipfs_rpc"
+name = "ipfs_rpc"
 path = "src/main.rs"
+
+[dependencies]
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+log = "0.4.11"

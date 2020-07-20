@@ -21,15 +21,27 @@ use walrus::ModuleConfig;
 
 use std::path::PathBuf;
 
-pub fn delete_wit_section(
+/// Delete all custom sections with WIT from provided Wasm file.
+pub fn delete_wit_section_from_file(
     in_wasm_path: PathBuf,
     out_wasm_path: PathBuf,
 ) -> Result<(), WITParserError> {
-    let mut module = ModuleConfig::new()
+    let module = ModuleConfig::new()
         .parse_file(&in_wasm_path)
         .map_err(WITParserError::CorruptedWasmFile)?;
 
-    let wit_section_ids = module
+    let mut module = delete_wit_section(module);
+
+    module
+        .emit_wasm_file(&out_wasm_path)
+        .map_err(WITParserError::WasmEmitError)?;
+
+    Ok(())
+}
+
+/// Delete all custom sections with WIT from provided Wasm module.
+pub fn delete_wit_section(mut wasm_module: walrus::Module) -> walrus::Module {
+    let wit_section_ids = wasm_module
         .customs
         .iter()
         .filter_map(|(id, section)| {
@@ -42,12 +54,8 @@ pub fn delete_wit_section(
         .collect::<Vec<_>>();
 
     for id in wit_section_ids {
-        module.customs.delete(id);
+        wasm_module.customs.delete(id);
     }
 
-    module
-        .emit_wasm_file(&out_wasm_path)
-        .map_err(WITParserError::WasmEmitError)?;
-
-    Ok(())
+    wasm_module
 }

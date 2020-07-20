@@ -48,7 +48,7 @@ pub enum FCEError {
     NoSuchFunction(String),
 
     /// Returns when there is no module with such name.
-    NoSuchModule,
+    NoSuchModule(String),
 
     /// WIT section parse error.
     WITParseError(WITParserError),
@@ -73,7 +73,9 @@ impl std::fmt::Display for FCEError {
             FCEError::NoSuchFunction(msg) => {
                 write!(f, "FCE doesn't have a function with such a name: {}", msg)
             }
-            FCEError::NoSuchModule => write!(f, "FCE doesn't have a module with such a name"),
+            FCEError::NoSuchModule(module_name) => {
+                write!(f, "FCE doesn't have a module with name {}", module_name)
+            }
             FCEError::WITParseError(err) => write!(f, "{}", err),
             FCEError::IncorrectWIT(err_msg) => write!(f, "{}", err_msg),
         }

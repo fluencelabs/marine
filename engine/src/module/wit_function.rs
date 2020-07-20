@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use super::wit_prelude::FCEError;
 use super::fce_module::FCEModule;
 use super::{IType, IValue, WValue};
 use super::fce_module::Callable;
+use crate::Result;
 
 use wasmer_wit::interpreter::wasm;
 use wasmer_core::instance::DynFunc;
@@ -45,7 +45,7 @@ pub(super) struct WITFunction {
 
 impl WITFunction {
     /// Creates functions from a "usual" (not WIT) module export.
-    pub(super) fn from_export(dyn_func: DynFunc<'static>) -> Result<Self, FCEError> {
+    pub(super) fn from_export(dyn_func: DynFunc<'static>) -> Result<Self> {
         use super::type_converters::wtype_to_itype;
 
         let signature = dyn_func.signature();
@@ -70,10 +70,7 @@ impl WITFunction {
     }
 
     /// Creates function from a module import.
-    pub(super) fn from_import(
-        wit_module: &FCEModule,
-        function_name: &str,
-    ) -> Result<Self, FCEError> {
+    pub(super) fn from_import(wit_module: &FCEModule, function_name: &str) -> Result<Self> {
         let callable = wit_module.get_callable(function_name)?;
 
         let inner = WITFunctionInner::Import { callable };
@@ -111,7 +108,7 @@ impl wasm::structures::LocalImport for WITFunction {
         }
     }
 
-    fn call(&self, arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
+    fn call(&self, arguments: &[IValue]) -> std::result::Result<Vec<IValue>, ()> {
         use super::type_converters::{ival_to_wval, wval_to_ival};
 
         match &self.inner {

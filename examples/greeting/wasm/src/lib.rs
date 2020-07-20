@@ -13,28 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#![warn(rust_2018_idioms)]
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
 
-mod custom;
-mod deleter;
-mod embedder;
-mod errors;
-mod extractor;
+use fluence::fce;
 
-pub use errors::WITParserError;
-
-pub use embedder::embed_wit;
-pub use embedder::embed_text_wit;
-pub use deleter::delete_wit_section;
-pub use deleter::delete_wit_section_from_file;
-pub use extractor::extract_wit;
-pub use extractor::extract_text_wit;
+#[fce]
+pub fn greeting(name: String) -> String {
+    format!("Hi, {}", name)
+}

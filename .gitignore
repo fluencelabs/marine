@@ -2,6 +2,9 @@ target/
 **/*.rs.bk
 .idea
 
+# MacOS misc file
+*.DS_Store
+
 # Wasm files
 *.wasm
 *.wat
@@ -10,5 +13,6 @@ target/
 /examples/ipfs_node/wasm/artifacts/ipfs_rpc_file
 
 # Allowed Wasm files for examples
-!/examples/ipfs_node/wasm/artifacts/wasm_ipfs_rpc_wit.wasi.wasm
+!/examples/greeting/wasm/artifacts/greeting.wasm
+!/examples/ipfs_node/wasm/artifacts/ipfs_rpc.wasm
 !/examples/ipfs_node/wasm/artifacts/wasm_modules/*

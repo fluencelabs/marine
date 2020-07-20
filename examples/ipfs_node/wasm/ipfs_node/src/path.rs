@@ -41,7 +41,7 @@ where
             let mut full_path = std::path::PathBuf::from(to_dir);
 
             // TODO: optimize this
-            #[warn(clippy::while_let_on_iterator)]
+            #[allow(clippy::while_let_on_iterator)]
             while let Some(component) = components.next() {
                 full_path.push(component);
             }
