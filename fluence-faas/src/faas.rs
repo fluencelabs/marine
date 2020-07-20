@@ -34,6 +34,46 @@ use std::collections::HashSet;
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
 
+/// Strategy for module loading: either `All`, or only those specified in `Named`
+pub enum Modules<'a> {
+    All,
+    Named(&'a HashSet<String>),
+}
+
+impl<'a> Modules<'a> {
+    #[inline]
+    /// Returns true if `module` should be loaded
+    pub fn should_load(&self, module: &str) -> bool {
+        match self {
+            Modules::All => true,
+            Modules::Named(set) => set.contains(module),
+        }
+    }
+
+    #[inline]
+    pub fn required_modules(&self) -> usize {
+        match self {
+            Modules::Named(set) => set.len(),
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    /// Returns difference between required and loaded modules
+    pub fn missing_modules<'s>(&self, loaded: impl Iterator<Item = &'s String>) -> HashSet<String> {
+        match self {
+            Modules::Named(set) => {
+                let set = (*set).clone();
+                loaded.fold(set, |mut set, module| {
+                    set.remove(module);
+                    set
+                })
+            }
+            _ => <_>::default(),
+        }
+    }
+}
+
 pub struct FluenceFaaS {
     fce: FCE,
 
@@ -54,7 +94,7 @@ impl FluenceFaaS {
         let modules = config
             .core_modules_dir
             .as_ref()
-            .map_or(Ok(vec![]), |dir| Self::load_modules(dir, |_| true))?;
+            .map_or(Ok(vec![]), |dir| Self::load_modules(dir, Modules::All))?;
         Self::with_modules(modules, config)
     }
 
@@ -82,39 +122,27 @@ impl FluenceFaaS {
     }
 
     /// Searches for modules in `config.core_modules_dir`, loads only those in the `names` set
-    pub fn with_module_names<C>(names: &mut HashSet<String>, config: C) -> Result<Self>
+    pub fn with_module_names<C>(names: &HashSet<String>, config: C) -> Result<Self>
     where
         C: TryInto<CoreModulesConfig>,
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
         let modules = config.core_modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
-            Self::load_modules(dir, |m| !names.remove(m))
+            Self::load_modules(dir, Modules::Named(names))
         })?;
-        if !names.is_empty() {
-            return Err(FaaSError::ConfigParseError(format!(
-                "the following modules were not found: {:?}",
-                names
-            )));
-        }
+
         Self::with_modules::<_, CoreModulesConfig>(modules, config)
     }
 
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
-    /// If `filter_module` returns true on a module name, that module is skipped
-    fn load_modules<P>(
-        core_modules_dir: &str,
-        mut filter_module: P,
-    ) -> Result<Vec<(String, Vec<u8>)>>
-    where
-        P: FnMut(&str) -> bool,
-    {
+    fn load_modules(core_modules_dir: &str, modules: Modules) -> Result<Vec<(String, Vec<u8>)>> {
         use FaaSError::IOError;
 
         let mut dir_entries = fs::read_dir(core_modules_dir)
             .map_err(|e| IOError(format!("{}: {}", core_modules_dir, e)))?;
 
-        dir_entries.try_fold(vec![], |mut vec, entry| {
+        let loaded = dir_entries.try_fold(vec![], |mut vec, entry| {
             let entry = entry?;
             let path = entry.path();
             // Skip directories
@@ -129,16 +157,24 @@ impl FluenceFaaS {
                 .into_string()
                 .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
 
-            // Skip filtered modules
-            if filter_module(&module_name) {
-                return Ok(vec);
+            if modules.should_load(&module_name) {
+                let module_bytes = fs::read(path)?;
+                vec.push((module_name, module_bytes));
             }
 
-            let module_bytes = fs::read(path)?;
-            vec.push((module_name, module_bytes));
+            Result::Ok(vec)
+        })?;
 
-            Ok(vec)
-        })
+        if modules.required_modules() > loaded.len() {
+            let loaded = loaded.iter().map(|(n, _)| n);
+            let not_found = modules.missing_modules(loaded);
+            return Err(FaaSError::ConfigParseError(format!(
+                "the following modules were not found: {:?}",
+                not_found
+            )));
+        }
+
+        Ok(loaded)
     }
 
     /// Executes provided Wasm code in the internal environment (with access to module exports).
