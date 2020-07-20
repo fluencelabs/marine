@@ -16,9 +16,7 @@
 
 use fluence::fce;
 
-pub fn main() {
-
-}
+pub fn main() {}
 
 #[fce]
 pub fn greeting(name: String) -> String {
