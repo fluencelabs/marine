@@ -15,17 +15,17 @@
  */
 
 use super::WITGenerator;
-use super::Interfaces;
-use super::FnInstructionGenerator;
+use super::WITResolver;
 use super::utils::ptype_to_itype;
 use crate::default_export_api_config::*;
+use crate::Result;
 
 use fluence_sdk_wit::AstFunctionItem;
 use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
 
 impl WITGenerator for AstFunctionItem {
-    fn generate_wit<'a>(&'a self, interfaces: &mut Interfaces<'a>) {
+    fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
         use wasmer_wit::ast::Type;
         use wasmer_wit::ast::Adapter;
 
@@ -33,14 +33,15 @@ impl WITGenerator for AstFunctionItem {
             .signature
             .input_types
             .iter()
-            .map(ptype_to_itype)
-            .collect::<Vec<_>>();
+            .map(|input_type| ptype_to_itype(input_type, wit_resolver))
+            .collect::<Result<Vec<_>>>()?;
 
         let outputs = match self.signature.output_type {
-            Some(ref output_type) => vec![ptype_to_itype(output_type)],
+            Some(ref output_type) => vec![ptype_to_itype(output_type, wit_resolver)?],
             None => vec![],
         };
 
+        let interfaces = &mut wit_resolver.interfaces;
         interfaces.types.push(Type::Function {
             inputs: inputs.clone(),
             outputs: outputs.clone(),
@@ -57,22 +58,27 @@ impl WITGenerator for AstFunctionItem {
             function_type: export_idx,
         });
 
-        let mut instructions: Vec<Instruction> = self
+        // TODO: rewrite with try_fold
+        let mut instructions = self
             .signature
             .input_types
             .iter()
             .enumerate()
-            .map(|(id, input_type)| input_type.generate_instructions_for_input_type(id as _))
+            .map(|(id, input_type)| {
+                input_type.generate_instructions_for_input_type(id as _, wit_resolver)
+            })
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
             .flatten()
-            .collect();
+            .collect::<Vec<Instruction>>();
 
-        let export_function_index = (interfaces.exports.len() - 1) as u32;
+        let export_function_index = (wit_resolver.interfaces.exports.len() - 1) as u32;
         instructions.push(Instruction::CallCore {
             function_index: export_function_index,
         });
 
         instructions.extend(match &self.signature.output_type {
-            Some(output_type) => output_type.generate_instructions_for_output_type(),
+            Some(output_type) => output_type.generate_instructions_for_output_type(wit_resolver)?,
             None => vec![],
         });
 
@@ -81,20 +87,37 @@ impl WITGenerator for AstFunctionItem {
             instructions,
         };
 
-        interfaces.adapters.push(adapter);
+        wit_resolver.interfaces.adapters.push(adapter);
 
         let implementation = wasmer_wit::ast::Implementation {
             core_function_type: export_idx,
             adapter_function_type: adapter_idx,
         };
-        interfaces.implementations.push(implementation);
+        wit_resolver.interfaces.implementations.push(implementation);
+
+        Ok(())
     }
+}
+
+/// Generate WIT instructions for a function.
+trait FnInstructionGenerator {
+    fn generate_instructions_for_input_type<'a>(
+        &self,
+        arg_id: u32,
+        wit_resolver: &mut WITResolver<'a>,
+    ) -> Result<Vec<Instruction>>;
+
+    fn generate_instructions_for_output_type<'a>(
+        &self,
+        wit_resolver: &mut WITResolver<'a>,
+    ) -> Result<Vec<Instruction>>;
 }
 
 impl FnInstructionGenerator for ParsedType {
     #[rustfmt::skip]
-    fn generate_instructions_for_input_type(&self, index: u32) -> Vec<Instruction> {
-        match self {
+    fn generate_instructions_for_input_type<'a>(&self, index: u32, wit_resolver: &mut WITResolver<'a>) -> Result<Vec<Instruction>> {
+        let instructions = match self {
+            ParsedType::Boolean => vec![Instruction::ArgumentGet { index }],
             ParsedType::I8 => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS8],
             ParsedType::I16 => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS16],
             ParsedType::I32 => vec![Instruction::ArgumentGet { index }],
@@ -119,13 +142,23 @@ impl FnInstructionGenerator for ParsedType {
                 Instruction::ArgumentGet { index },
                 Instruction::ByteArrayLowerMemory,
             ],
-            _ => unimplemented!(),
-        }
+            ParsedType::Record(record_name) => {
+                let type_index = wit_resolver.get_record_type_id(record_name)?;
+
+                vec! [
+                    Instruction::ArgumentGet { index },
+                    Instruction::RecordLowerMemory { type_index },
+                ]
+            },
+        };
+
+        Ok(instructions)
     }
 
     #[rustfmt::skip]
-    fn generate_instructions_for_output_type(&self) -> Vec<Instruction> {
-        match self {
+    fn generate_instructions_for_output_type<'a>(&self, wit_resolver: &mut WITResolver<'a>) -> Result<Vec<Instruction>> {
+        let instructions = match self {
+            ParsedType::Boolean => vec![],
             ParsedType::I8 => vec![Instruction::S8FromI32],
             ParsedType::I16 => vec![Instruction::S16FromI32],
             ParsedType::I32 => vec![],
@@ -152,7 +185,16 @@ impl FnInstructionGenerator for ParsedType {
                 Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
                 Instruction::CallCore { function_index: DEALLOCATE_FUNC.id },
             ],
-            _ => unimplemented!(),
-        }
+            ParsedType::Record(record_name) => {
+                let type_index = wit_resolver.get_record_type_id(record_name)?;
+
+                vec! [
+                    Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
+                    Instruction::RecordLiftMemory { type_index },
+                ]
+            },
+        };
+
+        Ok(instructions)
     }
 }

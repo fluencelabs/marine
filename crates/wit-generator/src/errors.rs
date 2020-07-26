@@ -22,6 +22,9 @@ pub enum WITGeneratorError {
     /// An error related to serde deserialization.
     DeserializationError(SerdeDeserializationError),
 
+    /// Various errors related to records
+    CorruptedRecord(String),
+
     /// Various errors occurred during the parsing/emitting a Wasm file.
     IOError(String),
 }
@@ -36,6 +39,7 @@ impl std::fmt::Display for WITGeneratorError {
                 "Embedded by rust-sdk metadata could't be parsed by serde: {:?}",
                 err
             ),
+            WITGeneratorError::CorruptedRecord(err) => write!(f, "{:?}", err),
             WITGeneratorError::IOError(err) => write!(f, "I/O error occurred: {:?}", err),
         }
     }

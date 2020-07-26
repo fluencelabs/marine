@@ -22,7 +22,7 @@ FCE is intended to run various Wasm binaries. At now, it is in the heavily devel
 - Init simple rust project `cargo init --bin`
 
 - `Config.toml`:
-```
+```rust
 [[bin]]
 name = "wasm_application"
 path = "src/main.rs"
@@ -33,7 +33,7 @@ fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger
 ```
 
 - Methods that will be exported from this module marked with `#[fce]`
-```
+```rust
 use fluence::fce;
 
 #[fce]
@@ -48,7 +48,7 @@ pub fn get(url: String) -> String {
 - Copy wasm file from `target/wasm32-wasi/debug` to directory with other modules
 
 - To import other wasm modules to your project use similar code:
-```
+```rust
 #[fce]
 #[link(wasm_import_module = "wasm_curl.wasm")]
 extern "C" {
@@ -68,7 +68,7 @@ extern "C" {
 
 - Create simple Rust project
 - Create `Config.toml` to describe existed wasm modules and give accesses to host binaries and local storage if needed:
-```
+```rust
 core_modules_dir = "wasm/artifacts/modules"
 
 [[core_module]]
@@ -97,7 +97,7 @@ core_modules_dir = "wasm/artifacts/modules"
 `curl = "/usr/bin/curl"` - gives possibility to call binary file `/usr/bin/curl` as method `curl` in Rust code
 
 Import example:
-```
+```rust
 #[link(wasm_import_module = "host")]
 extern "C" {
     fn curl(args: String) -> String;
@@ -112,7 +112,7 @@ Call binary with arguments: `curl("-vvv ya.ru")`
 `mapped_dirs` - mapping between paths
 
 Working with files as usual:
-```
+```rust
 fs::write(PathBuf::from("/tmp/somefile"), vec!(1,2,3));
 fs::read(...);
 ```

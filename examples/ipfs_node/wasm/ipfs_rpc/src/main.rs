@@ -27,7 +27,12 @@ pub fn main() {
 }
 
 #[fce]
-pub fn invoke() -> String {
+pub struct Asadasd {
+    pub a: i32,
+}
+
+#[fce]
+pub fn invoke(_a: Asadasd) -> String {
     "IPFS_RPC wasm example, it allows to:\ninvoke\nput\nget".to_string()
 }
 

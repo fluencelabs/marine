@@ -15,10 +15,10 @@
  */
 
 use super::WITGenerator;
-use super::Interfaces;
+use super::WITResolver;
 use super::utils::ptype_to_itype;
-use super::ForeignModInstructionGenerator;
 use crate::default_export_api_config::*;
+use crate::Result;
 
 use fluence_sdk_wit::AstExternModItem;
 use fluence_sdk_wit::AstExternFnItem;
@@ -29,23 +29,25 @@ use crate::instructions_generator::utils::wtype_to_itype;
 const HOST_NAMESPACE_NAME: &str = "host";
 
 impl WITGenerator for AstExternModItem {
-    fn generate_wit<'a>(&'a self, interfaces: &mut Interfaces<'a>) {
+    fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
         // host imports should be left as is
         if self.namespace == HOST_NAMESPACE_NAME {
-            return;
+            return Ok(());
         }
 
         for import in &self.imports {
-            generate_wit_for_import(import, &self.namespace, interfaces);
+            generate_wit_for_import(import, &self.namespace, wit_resolver)?;
         }
+
+        Ok(())
     }
 }
 
 fn generate_wit_for_import<'a>(
     import: &'a AstExternFnItem,
     namespace: &'a str,
-    interfaces: &mut Interfaces<'a>,
-) {
+    wit_resolver: &mut WITResolver<'a>,
+) -> Result<()> {
     use wasmer_wit::ast::Type;
     use wasmer_wit::ast::Adapter;
 
@@ -53,14 +55,15 @@ fn generate_wit_for_import<'a>(
         .signature
         .input_types
         .iter()
-        .map(ptype_to_itype)
-        .collect::<Vec<_>>();
+        .map(|input_type| ptype_to_itype(input_type, wit_resolver))
+        .collect::<Result<Vec<_>>>()?;
 
     let outputs = match import.signature.output_type {
-        Some(ref output_type) => vec![ptype_to_itype(output_type)],
+        Some(ref output_type) => vec![ptype_to_itype(output_type, wit_resolver)?],
         None => vec![],
     };
 
+    let interfaces = &mut wit_resolver.interfaces;
     interfaces.types.push(Type::Function { inputs, outputs });
 
     let raw_inputs = import
@@ -116,19 +119,24 @@ fn generate_wit_for_import<'a>(
         .input_types
         .iter()
         .enumerate()
-        .map(|(id, input_type)| input_type.generate_instructions_for_input_type(id as _))
+        .map(|(id, input_type)| {
+            input_type.generate_instructions_for_input_type(id as _, wit_resolver)
+        })
+        .collect::<Result<Vec<_>>>()?
+        .into_iter()
         .flatten()
         .collect();
 
     // TODO: refactor
-    let import_function_index =
-        (interfaces.exports.len() + interfaces.imports.len() / 2 - 1) as u32;
+    let import_function_index = (wit_resolver.interfaces.exports.len()
+        + wit_resolver.interfaces.imports.len() / 2
+        - 1) as u32;
     instructions.push(Instruction::CallCore {
         function_index: import_function_index,
     });
 
     instructions.extend(match &import.signature.output_type {
-        Some(output_type) => output_type.generate_instructions_for_output_type(),
+        Some(output_type) => output_type.generate_instructions_for_output_type(wit_resolver)?,
         None => vec![],
     });
 
@@ -136,18 +144,39 @@ fn generate_wit_for_import<'a>(
         function_type: adapter_idx,
         instructions,
     };
-    interfaces.adapters.push(adapter);
+    wit_resolver.interfaces.adapters.push(adapter);
 
     let implementation = wasmer_wit::ast::Implementation {
         core_function_type: raw_import_idx,
         adapter_function_type: adapter_idx,
     };
-    interfaces.implementations.push(implementation);
+    wit_resolver.interfaces.implementations.push(implementation);
+
+    Ok(())
+}
+
+/// Generate WIT instructions for a foreign mod.
+trait ForeignModInstructionGenerator {
+    fn generate_instructions_for_input_type<'a>(
+        &self,
+        arg_id: u32,
+        wit_resolver: &mut WITResolver<'a>,
+    ) -> Result<Vec<Instruction>>;
+
+    fn generate_instructions_for_output_type<'a>(
+        &self,
+        wit_resolver: &mut WITResolver<'a>,
+    ) -> Result<Vec<Instruction>>;
 }
 
 impl ForeignModInstructionGenerator for ParsedType {
-    fn generate_instructions_for_input_type(&self, index: u32) -> Vec<Instruction> {
-        match self {
+    fn generate_instructions_for_input_type<'a>(
+        &self,
+        index: u32,
+        wit_resolver: &mut WITResolver<'a>,
+    ) -> Result<Vec<Instruction>> {
+        let instructions = match self {
+            ParsedType::Boolean => vec![Instruction::ArgumentGet { index }],
             ParsedType::I8 => vec![Instruction::ArgumentGet { index }, Instruction::S8FromI32],
             ParsedType::I16 => vec![Instruction::ArgumentGet { index }, Instruction::S16FromI32],
             ParsedType::I32 => vec![Instruction::ArgumentGet { index }],
@@ -168,13 +197,23 @@ impl ForeignModInstructionGenerator for ParsedType {
                 Instruction::ArgumentGet { index: index + 1 },
                 Instruction::StringLiftMemory,
             ],
-            _ => unimplemented!(),
-        }
+            ParsedType::Record(record_name) => {
+                let type_index = wit_resolver.get_record_type_id(record_name)?;
+
+                vec![
+                    Instruction::ArgumentGet { index },
+                    Instruction::RecordLiftMemory { type_index },
+                ]
+            }
+        };
+
+        Ok(instructions)
     }
 
     #[rustfmt::skip]
-    fn generate_instructions_for_output_type(&self) -> Vec<Instruction> {
-        match self {
+    fn generate_instructions_for_output_type<'a>(&self, wit_resolver: &mut WITResolver<'a>) -> Result<Vec<Instruction>> {
+        let instructions = match self {
+            ParsedType::Boolean => vec![],
             ParsedType::I8 => vec![Instruction::I32FromS8],
             ParsedType::I16 => vec![Instruction::I32FromS16],
             ParsedType::I32 => vec![],
@@ -203,8 +242,17 @@ impl ForeignModInstructionGenerator for ParsedType {
                 Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
                 Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
             ],
-            _ => unimplemented!(),
-        }
+            ParsedType::Record(record_name) => {
+                let type_index = wit_resolver.get_record_type_id(record_name)?;
+
+                vec![
+                    Instruction::RecordLowerMemory {type_index},
+                    Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
+                ]
+            },
+        };
+
+        Ok(instructions)
     }
 }
 

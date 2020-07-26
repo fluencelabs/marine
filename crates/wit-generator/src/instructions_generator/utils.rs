@@ -15,25 +15,30 @@
  */
 
 use super::IType;
+use crate::instructions_generator::WITResolver;
+use crate::Result;
+
 use fluence_sdk_wit::ParsedType;
 use fluence_sdk_wit::WasmType;
 
-pub(crate) fn ptype_to_itype(pty: &ParsedType) -> IType {
+pub(crate) fn ptype_to_itype(pty: &ParsedType, wit_resolver: &WITResolver) -> Result<IType> {
     match pty {
-        ParsedType::I8 => IType::S8,
-        ParsedType::I16 => IType::S16,
-        ParsedType::I32 => IType::S32,
-        ParsedType::I64 => IType::S64,
-        ParsedType::U8 => IType::U8,
-        ParsedType::U16 => IType::U16,
-        ParsedType::U32 => IType::U32,
-        ParsedType::U64 => IType::U64,
-        ParsedType::F32 => IType::F32,
-        ParsedType::F64 => IType::F64,
-        ParsedType::Boolean => IType::I32,
-        ParsedType::Utf8String => IType::String,
-        ParsedType::ByteVector => IType::ByteArray,
-        ParsedType::Record(_) => unimplemented!(),
+        ParsedType::I8 => Ok(IType::S8),
+        ParsedType::I16 => Ok(IType::S16),
+        ParsedType::I32 => Ok(IType::S32),
+        ParsedType::I64 => Ok(IType::S64),
+        ParsedType::U8 => Ok(IType::U8),
+        ParsedType::U16 => Ok(IType::U16),
+        ParsedType::U32 => Ok(IType::U32),
+        ParsedType::U64 => Ok(IType::U64),
+        ParsedType::F32 => Ok(IType::F32),
+        ParsedType::F64 => Ok(IType::F64),
+        ParsedType::Boolean => Ok(IType::I32),
+        ParsedType::Utf8String => Ok(IType::String),
+        ParsedType::ByteVector => Ok(IType::ByteArray),
+        ParsedType::Record(record_name) => {
+            Ok(IType::Record(wit_resolver.get_record_type(record_name)?))
+        }
     }
 }
 

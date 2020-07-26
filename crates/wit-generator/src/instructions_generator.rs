@@ -19,34 +19,47 @@ mod foreign_mod_instructions;
 mod record_instructions;
 mod utils;
 
-use fluence_sdk_wit::FCEAst;
+use crate::Result;
 
 use wasmer_wit::types::InterfaceType as IType;
 use wasmer_wit::ast::Interfaces;
-use wasmer_wit::interpreter::Instruction;
 
-pub trait WITGenerator {
-    fn generate_wit<'a>(&'a self, interfaces: &mut Interfaces<'a>);
+#[derive(PartialEq, Debug, Default)]
+pub(crate) struct WITResolver<'a> {
+    pub(crate) types: std::collections::HashMap<String, u32>,
+    pub(crate) interfaces: Interfaces<'a>,
 }
 
-trait FnInstructionGenerator {
-    fn generate_instructions_for_input_type(&self, arg_id: u32) -> Vec<Instruction>;
-
-    fn generate_instructions_for_output_type(&self) -> Vec<Instruction>;
-}
-
-trait ForeignModInstructionGenerator {
-    fn generate_instructions_for_input_type(&self, arg_id: u32) -> Vec<Instruction>;
-
-    fn generate_instructions_for_output_type(&self) -> Vec<Instruction>;
-}
-
-impl WITGenerator for FCEAst {
-    fn generate_wit<'a>(&'a self, interfaces: &mut Interfaces<'a>) {
-        match self {
-            FCEAst::Function(func) => func.generate_wit(interfaces),
-            FCEAst::ExternMod(extern_mod) => extern_mod.generate_wit(interfaces),
-            FCEAst::Record(record) => record.generate_wit(interfaces),
+impl<'a> WITResolver<'a> {
+    pub(crate) fn get_record_type_id(&self, record_name: &str) -> Result<u32> {
+        match self.types.get(record_name) {
+            Some(type_index) => Ok(*type_index),
+            None => Err(crate::errors::WITGeneratorError::CorruptedRecord(format!(
+                "Can't find record with name='{}', don't you forget to wrap it with #[fce]",
+                record_name
+            ))),
         }
     }
+
+    pub(crate) fn get_record_type(
+        &self,
+        record_name: &str,
+    ) -> Result<wasmer_wit::types::RecordType> {
+        match self.types.get(record_name) {
+            Some(type_index) => match &self.interfaces.types[*type_index as usize] {
+                wasmer_wit::ast::Type::Function { .. } => {
+                    panic!("internal error inside WITResolver")
+                }
+                wasmer_wit::ast::Type::Record(record_type) => Ok(record_type.clone()),
+            },
+            None => Err(crate::errors::WITGeneratorError::CorruptedRecord(format!(
+                "Can't find record with name='{}', don't you forget to wrap it with #[fce]",
+                record_name
+            ))),
+        }
+    }
+}
+
+pub(crate) trait WITGenerator {
+    fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()>;
 }

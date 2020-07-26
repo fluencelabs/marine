@@ -28,20 +28,30 @@ pub fn embed_wit(path: std::path::PathBuf) -> Result<()> {
         .parse_file(path.clone())
         .map_err(|e| WITGeneratorError::IOError(format!("{:?} can't be parsed: {:?}", path, e)))?;
 
-    let ast_set = wasm_ast_extractor(&wasm_module)?;
-    let interfaces = generate_interfaces(&ast_set);
+    let module_ast = wasm_ast_extractor(&wasm_module)?;
+    let interfaces = generate_interfaces(&module_ast)?;
 
     let wasm_module = wit_parser::delete_wit_section(wasm_module);
     let mut wasm_module = wit_parser::embed_wit(wasm_module, &interfaces);
 
     wasm_module.emit_wasm_file(path).map_err(|e| {
-        WITGeneratorError::IOError(format!("resulted Wasm fule can't be emitted: {:?}", e))
+        WITGeneratorError::IOError(format!("resulted Wasm file can't be emitted: {:?}", e))
     })
 }
 
+pub(crate) struct ModuleAST {
+    pub(crate) records: Vec<fluence_sdk_wit::AstRecordItem>,
+    pub(crate) functions: Vec<fluence_sdk_wit::AstFunctionItem>,
+    pub(crate) extern_mods: Vec<fluence_sdk_wit::AstExternModItem>,
+}
+
 /// Extract all custom AST types previously embedded by rust-sdk from compiled binary.
-fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<Vec<fluence_sdk_wit::FCEAst>> {
-    let mut extracted_ast = Vec::new();
+fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<ModuleAST> {
+    use fluence_sdk_wit::*;
+
+    let mut records: Vec<AstRecordItem> = Vec::new();
+    let mut functions: Vec<AstFunctionItem> = Vec::new();
+    let mut extern_mods: Vec<AstExternModItem> = Vec::new();
 
     // consider only sections name of that starts with GENERATED_SECTION_PREFIX
     for custom_module in wasm_module.customs.iter().filter(|(_, section)| {
@@ -51,22 +61,36 @@ fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<Vec<fluence_sdk_wi
     }) {
         let default_ids = walrus::IdsToIndices::default();
         let raw_data = custom_module.1.data(&default_ids);
-        let decoded_json: fluence_sdk_wit::FCEAst = serde_json::from_slice(&raw_data)?;
-        extracted_ast.push(decoded_json);
+        let decoded_json: FCEAst = serde_json::from_slice(&raw_data)?;
+        match decoded_json {
+            FCEAst::Record(record) => records.push(record),
+            FCEAst::Function(function) => functions.push(function),
+            FCEAst::ExternMod(extern_mod) => extern_mods.push(extern_mod),
+        }
     }
 
-    Ok(extracted_ast)
+    Ok(ModuleAST {
+        records,
+        functions,
+        extern_mods,
+    })
 }
 
-fn generate_interfaces(ast_set: &[FCEAst]) -> Interfaces<'_> {
-    let mut interfaces = Interfaces::default();
-    generate_default_export_api(&mut interfaces);
+fn generate_interfaces(module_ast: &ModuleAST) -> Result<Interfaces<'_>> {
+    let mut wit_resolver = crate::instructions_generator::WITResolver::default();
+    generate_default_export_api(&mut wit_resolver.interfaces);
 
-    for ast in ast_set {
-        ast.generate_wit(&mut interfaces);
+    for record in &module_ast.records {
+        record.generate_wit(&mut wit_resolver)?;
+    }
+    for function in &module_ast.functions {
+        function.generate_wit(&mut wit_resolver)?;
+    }
+    for extern_mod in &module_ast.extern_mods {
+        extern_mod.generate_wit(&mut wit_resolver)?;
     }
 
-    interfaces
+    Ok(wit_resolver.interfaces)
 }
 
 fn generate_default_export_api(interfaces: &mut Interfaces) {
