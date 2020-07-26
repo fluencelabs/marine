@@ -22,7 +22,7 @@ FCE is intended to run various Wasm binaries. At now, it is in the heavily devel
 - Init simple rust project `cargo init --bin`
 
 - `Config.toml`:
-```rust
+```toml
 [[bin]]
 name = "wasm_application"
 path = "src/main.rs"
@@ -68,7 +68,7 @@ extern "C" {
 
 - Create simple Rust project
 - Create `Config.toml` to describe existed wasm modules and give accesses to host binaries and local storage if needed:
-```rust
+```toml
 core_modules_dir = "wasm/artifacts/modules"
 
 [[core_module]]

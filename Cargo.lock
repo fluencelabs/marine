@@ -436,16 +436,8 @@ name = "fluence"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#e589d52c7247462f194800f50595029d224a5e43"
 dependencies = [
- "fluence-sdk-macro 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-main 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
-]
-
-[[package]]
-name = "fluence"
-version = "0.2.0"
-dependencies = [
- "fluence-sdk-macro 0.2.0",
- "fluence-sdk-main 0.2.0",
+ "fluence-sdk-macro",
+ "fluence-sdk-main",
 ]
 
 [[package]]
@@ -469,14 +461,7 @@ name = "fluence-sdk-macro"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#e589d52c7247462f194800f50595029d224a5e43"
 dependencies = [
- "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
-]
-
-[[package]]
-name = "fluence-sdk-macro"
-version = "0.2.0"
-dependencies = [
- "fluence-sdk-wit 0.2.0",
+ "fluence-sdk-wit",
 ]
 
 [[package]]
@@ -488,28 +473,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-main"
-version = "0.2.0"
-dependencies = [
- "log",
-]
-
-[[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#e589d52c7247462f194800f50595029d224a5e43"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn",
- "uuid",
-]
-
-[[package]]
-name = "fluence-sdk-wit"
-version = "0.2.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1351,14 +1317,14 @@ checksum = "cccddf32554fecc6acb585f82a32a72e28b48f8c4c1883ddfeeeaa96f7d8e519"
 name = "wasm_greeting"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence",
 ]
 
 [[package]]
 name = "wasm_ipfs_node"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence",
  "log",
 ]
 
@@ -1366,7 +1332,7 @@ dependencies = [
 name = "wasm_ipfs_rpc"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.0",
+ "fluence",
  "log",
 ]
 
@@ -1570,7 +1536,7 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 name = "wit-generator"
 version = "0.1.0"
 dependencies = [
- "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-wit",
  "once_cell",
  "serde",
  "serde_json",
