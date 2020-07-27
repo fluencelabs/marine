@@ -9,5 +9,5 @@ name = "fce_wit_interfaces"
 path = "src/lib.rs"
 
 [dependencies]
-wasmer-wit = { package = "wasmer-interface-types", git = "https://github.com/fluencelabs/interface-types", branch = "byte_array"}
+wasmer-wit = { package = "wasmer-interface-types", git = "https://github.com/fluencelabs/interface-types", branch = "struct_support"}
 multimap = "0.8.1"

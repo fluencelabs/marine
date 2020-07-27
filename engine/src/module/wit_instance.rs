@@ -31,6 +31,7 @@ use std::collections::HashMap;
 pub(super) struct WITInstance {
     funcs: HashMap<usize, WITFunction>,
     memories: Vec<WITMemory>,
+    record_types: HashMap<u32, WITAstType>,
 }
 
 impl WITInstance {
@@ -46,7 +47,13 @@ impl WITInstance {
         exports.extend(imports);
         let funcs = exports;
 
-        Ok(Self { funcs, memories })
+        let record_types = Self::extract_record_types(wit);
+
+        Ok(Self {
+            funcs,
+            memories,
+            record_types,
+        })
     }
 
     fn extract_raw_exports(
@@ -113,6 +120,16 @@ impl WITInstance {
 
         memories
     }
+
+    fn extract_record_types(wit: &FCEWITInterfaces<'_>) -> HashMap<u32, WITAstType> {
+        wit.types()
+            .enumerate()
+            .filter_map(|(id, ty)| match ty {
+                WITAstType::Record(_) => Some((id as u32, ty.clone())),
+                _ => None,
+            })
+            .collect::<HashMap<_, _>>()
+    }
 }
 
 impl wasm::structures::Instance<WITExport, WITFunction, WITMemory, WITMemoryView<'_>>
@@ -138,7 +155,7 @@ impl wasm::structures::Instance<WITExport, WITFunction, WITMemory, WITMemoryView
         }
     }
 
-    fn wit_type(&self, _index: u32) -> Option<&WITAstType> {
-        None
+    fn wit_type(&self, index: u32) -> Option<&WITAstType> {
+        self.record_types.get(&index)
     }
 }

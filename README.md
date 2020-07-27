@@ -2,22 +2,22 @@
 
 FCE is intended to run various Wasm binaries. At now, it is in the heavily developing phase.
 
-# Installation
+## Installation
 - Clone this project
 - `cargo install --path <path-to-project/tools/cli>`
 
-# Usage
+## Usage
 - `fce build` in Rust project
 
-# HOW TO: Create App with FCE Modules
+## HOW TO: Create App with FCE Modules
 
-## Recommendations:
+### Recommendations:
 
 - Modules architecture should be upwards from `effectors` (modules that persist data and WASI modules) that will work with local binaries, local storage and syscalls to `pure modules` that perform business logic.
 - Splitting app to small FCE modules are easier to support, reuse and distribute
 - Each module for its own task (npm like)
 
-## Module project structure
+### Module project structure
 
 - Init simple rust project `cargo init --bin`
 
@@ -28,7 +28,7 @@ name = "wasm_application"
 path = "src/main.rs"
 
 [dependencies]
-// logger - if you'll use logging
+# logger - if you'll use logging
 fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
 ```
 
@@ -64,7 +64,7 @@ extern "C" {
 }
 ``` 
 
-## Combine modules to Application
+### Combine modules to Application
 
 - Create simple Rust project
 - Create `Config.toml` to describe existed wasm modules and give accesses to host binaries and local storage if needed:
