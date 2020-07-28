@@ -16,3 +16,4 @@ target/
 !/examples/greeting/wasm/artifacts/greeting.wasm
 !/examples/ipfs_node/wasm/artifacts/ipfs_rpc.wasm
 !/examples/ipfs_node/wasm/artifacts/wasm_modules/*
+!/examples/records/wasm/artifacts/wasm_modules/*
