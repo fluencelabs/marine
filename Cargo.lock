@@ -411,7 +411,7 @@ dependencies = [
  "parity-wasm",
  "pwasm-utils",
  "serde",
- "wasmer-interface-types",
+ "wasmer-interface-types-fl",
  "wasmer-runtime",
  "wasmer-runtime-core",
  "wasmer-wasi",
@@ -423,7 +423,7 @@ name = "fce-wit-interfaces"
 version = "0.1.0"
 dependencies = [
  "multimap",
- "wasmer-interface-types",
+ "wasmer-interface-types-fl",
 ]
 
 [[package]]
@@ -469,7 +469,7 @@ name = "fluence-sdk-macro"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#4683526e16d6db8c93ce95dda724652dc657d35f"
 dependencies = [
- "fluence-sdk-wit",
+ "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
@@ -484,6 +484,20 @@ dependencies = [
 name = "fluence-sdk-wit"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#4683526e16d6db8c93ce95dda724652dc657d35f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+ "uuid",
+]
+
+[[package]]
+name = "fluence-sdk-wit"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f4ae15ddfa80fea72de5b92ccd0b649d0f721aac18f5013427ccc5f6d55a3d4e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1421,9 +1435,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "wasmer-interface-types"
+name = "wasmer-interface-types-fl"
 version = "0.17.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=struct_support#33ce6228c8ad668bdae6487c6df44c6b09763454"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b12519a2a53ea1b2166ff47e56c6b57a3f7d714a2d34d26a6b04bdf22c37a41"
 dependencies = [
  "nom",
  "safe-transmute",
@@ -1559,12 +1574,12 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 name = "wit-generator"
 version = "0.1.0"
 dependencies = [
- "fluence-sdk-wit",
+ "fluence-sdk-wit 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "once_cell",
  "serde",
  "serde_json",
  "walrus",
- "wasmer-interface-types",
+ "wasmer-interface-types-fl",
  "wit-parser",
 ]
 
@@ -1575,6 +1590,6 @@ dependencies = [
  "anyhow",
  "fce-wit-interfaces",
  "walrus",
- "wasmer-interface-types",
+ "wasmer-interface-types-fl",
  "wasmer-runtime-core",
 ]
