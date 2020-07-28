@@ -318,6 +318,7 @@ name = "effector"
 version = "0.1.0"
 dependencies = [
  "fluence",
+ "test-record",
 ]
 
 [[package]]
@@ -441,7 +442,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#88afe8feaa6119ebeb2032281c26f6b74f2f8fd1"
+source = "git+https://github.com/fluencelabs/rust-sdk#4683526e16d6db8c93ce95dda724652dc657d35f"
 dependencies = [
  "fluence-sdk-macro",
  "fluence-sdk-main",
@@ -466,7 +467,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#88afe8feaa6119ebeb2032281c26f6b74f2f8fd1"
+source = "git+https://github.com/fluencelabs/rust-sdk#4683526e16d6db8c93ce95dda724652dc657d35f"
 dependencies = [
  "fluence-sdk-wit",
 ]
@@ -474,7 +475,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#88afe8feaa6119ebeb2032281c26f6b74f2f8fd1"
+source = "git+https://github.com/fluencelabs/rust-sdk#4683526e16d6db8c93ce95dda724652dc657d35f"
 dependencies = [
  "log",
 ]
@@ -482,7 +483,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#88afe8feaa6119ebeb2032281c26f6b74f2f8fd1"
+source = "git+https://github.com/fluencelabs/rust-sdk#4683526e16d6db8c93ce95dda724652dc657d35f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -874,6 +875,7 @@ name = "pure"
 version = "0.1.0"
 dependencies = [
  "fluence",
+ "test-record",
 ]
 
 [[package]]
@@ -1174,6 +1176,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "test-record"
+version = "0.1.0"
+dependencies = [
+ "fluence",
+]
+
+[[package]]
 name = "textwrap"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1414,7 +1423,7 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types"
 version = "0.17.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=struct_support#eb3dbcb8353f658040621e179251b182695f04f4"
+source = "git+https://github.com/fluencelabs/interface-types?branch=struct_support#33ce6228c8ad668bdae6487c6df44c6b09763454"
 dependencies = [
  "nom",
  "safe-transmute",

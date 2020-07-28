@@ -1,13 +1,12 @@
 [package]
-name = "pure"
+name = "test-record"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
-[[bin]]
-name = "pure"
-path = "src/main.rs"
+[lib]
+name = "test_record"
+path = "src/test_record.rs"
 
 [dependencies]
 fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
-test-record = { path = "../test-record" }

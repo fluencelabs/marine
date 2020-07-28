@@ -15,25 +15,9 @@
  */
 
 use fluence::fce;
+use test_record::TestRecord;
 
 pub fn main() {}
-
-#[fce]
-pub struct TestRecord {
-    pub field_0: bool,
-    pub field_1: i8,
-    pub field_2: i16,
-    pub field_3: i32,
-    pub field_4: i64,
-    pub field_5: u8,
-    pub field_6: u16,
-    pub field_7: u32,
-    pub field_8: u64,
-    pub field_9: f32,
-    pub field_10: f64,
-    pub field_11: String,
-    pub field_12: Vec<u8>,
-}
 
 #[fce]
 pub fn invoke() -> TestRecord {
