@@ -15,12 +15,12 @@
  */
 
 use super::IType;
-use serde::Serialize;
+use serde::{Serialize, Serializer};
 
 use std::fmt;
 use std::collections::HashMap;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 pub struct FaaSInterface<'a> {
     pub modules: HashMap<&'a str, HashMap<&'a str, FaaSFunctionSignature<'a>>>,
 }
@@ -46,5 +46,58 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
         }
 
         Ok(())
+    }
+}
+
+impl<'a> Serialize for FaaSInterface<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        #[derive(Serialize)]
+        pub struct Function<'a> {
+            pub name: &'a str,
+            pub input_types: &'a Vec<IType>,
+            pub output_types: &'a Vec<IType>,
+        }
+
+        #[derive(Serialize)]
+        pub struct Module<'a> {
+            pub name: &'a str,
+            pub functions: Vec<Function<'a>>,
+        }
+
+        #[derive(Serialize)]
+        pub struct Interface<'a> {
+            pub modules: Vec<Module<'a>>,
+        }
+
+        let modules: Vec<_> = self
+            .modules
+            .iter()
+            .map(|(name, functions)| {
+                let functions = functions
+                    .iter()
+                    .map(
+                        |(
+                            name,
+                            FaaSFunctionSignature {
+                                input_types,
+                                output_types,
+                            },
+                        )| {
+                            Function {
+                                name,
+                                input_types,
+                                output_types,
+                            }
+                        },
+                    )
+                    .collect();
+                Module { name, functions }
+            })
+            .collect();
+
+        Interface { modules }.serialize(serializer)
     }
 }
