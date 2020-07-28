@@ -31,11 +31,12 @@ mod errors;
 
 pub(crate) type Result<T> = std::result::Result<T, crate::errors::CLIError>;
 
-pub fn main() -> Result<()> {
-    let app = clap::App::new("CLI tool for embedding WIT to provided Wasm file")
+pub fn main() -> std::result::Result<(), anyhow::Error> {
+    let app = clap::App::new("CLI tool for dealing with Wasm modules for the Fluence network")
         .version(args::VERSION)
         .author(args::AUTHORS)
         .about(args::DESCRIPTION)
+        .setting(clap::AppSettings::ArgRequiredElseHelp)
         .subcommand(args::build())
         .subcommand(args::show_wit());
     let arg_matches = app.get_matches();
@@ -44,17 +45,19 @@ pub fn main() -> Result<()> {
         ("build", Some(args)) => {
             let trailing_args: Vec<&str> = args.values_of("optional").unwrap_or_default().collect();
 
-            crate::build::build(trailing_args)
+            crate::build::build(trailing_args)?;
+
+            Ok(())
         }
         ("show", Some(arg)) => {
             let wasm_path = arg.value_of(args::IN_WASM_PATH).unwrap();
             let wasm_path = std::path::PathBuf::from(wasm_path);
 
-            let result = wit_parser::extract_text_wit(wasm_path)?;
+            let result = fce_wit_parser::extract_text_wit(wasm_path)?;
             println!("{}", result);
 
             Ok(())
         }
-        c => Err(crate::errors::CLIError::NoSuchCommand(c.0.to_string())),
+        c => Err(crate::errors::CLIError::NoSuchCommand(c.0.to_string()).into()),
     }
 }

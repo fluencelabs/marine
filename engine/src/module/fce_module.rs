@@ -25,7 +25,7 @@ use wasmer_core::import::Namespace;
 use wasmer_runtime::compile;
 use wasmer_runtime::ImportObject;
 use wasmer_wit::interpreter::Interpreter;
-use wit_parser::extract_wit;
+use fce_wit_parser::extract_wit;
 
 use std::collections::HashMap;
 use std::convert::TryInto;

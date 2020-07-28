@@ -1,18 +1,19 @@
 [package]
-name = "wit-parser"
-version = "0.1.0"
+name = "fce-wit-parser"
+description = "Fluence FCE interface type helper crate"
+version = "0.1.2"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [lib]
-name = "wit_parser"
+name = "fce_wit_parser"
 path = "src/lib.rs"
 
 [dependencies]
 walrus = "0.17.0"
-wasmer-core = { package = "wasmer-runtime-core", git = "https://github.com/fluencelabs/wasmer", branch = "fluence" }
+wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0"}
 wasmer-wit = { package = "wasmer-interface-types-fl", version = "0.17.0"}
-fce-wit-interfaces = { path = "../fce-wit-interfaces", version = "0.1.0" }
+fce-wit-interfaces = { path = "../wit-interfaces", version = "0.1.0" }
 
 anyhow = "1.0.31"

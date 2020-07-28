@@ -406,16 +406,42 @@ name = "fce"
 version = "0.1.0"
 dependencies = [
  "fce-wit-interfaces",
+ "fce-wit-parser",
  "log",
  "multimap",
  "parity-wasm",
  "pwasm-utils",
  "serde",
  "wasmer-interface-types-fl",
- "wasmer-runtime",
- "wasmer-runtime-core",
- "wasmer-wasi",
- "wit-parser",
+ "wasmer-runtime-core-fl",
+ "wasmer-runtime-fl",
+ "wasmer-wasi-fl",
+]
+
+[[package]]
+name = "fce-cli"
+version = "0.1.1"
+dependencies = [
+ "anyhow",
+ "clap",
+ "exitfailure",
+ "fce-wit-generator",
+ "fce-wit-parser",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "fce-wit-generator"
+version = "0.1.1"
+dependencies = [
+ "fce-wit-parser",
+ "fluence-sdk-wit 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "walrus",
+ "wasmer-interface-types-fl",
 ]
 
 [[package]]
@@ -427,22 +453,20 @@ dependencies = [
 ]
 
 [[package]]
-name = "fce_cli"
-version = "0.1.0"
+name = "fce-wit-parser"
+version = "0.1.2"
 dependencies = [
- "clap",
- "exitfailure",
- "failure",
- "serde",
- "serde_json",
- "wit-generator",
- "wit-parser",
+ "anyhow",
+ "fce-wit-interfaces",
+ "walrus",
+ "wasmer-interface-types-fl",
+ "wasmer-runtime-core-fl",
 ]
 
 [[package]]
 name = "fluence"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#4683526e16d6db8c93ce95dda724652dc657d35f"
+source = "git+https://github.com/fluencelabs/rust-sdk#7018a64c29278a673e543867e691f74b3d652288"
 dependencies = [
  "fluence-sdk-macro",
  "fluence-sdk-main",
@@ -460,14 +484,14 @@ dependencies = [
  "serde_json",
  "toml",
  "wasmer-runtime",
- "wasmer-runtime-core",
+ "wasmer-runtime-core 0.17.0",
  "wasmer-wasi",
 ]
 
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#4683526e16d6db8c93ce95dda724652dc657d35f"
+source = "git+https://github.com/fluencelabs/rust-sdk#7018a64c29278a673e543867e691f74b3d652288"
 dependencies = [
  "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
@@ -475,7 +499,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#4683526e16d6db8c93ce95dda724652dc657d35f"
+source = "git+https://github.com/fluencelabs/rust-sdk#7018a64c29278a673e543867e691f74b3d652288"
 dependencies = [
  "log",
 ]
@@ -483,7 +507,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#4683526e16d6db8c93ce95dda724652dc657d35f"
+source = "git+https://github.com/fluencelabs/rust-sdk#7018a64c29278a673e543867e691f74b3d652288"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1402,8 +1426,34 @@ dependencies = [
  "target-lexicon",
  "wasmer-clif-fork-frontend",
  "wasmer-clif-fork-wasm",
- "wasmer-runtime-core",
- "wasmer-win-exception-handler",
+ "wasmer-runtime-core 0.17.0",
+ "wasmer-win-exception-handler 0.17.0",
+ "wasmparser 0.51.4",
+ "winapi",
+]
+
+[[package]]
+name = "wasmer-clif-backend-fl"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "532fb6cef712d9cd1ec68f9fc561447df33313393926f9bdb91fc3d67eed918f"
+dependencies = [
+ "byteorder",
+ "cranelift-codegen",
+ "cranelift-entity",
+ "cranelift-native",
+ "libc",
+ "nix",
+ "rayon",
+ "serde",
+ "serde-bench",
+ "serde_bytes",
+ "serde_derive",
+ "target-lexicon",
+ "wasmer-clif-fork-frontend",
+ "wasmer-clif-fork-wasm",
+ "wasmer-runtime-core-fl",
+ "wasmer-win-exception-handler 0.17.1",
  "wasmparser 0.51.4",
  "winapi",
 ]
@@ -1457,7 +1507,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "wasmer-clif-backend",
- "wasmer-runtime-core",
+ "wasmer-runtime-core 0.17.0",
 ]
 
 [[package]]
@@ -1489,6 +1539,78 @@ dependencies = [
 ]
 
 [[package]]
+name = "wasmer-runtime-core"
+version = "0.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "740161245998752cf1a567e860fd6355df0336fedca6be1940ec7aaa59643220"
+dependencies = [
+ "bincode",
+ "blake3",
+ "cc",
+ "digest 0.8.1",
+ "errno",
+ "hex",
+ "indexmap",
+ "lazy_static",
+ "libc",
+ "nix",
+ "page_size",
+ "parking_lot",
+ "rustc_version",
+ "serde",
+ "serde-bench",
+ "serde_bytes",
+ "serde_derive",
+ "smallvec",
+ "target-lexicon",
+ "wasmparser 0.51.4",
+ "winapi",
+]
+
+[[package]]
+name = "wasmer-runtime-core-fl"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d4630ff544a2d7f76938bcf82ae217e0bd5c9ee078c653459d4f117c2045d315"
+dependencies = [
+ "bincode",
+ "blake3",
+ "cc",
+ "digest 0.8.1",
+ "errno",
+ "hex",
+ "indexmap",
+ "lazy_static",
+ "libc",
+ "nix",
+ "page_size",
+ "parking_lot",
+ "rustc_version",
+ "serde",
+ "serde-bench",
+ "serde_bytes",
+ "serde_derive",
+ "smallvec",
+ "target-lexicon",
+ "wasmparser 0.51.4",
+ "winapi",
+]
+
+[[package]]
+name = "wasmer-runtime-fl"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e855c8942f998a6938e43c1d0bb11b76a60b1c8341e08db36cc36b97b58bb1e9"
+dependencies = [
+ "lazy_static",
+ "memmap",
+ "serde",
+ "serde_derive",
+ "wasmer-clif-backend-fl",
+ "wasmer-runtime-core-fl",
+]
+
+[[package]]
 name = "wasmer-wasi"
 version = "0.17.0"
 source = "git+https://github.com/fluencelabs/wasmer?branch=fluence#cdc9921023be726fca6967d0ed9af5b657aa6952"
@@ -1503,7 +1625,27 @@ dependencies = [
  "thiserror",
  "time",
  "typetag",
- "wasmer-runtime-core",
+ "wasmer-runtime-core 0.17.0",
+ "winapi",
+]
+
+[[package]]
+name = "wasmer-wasi-fl"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4e2493c1ef951a7a1704ecfd39abbbbb2346bf3768d761ef64ed53249a32b181"
+dependencies = [
+ "bincode",
+ "byteorder",
+ "generational-arena",
+ "getrandom",
+ "libc",
+ "log",
+ "serde",
+ "thiserror",
+ "time",
+ "typetag",
+ "wasmer-runtime-core-fl",
  "winapi",
 ]
 
@@ -1514,7 +1656,19 @@ source = "git+https://github.com/fluencelabs/wasmer?branch=fluence#cdc9921023be7
 dependencies = [
  "cc",
  "libc",
- "wasmer-runtime-core",
+ "wasmer-runtime-core 0.17.0",
+ "winapi",
+]
+
+[[package]]
+name = "wasmer-win-exception-handler"
+version = "0.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1cd39f3b2bd7964b28ea6f944a7eaa445cfbc91c4f2695d188103f2689bb37d9"
+dependencies = [
+ "cc",
+ "libc",
+ "wasmer-runtime-core 0.17.1",
  "winapi",
 ]
 
@@ -1569,27 +1723,3 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
-
-[[package]]
-name = "wit-generator"
-version = "0.1.0"
-dependencies = [
- "fluence-sdk-wit 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "once_cell",
- "serde",
- "serde_json",
- "walrus",
- "wasmer-interface-types-fl",
- "wit-parser",
-]
-
-[[package]]
-name = "wit-parser"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "fce-wit-interfaces",
- "walrus",
- "wasmer-interface-types-fl",
- "wasmer-runtime-core",
-]

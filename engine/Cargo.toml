@@ -1,22 +1,27 @@
 [package]
 name = "fce"
+description = "Fluence Compute Engine"
 version = "0.1.0"
 authors = ["Fluence Labs"]
+license = "Apache-2.0"
 edition = "2018"
 
-[dependencies]
-fce-wit-interfaces = { path = "../crates/fce-wit-interfaces", version = "0.1.0" }
-wit-parser = { path = "../crates/wit-parser", version = "0.1.0" }
+[lib]
+name = "fce"
+path = "src/lib.rs"
 
-wasmer-runtime = { git = "https://github.com/fluencelabs/wasmer", branch = "fluence" }
+[dependencies]
+fce-wit-interfaces = { path = "../crates/wit-interfaces", version = "0.1.0" }
+fce-wit-parser = { path = "../crates/wit-parser", version = "0.1.2" }
+
+wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
-wasmer-core = { package = "wasmer-runtime-core", git = "http://github.com/fluencelabs/wasmer", branch = "fluence", features = ["dynamicfunc-fat-closures"] }
+wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
 wasmer-wit = { package = "wasmer-interface-types-fl", version = "0.17.0", features = ["serde"] }
-wasmer-wasi = { git = "https://github.com/fluencelabs/wasmer", branch = "fluence" }
+wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.0" }
 serde = { version = "1.0.114", default-features = false, features = [ "derive" ] }
 
 multimap = "0.8.1"
 parity-wasm = "0.41.0"
 pwasm-utils = "0.12.0"
 log = "0.4.8"
-

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use wit_generator::WITGeneratorError;
-use wit_parser::WITParserError;
+use fce_wit_generator::WITGeneratorError;
+use fce_wit_parser::WITParserError;
 
 use std::io::Error as StdIOError;
 use std::error::Error;

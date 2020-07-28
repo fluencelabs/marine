@@ -66,14 +66,13 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> Result<()> {
     }
 
     if wasms.is_empty() {
-        return Err(CLIError::WasmCompilationError(
-            "Compilation failed: no .wasm files was generated".to_string(),
-        ));
+        // it is possible to build a object file without Wasm artifacts
+        return Ok(());
     }
 
     for wasm in wasms {
         let wasm_path = std::path::PathBuf::from(wasm);
-        wit_generator::embed_wit(wasm_path)?;
+        fce_wit_generator::embed_wit(wasm_path)?;
     }
 
     Ok(())

@@ -15,7 +15,7 @@
  */
 
 use fce_wit_interfaces::FCEWITInterfacesError;
-use wit_parser::WITParserError;
+use fce_wit_parser::WITParserError;
 
 use wasmer_wit::errors::InstructionError;
 use wasmer_runtime::error::{

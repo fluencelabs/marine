@@ -31,8 +31,8 @@ pub fn embed_wit(path: std::path::PathBuf) -> Result<()> {
     let module_ast = wasm_ast_extractor(&wasm_module)?;
     let interfaces = generate_interfaces(&module_ast)?;
 
-    let wasm_module = wit_parser::delete_wit_section(wasm_module);
-    let mut wasm_module = wit_parser::embed_wit(wasm_module, &interfaces);
+    let wasm_module = fce_wit_parser::delete_wit_section(wasm_module);
+    let mut wasm_module = fce_wit_parser::embed_wit(wasm_module, &interfaces);
 
     wasm_module.emit_wasm_file(path).map_err(|e| {
         WITGeneratorError::IOError(format!("resulted Wasm file can't be emitted: {:?}", e))

@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    "crates/fce-wit-interfaces",
     "crates/wit-generator",
+    "crates/wit-interfaces",
     "crates/wit-parser",
     "engine",
     "examples/greeting",
