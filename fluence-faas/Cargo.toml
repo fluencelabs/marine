@@ -7,10 +7,10 @@ edition = "2018"
 [dependencies]
 fce = { path = "../engine" }
 
-wasmer-runtime = { git = "https://github.com/fluencelabs/wasmer", branch = "fluence" }
+wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
-wasmer-core = { package = "wasmer-runtime-core", git = "http://github.com/fluencelabs/wasmer", branch = "fluence", features = ["dynamicfunc-fat-closures"] }
-wasmer-wasi = { git = "https://github.com/fluencelabs/wasmer", branch = "fluence" }
+wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
+wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.0" }
 
 toml = "0.5.6"
 serde = { version = "1.0.111", features = ["derive"] }
