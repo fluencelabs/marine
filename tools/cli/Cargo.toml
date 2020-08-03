@@ -1,6 +1,6 @@
 [package]
 name = "fce-cli"
-description = "Fluence FCE command line tool for develop services for the Fluence network"
+description = "Fluence FCE command line tool"
 version = "0.1.1"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/fce/tools/cli"
