@@ -14,7 +14,7 @@ members = [
     "examples/records/wasm/pure",
     "examples/records/wasm/test-record",
     "fluence-faas",
-    "fluence-service",
+    "fluence-faas-service",
     "tools/cli",
 ]
 
