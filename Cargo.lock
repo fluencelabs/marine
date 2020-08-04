@@ -489,6 +489,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "fluence-faas-service"
+version = "0.1.0"
+dependencies = [
+ "cmd_lib",
+ "fluence-faas",
+ "log",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "toml",
+ "wasmer-runtime-core-fl",
+ "wasmer-runtime-fl",
+ "wasmer-wasi-fl",
+]
+
+[[package]]
 name = "fluence-sdk-macro"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#7018a64c29278a673e543867e691f74b3d652288"
@@ -529,22 +545,6 @@ dependencies = [
  "serde_json",
  "syn",
  "uuid",
-]
-
-[[package]]
-name = "fluence-service"
-version = "0.1.0"
-dependencies = [
- "cmd_lib",
- "fluence-faas",
- "log",
- "serde",
- "serde_derive",
- "serde_json",
- "toml",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
- "wasmer-wasi-fl",
 ]
 
 [[package]]

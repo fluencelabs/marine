@@ -20,7 +20,7 @@ mod service;
 pub(crate) type Result<T> = std::result::Result<T, ServiceError>;
 
 pub use errors::ServiceError;
-pub use service::Service;
+pub use service::FluenceFaaSService;
 
 pub use fluence_faas::IValue;
 pub use fluence_faas::IType;

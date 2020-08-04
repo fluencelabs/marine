@@ -27,13 +27,13 @@ const TMP_DIR_NAME: &str = "tmp";
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 
 // TODO: remove and use mutex instead
-unsafe impl Send for Service {}
+unsafe impl Send for FluenceFaaSService {}
 
-pub struct Service {
+pub struct FluenceFaaSService {
     faas: FluenceFaaS,
 }
 
-impl Service {
+impl FluenceFaaSService {
     /// Creates Service with given modules and service id.
     pub fn new<I, C, S>(modules: I, config: C, service_id: S) -> Result<Self>
     where
