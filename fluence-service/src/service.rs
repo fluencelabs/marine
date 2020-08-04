@@ -87,7 +87,7 @@ impl Service {
         };
 
         let service_dir = std::path::Path::new(base_dir).join(service_id);
-        std::fs::create_dir(service_dir.clone())?; // will return an error if dir is already exists
+        std::fs::create_dir(service_dir)?; // will return an error if dir is already exists
 
         Ok(base_dir.clone())
     }

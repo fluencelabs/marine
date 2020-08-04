@@ -169,40 +169,19 @@ impl ModuleConfig {
     ) -> Self {
         match &mut self.wasi {
             Some(WASIConfig {
-                preopened_files: Some(files),
-                mapped_dirs: Some(dirs),
+                preopened_files,
+                mapped_dirs,
                 ..
             }) => {
-                files.extend(new_preopened_files);
-                dirs.extend(new_mapped_dirs);
-            }
-            Some(w @ WASIConfig {
-                    preopened_files: Some(_),
-                    mapped_dirs: None,
-                    ..
-                },
-            ) => {
-                w.preopened_files.as_mut().unwrap().extend(new_preopened_files);
-                w.mapped_dirs = Some(new_mapped_dirs);
-            }
-            Some(w @ WASIConfig {
-                    preopened_files: None,
-                    mapped_dirs: Some(_),
-                    ..
-                },
-            ) => {
-                w.preopened_files = Some(new_preopened_files);
-                w.mapped_dirs.as_mut().unwrap().extend(new_mapped_dirs);
-            }
-            Some(w @ WASIConfig {
-                preopened_files: None,
-                mapped_dirs: None,
-                ..
+                match preopened_files {
+                    Some(files) => files.extend(new_preopened_files),
+                    f @ None => *f = Some(new_preopened_files),
+                };
+                match mapped_dirs {
+                    Some(dirs) => dirs.extend(new_mapped_dirs),
+                    d @ None => *d = Some(new_mapped_dirs),
+                };
             },
-            ) => {
-                w.preopened_files.as_mut().unwrap().extend(new_preopened_files);
-                w.mapped_dirs.as_mut().unwrap().extend(new_mapped_dirs);
-            }
             w @ None => {
                 *w = Some(WASIConfig {
                     envs: None,
