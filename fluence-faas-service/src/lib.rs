@@ -26,3 +26,7 @@ pub use fluence_faas::IValue;
 pub use fluence_faas::IType;
 pub use fluence_faas::FaaSInterface;
 pub use fluence_faas::RawModulesConfig;
+pub use fluence_faas::RawModuleConfig;
+pub use fluence_faas::ModulesConfig;
+pub use fluence_faas::ModuleConfig;
+pub use fluence_faas::WASIConfig;

@@ -34,4 +34,5 @@ pub use faas_interface::FaaSInterface;
 pub use misc::RawModulesConfig;
 pub use misc::RawModuleConfig;
 pub use misc::ModulesConfig;
+pub use misc::ModuleConfig;
 pub use misc::WASIConfig;
