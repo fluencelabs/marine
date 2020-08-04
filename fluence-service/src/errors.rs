@@ -14,54 +14,54 @@
  * limitations under the License.
  */
 
-use fce::FCEError;
+use fluence_faas::FaaSError;
 
 use std::io::Error as IOError;
 use std::error::Error;
 
 #[derive(Debug)]
-pub enum FaaSError {
+pub enum ServiceError {
     /// An error related to config parsing.
-    ConfigParseError(String),
+    InvalidArguments(String),
 
     /// Various errors related to file i/o.
     IOError(String),
 
-    /// FCE errors.
-    EngineError(FCEError),
+    /// FaaS errors.
+    FaaSError(FaaSError),
 }
 
-impl Error for FaaSError {}
+impl Error for ServiceError {}
 
-impl std::fmt::Display for FaaSError {
+impl std::fmt::Display for ServiceError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            FaaSError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
-            FaaSError::IOError(err_msg) => write!(f, "{}", err_msg),
-            FaaSError::EngineError(err) => write!(f, "{}", err),
+            ServiceError::InvalidArguments(err_msg) => write!(f, "{}", err_msg),
+            ServiceError::IOError(err_msg) => write!(f, "{}", err_msg),
+            ServiceError::FaaSError(err) => write!(f, "{}", err),
         }
     }
 }
 
-impl From<IOError> for FaaSError {
+impl From<IOError> for ServiceError {
     fn from(err: IOError) -> Self {
-        FaaSError::IOError(format!("{}", err))
+        ServiceError::IOError(format!("{}", err))
     }
 }
 
-impl From<FCEError> for FaaSError {
-    fn from(err: FCEError) -> Self {
-        FaaSError::EngineError(err)
+impl From<FaaSError> for ServiceError {
+    fn from(err: FaaSError) -> Self {
+        ServiceError::FaaSError(err)
     }
 }
 
-impl From<toml::de::Error> for FaaSError {
+impl From<toml::de::Error> for ServiceError {
     fn from(err: toml::de::Error) -> Self {
-        FaaSError::ConfigParseError(format!("{}", err))
+        ServiceError::InvalidArguments(format!("{}", err))
     }
 }
 
-impl From<std::convert::Infallible> for FaaSError {
+impl From<std::convert::Infallible> for ServiceError {
     fn from(inf: std::convert::Infallible) -> Self {
         match inf {}
     }

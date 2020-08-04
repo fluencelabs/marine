@@ -15,7 +15,6 @@
  */
 
 use crate::misc::ModulesConfig;
-use crate::RawModulesConfig;
 use crate::Result;
 
 use super::faas_interface::FaaSInterface;
@@ -85,8 +84,11 @@ impl FluenceFaaS {
     }
 
     /// Creates FaaS from config deserialized from TOML.
-    pub fn with_raw_config(config: RawModulesConfig) -> Result<Self> {
-        let config = crate::misc::from_raw_config(config)?;
+    pub fn with_raw_config<C>(config: C) -> Result<Self>
+    where
+        C: TryInto<ModulesConfig, Error = FaaSError>,
+    {
+        let config = config.try_into()?;
         let modules = config.modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
             Self::load_modules(dir, ModulesLoadStrategy::All)
         })?;
@@ -188,7 +190,7 @@ impl FluenceFaaS {
             .map_err(Into::into)
     }
 
-    /// Return all export functions (name and signatures) of loaded on a startup modules.
+    /// Return all export functions (name and signatures) of loaded modules.
     pub fn get_interface(&self) -> FaaSInterface {
         let modules = self
             .fce

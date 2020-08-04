@@ -14,133 +14,135 @@
  * limitations under the License.
  */
 
-use crate::misc::{CoreModulesConfig, make_fce_config};
-use crate::RawCoreModulesConfig;
 use crate::Result;
-
-use super::faas_interface::FaaSInterface;
-use super::FaaSError;
+use super::ServiceError;
 use super::IValue;
 
-use fce::FCE;
-use fce::FCEModuleConfig;
 use fluence_faas::FluenceFaaS;
+use fluence_faas::ModulesConfig;
 
 use std::convert::TryInto;
-use std::fs;
-use std::path::PathBuf;
-use crate::faas_interface::FaaSFunctionSignature;
-use std::collections::HashSet;
+
+const TMP_DIR_NAME: &str = "tmp";
+const SERVICE_ID_ENV_NAME: &str = "service_id";
 
 // TODO: remove and use mutex instead
 unsafe impl Send for Service {}
 
 pub struct Service {
     faas: FluenceFaaS,
-    service_id: String,
 }
 
 impl Service {
     /// Creates Service with given modules and service id.
     pub fn new<I, C, S>(modules: I, config: C, service_id: S) -> Result<Self>
     where
-        I: IntoIterator<Item = (String, Vec<u8>)>,
-        C: TryInto<CoreModulesConfig>,
+        I: IntoIterator<Item = String>,
+        C: TryInto<ModulesConfig>,
         S: AsRef<str>,
-        FaaSError: From<C::Error>,
+        ServiceError: From<C::Error>,
     {
-        let config = config.try_into()?;
+        let config: ModulesConfig = config.try_into()?;
         let service_id = service_id.as_ref();
-        new_(modules, config, service_id)
+
+        let service_base_dir = Self::prepare_filesystem(&config, service_id)?;
+        let config = Self::prepare_wasi(config, &service_base_dir, service_id)?;
+
+        let modules = modules.into_iter().collect();
+        let faas = FluenceFaaS::with_module_names(&modules, config)?;
+
+        Ok(Self { faas })
     }
 
-    fn new_(
-        modules: impl IntoIterator<Item = (String, Vec<u8>)>,
-        mut config: CoreModulesConfig,
-        service_id: &str,
-    ) -> Result<Self> {
-        unimplemented!()
-    }
-
-    /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
-    fn load_modules(
-        core_modules_dir: &str,
-        modules: ModulesLoadStrategy,
-    ) -> Result<Vec<(String, Vec<u8>)>> {
-        use FaaSError::IOError;
-
-        let mut dir_entries = fs::read_dir(core_modules_dir)
-            .map_err(|e| IOError(format!("{}: {}", core_modules_dir, e)))?;
-
-        let loaded = dir_entries.try_fold(vec![], |mut vec, entry| {
-            let entry = entry?;
-            let path = entry.path();
-            // Skip directories
-            if path.is_dir() {
-                return Ok(vec);
-            }
-
-            let module_name = path
-                .file_name()
-                .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?
-                .to_os_string()
-                .into_string()
-                .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
-
-            if modules.should_load(&module_name) {
-                let module_bytes = fs::read(path)?;
-                vec.push((module_name, module_bytes));
-            }
-
-            Result::Ok(vec)
-        })?;
-
-        if modules.required_modules_len() > loaded.len() {
-            let loaded = loaded.iter().map(|(n, _)| n);
-            let not_found = modules.missing_modules(loaded);
-            return Err(FaaSError::ConfigParseError(format!(
-                "the following modules were not found: {:?}",
-                not_found
-            )));
-        }
-
-        Ok(loaded)
-    }
-
-    /// Call a specified function of loaded on a startup module by its name.
+    /// Call a specified function of loaded module by its name.
+    // TODO: replace serde_json::Value with Vec<u8>?
     pub fn call_module<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
         module_name: MN,
         func_name: FN,
-        args: serde_json::Value,
-    ) -> Result<serde_json::Value> {
-        self.fce
-            .call(module_name, func_name, args)
+        arguments: serde_json::Value,
+    ) -> Result<Vec<IValue>> {
+        let arguments = Self::prepare_arguments(arguments)?;
+
+        self.faas
+            .call_module(module_name, func_name, &arguments)
             .map_err(Into::into)
     }
 
-    /// Return all export functions (name and signatures) of loaded on a startup modules.
-    pub fn get_interface(&self) -> FaaSInterface {
-        let modules = self
-            .fce
-            .interface()
-            .map(|(name, signatures)| {
-                let signatures = signatures
-                    .iter()
-                    .map(|f| {
-                        (
-                            f.name,
-                            FaaSFunctionSignature {
-                                input_types: f.input_types,
-                                output_types: f.output_types,
-                            },
-                        )
-                    })
-                    .collect();
-                (name, signatures)
+    /// Return all export functions (name and signatures) of loaded modules.
+    pub fn get_interface(&self) -> fluence_faas::FaaSInterface {
+        self.faas.get_interface()
+    }
+
+    // returns service base directory
+    fn prepare_filesystem(config: &ModulesConfig, service_id: &str) -> Result<String> {
+        let base_dir = match config.service_base_dir {
+            Some(ref base_dir) => base_dir,
+            // TODO: refactor it later
+            None => {
+                return Err(ServiceError::IOError(String::from(
+                    "service_base_dir should be specified",
+                )))
+            }
+        };
+
+        let service_dir = std::path::Path::new(base_dir).join(service_id);
+        std::fs::create_dir(service_dir.clone())?; // will return an error if dir is already exists
+
+        Ok(base_dir.clone())
+    }
+
+    fn prepare_wasi(
+        mut config: ModulesConfig,
+        service_base_dir: &str,
+        service_id: &str,
+    ) -> Result<ModulesConfig> {
+        let service_id_env =
+            vec![format!("{}={}", SERVICE_ID_ENV_NAME, service_base_dir).into_bytes()];
+        let preopened_files = vec![String::from(service_id), String::from(TMP_DIR_NAME)];
+        let mapped_dirs = vec![
+            (String::from("service_dir"), String::from(service_id)),
+            (String::from("tmp"), String::from(TMP_DIR_NAME)),
+        ];
+
+        config.modules_config = config
+            .modules_config
+            .into_iter()
+            .map(|(name, module_config)| {
+                let module_config = module_config
+                    .extend_wasi_envs(service_id_env.clone())
+                    .extend_wasi_files(preopened_files.clone(), mapped_dirs.clone());
+
+                (name, module_config)
             })
             .collect();
 
-        FaaSInterface { modules }
+        Ok(config)
+    }
+
+    fn prepare_arguments(arguments: serde_json::Value) -> Result<Vec<IValue>> {
+        let is_null = arguments.is_null();
+        let is_empty_arr = arguments.as_array().map_or(false, |a| a.is_empty());
+        let is_empty_obj = arguments.as_object().map_or(false, |m| m.is_empty());
+        let arguments = if !is_null && !is_empty_arr && !is_empty_obj {
+            Some(fluence_faas::to_interface_value(&arguments).map_err(|e| {
+                ServiceError::InvalidArguments(format!(
+                    "can't parse arguments as array of interface types: {}",
+                    e
+                ))
+            })?)
+        } else {
+            None
+        };
+
+        match arguments {
+            Some(IValue::Record(arguments)) => Ok(arguments.into_vec()),
+            // Convert null, [] and {} into vec![]
+            None => Ok(vec![]),
+            other => Err(ServiceError::InvalidArguments(format!(
+                "expected array of interface values: got {:?}",
+                other
+            ))),
+        }
     }
 }

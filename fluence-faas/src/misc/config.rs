@@ -142,6 +142,80 @@ pub struct ModuleConfig {
     pub wasi: Option<WASIConfig>,
 }
 
+impl ModuleConfig {
+    pub fn extend_wasi_envs(mut self, new_envs: Vec<Vec<u8>>) -> Self {
+        match &mut self.wasi {
+            Some(WASIConfig {
+                envs: Some(envs), ..
+            }) => envs.extend(new_envs),
+            Some(w @ WASIConfig { envs: None, .. }) => w.envs = Some(new_envs),
+            w @ None => {
+                *w = Some(WASIConfig {
+                    envs: Some(new_envs),
+                    preopened_files: None,
+                    mapped_dirs: None,
+                })
+            }
+        }
+
+        self
+    }
+
+    #[rustfmt::skip]
+    pub fn extend_wasi_files(
+        mut self,
+        new_preopened_files: Vec<String>,
+        new_mapped_dirs: Vec<(String, String)>,
+    ) -> Self {
+        match &mut self.wasi {
+            Some(WASIConfig {
+                preopened_files: Some(files),
+                mapped_dirs: Some(dirs),
+                ..
+            }) => {
+                files.extend(new_preopened_files);
+                dirs.extend(new_mapped_dirs);
+            }
+            Some(w @ WASIConfig {
+                    preopened_files: Some(_),
+                    mapped_dirs: None,
+                    ..
+                },
+            ) => {
+                w.preopened_files.as_mut().unwrap().extend(new_preopened_files);
+                w.mapped_dirs = Some(new_mapped_dirs);
+            }
+            Some(w @ WASIConfig {
+                    preopened_files: None,
+                    mapped_dirs: Some(_),
+                    ..
+                },
+            ) => {
+                w.preopened_files = Some(new_preopened_files);
+                w.mapped_dirs.as_mut().unwrap().extend(new_mapped_dirs);
+            }
+            Some(w @ WASIConfig {
+                preopened_files: None,
+                mapped_dirs: None,
+                ..
+            },
+            ) => {
+                w.preopened_files.as_mut().unwrap().extend(new_preopened_files);
+                w.mapped_dirs.as_mut().unwrap().extend(new_mapped_dirs);
+            }
+            w @ None => {
+                *w = Some(WASIConfig {
+                    envs: None,
+                    preopened_files: Some(new_preopened_files),
+                    mapped_dirs: Some(new_mapped_dirs),
+                })
+            }
+        }
+
+        self
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct WASIConfig {
     /// A list of environment variables available for this module.
@@ -156,7 +230,7 @@ pub struct WASIConfig {
 }
 
 /// Prepare config after parsing it from TOML.
-pub(crate) fn from_raw_config(config: RawModulesConfig) -> Result<ModulesConfig> {
+fn from_raw_config(config: RawModulesConfig) -> Result<ModulesConfig> {
     let service_base_dir = config.service_base_dir;
     let modules_config = config
         .core_module

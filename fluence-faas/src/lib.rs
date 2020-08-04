@@ -24,11 +24,14 @@ pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
 pub use errors::FaaSError;
 
 pub use fce::IValue;
-pub use fce::{to_interface_value, from_interface_values};
 pub use fce::IType;
+pub use fce::to_interface_value;
+pub use fce::from_interface_values;
 
 pub use faas::FluenceFaaS;
 pub use faas_interface::FaaSInterface;
 
 pub use misc::RawModulesConfig;
 pub use misc::RawModuleConfig;
+pub use misc::ModulesConfig;
+pub use misc::WASIConfig;

@@ -16,16 +16,13 @@
 
 mod errors;
 mod service;
-mod faas_interface;
 
-pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
+pub(crate) type Result<T> = std::result::Result<T, ServiceError>;
 
-pub use fce::IValue;
-pub use fce::{to_interface_value, from_interface_values};
-pub use fce::IType;
+pub use errors::ServiceError;
+pub use service::Service;
 
-pub use errors::FaaSError;
-pub use service::FluenceFaaS;
-pub use faas_interface::FaaSInterface;
-
-pub use misc::{RawCoreModulesConfig, RawModuleConfig};
+pub use fluence_faas::IValue;
+pub use fluence_faas::IType;
+pub use fluence_faas::FaaSInterface;
+pub use fluence_faas::RawModulesConfig;
