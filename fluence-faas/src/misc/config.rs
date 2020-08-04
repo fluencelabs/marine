@@ -26,7 +26,8 @@ use std::convert::TryInto;
 /*
 An example of the config:
 
-core_modules_dir = "wasm/artifacts/wasm_modules"
+modules_dir = "wasm/artifacts/wasm_modules"
+service_base_dir = "/Users/user/tmp"
 
 [[core_module]]
     name = "ipfs_node.wasm"
@@ -39,30 +40,36 @@ core_modules_dir = "wasm/artifacts/wasm_modules"
 
     [core_module.wasi]
     envs = []
-    preopened_files = ["/Users/user/tmp/"]
-    mapped_dirs = { "tmp" = "/Users/user/tmp" }
+    preopened_files = ["service_id"]
+    # it has to be full path from the right side
+    mapped_dirs = ["tmp" = "/Users/user/tmp"]
 
-[rpc_module]
+[default]
     mem_pages_count = 100
     logger_enabled = true
 
+    [core_module.imports]
+    mysql = "/usr/bin/mysql"
+    ipfs = "/usr/local/bin/ipfs"
+
     [rpc_module.wasi]
     envs = []
-    preopened_files = ["/Users/user/tmp"]
-    mapped_dirs = { "tmp" = "/Users/user/tmp" }
+    preopened_files = ["service_id"]
+    mapped_dirs = ["tmp" = "/Users/user/tmp"]
  */
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
-pub struct RawCoreModulesConfig {
-    pub core_modules_dir: Option<String>,
+pub struct RawModulesConfig {
+    pub modules_dir: Option<String>,
+    pub service_base_dir: Option<String>,
     pub core_module: Vec<RawModuleConfig>,
-    pub rpc_module: Option<RawRPCModuleConfig>,
+    pub default: Option<RawDefaultModuleConfig>,
 }
 
-impl TryInto<CoreModulesConfig> for RawCoreModulesConfig {
+impl TryInto<ModulesConfig> for RawModulesConfig {
     type Error = FaaSError;
 
-    fn try_into(self) -> Result<CoreModulesConfig> {
+    fn try_into(self) -> Result<ModulesConfig> {
         from_raw_config(self)
     }
 }
@@ -70,6 +77,14 @@ impl TryInto<CoreModulesConfig> for RawCoreModulesConfig {
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct RawModuleConfig {
     pub name: String,
+    pub mem_pages_count: Option<u32>,
+    pub logger_enabled: Option<bool>,
+    pub imports: Option<toml::value::Table>,
+    pub wasi: Option<RawWASIConfig>,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+pub struct RawDefaultModuleConfig {
     pub mem_pages_count: Option<u32>,
     pub logger_enabled: Option<bool>,
     pub imports: Option<toml::value::Table>,
@@ -95,92 +110,105 @@ pub struct RawWASIConfig {
     pub mapped_dirs: Option<toml::value::Table>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Default)]
-pub struct RawRPCModuleConfig {
-    pub mem_pages_count: Option<u32>,
-    pub logger_enabled: Option<bool>,
-    pub wasi: Option<RawWASIConfig>,
-}
-
+/// Describes behaviour of all modules from a node.
 #[derive(Debug, Clone, Default)]
-pub struct CoreModulesConfig {
-    pub core_modules_dir: Option<String>,
+pub struct ModulesConfig {
+    /// If defined, will be prepended on all paths in preopened_files.
+    pub service_base_dir: Option<String>,
+
+    /// Path to a dir where compiled Wasm modules are located.
+    pub modules_dir: Option<String>,
+
+    /// Settings for a module with particular name.
     pub modules_config: HashMap<String, ModuleConfig>,
-    pub rpc_module_config: Option<ModuleConfig>,
+
+    /// Settings for a module that name's not been found in modules_config.
+    pub default_modules_config: Option<ModuleConfig>,
 }
 
+/// Various settings that could be used to guide FCE how to load a module in a proper way.
 #[derive(Debug, Clone, Default)]
 pub struct ModuleConfig {
+    /// Maximum memory size accessible by a module in Wasm pages (64 Kb).
     pub mem_pages_count: Option<u32>,
-    pub logger_enabled: Option<bool>,
+
+    /// Defines whether FaaS should provide a special host log_utf8_string function for this module.
+    pub logger_enabled: bool,
+
+    /// A list of CLI host imports that should be provided for this module.
     pub imports: Option<Vec<(String, String)>>,
+
+    /// A WASI config.
     pub wasi: Option<WASIConfig>,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct WASIConfig {
+    /// A list of environment variables available for this module.
     pub envs: Option<Vec<Vec<u8>>>,
+
+    /// A list of files available for this module.
+    /// A loaded module could have access only to files from this list.
     pub preopened_files: Option<Vec<String>>,
+
+    /// Mapping from a usually short to full file name.
     pub mapped_dirs: Option<Vec<(String, String)>>,
 }
 
-/// Prepare config after parsing it from TOML
-pub(crate) fn from_raw_config(config: RawCoreModulesConfig) -> Result<CoreModulesConfig> {
+/// Prepare config after parsing it from TOML.
+pub(crate) fn from_raw_config(config: RawModulesConfig) -> Result<ModulesConfig> {
+    let service_base_dir = config.service_base_dir;
     let modules_config = config
         .core_module
         .into_iter()
-        .map(|module| {
-            let imports = module
-                .imports
-                .map(|import| {
-                    Ok(import
-                        .into_iter()
-                        .map(|(import_func_name, host_cmd)| {
-                            let host_cmd = host_cmd.try_into::<String>()?;
-                            Ok((import_func_name, host_cmd))
-                        })
-                        .collect::<Result<Vec<_>>>()?) as Result<_>
-                })
-                .transpose()?;
-
-            let wasi = module.wasi.map(parse_raw_wasi);
-            Ok((
-                module.name,
-                ModuleConfig {
-                    mem_pages_count: module.mem_pages_count,
-                    logger_enabled: module.logger_enabled,
-                    imports,
-                    wasi,
-                },
-            ))
-        })
+        .map(from_raw_module_config)
         .collect::<Result<HashMap<_, _>>>()?;
 
-    let rpc_module_config = config.rpc_module.map(|rpc_module| {
-        let wasi = rpc_module.wasi.map(parse_raw_wasi);
+    let default_modules_config = config
+        .default
+        .map(from_raw_default_module_config)
+        .transpose()?;
 
-        ModuleConfig {
-            mem_pages_count: rpc_module.mem_pages_count,
-            logger_enabled: rpc_module.logger_enabled,
-            imports: None,
-            wasi,
-        }
-    });
-
-    Ok(CoreModulesConfig {
-        core_modules_dir: config.core_modules_dir,
+    Ok(ModulesConfig {
+        service_base_dir,
+        modules_dir: config.modules_dir,
         modules_config,
-        rpc_module_config,
+        default_modules_config,
     })
 }
 
-/// Parse config from TOML
-pub(crate) fn load_config(config_file_path: std::path::PathBuf) -> Result<RawCoreModulesConfig> {
+/// Parse config from TOML.
+pub(crate) fn load_config(config_file_path: std::path::PathBuf) -> Result<RawModulesConfig> {
     let file_content = std::fs::read(config_file_path)?;
     Ok(from_slice(&file_content)?)
 }
 
-fn parse_raw_wasi(wasi: RawWASIConfig) -> WASIConfig {
+fn from_raw_module_config(config: RawModuleConfig) -> Result<(String, ModuleConfig)> {
+    let imports = config.imports.map(parse_imports).transpose()?;
+    let wasi = config.wasi.map(from_raw_wasi_config);
+    Ok((
+        config.name,
+        ModuleConfig {
+            mem_pages_count: config.mem_pages_count,
+            logger_enabled: config.logger_enabled.map_or(false, |v| v),
+            imports,
+            wasi,
+        },
+    ))
+}
+
+fn from_raw_default_module_config(config: RawDefaultModuleConfig) -> Result<ModuleConfig> {
+    let imports = config.imports.map(parse_imports).transpose()?;
+    let wasi = config.wasi.map(from_raw_wasi_config);
+    Ok(ModuleConfig {
+        mem_pages_count: config.mem_pages_count,
+        logger_enabled: config.logger_enabled.map_or(false, |v| v),
+        imports,
+        wasi,
+    })
+}
+
+fn from_raw_wasi_config(wasi: RawWASIConfig) -> WASIConfig {
     let envs = wasi
         .envs
         .map(|env| env.into_iter().map(|e| e.into_bytes()).collect::<Vec<_>>());
@@ -197,4 +225,14 @@ fn parse_raw_wasi(wasi: RawWASIConfig) -> WASIConfig {
         preopened_files: wasi.preopened_files,
         mapped_dirs,
     }
+}
+
+fn parse_imports(imports: toml::value::Table) -> Result<Vec<(String, String)>> {
+    imports
+        .into_iter()
+        .map(|(import_func_name, host_cmd)| {
+            let host_cmd = host_cmd.try_into::<String>()?;
+            Ok((import_func_name, host_cmd))
+        })
+        .collect::<Result<Vec<_>>>()
 }

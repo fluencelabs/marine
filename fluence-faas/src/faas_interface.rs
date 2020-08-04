@@ -15,7 +15,9 @@
  */
 
 use super::IType;
-use serde::{Serialize, Serializer};
+
+use serde::Serialize;
+use serde::Serializer;
 
 use std::fmt;
 use std::collections::HashMap;

@@ -37,13 +37,11 @@ unsafe impl Send for Service {}
 
 pub struct Service {
     faas: FluenceFaaS,
-
-    // config for code loaded by call_code function
-    faas_code_config: FCEModuleConfig,
+    service_id: String,
 }
 
 impl Service {
-    /// Creates FaaS with given modules.
+    /// Creates Service with given modules and service id.
     pub fn new<I, C, S>(modules: I, config: C, service_id: S) -> Result<Self>
     where
         I: IntoIterator<Item = (String, Vec<u8>)>,
@@ -51,21 +49,17 @@ impl Service {
         S: AsRef<str>,
         FaaSError: From<C::Error>,
     {
-        let mut fce = FCE::new();
-        let mut config = config.try_into()?;
+        let config = config.try_into()?;
+        let service_id = service_id.as_ref();
+        new_(modules, config, service_id)
+    }
 
-        for (name, bytes) in modules {
-            let module_config = crate::misc::make_fce_config(config.modules_config.remove(&name))?;
-            fce.load_module(name.clone(), &bytes, module_config)?;
-        }
-
-        let faas_code_config = make_fce_config(config.rpc_module_config)?;
-        let faas = FluenceFaaS::with_modules(modules, config)?;
-
-        Ok(Self {
-            faas,
-            faas_code_config,
-        })
+    fn new_(
+        modules: impl IntoIterator<Item = (String, Vec<u8>)>,
+        mut config: CoreModulesConfig,
+        service_id: &str,
+    ) -> Result<Self> {
+        unimplemented!()
     }
 
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
@@ -118,8 +112,8 @@ impl Service {
         &mut self,
         module_name: MN,
         func_name: FN,
-        args: &[IValue],
-    ) -> Result<Vec<IValue>> {
+        args: serde_json::Value,
+    ) -> Result<serde_json::Value> {
         self.fce
             .call(module_name, func_name, args)
             .map_err(Into::into)

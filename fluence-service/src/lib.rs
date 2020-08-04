@@ -17,7 +17,6 @@
 mod errors;
 mod service;
 mod faas_interface;
-mod misc;
 
 pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
 
