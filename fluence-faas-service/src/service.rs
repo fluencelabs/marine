@@ -78,12 +78,7 @@ impl FluenceFaaSService {
     fn prepare_filesystem(config: &ModulesConfig, service_id: &str) -> Result<String> {
         let base_dir = match config.service_base_dir {
             Some(ref base_dir) => base_dir,
-            // TODO: refactor it later
-            None => {
-                return Err(ServiceError::IOError(String::from(
-                    "service_base_dir should be specified",
-                )))
-            }
+            None => String::new(),
         };
 
         let service_dir = std::path::Path::new(base_dir).join(service_id);
