@@ -93,7 +93,7 @@ where
         }
     };
 
-    let typed_func: Func<Args, Rets, wasmer_core::typed_func::Wasm> =
+    let typed_func: Func<'_, Args, Rets, wasmer_core::typed_func::Wasm> =
         Func::from_raw_parts(func_wasm_inner, export_func_ptr, None, ctx as _);
 
     Ok(typed_func)

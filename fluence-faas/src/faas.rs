@@ -136,7 +136,7 @@ impl FluenceFaaS {
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
     fn load_modules(
         core_modules_dir: &str,
-        modules: ModulesLoadStrategy,
+        modules: ModulesLoadStrategy<'_>,
     ) -> Result<Vec<(String, Vec<u8>)>> {
         use FaaSError::IOError;
 
@@ -191,7 +191,7 @@ impl FluenceFaaS {
     }
 
     /// Return all export functions (name and signatures) of loaded modules.
-    pub fn get_interface(&self) -> FaaSInterface {
+    pub fn get_interface(&self) -> FaaSInterface<'_> {
         let modules = self
             .fce
             .interface()

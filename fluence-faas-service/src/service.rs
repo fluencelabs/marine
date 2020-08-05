@@ -70,7 +70,7 @@ impl FluenceFaaSService {
     }
 
     /// Return all export functions (name and signatures) of loaded modules.
-    pub fn get_interface(&self) -> fluence_faas::FaaSInterface {
+    pub fn get_interface(&self) -> fluence_faas::FaaSInterface<'_> {
         self.faas.get_interface()
     }
 
