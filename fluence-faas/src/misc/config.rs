@@ -29,16 +29,16 @@ An example of the config:
 modules_dir = "wasm/artifacts/wasm_modules"
 service_base_dir = "/Users/user/tmp"
 
-[[core_module]]
+[[module]]
     name = "ipfs_node.wasm"
     mem_pages_count = 100
     logger_enabled = true
 
-    [core_module.imports]
+    [module.imports]
     mysql = "/usr/bin/mysql"
     ipfs = "/usr/local/bin/ipfs"
 
-    [core_module.wasi]
+    [module.wasi]
     envs = []
     preopened_files = ["service_id"]
     # it has to be full path from the right side
@@ -48,11 +48,11 @@ service_base_dir = "/Users/user/tmp"
     mem_pages_count = 100
     logger_enabled = true
 
-    [core_module.imports]
+    [default.imports]
     mysql = "/usr/bin/mysql"
     ipfs = "/usr/local/bin/ipfs"
 
-    [rpc_module.wasi]
+    [default.wasi]
     envs = []
     preopened_files = ["service_id"]
     mapped_dirs = ["tmp" = "/Users/user/tmp"]
@@ -62,7 +62,7 @@ service_base_dir = "/Users/user/tmp"
 pub struct RawModulesConfig {
     pub modules_dir: Option<String>,
     pub service_base_dir: Option<String>,
-    pub core_module: Vec<RawModuleConfig>,
+    pub module: Vec<RawModuleConfig>,
     pub default: Option<RawDefaultModuleConfig>,
 }
 
@@ -212,7 +212,7 @@ pub struct WASIConfig {
 fn from_raw_config(config: RawModulesConfig) -> Result<ModulesConfig> {
     let service_base_dir = config.service_base_dir;
     let modules_config = config
-        .core_module
+        .module
         .into_iter()
         .map(from_raw_module_config)
         .collect::<Result<HashMap<_, _>>>()?;
