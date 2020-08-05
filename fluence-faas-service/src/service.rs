@@ -23,7 +23,6 @@ use fluence_faas::ModulesConfig;
 
 use std::convert::TryInto;
 
-const TMP_DIR_NAME: &str = "tmp";
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 
 // TODO: remove and use mutex instead
@@ -44,9 +43,7 @@ impl FluenceFaaSService {
     {
         let config: ModulesConfig = config.try_into()?;
         let service_id = service_id.as_ref();
-
-        let service_base_dir = Self::prepare_filesystem(&config, service_id)?;
-        let config = Self::prepare_wasi(config, &service_base_dir, service_id)?;
+        let config = Self::prepare_before_creation(config, service_id)?;
 
         let modules = modules.into_iter().collect();
         let faas = FluenceFaaS::with_module_names(&modules, config)?;
@@ -74,8 +71,10 @@ impl FluenceFaaSService {
         self.faas.get_interface()
     }
 
-    // returns service base directory
-    fn prepare_filesystem(config: &ModulesConfig, service_id: &str) -> Result<String> {
+    fn prepare_before_creation(
+        mut config: ModulesConfig,
+        service_id: &str,
+    ) -> Result<ModulesConfig> {
         let base_dir = match config.service_base_dir {
             Some(ref base_dir) => base_dir,
             // TODO: refactor it later
@@ -87,23 +86,14 @@ impl FluenceFaaSService {
         };
 
         let service_dir = std::path::Path::new(base_dir).join(service_id);
-        std::fs::create_dir(service_dir)?; // will return an error if dir is already exists
+        std::fs::create_dir(service_dir.clone())?; // will return an error if dir is already exists
 
-        Ok(base_dir.clone())
-    }
-
-    fn prepare_wasi(
-        mut config: ModulesConfig,
-        service_base_dir: &str,
-        service_id: &str,
-    ) -> Result<ModulesConfig> {
-        let service_id_env =
-            vec![format!("{}={}", SERVICE_ID_ENV_NAME, service_base_dir).into_bytes()];
-        let preopened_files = vec![String::from(service_id), String::from(TMP_DIR_NAME)];
-        let mapped_dirs = vec![
-            (String::from("service_dir"), String::from(service_id)),
-            (String::from("tmp"), String::from(TMP_DIR_NAME)),
-        ];
+        let service_id_env = vec![format!("{}={}", SERVICE_ID_ENV_NAME, service_id).into_bytes()];
+        let preopened_files = vec![];
+        let mapped_dirs = vec![(
+            String::from("service_dir"),
+            service_dir.to_string_lossy().into(),
+        )];
 
         config.modules_config = config
             .modules_config

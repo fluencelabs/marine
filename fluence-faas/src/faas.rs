@@ -119,7 +119,7 @@ impl FluenceFaaS {
         Ok(Self { fce })
     }
 
-    /// Searches for modules in `config.core_modules_dir`, loads only those in the `names` set
+    /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
     pub fn with_module_names<C>(names: &HashSet<String>, config: C) -> Result<Self>
     where
         C: TryInto<ModulesConfig>,
@@ -135,13 +135,13 @@ impl FluenceFaaS {
 
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
     fn load_modules(
-        core_modules_dir: &str,
+        modules_dir: &str,
         modules: ModulesLoadStrategy<'_>,
     ) -> Result<Vec<(String, Vec<u8>)>> {
         use FaaSError::IOError;
 
-        let mut dir_entries = fs::read_dir(core_modules_dir)
-            .map_err(|e| IOError(format!("{}: {}", core_modules_dir, e)))?;
+        let mut dir_entries = fs::read_dir(modules_dir)
+            .map_err(|e| IOError(format!("{}: {}", modules_dir, e)))?;
 
         let loaded = dir_entries.try_fold(vec![], |mut vec, entry| {
             let entry = entry?;
