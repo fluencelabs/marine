@@ -70,7 +70,7 @@ impl TryInto<ModulesConfig> for RawModulesConfig {
     type Error = FaaSError;
 
     fn try_into(self) -> Result<ModulesConfig> {
-        from_raw_config(self)
+        from_raw_modules_config(self)
     }
 }
 
@@ -81,6 +81,14 @@ pub struct RawModuleConfig {
     pub logger_enabled: Option<bool>,
     pub imports: Option<toml::value::Table>,
     pub wasi: Option<RawWASIConfig>,
+}
+
+impl TryInto<ModuleConfig> for RawModuleConfig {
+    type Error = FaaSError;
+
+    fn try_into(self) -> Result<ModuleConfig> {
+        from_raw_module_config(self).map(|(_, module_config)| module_config)
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
@@ -209,7 +217,7 @@ pub struct WASIConfig {
 }
 
 /// Prepare config after parsing it from TOML.
-fn from_raw_config(config: RawModulesConfig) -> Result<ModulesConfig> {
+fn from_raw_modules_config(config: RawModulesConfig) -> Result<ModulesConfig> {
     let service_base_dir = config.service_base_dir;
     let modules_config = config
         .module

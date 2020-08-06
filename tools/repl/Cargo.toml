@@ -1,0 +1,20 @@
+[package]
+name = "fce-repl"
+description = "Fluence FCE REPL intended for testing purposes"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+repository = "https://github.com/fluencelabs/fce/tools/repl"
+license = "Apache-2.0"
+edition = "2018"
+
+[[bin]]
+name = "fce-repl"
+path = "src/main.rs"
+
+[dependencies]
+fluence-faas-service = { path = "../../fluence-faas-service", features = ["raw-module-api"] }
+
+rustyline = "6.1.2"
+anyhow = "1.0.31"
+clap = "2.33.1"
+exitfailure = "0.5.1"

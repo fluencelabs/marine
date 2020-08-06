@@ -1,4 +1,5 @@
 core_modules_dir = "wasm/artifacts/wasm_modules"
+service_local_dir = "/Users/tmp"
 
 [[core_module]]
     name = "ipfs_node.wasm"
@@ -11,8 +12,8 @@ core_modules_dir = "wasm/artifacts/wasm_modules"
 
     [core_module.wasi]
     envs = ["IPFS_ADDR=/dns4/relay02.fluence.dev/tcp/15001", "timeout=1s"]
-    preopened_files = ["./wasm/artifacts"]
-    mapped_dirs = { "tmp" = "./wasm/artifacts" }
+    #preopened_files = ["/wasm/artifacts"]
+    fs_mappings = { "/wasm/artifacts" = "./wasm/artifacts" }
 
 [rpc_module]
     mem_pages_count = 100

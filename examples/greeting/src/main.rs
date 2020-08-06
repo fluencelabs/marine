@@ -28,7 +28,7 @@ fn main() -> Result<(), anyhow::Error> {
         greeting_node.get_interface()
     );
 
-    let result = greeting_node.call_module(
+    let result = greeting_node.call(
         "greeting.wasm",
         "greeting",
         &[IValue::String("Fluence".to_string()), IValue::I32(1)],

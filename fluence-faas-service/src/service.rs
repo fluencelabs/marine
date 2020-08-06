@@ -53,7 +53,7 @@ impl FluenceFaaSService {
 
     /// Call a specified function of loaded module by its name.
     // TODO: replace serde_json::Value with Vec<u8>?
-    pub fn call_module<MN: AsRef<str>, FN: AsRef<str>>(
+    pub fn call<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
         module_name: MN,
         func_name: FN,
@@ -62,7 +62,7 @@ impl FluenceFaaSService {
         let arguments = Self::prepare_arguments(arguments)?;
 
         self.faas
-            .call_module(module_name, func_name, &arguments)
+            .call(module_name, func_name, &arguments)
             .map_err(Into::into)
     }
 
@@ -134,6 +134,59 @@ impl FluenceFaaSService {
                 "expected array of interface values: got {:?}",
                 other
             ))),
+        }
+    }
+}
+
+#[cfg(feature = "module-raw-api")]
+impl FluenceFaaSService {
+    fn load_module<S, C>(
+        &mut self,
+        module_name: S,
+        wasm_bytes: &[u8],
+        config: Option<C>,
+    ) -> Result<()>
+    where
+        S: Into<String>,
+        C: TryInto<crate::ModuleConfig>,
+    {
+        let mut config = config.try_into()?;
+
+        let fce_module_config = crate::misc::make_fce_config(module_config, None)?;
+        self.fce
+            .load_module(name.clone(), &bytes, fce_module_config)
+            .map_err(Into::into)
+    }
+
+    fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
+        self.fce.unload_module(module_name).map_err(Into::into)
+    }
+}
+
+// This API is intended for testing purposes (mostly in FCE REPL)
+#[cfg(feature = "raw-module-api")]
+impl FluenceFaaSService {
+    pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
+    where
+        S: Into<String>,
+        C: TryInto<crate::ModuleConfig>,
+        fluence_faas::FaaSError: From<C::Error>,
+    {
+        self.faas
+            .load_module(name, &wasm_bytes, config)
+            .map_err(Into::into)
+    }
+
+    pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
+        self.faas.unload_module(module_name).map_err(Into::into)
+    }
+}
+
+#[cfg(feature = "raw-module-api")]
+impl Default for FluenceFaaSService {
+    fn default() -> Self {
+        Self {
+            faas: <_>::default(),
         }
     }
 }

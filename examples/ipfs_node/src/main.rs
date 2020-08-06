@@ -30,7 +30,7 @@ fn main() -> Result<(), anyhow::Error> {
     let mut ipfs_node = FluenceFaaS::new(PathBuf::from(IPFS_MODULES_CONFIG_PATH))?;
     println!("ipfs node interface is\n{}", ipfs_node.get_interface());
 
-    let node_address = ipfs_node.call_module("ipfs_node.wasm", "get_address", &[])?;
+    let node_address = ipfs_node.call("ipfs_node.wasm", "get_address", &[])?;
     println!("ipfs node address is:\n{:?}", node_address);
 
     let result = ipfs_node.call_code(
