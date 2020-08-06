@@ -86,7 +86,7 @@ impl FluenceFaaSService {
         };
 
         let service_dir = std::path::Path::new(base_dir).join(service_id);
-        std::fs::create_dir(service_dir.clone())?; // will return an error if dir is already exists
+        std::fs::create_dir(service_dir.clone())?; // will return an error if dir already exists
 
         let service_id_env = vec![format!("{}={}", SERVICE_ID_ENV_NAME, service_id).into_bytes()];
         let preopened_files = vec![];
