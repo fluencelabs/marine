@@ -60,11 +60,12 @@ fn main() -> Result<(), anyhow::Error> {
                             continue;
                         }
 
-                        let result_msg = match app_service.load_module::<String, fluence_faas_service::ModuleConfig>(
-                            module_name.into(),
-                            &wasm_bytes.unwrap(),
-                            None,
-                        ) {
+                        let result_msg = match app_service
+                            .load_module::<String, fluence_faas_service::ModuleConfig>(
+                                module_name.into(),
+                                &wasm_bytes.unwrap(),
+                                None,
+                            ) {
                             Ok(_) => "module successfully loaded into App service".to_string(),
                             Err(e) => format!("module loaded failed with: {:?}", e),
                         };
@@ -84,16 +85,16 @@ fn main() -> Result<(), anyhow::Error> {
                         next_argument!(func_name, args, "Function name should be specified");
 
                         let module_arg: String = args.collect();
-                        let module_arg: serde_json::Value = match serde_json::from_str(&module_arg) {
+                        let module_arg: serde_json::Value = match serde_json::from_str(&module_arg)
+                        {
                             Ok(module_arg) => module_arg,
                             Err(e) => {
                                 println!("incorrect arguments {}", e);
                                 continue;
-                            },
+                            }
                         };
 
-                        let result = match app_service.call(module_name, func_name, module_arg)
-                        {
+                        let result = match app_service.call(module_name, func_name, module_arg) {
                             Ok(result) => format!("result: {:?}", result),
                             Err(e) => format!("execution failed with {:?}", e),
                         };
