@@ -243,7 +243,7 @@ fn from_raw_module_config(config: RawModuleConfig) -> Result<(String, ModuleConf
         config.name,
         ModuleConfig {
             mem_pages_count: config.mem_pages_count,
-            logger_enabled: config.logger_enabled.map_or(false, |v| v),
+            logger_enabled: config.logger_enabled.unwrap_or_default(),
             imports,
             wasi,
         },
