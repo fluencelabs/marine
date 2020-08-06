@@ -113,7 +113,7 @@ pub struct RawWASIConfig {
 /// Describes behaviour of all modules from a node.
 #[derive(Debug, Clone, Default)]
 pub struct ModulesConfig {
-    /// If defined, will be prepended on all paths in preopened_files.
+    /// Used for preparing filesystem on the service initialization stage.
     pub service_base_dir: Option<String>,
 
     /// Path to a dir where compiled Wasm modules are located.
