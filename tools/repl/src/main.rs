@@ -47,7 +47,6 @@ fn main() -> Result<(), anyhow::Error> {
         let readline = rl.readline(">> ");
         match readline {
             Ok(line) => {
-                // TODO: improve argument parsing
                 let mut args = line.split(' ');
                 match args.next() {
                     Some("load") => {
@@ -125,23 +124,3 @@ fn main() -> Result<(), anyhow::Error> {
 
     Ok(())
 }
-
-/*
-fn call_function_command(
-    app_service: &mut FluenceFaaSService,
-    args: &[String],
-) -> Result<serde_json::Value, String> {
-    let module_name = &args[0];
-    let func_name = &args[1];
-    let module_interfaces = app_service
-        .get_interface()
-        .modules
-        .get(module_name)
-        .ok_or_else(|| Err(format!("{} not found in app service", module_name)))?;
-    let function_signature = module_interfaces
-        .get(module_name)
-        .ok_or_else(|| Err(format!("{} not found in {} module", func_name, module_name)))?;
-
-    //    let arguments = serde_json::from
-}
-*/
