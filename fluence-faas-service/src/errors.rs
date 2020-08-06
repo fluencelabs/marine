@@ -20,7 +20,7 @@ use std::io::Error as IOError;
 use std::error::Error;
 
 #[derive(Debug)]
-pub enum ServiceError {
+pub enum AppServiceError {
     /// An error related to config parsing.
     InvalidArguments(String),
 
@@ -31,37 +31,37 @@ pub enum ServiceError {
     FaaSError(FaaSError),
 }
 
-impl Error for ServiceError {}
+impl Error for AppServiceError {}
 
-impl std::fmt::Display for ServiceError {
+impl std::fmt::Display for AppServiceError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            ServiceError::InvalidArguments(err_msg) => write!(f, "{}", err_msg),
-            ServiceError::IOError(err_msg) => write!(f, "{}", err_msg),
-            ServiceError::FaaSError(err) => write!(f, "{}", err),
+            AppServiceError::InvalidArguments(err_msg) => write!(f, "{}", err_msg),
+            AppServiceError::IOError(err_msg) => write!(f, "{}", err_msg),
+            AppServiceError::FaaSError(err) => write!(f, "{}", err),
         }
     }
 }
 
-impl From<IOError> for ServiceError {
+impl From<IOError> for AppServiceError {
     fn from(err: IOError) -> Self {
-        ServiceError::IOError(format!("{}", err))
+        AppServiceError::IOError(format!("{}", err))
     }
 }
 
-impl From<FaaSError> for ServiceError {
+impl From<FaaSError> for AppServiceError {
     fn from(err: FaaSError) -> Self {
-        ServiceError::FaaSError(err)
+        AppServiceError::FaaSError(err)
     }
 }
 
-impl From<toml::de::Error> for ServiceError {
+impl From<toml::de::Error> for AppServiceError {
     fn from(err: toml::de::Error) -> Self {
-        ServiceError::InvalidArguments(format!("{}", err))
+        AppServiceError::InvalidArguments(format!("{}", err))
     }
 }
 
-impl From<std::convert::Infallible> for ServiceError {
+impl From<std::convert::Infallible> for AppServiceError {
     fn from(inf: std::convert::Infallible) -> Self {
         match inf {}
     }
