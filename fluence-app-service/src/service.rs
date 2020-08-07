@@ -55,7 +55,11 @@ impl AppService {
     }
 
     /// Create Service with given raw config, service id and service base dir.
-    pub fn with_raw_config<P, SI>(config: P, service_id: SI, service_base_dir: Option<&str>) -> Result<Self>
+    pub fn with_raw_config<P, SI>(
+        config: P,
+        service_id: SI,
+        service_base_dir: Option<&str>,
+    ) -> Result<Self>
     where
         P: Into<PathBuf>,
         SI: AsRef<str>,
