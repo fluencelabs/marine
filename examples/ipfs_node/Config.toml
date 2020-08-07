@@ -13,6 +13,6 @@ service_base_dir = "/Users/tmp"
     envs = ["IPFS_ADDR=/dns4/relay02.fluence.dev/tcp/15001", "timeout=1s"]
 
 [[module]]
-    name = "zipfs_rpc.wasm"
+    name = "ipfs_rpc.wasm"
     mem_pages_count = 100
     logger_enabled = true

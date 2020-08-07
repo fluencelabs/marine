@@ -25,6 +25,7 @@ use fce::FCE;
 
 use std::convert::TryInto;
 use std::collections::HashSet;
+use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 
@@ -89,28 +90,38 @@ impl FluenceFaaS {
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
-        let modules = config.modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
-            Self::load_modules(dir, ModulesLoadStrategy::All)
-        })?;
+        let modules = config
+            .modules_dir
+            .as_ref()
+            .map_or(Ok(HashMap::new()), |dir| {
+                Self::load_modules(dir, ModulesLoadStrategy::All)
+            })?;
 
-        Self::with_modules::<_, ModulesConfig>(modules, config)
+        Self::with_modules::<ModulesConfig>(modules, config)
     }
 
     /// Creates FaaS with given modules.
-    pub fn with_modules<I, C>(modules: I, config: C) -> Result<Self>
+    pub fn with_modules<C>(mut modules: HashMap<String, Vec<u8>>, config: C) -> Result<Self>
     where
-        I: IntoIterator<Item = (String, Vec<u8>)>,
         C: TryInto<ModulesConfig>,
         FaaSError: From<C::Error>,
     {
         let mut fce = FCE::new();
-        let mut config = config.try_into()?;
+        let config = config.try_into()?;
+
+        for (module_name, module_config) in config.modules_config {
+            let module_bytes = modules.remove(&module_name).ok_or_else(|| {
+                FaaSError::InstantiationError(format!(
+                    "module with name {} is specified in config, but not found in provided modules",
+                    module_name
+                ))
+            })?;
+            let fce_module_config = crate::misc::make_fce_config(Some(module_config))?;
+            fce.load_module(module_name, &module_bytes, fce_module_config)?;
+        }
 
         for (name, bytes) in modules {
-            let module_config = match config.modules_config.remove(&name) {
-                module_config @ Some(_) => module_config,
-                None => config.default_modules_config.clone(),
-            };
+            let module_config = config.default_modules_config.clone();
             let fce_module_config = crate::misc::make_fce_config(module_config)?;
             fce.load_module(name.clone(), &bytes, fce_module_config)?;
         }
@@ -125,29 +136,32 @@ impl FluenceFaaS {
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
-        let modules = config.modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
-            Self::load_modules(dir, ModulesLoadStrategy::Named(names))
-        })?;
+        let modules = config
+            .modules_dir
+            .as_ref()
+            .map_or(Ok(HashMap::new()), |dir| {
+                Self::load_modules(dir, ModulesLoadStrategy::Named(names))
+            })?;
 
-        Self::with_modules::<_, ModulesConfig>(modules, config)
+        Self::with_modules::<ModulesConfig>(modules, config)
     }
 
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
     fn load_modules(
         modules_dir: &str,
         modules: ModulesLoadStrategy<'_>,
-    ) -> Result<Vec<(String, Vec<u8>)>> {
+    ) -> Result<HashMap<String, Vec<u8>>> {
         use FaaSError::IOError;
 
         let mut dir_entries =
             fs::read_dir(modules_dir).map_err(|e| IOError(format!("{}: {}", modules_dir, e)))?;
 
-        let loaded = dir_entries.try_fold(vec![], |mut vec, entry| {
+        let loaded = dir_entries.try_fold(HashMap::new(), |mut hash_map, entry| {
             let entry = entry?;
             let path = entry.path();
             // Skip directories
             if path.is_dir() {
-                return Ok(vec);
+                return Ok(hash_map);
             }
 
             let module_name = path
@@ -159,10 +173,14 @@ impl FluenceFaaS {
 
             if modules.should_load(&module_name) {
                 let module_bytes = fs::read(path)?;
-                vec.push((module_name, module_bytes));
+                if hash_map.insert(module_name, module_bytes).is_some() {
+                    return Err(FaaSError::ConfigParseError(String::from(
+                        "config contains modules with the same name",
+                    )));
+                }
             }
 
-            Result::Ok(vec)
+            Ok(hash_map)
         })?;
 
         if modules.required_modules_len() > loaded.len() {

@@ -24,6 +24,9 @@ pub enum FaaSError {
     /// An error related to config parsing.
     ConfigParseError(String),
 
+    /// An error occurred at the instantiation step.
+    InstantiationError(String),
+
     /// Various errors related to file i/o.
     IOError(String),
 
@@ -37,6 +40,7 @@ impl std::fmt::Display for FaaSError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             FaaSError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
+            FaaSError::InstantiationError(err_msg) => write!(f, "{}", err_msg),
             FaaSError::IOError(err_msg) => write!(f, "{}", err_msg),
             FaaSError::EngineError(err) => write!(f, "{}", err),
         }

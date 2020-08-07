@@ -17,9 +17,9 @@
 use crate::FaaSError;
 use crate::Result;
 
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::Serialize;
+use serde_derive::Deserialize;
 
-use std::collections::HashMap;
 use std::convert::TryInto;
 
 /*
@@ -39,8 +39,7 @@ service_base_dir = "/Users/user/tmp"
 
     [module.wasi]
     envs = []
-    preopened_files = ["service_id"]
-    # it has to be full path from the right side
+    preopened_files = ["/Users/user/tmp"]
     mapped_dirs = ["tmp" = "/Users/user/tmp"]
 
 [default]
@@ -53,7 +52,7 @@ service_base_dir = "/Users/user/tmp"
 
     [default.wasi]
     envs = []
-    preopened_files = ["service_id"]
+    preopened_files = ["/Users/user/tmp"]
     mapped_dirs = ["tmp" = "/Users/user/tmp"]
  */
 
@@ -127,7 +126,7 @@ pub struct ModulesConfig {
     pub modules_dir: Option<String>,
 
     /// Settings for a module with particular name.
-    pub modules_config: HashMap<String, ModuleConfig>,
+    pub modules_config: Vec<(String, ModuleConfig)>,
 
     /// Settings for a module that name's not been found in modules_config.
     pub default_modules_config: Option<ModuleConfig>,
@@ -222,7 +221,7 @@ fn from_raw_modules_config(config: RawModulesConfig) -> Result<ModulesConfig> {
         .module
         .into_iter()
         .map(from_raw_module_config)
-        .collect::<Result<HashMap<_, _>>>()?;
+        .collect::<Result<Vec<_>>>()?;
 
     let default_modules_config = config
         .default

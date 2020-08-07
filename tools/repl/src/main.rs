@@ -121,15 +121,15 @@ fn main() -> Result<(), anyhow::Error> {
             }
             Some("interface") => {
                 let interface = app_service.get_interface();
-                println!("application service interface: {}", interface);
+                println!("application service interface:\n{}", interface);
             }
             Some("h") | Some("help") | None => {
                 println!(
                             "Enter:\n\
-                                new [config_path]                       - to create a new AppService (old will be removed)
+                                new [config_path]                       - to create a new AppService (current will be removed)\n\
                                 load <module_name> <module_path>        - to load a new Wasm module into App service\n\
                                 unload <module_name>                    - to unload Wasm module from AppService\n\
-                                call <module_name> <func_name> [args]   - to call function with given name on module with given module_name\n\
+                                call <module_name> <func_name> [args]   - to call function with func_name of module with module_name\n\
                                 interface                               - to print public interface of current AppService\n\
                                 h/help                                  - to print this message\n\
                                 e/exit/q/quit                           - to exit"
