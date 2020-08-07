@@ -102,7 +102,6 @@ where
 /// Make FCE config based on parsed config.
 pub(crate) fn make_fce_config(
     module_config: Option<ModuleConfig>,
-    service_base_dir: Option<String>,
 ) -> crate::Result<FCEModuleConfig> {
     use super::imports::create_host_import_func;
     use super::imports::log_utf8_string;
@@ -127,7 +126,6 @@ pub(crate) fn make_fce_config(
     }
 
     if let Some(wasi) = module_config.wasi {
-        let service_base_dir = service_base_dir.map(PathBuf::from);
         if let Some(envs) = wasi.envs {
             wasm_module_config.wasi_envs = envs;
         }
@@ -136,20 +134,13 @@ pub(crate) fn make_fce_config(
             wasm_module_config.wasi_preopened_files = preopened_files
                 .iter()
                 .map(PathBuf::from)
-                .map(|file| match service_base_dir {
-                    Some(ref base_dir) => base_dir.join(file),
-                    None => file,
-                })
                 .collect::<Vec<_>>();
         }
 
         if let Some(mapped_dirs) = wasi.mapped_dirs {
             wasm_module_config.wasi_mapped_dirs = mapped_dirs
                 .into_iter()
-                .map(|(from, to)| match service_base_dir {
-                    Some(ref base_dir) => (from, base_dir.join(PathBuf::from(to))),
-                    None => (from, PathBuf::from(to)),
-                })
+                .map(|(alias, path)| (alias, PathBuf::from(path)))
                 .collect::<Vec<_>>();
         }
 

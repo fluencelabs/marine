@@ -109,9 +109,7 @@ impl FluenceFaaS {
                 module_config @ Some(_) => module_config,
                 None => config.default_modules_config.clone(),
             };
-
-            let fce_module_config =
-                crate::misc::make_fce_config(module_config, config.service_base_dir.clone())?;
+            let fce_module_config = crate::misc::make_fce_config(module_config)?;
             fce.load_module(name.clone(), &bytes, fce_module_config)?;
         }
 

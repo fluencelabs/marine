@@ -121,7 +121,7 @@ pub struct RawWASIConfig {
 /// Describes behaviour of all modules from a node.
 #[derive(Debug, Clone, Default)]
 pub struct ModulesConfig {
-    /// If defined, will be prepended on all paths in preopened_files.
+    /// Used for preparing filesystem on the service initialization stage.
     pub service_base_dir: Option<String>,
 
     /// Path to a dir where compiled Wasm modules are located.
@@ -251,7 +251,7 @@ fn from_raw_module_config(config: RawModuleConfig) -> Result<(String, ModuleConf
         config.name,
         ModuleConfig {
             mem_pages_count: config.mem_pages_count,
-            logger_enabled: config.logger_enabled.map_or(false, |v| v),
+            logger_enabled: config.logger_enabled.unwrap_or_default(),
             imports,
             wasi,
         },
@@ -263,7 +263,7 @@ fn from_raw_default_module_config(config: RawDefaultModuleConfig) -> Result<Modu
     let wasi = config.wasi.map(from_raw_wasi_config);
     Ok(ModuleConfig {
         mem_pages_count: config.mem_pages_count,
-        logger_enabled: config.logger_enabled.map_or(false, |v| v),
+        logger_enabled: config.logger_enabled.unwrap_or_default(),
         imports,
         wasi,
     })

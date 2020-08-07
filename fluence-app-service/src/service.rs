@@ -35,11 +35,11 @@ pub struct FluenceFaaSService {
 impl FluenceFaaSService {
     /// Creates Service with given modules and service id.
     pub fn new<I, C, S>(modules: I, config: C, service_id: S) -> Result<Self>
-    where
-        I: IntoIterator<Item = String>,
-        C: TryInto<ModulesConfig>,
-        S: AsRef<str>,
-        ServiceError: From<C::Error>,
+        where
+            I: IntoIterator<Item = String>,
+            C: TryInto<ModulesConfig>,
+            S: AsRef<str>,
+            ServiceError: From<C::Error>,
     {
         let config: ModulesConfig = config.try_into()?;
         let service_id = service_id.as_ref();
@@ -146,9 +146,9 @@ impl FluenceFaaSService {
         wasm_bytes: &[u8],
         config: Option<C>,
     ) -> Result<()>
-    where
-        S: Into<String>,
-        C: TryInto<crate::ModuleConfig>,
+        where
+            S: Into<String>,
+            C: TryInto<crate::ModuleConfig>,
     {
         let mut config = config.try_into()?;
 
@@ -167,10 +167,10 @@ impl FluenceFaaSService {
 #[cfg(feature = "raw-module-api")]
 impl FluenceFaaSService {
     pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
-    where
-        S: Into<String>,
-        C: TryInto<crate::ModuleConfig>,
-        fluence_faas::FaaSError: From<C::Error>,
+        where
+            S: Into<String>,
+            C: TryInto<crate::ModuleConfig>,
+            fluence_faas::FaaSError: From<C::Error>,
     {
         self.faas
             .load_module(name, &wasm_bytes, config)

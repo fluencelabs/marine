@@ -13,8 +13,8 @@ members = [
     "examples/records/wasm/effector",
     "examples/records/wasm/pure",
     "examples/records/wasm/test-record",
+    "fluence-app-service",
     "fluence-faas",
-    "fluence-faas-service",
     "tools/cli",
     "tools/repl",
 ]
