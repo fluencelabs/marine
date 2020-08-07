@@ -473,11 +473,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-faas"
+name = "fluence-app-service"
 version = "0.1.0"
 dependencies = [
  "cmd_lib",
- "fce",
+ "fluence-faas",
  "log",
  "serde",
  "serde_derive",
@@ -489,11 +489,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-faas-service"
+name = "fluence-faas"
 version = "0.1.0"
 dependencies = [
  "cmd_lib",
- "fluence-faas",
+ "fce",
  "log",
  "serde",
  "serde_derive",
