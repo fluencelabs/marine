@@ -119,13 +119,19 @@ fn main() -> Result<(), anyhow::Error> {
                 };
                 println!("{}", result);
             }
-            Some("help") | None => {
+            Some("interface") => {
+                let interface = app_service.get_interface();
+                println!("application service interface: {}", interface);
+            }
+            Some("h") | Some("help") | None => {
                 println!(
                             "Enter:\n\
+                                new [config_path]                       - to create a new AppService (old will be removed)
                                 load <module_name> <module_path>        - to load a new Wasm module into App service\n\
                                 unload <module_name>                    - to unload Wasm module from AppService\n\
-                                call <module_name> <func_name> <args>   - to call function with given name on module with given module_name\n\
-                                help                                    - to print this message\n\
+                                call <module_name> <func_name> [args]   - to call function with given name on module with given module_name\n\
+                                interface                               - to print public interface of current AppService\n\
+                                h/help                                  - to print this message\n\
                                 e/exit/q/quit                           - to exit"
                         );
             }
@@ -139,30 +145,28 @@ fn main() -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-fn create_service_from_config<S: AsRef<str>>(
+fn create_service_from_config<S: Into<String>>(
     config_file_path: Option<S>,
 ) -> Result<fluence_app_service::AppService, anyhow::Error> {
-    use anyhow::Context;
+    let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
+    let service_id = uuid::Uuid::new_v4().to_string();
 
-    let config = match config_file_path {
+    let app_service = match config_file_path {
         Some(config_file_path) => {
-            let file_content = std::fs::read(config_file_path.as_ref())?;
-            let config: fluence_app_service::RawModulesConfig =
-                serde_json::from_slice(&file_content)?;
-            config
+            let config_file_path = config_file_path.into();
+            fluence_app_service::AppService::with_raw_config(
+                config_file_path,
+                &service_id,
+                Some(&tmp_path),
+            )
         }
         None => {
             let mut config: fluence_app_service::RawModulesConfig = <_>::default();
-            let tmp: String = std::env::temp_dir().to_string_lossy().into();
-            config.service_base_dir = Some(tmp);
+            config.service_base_dir = Some(tmp_path);
 
-            config
+            fluence_app_service::AppService::new(std::iter::empty(), config, &service_id)
         }
-    };
-
-    let service_id = uuid::Uuid::new_v4().to_string();
-    let app_service =
-        fluence_app_service::AppService::new(std::iter::empty(), config, service_id.clone())?;
+    }?;
 
     println!("app service's created with service id = {}", service_id);
 

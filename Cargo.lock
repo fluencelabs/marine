@@ -527,7 +527,6 @@ dependencies = [
 name = "fluence-app-service"
 version = "0.1.0"
 dependencies = [
- "cmd_lib",
  "fluence-faas",
  "log",
  "serde_json",

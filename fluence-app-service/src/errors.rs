@@ -15,7 +15,6 @@
  */
 
 use fluence_faas::FaaSError;
-use serde_json::Error as SerdeError;
 
 use std::io::Error as IOError;
 use std::error::Error;
@@ -23,10 +22,7 @@ use std::error::Error;
 #[derive(Debug)]
 pub enum AppServiceError {
     /// An error related to config parsing.
-    InvalidArguments(String),
-
-    /// An error related to config parsing.
-    ConfigParseError(SerdeError),
+    InvalidConfig(String),
 
     /// Various errors related to file i/o.
     IOError(String),
@@ -40,8 +36,7 @@ impl Error for AppServiceError {}
 impl std::fmt::Display for AppServiceError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            AppServiceError::InvalidArguments(err_msg) => write!(f, "{}", err_msg),
-            AppServiceError::ConfigParseError(err) => write!(f, "{}", err),
+            AppServiceError::InvalidConfig(err_msg) => write!(f, "{}", err_msg),
             AppServiceError::IOError(err_msg) => write!(f, "{}", err_msg),
             AppServiceError::FaaSError(err) => write!(f, "{}", err),
         }
@@ -60,15 +55,9 @@ impl From<FaaSError> for AppServiceError {
     }
 }
 
-impl From<SerdeError> for AppServiceError {
-    fn from(err: SerdeError) -> Self {
-        AppServiceError::ConfigParseError(err)
-    }
-}
-
 impl From<toml::de::Error> for AppServiceError {
     fn from(err: toml::de::Error) -> Self {
-        AppServiceError::InvalidArguments(format!("{}", err))
+        AppServiceError::InvalidConfig(format!("{}", err))
     }
 }
 

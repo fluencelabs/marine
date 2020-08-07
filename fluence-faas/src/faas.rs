@@ -92,7 +92,8 @@ impl FluenceFaaS {
         let modules = config.modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
             Self::load_modules(dir, ModulesLoadStrategy::All)
         })?;
-        Self::with_modules(modules, config)
+
+        Self::with_modules::<_, ModulesConfig>(modules, config)
     }
 
     /// Creates FaaS with given modules.

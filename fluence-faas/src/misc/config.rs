@@ -18,7 +18,6 @@ use crate::FaaSError;
 use crate::Result;
 
 use serde_derive::{Serialize, Deserialize};
-use toml::from_slice;
 
 use std::collections::HashMap;
 use std::convert::TryInto;
@@ -241,7 +240,7 @@ fn from_raw_modules_config(config: RawModulesConfig) -> Result<ModulesConfig> {
 /// Parse config from TOML.
 pub(crate) fn load_config(config_file_path: std::path::PathBuf) -> Result<RawModulesConfig> {
     let file_content = std::fs::read(config_file_path)?;
-    Ok(from_slice(&file_content)?)
+    Ok(toml::from_slice(&file_content)?)
 }
 
 fn from_raw_module_config(config: RawModuleConfig) -> Result<(String, ModuleConfig)> {

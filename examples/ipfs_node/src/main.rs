@@ -23,7 +23,7 @@ const IPFS_MODULES_CONFIG_PATH: &str = "Config.toml";
 
 fn main() -> Result<(), anyhow::Error> {
     env_logger::init();
-    let mut ipfs_node = AppService::new(std::iter::empty(), );
+    let mut ipfs_node = AppService::with_raw_config();
     println!("ipfs node interface is\n{}", ipfs_node.get_interface());
 
     let node_address = ipfs_node.call("ipfs_node.wasm", "get_address", &[])?;
