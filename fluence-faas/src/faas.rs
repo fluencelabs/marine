@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use crate::misc::{CoreModulesConfig, make_fce_config};
-use crate::RawCoreModulesConfig;
+use crate::misc::ModulesConfig;
 use crate::Result;
 
 use super::faas_interface::FaaSInterface;
@@ -23,7 +22,6 @@ use super::FaaSError;
 use super::IValue;
 
 use fce::FCE;
-use fce::FCEModuleConfig;
 
 use std::convert::TryInto;
 use std::fs;
@@ -76,9 +74,6 @@ impl<'a> ModulesLoadStrategy<'a> {
 
 pub struct FluenceFaaS {
     fce: FCE,
-
-    // config for code loaded by call_code function
-    faas_code_config: FCEModuleConfig,
 }
 
 impl FluenceFaaS {
@@ -89,9 +84,12 @@ impl FluenceFaaS {
     }
 
     /// Creates FaaS from config deserialized from TOML.
-    pub fn with_raw_config(config: RawCoreModulesConfig) -> Result<Self> {
-        let config = crate::misc::from_raw_config(config)?;
-        let modules = config.core_modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
+    pub fn with_raw_config<C>(config: C) -> Result<Self>
+    where
+        C: TryInto<ModulesConfig, Error = FaaSError>,
+    {
+        let config = config.try_into()?;
+        let modules = config.modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
             Self::load_modules(dir, ModulesLoadStrategy::All)
         })?;
         Self::with_modules(modules, config)
@@ -101,48 +99,48 @@ impl FluenceFaaS {
     pub fn with_modules<I, C>(modules: I, config: C) -> Result<Self>
     where
         I: IntoIterator<Item = (String, Vec<u8>)>,
-        C: TryInto<CoreModulesConfig>,
+        C: TryInto<ModulesConfig>,
         FaaSError: From<C::Error>,
     {
         let mut fce = FCE::new();
         let mut config = config.try_into()?;
 
         for (name, bytes) in modules {
-            let module_config = crate::misc::make_fce_config(config.modules_config.remove(&name))?;
-            fce.load_module(name.clone(), &bytes, module_config)?;
+            let module_config = match config.modules_config.remove(&name) {
+                module_config @ Some(_) => module_config,
+                None => config.default_modules_config.clone(),
+            };
+
+            let fce_module_config = crate::misc::make_fce_config(module_config)?;
+            fce.load_module(name.clone(), &bytes, fce_module_config)?;
         }
 
-        let faas_code_config = make_fce_config(config.rpc_module_config)?;
-
-        Ok(Self {
-            fce,
-            faas_code_config,
-        })
+        Ok(Self { fce })
     }
 
-    /// Searches for modules in `config.core_modules_dir`, loads only those in the `names` set
+    /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
     pub fn with_module_names<C>(names: &HashSet<String>, config: C) -> Result<Self>
     where
-        C: TryInto<CoreModulesConfig>,
+        C: TryInto<ModulesConfig>,
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
-        let modules = config.core_modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
+        let modules = config.modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
             Self::load_modules(dir, ModulesLoadStrategy::Named(names))
         })?;
 
-        Self::with_modules::<_, CoreModulesConfig>(modules, config)
+        Self::with_modules::<_, ModulesConfig>(modules, config)
     }
 
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
     fn load_modules(
-        core_modules_dir: &str,
-        modules: ModulesLoadStrategy,
+        modules_dir: &str,
+        modules: ModulesLoadStrategy<'_>,
     ) -> Result<Vec<(String, Vec<u8>)>> {
         use FaaSError::IOError;
 
-        let mut dir_entries = fs::read_dir(core_modules_dir)
-            .map_err(|e| IOError(format!("{}: {}", core_modules_dir, e)))?;
+        let mut dir_entries =
+            fs::read_dir(modules_dir).map_err(|e| IOError(format!("{}: {}", modules_dir, e)))?;
 
         let loaded = dir_entries.try_fold(vec![], |mut vec, entry| {
             let entry = entry?;
@@ -179,34 +177,6 @@ impl FluenceFaaS {
         Ok(loaded)
     }
 
-    /// Executes provided Wasm code in the internal environment (with access to module exports).
-    pub fn call_code<S: AsRef<str>>(
-        &mut self,
-        wasm: &[u8],
-        func_name: S,
-        args: &[IValue],
-    ) -> Result<Vec<IValue>> {
-        self.call_code_(wasm, func_name.as_ref(), args)
-    }
-
-    pub fn call_code_(
-        &mut self,
-        wasm: &[u8],
-        func_name: &str,
-        args: &[IValue],
-    ) -> Result<Vec<IValue>> {
-        // We need this because every wasm code loaded into VM needs a module name
-        let anonymous_module = "anonymous_module_name";
-
-        self.fce
-            .load_module(anonymous_module, wasm, self.faas_code_config.clone())?;
-
-        let call_result = self.fce.call(anonymous_module, func_name, args)?;
-        self.fce.unload_module(anonymous_module)?;
-
-        Ok(call_result)
-    }
-
     /// Call a specified function of loaded on a startup module by its name.
     pub fn call_module<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
@@ -219,8 +189,8 @@ impl FluenceFaaS {
             .map_err(Into::into)
     }
 
-    /// Return all export functions (name and signatures) of loaded on a startup modules.
-    pub fn get_interface(&self) -> FaaSInterface {
+    /// Return all export functions (name and signatures) of loaded modules.
+    pub fn get_interface(&self) -> FaaSInterface<'_> {
         let modules = self
             .fce
             .interface()

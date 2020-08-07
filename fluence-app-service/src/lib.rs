@@ -25,24 +25,20 @@
 )]
 
 mod errors;
-mod faas;
-mod faas_interface;
-mod misc;
+mod service;
 
-pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
+pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 
-pub use errors::FaaSError;
+pub use errors::AppServiceError;
+pub use service::AppService;
 
-pub use fce::IValue;
-pub use fce::IType;
-pub use fce::to_interface_value;
-pub use fce::from_interface_values;
-
-pub use faas::FluenceFaaS;
-pub use faas_interface::FaaSInterface;
-
-pub use misc::RawModulesConfig;
-pub use misc::RawModuleConfig;
-pub use misc::ModulesConfig;
-pub use misc::ModuleConfig;
-pub use misc::WASIConfig;
+pub use fluence_faas::IValue;
+pub use fluence_faas::IType;
+pub use fluence_faas::FaaSInterface;
+pub use fluence_faas::RawModulesConfig;
+pub use fluence_faas::RawModuleConfig;
+pub use fluence_faas::ModulesConfig;
+pub use fluence_faas::ModuleConfig;
+pub use fluence_faas::WASIConfig;
+pub use fluence_faas::to_interface_value;
+pub use fluence_faas::from_interface_values;

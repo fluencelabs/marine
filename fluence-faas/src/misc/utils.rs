@@ -28,8 +28,6 @@ use wasmer_runtime::Func;
 use wasmer_runtime::error::ResolveError;
 use wasmer_runtime::types::LocalOrImport;
 
-use std::path::PathBuf;
-
 // based on Wasmer: https://github.com/wasmerio/wasmer/blob/081f6250e69b98b9f95a8f62ad6d8386534f3279/lib/runtime-core/src/instance.rs#L863
 /// Extract export function from Wasmer instance by name.
 pub(crate) unsafe fn get_export_func_by_name<'a, Args, Rets>(
@@ -95,22 +93,25 @@ where
         }
     };
 
-    let typed_func: Func<Args, Rets, wasmer_core::typed_func::Wasm> =
+    let typed_func: Func<'_, Args, Rets, wasmer_core::typed_func::Wasm> =
         Func::from_raw_parts(func_wasm_inner, export_func_ptr, None, ctx as _);
 
     Ok(typed_func)
 }
 
-/// Make FCE config based on parsed raw config.
-pub(crate) fn make_fce_config(config: Option<ModuleConfig>) -> crate::Result<FCEModuleConfig> {
+/// Make FCE config based on parsed config.
+pub(crate) fn make_fce_config(
+    module_config: Option<ModuleConfig>,
+) -> crate::Result<FCEModuleConfig> {
     use super::imports::create_host_import_func;
     use super::imports::log_utf8_string;
     use wasmer_core::import::Namespace;
+    use std::path::PathBuf;
 
     let mut wasm_module_config = FCEModuleConfig::default();
 
-    let module_config = match config {
-        Some(config) => config,
+    let module_config = match module_config {
+        Some(module_config) => module_config,
         None => return Ok(wasm_module_config),
     };
 
@@ -120,10 +121,8 @@ pub(crate) fn make_fce_config(config: Option<ModuleConfig>) -> crate::Result<FCE
 
     let mut namespace = Namespace::new();
 
-    if let Some(logger_enabled) = module_config.logger_enabled {
-        if logger_enabled {
-            namespace.insert("log_utf8_string", func!(log_utf8_string));
-        }
+    if module_config.logger_enabled {
+        namespace.insert("log_utf8_string", func!(log_utf8_string));
     }
 
     if let Some(wasi) = module_config.wasi {
@@ -141,7 +140,7 @@ pub(crate) fn make_fce_config(config: Option<ModuleConfig>) -> crate::Result<FCE
         if let Some(mapped_dirs) = wasi.mapped_dirs {
             wasm_module_config.wasi_mapped_dirs = mapped_dirs
                 .into_iter()
-                .map(|(from, to)| (from, PathBuf::from(to)))
+                .map(|(alias, path)| (alias, PathBuf::from(path)))
                 .collect::<Vec<_>>();
         }
 
