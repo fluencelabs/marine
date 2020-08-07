@@ -14,27 +14,23 @@
  * limitations under the License.
  */
 
-use fluence_faas::FluenceFaaS;
-use fluence_faas::IValue;
+use fluence_app_service::AppService;
+use fluence_app_service::IValue;
 
 use std::path::PathBuf;
-use anyhow::Context;
 
 const IPFS_MODULES_CONFIG_PATH: &str = "Config.toml";
-const IPFS_RPC: &str = "wasm/artifacts/ipfs_rpc.wasm";
 
 fn main() -> Result<(), anyhow::Error> {
     env_logger::init();
-    let ipfs_rpc = std::fs::read(IPFS_RPC).with_context(|| format!("{} wasn't found", IPFS_RPC))?;
-
-    let mut ipfs_node = FluenceFaaS::new(PathBuf::from(IPFS_MODULES_CONFIG_PATH))?;
+    let mut ipfs_node = AppService::new(std::iter::empty(), );
     println!("ipfs node interface is\n{}", ipfs_node.get_interface());
 
     let node_address = ipfs_node.call("ipfs_node.wasm", "get_address", &[])?;
     println!("ipfs node address is:\n{:?}", node_address);
 
-    let result = ipfs_node.call_code(
-        &ipfs_rpc,
+    let result = ipfs_node.call(
+        "ipfs_rpc.wasm",
         "get",
         &[IValue::String(
             "QmXdC36pX1B1sdHdbri859vMYctQjAhvTmkWyG9xzhShxb".to_string(),

@@ -85,7 +85,8 @@ impl FluenceFaaS {
     /// Creates FaaS from config deserialized from TOML.
     pub fn with_raw_config<C>(config: C) -> Result<Self>
     where
-        C: TryInto<ModulesConfig, Error = FaaSError>,
+        C: TryInto<ModulesConfig>,
+        FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
         let modules = config.modules_dir.as_ref().map_or(Ok(vec![]), |dir| {

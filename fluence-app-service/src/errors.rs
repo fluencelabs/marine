@@ -15,6 +15,7 @@
  */
 
 use fluence_faas::FaaSError;
+use serde_json::Error as SerdeError;
 
 use std::io::Error as IOError;
 use std::error::Error;
@@ -23,6 +24,9 @@ use std::error::Error;
 pub enum AppServiceError {
     /// An error related to config parsing.
     InvalidArguments(String),
+
+    /// An error related to config parsing.
+    ConfigParseError(SerdeError),
 
     /// Various errors related to file i/o.
     IOError(String),
@@ -37,6 +41,7 @@ impl std::fmt::Display for AppServiceError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             AppServiceError::InvalidArguments(err_msg) => write!(f, "{}", err_msg),
+            AppServiceError::ConfigParseError(err) => write!(f, "{}", err),
             AppServiceError::IOError(err_msg) => write!(f, "{}", err_msg),
             AppServiceError::FaaSError(err) => write!(f, "{}", err),
         }
@@ -55,6 +60,12 @@ impl From<FaaSError> for AppServiceError {
     }
 }
 
+impl From<SerdeError> for AppServiceError {
+    fn from(err: SerdeError) -> Self {
+        AppServiceError::ConfigParseError(err)
+    }
+}
+
 impl From<toml::de::Error> for AppServiceError {
     fn from(err: toml::de::Error) -> Self {
         AppServiceError::InvalidArguments(format!("{}", err))
@@ -62,7 +73,7 @@ impl From<toml::de::Error> for AppServiceError {
 }
 
 impl From<std::convert::Infallible> for AppServiceError {
-    fn from(inf: std::convert::Infallible) -> Self {
-        match inf {}
+    fn from(_: std::convert::Infallible) -> Self {
+        unreachable!()
     }
 }

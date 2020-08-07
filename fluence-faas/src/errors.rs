@@ -62,7 +62,7 @@ impl From<toml::de::Error> for FaaSError {
 }
 
 impl From<std::convert::Infallible> for FaaSError {
-    fn from(inf: std::convert::Infallible) -> Self {
-        match inf {}
+    fn from(_: std::convert::Infallible) -> Self {
+        unreachable!()
     }
 }

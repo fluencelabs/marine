@@ -142,6 +142,8 @@ fn main() -> Result<(), anyhow::Error> {
 fn create_service_from_config<S: AsRef<str>>(
     config_file_path: Option<S>,
 ) -> Result<fluence_app_service::AppService, anyhow::Error> {
+    use anyhow::Context;
+
     let config = match config_file_path {
         Some(config_file_path) => {
             let file_content = std::fs::read(config_file_path.as_ref())?;
@@ -162,7 +164,7 @@ fn create_service_from_config<S: AsRef<str>>(
     let app_service =
         fluence_app_service::AppService::new(std::iter::empty(), config, service_id.clone())?;
 
-    println!("app service's created with service_id {}", service_id);
+    println!("app service's created with service id = {}", service_id);
 
     Ok(app_service)
 }

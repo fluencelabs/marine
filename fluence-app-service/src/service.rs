@@ -22,6 +22,7 @@ use fluence_faas::FluenceFaaS;
 use fluence_faas::ModulesConfig;
 
 use std::convert::TryInto;
+use std::path::PathBuf;
 
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
@@ -37,18 +38,38 @@ pub struct AppService {
 impl AppService {
     /// Creates Service with given modules and service id.
     pub fn new<I, C, S>(modules: I, config: C, service_id: S) -> Result<Self>
-        where
-            I: IntoIterator<Item = String>,
-            C: TryInto<ModulesConfig>,
-            S: AsRef<str>,
-            AppServiceError: From<C::Error>,
+    where
+        I: IntoIterator<Item = String>,
+        C: TryInto<ModulesConfig>,
+        S: AsRef<str>,
+        AppServiceError: From<C::Error>,
     {
         let config: ModulesConfig = config.try_into()?;
         let service_id = service_id.as_ref();
-        let config = Self::set_env_and_dirs(config, service_id)?;
+        let config = Self::set_env_and_dirs(config, service_id, None)?;
 
         let modules = modules.into_iter().collect();
         let faas = FluenceFaaS::with_module_names(&modules, config)?;
+
+        Ok(Self { faas })
+    }
+
+    /// Creates Service with given raw config.
+    pub fn wit_raw_config<P, SI, SB>(config: P, service_id: SI, service_base_dir: SB) -> Result<Self>
+    where
+        P: Into<PathBuf>,
+        SI: AsRef<str>,
+        SB: AsRef<str>,
+    {
+        let service_id = service_id.as_ref();
+        let service_base_dir = service_base_dir.as_ref();
+
+        let config_content = std::fs::read(config.into())?;
+        let config: crate::RawModulesConfig = serde_json::from_slice(&config_content)?;
+        let config = config.try_into()?;
+        let config = Self::set_env_and_dirs(config, service_id, Some(service_base_dir))?;
+
+        let faas = FluenceFaaS::with_raw_config(config)?;
 
         Ok(Self { faas })
     }
@@ -78,11 +99,15 @@ impl AppService {
     ///     - service_base_dir/service_id/SERVICE_LOCAL_DIR_NAME
     ///     - service_base_dir/service_id/SERVICE_TMP_DIR_NAME
     ///  2. adding service_id to environment variables
-    fn set_env_and_dirs(mut config: ModulesConfig, service_id: &str) -> Result<ModulesConfig> {
-        let base_dir = match config.service_base_dir {
-            Some(ref base_dir) => base_dir,
-            // TODO: refactor it later
-            None => {
+    fn set_env_and_dirs(
+        mut config: ModulesConfig,
+        service_id: &str,
+        service_base_dir: Option<&str>,
+    ) -> Result<ModulesConfig> {
+        let base_dir = match (config.service_base_dir, service_base_dir) {
+            (_, Some(base_dir)) => base_dir,
+            (Some(ref base_dir), None) => base_dir,
+            _ => {
                 return Err(AppServiceError::IOError(String::from(
                     "service_base_dir should be specified",
                 )))
@@ -154,12 +179,6 @@ impl AppService {
 // This API is intended for testing purposes (mostly in FCE REPL)
 #[cfg(feature = "raw-module-api")]
 impl AppService {
-    pub fn with_config<P: Into<std::path::PathBuf>>(config: P) -> Result<Self> {
-        let faas = fluence_faas::FluenceFaaS::new(config)?;
-
-        Ok(Self { faas })
-    }
-
     pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
     where
         S: Into<String>,
