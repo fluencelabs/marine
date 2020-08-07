@@ -22,6 +22,7 @@ use fluence_faas::FluenceFaaS;
 use fluence_faas::ModulesConfig;
 
 use std::convert::TryInto;
+use std::path::PathBuf;
 
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
@@ -35,7 +36,7 @@ pub struct AppService {
 }
 
 impl AppService {
-    /// Creates Service with given modules and service id.
+    /// Create Service with given modules and service id.
     pub fn new<I, C, S>(modules: I, config: C, service_id: S) -> Result<Self>
     where
         I: IntoIterator<Item = String>,
@@ -45,7 +46,7 @@ impl AppService {
     {
         let config: ModulesConfig = config.try_into()?;
         let service_id = service_id.as_ref();
-        let config = Self::set_env_and_dirs(config, service_id)?;
+        let config = Self::set_env_and_dirs(config, service_id, None)?;
 
         let modules = modules.into_iter().collect();
         let faas = FluenceFaaS::with_module_names(&modules, config)?;
@@ -53,9 +54,33 @@ impl AppService {
         Ok(Self { faas })
     }
 
+    /// Create Service with given raw config, service id and service base dir.
+    pub fn with_raw_config<P, SI>(
+        config: P,
+        service_id: SI,
+        service_base_dir: Option<&str>,
+    ) -> Result<Self>
+    where
+        P: Into<PathBuf>,
+        SI: AsRef<str>,
+    {
+        let service_id = service_id.as_ref();
+        let service_base_dir = service_base_dir;
+
+        let config_content = std::fs::read(config.into())?;
+        let config: crate::RawModulesConfig = toml::from_slice(&config_content)?;
+
+        let config = config.try_into()?;
+        let config = Self::set_env_and_dirs(config, service_id, service_base_dir)?;
+
+        let faas = FluenceFaaS::with_raw_config(config)?;
+
+        Ok(Self { faas })
+    }
+
     /// Call a specified function of loaded module by its name.
     // TODO: replace serde_json::Value with Vec<u8>?
-    pub fn call_module<MN: AsRef<str>, FN: AsRef<str>>(
+    pub fn call<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
         module_name: MN,
         func_name: FN,
@@ -64,7 +89,7 @@ impl AppService {
         let arguments = Self::json_to_ivalue(arguments)?;
 
         self.faas
-            .call_module(module_name, func_name, &arguments)
+            .call(module_name, func_name, &arguments)
             .map_err(Into::into)
     }
 
@@ -78,11 +103,15 @@ impl AppService {
     ///     - service_base_dir/service_id/SERVICE_LOCAL_DIR_NAME
     ///     - service_base_dir/service_id/SERVICE_TMP_DIR_NAME
     ///  2. adding service_id to environment variables
-    fn set_env_and_dirs(mut config: ModulesConfig, service_id: &str) -> Result<ModulesConfig> {
-        let base_dir = match config.service_base_dir {
-            Some(ref base_dir) => base_dir,
-            // TODO: refactor it later
-            None => {
+    fn set_env_and_dirs(
+        mut config: ModulesConfig,
+        service_id: &str,
+        service_base_dir: Option<&str>,
+    ) -> Result<ModulesConfig> {
+        let base_dir = match (&config.service_base_dir, service_base_dir) {
+            (_, Some(base_dir)) => base_dir,
+            (Some(ref base_dir), None) => base_dir,
+            _ => {
                 return Err(AppServiceError::IOError(String::from(
                     "service_base_dir should be specified",
                 )))
@@ -130,7 +159,7 @@ impl AppService {
         let is_empty_obj = arguments.as_object().map_or(false, |m| m.is_empty());
         let arguments = if !is_null && !is_empty_arr && !is_empty_obj {
             Some(fluence_faas::to_interface_value(&arguments).map_err(|e| {
-                AppServiceError::InvalidArguments(format!(
+                AppServiceError::InvalidConfig(format!(
                     "can't parse arguments as array of interface types: {}",
                     e
                 ))
@@ -143,10 +172,29 @@ impl AppService {
             Some(IValue::Record(arguments)) => Ok(arguments.into_vec()),
             // Convert null, [] and {} into vec![]
             None => Ok(vec![]),
-            other => Err(AppServiceError::InvalidArguments(format!(
+            other => Err(AppServiceError::InvalidConfig(format!(
                 "expected array of interface values: got {:?}",
                 other
             ))),
         }
+    }
+}
+
+// This API is intended for testing purposes (mostly in FCE REPL)
+#[cfg(feature = "raw-module-api")]
+impl AppService {
+    pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
+    where
+        S: Into<String>,
+        C: TryInto<crate::ModuleConfig>,
+        fluence_faas::FaaSError: From<C::Error>,
+    {
+        self.faas
+            .load_module(name, &wasm_bytes, config)
+            .map_err(Into::into)
+    }
+
+    pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
+        self.faas.unload_module(module_name).map_err(Into::into)
     }
 }

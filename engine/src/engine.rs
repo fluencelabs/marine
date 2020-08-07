@@ -67,16 +67,16 @@ impl FCE {
     /// Load a new module inside FCE.
     pub fn load_module<S: Into<String>>(
         &mut self,
-        module_name: S,
+        name: S,
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
     ) -> Result<()> {
-        self.load_module_(module_name.into(), wasm_bytes, config)
+        self.load_module_(name.into(), wasm_bytes, config)
     }
 
     pub fn load_module_(
         &mut self,
-        module_name: String,
+        name: String,
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
     ) -> Result<()> {
@@ -84,7 +84,7 @@ impl FCE {
 
         let module = FCEModule::new(&wasm_bytes, config, &self.modules)?;
 
-        match self.modules.entry(module_name) {
+        match self.modules.entry(name) {
             Entry::Vacant(entry) => {
                 entry.insert(module);
                 Ok(())
@@ -94,8 +94,8 @@ impl FCE {
     }
 
     /// Unload previously loaded module.
-    pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
-        self.unload_module_(module_name.as_ref())
+    pub fn unload_module<S: AsRef<str>>(&mut self, name: S) -> Result<()> {
+        self.unload_module_(name.as_ref())
     }
 
     pub fn unload_module_(&mut self, module_name: &str) -> Result<()> {

@@ -16,6 +16,7 @@ members = [
     "fluence-app-service",
     "fluence-faas",
     "tools/cli",
+    "tools/repl",
 ]
 
 [profile.release]

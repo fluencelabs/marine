@@ -26,7 +26,7 @@ fn main() -> Result<(), anyhow::Error> {
     let mut records_test = FluenceFaaS::new(PathBuf::from(RECORDS_MODULES_CONFIG_PATH))?;
     println!("ipfs node interface is\n{}", records_test.get_interface());
 
-    let result = records_test.call_module("pure.wasm", "invoke", &[])?;
+    let result = records_test.call("pure.wasm", "invoke", &[])?;
     println!("execution result {:?}", result);
 
     Ok(())

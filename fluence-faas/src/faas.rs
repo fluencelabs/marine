@@ -15,19 +15,18 @@
  */
 
 use crate::misc::ModulesConfig;
+use crate::faas_interface::FaaSFunctionSignature;
+use crate::faas_interface::FaaSInterface;
+use crate::FaaSError;
 use crate::Result;
-
-use super::faas_interface::FaaSInterface;
-use super::FaaSError;
-use super::IValue;
+use crate::IValue;
 
 use fce::FCE;
 
 use std::convert::TryInto;
+use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
-use crate::faas_interface::FaaSFunctionSignature;
-use std::collections::HashSet;
 
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
@@ -86,13 +85,15 @@ impl FluenceFaaS {
     /// Creates FaaS from config deserialized from TOML.
     pub fn with_raw_config<C>(config: C) -> Result<Self>
     where
-        C: TryInto<ModulesConfig, Error = FaaSError>,
+        C: TryInto<ModulesConfig>,
+        FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
         let modules = config.modules_dir.as_ref().map_or(Ok(vec![]), |dir| {
             Self::load_modules(dir, ModulesLoadStrategy::All)
         })?;
-        Self::with_modules(modules, config)
+
+        Self::with_modules::<_, ModulesConfig>(modules, config)
     }
 
     /// Creates FaaS with given modules.
@@ -110,7 +111,6 @@ impl FluenceFaaS {
                 module_config @ Some(_) => module_config,
                 None => config.default_modules_config.clone(),
             };
-
             let fce_module_config = crate::misc::make_fce_config(module_config)?;
             fce.load_module(name.clone(), &bytes, fce_module_config)?;
         }
@@ -178,7 +178,7 @@ impl FluenceFaaS {
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub fn call_module<MN: AsRef<str>, FN: AsRef<str>>(
+    pub fn call<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
         module_name: MN,
         func_name: FN,
@@ -212,5 +212,27 @@ impl FluenceFaaS {
             .collect();
 
         FaaSInterface { modules }
+    }
+}
+
+// This API is intended for testing purposes (mostly in FCE REPL)
+#[cfg(feature = "raw-module-api")]
+impl FluenceFaaS {
+    pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
+    where
+        S: Into<String>,
+        C: TryInto<crate::ModuleConfig>,
+        FaaSError: From<C::Error>,
+    {
+        let config = config.map(|c| c.try_into()).transpose()?;
+
+        let fce_module_config = crate::misc::make_fce_config(config)?;
+        self.fce
+            .load_module(name, &wasm_bytes, fce_module_config)
+            .map_err(Into::into)
+    }
+
+    pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
+        self.fce.unload_module(module_name).map_err(Into::into)
     }
 }

@@ -1,24 +1,18 @@
-core_modules_dir = "wasm/artifacts/wasm_modules"
+modules_dir = "wasm/artifacts/wasm_modules"
+service_base_dir = "/Users/tmp"
 
-[[core_module]]
+[[module]]
     name = "ipfs_node.wasm"
     mem_pages_count = 100
     logger_enabled = true
 
-    [core_module.imports]
-    mysql = "/usr/bin/mysql"
+    [module.imports]
     ipfs = "/usr/local/bin/ipfs"
 
-    [core_module.wasi]
+    [module.wasi]
     envs = ["IPFS_ADDR=/dns4/relay02.fluence.dev/tcp/15001", "timeout=1s"]
-    preopened_files = ["./wasm/artifacts"]
-    mapped_dirs = { "tmp" = "./wasm/artifacts" }
 
-[rpc_module]
+[[module]]
+    name = "zipfs_rpc.wasm"
     mem_pages_count = 100
     logger_enabled = true
-
-    [rpc_module.wasi]
-    envs = []
-    preopened_files = ["./wasm/artifacts"]
-    mapped_dirs = { "tmp" = "./wasm/artifacts" }
