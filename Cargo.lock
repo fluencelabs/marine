@@ -117,9 +117,9 @@ dependencies = [
 
 [[package]]
 name = "blake3"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59f88a20f7dc23e3896bcbd85add056543c87215de721468b90e0c85d5a9f365"
+checksum = "ce4f9586c9a3151c4b49b19e82ba163dd073614dd057e53c969e1a4db5b52720"
 dependencies = [
  "arrayref",
  "arrayvec",
@@ -150,9 +150,9 @@ checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 
 [[package]]
 name = "clap"
-version = "2.33.1"
+version = "2.33.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdfa80d47f954d53a35a64987ca1422f495b8d6483c0fe9f7117b36c2a792129"
+checksum = "10040cdf04294b565d9e0319955430099ec3813a64c952b86a41200ad714ae48"
 dependencies = [
  "ansi_term",
  "atty",
@@ -476,8 +476,10 @@ dependencies = [
  "anyhow",
  "clap",
  "fluence-app-service",
+ "rustop",
  "rustyline",
  "serde_json",
+ "uuid",
 ]
 
 [[package]]
@@ -515,7 +517,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#7018a64c29278a673e543867e691f74b3d652288"
+source = "git+https://github.com/fluencelabs/rust-sdk#8418111074644a1bc197315060facd34778099de"
 dependencies = [
  "fluence-sdk-macro",
  "fluence-sdk-main",
@@ -553,7 +555,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#7018a64c29278a673e543867e691f74b3d652288"
+source = "git+https://github.com/fluencelabs/rust-sdk#8418111074644a1bc197315060facd34778099de"
 dependencies = [
  "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
@@ -561,7 +563,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#7018a64c29278a673e543867e691f74b3d652288"
+source = "git+https://github.com/fluencelabs/rust-sdk#8418111074644a1bc197315060facd34778099de"
 dependencies = [
  "log",
 ]
@@ -569,7 +571,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#7018a64c29278a673e543867e691f74b3d652288"
+source = "git+https://github.com/fluencelabs/rust-sdk#8418111074644a1bc197315060facd34778099de"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -798,9 +800,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.73"
+version = "0.2.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd7d4bd64732af4bf3a67f367c27df8520ad7e230c5817b8ff485864d80242b9"
+checksum = "a2f02823cf78b754822df5f7f268fb59822e7296276d3e069d8e8cb26a14bd10"
 
 [[package]]
 name = "lock_api"
@@ -1167,6 +1169,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustop"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ccb57833f46c9d679d68f383e81b9a74b82aa8d6f8a9c9aaae7fc29476bc3274"
+
+[[package]]
 name = "rustyline"
 version = "6.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1294,9 +1302,9 @@ checksum = "502d53007c02d7605a05df1c1a73ee436952781653da5d0bf57ad608f66932c1"
 
 [[package]]
 name = "syn"
-version = "1.0.36"
+version = "1.0.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cdb98bcb1f9d81d07b536179c269ea15999b5d14ea958196413869445bb5250"
+checksum = "e69abc24912995b3038597a7a593be5053eb0fb44f3cc5beec0deb421790c1f4"
 dependencies = [
  "proc-macro2",
  "quote",

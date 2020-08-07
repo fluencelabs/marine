@@ -234,10 +234,3 @@ impl FluenceFaaS {
         self.fce.unload_module(module_name).map_err(Into::into)
     }
 }
-
-#[cfg(feature = "raw-module-api")]
-impl Default for FluenceFaaS {
-    fn default() -> Self {
-        Self { fce: FCE::new() }
-    }
-}
