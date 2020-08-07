@@ -475,8 +475,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "exitfailure",
- "fluence-faas-service",
+ "fluence-app-service",
  "rustyline",
  "serde_json",
 ]
@@ -533,9 +532,6 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "toml",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
- "wasmer-wasi-fl",
 ]
 
 [[package]]
@@ -544,22 +540,6 @@ version = "0.1.0"
 dependencies = [
  "cmd_lib",
  "fce",
- "log",
- "serde",
- "serde_derive",
- "serde_json",
- "toml",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
- "wasmer-wasi-fl",
-]
-
-[[package]]
-name = "fluence-faas-service"
-version = "0.1.0"
-dependencies = [
- "cmd_lib",
- "fluence-faas",
  "log",
  "serde",
  "serde_derive",

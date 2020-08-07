@@ -224,7 +224,7 @@ impl FluenceFaaS {
     {
         let config = config.map(|c| c.try_into()).transpose()?;
 
-        let fce_module_config = crate::misc::make_fce_config(config, None)?;
+        let fce_module_config = crate::misc::make_fce_config(config)?;
         self.fce
             .load_module(name, &wasm_bytes, fce_module_config)
             .map_err(Into::into)

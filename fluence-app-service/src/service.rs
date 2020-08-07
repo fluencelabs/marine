@@ -15,8 +15,8 @@
  */
 
 use crate::Result;
-use super::ServiceError;
-use super::IValue;
+use crate::AppServiceError;
+use crate::IValue;
 
 use fluence_faas::FluenceFaaS;
 use fluence_faas::ModulesConfig;
@@ -26,20 +26,20 @@ use std::convert::TryInto;
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 
 // TODO: remove and use mutex instead
-unsafe impl Send for FluenceFaaSService {}
+unsafe impl Send for AppService {}
 
-pub struct FluenceFaaSService {
+pub struct AppService {
     faas: FluenceFaaS,
 }
 
-impl FluenceFaaSService {
+impl AppService {
     /// Creates Service with given modules and service id.
     pub fn new<I, C, S>(modules: I, config: C, service_id: S) -> Result<Self>
-        where
-            I: IntoIterator<Item = String>,
-            C: TryInto<ModulesConfig>,
-            S: AsRef<str>,
-            ServiceError: From<C::Error>,
+    where
+        I: IntoIterator<Item = String>,
+        C: TryInto<ModulesConfig>,
+        S: AsRef<str>,
+        AppServiceError: From<C::Error>,
     {
         let config: ModulesConfig = config.try_into()?;
         let service_id = service_id.as_ref();
@@ -79,7 +79,7 @@ impl FluenceFaaSService {
             Some(ref base_dir) => base_dir,
             // TODO: refactor it later
             None => {
-                return Err(ServiceError::IOError(String::from(
+                return Err(AppServiceError::IOError(String::from(
                     "service_base_dir should be specified",
                 )))
             }
@@ -117,7 +117,7 @@ impl FluenceFaaSService {
         let is_empty_obj = arguments.as_object().map_or(false, |m| m.is_empty());
         let arguments = if !is_null && !is_empty_arr && !is_empty_obj {
             Some(fluence_faas::to_interface_value(&arguments).map_err(|e| {
-                ServiceError::InvalidArguments(format!(
+                AppServiceError::InvalidArguments(format!(
                     "can't parse arguments as array of interface types: {}",
                     e
                 ))
@@ -130,7 +130,7 @@ impl FluenceFaaSService {
             Some(IValue::Record(arguments)) => Ok(arguments.into_vec()),
             // Convert null, [] and {} into vec![]
             None => Ok(vec![]),
-            other => Err(ServiceError::InvalidArguments(format!(
+            other => Err(AppServiceError::InvalidArguments(format!(
                 "expected array of interface values: got {:?}",
                 other
             ))),
@@ -139,16 +139,16 @@ impl FluenceFaaSService {
 }
 
 #[cfg(feature = "module-raw-api")]
-impl FluenceFaaSService {
+impl AppService {
     fn load_module<S, C>(
         &mut self,
         module_name: S,
         wasm_bytes: &[u8],
         config: Option<C>,
     ) -> Result<()>
-        where
-            S: Into<String>,
-            C: TryInto<crate::ModuleConfig>,
+    where
+        S: Into<String>,
+        C: TryInto<crate::ModuleConfig>,
     {
         let mut config = config.try_into()?;
 
@@ -165,12 +165,12 @@ impl FluenceFaaSService {
 
 // This API is intended for testing purposes (mostly in FCE REPL)
 #[cfg(feature = "raw-module-api")]
-impl FluenceFaaSService {
+impl AppService {
     pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
-        where
-            S: Into<String>,
-            C: TryInto<crate::ModuleConfig>,
-            fluence_faas::FaaSError: From<C::Error>,
+    where
+        S: Into<String>,
+        C: TryInto<crate::ModuleConfig>,
+        fluence_faas::FaaSError: From<C::Error>,
     {
         self.faas
             .load_module(name, &wasm_bytes, config)
@@ -183,7 +183,7 @@ impl FluenceFaaSService {
 }
 
 #[cfg(feature = "raw-module-api")]
-impl Default for FluenceFaaSService {
+impl Default for AppService {
     fn default() -> Self {
         Self {
             faas: <_>::default(),

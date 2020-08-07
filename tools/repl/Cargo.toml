@@ -12,10 +12,9 @@ name = "fce-repl"
 path = "src/main.rs"
 
 [dependencies]
-fluence-faas-service = { path = "../../fluence-faas-service", features = ["raw-module-api"] }
+fluence-app-service = { path = "../../fluence-app-service", features = ["raw-module-api"] }
 
 rustyline = "6.1.2"
 anyhow = "1.0.31"
 clap = "2.33.1"
-exitfailure = "0.5.1"
 serde_json = "1.0.57"

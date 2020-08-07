@@ -7,14 +7,12 @@ edition = "2018"
 [dependencies]
 fluence-faas = { path = "../fluence-faas" }
 
-wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
-# dynamicfunc-fat-closures allows using state inside DynamicFunc
-wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
-wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.0" }
-
 toml = "0.5.6"
 serde = { version = "1.0.111", features = ["derive"] }
 serde_json = "1.0.53"
 serde_derive = "1.0.111"
 cmd_lib = "0.7.8"
 log = "0.4.8"
+
+[features]
+raw-module-api = ["fluence-faas/raw-module-api"]

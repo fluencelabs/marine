@@ -41,7 +41,7 @@ macro_rules! next_argument {
 fn main() -> Result<(), anyhow::Error> {
     println!("Welcome to the Fluence FaaS REPL:");
     let mut rl = rustyline::Editor::<()>::new();
-    let mut app_service = fluence_faas_service::FluenceFaaSService::default();
+    let mut app_service =  fluence_app_service::AppService::default();
 
     loop {
         let readline = rl.readline(">> ");
@@ -60,7 +60,7 @@ fn main() -> Result<(), anyhow::Error> {
                         }
 
                         let result_msg = match app_service
-                            .load_module::<String, fluence_faas_service::ModuleConfig>(
+                            .load_module::<String,  fluence_app_service::ModuleConfig>(
                                 module_name.into(),
                                 &wasm_bytes.unwrap(),
                                 None,
