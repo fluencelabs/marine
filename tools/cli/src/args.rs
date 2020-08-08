@@ -63,3 +63,11 @@ pub fn show_wit<'a, 'b>() -> App<'a, 'b> {
             .short("i")
             .help("path to the Wasm file")])
 }
+
+pub fn repl<'a, 'b>() -> App<'a, 'b> {
+    SubCommand::with_name("repl")
+        .about("Start Fluence application service REPL")
+        .setting(clap::AppSettings::TrailingVarArg)
+        .setting(clap::AppSettings::AllowLeadingHyphen)
+        .arg(Arg::from_usage("[optional]... 'fluence repl arguments'").multiple(true))
+}
