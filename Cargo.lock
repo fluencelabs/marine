@@ -417,7 +417,7 @@ dependencies = [
 
 [[package]]
 name = "fce"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "boolinator",
  "fce-wit-interfaces",
@@ -430,33 +430,6 @@ dependencies = [
  "wasmer-interface-types-fl",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
- "wasmer-wasi-fl",
-]
-
-[[package]]
-name = "fce-cli"
-version = "0.1.1"
-dependencies = [
- "anyhow",
- "clap",
- "exitfailure",
- "fce-wit-generator",
- "fce-wit-parser",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "fce-repl"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "fluence-app-service",
- "rustop",
- "rustyline",
- "serde_json",
- "uuid",
  "wasmer-wasi-fl",
 ]
 
@@ -490,6 +463,19 @@ dependencies = [
  "walrus",
  "wasmer-interface-types-fl",
  "wasmer-runtime-core-fl",
+]
+
+[[package]]
+name = "fcli"
+version = "0.1.1"
+dependencies = [
+ "anyhow",
+ "clap",
+ "exitfailure",
+ "fce-wit-generator",
+ "fce-wit-parser",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -569,6 +555,20 @@ dependencies = [
  "serde_json",
  "syn",
  "uuid",
+]
+
+[[package]]
+name = "frepl"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "fluence-app-service",
+ "rustop",
+ "rustyline",
+ "serde_json",
+ "uuid",
+ "wasmer-wasi-fl",
 ]
 
 [[package]]
