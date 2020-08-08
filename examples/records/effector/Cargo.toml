@@ -1,12 +1,13 @@
 [package]
-name = "wasm_greeting"
+name = "record-effector"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [[bin]]
-name = "greeting"
+name = "effector"
 path = "src/main.rs"
 
 [dependencies]
 fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
+test-record = { path = "../test-record" }

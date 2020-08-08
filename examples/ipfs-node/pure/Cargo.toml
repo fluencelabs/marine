@@ -1,11 +1,11 @@
 [package]
-name = "wasm_ipfs_rpc"
+name = "ipfs-pure"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [[bin]]
-name = "ipfs_rpc"
+name = "ipfs_pure"
 path = "src/main.rs"
 
 [dependencies]

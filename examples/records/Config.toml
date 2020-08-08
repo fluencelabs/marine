@@ -1,11 +1,11 @@
-core_modules_dir = "wasm/artifacts/wasm_modules"
+modules_dir = "artifacts/wasm_modules"
 
-[[core_module]]
+[[module]]
     name = "effector.wasm"
     mem_pages_count = 1
     logger_enabled = true
 
-[[core_module]]
+[[module]]
     name = "pure.wasm"
     mem_pages_count = 1
     logger_enabled = true

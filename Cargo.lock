@@ -16,15 +16,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee2a4ec343196209d6594e19543ae87a39f96d5534d7174822a3ad825dd6ed7e"
 
 [[package]]
-name = "aho-corasick"
-version = "0.7.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "043164d8ba5c4c3035fec9bbee8647c0261d788f3474306f93bb65901cae0e86"
-dependencies = [
- "memchr",
-]
-
-[[package]]
 name = "ansi_term"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -358,31 +349,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "effector"
-version = "0.1.0"
-dependencies = [
- "fluence",
- "test-record",
-]
-
-[[package]]
 name = "either"
 version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb1f6b1ce1c140482ea30ddd3335fc0024ac7ee112895426e0a629a6c20adfe3"
-
-[[package]]
-name = "env_logger"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44533bbbb3bb3c1fa17d9f2e4e38bbbaf8396ba82193c4cb1b6445d711445d36"
-dependencies = [
- "atty",
- "humantime",
- "log",
- "regex",
- "termcolor",
-]
 
 [[package]]
 name = "erased-serde"
@@ -673,14 +643,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aaf91faf136cb47367fa430cd46e37a788775e7fa104f8b4bcb3861dc389b724"
 
 [[package]]
-name = "greeting"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "fluence-faas",
-]
-
-[[package]]
 name = "hashbrown"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -712,15 +674,6 @@ name = "hex"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "644f9158b2f133fd50f5fb3242878846d9eb792e445c893805ff0e3824006e35"
-
-[[package]]
-name = "humantime"
-version = "1.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df004cfca50ef23c36850aaaa59ad52cc70d0e90243c3c7737a4dd32dc7a3c4f"
-dependencies = [
- "quick-error",
-]
 
 [[package]]
 name = "id-arena"
@@ -762,12 +715,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "ipfs_node"
+name = "ipfs-effector"
 version = "0.1.0"
 dependencies = [
- "anyhow",
- "env_logger",
- "fluence-app-service",
+ "fluence",
+ "log",
+]
+
+[[package]]
+name = "ipfs-pure"
+version = "0.1.0"
+dependencies = [
+ "fluence",
  "log",
 ]
 
@@ -990,14 +949,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pure"
-version = "0.1.0"
-dependencies = [
- "fluence",
- "test-record",
-]
-
-[[package]]
 name = "pwasm-utils"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1007,12 +958,6 @@ dependencies = [
  "log",
  "parity-wasm",
 ]
-
-[[package]]
-name = "quick-error"
-version = "1.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
 
 [[package]]
 name = "quote"
@@ -1101,13 +1046,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "records"
+name = "record-effector"
 version = "0.1.0"
 dependencies = [
- "anyhow",
- "env_logger",
- "fluence-faas",
- "log",
+ "fluence",
+ "test-record",
+]
+
+[[package]]
+name = "record-pure"
+version = "0.1.0"
+dependencies = [
+ "fluence",
+ "test-record",
 ]
 
 [[package]]
@@ -1126,24 +1077,6 @@ dependencies = [
  "redox_syscall",
  "rust-argon2",
 ]
-
-[[package]]
-name = "regex"
-version = "1.3.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c3780fcf44b193bc4d09f36d2a3c87b251da4a046c87795a0d35f4f927ad8e6"
-dependencies = [
- "aho-corasick",
- "memchr",
- "regex-syntax",
- "thread_local",
-]
-
-[[package]]
-name = "regex-syntax"
-version = "0.6.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26412eb97c6b088a6997e05f69403a802a92d520de2f8e63c2b65f9e0f47c4e8"
 
 [[package]]
 name = "rust-argon2"
@@ -1334,15 +1267,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab0e7238dcc7b40a7be719a25365910f6807bd864f4cce6b2e6b873658e2b19d"
 
 [[package]]
-name = "termcolor"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb6bfa289a4d7c5766392812c0a1f4c1ba45afa1ad47803c11e1f407d846d75f"
-dependencies = [
- "winapi-util",
-]
-
-[[package]]
 name = "test-record"
 version = "0.1.0"
 dependencies = [
@@ -1376,15 +1300,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "thread_local"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d40c6d1b69745a6ec6fb1ca717914848da4b44ae29d9b3080cbee91d72a69b14"
-dependencies = [
- "lazy_static",
 ]
 
 [[package]]
@@ -1520,26 +1435,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cccddf32554fecc6acb585f82a32a72e28b48f8c4c1883ddfeeeaa96f7d8e519"
 
 [[package]]
-name = "wasm_greeting"
+name = "wasm-greeting"
 version = "0.1.0"
 dependencies = [
  "fluence",
-]
-
-[[package]]
-name = "wasm_ipfs_node"
-version = "0.1.0"
-dependencies = [
- "fluence",
- "log",
-]
-
-[[package]]
-name = "wasm_ipfs_rpc"
-version = "0.1.0"
-dependencies = [
- "fluence",
- "log",
 ]
 
 [[package]]
@@ -1747,15 +1646,6 @@ name = "winapi-i686-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6"
-
-[[package]]
-name = "winapi-util"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70ec6ce85bb158151cae5e5c87f95a8e97d2c0c4b001223f33a334e3ce5de178"
-dependencies = [
- "winapi",
-]
 
 [[package]]
 name = "winapi-x86_64-pc-windows-gnu"

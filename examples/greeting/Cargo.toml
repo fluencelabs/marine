@@ -1,9 +1,12 @@
 [package]
-name = "greeting"
+name = "wasm-greeting"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
+[[bin]]
+name = "greeting"
+path = "src/main.rs"
+
 [dependencies]
-fluence-faas = { path = "../../fluence-faas" }
-anyhow = "1.0.31"
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
