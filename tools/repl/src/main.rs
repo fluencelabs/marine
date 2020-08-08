@@ -119,6 +119,20 @@ fn main() -> Result<(), anyhow::Error> {
                 };
                 println!("{}", result);
             }
+            Some("envs") => {
+                next_argument!(module_name, args, "Module name should be specified");
+                match app_service.get_wasi_state(module_name) {
+                    Ok(wasi_state) => print_envs(wasi_state),
+                    Err(e) => println!("{}", e),
+                };
+            }
+            Some("fs") => {
+                next_argument!(module_name, args, "Module name should be specified");
+                match app_service.get_wasi_state(module_name) {
+                    Ok(wasi_state) => print_fs_state(wasi_state),
+                    Err(e) => println!("{}", e),
+                };
+            }
             Some("interface") => {
                 let interface = app_service.get_interface();
                 println!("application service interface:\n{}", interface);
@@ -131,6 +145,8 @@ fn main() -> Result<(), anyhow::Error> {
                                 unload <module_name>                    - to unload Wasm module from AppService\n\
                                 call <module_name> <func_name> [args]   - to call function with func_name of module with module_name\n\
                                 interface                               - to print public interface of current AppService\n\
+                                envs <module_name>                      - to print environment variables of module with module_name\n\
+                                fs <module_name>                        - to print filesystem state of module with module_name\n\
                                 h/help                                  - to print this message\n\
                                 e/exit/q/quit                           - to exit"
                         );
@@ -171,4 +187,42 @@ fn create_service_from_config<S: Into<String>>(
     println!("app service's created with service id = {}", service_id);
 
     Ok(app_service)
+}
+
+fn print_envs(wasi_state: &wasmer_wasi::state::WasiState) {
+    let envs = &wasi_state.envs;
+
+    println!("Environment variables:");
+    for env in envs.iter() {
+        match String::from_utf8(env.clone()) {
+            Ok(string) => println!("{}", string),
+            Err(_) => println!("{:?}", env),
+        }
+    }
+}
+
+fn print_fs_state(wasi_state: &wasmer_wasi::state::WasiState) {
+    let wasi_fs = &wasi_state.fs;
+
+    println!("preopened file descriptors:\n{:?}\n", wasi_fs.preopen_fds);
+
+    println!("name map:");
+    for (name, inode) in &wasi_fs.name_map {
+        println!("{} - {:?}", name, inode);
+    }
+
+    println!("\nfile descriptors map:");
+    for (id, fd) in &wasi_fs.fd_map {
+        println!("{} - {:?}", id, fd);
+    }
+
+    println!("\norphan file descriptors:");
+    for (fd, inode) in &wasi_fs.orphan_fds {
+        println!("{:?} - {:?}", fd, inode);
+    }
+
+    println!("\ninodes:");
+    for (id, inode) in wasi_fs.inodes.iter().enumerate() {
+        println!("{}: {:?}", id, inode);
+    }
 }

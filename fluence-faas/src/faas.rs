@@ -253,4 +253,11 @@ impl FluenceFaaS {
     pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
         self.fce.unload_module(module_name).map_err(Into::into)
     }
+
+    pub fn module_wasi_state<S: AsRef<str>>(
+        &mut self,
+        module_name: S,
+    ) -> Result<&wasmer_wasi::state::WasiState> {
+        self.fce.module_wasi_state(module_name).map_err(Into::into)
+    }
 }

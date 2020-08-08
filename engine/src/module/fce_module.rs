@@ -154,6 +154,10 @@ impl FCEModule {
         })
     }
 
+    pub(crate) fn get_wasi_state(&mut self) -> &wasmer_wasi::state::WasiState {
+        unsafe { wasmer_wasi::state::get_wasi_state(self.wasmer_instance.context_mut()) }
+    }
+
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
     pub(super) fn get_callable(&self, function_name: &str) -> Result<Arc<Callable>> {
         match self.exports_funcs.get(function_name) {

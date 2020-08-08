@@ -7,9 +7,10 @@ edition = "2018"
 [dependencies]
 fluence-faas = { path = "../fluence-faas" }
 
-toml = "0.5.6"
-serde_json = "1.0.53"
 log = "0.4.8"
+serde_json = "1.0.53"
+toml = "0.5.6"
+wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.0" }
 
 [features]
 raw-module-api = ["fluence-faas/raw-module-api"]

@@ -197,4 +197,11 @@ impl AppService {
     pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
         self.faas.unload_module(module_name).map_err(Into::into)
     }
+
+    pub fn get_wasi_state<S: AsRef<str>>(
+        &mut self,
+        module_name: S,
+    ) -> Result<&wasmer_wasi::state::WasiState> {
+        self.faas.module_wasi_state(module_name).map_err(Into::into)
+    }
 }

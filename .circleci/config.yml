@@ -44,19 +44,19 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - examples01-{{ checksum "examples/ipfs_node/wasm/ipfs_node/Cargo.toml" }}-{{ checksum "examples/ipfs_node/wasm/ipfs_rpc/Cargo.toml" }}-{{ checksum "examples/ipfs_node/Cargo.toml" }}
+            - examples01-{{ checksum "examples/ipfs_node/effector/Cargo.toml" }}-{{ checksum "examples/ipfs_node/pure/Cargo.toml" }}
       - run: |
           rustup toolchain install nightly
           rustup component add rustfmt
           rustup component add clippy
           cargo install cargo-wasi
 
-          cd examples/ipfs_node/wasm/ipfs_node
+          cd examples/ipfs_node/effector
           cargo fmt --all -- --check --color always
           cargo wasi build
           cargo clippy -v --target wasm32-wasi
 
-          cd ../ipfs_rpc
+          cd ../pure
           cargo fmt --all -- --check --color always
           cargo wasi build
           cargo clippy -v --target wasm32-wasi

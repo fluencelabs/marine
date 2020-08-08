@@ -106,6 +106,20 @@ impl FCE {
         }
     }
 
+    pub fn module_wasi_state<S: AsRef<str>>(
+        &mut self,
+        module_name: S,
+    ) -> Result<&wasmer_wasi::state::WasiState> {
+        self.module_wasi_state_(module_name.as_ref())
+    }
+
+    fn module_wasi_state_(&mut self, module_name: &str) -> Result<&wasmer_wasi::state::WasiState> {
+        match self.modules.get_mut(module_name) {
+            Some(module) => Ok(module.get_wasi_state()),
+            None => Err(FCEError::NoSuchModule(module_name.to_string())),
+        }
+    }
+
     /// Return function signatures of all loaded info FCE modules with their names.
     pub fn interface(&self) -> impl Iterator<Item = (&str, Vec<FCEFunctionSignature<'_>>)> {
         self.modules.iter().map(|(module_name, module)| {

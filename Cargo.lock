@@ -457,6 +457,7 @@ dependencies = [
  "rustyline",
  "serde_json",
  "uuid",
+ "wasmer-wasi-fl",
 ]
 
 [[package]]
@@ -508,6 +509,7 @@ dependencies = [
  "log",
  "serde_json",
  "toml",
+ "wasmer-wasi-fl",
 ]
 
 [[package]]
