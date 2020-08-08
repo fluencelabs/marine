@@ -86,7 +86,7 @@ pub(crate) struct FCEModule {
 impl FCEModule {
     pub(crate) fn new(
         wasm_bytes: &[u8],
-        fce_module_config: FCEModuleConfig,
+        config: FCEModuleConfig,
         modules: &HashMap<String, FCEModule>,
     ) -> Result<Self> {
         let wasmer_module = compile(&wasm_bytes)?;
@@ -97,15 +97,15 @@ impl FCEModule {
         let import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
 
         let mut wasi_import_object = wasmer_wasi::generate_import_object_for_version(
-            fce_module_config.wasi_version,
+            config.wasi_version,
             vec![],
-            fce_module_config.wasi_envs.clone(),
-            fce_module_config.wasi_preopened_files.clone(),
-            fce_module_config.wasi_mapped_dirs.clone(),
+            config.wasi_envs.clone(),
+            config.wasi_preopened_files.clone(),
+            config.wasi_mapped_dirs.clone(),
         );
 
         wasi_import_object.extend(import_object.clone());
-        wasi_import_object.extend(fce_module_config.imports.clone());
+        wasi_import_object.extend(config.imports.clone());
 
         let wasmer_instance = wasmer_module.instantiate(&wasi_import_object)?;
         let wit_instance = unsafe {
@@ -127,7 +127,7 @@ impl FCEModule {
         Ok(Self {
             wasmer_instance: Box::new(wasmer_instance),
             import_object,
-            host_import_object: fce_module_config.imports,
+            host_import_object: config.imports,
             exports_funcs,
         })
     }
