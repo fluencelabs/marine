@@ -32,12 +32,12 @@ mod errors;
 pub(crate) type Result<T> = std::result::Result<T, crate::errors::CLIError>;
 
 pub fn main() -> std::result::Result<(), anyhow::Error> {
-    let app = clap::App::new("CLI tool for dealing with Wasm modules for the Fluence network")
+    let app = clap::App::new(args::DESCRIPTION)
         .version(args::VERSION)
         .author(args::AUTHORS)
-        .about(args::DESCRIPTION)
         .setting(clap::AppSettings::ArgRequiredElseHelp)
         .subcommand(args::build())
+        .subcommand(args::embed_wit())
         .subcommand(args::show_wit());
     let arg_matches = app.get_matches();
 
@@ -46,6 +46,24 @@ pub fn main() -> std::result::Result<(), anyhow::Error> {
             let trailing_args: Vec<&str> = args.values_of("optional").unwrap_or_default().collect();
 
             crate::build::build(trailing_args)?;
+
+            Ok(())
+        }
+        ("embed", Some(arg)) => {
+            let in_wasm_path = arg.value_of(args::IN_WASM_PATH).unwrap();
+            let wit_path = arg.value_of(args::WIT_PATH).unwrap();
+            let out_wasm_path = match arg.value_of(args::OUT_WASM_PATH) {
+                Some(path) => path,
+                None => in_wasm_path,
+            };
+
+            let wit = String::from_utf8(std::fs::read(wit_path)?).unwrap();
+
+            fce_wit_parser::embed_text_wit(
+                std::path::PathBuf::from(in_wasm_path),
+                std::path::PathBuf::from(out_wasm_path),
+                &wit,
+            )?;
 
             Ok(())
         }
