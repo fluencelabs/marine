@@ -51,7 +51,7 @@ impl FCE {
         self.call_(module_name.as_ref(), func_name.as_ref(), argument)
     }
 
-    pub fn call_(
+    fn call_(
         &mut self,
         module_name: &str,
         func_name: &str,
@@ -74,7 +74,7 @@ impl FCE {
         self.load_module_(name.into(), wasm_bytes, config)
     }
 
-    pub fn load_module_(
+    fn load_module_(
         &mut self,
         name: String,
         wasm_bytes: &[u8],
@@ -99,7 +99,7 @@ impl FCE {
         self.unload_module_(name.as_ref())
     }
 
-    pub fn unload_module_(&mut self, module_name: &str) -> Result<()> {
+    fn unload_module_(&mut self, module_name: &str) -> Result<()> {
         match self.modules.remove(module_name) {
             Some(_) => Ok(()),
             None => Err(FCEError::NoSuchModule(module_name.to_string())),
