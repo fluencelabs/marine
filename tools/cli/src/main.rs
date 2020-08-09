@@ -38,7 +38,8 @@ pub fn main() -> std::result::Result<(), anyhow::Error> {
         .setting(clap::AppSettings::ArgRequiredElseHelp)
         .subcommand(args::build())
         .subcommand(args::embed_wit())
-        .subcommand(args::show_wit());
+        .subcommand(args::show_wit())
+        .subcommand(args::repl());
     let arg_matches = app.get_matches();
 
     match arg_matches.subcommand() {
@@ -73,6 +74,25 @@ pub fn main() -> std::result::Result<(), anyhow::Error> {
 
             let result = fce_wit_parser::extract_text_wit(wasm_path)?;
             println!("{}", result);
+
+            Ok(())
+        }
+        ("repl", Some(args)) => {
+            use std::process::Command;
+            // use UNIX-specific API for replacing process image
+            use std::os::unix::process::CommandExt;
+
+            let trailing_args: Vec<&str> = args.values_of("optional").unwrap_or_default().collect();
+
+            let mut repl = Command::new("fce-repl");
+            repl.args(trailing_args);
+            let error = repl.exec();
+            if error.kind() == std::io::ErrorKind::NotFound {
+                println!("fce-repl not found, run `cargo +nightly install frepl` to install it");
+            } else {
+                // this branch should be executed if exec was successful, so just else if fine here
+                println!("error occurred: {:?}", error);
+            }
 
             Ok(())
         }
