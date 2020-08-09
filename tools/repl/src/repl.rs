@@ -129,7 +129,7 @@ impl REPL {
                                 envs <module_name>                      - to print environment variables of module with module_name\n\
                                 fs <module_name>                        - to print filesystem state of module with module_name\n\
                                 h/help                                  - to print this message\n\
-                                Ctrl-C                                - to exit"
+                                Ctrl-C                                  - to exit"
                 );
             }
             _ => {

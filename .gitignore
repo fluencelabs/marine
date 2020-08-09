@@ -9,6 +9,9 @@ target/
 *.wasm
 *.wat
 
+# REPL history files
+*.repl_history
+
 # Temporary file of ipfs node example
 /examples/ipfs_node/wasm/artifacts/ipfs_rpc_file
 

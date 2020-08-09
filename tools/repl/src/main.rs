@@ -40,6 +40,9 @@ use rustyline::{Cmd, CompletionType, Config, Context, EditMode, Editor, KeyPress
 use rustyline_derive::Helper;
 
 use std::borrow::Cow::{self, Borrowed, Owned};
+use std::collections::HashSet;
+
+const HISTORY_FILE_PATH: &str = ".repl_history";
 
 pub(crate) type Result<T> = std::result::Result<T, anyhow::Error>;
 
@@ -52,22 +55,28 @@ fn main() -> Result<()> {
 
     let config = Config::builder()
         .history_ignore_space(true)
-        .completion_type(CompletionType::List)
+        .completion_type(CompletionType::Fuzzy)
         .edit_mode(EditMode::Emacs)
         .output_stream(OutputStreamType::Stdout)
         .build();
-    let h = MyHelper {
+
+    let repl_hinter = REPLHinter {
+        commands_hints: commands_hints(),
+        history_hinter: HistoryHinter {},
+    };
+    let repl_helper = REPLHelper {
         completer: FilenameCompleter::new(),
         highlighter: MatchingBracketHighlighter::new(),
-        hinter: HistoryHinter {},
+        hinter: repl_hinter,
         colored_prompt: "".to_owned(),
         validator: MatchingBracketValidator::new(),
     };
+
     let mut rl = Editor::with_config(config);
-    rl.set_helper(Some(h));
+    rl.set_helper(Some(repl_helper));
     rl.bind_sequence(KeyPress::Meta('N'), Cmd::HistorySearchForward);
     rl.bind_sequence(KeyPress::Meta('P'), Cmd::HistorySearchBackward);
-    let _ = rl.load_history("history.txt");
+    let _ = rl.load_history(HISTORY_FILE_PATH);
 
     println!("Welcome to the Fluence FaaS REPL:");
 
@@ -75,7 +84,7 @@ fn main() -> Result<()> {
 
     let mut count = 1;
     loop {
-        let p = format!("{}> ", count);
+        let p = format!("\n{}> ", count);
         rl.helper_mut().expect("No helper").colored_prompt = format!("\x1b[1;32m{}\x1b[0m", p);
         let readline = rl.readline(&p);
         match readline {
@@ -99,19 +108,29 @@ fn main() -> Result<()> {
         count += 1;
     }
 
+    if let Err(e) = rl.save_history(HISTORY_FILE_PATH) {
+        eprintln!("failed to save history: {}", e);
+    }
+
     Ok(())
 }
 
 #[derive(Helper)]
-struct MyHelper {
+struct REPLHelper {
     completer: FilenameCompleter,
     highlighter: MatchingBracketHighlighter,
     validator: MatchingBracketValidator,
-    hinter: HistoryHinter,
+    hinter: REPLHinter,
     colored_prompt: String,
 }
 
-impl Completer for MyHelper {
+/// Tries to find hint from history if its failed from supported command list.
+struct REPLHinter {
+    commands_hints: HashSet<String>,
+    history_hinter: HistoryHinter,
+}
+
+impl Completer for REPLHelper {
     type Candidate = Pair;
 
     fn complete(
@@ -124,13 +143,33 @@ impl Completer for MyHelper {
     }
 }
 
-impl Hinter for MyHelper {
+impl Hinter for REPLHelper {
     fn hint(&self, line: &str, pos: usize, ctx: &Context<'_>) -> Option<String> {
-        self.hinter.hint(line, pos, ctx)
+        if pos < line.len() {
+            return None;
+        }
+
+        if let Some(hint) = self.hinter.history_hinter.hint(line, pos, ctx) {
+            return Some(hint);
+        }
+
+        self.hinter
+            .commands_hints
+            .iter()
+            .filter_map(|hint| {
+                // expect hint after word complete, like redis cli, add condition:
+                // line.ends_with(" ")
+                if pos > 0 && hint.starts_with(&line[..pos]) {
+                    Some(hint[pos..].to_owned())
+                } else {
+                    None
+                }
+            })
+            .next()
     }
 }
 
-impl Highlighter for MyHelper {
+impl Highlighter for REPLHelper {
     fn highlight<'l>(&self, line: &'l str, pos: usize) -> Cow<'l, str> {
         self.highlighter.highlight(line, pos)
     }
@@ -156,7 +195,7 @@ impl Highlighter for MyHelper {
     }
 }
 
-impl Validator for MyHelper {
+impl Validator for REPLHelper {
     fn validate(
         &self,
         ctx: &mut validate::ValidationContext<'_>,
@@ -167,4 +206,16 @@ impl Validator for MyHelper {
     fn validate_while_typing(&self) -> bool {
         self.validator.validate_while_typing()
     }
+}
+
+fn commands_hints() -> HashSet<String> {
+    let mut set = HashSet::new();
+    set.insert(String::from("load"));
+    set.insert(String::from("unload"));
+    set.insert(String::from("call"));
+    set.insert(String::from("envs"));
+    set.insert(String::from("fs"));
+    set.insert(String::from("interface"));
+    set.insert(String::from("help"));
+    set
 }
