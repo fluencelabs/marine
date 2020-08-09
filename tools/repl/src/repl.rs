@@ -20,6 +20,7 @@ use fluence_app_service::AppService;
 
 use std::path::PathBuf;
 use std::fs;
+use std::time::Instant;
 
 macro_rules! next_argument {
     ($arg_name:ident, $args:ident, $error_msg:expr) => {
@@ -60,6 +61,7 @@ impl REPL {
                     return;
                 }
 
+                let start = Instant::now();
                 let result_msg = match self
                     .app_service
                     .load_module::<String, fluence_app_service::ModuleConfig>(
@@ -67,7 +69,13 @@ impl REPL {
                         &wasm_bytes.unwrap(),
                         None,
                     ) {
-                    Ok(_) => "module successfully loaded into App service".to_string(),
+                    Ok(_) => {
+                        let elapsed_time = start.elapsed();
+                        format!(
+                            "module successfully loaded into App service\nelapsed time: {:?}",
+                            elapsed_time
+                        )
+                    }
                     Err(e) => format!("module loaded failed with: {:?}", e),
                 };
                 println!("{}", result_msg);
@@ -75,8 +83,15 @@ impl REPL {
             Some("unload") => {
                 next_argument!(module_name, args, "Module name should be specified");
 
+                let start = Instant::now();
                 let result_msg = match self.app_service.unload_module(module_name) {
-                    Ok(_) => "module successfully unloaded from App service".to_string(),
+                    Ok(_) => {
+                        let elapsed_time = start.elapsed();
+                        format!(
+                            "module successfully unloaded from App service\nelapsed time: {:?}",
+                            elapsed_time
+                        )
+                    }
                     Err(e) => format!("module unloaded failed with: {:?}", e),
                 };
                 println!("{}", result_msg);
@@ -94,8 +109,12 @@ impl REPL {
                     }
                 };
 
+                let start = Instant::now();
                 let result = match self.app_service.call(module_name, func_name, module_arg) {
-                    Ok(result) => format!("result: {:?}", result),
+                    Ok(result) => {
+                        let elapsed_time = start.elapsed();
+                        format!("result: {:?}\n elapsed time: {:?}", result, elapsed_time)
+                    }
                     Err(e) => format!("execution failed with {:?}", e),
                 };
                 println!("{}", result);
@@ -142,6 +161,7 @@ impl REPL {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
 
+        let start = Instant::now();
         let app_service = match config_file_path {
             Some(config_file_path) => {
                 let config_file_path = config_file_path.into();
@@ -154,8 +174,12 @@ impl REPL {
                 AppService::new(std::iter::empty(), config, &service_id)
             }
         }?;
+        let duration = start.elapsed();
 
-        println!("app service's created with service id = {}", service_id);
+        println!(
+            "app service's created with service id = {}\nelapsed time {:?}",
+            service_id, duration
+        );
 
         Ok(app_service)
     }
