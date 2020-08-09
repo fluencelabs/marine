@@ -25,204 +25,146 @@
 #![warn(rust_2018_idioms)]
 
 /// Command-line tool intended to test Fluence FaaS.
-use std::fs;
 
-macro_rules! next_argument {
-    ($arg_name:ident, $args:ident, $error_msg:expr) => {
-        let $arg_name = if let Some($arg_name) = $args.next() {
-            $arg_name
-        } else {
-            println!($error_msg);
-            continue;
-        };
-    };
-}
+mod repl;
 
-fn main() -> Result<(), anyhow::Error> {
+use repl::REPL;
+
+use rustyline::completion::{Completer, FilenameCompleter, Pair};
+use rustyline::config::OutputStreamType;
+use rustyline::error::ReadlineError;
+use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
+use rustyline::hint::{Hinter, HistoryHinter};
+use rustyline::validate::{self, MatchingBracketValidator, Validator};
+use rustyline::{Cmd, CompletionType, Config, Context, EditMode, Editor, KeyPress};
+use rustyline_derive::Helper;
+
+use std::borrow::Cow::{self, Borrowed, Owned};
+
+pub(crate) type Result<T> = std::result::Result<T, anyhow::Error>;
+
+fn main() -> Result<()> {
     let (args, _) = rustop::opts! {
         synopsis "Fluence Application service REPL";
         param config_file_path: Option<String>, desc: "Path to a service config";
     }
     .parse_or_exit();
 
-    println!("Welcome to the Fluence FaaS REPL:");
-    let mut app_service = create_service_from_config(args.config_file_path)?;
+    let config = Config::builder()
+        .history_ignore_space(true)
+        .completion_type(CompletionType::List)
+        .edit_mode(EditMode::Emacs)
+        .output_stream(OutputStreamType::Stdout)
+        .build();
+    let h = MyHelper {
+        completer: FilenameCompleter::new(),
+        highlighter: MatchingBracketHighlighter::new(),
+        hinter: HistoryHinter {},
+        colored_prompt: "".to_owned(),
+        validator: MatchingBracketValidator::new(),
+    };
+    let mut rl = Editor::with_config(config);
+    rl.set_helper(Some(h));
+    rl.bind_sequence(KeyPress::Meta('N'), Cmd::HistorySearchForward);
+    rl.bind_sequence(KeyPress::Meta('P'), Cmd::HistorySearchBackward);
+    let _ = rl.load_history("history.txt");
 
-    let mut rl = rustyline::Editor::<()>::new();
+    println!("Welcome to the Fluence FaaS REPL:");
+
+    let mut repl = REPL::new(args.config_file_path)?;
+
+    let mut count = 1;
     loop {
-        let readline = rl.readline(">> ");
-        let readline = match readline {
-            Ok(readline) => readline,
-            Err(e) => {
-                println!("a error occurred: {}", e);
+        let p = format!("{}> ", count);
+        rl.helper_mut().expect("No helper").colored_prompt = format!("\x1b[1;32m{}\x1b[0m", p);
+        let readline = rl.readline(&p);
+        match readline {
+            Ok(line) => {
+                rl.add_history_entry(line.as_str());
+                repl.execute(line.split_whitespace());
+            }
+            Err(ReadlineError::Interrupted) => {
+                println!("CTRL-C");
                 break;
             }
-        };
-
-        let mut args = readline.split_whitespace();
-        match args.next() {
-            Some("new") => {
-                app_service = match create_service_from_config(args.next()) {
-                    Ok(service) => service,
-                    Err(e) => {
-                        println!("failed to create a new application service: {}", e);
-                        app_service
-                    }
-                };
+            Err(ReadlineError::Eof) => {
+                println!("CTRL-D");
+                break;
             }
-            Some("load") => {
-                next_argument!(module_name, args, "Module name should be specified");
-                next_argument!(module_path, args, "Module path should be specified");
-
-                let wasm_bytes = fs::read(module_path);
-                if let Err(e) = wasm_bytes {
-                    println!("failed to read wasm module: {}", e);
-                    continue;
-                }
-
-                let result_msg = match app_service
-                    .load_module::<String, fluence_app_service::ModuleConfig>(
-                        module_name.into(),
-                        &wasm_bytes.unwrap(),
-                        None,
-                    ) {
-                    Ok(_) => "module successfully loaded into App service".to_string(),
-                    Err(e) => format!("module loaded failed with: {:?}", e),
-                };
-                println!("{}", result_msg);
-            }
-            Some("unload") => {
-                next_argument!(module_name, args, "Module name should be specified");
-
-                let result_msg = match app_service.unload_module(module_name) {
-                    Ok(_) => "module successfully unloaded from App service".to_string(),
-                    Err(e) => format!("module unloaded failed with: {:?}", e),
-                };
-                println!("{}", result_msg);
-            }
-            Some("call") => {
-                next_argument!(module_name, args, "Module name should be specified");
-                next_argument!(func_name, args, "Function name should be specified");
-
-                let module_arg: String = args.collect();
-                let module_arg: serde_json::Value = match serde_json::from_str(&module_arg) {
-                    Ok(module_arg) => module_arg,
-                    Err(e) => {
-                        println!("incorrect arguments {}", e);
-                        continue;
-                    }
-                };
-
-                let result = match app_service.call(module_name, func_name, module_arg) {
-                    Ok(result) => format!("result: {:?}", result),
-                    Err(e) => format!("execution failed with {:?}", e),
-                };
-                println!("{}", result);
-            }
-            Some("envs") => {
-                next_argument!(module_name, args, "Module name should be specified");
-                match app_service.get_wasi_state(module_name) {
-                    Ok(wasi_state) => print_envs(wasi_state),
-                    Err(e) => println!("{}", e),
-                };
-            }
-            Some("fs") => {
-                next_argument!(module_name, args, "Module name should be specified");
-                match app_service.get_wasi_state(module_name) {
-                    Ok(wasi_state) => print_fs_state(wasi_state),
-                    Err(e) => println!("{}", e),
-                };
-            }
-            Some("interface") => {
-                let interface = app_service.get_interface();
-                println!("application service interface:\n{}", interface);
-            }
-            Some("h") | Some("help") | None => {
-                println!(
-                            "Enter:\n\
-                                new [config_path]                       - to create a new AppService (current will be removed)\n\
-                                load <module_name> <module_path>        - to load a new Wasm module into App service\n\
-                                unload <module_name>                    - to unload Wasm module from AppService\n\
-                                call <module_name> <func_name> [args]   - to call function with func_name of module with module_name\n\
-                                interface                               - to print public interface of current AppService\n\
-                                envs <module_name>                      - to print environment variables of module with module_name\n\
-                                fs <module_name>                        - to print filesystem state of module with module_name\n\
-                                h/help                                  - to print this message\n\
-                                e/exit/q/quit                           - to exit"
-                        );
-            }
-            Some("e") | Some("exit") | Some("q") | Some("quit") => break,
-            _ => {
-                println!("unsupported command");
+            Err(err) => {
+                println!("Error: {:?}", err);
+                break;
             }
         }
+        count += 1;
     }
 
     Ok(())
 }
 
-fn create_service_from_config<S: Into<String>>(
-    config_file_path: Option<S>,
-) -> Result<fluence_app_service::AppService, anyhow::Error> {
-    let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
-    let service_id = uuid::Uuid::new_v4().to_string();
-
-    let app_service = match config_file_path {
-        Some(config_file_path) => {
-            let config_file_path = config_file_path.into();
-            fluence_app_service::AppService::with_raw_config(
-                config_file_path,
-                &service_id,
-                Some(&tmp_path),
-            )
-        }
-        None => {
-            let mut config: fluence_app_service::RawModulesConfig = <_>::default();
-            config.service_base_dir = Some(tmp_path);
-
-            fluence_app_service::AppService::new(std::iter::empty(), config, &service_id)
-        }
-    }?;
-
-    println!("app service's created with service id = {}", service_id);
-
-    Ok(app_service)
+#[derive(Helper)]
+struct MyHelper {
+    completer: FilenameCompleter,
+    highlighter: MatchingBracketHighlighter,
+    validator: MatchingBracketValidator,
+    hinter: HistoryHinter,
+    colored_prompt: String,
 }
 
-fn print_envs(wasi_state: &wasmer_wasi::state::WasiState) {
-    let envs = &wasi_state.envs;
+impl Completer for MyHelper {
+    type Candidate = Pair;
 
-    println!("Environment variables:");
-    for env in envs.iter() {
-        match String::from_utf8(env.clone()) {
-            Ok(string) => println!("{}", string),
-            Err(_) => println!("{:?}", env),
-        }
+    fn complete(
+        &self,
+        line: &str,
+        pos: usize,
+        ctx: &Context<'_>,
+    ) -> std::result::Result<(usize, Vec<Pair>), ReadlineError> {
+        self.completer.complete(line, pos, ctx)
     }
 }
 
-fn print_fs_state(wasi_state: &wasmer_wasi::state::WasiState) {
-    let wasi_fs = &wasi_state.fs;
+impl Hinter for MyHelper {
+    fn hint(&self, line: &str, pos: usize, ctx: &Context<'_>) -> Option<String> {
+        self.hinter.hint(line, pos, ctx)
+    }
+}
 
-    println!("preopened file descriptors:\n{:?}\n", wasi_fs.preopen_fds);
-
-    println!("name map:");
-    for (name, inode) in &wasi_fs.name_map {
-        println!("{} - {:?}", name, inode);
+impl Highlighter for MyHelper {
+    fn highlight<'l>(&self, line: &'l str, pos: usize) -> Cow<'l, str> {
+        self.highlighter.highlight(line, pos)
     }
 
-    println!("\nfile descriptors map:");
-    for (id, fd) in &wasi_fs.fd_map {
-        println!("{} - {:?}", id, fd);
+    fn highlight_prompt<'b, 's: 'b, 'p: 'b>(
+        &'s self,
+        prompt: &'p str,
+        default: bool,
+    ) -> Cow<'b, str> {
+        if default {
+            Borrowed(&self.colored_prompt)
+        } else {
+            Borrowed(prompt)
+        }
     }
 
-    println!("\norphan file descriptors:");
-    for (fd, inode) in &wasi_fs.orphan_fds {
-        println!("{:?} - {:?}", fd, inode);
+    fn highlight_hint<'h>(&self, hint: &'h str) -> Cow<'h, str> {
+        Owned("\x1b[1m".to_owned() + hint + "\x1b[m")
     }
 
-    println!("\ninodes:");
-    for (id, inode) in wasi_fs.inodes.iter().enumerate() {
-        println!("{}: {:?}", id, inode);
+    fn highlight_char(&self, line: &str, pos: usize) -> bool {
+        self.highlighter.highlight_char(line, pos)
+    }
+}
+
+impl Validator for MyHelper {
+    fn validate(
+        &self,
+        ctx: &mut validate::ValidationContext<'_>,
+    ) -> rustyline::Result<validate::ValidationResult> {
+        self.validator.validate(ctx)
+    }
+
+    fn validate_while_typing(&self) -> bool {
+        self.validator.validate_while_typing()
     }
 }
