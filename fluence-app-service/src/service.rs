@@ -22,7 +22,6 @@ use fluence_faas::FluenceFaaS;
 use fluence_faas::ModulesConfig;
 
 use std::convert::TryInto;
-use std::path::PathBuf;
 
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
@@ -109,14 +108,14 @@ impl AppService {
             (String::from(SERVICE_LOCAL_DIR_NAME), local_dir),
             (String::from(SERVICE_TMP_DIR_NAME), tmp_dir),
         ];
-        envs.extend(format!("{}={}", SERVICE_ID_ENV_NAME, service_id));
+        envs.push(format!("{}={}", SERVICE_ID_ENV_NAME, service_id));
 
         config.modules_config = config
             .modules_config
             .into_iter()
             .map(|(name, module_config)| {
                 let module_config = module_config
-                    .extend_wasi_envs(envs.iter().map(|s| s.into_bytes()).collect())
+                    .extend_wasi_envs(envs.iter().map(|s| s.clone().into_bytes()).collect())
                     .extend_wasi_files(preopened_files.clone(), mapped_dirs.clone());
 
                 (name, module_config)
