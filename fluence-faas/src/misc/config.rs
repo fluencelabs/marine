@@ -61,6 +61,7 @@ service_base_dir = "/Users/user/tmp"
 pub struct RawModulesConfig {
     pub modules_dir: Option<String>,
     pub service_base_dir: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub module: Vec<RawModuleConfig>,
     pub default: Option<RawDefaultModuleConfig>,
 }
