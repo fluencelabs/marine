@@ -1,10 +1,11 @@
 # Fluence Compute Engine
 
-FCE is intended to run various Wasm binaries. At now, it is in the heavily developing phase.
+FCE is intended to run various Wasm binaries. At now, it is in the heavily developing phase. Docs and tutorials are also in the work-in-progress state.
 
 ## Installation
-- Clone this project
-- `cargo install --path <path-to-project/tools/cli>`
+- `cargo install fcli`
+
+this will add `fce` binary to your system.
 
 ## Usage
 - `fce build` in Rust project
