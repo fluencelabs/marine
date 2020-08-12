@@ -76,6 +76,14 @@ impl<'a> ModulesLoadStrategy<'a> {
             _ => <_>::default(),
         }
     }
+
+    #[inline]
+    pub fn extract_module_name(&self, module: String) -> String {
+        match self {
+            ModulesLoadStrategy::WasmOnly => module.replace(".wasm", ""),
+            _ => module,
+        }
+    }
 }
 
 pub struct FluenceFaaS {
@@ -179,6 +187,7 @@ impl FluenceFaaS {
 
             if modules.should_load(&module_name) {
                 let module_bytes = fs::read(path)?;
+                let module_name = modules.extract_module_name(module_name);
                 if hash_map.insert(module_name, module_bytes).is_some() {
                     return Err(FaaSError::ConfigParseError(String::from(
                         "config contains modules with the same name",
