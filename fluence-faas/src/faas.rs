@@ -32,10 +32,15 @@ use std::path::PathBuf;
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
 
-/// Strategy for module loading: either `All`, or only those specified in `Named`
+/// Strategies for module loading.
 pub enum ModulesLoadStrategy<'a> {
+    /// Try to load all files in a given directory
+    #[allow(dead_code)]
     All,
+    /// Try to load only files contained in the set
     Named(&'a HashSet<String>),
+    /// In a given directory, try to load all files ending with .wasm
+    WasmOnly,
 }
 
 impl<'a> ModulesLoadStrategy<'a> {
@@ -45,6 +50,7 @@ impl<'a> ModulesLoadStrategy<'a> {
         match self {
             ModulesLoadStrategy::All => true,
             ModulesLoadStrategy::Named(set) => set.contains(module),
+            ModulesLoadStrategy::WasmOnly => module.ends_with(".wasm"),
         }
     }
 
@@ -94,7 +100,7 @@ impl FluenceFaaS {
             .modules_dir
             .as_ref()
             .map_or(Ok(HashMap::new()), |dir| {
-                Self::load_modules(dir, ModulesLoadStrategy::All)
+                Self::load_modules(dir, ModulesLoadStrategy::WasmOnly)
             })?;
 
         Self::with_modules::<ModulesConfig>(modules, config)
