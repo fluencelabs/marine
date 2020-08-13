@@ -80,7 +80,10 @@ impl<'a> ModulesLoadStrategy<'a> {
     #[inline]
     pub fn extract_module_name(&self, module: String) -> String {
         match self {
-            ModulesLoadStrategy::WasmOnly => module.replace(".wasm", ""),
+            ModulesLoadStrategy::WasmOnly => module
+                .strip_suffix(".wasm")
+                .map(|s| s.to_string())
+                .unwrap_or(module),
             _ => module,
         }
     }
@@ -190,7 +193,7 @@ impl FluenceFaaS {
                 let module_name = modules.extract_module_name(module_name);
                 if hash_map.insert(module_name, module_bytes).is_some() {
                     return Err(FaaSError::ConfigParseError(String::from(
-                        "config contains modules with the same name",
+                        "module {} is duplicated in config",
                     )));
                 }
             }
