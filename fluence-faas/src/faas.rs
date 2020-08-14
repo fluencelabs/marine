@@ -50,7 +50,7 @@ impl<'a> ModulesLoadStrategy<'a> {
         match self {
             ModulesLoadStrategy::All => true,
             ModulesLoadStrategy::Named(set) => set.contains(module.to_string_lossy().as_ref()),
-            ModulesLoadStrategy::WasmOnly => module.extension().map_or(false, |e| e == ".wasm"),
+            ModulesLoadStrategy::WasmOnly => module.extension().map_or(false, |e| e == "wasm"),
         }
     }
 
