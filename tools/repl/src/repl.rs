@@ -165,6 +165,7 @@ impl REPL {
 
         let mut config = config_file_path
             .map(|p| RawModulesConfig::load(p.into()))
+            .transpose()?
             .unwrap_or_default();
         config.service_base_dir = Some(tmp_path);
 
