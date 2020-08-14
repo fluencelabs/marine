@@ -27,24 +27,30 @@ use std::convert::TryInto;
 use std::collections::HashSet;
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
 
-/// Strategy for module loading: either `All`, or only those specified in `Named`
+/// Strategies for module loading.
 pub enum ModulesLoadStrategy<'a> {
+    /// Try to load all files in a given directory
+    #[allow(dead_code)]
     All,
+    /// Try to load only files contained in the set
     Named(&'a HashSet<String>),
+    /// In a given directory, try to load all files ending with .wasm
+    WasmOnly,
 }
 
 impl<'a> ModulesLoadStrategy<'a> {
     #[inline]
     /// Returns true if `module` should be loaded.
-    pub fn should_load(&self, module: &str) -> bool {
+    pub fn should_load(&self, module: &Path) -> bool {
         match self {
             ModulesLoadStrategy::All => true,
-            ModulesLoadStrategy::Named(set) => set.contains(module),
+            ModulesLoadStrategy::Named(set) => set.contains(module.to_string_lossy().as_ref()),
+            ModulesLoadStrategy::WasmOnly => module.extension().map_or(false, |e| e == ".wasm"),
         }
     }
 
@@ -68,6 +74,19 @@ impl<'a> ModulesLoadStrategy<'a> {
                 vec
             }),
             _ => <_>::default(),
+        }
+    }
+
+    #[inline]
+    pub fn extract_module_name(&self, module: String) -> String {
+        match self {
+            ModulesLoadStrategy::WasmOnly => {
+                let path: &Path = module.as_ref();
+                path.file_stem()
+                    .map(|s| s.to_string_lossy().to_string())
+                    .unwrap_or(module)
+            }
+            _ => module,
         }
     }
 }
@@ -94,7 +113,7 @@ impl FluenceFaaS {
             .modules_dir
             .as_ref()
             .map_or(Ok(HashMap::new()), |dir| {
-                Self::load_modules(dir, ModulesLoadStrategy::All)
+                Self::load_modules(dir, ModulesLoadStrategy::WasmOnly)
             })?;
 
         Self::with_modules::<ModulesConfig>(modules, config)
@@ -171,11 +190,12 @@ impl FluenceFaaS {
                 .into_string()
                 .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
 
-            if modules.should_load(&module_name) {
+            if modules.should_load(&module_name.as_ref()) {
                 let module_bytes = fs::read(path)?;
+                let module_name = modules.extract_module_name(module_name);
                 if hash_map.insert(module_name, module_bytes).is_some() {
                     return Err(FaaSError::ConfigParseError(String::from(
-                        "config contains modules with the same name",
+                        "module {} is duplicated in config",
                     )));
                 }
             }

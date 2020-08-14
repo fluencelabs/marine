@@ -21,6 +21,7 @@ use serde_derive::Serialize;
 use serde_derive::Deserialize;
 
 use std::convert::TryInto;
+use std::path::PathBuf;
 
 /*
 An example of the config:
@@ -60,8 +61,20 @@ service_base_dir = "/Users/user/tmp"
 pub struct RawModulesConfig {
     pub modules_dir: Option<String>,
     pub service_base_dir: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub module: Vec<RawModuleConfig>,
     pub default: Option<RawDefaultModuleConfig>,
+}
+
+impl RawModulesConfig {
+    /// Load config from filesystem
+    pub fn load<P: Into<PathBuf>>(path: P) -> Result<Self> {
+        let path = path.into();
+        let bytes = std::fs::read(&path)?;
+        toml::from_slice(bytes.as_slice()).map_err(|e| {
+            FaaSError::ConfigParseError(format!("Error parsing config {:?}: {:?}", path, e))
+        })
+    }
 }
 
 impl TryInto<ModulesConfig> for RawModulesConfig {
