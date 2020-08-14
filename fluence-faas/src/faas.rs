@@ -27,7 +27,7 @@ use std::convert::TryInto;
 use std::collections::HashSet;
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
@@ -46,11 +46,11 @@ pub enum ModulesLoadStrategy<'a> {
 impl<'a> ModulesLoadStrategy<'a> {
     #[inline]
     /// Returns true if `module` should be loaded.
-    pub fn should_load(&self, module: &str) -> bool {
+    pub fn should_load(&self, module: &Path) -> bool {
         match self {
             ModulesLoadStrategy::All => true,
-            ModulesLoadStrategy::Named(set) => set.contains(module),
-            ModulesLoadStrategy::WasmOnly => module.ends_with(".wasm"),
+            ModulesLoadStrategy::Named(set) => set.contains(module.to_string_lossy().as_ref()),
+            ModulesLoadStrategy::WasmOnly => module.extension().map_or(false, |e| e == ".wasm"),
         }
     }
 
@@ -80,10 +80,12 @@ impl<'a> ModulesLoadStrategy<'a> {
     #[inline]
     pub fn extract_module_name(&self, module: String) -> String {
         match self {
-            ModulesLoadStrategy::WasmOnly => module
-                .strip_suffix(".wasm")
-                .map(|s| s.to_string())
-                .unwrap_or(module),
+            ModulesLoadStrategy::WasmOnly => {
+                let path: &Path = module.as_ref();
+                path.file_stem()
+                    .map(|s| s.to_string_lossy().to_string())
+                    .unwrap_or(module)
+            }
             _ => module,
         }
     }
@@ -188,7 +190,7 @@ impl FluenceFaaS {
                 .into_string()
                 .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
 
-            if modules.should_load(&module_name) {
+            if modules.should_load(&module_name.as_ref()) {
                 let module_bytes = fs::read(path)?;
                 let module_name = modules.extract_module_name(module_name);
                 if hash_map.insert(module_name, module_bytes).is_some() {
