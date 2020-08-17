@@ -23,6 +23,7 @@ use fluence_faas::ModulesConfig;
 
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};
+use std::io::ErrorKind;
 
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
@@ -88,8 +89,13 @@ impl AppService {
             .ok_or(AppServiceError::MissingServiceDir)?
             .as_ref();
 
-        let create = |dir: &PathBuf| {
-            std::fs::create_dir(dir).map_err(|err| AppServiceError::dir_exists(err, dir.clone()))
+        let create = |dir: &PathBuf| match std::fs::create_dir(dir) {
+            Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
+            Err(err) => Err(AppServiceError::CreateDir {
+                err,
+                path: dir.clone(),
+            }),
+            _ => Ok(()),
         };
 
         let service_dir = base_dir.join(service_id);

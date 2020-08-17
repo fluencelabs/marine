@@ -28,18 +28,12 @@ pub enum AppServiceError {
     /// FaaS errors.
     FaaSError(FaaSError),
 
-    /// Directory we tried to created already exists
-    DirExists { err: IOError, path: PathBuf },
+    /// Directory creation failed
+    CreateDir { err: IOError, path: PathBuf },
 
     /// Base service dir wasn't specified in config
     /// TODO: do we need that dir to be optional?
     MissingServiceDir,
-}
-
-impl AppServiceError {
-    pub fn dir_exists(err: IOError, path: PathBuf) -> Self {
-        Self::DirExists { err, path }
-    }
 }
 
 impl Error for AppServiceError {}
@@ -49,11 +43,9 @@ impl std::fmt::Display for AppServiceError {
         match self {
             AppServiceError::InvalidConfig(err_msg) => write!(f, "{}", err_msg),
             AppServiceError::FaaSError(err) => write!(f, "{}", err),
-            AppServiceError::DirExists { err, path } => write!(
-                f,
-                "Failed to create dir {:?}. It already exists: {:?}",
-                path, err
-            ),
+            AppServiceError::CreateDir { err, path } => {
+                write!(f, "Failed to create dir {:?}: {:?}", path, err)
+            }
             AppServiceError::MissingServiceDir => {
                 write!(f, "service base dir should be specified in config")
             }
