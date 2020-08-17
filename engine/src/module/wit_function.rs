@@ -83,28 +83,28 @@ impl wasm::structures::LocalImport for WITFunction {
     fn inputs_cardinality(&self) -> usize {
         match &self.inner {
             WITFunctionInner::Export { ref inputs, .. } => inputs.len(),
-            WITFunctionInner::Import { ref callable, .. } => callable.wit_module_func.inputs.len(),
+            WITFunctionInner::Import { ref callable, .. } => callable.wit_module_func.arg_types.len(),
         }
     }
 
     fn outputs_cardinality(&self) -> usize {
         match &self.inner {
             WITFunctionInner::Export { ref outputs, .. } => outputs.len(),
-            WITFunctionInner::Import { ref callable, .. } => callable.wit_module_func.outputs.len(),
+            WITFunctionInner::Import { ref callable, .. } => callable.wit_module_func.output_types.len(),
         }
     }
 
     fn inputs(&self) -> &[IType] {
         match &self.inner {
             WITFunctionInner::Export { ref inputs, .. } => inputs,
-            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.inputs,
+            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.arg_types,
         }
     }
 
     fn outputs(&self) -> &[IType] {
         match &self.inner {
             WITFunctionInner::Export { ref outputs, .. } => outputs,
-            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.outputs,
+            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.output_types,
         }
     }
 

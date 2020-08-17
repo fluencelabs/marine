@@ -38,8 +38,10 @@ type WITInterpreter =
 #[derive(Clone)]
 pub(super) struct WITModuleFunc {
     interpreter: Arc<WITInterpreter>,
-    pub(super) inputs: Vec<IType>,
-    pub(super) outputs: Vec<IType>,
+    pub(super) name: String,
+    pub(super) arg_types: Vec<IType>,
+    pub(super) arg_names: Vec<String>,
+    pub(super) output_types: Vec<IType>,
 }
 
 #[derive(Clone)]
@@ -148,8 +150,8 @@ impl FCEModule {
         self.exports_funcs.iter().map(|(func_name, func)| {
             (
                 func_name,
-                &func.wit_module_func.inputs,
-                &func.wit_module_func.outputs,
+                &func.wit_module_func.arg_types,
+                &func.wit_module_func.output_types,
             )
         })
     }
@@ -197,13 +199,15 @@ impl FCEModule {
 
                 match wit_type {
                     WITAstType::Function {
-                        inputs, outputs, ..
+                        name, arg_types, arg_names, output_types
                     } => {
                         let interpreter: WITInterpreter = adapter_instructions.try_into()?;
                         let wit_module_func = WITModuleFunc {
                             interpreter: Arc::new(interpreter),
-                            inputs: inputs.clone(),
-                            outputs: outputs.clone(),
+                            name: name.clone(),
+                            arg_types: arg_types.clone(),
+                            arg_names: arg_names.clone(),
+                            output_types: output_types.clone(),
                         };
 
                         Ok((
@@ -309,7 +313,7 @@ impl FCEModule {
                 let wit_type = wit.type_by_idx_r(adapter_function_type)?;
 
                 match wit_type {
-                    WITAstType::Function { inputs, outputs } => {
+                    WITAstType::Function { arg_types, output_types, .. } => {
                         let interpreter: WITInterpreter = adapter_instructions.try_into()?;
 
                         let raw_import = create_raw_import(
@@ -319,7 +323,7 @@ impl FCEModule {
                             import_name.to_string(),
                         );
                         let wit_import =
-                            dyn_func_from_raw_import(inputs.clone(), outputs.clone(), raw_import);
+                            dyn_func_from_raw_import(arg_types.clone(), output_types.clone(), raw_import);
 
                         Ok((import_namespace.to_string(), (*import_name, wit_import)))
                     }

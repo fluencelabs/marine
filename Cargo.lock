@@ -1803,9 +1803,7 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b12519a2a53ea1b2166ff47e56c6b57a3f7d714a2d34d26a6b04bdf22c37a41"
+version = "0.17.1"
 dependencies = [
  "nom",
  "safe-transmute",
