@@ -542,7 +542,7 @@ name = "fce-wit-generator"
 version = "0.1.2"
 dependencies = [
  "fce-wit-parser",
- "fluence-sdk-wit 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=record_support)",
  "once_cell",
  "serde",
  "serde_json",
@@ -650,8 +650,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4ae15ddfa80fea72de5b92ccd0b649d0f721aac18f5013427ccc5f6d55a3d4e"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=record_support#b2a46e023823f3812e74c11407f0416d130031b1"
 dependencies = [
  "proc-macro2",
  "quote",

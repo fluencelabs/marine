@@ -31,12 +31,12 @@ impl WITGenerator for AstFunctionItem {
 
         let inputs = self
             .signature
-            .input_types
+            .arguments
             .iter()
-            .map(|input_type| ptype_to_itype(input_type, wit_resolver))
+            .map(|(name, input_type)| (name, ptype_to_itype(input_type, wit_resolver)))
             .collect::<Result<Vec<_>>>()?;
 
-        let outputs = match self.signature.output_type {
+        let output_types = match self.signature.output_type {
             Some(ref output_type) => vec![ptype_to_itype(output_type, wit_resolver)?],
             None => vec![],
         };
@@ -44,7 +44,7 @@ impl WITGenerator for AstFunctionItem {
         let interfaces = &mut wit_resolver.interfaces;
         interfaces.types.push(Type::Function {
             inputs: inputs.clone(),
-            outputs: outputs.clone(),
+            output_types: output_types.clone(),
         });
 
         // TODO: replace with Wasm types
