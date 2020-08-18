@@ -133,6 +133,7 @@ pub struct RawWASIConfig {
 #[derive(Debug, Clone, Default)]
 pub struct ModulesConfig {
     /// Used for preparing filesystem on the service initialization stage.
+    /// TODO: do we need that dir to be optional? We require it on creation anyways
     pub service_base_dir: Option<String>,
 
     /// Path to a dir where compiled Wasm modules are located.
