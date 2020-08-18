@@ -1,0 +1,12 @@
+modules_dir = "artifacts/"
+
+[[module]]
+    name = "greeting.wasm"
+    mem_pages_count = 1
+    logger_enabled = false
+
+    [module.imports]
+    mariadb = "/usr/local/bin/mariadb"
+
+    [module.wasi]
+    envs = ["USER=root", "PASSWORD=toor", "HOST=192.168.88.25", "PORT=3306", "DB_NAME=test"]

@@ -923,6 +923,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "mariadb"
+version = "0.1.0"
+dependencies = [
+ "fluence",
+ "log",
+]
+
+[[package]]
 name = "maybe-uninit"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

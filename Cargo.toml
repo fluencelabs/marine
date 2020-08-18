@@ -7,6 +7,7 @@ members = [
     "examples/greeting",
     "examples/ipfs-node/effector",
     "examples/ipfs-node/pure",
+    "examples/mariadb",
     "examples/records/effector",
     "examples/records/pure",
     "examples/records/test-record",
