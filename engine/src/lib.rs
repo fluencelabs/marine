@@ -38,8 +38,12 @@ pub use engine::FCE;
 pub use engine::FCEFunctionSignature;
 pub use errors::FCEError;
 pub use module::IValue;
+pub use module::IRecordType;
+pub use module::IFunctionArg;
 pub use module::IType;
 pub use module::from_interface_values;
 pub use module::to_interface_value;
+
+pub use wasmer_wit::types::RecordFieldType as IRecordFieldType;
 
 pub(crate) type Result<T> = std::result::Result<T, FCEError>;

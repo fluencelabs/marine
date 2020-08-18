@@ -15,6 +15,8 @@
  */
 
 use super::IType;
+use super::IRecordType;
+use super::IFunctionArg;
 
 use serde::Serialize;
 use serde::Serializer;
@@ -24,26 +26,37 @@ use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct FaaSInterface<'a> {
+    pub record_types: Vec<&'a IRecordType>,
     pub modules: HashMap<&'a str, HashMap<&'a str, FaaSFunctionSignature<'a>>>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 pub struct FaaSFunctionSignature<'a> {
-    pub input_types: &'a Vec<IType>,
+    pub arguments: &'a Vec<IFunctionArg>,
     pub output_types: &'a Vec<IType>,
 }
 
 impl<'a> fmt::Display for FaaSInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for record_type in &self.record_types {
+            writeln!(f, "{} {{", record_type.name)?;
+
+            for field in record_type.fields.iter() {
+                writeln!(f, "  {}: {:?}", field.name, field.ty)?;
+            }
+            writeln!(f, "}}")?;
+        }
+
         for (name, functions) in self.modules.iter() {
             writeln!(f, "{}", *name)?;
 
             for (name, signature) in functions.iter() {
-                writeln!(
-                    f,
-                    "  pub fn {}({:?}) -> {:?}",
-                    name, signature.input_types, signature.output_types
-                )?;
+                write!(f, "  pub fn {}(", name)?;
+
+                for arg in signature.arguments {
+                    write!(f, "{}, {:?}", arg.name, arg.ty)?;
+                }
+                write!(f, "  pub fn ) -> {:?}", signature.output_types)?;
             }
         }
 
@@ -59,8 +72,14 @@ impl<'a> Serialize for FaaSInterface<'a> {
         #[derive(Serialize)]
         pub struct Function<'a> {
             pub name: &'a str,
-            pub input_types: &'a Vec<IType>,
+            pub arguments: Vec<(&'a String, &'a IType)>,
             pub output_types: &'a Vec<IType>,
+        }
+
+        #[derive(Serialize)]
+        pub struct RecordType<'a> {
+            pub name: &'a str,
+            pub fields: Vec<(&'a String, &'a IType)>,
         }
 
         #[derive(Serialize)]
@@ -71,8 +90,25 @@ impl<'a> Serialize for FaaSInterface<'a> {
 
         #[derive(Serialize)]
         pub struct Interface<'a> {
+            pub record_types: Vec<RecordType<'a>>,
             pub modules: Vec<Module<'a>>,
         }
+
+        let record_types: Vec<_> = self
+            .record_types
+            .iter()
+            .map(|IRecordType { name, fields }| {
+                let fields = fields
+                    .iter()
+                    .map(|field| (&field.name, &field.ty))
+                    .collect::<Vec<_>>();
+
+                RecordType {
+                    name: name.as_str(),
+                    fields,
+                }
+            })
+            .collect();
 
         let modules: Vec<_> = self
             .modules
@@ -84,13 +120,15 @@ impl<'a> Serialize for FaaSInterface<'a> {
                         |(
                             name,
                             FaaSFunctionSignature {
-                                input_types,
+                                arguments,
                                 output_types,
                             },
                         )| {
+                            let arguments =
+                                arguments.iter().map(|arg| (&arg.name, &arg.ty)).collect();
                             Function {
                                 name,
-                                input_types,
+                                arguments,
                                 output_types,
                             }
                         },
@@ -100,6 +138,10 @@ impl<'a> Serialize for FaaSInterface<'a> {
             })
             .collect();
 
-        Interface { modules }.serialize(serializer)
+        Interface {
+            record_types,
+            modules,
+        }
+        .serialize(serializer)
     }
 }

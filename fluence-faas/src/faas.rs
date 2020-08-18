@@ -209,6 +209,8 @@ impl FluenceFaaS {
 
     /// Return all export functions (name and signatures) of loaded modules.
     pub fn get_interface(&self) -> FaaSInterface<'_> {
+        let record_types = self.fce.record_types().collect::<Vec<_>>();
+
         let modules = self
             .fce
             .interface()
@@ -219,7 +221,7 @@ impl FluenceFaaS {
                         (
                             f.name,
                             FaaSFunctionSignature {
-                                input_types: f.input_types,
+                                arguments: f.arguments,
                                 output_types: f.output_types,
                             },
                         )
@@ -229,7 +231,7 @@ impl FluenceFaaS {
             })
             .collect();
 
-        FaaSInterface { modules }
+        FaaSInterface { record_types, modules }
     }
 }
 

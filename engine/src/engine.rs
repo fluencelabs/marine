@@ -21,10 +21,10 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 /// Represent a function type inside FCE.
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug)]
 pub struct FCEFunctionSignature<'a> {
     pub name: &'a str,
-    pub input_types: &'a Vec<IType>,
+    pub arguments: &'a Vec<IFunctionArg>,
     pub output_types: &'a Vec<IType>,
 }
 
@@ -141,12 +141,30 @@ impl FCE {
         }
     }
 
+    /// Return record types of export functions of all loaded info FCE modules.
+    pub fn record_types(&self) -> impl Iterator<Item = &IRecordType> {
+        self.modules
+            .iter()
+            .flat_map(|(_, module)| module.get_export_record_types())
+    }
+
+    /// Return record types exported by module with given name.
+    pub fn module_record_types<S: AsRef<str>>(
+        &self,
+        module_name: S,
+    ) -> Result<impl Iterator<Item = &IRecordType>> {
+        match self.modules.get(module_name.as_ref()) {
+            Some(module) => Ok(module.get_export_record_types()),
+            None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
+        }
+    }
+
     fn get_module_function_signatures(module: &FCEModule) -> Vec<FCEFunctionSignature<'_>> {
         module
             .get_exports_signatures()
-            .map(|(name, input_types, output_types)| FCEFunctionSignature {
+            .map(|(name, arguments, output_types)| FCEFunctionSignature {
                 name,
-                input_types,
+                arguments,
                 output_types,
             })
             .collect::<Vec<_>>()

@@ -15,17 +15,17 @@
  */
 
 use super::wit_prelude::*;
-use super::{IType, IValue, WValue};
+use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
 use crate::Result;
 use crate::FCEModuleConfig;
 
 use fce_wit_interfaces::FCEWITInterfaces;
+use fce_wit_parser::extract_wit;
 use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
 use wasmer_runtime::compile;
 use wasmer_runtime::ImportObject;
 use wasmer_wit::interpreter::Interpreter;
-use fce_wit_parser::extract_wit;
 
 use std::collections::HashMap;
 use std::convert::TryInto;
@@ -38,9 +38,7 @@ type WITInterpreter =
 #[derive(Clone)]
 pub(super) struct WITModuleFunc {
     interpreter: Arc<WITInterpreter>,
-    pub(super) name: String,
-    pub(super) arg_types: Vec<IType>,
-    pub(super) arg_names: Vec<String>,
+    pub(super) arguments: Vec<IFunctionArg>,
     pub(super) output_types: Vec<IType>,
 }
 
@@ -67,7 +65,7 @@ impl Callable {
 
 pub(crate) struct FCEModule {
     // wasmer_instance is needed because WITInstance contains dynamic functions
-    // that internally keep pointer to Wasmer instance.
+    // that internally keep pointer to it.
     #[allow(unused)]
     wasmer_instance: Box<WasmerInstance>,
 
@@ -82,7 +80,10 @@ pub(crate) struct FCEModule {
     host_import_object: ImportObject,
 
     // TODO: replace with dyn Trait
-    exports_funcs: HashMap<String, Arc<Callable>>,
+    export_funcs: HashMap<String, Arc<Callable>>,
+
+    // TODO: save refs to prevent copy
+    record_types: Vec<IRecordType>,
 }
 
 impl FCEModule {
@@ -118,7 +119,9 @@ impl FCEModule {
             std::mem::transmute::<_, Arc<WITInstance>>(wit_instance)
         };
 
-        let exports_funcs = Self::instantiate_wit_exports(wit_instance, &fce_wit)?;
+        let export_funcs = Self::instantiate_wit_exports(wit_instance.clone(), &fce_wit)?;
+        let record_types =
+            Self::extract_export_record_types(&export_funcs, wit_instance.record_types());
 
         // call _start to populate the WASI state of the module
         #[rustfmt::skip]
@@ -130,12 +133,13 @@ impl FCEModule {
             wasmer_instance: Box::new(wasmer_instance),
             import_object,
             host_import_object: config.imports,
-            exports_funcs,
+            export_funcs,
+            record_types,
         })
     }
 
     pub(crate) fn call(&mut self, function_name: &str, args: &[IValue]) -> Result<Vec<IValue>> {
-        match self.exports_funcs.get_mut(function_name) {
+        match self.export_funcs.get_mut(function_name) {
             Some(func) => Arc::make_mut(func).call(args),
             None => Err(FCEError::NoSuchFunction(format!(
                 "{} hasn't been found while calling",
@@ -146,14 +150,18 @@ impl FCEModule {
 
     pub(crate) fn get_exports_signatures(
         &self,
-    ) -> impl Iterator<Item = (&String, &Vec<IType>, &Vec<IType>)> {
-        self.exports_funcs.iter().map(|(func_name, func)| {
+    ) -> impl Iterator<Item = (&String, &Vec<IFunctionArg>, &Vec<IType>)> {
+        self.export_funcs.iter().map(|(func_name, func)| {
             (
                 func_name,
-                &func.wit_module_func.arg_types,
+                &func.wit_module_func.arguments,
                 &func.wit_module_func.output_types,
             )
         })
+    }
+
+    pub(crate) fn get_export_record_types(&self) -> impl Iterator<Item = &IRecordType> {
+        self.record_types.iter()
     }
 
     pub(crate) fn get_wasi_state(&mut self) -> &wasmer_wasi::state::WasiState {
@@ -162,7 +170,7 @@ impl FCEModule {
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
     pub(super) fn get_callable(&self, function_name: &str) -> Result<Arc<Callable>> {
-        match self.exports_funcs.get(function_name) {
+        match self.export_funcs.get(function_name) {
             Some(func) => Ok(func.clone()),
             None => Err(FCEError::NoSuchFunction(format!(
                 "{} hasn't been found while calling",
@@ -199,14 +207,13 @@ impl FCEModule {
 
                 match wit_type {
                     WITAstType::Function {
-                        name, arg_types, arg_names, output_types
+                        arguments,
+                        output_types,
                     } => {
                         let interpreter: WITInterpreter = adapter_instructions.try_into()?;
                         let wit_module_func = WITModuleFunc {
                             interpreter: Arc::new(interpreter),
-                            name: name.clone(),
-                            arg_types: arg_types.clone(),
-                            arg_names: arg_names.clone(),
+                            arguments: arguments.clone(),
                             output_types: output_types.clone(),
                         };
 
@@ -237,9 +244,9 @@ impl FCEModule {
         use wasmer_core::vm::Ctx;
 
         // returns function that will be called from imports of Wasmer module
-        fn dyn_func_from_raw_import<F>(
-            inputs: Vec<IType>,
-            outputs: Vec<IType>,
+        fn dyn_func_from_raw_import<'a, 'b, F>(
+            inputs: impl Iterator<Item = &'a IType>,
+            outputs: impl Iterator<Item = &'b IType>,
             raw_import: F,
         ) -> DynamicFunc<'static>
         where
@@ -248,8 +255,8 @@ impl FCEModule {
             use wasmer_core::types::FuncSig;
             use super::type_converters::itype_to_wtype;
 
-            let inputs = inputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
-            let outputs = outputs.iter().map(itype_to_wtype).collect::<Vec<_>>();
+            let inputs = inputs.map(itype_to_wtype).collect::<Vec<_>>();
+            let outputs = outputs.map(itype_to_wtype).collect::<Vec<_>>();
             DynamicFunc::new(Arc::new(FuncSig::new(inputs, outputs)), raw_import)
         }
 
@@ -313,7 +320,10 @@ impl FCEModule {
                 let wit_type = wit.type_by_idx_r(adapter_function_type)?;
 
                 match wit_type {
-                    WITAstType::Function { arg_types, output_types, .. } => {
+                    WITAstType::Function {
+                        arguments,
+                        output_types,
+                    } => {
                         let interpreter: WITInterpreter = adapter_instructions.try_into()?;
 
                         let raw_import = create_raw_import(
@@ -322,8 +332,12 @@ impl FCEModule {
                             import_namespace.to_string(),
                             import_name.to_string(),
                         );
-                        let wit_import =
-                            dyn_func_from_raw_import(arg_types.clone(), output_types.clone(), raw_import);
+
+                        let wit_import = dyn_func_from_raw_import(
+                            arguments.iter().map(|IFunctionArg { ty, .. }| ty),
+                            output_types.iter(),
+                            raw_import,
+                        );
 
                         Ok((import_namespace.to_string(), (*import_name, wit_import)))
                     }
@@ -347,5 +361,36 @@ impl FCEModule {
         }
 
         Ok(import_object)
+    }
+
+    fn extract_export_record_types<'a, 'b>(
+        export_funcs: &'a HashMap<String, Arc<Callable>>,
+        record_types: impl Iterator<Item = &'b IRecordType>,
+    ) -> Vec<IRecordType> {
+        let mut export_record_types = Vec::new();
+
+        let export_type_names = export_funcs
+            .iter()
+            .flat_map(|(_, ref mut callable)| {
+                callable
+                    .wit_module_func
+                    .arguments
+                    .iter()
+                    .map(|arg| &arg.ty)
+                    .chain(callable.wit_module_func.output_types.iter())
+            })
+            .filter_map(|itype| match itype {
+                IType::Record(name) => Some(name),
+                _ => None,
+            })
+            .collect::<std::collections::HashSet<_>>();
+
+        for record_type in record_types {
+            if export_type_names.get(&record_type.name).is_some() {
+                export_record_types.push(record_type.clone());
+            }
+        }
+
+        export_record_types
     }
 }
