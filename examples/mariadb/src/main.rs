@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-mod path;
-
 use fluence::fce;
 use fluence::WasmLogger;
 use crate::path::to_full_path;
 
 use std::path::PathBuf;
 
+const ROOT_PASSWORD_ENV_NAME: &str = "ROOT_PASSWORD";
+const ROOT_DB_NAME_ENV_NAME: &str = "ROOT_DB_NAME";
 const PASSWORD_ENV_NAME: &str = "PASSWORD";
 const DB_NAME_ENV_NAME: &str = "DB_NAME";
+
 const PORT_ENV_NAME: &str = "PORT";
 const USER_ENV_NAME: &str = "USER";
 const HOST_ENV_NAME: &str = "HOST_ENV_NAME";
-
-const TMP_FILE_NAME: &str = "mariadb.sql";
 
 pub fn main() {
     WasmLogger::init_with_level(log::Level::Info).unwrap();
@@ -62,27 +61,25 @@ impl ExecutionResult {
 pub fn sql(sql: String) -> ExecutionResult {
     log::info!("sql called with command {}", sql);
 
-    let sql_cmd_filepath = TMP_FILE_NAME.to_string();
+    let (password, user_name, db_name) = match fluence::get_current_user() {
+        "root" => (
+            std::env::var(ROOT_PASSWORD_ENV_NAME).expect("password env variable should be set"),
+            "root",
+            std::env::var(ROOT_DB_NAME_ENV_NAME).expect("db name env variable should be set"),
+        ),
+        user_name => (
+            std::env::var(PASSWORD_ENV_NAME).expect("password env variable should be set"),
+            user_name.as_str(),
+            std::env::var(DB_NAME_ENV_NAME).expect("db name env variable should be set"),
+        ),
+    };
 
-    if let Err(e) = std::fs::write(PathBuf::from(sql_cmd_filepath), sql) {
-        return ExecutionResult {
-            result: String::new(),
-            // it is safe because write return only OS errors
-            error_code: e.raw_os_error().unwrap(),
-        };
-    }
-
-    let sql_cmd_filepath = to_full_path(TMP_FILE_NAME);
-
-    let password = std::env::var(PASSWORD_ENV_NAME).unwrap_or_else(|_| "toor".to_string());
-    let db_name = std::env::var(DB_NAME_ENV_NAME).unwrap_or_else(|_| "test".to_string());
-    let port = std::env::var(PORT_ENV_NAME).unwrap_or_else(|_| "3306".to_string());
-    let user = std::env::var(USER_ENV_NAME).unwrap_or_else(|_| "root".to_string());
-    let host = std::env::var(HOST_ENV_NAME).unwrap_or_else(|_| "127.0.0.1".to_string());
+    let port = std::env::var(PORT_ENV_NAME).expect("port env variable should be set");
+    let host = std::env::var(HOST_ENV_NAME).expect("host env variable should be set");
 
     let cmd = format!(
-        "-u{} -p{} -h{} -P{} -D{} < {}",
-        user, password, host, port, db_name, sql_cmd_filepath
+        "-u{} -p{} -h{} -P{} -D{} < <(echo \"{}\")",
+        user_name, password, host, port, db_name, sql
     );
 
     let result = mariadb(cmd);
