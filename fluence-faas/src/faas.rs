@@ -139,12 +139,6 @@ impl FluenceFaaS {
             fce.load_module(module_name, &module_bytes, fce_module_config)?;
         }
 
-        for (name, bytes) in modules {
-            let module_config = config.default_modules_config.clone();
-            let fce_module_config = crate::misc::make_fce_config(module_config)?;
-            fce.load_module(name.clone(), &bytes, fce_module_config)?;
-        }
-
         Ok(Self { fce })
     }
 
