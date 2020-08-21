@@ -22,12 +22,16 @@ use crate::Result;
 use crate::IValue;
 
 use fce::FCE;
+use fluence_sdk_main::CallParameters;
 
+use std::cell::RefCell;
 use std::convert::TryInto;
 use std::collections::HashSet;
 use std::collections::HashMap;
+use std::rc::Rc;
 use std::fs;
-use std::path::{PathBuf, Path};
+use std::path::PathBuf;
+use std::path::Path;
 
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
@@ -92,7 +96,11 @@ impl<'a> ModulesLoadStrategy<'a> {
 }
 
 pub struct FluenceFaaS {
+    /// The Fluence Compute Engine instance.
     fce: FCE,
+
+    /// Parameters of call accessible by Wasm modules.
+    call_parameters: Rc<RefCell<CallParameters>>,
 }
 
 impl FluenceFaaS {
@@ -127,6 +135,7 @@ impl FluenceFaaS {
     {
         let mut fce = FCE::new();
         let config = config.try_into()?;
+        let call_parameters = Rc::new(RefCell::new(<_>::default()));
 
         for (module_name, module_config) in config.modules_config {
             let module_bytes = modules.remove(&module_name).ok_or_else(|| {
@@ -135,17 +144,22 @@ impl FluenceFaaS {
                     module_name
                 ))
             })?;
-            let fce_module_config = crate::misc::make_fce_config(Some(module_config))?;
+            let fce_module_config =
+                crate::misc::make_fce_config(Some(module_config), call_parameters.clone())?;
             fce.load_module(module_name, &module_bytes, fce_module_config)?;
         }
 
         for (name, bytes) in modules {
             let module_config = config.default_modules_config.clone();
-            let fce_module_config = crate::misc::make_fce_config(module_config)?;
+            let fce_module_config =
+                crate::misc::make_fce_config(module_config, call_parameters.clone())?;
             fce.load_module(name.clone(), &bytes, fce_module_config)?;
         }
 
-        Ok(Self { fce })
+        Ok(Self {
+            fce,
+            call_parameters,
+        })
     }
 
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
@@ -221,7 +235,10 @@ impl FluenceFaaS {
         module_name: MN,
         func_name: FN,
         args: &[IValue],
+        call_parameters: fluence_sdk_main::CallParameters,
     ) -> Result<Vec<IValue>> {
+        self.call_parameters.replace(call_parameters);
+
         self.fce
             .call(module_name, func_name, args)
             .map_err(Into::into)

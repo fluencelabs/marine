@@ -23,6 +23,9 @@ use wasmer_core::types::Value;
 use wasmer_core::types::Type;
 use wasmer_core::types::FuncSig;
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 const ALLOCATE_FUNC_NAME: &str = "allocate";
 const SET_PTR_FUNC_NAME: &str = "set_result_ptr";
 const SET_SIZE_FUNC_NAME: &str = "set_result_size";
@@ -33,19 +36,17 @@ pub(super) fn log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
     let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
     match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
         Some(msg) => log::info!("{}", msg),
-        None => log::warn!("ipfs node logger: incorrect UTF8 string's been supplied to logger"),
+        None => log::warn!("logger: incorrect UTF8 string's been supplied to logger"),
     }
 }
 
 fn write_to_mem(context: &mut Ctx, address: usize, value: &[u8]) {
     let memory = context.memory(0);
 
-    for (byte_id, cell) in memory.view::<u8>()[address as usize..(address + value.len())]
+    memory.view::<u8>()[address..(address + value.len())]
         .iter()
-        .enumerate()
-    {
-        cell.set(value[byte_id]);
-    }
+        .zip(value.iter())
+        .for_each(|(cell, byte)| cell.set(*byte));
 }
 
 pub(super) fn create_host_import_func<S>(host_cmd: S) -> DynamicFunc<'static>
@@ -53,9 +54,7 @@ where
     S: Into<String>,
 {
     use wasmer_core::Func;
-    use std::cell::RefCell;
 
-    //#[rustfmt:skip]
     let allocate_func: Box<RefCell<Option<Func<'static, i32, i32>>>> = Box::new(RefCell::new(None));
     let set_result_ptr_func: Box<RefCell<Option<Func<'static, i32, ()>>>> =
         Box::new(RefCell::new(None));
@@ -75,7 +74,7 @@ where
         let wasm_ptr = WasmPtr::<u8, Array>::new(array_ptr as _);
         let result = match wasm_ptr.get_utf8_string(ctx.memory(0), array_size as _) {
             Some(arg_value) => cmd_lib::run_fun!("{} {}", host_cmd, arg_value).unwrap(),
-            None => return vec![Value::I32(1)],
+            None => return vec![],
         };
 
         unsafe {
@@ -88,7 +87,7 @@ where
             call_wasm_func!(set_result_ptr_func, mem_address);
             call_wasm_func!(set_result_size_func, result.len() as i32);
 
-            vec![Value::I32(0)]
+            vec![]
         }
     };
 
@@ -96,4 +95,28 @@ where
         std::sync::Arc::new(FuncSig::new(vec![Type::I32, Type::I32], vec![])),
         func,
     )
+}
+
+pub(super) fn create_get_call_parameters_func(
+    call_parameters: Rc<RefCell<crate::CallParameters>>,
+) -> DynamicFunc<'static> {
+    use wasmer_core::Func;
+
+    let set_result_ptr_func: Box<RefCell<Option<Func<'static, i32, ()>>>> =
+        Box::new(RefCell::new(None));
+
+    let func = move |ctx: &mut Ctx, _inputs: &[Value]| -> Vec<Value> {
+        use fluence_sdk_main::FCEStructSerializable;
+
+        let serialized_ptr = call_parameters.borrow().__fce_generated_serialize();
+
+        unsafe {
+            init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 3);
+
+            call_wasm_func!(set_result_ptr_func, serialized_ptr as i32);
+            vec![Value::I32(0)]
+        }
+    };
+
+    DynamicFunc::new(std::sync::Arc::new(FuncSig::new(vec![], vec![])), func)
 }

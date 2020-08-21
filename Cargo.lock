@@ -587,8 +587,8 @@ name = "fluence"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#8418111074644a1bc197315060facd34778099de"
 dependencies = [
- "fluence-sdk-macro",
- "fluence-sdk-main",
+ "fluence-sdk-macro 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-main 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
@@ -608,6 +608,7 @@ version = "0.1.0"
 dependencies = [
  "cmd_lib",
  "fce",
+ "fluence-sdk-main 0.2.0",
  "log",
  "serde",
  "serde_derive",
@@ -627,6 +628,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "fluence-sdk-macro"
+version = "0.2.0"
+dependencies = [
+ "fluence-sdk-wit 0.2.0",
+]
+
+[[package]]
 name = "fluence-sdk-main"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#8418111074644a1bc197315060facd34778099de"
@@ -635,9 +643,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "fluence-sdk-main"
+version = "0.2.0"
+dependencies = [
+ "fluence-sdk-macro 0.2.0",
+ "log",
+]
+
+[[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#8418111074644a1bc197315060facd34778099de"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+ "uuid",
+]
+
+[[package]]
+name = "fluence-sdk-wit"
+version = "0.2.0"
 dependencies = [
  "proc-macro2",
  "quote",
