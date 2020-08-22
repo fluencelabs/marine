@@ -106,8 +106,6 @@ pub(super) fn create_get_call_parameters_func(
         Box::new(RefCell::new(None));
 
     let func = move |ctx: &mut Ctx, _inputs: &[Value]| -> Vec<Value> {
-        use fluence_sdk_main::FCEStructSerializable;
-
         let serialized_ptr = call_parameters.borrow().__fce_generated_serialize();
 
         unsafe {
