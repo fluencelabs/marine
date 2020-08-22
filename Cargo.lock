@@ -585,7 +585,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters#52a59d2eb8d88b53c2ae271ae6fcd2cde896526a"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters#39affc0b283f8f830815d013c8f9dd334ddda9d7"
 dependencies = [
  "fluence-sdk-macro 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters)",
  "fluence-sdk-main 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters)",
@@ -631,7 +631,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters#52a59d2eb8d88b53c2ae271ae6fcd2cde896526a"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters#39affc0b283f8f830815d013c8f9dd334ddda9d7"
 dependencies = [
  "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters)",
 ]
@@ -647,10 +647,11 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters#52a59d2eb8d88b53c2ae271ae6fcd2cde896526a"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters#39affc0b283f8f830815d013c8f9dd334ddda9d7"
 dependencies = [
  "fluence-sdk-macro 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters)",
  "log",
+ "serde",
 ]
 
 [[package]]
@@ -664,7 +665,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters#52a59d2eb8d88b53c2ae271ae6fcd2cde896526a"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters#39affc0b283f8f830815d013c8f9dd334ddda9d7"
 dependencies = [
  "proc-macro2",
  "quote",
