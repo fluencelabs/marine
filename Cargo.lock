@@ -608,7 +608,7 @@ version = "0.1.0"
 dependencies = [
  "cmd_lib",
  "fce",
- "fluence-sdk-main 0.2.0",
+ "fluence-sdk-main 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters)",
  "log",
  "serde",
  "serde_derive",
@@ -622,16 +622,26 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.0"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters#b3a8f3cc31ba8a87270e85d9f5026d784f01942e"
+dependencies = [
+ "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters)",
+]
+
+[[package]]
+name = "fluence-sdk-macro"
+version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#8418111074644a1bc197315060facd34778099de"
 dependencies = [
  "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
-name = "fluence-sdk-macro"
+name = "fluence-sdk-main"
 version = "0.2.0"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters#b3a8f3cc31ba8a87270e85d9f5026d784f01942e"
 dependencies = [
- "fluence-sdk-wit 0.2.0",
+ "fluence-sdk-macro 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters)",
+ "log",
 ]
 
 [[package]]
@@ -639,21 +649,13 @@ name = "fluence-sdk-main"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#8418111074644a1bc197315060facd34778099de"
 dependencies = [
- "log",
-]
-
-[[package]]
-name = "fluence-sdk-main"
-version = "0.2.0"
-dependencies = [
- "fluence-sdk-macro 0.2.0",
  "log",
 ]
 
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#8418111074644a1bc197315060facd34778099de"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=call_parameters#b3a8f3cc31ba8a87270e85d9f5026d784f01942e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -666,6 +668,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
+source = "git+https://github.com/fluencelabs/rust-sdk#8418111074644a1bc197315060facd34778099de"
 dependencies = [
  "proc-macro2",
  "quote",
