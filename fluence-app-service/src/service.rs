@@ -22,6 +22,8 @@ use fluence_faas::FluenceFaaS;
 use fluence_faas::ModulesConfig;
 
 use std::convert::TryInto;
+use std::path::{Path, PathBuf};
+use std::io::ErrorKind;
 
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
@@ -82,26 +84,32 @@ impl AppService {
         service_id: &str,
         mut envs: Vec<String>,
     ) -> Result<ModulesConfig> {
-        let base_dir = match config.service_base_dir.as_ref() {
-            Some(base_dir) => base_dir,
-            _ => {
-                return Err(AppServiceError::IOError(String::from(
-                    "service_base_dir should be specified",
-                )))
-            }
+        let base_dir: &Path = config
+            .service_base_dir
+            .as_ref()
+            .ok_or(AppServiceError::MissingServiceDir)?
+            .as_ref();
+
+        let create = |dir: &PathBuf| match std::fs::create_dir(dir) {
+            Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
+            Err(err) => Err(AppServiceError::CreateDir {
+                err,
+                path: dir.clone(),
+            }),
+            _ => Ok(()),
         };
 
-        let service_dir_path = std::path::Path::new(base_dir).join(service_id);
-        std::fs::create_dir(service_dir_path.clone())?; // will return an error if dir is already exists
+        let service_dir = base_dir.join(service_id);
+        create(&service_dir)?;
 
-        let local_dir_path = service_dir_path.join(SERVICE_LOCAL_DIR_NAME);
-        std::fs::create_dir(local_dir_path.clone())?; // will return an error if dir is already exists
+        let local_dir = service_dir.join(SERVICE_LOCAL_DIR_NAME);
+        create(&local_dir)?;
 
-        let tmp_dir_path = service_dir_path.join(SERVICE_TMP_DIR_NAME);
-        std::fs::create_dir(tmp_dir_path.clone())?; // will return an error if dir is already exists
+        let tmp_dir = service_dir.join(SERVICE_TMP_DIR_NAME);
+        create(&tmp_dir)?;
 
-        let local_dir: String = local_dir_path.to_string_lossy().into();
-        let tmp_dir: String = tmp_dir_path.to_string_lossy().into();
+        let local_dir = local_dir.to_string_lossy().to_string();
+        let tmp_dir = tmp_dir.to_string_lossy().to_string();
 
         let preopened_files = vec![local_dir.clone(), tmp_dir.clone()];
         let mapped_dirs = vec![
