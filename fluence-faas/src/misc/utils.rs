@@ -187,7 +187,7 @@ macro_rules! init_wasm_func_once {
                 };
 
             // assumed that this function will be used only in the context of closure
-            // linked to a corresponding Wasm import - so it is safe to make is static
+            // linked to a corresponding Wasm import, so it is safe to make is static
             let raw_func = std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_func);
 
             *$func.borrow_mut() = Some(raw_func);

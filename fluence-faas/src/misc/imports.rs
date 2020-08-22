@@ -114,7 +114,7 @@ pub(super) fn create_get_call_parameters_func(
             init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 3);
 
             call_wasm_func!(set_result_ptr_func, serialized_ptr as i32);
-            vec![Value::I32(0)]
+            vec![]
         }
     };
 
