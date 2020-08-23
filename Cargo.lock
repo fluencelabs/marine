@@ -638,7 +638,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#a6e8d326c23d9f4f88c9c2d44d6a7d7369b8c52c"
+source = "git+https://github.com/fluencelabs/rust-sdk#55f965f9b88b1a8bbceaee3fc9fb6b1e5f3aa63f"
 dependencies = [
  "fluence-sdk-macro",
  "fluence-sdk-main",
@@ -666,6 +666,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "toml",
+ "wasmer-interface-types-fl",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
  "wasmer-wasi-fl",
@@ -674,7 +675,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#a6e8d326c23d9f4f88c9c2d44d6a7d7369b8c52c"
+source = "git+https://github.com/fluencelabs/rust-sdk#55f965f9b88b1a8bbceaee3fc9fb6b1e5f3aa63f"
 dependencies = [
  "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
@@ -682,7 +683,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#a6e8d326c23d9f4f88c9c2d44d6a7d7369b8c52c"
+source = "git+https://github.com/fluencelabs/rust-sdk#55f965f9b88b1a8bbceaee3fc9fb6b1e5f3aa63f"
 dependencies = [
  "log",
 ]
@@ -690,7 +691,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#a6e8d326c23d9f4f88c9c2d44d6a7d7369b8c52c"
+source = "git+https://github.com/fluencelabs/rust-sdk#55f965f9b88b1a8bbceaee3fc9fb6b1e5f3aa63f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2547,9 +2548,9 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.17.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b12519a2a53ea1b2166ff47e56c6b57a3f7d714a2d34d26a6b04bdf22c37a41"
+checksum = "d7ea6479fe1487fc529af1d59f33f2ba89f1f50c5c89614ce8385f7915c8fbcb"
 dependencies = [
  "nom",
  "safe-transmute",

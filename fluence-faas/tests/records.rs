@@ -14,30 +14,25 @@
  * limitations under the License.
  */
 
-use fce::FCE;
-use fce::IValue;
+use fluence_faas::FluenceFaaS;
+use fluence_faas::IValue;
 
 #[test]
 #[ignore]
 pub fn records() {
-    let effector_wasm_bytes =
-        std::fs::read("../examples/records/artifacts/wasm_modules/effector.wasm")
-            .expect("examples/records/artifacts/wasm_modules/effector.wasm should presence");
+    let records_config_path = "../examples/records/Config.toml";
 
-    let pure_wasm_bytes = std::fs::read("../examples/records/artifacts/wasm_modules/pure.wasm")
-        .expect("examples/records/artifacts/wasm_modules/pure.wasm should presence");
+    let records_config_raw = std::fs::read(records_config_path)
+        .expect("../examples/records/Config.toml should presence");
 
-    let mut fce = FCE::new();
-    let load_result = fce.load_module("pure", &pure_wasm_bytes, <_>::default());
-    assert!(load_result.is_err());
+    let mut records_config: fluence_faas::RawModulesConfig =
+        toml::from_slice(&records_config_raw).expect("greeting config should be well-formed");
+    records_config.modules_dir = Some(String::from("../examples/records/artifacts/wasm_modules/"));
 
-    fce.load_module("effector", &effector_wasm_bytes, <_>::default())
-        .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
+    let mut faas = FluenceFaaS::with_raw_config(records_config)
+        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
 
-    fce.load_module("pure", &pure_wasm_bytes, <_>::default())
-        .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
-
-    let result = fce
+    let result = faas
         .call("pure", "invoke", &[])
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
