@@ -28,4 +28,4 @@ mod errors;
 mod fce_wit_interfaces;
 
 pub use errors::*;
-pub use fce_wit_interfaces::*;
+pub use self::fce_wit_interfaces::*;

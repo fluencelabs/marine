@@ -39,7 +39,7 @@ pub fn put(file_path: String) -> String {
     let timeout = std::env::var(TIMEOUT_ENV_NAME).unwrap_or_else(|_| "1s".to_string());
     let cmd = format!("add --timeout {} -Q {}", timeout, file_path);
 
-    ipfs(cmd)
+    unsafe { ipfs(cmd) }
 }
 
 /// Get file by provided hash from IPFS, saves it to a temporary file and returns a path to it.
@@ -55,7 +55,7 @@ pub fn get(hash: String) -> String {
         timeout, result_file_path, hash
     );
 
-    ipfs(cmd);
+    unsafe { ipfs(cmd) };
 
     RESULT_FILE_PATH.to_string()
 }
