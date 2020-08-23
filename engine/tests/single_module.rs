@@ -34,25 +34,50 @@ async fn redis() {
         .unwrap_or_else(|e| panic!("can't create FCE: {:?}", e));
 
     let result1 = fce
-        .call(module_name, "invoke", &[IValue::String(String::from("SET A 10"))])
+        .call(
+            module_name,
+            "invoke",
+            &[IValue::String(String::from("SET A 10"))],
+        )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
     let result2 = fce
-        .call(module_name, "invoke", &[IValue::String(String::from("SADD B 20"))])
+        .call(
+            module_name,
+            "invoke",
+            &[IValue::String(String::from("SADD B 20"))],
+        )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
     let result3 = fce
-        .call(module_name, "invoke", &[IValue::String(String::from("GET A"))])
+        .call(
+            module_name,
+            "invoke",
+            &[IValue::String(String::from("GET A"))],
+        )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
     let result4 = fce
-        .call(module_name, "invoke", &[IValue::String(String::from("SMEMBERS B"))])
+        .call(
+            module_name,
+            "invoke",
+            &[IValue::String(String::from("SMEMBERS B"))],
+        )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
     let result5 = fce
-        .call(module_name, "invoke", &[IValue::String(String::from("eval \"redis.call('incr', 'A') return redis.call('get', 'A') * 8 + 5\"  0"))])
+        .call(
+            module_name,
+            "invoke",
+            &[IValue::String(String::from(
+                "eval \"redis.call('incr', 'A') return redis.call('get', 'A') * 8 + 5\"  0",
+            ))],
+        )
         .expect("error while FCE invocation");
 
     assert_eq!(result1, vec![IValue::String(String::from("+OK\r\n"))]);
     assert_eq!(result2, vec![IValue::String(String::from(":1\r\n"))]);
     assert_eq!(result3, vec![IValue::String(String::from("$2\r\n10\r\n"))]);
-    assert_eq!(result4, vec![IValue::String(String::from("*1\r\n$2\r\n20\r\n"))]);
+    assert_eq!(
+        result4,
+        vec![IValue::String(String::from("*1\r\n$2\r\n20\r\n"))]
+    );
     assert_eq!(result5, vec![IValue::String(String::from(":93\r\n"))]);
 }
 
@@ -72,21 +97,27 @@ async fn sqlite() {
         .call(
             module_name,
             "invoke",
-            &[IValue::String(String::from("CREATE VIRTUAL TABLE users USING FTS5(body)"))],
+            &[IValue::String(String::from(
+                "CREATE VIRTUAL TABLE users USING FTS5(body)",
+            ))],
         )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
     let result2 = fce
         .call(
             module_name,
             "invoke",
-            &[IValue::String(String::from("INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')"))],
+            &[IValue::String(String::from(
+                "INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')",
+            ))],
         )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
     let result3 = fce
         .call(
             module_name,
             "invoke",
-            &[IValue::String(String::from("SELECT * FROM users WHERE users MATCH 'A* OR B*"))],
+            &[IValue::String(String::from(
+                "SELECT * FROM users WHERE users MATCH 'A* OR B*",
+            ))],
         )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
 
