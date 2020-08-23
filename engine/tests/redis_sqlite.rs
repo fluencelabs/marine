@@ -14,24 +14,33 @@
  * limitations under the License.
  */
 
-mod downloader;
-use fce::{FCE, IValue};
+use fce::FCE;
+use fce::IValue;
 
 const REDIS_DOWNLOAD_URL: &str =
     "https://github.com/fluencelabs/redis/releases/download/0.9.0_w/redis.wasm";
 const SQLITE_DOWNLOAD_URL: &str =
     "https://github.com/fluencelabs/sqlite/releases/download/0.4.0_w/sqlite3.wasm";
 
+pub async fn download(url: &str) -> bytes::Bytes {
+    reqwest::get(url)
+        .await
+        .expect("failed to download redis")
+        .bytes()
+        .await
+        .expect("failed to convert response to bytes")
+}
+
 #[tokio::test]
 async fn redis() {
-    let wasm_bytes = downloader::download(REDIS_DOWNLOAD_URL).await;
+    let wasm_bytes = download(REDIS_DOWNLOAD_URL).await;
 
     let mut fce = FCE::new();
     let module_name = "redis";
     let config = <_>::default();
 
     fce.load_module(module_name, wasm_bytes.as_ref(), config)
-        .unwrap_or_else(|e| panic!("can't create FCE: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
 
     let result1 = fce
         .call(
@@ -84,14 +93,14 @@ async fn redis() {
 #[tokio::test]
 #[ignore]
 async fn sqlite() {
-    let wasm_bytes = downloader::download(SQLITE_DOWNLOAD_URL).await;
+    let wasm_bytes = download(SQLITE_DOWNLOAD_URL).await;
 
     let mut fce = FCE::new();
     let module_name = "sqlite";
     let config = <_>::default();
 
     fce.load_module(module_name, wasm_bytes.as_ref(), config)
-        .unwrap_or_else(|e| panic!("can't create FCE: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
 
     let result1 = fce
         .call(

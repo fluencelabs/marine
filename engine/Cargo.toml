@@ -31,3 +31,4 @@ log = "0.4.8"
 reqwest = "0.10.4"
 bytes = "0.5.4"
 tokio = { version = "0.2.20", features = ["blocking", "macros"] }
+once_cell = "1.4.0"
