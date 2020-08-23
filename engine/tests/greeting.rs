@@ -21,7 +21,7 @@ use once_cell::sync::Lazy;
 
 static GREETING_WASM_BYTES: Lazy<Vec<u8>> = Lazy::new(|| {
     std::fs::read("../examples/greeting/artifacts/greeting.wasm")
-        .expect("examples/greeting/artifacts/greeting.wasm should presence")
+        .expect("../examples/greeting/artifacts/greeting.wasm should presence")
 });
 
 #[test]
