@@ -106,7 +106,7 @@ pub(super) fn create_get_call_parameters_func(
         Box::new(RefCell::new(None));
 
     let func = move |ctx: &mut Ctx, _inputs: &[Value]| -> Vec<Value> {
-        let serialized_ptr = call_parameters.borrow().__fce_generated_serialize();
+        let serialized_ptr = call_parameters.borrow().clone().__fce_generated_serialize();
 
         unsafe {
             init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 3);

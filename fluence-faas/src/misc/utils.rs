@@ -179,7 +179,7 @@ pub(crate) fn make_fce_config(
 /// Initialize Wasm function in form of Box<RefCell<Option<Func<'static, args, rets>>>> only once.
 macro_rules! init_wasm_func_once {
     ($func:ident, $ctx:ident, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
-        if $func.borrow_mut().is_none() {
+        if $func.borrow().is_none() {
             let raw_func =
                 match super::utils::get_export_func_by_name::<$args, $rets>($ctx, $func_name) {
                     Ok(func) => func,
@@ -199,6 +199,6 @@ macro_rules! init_wasm_func_once {
 /// Call Wasm function that have Box<RefCell<Option<Func<'static, args, rets>>>> type.
 macro_rules! call_wasm_func {
     ($func:ident, $arg:expr) => {
-        $func.borrow_mut().as_ref().unwrap().call($arg).unwrap()
+        $func.borrow().as_ref().unwrap().call($arg).unwrap()
     };
 }
