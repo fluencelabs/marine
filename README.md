@@ -70,30 +70,30 @@ extern "C" {
 - Create simple Rust project
 - Create `Config.toml` to describe existed wasm modules and give accesses to host binaries and local storage if needed:
 ```toml
-core_modules_dir = "wasm/artifacts/modules"
+modules_dir = "wasm/artifacts/modules"
 
-[[core_module]]
+[[module]]
     name = "wasm_local_storage_with_curl.wasm"
     mem_pages_count = 100    
 
-   [core_module.imports]
+   [module.imports]
     curl = "/usr/bin/curl"
 
-    [core_module.wasi]
+    [module.wasi]
     envs = []
     preopened_files = ["./wasm/artifacts"]
     mapped_dirs = { "tmp" = "./wasm/artifacts" }
 ```
 
-`core_modules_dir` - path to directory with all modules. All subsequent paths will be relative to this path
+`modules_dir` - path to directory with all modules. All subsequent paths will be relative to this path
 
-`[[core_module]]` - modules list
+`[[module]]` - modules list
 
-`name` - wasm file name in `core_modules_dir`
+`name` - wasm file name in `modules_dir`
 
 `mem_pages_count` - a maximum number of Wasm memory pages that loaded module can use. Each Wasm pages is 65536 bytes long
 
-`[core_module.imports]` - list of available imports
+`[module.imports]` - list of available imports
 
 `curl = "/usr/bin/curl"` - gives possibility to call binary file `/usr/bin/curl` as method `curl` in Rust code
 
@@ -107,7 +107,7 @@ extern "C" {
 
 Call binary with arguments: `curl("-vvv ya.ru")`
 
-`[core_module.wasi]` - this block manages communication with the "outside" world
+`[module.wasi]` - this block manages communication with the "outside" world
 `env` - environment variables. Usage: `std::env::var("IPFS_ADDR")`
 `preopened_files` - list of available directories for loaded modules
 `mapped_dirs` - mapping between paths

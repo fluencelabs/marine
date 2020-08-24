@@ -1,11 +1,11 @@
 modules_dir = "artifacts/wasm_modules"
 
 [[module]]
-    name = "effector.wasm"
+    name = "effector"
     mem_pages_count = 1
     logger_enabled = true
 
 [[module]]
-    name = "pure.wasm"
+    name = "pure"
     mem_pages_count = 1
     logger_enabled = true
