@@ -22,3 +22,9 @@ pub fn main() {}
 pub fn greeting(name: String) -> String {
     format!("Hi, {}", name)
 }
+
+#[fce]
+pub fn greeting_cp() -> String {
+    let name = unsafe { fluence::get_call_parameters().user_name };
+    format!("Hi, {}", name)
+}

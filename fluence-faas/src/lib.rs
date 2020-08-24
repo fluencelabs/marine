@@ -42,6 +42,7 @@ pub use fluence_sdk_main::CallParameters;
 
 pub use faas::FluenceFaaS;
 pub use faas_interface::FaaSInterface;
+pub use faas_interface::FaaSFunctionSignature;
 
 pub use misc::RawModulesConfig;
 pub use misc::RawModuleConfig;
