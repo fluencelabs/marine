@@ -10,7 +10,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - fce01-{{ checksum "engine/Cargo.toml" }}-{{ checksum "fluence-faas/Cargo.toml" }}-{{ checksum "fluence-app-service/Cargo.toml" }}
+            - fce01-{{ checksum "Cargo.lock" }}-{{ checksum "examples/greeting/artifacts/greeting.wasm" }}-{{ checksum "examples/records/artifacts/pure.wasm" }}-{{ checksum "examples/records/artifacts/effector.wasm" }}
       - run: |
           rustup toolchain install nightly
           rustup component add rustfmt
@@ -25,7 +25,7 @@ jobs:
           paths:
             - ~/.cargo
             - ~/.rustup
-          key: fce01-{{ checksum "engine/Cargo.toml" }}-{{ checksum "fluence-faas/Cargo.toml" }}-{{ checksum "fluence-app-service/Cargo.toml" }}
+          key: fce01-{{ checksum "Cargo.lock" }}-{{ checksum "examples/greeting/artifacts/greeting.wasm" }}-{{ checksum "examples/records/artifacts/pure.wasm" }}-{{ checksum "examples/records/artifacts/effector.wasm" }}
 
   examples:
     docker:
