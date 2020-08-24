@@ -20,9 +20,8 @@ use fce::IValue;
 #[test]
 #[ignore]
 pub fn records() {
-    let effector_wasm_bytes =
-        std::fs::read("../examples/records/artifacts/wasm_modules/effector")
-            .expect("../examples/records/artifacts/wasm_modules/effector.wasm should presence");
+    let effector_wasm_bytes = std::fs::read("../examples/records/artifacts/wasm_modules/effector")
+        .expect("../examples/records/artifacts/wasm_modules/effector.wasm should presence");
 
     let pure_wasm_bytes = std::fs::read("../examples/records/artifacts/wasm_modules/pure")
         .expect("../examples/records/artifacts/wasm_modules/pure.wasm should presence");
