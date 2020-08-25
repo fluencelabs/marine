@@ -32,6 +32,7 @@ pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 pub use errors::AppServiceError;
 pub use service::AppService;
 
+pub use fluence_faas::CallParameters;
 pub use fluence_faas::IValue;
 pub use fluence_faas::IType;
 pub use fluence_faas::FaaSInterface;

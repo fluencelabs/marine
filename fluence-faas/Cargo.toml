@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 fce = { path = "../engine", version = "0.1.1" }
+fluence-sdk-main = { git = "https://github.com/fluencelabs/rust-sdk" }
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
@@ -20,9 +21,10 @@ serde_json = "1.0.53"
 serde_derive = "1.0.111"
 cmd_lib = "0.7.8"
 log = "0.4.8"
+safe-transmute = "0.11.0"
 
 [dev-dependencies]
-wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.1"}
+wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.0"}
 
 [features]
 raw-module-api = []

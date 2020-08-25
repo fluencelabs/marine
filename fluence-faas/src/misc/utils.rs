@@ -102,8 +102,10 @@ where
 /// Make FCE config based on parsed config.
 pub(crate) fn make_fce_config(
     module_config: Option<ModuleConfig>,
+    call_parameters: std::rc::Rc<std::cell::RefCell<fluence_sdk_main::CallParameters>>,
 ) -> crate::Result<FCEModuleConfig> {
     use super::imports::create_host_import_func;
+    use super::imports::create_get_call_parameters_func;
     use super::imports::log_utf8_string;
     use wasmer_core::import::Namespace;
     use std::path::PathBuf;
@@ -159,6 +161,10 @@ pub(crate) fn make_fce_config(
             namespace.insert(import_name, host_import);
         }
     }
+    namespace.insert(
+        "get_call_parameters",
+        create_get_call_parameters_func(call_parameters),
+    );
 
     let mut import_object = ImportObject::new();
     import_object.register("host", namespace);
@@ -181,7 +187,7 @@ macro_rules! init_wasm_func_once {
                 };
 
             // assumed that this function will be used only in the context of closure
-            // linked to a corresponding Wasm import - os it is safe to make is static
+            // linked to a corresponding Wasm import, so it is safe to make is static
             let raw_func = std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_func);
 
             *$func.borrow_mut() = Some(raw_func);

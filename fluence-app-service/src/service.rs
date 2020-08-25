@@ -60,11 +60,12 @@ impl AppService {
         module_name: MN,
         func_name: FN,
         arguments: serde_json::Value,
+        call_parameters: crate::CallParameters,
     ) -> Result<Vec<IValue>> {
         let arguments = Self::json_to_ivalue(arguments)?;
 
         self.faas
-            .call(module_name, func_name, &arguments)
+            .call(module_name, func_name, &arguments, call_parameters)
             .map_err(Into::into)
     }
 
