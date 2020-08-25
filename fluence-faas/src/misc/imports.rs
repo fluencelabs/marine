@@ -109,13 +109,32 @@ pub(super) fn create_get_call_parameters_func(
         unsafe {
             init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 2);
 
-            let call_id_ptr = call_wasm_func!(allocate_func, call_parameters.borrow().call_id.len() as i32);
-            let user_name_ptr = call_wasm_func!(allocate_func, call_parameters.borrow().user_name.len() as i32);
-            let application_id_ptr = call_wasm_func!(allocate_func, call_parameters.borrow().application_id.len() as i32);
+            let call_id_ptr =
+                call_wasm_func!(allocate_func, call_parameters.borrow().call_id.len() as i32);
+            let user_name_ptr = call_wasm_func!(
+                allocate_func,
+                call_parameters.borrow().user_name.len() as i32
+            );
+            let application_id_ptr = call_wasm_func!(
+                allocate_func,
+                call_parameters.borrow().application_id.len() as i32
+            );
 
-            write_to_mem(ctx, call_id_ptr as usize, call_parameters.borrow().call_id.as_bytes());
-            write_to_mem(ctx, user_name_ptr as usize, call_parameters.borrow().user_name.as_bytes());
-            write_to_mem(ctx, application_id_ptr as usize, call_parameters.borrow().application_id.as_bytes());
+            write_to_mem(
+                ctx,
+                call_id_ptr as usize,
+                call_parameters.borrow().call_id.as_bytes(),
+            );
+            write_to_mem(
+                ctx,
+                user_name_ptr as usize,
+                call_parameters.borrow().user_name.as_bytes(),
+            );
+            write_to_mem(
+                ctx,
+                application_id_ptr as usize,
+                call_parameters.borrow().application_id.as_bytes(),
+            );
 
             let mut serialized_call_parameters = Vec::new();
             serialized_call_parameters.push(call_id_ptr as u64);
@@ -125,13 +144,22 @@ pub(super) fn create_get_call_parameters_func(
             serialized_call_parameters.push(application_id_ptr as u64);
             serialized_call_parameters.push(call_parameters.borrow().application_id.len() as u64);
 
-            let serialized_call_parameters_ptr = call_wasm_func!(allocate_func, serialized_call_parameters.len() as i32);
-            let serialized_call_parameters_bytes = safe_transmute::transmute_to_bytes::<u64>(&serialized_call_parameters);
-            write_to_mem(ctx, serialized_call_parameters_ptr as usize, serialized_call_parameters_bytes);
+            let serialized_call_parameters_ptr =
+                call_wasm_func!(allocate_func, serialized_call_parameters.len() as i32);
+            let serialized_call_parameters_bytes =
+                safe_transmute::transmute_to_bytes::<u64>(&serialized_call_parameters);
+            write_to_mem(
+                ctx,
+                serialized_call_parameters_ptr as usize,
+                serialized_call_parameters_bytes,
+            );
 
             vec![Value::I32(serialized_call_parameters_ptr as _)]
         }
     };
 
-    DynamicFunc::new(std::sync::Arc::new(FuncSig::new(vec![], vec![Type::I32])), func)
+    DynamicFunc::new(
+        std::sync::Arc::new(FuncSig::new(vec![], vec![Type::I32])),
+        func,
+    )
 }
