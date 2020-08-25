@@ -37,11 +37,11 @@ pub fn invoke() -> TestRecord {
         field_12: Vec::new(),
     };
 
-    mutate_struct(test_record)
+    unsafe { mutate_struct(test_record) }
 }
 
 #[fce]
-#[link(wasm_import_module = "effector.wasm")]
+#[link(wasm_import_module = "effector")]
 extern "C" {
     pub fn mutate_struct(test_record: TestRecord) -> TestRecord;
 }

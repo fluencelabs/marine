@@ -24,13 +24,13 @@ use serde::Serializer;
 use std::fmt;
 use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct FaaSInterface<'a> {
     pub record_types: Vec<&'a IRecordType>,
     pub modules: HashMap<&'a str, HashMap<&'a str, FaaSFunctionSignature<'a>>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct FaaSFunctionSignature<'a> {
     pub arguments: &'a Vec<IFunctionArg>,
     pub output_types: &'a Vec<IType>,

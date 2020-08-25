@@ -22,7 +22,8 @@ use fluence_faas::FluenceFaaS;
 use fluence_faas::ModulesConfig;
 
 use std::convert::TryInto;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::io::ErrorKind;
 
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
@@ -37,41 +38,15 @@ pub struct AppService {
 
 impl AppService {
     /// Create Service with given modules and service id.
-    pub fn new<I, C, S>(modules: I, config: C, service_id: S) -> Result<Self>
+    pub fn new<C, S>(config: C, service_id: S, envs: Vec<String>) -> Result<Self>
     where
-        I: IntoIterator<Item = String>,
         C: TryInto<ModulesConfig>,
         S: AsRef<str>,
         AppServiceError: From<C::Error>,
     {
         let config: ModulesConfig = config.try_into()?;
         let service_id = service_id.as_ref();
-        let config = Self::set_env_and_dirs(config, service_id, None)?;
-
-        let modules = modules.into_iter().collect();
-        let faas = FluenceFaaS::with_module_names(&modules, config)?;
-
-        Ok(Self { faas })
-    }
-
-    /// Create Service with given raw config, service id and service base dir.
-    pub fn with_raw_config<P, SI>(
-        config: P,
-        service_id: SI,
-        service_base_dir: Option<&str>,
-    ) -> Result<Self>
-    where
-        P: Into<PathBuf>,
-        SI: AsRef<str>,
-    {
-        let service_id = service_id.as_ref();
-        let service_base_dir = service_base_dir;
-
-        let config_content = std::fs::read(config.into())?;
-        let config: crate::RawModulesConfig = toml::from_slice(&config_content)?;
-
-        let config = config.try_into()?;
-        let config = Self::set_env_and_dirs(config, service_id, service_base_dir)?;
+        let config = Self::set_env_and_dirs(config, service_id, envs)?;
 
         let faas = FluenceFaaS::with_raw_config(config)?;
 
@@ -85,11 +60,12 @@ impl AppService {
         module_name: MN,
         func_name: FN,
         arguments: serde_json::Value,
+        call_parameters: crate::CallParameters,
     ) -> Result<Vec<IValue>> {
         let arguments = Self::json_to_ivalue(arguments)?;
 
         self.faas
-            .call(module_name, func_name, &arguments)
+            .call(module_name, func_name, &arguments, call_parameters)
             .map_err(Into::into)
     }
 
@@ -106,43 +82,48 @@ impl AppService {
     fn set_env_and_dirs(
         mut config: ModulesConfig,
         service_id: &str,
-        service_base_dir: Option<&str>,
+        mut envs: Vec<String>,
     ) -> Result<ModulesConfig> {
-        let base_dir = match (&config.service_base_dir, service_base_dir) {
-            (_, Some(base_dir)) => base_dir,
-            (Some(ref base_dir), None) => base_dir,
-            _ => {
-                return Err(AppServiceError::IOError(String::from(
-                    "service_base_dir should be specified",
-                )))
-            }
+        let base_dir: &Path = config
+            .service_base_dir
+            .as_ref()
+            .ok_or(AppServiceError::MissingServiceDir)?
+            .as_ref();
+
+        let create = |dir: &PathBuf| match std::fs::create_dir(dir) {
+            Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
+            Err(err) => Err(AppServiceError::CreateDir {
+                err,
+                path: dir.clone(),
+            }),
+            _ => Ok(()),
         };
 
-        let service_dir_path = std::path::Path::new(base_dir).join(service_id);
-        std::fs::create_dir(service_dir_path.clone())?; // will return an error if dir is already exists
+        let service_dir = base_dir.join(service_id);
+        create(&service_dir)?;
 
-        let local_dir_path = service_dir_path.join(SERVICE_LOCAL_DIR_NAME);
-        std::fs::create_dir(local_dir_path.clone())?; // will return an error if dir is already exists
+        let local_dir = service_dir.join(SERVICE_LOCAL_DIR_NAME);
+        create(&local_dir)?;
 
-        let tmp_dir_path = service_dir_path.join(SERVICE_TMP_DIR_NAME);
-        std::fs::create_dir(tmp_dir_path.clone())?; // will return an error if dir is already exists
+        let tmp_dir = service_dir.join(SERVICE_TMP_DIR_NAME);
+        create(&tmp_dir)?;
 
-        let local_dir: String = local_dir_path.to_string_lossy().into();
-        let tmp_dir: String = tmp_dir_path.to_string_lossy().into();
+        let local_dir = local_dir.to_string_lossy().to_string();
+        let tmp_dir = tmp_dir.to_string_lossy().to_string();
 
-        let service_id_env = vec![format!("{}={}", SERVICE_ID_ENV_NAME, service_id).into_bytes()];
         let preopened_files = vec![local_dir.clone(), tmp_dir.clone()];
         let mapped_dirs = vec![
             (String::from(SERVICE_LOCAL_DIR_NAME), local_dir),
             (String::from(SERVICE_TMP_DIR_NAME), tmp_dir),
         ];
+        envs.push(format!("{}={}", SERVICE_ID_ENV_NAME, service_id));
 
         config.modules_config = config
             .modules_config
             .into_iter()
             .map(|(name, module_config)| {
                 let module_config = module_config
-                    .extend_wasi_envs(service_id_env.clone())
+                    .extend_wasi_envs(envs.iter().map(|s| s.clone().into_bytes()).collect())
                     .extend_wasi_files(preopened_files.clone(), mapped_dirs.clone());
 
                 (name, module_config)

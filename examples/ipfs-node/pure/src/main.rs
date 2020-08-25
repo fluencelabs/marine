@@ -42,14 +42,14 @@ pub fn put(file_content: Vec<u8>) -> String {
         return format!("file can't be written: {}", e);
     }
 
-    ipfs_put(rpc_tmp_filepath)
+    unsafe { ipfs_put(rpc_tmp_filepath) }
 }
 
 #[fce]
 pub fn get(hash: String) -> Vec<u8> {
     log::info!("get called with hash: {}", hash);
 
-    let file_path = ipfs_get(hash);
+    let file_path = unsafe { ipfs_get(hash) };
     fs::read(file_path).unwrap_or_else(|_| b"error while reading file".to_vec())
 }
 

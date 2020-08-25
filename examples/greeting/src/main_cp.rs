@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-pub async fn download(url: &str) -> bytes::Bytes {
-    reqwest::get(url)
-        .await
-        .expect("failed to download redis")
-        .bytes()
-        .await
-        .expect("failed to convert response to bytes")
+pub fn main() {}
+
+#[fluence::fce]
+#[cfg(target_arch = "wasm32")]
+pub fn greeting() -> String {
+    let name = fluence::get_call_parameters().user_name;
+    format!("Hi, {}", name)
 }

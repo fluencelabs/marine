@@ -18,17 +18,22 @@ use fluence_faas::FaaSError;
 
 use std::io::Error as IOError;
 use std::error::Error;
+use std::path::PathBuf;
 
 #[derive(Debug)]
 pub enum AppServiceError {
     /// An error related to config parsing.
     InvalidConfig(String),
 
-    /// Various errors related to file i/o.
-    IOError(String),
-
     /// FaaS errors.
     FaaSError(FaaSError),
+
+    /// Directory creation failed
+    CreateDir { err: IOError, path: PathBuf },
+
+    /// Base service dir wasn't specified in config
+    /// TODO: do we need that dir to be optional?
+    MissingServiceDir,
 }
 
 impl Error for AppServiceError {}
@@ -37,15 +42,14 @@ impl std::fmt::Display for AppServiceError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             AppServiceError::InvalidConfig(err_msg) => write!(f, "{}", err_msg),
-            AppServiceError::IOError(err_msg) => write!(f, "{}", err_msg),
             AppServiceError::FaaSError(err) => write!(f, "{}", err),
+            AppServiceError::CreateDir { err, path } => {
+                write!(f, "Failed to create dir {:?}: {:?}", path, err)
+            }
+            AppServiceError::MissingServiceDir => {
+                write!(f, "service base dir should be specified in config")
+            }
         }
-    }
-}
-
-impl From<IOError> for AppServiceError {
-    fn from(err: IOError) -> Self {
-        AppServiceError::IOError(format!("{}", err))
     }
 }
 

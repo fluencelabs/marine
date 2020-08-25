@@ -16,7 +16,7 @@
 
 use crate::Result;
 
-use fluence_app_service::AppService;
+use fluence_app_service::{AppService, RawModulesConfig};
 
 use std::path::PathBuf;
 use std::fs;
@@ -110,13 +110,18 @@ impl REPL {
                 };
 
                 let start = Instant::now();
-                let result = match self.app_service.call(module_name, func_name, module_arg) {
-                    Ok(result) => {
-                        let elapsed_time = start.elapsed();
-                        format!("result: {:?}\n elapsed time: {:?}", result, elapsed_time)
-                    }
-                    Err(e) => format!("execution failed with {:?}", e),
-                };
+                // TODO: add support of call parameters
+                let result =
+                    match self
+                        .app_service
+                        .call(module_name, func_name, module_arg, <_>::default())
+                    {
+                        Ok(result) => {
+                            let elapsed_time = start.elapsed();
+                            format!("result: {:?}\n elapsed time: {:?}", result, elapsed_time)
+                        }
+                        Err(e) => format!("execution failed with {:?}", e),
+                    };
                 println!("{}", result);
             }
             Some("envs") => {
@@ -162,18 +167,15 @@ impl REPL {
         let service_id = uuid::Uuid::new_v4().to_string();
 
         let start = Instant::now();
-        let app_service = match config_file_path {
-            Some(config_file_path) => {
-                let config_file_path = config_file_path.into();
-                AppService::with_raw_config(config_file_path, &service_id, Some(&tmp_path))
-            }
-            None => {
-                let mut config: fluence_app_service::RawModulesConfig = <_>::default();
-                config.service_base_dir = Some(tmp_path);
 
-                AppService::new(std::iter::empty(), config, &service_id)
-            }
-        }?;
+        let mut config = config_file_path
+            .map(|p| RawModulesConfig::load(p.into()))
+            .transpose()?
+            .unwrap_or_default();
+        config.service_base_dir = Some(tmp_path);
+
+        let app_service = AppService::new(config, &service_id, vec![])?;
+
         let duration = start.elapsed();
 
         println!(

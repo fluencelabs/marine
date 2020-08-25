@@ -22,29 +22,39 @@ use crate::Result;
 use crate::IValue;
 
 use fce::FCE;
+use fluence_sdk_main::CallParameters;
 
+use std::cell::RefCell;
 use std::convert::TryInto;
 use std::collections::HashSet;
 use std::collections::HashMap;
+use std::rc::Rc;
 use std::fs;
 use std::path::PathBuf;
+use std::path::Path;
 
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
 
-/// Strategy for module loading: either `All`, or only those specified in `Named`
+/// Strategies for module loading.
 pub enum ModulesLoadStrategy<'a> {
+    /// Try to load all files in a given directory
+    #[allow(dead_code)]
     All,
+    /// Try to load only files contained in the set
     Named(&'a HashSet<String>),
+    /// In a given directory, try to load all files ending with .wasm
+    WasmOnly,
 }
 
 impl<'a> ModulesLoadStrategy<'a> {
     #[inline]
     /// Returns true if `module` should be loaded.
-    pub fn should_load(&self, module: &str) -> bool {
+    pub fn should_load(&self, module: &Path) -> bool {
         match self {
             ModulesLoadStrategy::All => true,
-            ModulesLoadStrategy::Named(set) => set.contains(module),
+            ModulesLoadStrategy::Named(set) => set.contains(module.to_string_lossy().as_ref()),
+            ModulesLoadStrategy::WasmOnly => module.extension().map_or(false, |e| e == "wasm"),
         }
     }
 
@@ -70,10 +80,27 @@ impl<'a> ModulesLoadStrategy<'a> {
             _ => <_>::default(),
         }
     }
+
+    #[inline]
+    pub fn extract_module_name(&self, module: String) -> String {
+        match self {
+            ModulesLoadStrategy::WasmOnly => {
+                let path: &Path = module.as_ref();
+                path.file_stem()
+                    .map(|s| s.to_string_lossy().to_string())
+                    .unwrap_or(module)
+            }
+            _ => module,
+        }
+    }
 }
 
 pub struct FluenceFaaS {
+    /// The Fluence Compute Engine instance.
     fce: FCE,
+
+    /// Parameters of call accessible by Wasm modules.
+    call_parameters: Rc<RefCell<CallParameters>>,
 }
 
 impl FluenceFaaS {
@@ -94,7 +121,7 @@ impl FluenceFaaS {
             .modules_dir
             .as_ref()
             .map_or(Ok(HashMap::new()), |dir| {
-                Self::load_modules(dir, ModulesLoadStrategy::All)
+                Self::load_modules(dir, ModulesLoadStrategy::WasmOnly)
             })?;
 
         Self::with_modules::<ModulesConfig>(modules, config)
@@ -108,6 +135,7 @@ impl FluenceFaaS {
     {
         let mut fce = FCE::new();
         let config = config.try_into()?;
+        let call_parameters = Rc::new(RefCell::new(<_>::default()));
 
         for (module_name, module_config) in config.modules_config {
             let module_bytes = modules.remove(&module_name).ok_or_else(|| {
@@ -116,17 +144,15 @@ impl FluenceFaaS {
                     module_name
                 ))
             })?;
-            let fce_module_config = crate::misc::make_fce_config(Some(module_config))?;
+            let fce_module_config =
+                crate::misc::make_fce_config(Some(module_config), call_parameters.clone())?;
             fce.load_module(module_name, &module_bytes, fce_module_config)?;
         }
 
-        for (name, bytes) in modules {
-            let module_config = config.default_modules_config.clone();
-            let fce_module_config = crate::misc::make_fce_config(module_config)?;
-            fce.load_module(name.clone(), &bytes, fce_module_config)?;
-        }
-
-        Ok(Self { fce })
+        Ok(Self {
+            fce,
+            call_parameters,
+        })
     }
 
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
@@ -171,11 +197,12 @@ impl FluenceFaaS {
                 .into_string()
                 .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
 
-            if modules.should_load(&module_name) {
+            if modules.should_load(&module_name.as_ref()) {
                 let module_bytes = fs::read(path)?;
+                let module_name = modules.extract_module_name(module_name);
                 if hash_map.insert(module_name, module_bytes).is_some() {
                     return Err(FaaSError::ConfigParseError(String::from(
-                        "config contains modules with the same name",
+                        "module {} is duplicated in config",
                     )));
                 }
             }
@@ -201,7 +228,10 @@ impl FluenceFaaS {
         module_name: MN,
         func_name: FN,
         args: &[IValue],
+        call_parameters: fluence_sdk_main::CallParameters,
     ) -> Result<Vec<IValue>> {
+        self.call_parameters.replace(call_parameters);
+
         self.fce
             .call(module_name, func_name, args)
             .map_err(Into::into)
@@ -246,7 +276,7 @@ impl FluenceFaaS {
     {
         let config = config.map(|c| c.try_into()).transpose()?;
 
-        let fce_module_config = crate::misc::make_fce_config(config)?;
+        let fce_module_config = crate::misc::make_fce_config(config, self.call_parameters.clone())?;
         self.fce
             .load_module(name, &wasm_bytes, fce_module_config)
             .map_err(Into::into)
