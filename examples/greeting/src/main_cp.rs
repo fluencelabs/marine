@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-use fluence::fce;
-
 pub fn main() {}
 
-#[fce]
-pub fn greeting(name: String) -> String {
+#[fluence::fce]
+#[cfg(target_arch = "wasm32")]
+pub fn greeting() -> String {
+    let name = fluence::get_call_parameters().user_name;
     format!("Hi, {}", name)
 }

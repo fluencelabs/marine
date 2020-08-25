@@ -70,19 +70,13 @@ pub fn get_interfaces() {
     let interface = faas.get_interface();
 
     let string_type_params = vec![fluence_faas::IType::String];
-    let empty_type_params = vec![];
     let greeting_sign = fluence_faas::FaaSFunctionSignature {
         input_types: &string_type_params,
-        output_types: &string_type_params,
-    };
-    let greeting_cp_sign = fluence_faas::FaaSFunctionSignature {
-        input_types: &empty_type_params,
         output_types: &string_type_params,
     };
 
     let mut functions = std::collections::HashMap::new();
     functions.insert("greeting", greeting_sign);
-    functions.insert("greeting_cp", greeting_cp_sign);
 
     let mut modules = std::collections::HashMap::new();
     modules.insert("greeting", functions);
@@ -92,10 +86,10 @@ pub fn get_interfaces() {
 
 #[test]
 pub fn call_parameters() {
-    let greeting_config_path = "../examples/greeting/Config.toml";
+    let greeting_config_path = "../examples/greeting/Config_cp.toml";
 
     let greeting_config_raw = std::fs::read(greeting_config_path)
-        .expect("../examples/greeting/Config.toml should presence");
+        .expect("../examples/greeting/Config_cp.toml should presence");
 
     let mut greeting_config: fluence_faas::RawModulesConfig =
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
@@ -106,8 +100,8 @@ pub fn call_parameters() {
 
     let result = faas
         .call(
-            "greeting",
             "greeting_cp",
+            "greeting",
             &[],
             fluence_sdk_main::CallParameters {
                 call_id: "0x1337".to_string(),

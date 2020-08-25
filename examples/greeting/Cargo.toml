@@ -8,5 +8,9 @@ edition = "2018"
 name = "greeting"
 path = "src/main.rs"
 
+[[bin]]
+name = "greeting_cp"
+path = "src/main_cp.rs"
+
 [dependencies]
 fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
