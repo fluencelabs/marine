@@ -653,14 +653,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence"
-version = "0.2.0"
-dependencies = [
- "fluence-sdk-macro 0.2.0",
- "fluence-sdk-main 0.2.0",
-]
-
-[[package]]
 name = "fluence-app-service"
 version = "0.1.0"
 dependencies = [
@@ -707,13 +699,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-macro"
-version = "0.2.0"
-dependencies = [
- "fluence-sdk-wit 0.2.0",
-]
-
-[[package]]
 name = "fluence-sdk-main"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#d0db9a365f68046e3fe8d2ae19badb988c68ea3f"
@@ -734,15 +719,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-main"
-version = "0.2.0"
-dependencies = [
- "fluence-sdk-macro 0.2.0",
- "log",
- "serde",
-]
-
-[[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#d0db9a365f68046e3fe8d2ae19badb988c68ea3f"
@@ -759,18 +735,6 @@ dependencies = [
 name = "fluence-sdk-wit"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk?branch=record_support#f22fcbf95fe6dbddd678db036d8b6c4099728883"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn",
- "uuid",
-]
-
-[[package]]
-name = "fluence-sdk-wit"
-version = "0.2.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1706,7 +1670,7 @@ dependencies = [
 name = "record-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.0",
+ "fluence 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=record_support)",
  "test-record",
 ]
 
@@ -2134,7 +2098,7 @@ dependencies = [
 name = "test-record"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=record_support)",
 ]
 
 [[package]]

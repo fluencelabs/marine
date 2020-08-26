@@ -9,5 +9,5 @@ name = "effector"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk", branch = "record_support" }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "record_support" }
 test-record = { path = "../test-record" }

@@ -69,10 +69,15 @@ pub fn get_interfaces() {
 
     let interface = faas.get_interface();
 
-    let string_type_params = vec![fluence_faas::IType::String];
+    let arguments = vec![fluence_faas::IFunctionArg {
+        name: String::from("name"),
+        ty: fluence_faas::IType::String
+    }];
+    let output_types = vec![fluence_faas::IType::String];
+
     let greeting_sign = fluence_faas::FaaSFunctionSignature {
-        input_types: &string_type_params,
-        output_types: &string_type_params,
+        arguments: &arguments,
+        output_types: &output_types,
     };
 
     let mut functions = std::collections::HashMap::new();
@@ -81,7 +86,10 @@ pub fn get_interfaces() {
     let mut modules = std::collections::HashMap::new();
     modules.insert("greeting", functions);
 
-    assert_eq!(interface, fluence_faas::FaaSInterface { modules });
+    assert_eq!(interface, fluence_faas::FaaSInterface {
+        record_types: vec![],
+        modules
+    });
 }
 
 #[test]
