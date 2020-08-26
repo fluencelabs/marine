@@ -707,7 +707,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=record_support#b2a46e023823f3812e74c11407f0416d130031b1"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=record_support#c385a1f0ffc96d656e1e55282db01100ef202a59"
 dependencies = [
  "proc-macro2",
  "quote",
