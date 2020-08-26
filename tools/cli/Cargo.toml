@@ -12,8 +12,8 @@ name = "fce"
 path = "src/main.rs"
 
 [dependencies]
-fce-wit-generator = { path = "../../crates/wit-generator", version = "0.1.2"}
-fce-wit-parser = { path = "../../crates/wit-parser", version = "0.1.2" }
+fce-wit-generator = { path = "../../crates/wit-generator" }
+fce-wit-parser = { path = "../../crates/wit-parser" }
 
 anyhow = "1.0.31"
 clap = "2.33.1"
