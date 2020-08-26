@@ -16,13 +16,14 @@
 
 use super::WITGenerator;
 use super::WITResolver;
-use super::utils::ptype_to_itype;
+use super::utils::ptype_to_itype_checked;
 use crate::default_export_api_config::*;
 use crate::Result;
 
 use fluence_sdk_wit::AstExternModItem;
 use fluence_sdk_wit::AstExternFnItem;
 use fluence_sdk_wit::ParsedType;
+use wasmer_wit::ast::FunctionArg as IFunctionArg;
 use wasmer_wit::interpreter::Instruction;
 use crate::instructions_generator::utils::wtype_to_itype;
 
@@ -51,28 +52,35 @@ fn generate_wit_for_import<'a>(
     use wasmer_wit::ast::Type;
     use wasmer_wit::ast::Adapter;
 
-    let inputs = import
+    let arguments = import
         .signature
-        .input_types
+        .arguments
         .iter()
-        .map(|input_type| ptype_to_itype(input_type, wit_resolver))
+        .map(|(arg_name, arg_type)| -> Result<IFunctionArg> {
+            Ok(IFunctionArg {
+                name: arg_name.clone(),
+                ty: ptype_to_itype_checked(arg_type, wit_resolver)?,
+            })
+        })
         .collect::<Result<Vec<_>>>()?;
 
-    let outputs = match import.signature.output_type {
-        Some(ref output_type) => vec![ptype_to_itype(output_type, wit_resolver)?],
+    let output_types = match import.signature.output_type {
+        Some(ref output_type) => vec![ptype_to_itype_checked(output_type, wit_resolver)?],
         None => vec![],
     };
 
     let interfaces = &mut wit_resolver.interfaces;
-    interfaces.types.push(Type::Function { inputs, outputs });
+    interfaces.types.push(Type::Function {
+        arguments,
+        output_types,
+    });
 
     let raw_inputs = import
         .signature
-        .input_types
+        .arguments
         .iter()
         .map(to_raw_input_types)
         .flatten()
-        .map(|wt| wtype_to_itype(&wt))
         .collect::<Vec<_>>();
 
     let raw_outputs = match import.signature.output_type {
@@ -84,13 +92,13 @@ fn generate_wit_for_import<'a>(
     };
 
     interfaces.types.push(Type::Function {
-        inputs: raw_inputs.clone(),
-        outputs: raw_outputs.clone(),
+        arguments: raw_inputs.clone(),
+        output_types: raw_outputs.clone(),
     });
 
     interfaces.types.push(Type::Function {
-        inputs: raw_inputs,
-        outputs: raw_outputs,
+        arguments: raw_inputs,
+        output_types: raw_outputs,
     });
 
     let adapter_idx = (interfaces.types.len() - 2) as u32;
@@ -116,11 +124,11 @@ fn generate_wit_for_import<'a>(
 
     let mut instructions: Vec<Instruction> = import
         .signature
-        .input_types
+        .arguments
         .iter()
         .enumerate()
-        .map(|(id, input_type)| {
-            input_type.generate_instructions_for_input_type(id as _, wit_resolver)
+        .map(|(id, (_, arg_type))| {
+            arg_type.generate_instructions_for_input_type(id as _, wit_resolver)
         })
         .collect::<Result<Vec<_>>>()?
         .into_iter()
@@ -257,9 +265,10 @@ impl ForeignModInstructionGenerator for ParsedType {
 }
 
 use fluence_sdk_wit::WasmType;
+use wasmer_wit::types::InterfaceType as IType;
 
-pub fn to_raw_input_types(ty: &ParsedType) -> Vec<WasmType> {
-    match ty {
+pub fn to_raw_input_types(arg: &(String, ParsedType)) -> Vec<IFunctionArg> {
+    match arg.1 {
         ParsedType::Boolean
         | ParsedType::I8
         | ParsedType::I16
@@ -267,11 +276,32 @@ pub fn to_raw_input_types(ty: &ParsedType) -> Vec<WasmType> {
         | ParsedType::U8
         | ParsedType::U16
         | ParsedType::U32
-        | ParsedType::Record(_) => vec![WasmType::I32],
-        ParsedType::I64 | ParsedType::U64 => vec![WasmType::I64],
-        ParsedType::F32 => vec![WasmType::F32],
-        ParsedType::F64 => vec![WasmType::F64],
-        ParsedType::Utf8String | ParsedType::ByteVector => vec![WasmType::I32, WasmType::I32],
+        | ParsedType::Record(_) => vec![IFunctionArg {
+            name: arg.0.clone(),
+            ty: IType::I32,
+        }],
+        ParsedType::I64 | ParsedType::U64 => vec![IFunctionArg {
+            name: arg.0.clone(),
+            ty: IType::I64,
+        }],
+        ParsedType::F32 => vec![IFunctionArg {
+            name: arg.0.clone(),
+            ty: IType::F32,
+        }],
+        ParsedType::F64 => vec![IFunctionArg {
+            name: arg.0.clone(),
+            ty: IType::F64,
+        }],
+        ParsedType::Utf8String | ParsedType::ByteVector => vec![
+            IFunctionArg {
+                name: format!("{}_ptr", arg.0),
+                ty: IType::I32,
+            },
+            IFunctionArg {
+                name: format!("{}_ptr", arg.0),
+                ty: IType::I32,
+            },
+        ],
     }
 }
 

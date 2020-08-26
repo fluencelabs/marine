@@ -16,39 +16,48 @@
 
 use super::WITGenerator;
 use super::WITResolver;
-use super::utils::ptype_to_itype;
+use super::utils::ptype_to_itype_checked;
 use crate::default_export_api_config::*;
 use crate::Result;
 
 use fluence_sdk_wit::AstFunctionItem;
 use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
+use wasmer_wit::ast::FunctionArg as IFunctionArg;
 
 impl WITGenerator for AstFunctionItem {
     fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
         use wasmer_wit::ast::Type;
         use wasmer_wit::ast::Adapter;
 
-        let inputs = self
+        let arguments = self
             .signature
             .arguments
             .iter()
-            .map(|(name, input_type)| (name, ptype_to_itype(input_type, wit_resolver)))
+            .map(|(arg_name, arg_type)| -> Result<IFunctionArg> {
+                Ok(IFunctionArg {
+                    name: arg_name.clone(),
+                    ty: ptype_to_itype_checked(arg_type, wit_resolver)?,
+                })
+            })
             .collect::<Result<Vec<_>>>()?;
 
         let output_types = match self.signature.output_type {
-            Some(ref output_type) => vec![ptype_to_itype(output_type, wit_resolver)?],
+            Some(ref output_type) => vec![ptype_to_itype_checked(output_type, wit_resolver)?],
             None => vec![],
         };
 
         let interfaces = &mut wit_resolver.interfaces;
         interfaces.types.push(Type::Function {
-            inputs: inputs.clone(),
+            arguments: arguments.clone(),
             output_types: output_types.clone(),
         });
 
         // TODO: replace with Wasm types
-        interfaces.types.push(Type::Function { inputs, outputs });
+        interfaces.types.push(Type::Function {
+            arguments,
+            output_types,
+        });
 
         let adapter_idx = (interfaces.types.len() - 2) as u32;
         let export_idx = (interfaces.types.len() - 1) as u32;
@@ -61,11 +70,11 @@ impl WITGenerator for AstFunctionItem {
         // TODO: rewrite with try_fold
         let mut instructions = self
             .signature
-            .input_types
+            .arguments
             .iter()
             .enumerate()
-            .map(|(id, input_type)| {
-                input_type.generate_instructions_for_input_type(id as _, wit_resolver)
+            .map(|(id, (_, arg_type))| {
+                arg_type.generate_instructions_for_input_type(id as _, wit_resolver)
             })
             .collect::<Result<Vec<_>>>()?
             .into_iter()

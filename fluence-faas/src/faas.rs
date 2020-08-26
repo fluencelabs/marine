@@ -261,7 +261,10 @@ impl FluenceFaaS {
             })
             .collect();
 
-        FaaSInterface { record_types, modules }
+        FaaSInterface {
+            record_types,
+            modules,
+        }
     }
 }
 
