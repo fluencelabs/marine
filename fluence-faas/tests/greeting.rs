@@ -71,7 +71,7 @@ pub fn get_interfaces() {
 
     let arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("name"),
-        ty: fluence_faas::IType::String
+        ty: fluence_faas::IType::String,
     }];
     let output_types = vec![fluence_faas::IType::String];
 
@@ -86,10 +86,13 @@ pub fn get_interfaces() {
     let mut modules = std::collections::HashMap::new();
     modules.insert("greeting", functions);
 
-    assert_eq!(interface, fluence_faas::FaaSInterface {
-        record_types: vec![],
-        modules
-    });
+    assert_eq!(
+        interface,
+        fluence_faas::FaaSInterface {
+            record_types: vec![],
+            modules
+        }
+    );
 }
 
 #[test]
