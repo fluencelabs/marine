@@ -13,4 +13,4 @@ name = "greeting_cp"
 path = "src/main_cp.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "record_support" }

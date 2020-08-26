@@ -20,7 +20,7 @@ use test_record::TestRecord;
 pub fn main() {}
 
 #[fce]
-pub fn mutate_struct(mut test_record: TestRecord) -> TestRecord {
+pub fn mutate_struct(mut test_record: test_record::TestRecord) -> TestRecord {
     test_record.field_0 = true;
     test_record.field_1 = 1;
     test_record.field_2 = 2;

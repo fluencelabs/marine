@@ -44,13 +44,13 @@ impl<'a> WITResolver<'a> {
     pub(crate) fn get_record_type(
         &self,
         record_name: &str,
-    ) -> Result<wasmer_wit::types::RecordType> {
+    ) -> Result<&wasmer_wit::types::RecordType> {
         match self.types.get(record_name) {
             Some(type_index) => match &self.interfaces.types[*type_index as usize] {
                 wasmer_wit::ast::Type::Function { .. } => {
                     panic!("internal error inside WITResolver")
                 }
-                wasmer_wit::ast::Type::Record(record_type) => Ok(record_type.clone()),
+                wasmer_wit::ast::Type::Record(record_type) => Ok(record_type),
             },
             None => Err(crate::errors::WITGeneratorError::CorruptedRecord(format!(
                 "Can't find record with name='{}', don't you forget to wrap it with #[fce]",

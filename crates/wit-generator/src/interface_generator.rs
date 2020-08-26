@@ -17,6 +17,7 @@
 use crate::default_export_api_config::*;
 use crate::errors::WITGeneratorError;
 use crate::instructions_generator::WITGenerator;
+use crate::instructions_generator::WITResolver;
 use crate::Result;
 
 pub use fluence_sdk_wit::FCEAst;
@@ -77,12 +78,14 @@ fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<ModuleAST> {
 }
 
 fn generate_interfaces(module_ast: &ModuleAST) -> Result<Interfaces<'_>> {
-    let mut wit_resolver = crate::instructions_generator::WITResolver::default();
+    let mut wit_resolver = WITResolver::default();
     generate_default_export_api(&mut wit_resolver.interfaces);
 
     for record in &module_ast.records {
         record.generate_wit(&mut wit_resolver)?;
     }
+    validate_records(&wit_resolver)?;
+
     for function in &module_ast.functions {
         function.generate_wit(&mut wit_resolver)?;
     }
@@ -101,4 +104,43 @@ fn generate_default_export_api(interfaces: &mut Interfaces) {
     GET_RESULT_PTR_FUNC.update_interfaces(interfaces);
     SET_RESULT_SIZE_FUNC.update_interfaces(interfaces);
     SET_RESULT_PTR_FUNC.update_interfaces(interfaces);
+}
+
+fn validate_records(wit_resolver: &WITResolver) -> Result<()> {
+    const TYPE_RESOLVE_RECURSION_LIMIT: u32 = 1024;
+
+    fn validate_record_type(
+        record_type: &wasmer_wit::types::RecordType,
+        recursion_level: u32,
+        wit_resolver: &WITResolver,
+    ) -> Result<()> {
+        if recursion_level >= TYPE_RESOLVE_RECURSION_LIMIT {
+            return Err(WITGeneratorError::CorruptedRecord(String::from(
+                "too many inner structures level",
+            )));
+        }
+
+        for field in record_type.fields.iter() {
+            match &field.ty {
+                wasmer_wit::types::InterfaceType::Record(name) => {
+                    let inner_record_type = wit_resolver.get_record_type(&name)?;
+                    validate_record_type(&inner_record_type, recursion_level + 1, wit_resolver)?;
+                }
+                _ => continue,
+            }
+        }
+
+        Ok(())
+    }
+
+    for ty in wit_resolver.interfaces.types.iter() {
+        let record_type = match ty {
+            wasmer_wit::ast::Type::Record(ty) => ty,
+            _ => continue,
+        };
+
+        validate_record_type(record_type, 0, wit_resolver)?;
+    }
+
+    Ok(())
 }
