@@ -12,7 +12,7 @@ name = "fce-repl"
 path = "src/main.rs"
 
 [dependencies]
-fluence-app-service = { path = "../../fluence-app-service", version = "0.1.0", features = ["raw-module-api"] }
+fluence-app-service = { path = "../../fluence-app-service", version = "0.1.1", features = ["raw-module-api"] }
 
 anyhow = "1.0.31"
 clap = "2.33.1"
