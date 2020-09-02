@@ -78,7 +78,7 @@ fn main() -> Result<()> {
     rl.bind_sequence(KeyPress::Meta('P'), Cmd::HistorySearchBackward);
     let _ = rl.load_history(HISTORY_FILE_PATH);
 
-    println!("Welcome to the Fluence FaaS REPL:");
+    println!("Welcome to the Fluence FaaS REPL");
 
     let mut repl = REPL::new(args.config_file_path)?;
 
