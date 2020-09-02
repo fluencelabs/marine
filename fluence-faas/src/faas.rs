@@ -223,7 +223,7 @@ impl FluenceFaaS {
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub fn call<MN: AsRef<str>, FN: AsRef<str>>(
+    pub fn call_with_ivalues<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
         module_name: MN,
         func_name: FN,
@@ -234,6 +234,30 @@ impl FluenceFaaS {
 
         self.fce
             .call(module_name, func_name, args)
+            .map_err(Into::into)
+    }
+
+    /// Call a specified function of loaded on a startup module by its name.
+    pub fn call_with_json<MN: AsRef<str>, FN: AsRef<str>>(
+        &mut self,
+        module_name: MN,
+        func_name: FN,
+        args: serde_json::Value,
+        call_parameters: fluence_sdk_main::CallParameters,
+    ) -> Result<Vec<IValue>> {
+        self.call_parameters.replace(call_parameters);
+        let module_name = module_name.as_ref();
+
+        let mut signatures = self.fce.module_interface(module_name)?;
+        let cur_signature = signatures.find(|sign|sign.name == func_name).unwrap();
+
+        let mut iargs = Vec::with_capacity(cur_signature.arguments.len());
+        for arg in cur_signature.arguments {
+            iargs.push(args.get(&arg.name).unwrap())
+        }
+
+        self.fce
+            .call(module_name, func_name, iargs)
             .map_err(Into::into)
     }
 

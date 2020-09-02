@@ -82,7 +82,7 @@ pub(crate) struct FCEModule {
     // TODO: replace with dyn Trait
     export_funcs: HashMap<String, Arc<Callable>>,
 
-    // TODO: save refs to prevent copy
+    // TODO: save refs instead of copies
     record_types: Vec<IRecordType>,
 }
 

@@ -125,7 +125,7 @@ impl FCE {
         self.modules.iter().map(|(module_name, module)| {
             (
                 module_name.as_str(),
-                Self::get_module_function_signatures(module),
+                Self::get_module_function_signatures(module).collect::<Vec<_>>(),
             )
         })
     }
@@ -134,7 +134,7 @@ impl FCE {
     pub fn module_interface<S: AsRef<str>>(
         &self,
         module_name: S,
-    ) -> Result<Vec<FCEFunctionSignature<'_>>> {
+    ) -> Result<impl Iterator<Item = FCEFunctionSignature<'_>>> {
         match self.modules.get(module_name.as_ref()) {
             Some(module) => Ok(Self::get_module_function_signatures(module)),
             None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
@@ -159,7 +159,9 @@ impl FCE {
         }
     }
 
-    fn get_module_function_signatures(module: &FCEModule) -> Vec<FCEFunctionSignature<'_>> {
+    fn get_module_function_signatures(
+        module: &FCEModule,
+    ) -> impl Iterator<Item = FCEFunctionSignature<'_>> {
         module
             .get_exports_signatures()
             .map(|(name, arguments, output_types)| FCEFunctionSignature {
@@ -167,7 +169,6 @@ impl FCE {
                 arguments,
                 output_types,
             })
-            .collect::<Vec<_>>()
     }
 
     #[rustfmt::skip]

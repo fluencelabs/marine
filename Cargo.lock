@@ -631,19 +631,19 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=record_support#5dc60f01e42abdd58ec63c5b8532953baa29b303"
+source = "git+https://github.com/fluencelabs/rust-sdk#d0db9a365f68046e3fe8d2ae19badb988c68ea3f"
 dependencies = [
- "fluence-sdk-macro 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=record_support)",
- "fluence-sdk-main 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=record_support)",
+ "fluence-sdk-macro 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-main 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
 name = "fluence"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#d0db9a365f68046e3fe8d2ae19badb988c68ea3f"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=record_support#5dc60f01e42abdd58ec63c5b8532953baa29b303"
 dependencies = [
- "fluence-sdk-macro 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-main 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=record_support)",
+ "fluence-sdk-main 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=record_support)",
 ]
 
 [[package]]
@@ -679,27 +679,17 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=record_support#5dc60f01e42abdd58ec63c5b8532953baa29b303"
-dependencies = [
- "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=record_support)",
-]
-
-[[package]]
-name = "fluence-sdk-macro"
-version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#d0db9a365f68046e3fe8d2ae19badb988c68ea3f"
 dependencies = [
  "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
-name = "fluence-sdk-main"
+name = "fluence-sdk-macro"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk?branch=record_support#5dc60f01e42abdd58ec63c5b8532953baa29b303"
 dependencies = [
- "fluence-sdk-macro 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=record_support)",
- "log",
- "serde",
+ "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=record_support)",
 ]
 
 [[package]]
@@ -713,9 +703,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-wit"
+name = "fluence-sdk-main"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk?branch=record_support#5dc60f01e42abdd58ec63c5b8532953baa29b303"
+dependencies = [
+ "fluence-sdk-macro 0.2.0 (git+https://github.com/fluencelabs/rust-sdk?branch=record_support)",
+ "log",
+ "serde",
+]
+
+[[package]]
+name = "fluence-sdk-wit"
+version = "0.2.0"
+source = "git+https://github.com/fluencelabs/rust-sdk#d0db9a365f68046e3fe8d2ae19badb988c68ea3f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -728,7 +728,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#d0db9a365f68046e3fe8d2ae19badb988c68ea3f"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=record_support#5dc60f01e42abdd58ec63c5b8532953baa29b303"
 dependencies = [
  "proc-macro2",
  "quote",
