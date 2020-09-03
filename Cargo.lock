@@ -591,10 +591,10 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-generator"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fce-wit-parser",
- "fluence-sdk-wit 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-wit 0.2.2",
  "once_cell",
  "serde",
  "serde_json",
@@ -639,8 +639,8 @@ name = "fluence"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#d0db9a365f68046e3fe8d2ae19badb988c68ea3f"
 dependencies = [
- "fluence-sdk-macro",
- "fluence-sdk-main",
+ "fluence-sdk-macro 0.2.0",
+ "fluence-sdk-main 0.2.0",
 ]
 
 [[package]]
@@ -660,7 +660,7 @@ version = "0.1.1"
 dependencies = [
  "cmd_lib",
  "fce",
- "fluence-sdk-main",
+ "fluence-sdk-main 0.2.2",
  "log",
  "safe-transmute",
  "serde",
@@ -678,7 +678,16 @@ name = "fluence-sdk-macro"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#d0db9a365f68046e3fe8d2ae19badb988c68ea3f"
 dependencies = [
- "fluence-sdk-wit 0.2.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-wit 0.2.0",
+]
+
+[[package]]
+name = "fluence-sdk-macro"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "21ca1fdcc78a17bc84798cdc2b13c36a07555b1a3dfe9db9a6ec3a3079aaebe6"
+dependencies = [
+ "fluence-sdk-wit 0.2.2",
 ]
 
 [[package]]
@@ -686,7 +695,18 @@ name = "fluence-sdk-main"
 version = "0.2.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#d0db9a365f68046e3fe8d2ae19badb988c68ea3f"
 dependencies = [
- "fluence-sdk-macro",
+ "fluence-sdk-macro 0.2.0",
+ "log",
+ "serde",
+]
+
+[[package]]
+name = "fluence-sdk-main"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26474b00df6b7ec38cfcaf96c8636bca84f3e504c3e192c3341dc2372e23b30e"
+dependencies = [
+ "fluence-sdk-macro 0.2.2",
  "log",
  "serde",
 ]
@@ -706,9 +726,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-wit"
-version = "0.2.0"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4ae15ddfa80fea72de5b92ccd0b649d0f721aac18f5013427ccc5f6d55a3d4e"
+checksum = "93c94643121eb234778b7f8f0e12fd29ec7c70ac71d84329ae25daf5d263074d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -741,7 +761,7 @@ checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 
 [[package]]
 name = "frepl"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "clap",
