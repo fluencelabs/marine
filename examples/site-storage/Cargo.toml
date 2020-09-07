@@ -1,0 +1,15 @@
+[package]
+name = "site-storage"
+version = "0.1.0"
+authors = ["DieMyst <dmitry.shakhtarin@fluence.ai>"]
+edition = "2018"
+
+[[bin]]
+name = "site-storage"
+path = "src/main.rs"
+
+[dependencies]
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
+anyhow = "1.0.31"
+
+

@@ -1,0 +1,14 @@
+[package]
+name = "wasm_local_storage"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[lib]
+name = "wasm_local_storage"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+log = "0.4.8"

@@ -1,0 +1,25 @@
+modules_dir = "/home/diemust/git/fce/examples/site-storage/wasm/artifacts/modules"
+#modules_dir = "wasm/artifacts/modules/"
+
+[[module]]
+    name = "wasm_local_storage"
+    mem_pages_count = 100
+    logger_enabled = true
+
+    [core_module.wasi]
+    preopened_files = ["./wasm/artifacts"]
+    mapped_dirs = { "tmp" = "./wasm/artifacts" }
+
+[[module]]
+    name = "wasm_curl"
+    mem_pages_count = 100
+
+    [module.imports]
+    curl = "/usr/bin/curl"
+
+[[module]]
+    name = "site-storage"
+    mem_pages_count = 100
+    logger_enabled = true
+
+
