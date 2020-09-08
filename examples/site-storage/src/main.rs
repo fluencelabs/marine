@@ -24,7 +24,8 @@ pub fn main() {
 fn get_n_save(url: String, file_name: String) -> String {
     let result = unsafe { curl(url) };
     println!("execution result {:?}", result);
-    unsafe { file_put(file_name, result.into_bytes()); }
+    let a =unsafe { file_put(file_name, result.into_bytes()) };
+    println!("{}", a);
 
 
     "Ok".to_string()

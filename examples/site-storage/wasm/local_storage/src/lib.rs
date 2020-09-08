@@ -19,7 +19,7 @@ use fluence::fce;
 use fluence::WasmLogger;
 use std::path::PathBuf;
 
-const RPC_TMP_FILEPATH: &str = "/tmp/";
+const RPC_TMP_FILEPATH: &str = "/test/";
 
 pub fn main() {
     WasmLogger::init_with_level(log::Level::Info).unwrap();
@@ -30,9 +30,7 @@ pub fn put(name: String, file_content: Vec<u8>) -> String {
     log::info!("put called with {:?}", file_content);
 
     let rpc_tmp_filepath = format!("{}{}", RPC_TMP_FILEPATH, name);
-    let read_filepath = format!("{}alala", RPC_TMP_FILEPATH);
-    let res = fs::read(read_filepath);
-    log::info!("read {:?}", res);
+
     let r = fs::write(PathBuf::from(rpc_tmp_filepath.clone()), file_content);
     if let Err(e) = r {
         return format!("file can't be written: {}", e);
