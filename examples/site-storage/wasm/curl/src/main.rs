@@ -15,10 +15,11 @@
  */
 
 use fluence::fce;
+use fluence::WasmLogger;
 
-// const RESULT_FILE_DIR: &str = "/tmp/";
-
-pub fn main() {}
+pub fn main() {
+    WasmLogger::init_with_level(log::Level::Info).unwrap();
+}
 
 #[fce]
 pub fn get(url: String) -> String {

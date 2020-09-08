@@ -13,6 +13,7 @@ modules_dir = "/home/diemust/git/fce/examples/site-storage/wasm/artifacts/module
 [[module]]
     name = "wasm_curl"
     mem_pages_count = 100
+    logger_enabled = true
 
     [module.imports]
     curl = "/usr/bin/curl"

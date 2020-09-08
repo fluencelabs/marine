@@ -4,10 +4,9 @@ version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
-[lib]
+[[bin]]
+path = "src/main.rs"
 name = "wasm_curl"
-path = "src/lib.rs"
-crate-type = ["cdylib"]
 
 [dependencies]
 fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
