@@ -54,7 +54,7 @@ pub fn get(hash: String) -> Vec<u8> {
 }
 
 #[fce]
-#[link(wasm_import_module = "ipfs_node.wasm")]
+#[link(wasm_import_module = "ipfs_effector")]
 extern "C" {
     /// Put provided file to ipfs, return ipfs hash of the file.
     #[link_name = "put"]

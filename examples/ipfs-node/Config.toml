@@ -1,7 +1,7 @@
-modules_dir = "artifacts/wasm_modules"
+modules_dir = "artifacts"
 
 [[module]]
-    name = "ipfs_node.wasm"
+    name = "ipfs_effector"
     mem_pages_count = 100
     logger_enabled = true
 
@@ -12,6 +12,6 @@ modules_dir = "artifacts/wasm_modules"
     envs = ["IPFS_ADDR=/dns4/relay02.fluence.dev/tcp/15001", "timeout=1s"]
 
 [[module]]
-    name = "ipfs_pure.wasm"
+    name = "ipfs_pure"
     mem_pages_count = 100
     logger_enabled = true
