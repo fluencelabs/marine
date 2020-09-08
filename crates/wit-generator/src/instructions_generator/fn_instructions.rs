@@ -67,19 +67,18 @@ impl WITGenerator for AstFunctionItem {
             function_type: export_idx,
         });
 
-        // TODO: rewrite with try_fold
         let mut instructions = self
             .signature
             .arguments
             .iter()
             .enumerate()
-            .map(|(id, (_, arg_type))| {
-                arg_type.generate_instructions_for_input_type(id as _, wit_resolver)
-            })
-            .collect::<Result<Vec<_>>>()?
-            .into_iter()
-            .flatten()
-            .collect::<Vec<Instruction>>();
+            .try_fold::<_, _, Result<_>>(Vec::new(), |mut instructions, (arg_id, input_type)| {
+                let mut new_instructions =
+                    input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
+
+                instructions.append(&mut new_instructions);
+                Ok(instructions)
+            })?;
 
         let export_function_index = (wit_resolver.interfaces.exports.len() - 1) as u32;
         instructions.push(Instruction::CallCore {

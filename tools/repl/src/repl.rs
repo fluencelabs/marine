@@ -97,10 +97,12 @@ impl REPL {
                 println!("{}", result_msg);
             }
             Some("call") => {
+                use itertools::Itertools;
+
                 next_argument!(module_name, args, "Module name should be specified");
                 next_argument!(func_name, args, "Function name should be specified");
 
-                let module_arg: String = args.collect();
+                let module_arg: String = args.join(" ");
                 let module_arg: serde_json::Value = match serde_json::from_str(&module_arg) {
                     Ok(module_arg) => module_arg,
                     Err(e) => {
