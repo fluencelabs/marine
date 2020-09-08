@@ -15,9 +15,10 @@
  */
 
 use fluence::fce;
+use fluence::WasmLogger;
 
 pub fn main() {
-
+    WasmLogger::init_with_level(log::Level::Info).unwrap();
 }
 
 #[fce]
