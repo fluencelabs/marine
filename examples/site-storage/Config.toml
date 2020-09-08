@@ -1,9 +1,7 @@
-modules_dir = "/home/diemust/git/fce/examples/site-storage/wasm/artifacts/modules"
-#modules_dir = "wasm/artifacts/modules/"
+modules_dir = "wasm/artifacts/modules/"
 
 [[module]]
     name = "wasm_local_storage"
-    mem_pages_count = 10000
     logger_enabled = true
 
     [module.wasi]
@@ -12,7 +10,6 @@ modules_dir = "/home/diemust/git/fce/examples/site-storage/wasm/artifacts/module
 
 [[module]]
     name = "wasm_curl"
-    mem_pages_count = 10000
     logger_enabled = true
 
     [module.imports]
@@ -20,7 +17,6 @@ modules_dir = "/home/diemust/git/fce/examples/site-storage/wasm/artifacts/module
 
 [[module]]
     name = "site-storage"
-    mem_pages_count = 10000
     logger_enabled = true
 
 
