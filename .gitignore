@@ -19,3 +19,4 @@ target/
 !/examples/greeting/artifacts/*.wasm
 !/examples/ipfs_node/artifacts/wasm_modules/*.wasm
 !/examples/records/artifacts/wasm_modules/*.wasm
+!/examples/site-storage/wasm/artifacts/modules/*.wasm
