@@ -49,6 +49,7 @@ fn write_to_mem(context: &mut Ctx, address: usize, value: &[u8]) {
         .for_each(|(cell, byte)| cell.set(*byte));
 }
 
+#[rustfmt::skip]
 pub(super) fn create_host_import_func<S>(host_cmd: S) -> DynamicFunc<'static>
 where
     S: Into<String>,
@@ -56,10 +57,8 @@ where
     use wasmer_core::Func;
 
     let allocate_func: Box<RefCell<Option<Func<'static, i32, i32>>>> = Box::new(RefCell::new(None));
-    let set_result_ptr_func: Box<RefCell<Option<Func<'static, i32, ()>>>> =
-        Box::new(RefCell::new(None));
-    let set_result_size_func: Box<RefCell<Option<Func<'static, i32, ()>>>> =
-        Box::new(RefCell::new(None));
+    let set_result_ptr_func: Box<RefCell<Option<Func<'static, i32, ()>>>> = Box::new(RefCell::new(None));
+    let set_result_size_func: Box<RefCell<Option<Func<'static, i32, ()>>>> = Box::new(RefCell::new(None));
 
     let host_cmd = host_cmd.into();
 
@@ -73,8 +72,18 @@ where
 
         let wasm_ptr = WasmPtr::<u8, Array>::new(array_ptr as _);
         let result = match wasm_ptr.get_utf8_string(ctx.memory(0), array_size as _) {
-            Some(arg_value) => cmd_lib::run_fun!("{} {}", host_cmd, arg_value).unwrap(),
-            None => return vec![],
+            // TODO: prevent command injection
+            Some(arg_value) => match cmd_lib::run_fun!("{} {}", host_cmd, arg_value) {
+                Ok(result) => result,
+                Err(e) => {
+                    log::error!("error occurred while calling `{} {}`: {:?} ", host_cmd, arg_value, e);
+                    String::new()
+                },
+            }
+            None => {
+                log::error!("error getting utf8 string from {} offset of {} bytes", array_ptr, array_size);
+                String::new()
+            }
         };
 
         unsafe {

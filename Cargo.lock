@@ -652,7 +652,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fluence-faas",
  "log",
@@ -663,7 +663,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "cmd_lib",
  "fce",

@@ -17,5 +17,5 @@ target/
 
 # Allowed Wasm files for examples
 !/examples/greeting/artifacts/*.wasm
-!/examples/ipfs_node/artifacts/wasm_modules/*.wasm
+!/examples/ipfs_node/artifacts/*.wasm
 !/examples/records/artifacts/wasm_modules/*.wasm
