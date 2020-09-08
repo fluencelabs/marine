@@ -195,7 +195,7 @@ impl ForeignModInstructionGenerator for ParsedType {
             ParsedType::ByteVector => vec![
                 Instruction::ArgumentGet { index },
                 Instruction::ArgumentGet { index: index + 1 },
-                Instruction::StringLiftMemory,
+                Instruction::ByteArrayLiftMemory,
             ],
             ParsedType::Record(record_name) => {
                 let type_index = wit_resolver.get_record_type_id(record_name)?;
