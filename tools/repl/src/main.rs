@@ -47,6 +47,8 @@ const HISTORY_FILE_PATH: &str = ".repl_history";
 pub(crate) type Result<T> = std::result::Result<T, anyhow::Error>;
 
 fn main() -> Result<()> {
+    env_logger::init();
+
     let (args, _) = rustop::opts! {
         synopsis "Fluence Application service REPL";
         param config_file_path: Option<String>, desc: "Path to a service config";

@@ -501,6 +501,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "env_logger"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "44533bbbb3bb3c1fa17d9f2e4e38bbbaf8396ba82193c4cb1b6445d711445d36"
+dependencies = [
+ "atty",
+ "humantime",
+ "log",
+ "regex",
+ "termcolor",
+]
+
+[[package]]
 name = "erased-serde"
 version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -759,6 +772,7 @@ version = "0.1.2"
 dependencies = [
  "anyhow",
  "clap",
+ "env_logger 0.7.1",
  "fluence-app-service",
  "itertools",
  "rustop",
@@ -1957,7 +1971,7 @@ dependencies = [
  "chrono",
  "clap",
  "derive_builder",
- "env_logger",
+ "env_logger 0.6.2",
  "fuzzy-matcher",
  "lazy_static",
  "log",
