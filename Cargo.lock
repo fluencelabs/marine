@@ -601,7 +601,7 @@ name = "fce-wit-generator"
 version = "0.1.4"
 dependencies = [
  "fce-wit-parser",
- "fluence-sdk-wit 0.2.1",
+ "fluence-sdk-wit 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "once_cell",
  "serde",
  "serde_json",

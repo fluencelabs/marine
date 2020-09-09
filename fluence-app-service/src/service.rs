@@ -62,10 +62,10 @@ impl AppService {
         arguments: serde_json::Value,
         call_parameters: crate::CallParameters,
     ) -> Result<Vec<IValue>> {
-        let arguments = Self::json_to_ivalue(arguments)?;
+        // let arguments = Self::json_to_ivalue(arguments)?;
 
         self.faas
-            .call(module_name, func_name, &arguments, call_parameters)
+            .call_with_json(module_name, func_name, arguments, call_parameters)
             .map_err(Into::into)
     }
 
@@ -131,33 +131,6 @@ impl AppService {
             .collect();
 
         Ok(config)
-    }
-
-    fn json_to_ivalue(arguments: serde_json::Value) -> Result<Vec<IValue>> {
-        // If arguments are on of: null, [] or {}, avoid calling `to_interface_value`
-        let is_null = arguments.is_null();
-        let is_empty_arr = arguments.as_array().map_or(false, |a| a.is_empty());
-        let is_empty_obj = arguments.as_object().map_or(false, |m| m.is_empty());
-        let arguments = if !is_null && !is_empty_arr && !is_empty_obj {
-            Some(fluence_faas::to_interface_value(&arguments).map_err(|e| {
-                AppServiceError::InvalidConfig(format!(
-                    "can't parse arguments as array of interface types: {}",
-                    e
-                ))
-            })?)
-        } else {
-            None
-        };
-
-        match arguments {
-            Some(IValue::Record(arguments)) => Ok(arguments.into_vec()),
-            // Convert null, [] and {} into vec![]
-            None => Ok(vec![]),
-            other => Err(AppServiceError::InvalidConfig(format!(
-                "expected array of interface values: got {:?}",
-                other
-            ))),
-        }
     }
 }
 

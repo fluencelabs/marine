@@ -20,9 +20,12 @@ use crate::faas_interface::FaaSInterface;
 use crate::FaaSError;
 use crate::Result;
 use crate::IValue;
+use crate::IType;
 
 use fce::FCE;
 use fluence_sdk_main::CallParameters;
+use wasmer_wit::vec1::Vec1;
+use wasmer_wit::types::RecordFieldType;
 
 use std::cell::RefCell;
 use std::convert::TryInto;
@@ -242,22 +245,46 @@ impl FluenceFaaS {
         &mut self,
         module_name: MN,
         func_name: FN,
-        args: serde_json::Value,
+        json_args: serde_json::Value,
         call_parameters: fluence_sdk_main::CallParameters,
     ) -> Result<Vec<IValue>> {
+        use serde_json::Value;
+
         self.call_parameters.replace(call_parameters);
         let module_name = module_name.as_ref();
+        let func_name = func_name.as_ref();
 
-        let mut signatures = self.fce.module_interface(module_name)?;
-        let cur_signature = signatures.find(|sign|sign.name == func_name).unwrap();
+        let iargs = {
+            let mut func_signatures = self.fce.module_interface(module_name)?;
+            let func_signature = func_signatures
+                .find(|sign| sign.name == func_name)
+                .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
+            let record_types = self
+                .fce
+                .module_record_types(module_name)?
+                .map(|ty| (&ty.name, &ty.fields))
+                .collect::<HashMap<_, _>>();
 
-        let mut iargs = Vec::with_capacity(cur_signature.arguments.len());
-        for arg in cur_signature.arguments {
-            iargs.push(args.get(&arg.name).unwrap())
-        }
+            match json_args {
+                Value::Object(json_map) => Self::json_map_to_ivalues(
+                    json_map,
+                    func_signature
+                        .arguments
+                        .iter()
+                        .map(|arg| (&arg.name, &arg.ty)),
+                    &record_types,
+                )?,
+                Value::Array(json_array) => Self::json_array_to_ivalues(
+                    json_array,
+                    func_signature.arguments.iter().map(|arg| &arg.ty),
+                    &record_types,
+                )?,
+                _ => unimplemented!(),
+            }
+        };
 
         self.fce
-            .call(module_name, func_name, iargs)
+            .call(module_name, func_name, &iargs)
             .map_err(Into::into)
     }
 
@@ -288,6 +315,177 @@ impl FluenceFaaS {
         FaaSInterface {
             record_types,
             modules,
+        }
+    }
+
+    fn json_map_to_ivalues<'a, 'b>(
+        mut json_map: serde_json::Map<String, serde_json::Value>,
+        signature: impl Iterator<Item = (&'a String, &'a IType)>,
+        record_types: &'b HashMap<&'b String, &'b Vec1<RecordFieldType>>,
+    ) -> Result<Vec<IValue>> {
+        let mut iargs = Vec::new();
+
+        for (arg_name, arg_type) in signature {
+            let json_value = json_map
+                .remove(arg_name)
+                .ok_or_else(|| FaaSError::MissingArgumentError(arg_name.clone()))?;
+            let iarg = Self::json_value_to_ivalue(json_value, arg_type, record_types)?;
+            iargs.push(iarg);
+        }
+
+        if !json_map.is_empty() {
+            return Err(FaaSError::JsonArgumentsDeserializationError(format!(
+                "function requires {} arguments, {} provided",
+                iargs.len(),
+                iargs.len() + json_map.len()
+            )));
+        }
+
+        Ok(iargs)
+    }
+
+    fn json_array_to_ivalues<'a, 'b>(
+        mut json_array: Vec<serde_json::Value>,
+        signature: impl Iterator<Item = &'a IType>,
+        record_types: &'b HashMap<&'b String, &'b Vec1<RecordFieldType>>,
+    ) -> Result<Vec<IValue>> {
+        let mut iargs = Vec::new();
+
+        for (arg_id, arg_type) in signature.enumerate() {
+            let json_value = json_array.remove(arg_id);
+            let iarg = Self::json_value_to_ivalue(json_value, arg_type, record_types)?;
+            iargs.push(iarg);
+        }
+
+        if !json_array.is_empty() {
+            return Err(FaaSError::JsonArgumentsDeserializationError(format!(
+                "function requires {} arguments, {} provided",
+                iargs.len(),
+                iargs.len() + json_array.len()
+            )));
+        }
+
+        Ok(iargs)
+    }
+
+    fn json_value_to_ivalue(
+        json_value: serde_json::Value,
+        ty: &IType,
+        record_types: &HashMap<&String, &Vec1<RecordFieldType>>,
+    ) -> Result<IValue> {
+        match ty {
+            IType::S8 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::S8(value))
+            }
+            IType::S16 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::S16(value))
+            }
+            IType::S32 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::S32(value))
+            }
+            IType::S64 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::S64(value))
+            }
+            IType::U8 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::U8(value))
+            }
+            IType::U16 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::U16(value))
+            }
+            IType::U32 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::U32(value))
+            }
+            IType::U64 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::U64(value))
+            }
+            IType::F32 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::F32(value))
+            }
+            IType::F64 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::F64(value))
+            }
+            IType::String => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::String(value))
+            }
+            IType::ByteArray => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::ByteArray(value))
+            }
+            IType::I32 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::I32(value))
+            }
+            IType::I64 => {
+                let value = serde_json::from_value(json_value)
+                    .map_err(FaaSError::ArgumentDeserializationError)?;
+                Ok(IValue::I64(value))
+            }
+            IType::Record(ty_name) => {
+                let value = Self::json_record_type_to_ivalue(json_value, ty_name, &record_types)?;
+                Ok(IValue::Record(value))
+            }
+            IType::Anyref => Err(FaaSError::JsonArgumentsDeserializationError(String::from(
+                "anyref interface-type is unsupported now",
+            ))),
+        }
+    }
+
+    #[allow(clippy::ptr_arg)]
+    fn json_record_type_to_ivalue(
+        json_value: serde_json::Value,
+        itype_name: &String,
+        record_types: &HashMap<&String, &Vec1<RecordFieldType>>,
+    ) -> Result<Vec1<IValue>> {
+        use serde_json::Value;
+
+        let record_type = record_types.get(itype_name).ok_or_else(|| {
+            FaaSError::JsonArgumentsDeserializationError(format!(
+                "record with type `{}` wasn't found",
+                itype_name
+            ))
+        })?;
+
+        match json_value {
+            Value::Object(json_map) => Ok(Vec1::new(Self::json_map_to_ivalues(
+                json_map,
+                record_type.iter().map(|field| (&field.name, &field.ty)),
+                record_types,
+            )?)
+            .unwrap()),
+            Value::Array(json_array) => Ok(Vec1::new(Self::json_array_to_ivalues(
+                json_array,
+                record_type.iter().map(|field| (&field.ty)),
+                record_types,
+            )?)
+            .unwrap()),
+            _ => Err(FaaSError::JsonArgumentsDeserializationError(format!(
+                "record with type `{}` should be encoded as array or map of fields",
+                itype_name
+            ))),
         }
     }
 }
