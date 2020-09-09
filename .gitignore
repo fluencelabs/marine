@@ -12,11 +12,7 @@ target/
 # REPL history files
 *.repl_history
 
-# Temporary file of ipfs node example
-/examples/ipfs_node/wasm/artifacts/ipfs_rpc_file
-
 # Allowed Wasm files for examples
 !/examples/greeting/artifacts/*.wasm
-!/examples/ipfs_node/artifacts/wasm_modules/*.wasm
-!/examples/records/artifacts/wasm_modules/*.wasm
-!/examples/site-storage/wasm/artifacts/modules/*.wasm
+!/examples/ipfs_node/artifacts/*.wasm
+!/examples/records/artifacts/*.wasm

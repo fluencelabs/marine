@@ -114,18 +114,18 @@ fn generate_wit_for_import<'a>(
         function_type: raw_import_idx,
     });
 
-    let mut instructions: Vec<Instruction> = import
+    let mut instructions = import
         .signature
         .input_types
         .iter()
-        .enumerate()
-        .map(|(id, input_type)| {
-            input_type.generate_instructions_for_input_type(id as _, wit_resolver)
-        })
-        .collect::<Result<Vec<_>>>()?
-        .into_iter()
-        .flatten()
-        .collect();
+        .try_fold::<_, _, Result<_>>((0, Vec::new()), |(arg_id, mut instructions), input_type| {
+            let (mut new_instructions, shift) =
+                input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
+
+            instructions.append(&mut new_instructions);
+            Ok((arg_id + shift, instructions))
+        })?
+        .1;
 
     // TODO: refactor
     let import_function_index = (wit_resolver.interfaces.exports.len()
@@ -161,7 +161,7 @@ trait ForeignModInstructionGenerator {
         &self,
         arg_id: u32,
         wit_resolver: &mut WITResolver<'a>,
-    ) -> Result<Vec<Instruction>>;
+    ) -> Result<(Vec<Instruction>, u32)>;
 
     fn generate_instructions_for_output_type<'a>(
         &self,
@@ -169,41 +169,42 @@ trait ForeignModInstructionGenerator {
     ) -> Result<Vec<Instruction>>;
 }
 
+#[rustfmt::skip]
 impl ForeignModInstructionGenerator for ParsedType {
     fn generate_instructions_for_input_type<'a>(
         &self,
         index: u32,
         wit_resolver: &mut WITResolver<'a>,
-    ) -> Result<Vec<Instruction>> {
+    ) -> Result<(Vec<Instruction>, u32)> {
         let instructions = match self {
-            ParsedType::Boolean => vec![Instruction::ArgumentGet { index }],
-            ParsedType::I8 => vec![Instruction::ArgumentGet { index }, Instruction::S8FromI32],
-            ParsedType::I16 => vec![Instruction::ArgumentGet { index }, Instruction::S16FromI32],
-            ParsedType::I32 => vec![Instruction::ArgumentGet { index }],
-            ParsedType::I64 => vec![Instruction::ArgumentGet { index }],
-            ParsedType::U8 => vec![Instruction::ArgumentGet { index }, Instruction::U8FromI32],
-            ParsedType::U16 => vec![Instruction::ArgumentGet { index }, Instruction::U16FromI32],
-            ParsedType::U32 => vec![Instruction::ArgumentGet { index }, Instruction::U32FromI32],
-            ParsedType::U64 => vec![Instruction::ArgumentGet { index }, Instruction::U64FromI64],
-            ParsedType::F32 => vec![Instruction::ArgumentGet { index }],
-            ParsedType::F64 => vec![Instruction::ArgumentGet { index }],
-            ParsedType::Utf8String => vec![
+            ParsedType::Boolean => (vec![Instruction::ArgumentGet { index }], 1),
+            ParsedType::I8 => (vec![Instruction::ArgumentGet { index }, Instruction::S8FromI32], 1),
+            ParsedType::I16 => (vec![Instruction::ArgumentGet { index }, Instruction::S16FromI32], 1),
+            ParsedType::I32 => (vec![Instruction::ArgumentGet { index }], 1),
+            ParsedType::I64 => (vec![Instruction::ArgumentGet { index }], 1),
+            ParsedType::U8 => (vec![Instruction::ArgumentGet { index }, Instruction::U8FromI32], 1),
+            ParsedType::U16 => (vec![Instruction::ArgumentGet { index }, Instruction::U16FromI32], 1),
+            ParsedType::U32 => (vec![Instruction::ArgumentGet { index }, Instruction::U32FromI32], 1),
+            ParsedType::U64 => (vec![Instruction::ArgumentGet { index }, Instruction::U64FromI64], 1),
+            ParsedType::F32 => (vec![Instruction::ArgumentGet { index }], 1),
+            ParsedType::F64 => (vec![Instruction::ArgumentGet { index }], 1),
+            ParsedType::Utf8String => (vec![
                 Instruction::ArgumentGet { index },
                 Instruction::ArgumentGet { index: index + 1 },
                 Instruction::StringLiftMemory,
-            ],
-            ParsedType::ByteVector => vec![
+            ], 2),
+            ParsedType::ByteVector => (vec![
                 Instruction::ArgumentGet { index },
                 Instruction::ArgumentGet { index: index + 1 },
-                Instruction::StringLiftMemory,
-            ],
+                Instruction::ByteArrayLiftMemory,
+            ], 2),
             ParsedType::Record(record_name) => {
                 let type_index = wit_resolver.get_record_type_id(record_name)?;
 
-                vec![
+                (vec![
                     Instruction::ArgumentGet { index },
                     Instruction::RecordLiftMemory { type_index },
-                ]
+                ], 1)
             }
         };
 
