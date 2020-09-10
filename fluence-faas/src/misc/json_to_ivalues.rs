@@ -39,12 +39,11 @@ pub(crate) fn json_to_ivalues(
                 .map(|arg| (&arg.name, &arg.ty)),
             &record_types,
         )?,
-        SerdeValue::Array(json_array) =>
-            json_array_to_ivalues(
-                json_array,
-                func_signature.arguments.iter().map(|arg| &arg.ty),
-                &record_types,
-            )?,
+        SerdeValue::Array(json_array) => json_array_to_ivalues(
+            json_array,
+            func_signature.arguments.iter().map(|arg| &arg.ty),
+            &record_types,
+        )?,
         SerdeValue::String(json_string) => json_string_to_ivalue(json_string, func_signature)?,
         json_bool @ SerdeValue::Bool(_) => json_bool_to_ivalue(json_bool, func_signature)?,
         json_number @ SerdeValue::Number(_) => json_number_to_ivalue(json_number, func_signature)?,

@@ -729,10 +729,7 @@ pub fn bytearray_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
-    assert_eq!(
-        result3,
-        vec![IValue::ByteArray(vec![0x13, 0x37, 0x1])]
-    );
+    assert_eq!(result3, vec![IValue::ByteArray(vec![0x13, 0x37, 0x1])]);
 
     let result4 = faas
         .call_with_json(
@@ -742,10 +739,7 @@ pub fn bytearray_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
-    assert_eq!(
-        result4,
-        vec![IValue::ByteArray(vec![0x13, 0x37, 0x1])]
-    );
+    assert_eq!(result4, vec![IValue::ByteArray(vec![0x13, 0x37, 0x1])]);
 }
 
 #[test]
