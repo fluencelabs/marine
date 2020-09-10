@@ -17,6 +17,6 @@ target/
 !/examples/ipfs_node/artifacts/*.wasm
 !/examples/records/artifacts/*.wasm
 
-# Allow Wasm files for test
+# Allowed Wasm files for test
 !/fluence-faas/tests/json_wasm_tests/arguments_passing/artifacts/effector.wasm
 !/fluence-faas/tests/json_wasm_tests/arguments_passing/artifacts/pure.wasm
