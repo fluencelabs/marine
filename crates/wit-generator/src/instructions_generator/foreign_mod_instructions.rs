@@ -126,13 +126,16 @@ fn generate_wit_for_import<'a>(
         .signature
         .arguments
         .iter()
-        .try_fold::<_, _, Result<_>>((0, Vec::new()), |(arg_id, mut instructions), (_, input_type)| {
-            let (mut new_instructions, shift) =
-                input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
+        .try_fold::<_, _, Result<_>>(
+            (0, Vec::new()),
+            |(arg_id, mut instructions), (_, input_type)| {
+                let (mut new_instructions, shift) =
+                    input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
 
-            instructions.append(&mut new_instructions);
-            Ok((arg_id + shift, instructions))
-        })?
+                instructions.append(&mut new_instructions);
+                Ok((arg_id + shift, instructions))
+            },
+        )?
         .1;
 
     // TODO: refactor
