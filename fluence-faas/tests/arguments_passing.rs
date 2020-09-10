@@ -49,6 +49,17 @@ pub fn get_interfaces() {
         output_types: &string_type_output_types,
     };
 
+    let bytearray_type_arguments = vec![fluence_faas::IFunctionArg {
+        name: String::from("arg"),
+        ty: fluence_faas::IType::ByteArray,
+    }];
+    let bytearray_type_output_types = vec![fluence_faas::IType::ByteArray];
+
+    let bytearray_type_sign = fluence_faas::FaaSFunctionSignature {
+        arguments: &bytearray_type_arguments,
+        output_types: &bytearray_type_output_types,
+    };
+
     let i32_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
         ty: fluence_faas::IType::S32,
@@ -194,6 +205,7 @@ pub fn get_interfaces() {
 
     let mut functions = std::collections::HashMap::new();
     functions.insert("string_type", string_type_sign);
+    functions.insert("bytearray_type", bytearray_type_sign);
     functions.insert("i32_type", i32_type_sign);
     functions.insert("i64_type", i64_type_sign);
     functions.insert("u32_type", u32_type_sign);
@@ -306,4 +318,538 @@ pub fn all_types() {
             19, 55
         ])]
     );
+}
+
+#[test]
+pub fn i32_type() {
+    let argument_passing_config_raw = std::fs::read(ARGUMENT_PASSING_CONFIG_PATH)
+        .expect("./json_wasm_tests/arguments_passing/Config.toml should presence");
+
+    let mut arguments_passing_config: fluence_faas::RawModulesConfig =
+        toml::from_slice(&argument_passing_config_raw)
+            .expect("argument passing test config should be well-formed");
+    arguments_passing_config.modules_dir = Some(String::from(
+        "./tests/json_wasm_tests/arguments_passing/artifacts",
+    ));
+
+    let mut faas = FluenceFaaS::with_raw_config(arguments_passing_config)
+        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+
+    let result1 = faas.call_with_json(
+        "arguments_passing_test",
+        "i32_type",
+        json!({}),
+        <_>::default(),
+    );
+    assert!(result1.is_err());
+
+    let result2 = faas.call_with_json(
+        "arguments_passing_test",
+        "i32_type",
+        json!([]),
+        <_>::default(),
+    );
+    assert!(result2.is_err());
+
+    let result3 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "i32_type",
+            json!({ "arg": 1 }),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
+    assert_eq!(result3, vec![IValue::S32(2)]);
+
+    let result4 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "i32_type",
+            json!(1),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
+    assert_eq!(result4, vec![IValue::S32(2)]);
+}
+
+#[test]
+pub fn i64_type() {
+    let argument_passing_config_raw = std::fs::read(ARGUMENT_PASSING_CONFIG_PATH)
+        .expect("./json_wasm_tests/arguments_passing/Config.toml should presence");
+
+    let mut arguments_passing_config: fluence_faas::RawModulesConfig =
+        toml::from_slice(&argument_passing_config_raw)
+            .expect("argument passing test config should be well-formed");
+    arguments_passing_config.modules_dir = Some(String::from(
+        "./tests/json_wasm_tests/arguments_passing/artifacts",
+    ));
+
+    let mut faas = FluenceFaaS::with_raw_config(arguments_passing_config)
+        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+
+    let result1 = faas.call_with_json(
+        "arguments_passing_test",
+        "i64_type",
+        json!({}),
+        <_>::default(),
+    );
+    assert!(result1.is_err());
+
+    let result2 = faas.call_with_json(
+        "arguments_passing_test",
+        "i64_type",
+        json!([]),
+        <_>::default(),
+    );
+    assert!(result2.is_err());
+
+    let result3 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "i64_type",
+            json!({ "arg": 1 }),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke i64_type: {:?}", e));
+    assert_eq!(result3, vec![IValue::S64(2)]);
+
+    let result4 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "i64_type",
+            json!(1),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke i64_type: {:?}", e));
+    assert_eq!(result4, vec![IValue::S64(2)]);
+}
+
+#[test]
+pub fn u32_type() {
+    let argument_passing_config_raw = std::fs::read(ARGUMENT_PASSING_CONFIG_PATH)
+        .expect("./json_wasm_tests/arguments_passing/Config.toml should presence");
+
+    let mut arguments_passing_config: fluence_faas::RawModulesConfig =
+        toml::from_slice(&argument_passing_config_raw)
+            .expect("argument passing test config should be well-formed");
+    arguments_passing_config.modules_dir = Some(String::from(
+        "./tests/json_wasm_tests/arguments_passing/artifacts",
+    ));
+
+    let mut faas = FluenceFaaS::with_raw_config(arguments_passing_config)
+        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+
+    let result1 = faas.call_with_json(
+        "arguments_passing_test",
+        "u32_type",
+        json!({}),
+        <_>::default(),
+    );
+    assert!(result1.is_err());
+
+    let result2 = faas.call_with_json(
+        "arguments_passing_test",
+        "u32_type",
+        json!([]),
+        <_>::default(),
+    );
+    assert!(result2.is_err());
+
+    let result3 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "u32_type",
+            json!({ "arg": 1 }),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke u32_type: {:?}", e));
+    assert_eq!(result3, vec![IValue::U32(2)]);
+
+    let result4 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "u32_type",
+            json!(1),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke u32_type: {:?}", e));
+    assert_eq!(result4, vec![IValue::U32(2)]);
+}
+
+#[test]
+pub fn u64_type() {
+    let argument_passing_config_raw = std::fs::read(ARGUMENT_PASSING_CONFIG_PATH)
+        .expect("./json_wasm_tests/arguments_passing/Config.toml should presence");
+
+    let mut arguments_passing_config: fluence_faas::RawModulesConfig =
+        toml::from_slice(&argument_passing_config_raw)
+            .expect("argument passing test config should be well-formed");
+    arguments_passing_config.modules_dir = Some(String::from(
+        "./tests/json_wasm_tests/arguments_passing/artifacts",
+    ));
+
+    let mut faas = FluenceFaaS::with_raw_config(arguments_passing_config)
+        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+
+    let result1 = faas.call_with_json(
+        "arguments_passing_test",
+        "u64_type",
+        json!({}),
+        <_>::default(),
+    );
+    assert!(result1.is_err());
+
+    let result2 = faas.call_with_json(
+        "arguments_passing_test",
+        "u64_type",
+        json!([]),
+        <_>::default(),
+    );
+    assert!(result2.is_err());
+
+    let result3 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "u64_type",
+            json!({ "arg": 1 }),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke u64_type: {:?}", e));
+    assert_eq!(result3, vec![IValue::U64(2)]);
+
+    let result4 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "u64_type",
+            json!(1),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke u64_type: {:?}", e));
+    assert_eq!(result4, vec![IValue::U64(2)]);
+}
+
+#[test]
+pub fn f32_type() {
+    let argument_passing_config_raw = std::fs::read(ARGUMENT_PASSING_CONFIG_PATH)
+        .expect("./json_wasm_tests/arguments_passing/Config.toml should presence");
+
+    let mut arguments_passing_config: fluence_faas::RawModulesConfig =
+        toml::from_slice(&argument_passing_config_raw)
+            .expect("argument passing test config should be well-formed");
+    arguments_passing_config.modules_dir = Some(String::from(
+        "./tests/json_wasm_tests/arguments_passing/artifacts",
+    ));
+
+    let mut faas = FluenceFaaS::with_raw_config(arguments_passing_config)
+        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+
+    let result1 = faas.call_with_json(
+        "arguments_passing_test",
+        "f32_type",
+        json!({}),
+        <_>::default(),
+    );
+    assert!(result1.is_err());
+
+    let result2 = faas.call_with_json(
+        "arguments_passing_test",
+        "f32_type",
+        json!([]),
+        <_>::default(),
+    );
+    assert!(result2.is_err());
+
+    let result3 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "f32_type",
+            json!({ "arg": 1.0 }),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke f32_type: {:?}", e));
+    assert_eq!(result3, vec![IValue::F32(2.0)]);
+
+    let result4 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "f32_type",
+            json!(1.0),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke f32_type: {:?}", e));
+    assert_eq!(result4, vec![IValue::F32(2.0)]);
+}
+
+#[test]
+pub fn f64_type() {
+    let argument_passing_config_raw = std::fs::read(ARGUMENT_PASSING_CONFIG_PATH)
+        .expect("./json_wasm_tests/arguments_passing/Config.toml should presence");
+
+    let mut arguments_passing_config: fluence_faas::RawModulesConfig =
+        toml::from_slice(&argument_passing_config_raw)
+            .expect("argument passing test config should be well-formed");
+    arguments_passing_config.modules_dir = Some(String::from(
+        "./tests/json_wasm_tests/arguments_passing/artifacts",
+    ));
+
+    let mut faas = FluenceFaaS::with_raw_config(arguments_passing_config)
+        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+
+    let result1 = faas.call_with_json(
+        "arguments_passing_test",
+        "f64_type",
+        json!({}),
+        <_>::default(),
+    );
+    assert!(result1.is_err());
+
+    let result2 = faas.call_with_json(
+        "arguments_passing_test",
+        "f64_type",
+        json!([]),
+        <_>::default(),
+    );
+    assert!(result2.is_err());
+
+    let result3 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "f64_type",
+            json!({ "arg": 1.0 }),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
+    assert_eq!(result3, vec![IValue::F64(2.0)]);
+
+    let result4 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "f64_type",
+            json!(1.0),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
+    assert_eq!(result4, vec![IValue::F64(2.0)]);
+}
+
+#[test]
+pub fn string_type() {
+    let argument_passing_config_raw = std::fs::read(ARGUMENT_PASSING_CONFIG_PATH)
+        .expect("./json_wasm_tests/arguments_passing/Config.toml should presence");
+
+    let mut arguments_passing_config: fluence_faas::RawModulesConfig =
+        toml::from_slice(&argument_passing_config_raw)
+            .expect("argument passing test config should be well-formed");
+    arguments_passing_config.modules_dir = Some(String::from(
+        "./tests/json_wasm_tests/arguments_passing/artifacts",
+    ));
+
+    let mut faas = FluenceFaaS::with_raw_config(arguments_passing_config)
+        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+
+    let result1 = faas.call_with_json(
+        "arguments_passing_test",
+        "string_type",
+        json!({}),
+        <_>::default(),
+    );
+    assert!(result1.is_err());
+
+    let result2 = faas.call_with_json(
+        "arguments_passing_test",
+        "string_type",
+        json!([]),
+        <_>::default(),
+    );
+    assert!(result2.is_err());
+
+    let result3 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "string_type",
+            json!({ "arg": "Fluence" }),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke string_type: {:?}", e));
+    assert_eq!(
+        result3,
+        vec![IValue::String(String::from("Fluence_Fluence"))]
+    );
+
+    let result4 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "string_type",
+            json!("Fluence"),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke string_type: {:?}", e));
+    assert_eq!(
+        result4,
+        vec![IValue::String(String::from("Fluence_Fluence"))]
+    );
+}
+
+#[test]
+pub fn bytearray_type() {
+    let argument_passing_config_raw = std::fs::read(ARGUMENT_PASSING_CONFIG_PATH)
+        .expect("./json_wasm_tests/arguments_passing/Config.toml should presence");
+
+    let mut arguments_passing_config: fluence_faas::RawModulesConfig =
+        toml::from_slice(&argument_passing_config_raw)
+            .expect("argument passing test config should be well-formed");
+    arguments_passing_config.modules_dir = Some(String::from(
+        "./tests/json_wasm_tests/arguments_passing/artifacts",
+    ));
+
+    let mut faas = FluenceFaaS::with_raw_config(arguments_passing_config)
+        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+
+    let result1 = faas.call_with_json(
+        "arguments_passing_test",
+        "bytearray_type",
+        json!({}),
+        <_>::default(),
+    );
+    assert!(result1.is_err());
+
+    let result2 = faas.call_with_json(
+        "arguments_passing_test",
+        "bytearray_type",
+        json!([]),
+        <_>::default(),
+    );
+    assert!(result2.is_err());
+
+    let result3 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "bytearray_type",
+            json!({ "arg": [0x13, 0x37] }),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
+    assert_eq!(
+        result3,
+        vec![IValue::ByteArray(vec![0x13, 0x37, 0x1])]
+    );
+
+    let result4 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "bytearray_type",
+            json!([[0x13, 0x37]]),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
+    assert_eq!(
+        result4,
+        vec![IValue::ByteArray(vec![0x13, 0x37, 0x1])]
+    );
+}
+
+#[test]
+pub fn bool_type() {
+    let argument_passing_config_raw = std::fs::read(ARGUMENT_PASSING_CONFIG_PATH)
+        .expect("./json_wasm_tests/arguments_passing/Config.toml should presence");
+
+    let mut arguments_passing_config: fluence_faas::RawModulesConfig =
+        toml::from_slice(&argument_passing_config_raw)
+            .expect("argument passing test config should be well-formed");
+    arguments_passing_config.modules_dir = Some(String::from(
+        "./tests/json_wasm_tests/arguments_passing/artifacts",
+    ));
+
+    let mut faas = FluenceFaaS::with_raw_config(arguments_passing_config)
+        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+
+    let result1 = faas.call_with_json(
+        "arguments_passing_test",
+        "bool_type",
+        json!({}),
+        <_>::default(),
+    );
+    assert!(result1.is_err());
+
+    let result2 = faas.call_with_json(
+        "arguments_passing_test",
+        "bool_type",
+        json!([]),
+        <_>::default(),
+    );
+    assert!(result2.is_err());
+
+    let result3 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "bool_type",
+            json!({ "arg": 0 }),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke bool_type: {:?}", e));
+    assert_eq!(result3, vec![IValue::I32(1)]);
+
+    let result4 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "bool_type",
+            json!(0),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke bool_type: {:?}", e));
+    assert_eq!(result4, vec![IValue::I32(1)]);
+}
+
+#[test]
+pub fn empty_type() {
+    let argument_passing_config_raw = std::fs::read(ARGUMENT_PASSING_CONFIG_PATH)
+        .expect("./json_wasm_tests/arguments_passing/Config.toml should presence");
+
+    let mut arguments_passing_config: fluence_faas::RawModulesConfig =
+        toml::from_slice(&argument_passing_config_raw)
+            .expect("argument passing test config should be well-formed");
+    arguments_passing_config.modules_dir = Some(String::from(
+        "./tests/json_wasm_tests/arguments_passing/artifacts",
+    ));
+
+    let mut faas = FluenceFaaS::with_raw_config(arguments_passing_config)
+        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+
+    let result1 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "empty_type",
+            json!({}),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
+    assert_eq!(result1, vec![IValue::String(String::from("success"))]);
+
+    let result2 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "empty_type",
+            json!([]),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
+    assert_eq!(result2, vec![IValue::String(String::from("success"))]);
+
+    let result3 = faas
+        .call_with_json(
+            "arguments_passing_test",
+            "empty_type",
+            json!([]),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
+    assert_eq!(result3, vec![IValue::String(String::from("success"))]);
+
+    let result4 = faas.call_with_json(
+        "arguments_passing_test",
+        "empty_type",
+        json!([1]),
+        <_>::default(),
+    );
+    assert!(result4.is_err());
 }

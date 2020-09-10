@@ -57,6 +57,12 @@ pub fn string_type(arg: String) -> String {
 }
 
 #[fce]
+pub fn bytearray_type(mut arg: Vec<u8>) -> Vec<u8> {
+    arg.push(1);
+    arg
+}
+
+#[fce]
 pub fn bool_type(arg: bool) -> bool {
     !arg
 }
