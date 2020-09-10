@@ -186,7 +186,6 @@ impl FluenceFaaS {
         json_args: serde_json::Value,
         call_parameters: fluence_sdk_main::CallParameters,
     ) -> Result<Vec<IValue>> {
-        use serde_json::Value;
         let module_name = module_name.as_ref();
         let func_name = func_name.as_ref();
 
@@ -195,28 +194,15 @@ impl FluenceFaaS {
             let func_signature = func_signatures
                 .find(|sign| sign.name == func_name)
                 .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
+
+            // TODO: cache record types
             let record_types = self
                 .fce
                 .module_record_types(module_name)?
                 .map(|ty| (&ty.name, &ty.fields))
                 .collect::<HashMap<_, _>>();
 
-            match json_args {
-                Value::Object(json_map) => crate::misc::json_map_to_ivalues(
-                    json_map,
-                    func_signature
-                        .arguments
-                        .iter()
-                        .map(|arg| (&arg.name, &arg.ty)),
-                    &record_types,
-                )?,
-                Value::Array(json_array) => crate::misc::json_array_to_ivalues(
-                    json_array,
-                    func_signature.arguments.iter().map(|arg| &arg.ty),
-                    &record_types,
-                )?,
-                _ => unimplemented!(),
-            }
+            crate::misc::json_to_ivalues(json_args, &func_signature, &record_types)?
         };
 
         self.call_parameters.replace(call_parameters);

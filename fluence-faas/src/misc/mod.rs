@@ -27,7 +27,6 @@ pub use config::ModuleConfig;
 pub use config::WASIConfig;
 
 pub(crate) use config::load_config;
-pub(crate) use json_to_ivalues::json_array_to_ivalues;
-pub(crate) use json_to_ivalues::json_map_to_ivalues;
+pub(crate) use json_to_ivalues::json_to_ivalues;
 pub(crate) use modules_load_strategy::ModulesLoadStrategy;
 pub(crate) use utils::make_fce_config;

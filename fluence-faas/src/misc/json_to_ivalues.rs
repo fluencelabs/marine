@@ -25,7 +25,38 @@ use wasmer_wit::types::RecordFieldType;
 
 use std::collections::HashMap;
 
-pub(crate) fn json_map_to_ivalues<'a, 'b>(
+pub(crate) fn json_to_ivalues(
+    json_args: serde_json::Value,
+    func_signature: &fce::FCEFunctionSignature<'_>,
+    record_types: &HashMap<&String, &Vec1<RecordFieldType>>,
+) -> Result<Vec<IValue>> {
+    let ivalues = match json_args {
+        SerdeValue::Object(json_map) => json_map_to_ivalues(
+            json_map,
+            func_signature
+                .arguments
+                .iter()
+                .map(|arg| (&arg.name, &arg.ty)),
+            &record_types,
+        )?,
+        SerdeValue::Array(json_array) => {
+            println!("json array: {:?}", json_array);
+            json_array_to_ivalues(
+                json_array,
+                func_signature.arguments.iter().map(|arg| &arg.ty),
+                &record_types,
+            )?
+        }
+        SerdeValue::String(json_string) => json_string_to_ivalue(json_string, func_signature)?,
+        json_bool @ SerdeValue::Bool(_) => json_bool_to_ivalue(json_bool, func_signature)?,
+        json_number @ SerdeValue::Number(_) => json_number_to_ivalue(json_number, func_signature)?,
+        SerdeValue::Null => json_null_to_ivalue(func_signature)?,
+    };
+
+    Ok(ivalues)
+}
+
+fn json_map_to_ivalues<'a, 'b>(
     mut json_map: serde_json::Map<String, SerdeValue>,
     signature: impl Iterator<Item = (&'a String, &'a IType)>,
     record_types: &'b HashMap<&'b String, &'b Vec1<RecordFieldType>>,
@@ -51,28 +82,90 @@ pub(crate) fn json_map_to_ivalues<'a, 'b>(
     Ok(iargs)
 }
 
-pub(crate) fn json_array_to_ivalues<'a, 'b>(
+fn json_array_to_ivalues<'a, 'b>(
     mut json_array: Vec<SerdeValue>,
-    signature: impl Iterator<Item = &'a IType>,
+    signature: impl Iterator<Item = &'a IType> + std::iter::ExactSizeIterator,
     record_types: &'b HashMap<&'b String, &'b Vec1<RecordFieldType>>,
 ) -> Result<Vec<IValue>> {
-    let mut iargs = Vec::new();
+    if json_array.len() != signature.len() {
+        return Err(FaaSError::JsonArgumentsDeserializationError(format!(
+            "function requires {} arguments, {} provided",
+            signature.len(),
+            json_array.len()
+        )));
+    }
 
-    for (arg_id, arg_type) in signature.enumerate() {
-        let json_value = json_array.remove(arg_id);
+    let mut iargs = Vec::with_capacity(signature.len());
+
+    for arg_type in signature {
+        // remove here is safe because we've already checked sizes
+        let json_value = json_array.remove(0);
         let iarg = json_value_to_ivalue(json_value, arg_type, record_types)?;
         iargs.push(iarg);
     }
 
-    if !json_array.is_empty() {
+    Ok(iargs)
+}
+
+fn json_string_to_ivalue(
+    json_string: String,
+    func_signature: &fce::FCEFunctionSignature<'_>,
+) -> Result<Vec<IValue>> {
+    if func_signature.arguments.len() != 1 || func_signature.arguments[0].ty != IType::String {
         return Err(FaaSError::JsonArgumentsDeserializationError(format!(
-            "function requires {} arguments, {} provided",
-            iargs.len(),
-            iargs.len() + json_array.len()
+            "the called function has the following signature: {:?}, but only one string argument is provided",
+            func_signature
         )));
     }
 
-    Ok(iargs)
+    Ok(vec![IValue::String(json_string)])
+}
+
+fn json_bool_to_ivalue(
+    json_bool: SerdeValue,
+    func_signature: &fce::FCEFunctionSignature<'_>,
+) -> Result<Vec<IValue>> {
+    if func_signature.arguments.len() != 1 {
+        return Err(FaaSError::JsonArgumentsDeserializationError(format!(
+            "the called function has the following signature: {:?}, but only one bool argument is provided",
+            func_signature
+        )));
+    }
+
+    Ok(vec![json_value_to_ivalue(
+        json_bool,
+        &func_signature.arguments[0].ty,
+        &HashMap::new(),
+    )?])
+}
+
+fn json_number_to_ivalue(
+    json_number: SerdeValue,
+    func_signature: &fce::FCEFunctionSignature<'_>,
+) -> Result<Vec<IValue>> {
+    if func_signature.arguments.len() != 1 {
+        return Err(FaaSError::JsonArgumentsDeserializationError(format!(
+            "the called function has the following signature: {:?}, but only one number argument is provided",
+            func_signature
+        )));
+    }
+
+    Ok(vec![json_value_to_ivalue(
+        json_number,
+        &func_signature.arguments[0].ty,
+        &HashMap::new(),
+    )?])
+}
+
+fn json_null_to_ivalue(func_signature: &fce::FCEFunctionSignature<'_>) -> Result<Vec<IValue>> {
+    if !func_signature.arguments.is_empty() {
+        return Err(FaaSError::JsonArgumentsDeserializationError(format!(
+            "the called function has the following signature: {:?}, but no arguments is provided",
+            func_signature
+        )));
+    }
+
+    Ok(vec![])
 }
 
 fn json_value_to_ivalue(
@@ -80,6 +173,7 @@ fn json_value_to_ivalue(
     ty: &IType,
     record_types: &HashMap<&String, &Vec1<RecordFieldType>>,
 ) -> Result<IValue> {
+    // TODO: get rid of copy-past
     match ty {
         IType::S8 => {
             let value = serde_json::from_value(json_value)

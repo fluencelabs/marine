@@ -1,0 +1,6 @@
+modules_dir = "./artifacts/"
+
+[[module]]
+    name = "arguments_passing_test"
+    mem_pages_count = 1
+    logger_enabled = false
