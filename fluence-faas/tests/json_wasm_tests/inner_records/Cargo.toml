@@ -1,9 +1,13 @@
 [package]
-name = "inner_records"
+name = "inner-records-test"
 version = "0.1.0"
-authors = ["vms <michail.vms@gmail.com>"]
+authors = ["Fluence Labs"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "pure"
+path = "src/pure.rs"
 
 [dependencies]
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "record_support" }
+safe-transmute = "0.11.0"

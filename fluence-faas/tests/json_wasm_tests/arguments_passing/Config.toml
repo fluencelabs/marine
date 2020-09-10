@@ -3,9 +3,9 @@ modules_dir = "./artifacts/"
 [[module]]
     name = "effector"
     mem_pages_count = 1
-    logger_enabled = false
+    logger_enabled = true
 
 [[module]]
     name = "pure"
     mem_pages_count = 1
-    logger_enabled = false
+    logger_enabled = true
