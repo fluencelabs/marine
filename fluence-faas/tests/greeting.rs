@@ -32,7 +32,7 @@ pub fn greeting() {
         .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
 
     let result1 = faas
-        .call(
+        .call_with_ivalues(
             "greeting",
             "greeting",
             &[IValue::String(String::from("Fluence"))],
@@ -41,7 +41,7 @@ pub fn greeting() {
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
     let result2 = faas
-        .call(
+        .call_with_ivalues(
             "greeting",
             "greeting",
             &[IValue::String(String::from(""))],
@@ -110,7 +110,7 @@ pub fn call_parameters() {
         .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
 
     let result = faas
-        .call(
+        .call_with_ivalues(
             "greeting_cp",
             "greeting",
             &[],

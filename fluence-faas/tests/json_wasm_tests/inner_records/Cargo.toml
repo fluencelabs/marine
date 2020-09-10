@@ -1,0 +1,9 @@
+[package]
+name = "inner_records"
+version = "0.1.0"
+authors = ["vms <michail.vms@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

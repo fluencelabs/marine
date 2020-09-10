@@ -72,7 +72,7 @@ impl WITGenerator for AstFunctionItem {
             .arguments
             .iter()
             .enumerate()
-            .try_fold::<_, _, Result<_>>(Vec::new(), |mut instructions, (arg_id, input_type)| {
+            .try_fold::<_, _, Result<_>>(Vec::new(), |mut instructions, (arg_id, (_, input_type))| {
                 let mut new_instructions =
                     input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
 

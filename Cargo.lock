@@ -601,7 +601,7 @@ name = "fce-wit-generator"
 version = "0.1.4"
 dependencies = [
  "fce-wit-parser",
- "fluence-sdk-wit 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-wit 0.2.1",
  "once_cell",
  "serde",
  "serde_json",
@@ -2639,8 +2639,9 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.17.1"
-source = "git+https://github.com/fluencelabs/interface-types/?branch=record_refactoring#010cebcb180f0f11600360de8c7aa6729b7bee70"
+version = "0.17.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9bc4a5bd821d81bddb8423a2ad0b66bb5fc30b3a1a137e02679ac7228fa9012d"
 dependencies = [
  "nom",
  "safe-transmute",

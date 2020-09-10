@@ -33,7 +33,7 @@ pub fn records() {
         .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
 
     let result = faas
-        .call("pure", "invoke", &[], <_>::default())
+        .call_with_ivalues("pure", "invoke", &[], <_>::default())
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     assert_eq!(
