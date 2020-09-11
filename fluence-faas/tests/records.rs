@@ -26,7 +26,7 @@ pub fn records() {
         .expect("../examples/records/Config.toml should presence");
 
     let mut records_config: fluence_faas::RawModulesConfig =
-        toml::from_slice(&records_config_raw).expect("greeting config should be well-formed");
+        toml::from_slice(&records_config_raw).expect("records config should be well-formed");
     records_config.modules_dir = Some(String::from("../examples/records/artifacts/wasm_modules/"));
 
     let mut faas = FluenceFaaS::with_raw_config(records_config)
