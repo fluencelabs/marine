@@ -46,19 +46,19 @@ pub fn get(url: String) -> String {
 
 - Build project with `fce build` (supports --release and all other cargo flags now)
 
-- Copy wasm file from `target/wasm32-wasi/debug` to directory with other modules
+- Copy wasm file from `target/wasm32-wasi/debug` or `target/wasm32-wasi/release` to directory with other modules
 
 - To import other wasm modules to your project use similar code:
 ```rust
 #[fce]
-#[link(wasm_import_module = "wasm_curl.wasm")]
+#[link(wasm_import_module = "curl")]
 extern "C" {
     #[link_name = "get"]
     pub fn curl_get(url: String) -> String;
 }
 
 #[fce]
-#[link(wasm_import_module = "wasm_local_storage.wasm")]
+#[link(wasm_import_module = "local_storage")]
 extern "C" {
     #[link_name = "get"]
     pub fn curl_get(url: String) -> String;
@@ -70,19 +70,29 @@ extern "C" {
 - Create simple Rust project
 - Create `Config.toml` to describe existed wasm modules and give accesses to host binaries and local storage if needed:
 ```toml
-modules_dir = "wasm/artifacts/modules"
+modules_dir = "wasm/artifacts/modules/"
 
 [[module]]
-    name = "wasm_local_storage_with_curl.wasm"
-    mem_pages_count = 100    
-
-   [module.imports]
-    curl = "/usr/bin/curl"
+    name = "local_storage"
+    logger_enabled = true
 
     [module.wasi]
-    envs = []
     preopened_files = ["./wasm/artifacts"]
-    mapped_dirs = { "tmp" = "./wasm/artifacts" }
+    mapped_dirs = { "sites" = "./sites" }
+
+[[module]]
+    name = "curl"
+    logger_enabled = true
+
+    [module.imports]
+    curl = "/usr/bin/curl"
+
+[[module]]
+    name = "site-storage"
+    mem_pages_count = 10000
+    logger_enabled = true
+    [module.wasi]
+    envs = ["ENV_ONE=parameter-one"]
 ```
 
 `modules_dir` - path to directory with all modules. All subsequent paths will be relative to this path
@@ -99,6 +109,7 @@ modules_dir = "wasm/artifacts/modules"
 
 Import example:
 ```rust
+#[fce]
 #[link(wasm_import_module = "host")]
 extern "C" {
     fn curl(args: String) -> String;

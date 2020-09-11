@@ -1,0 +1,21 @@
+modules_dir = "wasm/artifacts/modules/"
+
+[[module]]
+    name = "local_storage"
+    logger_enabled = true
+
+    [module.wasi]
+    preopened_files = ["./../sites"]
+    # this is where files will be stored
+    mapped_dirs = { "sites" = "./../sites" }
+
+[[module]]
+    name = "curl"
+    logger_enabled = true
+
+    [module.imports]
+    curl = "/usr/bin/curl"
+
+[[module]]
+    name = "site-storage"
+    logger_enabled = true

@@ -1,0 +1,13 @@
+[package]
+name = "curl"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[[bin]]
+path = "src/main.rs"
+name = "curl"
+
+[dependencies]
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+log = "0.4.8"
