@@ -10,7 +10,7 @@ members = [
     "examples/records/effector",
     "examples/records/pure",
     "examples/records/test-record",
-    "examples/site-storage",
+    "examples/site-storage/wasm/site-storage",
     "examples/site-storage/wasm/curl",
     "examples/site-storage/wasm/local_storage",
     "fluence-app-service",

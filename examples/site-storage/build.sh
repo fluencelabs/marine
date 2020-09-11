@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # This script builds all subprojects and puts all created Wasm modules in one dir
-
+cd wasm/site-storage
 cargo update
 fce build --release
-cd wasm/curl
+cd ../curl
 cargo update
 fce build --release
 cd ../local_storage

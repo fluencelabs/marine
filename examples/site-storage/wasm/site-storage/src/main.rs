@@ -21,7 +21,7 @@ pub fn main() {
     WasmLogger::init_with_level(log::Level::Info).unwrap();
 }
 
-/// Combining to modules: `curl` and `local_storage`.
+/// Combining of modules: `curl` and `local_storage`.
 /// Calls `curl` and stores returned result into a file.
 #[fce]
 fn get_n_save(url: String, file_name: String) -> String {
