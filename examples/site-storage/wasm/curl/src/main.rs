@@ -17,21 +17,19 @@
 use fluence::fce;
 use fluence::WasmLogger;
 
+/// Log level can be changed by `RUST_LOG` env as well.
 pub fn main() {
     WasmLogger::init_with_level(log::Level::Info).unwrap();
 }
 
 #[fce]
-pub fn get(url: String) -> String {
-    log::info!("get called with url {}", url);
+pub fn get(cmd: String) -> String {
+    log::info!("get called with url {}", cmd);
 
-    call_curl(url)
-}
-
-fn call_curl(cmd: String) -> String {
     unsafe { curl(cmd) }
 }
 
+/// Permissions in `Config.toml` should exist to use host functions.
 #[fce]
 #[link(wasm_import_module = "host")]
 extern "C" {

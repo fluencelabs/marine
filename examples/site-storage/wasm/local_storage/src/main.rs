@@ -19,20 +19,22 @@ use fluence::fce;
 use fluence::WasmLogger;
 use std::path::PathBuf;
 
-const RPC_TMP_FILEPATH: &str = "/test/";
+const RPC_TMP_FILEPATH: &str = "/sites/";
 
+/// Log level can be changed by `RUST_LOG` env as well.
 pub fn main() {
     WasmLogger::init_with_level(log::Level::Info).unwrap();
 }
 
+/// You can read or write files from the file system if there is permission to use directories described in `Config.toml`.
 #[fce]
 pub fn put(name: String, file_content: Vec<u8>) -> String {
     log::info!("put called with {:?}", file_content);
 
     let rpc_tmp_filepath = format!("{}{}", RPC_TMP_FILEPATH, name);
 
-    let r = fs::write(PathBuf::from(rpc_tmp_filepath.clone()), file_content);
-    if let Err(e) = r {
+    let result = fs::write(PathBuf::from(rpc_tmp_filepath.clone()), file_content);
+    if let Err(e) = result {
         return format!("file can't be written: {}", e);
     }
 

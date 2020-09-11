@@ -1,15 +1,16 @@
 modules_dir = "wasm/artifacts/modules/"
 
 [[module]]
-    name = "wasm_local_storage"
+    name = "local_storage"
     logger_enabled = true
 
     [module.wasi]
     preopened_files = ["./wasm/artifacts"]
-    mapped_dirs = { "test" = "./wasm/artifacts" }
+    # this is where files will be stored
+    mapped_dirs = { "sites" = "./sites" }
 
 [[module]]
-    name = "wasm_curl"
+    name = "curl"
     logger_enabled = true
 
     [module.imports]

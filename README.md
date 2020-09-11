@@ -51,14 +51,14 @@ pub fn get(url: String) -> String {
 - To import other wasm modules to your project use similar code:
 ```rust
 #[fce]
-#[link(wasm_import_module = "wasm_curl")]
+#[link(wasm_import_module = "curl")]
 extern "C" {
     #[link_name = "get"]
     pub fn curl_get(url: String) -> String;
 }
 
 #[fce]
-#[link(wasm_import_module = "wasm_local_storage")]
+#[link(wasm_import_module = "local_storage")]
 extern "C" {
     #[link_name = "get"]
     pub fn curl_get(url: String) -> String;
@@ -73,15 +73,15 @@ extern "C" {
 modules_dir = "wasm/artifacts/modules/"
 
 [[module]]
-    name = "wasm_local_storage"
+    name = "local_storage"
     logger_enabled = true
 
     [module.wasi]
     preopened_files = ["./wasm/artifacts"]
-    mapped_dirs = { "test" = "./wasm/artifacts" }
+    mapped_dirs = { "sites" = "./sites" }
 
 [[module]]
-    name = "wasm_curl"
+    name = "curl"
     logger_enabled = true
 
     [module.imports]

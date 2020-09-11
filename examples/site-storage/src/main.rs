@@ -21,6 +21,8 @@ pub fn main() {
     WasmLogger::init_with_level(log::Level::Info).unwrap();
 }
 
+/// Combining to modules: `curl` and `local_storage`.
+/// Calls `curl` and stores returned result into a file.
 #[fce]
 fn get_n_save(url: String, file_name: String) -> String {
     let result = unsafe { curl(url) };
@@ -28,19 +30,20 @@ fn get_n_save(url: String, file_name: String) -> String {
     let a =unsafe { file_put(file_name, result.into_bytes()) };
     println!("{}", a);
 
-
     "Ok".to_string()
 }
 
+/// Importing `curl` module
 #[fce]
-#[link(wasm_import_module = "wasm_curl")]
+#[link(wasm_import_module = "curl")]
 extern "C" {
     #[link_name = "get"]
     pub fn curl(url: String) -> String;
 }
 
+/// Importing `local_storage` module
 #[fce]
-#[link(wasm_import_module = "wasm_local_storage")]
+#[link(wasm_import_module = "local_storage")]
 extern "C" {
     #[link_name = "get"]
     pub fn file_get(file_name: String) -> Vec<u8>;

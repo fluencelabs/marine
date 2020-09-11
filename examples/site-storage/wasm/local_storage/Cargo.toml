@@ -1,11 +1,11 @@
 [package]
-name = "wasm_local_storage"
+name = "local_storage"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [[bin]]
-name = "wasm_local_storage"
+name = "local_storage"
 path = "src/main.rs"
 
 [dependencies]
