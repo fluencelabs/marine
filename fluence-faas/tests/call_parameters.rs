@@ -25,8 +25,10 @@ pub fn call_parameters() {
         .expect("../examples/call_parameters/Config.toml should presence");
 
     let mut call_parameters_config: fluence_faas::RawModulesConfig =
-        toml::from_slice(&call_parameters_config_raw).expect("call_parameters config should be well-formed");
-    call_parameters_config.modules_dir = Some(String::from("../examples/call_parameters/artifacts"));
+        toml::from_slice(&call_parameters_config_raw)
+            .expect("call_parameters config should be well-formed");
+    call_parameters_config.modules_dir =
+        Some(String::from("../examples/call_parameters/artifacts"));
 
     let mut faas = FluenceFaaS::with_raw_config(call_parameters_config)
         .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
