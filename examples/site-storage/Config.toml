@@ -5,8 +5,9 @@ modules_dir = "wasm/artifacts/modules/"
     logger_enabled = true
 
     [module.wasi]
+    preopened_files = ["./../sites"]
     # this is where files will be stored
-    mapped_dirs = { "sites" = "./sites" }
+    mapped_dirs = { "sites" = "./../sites" }
 
 [[module]]
     name = "curl"
