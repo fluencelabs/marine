@@ -47,17 +47,23 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
             writeln!(f, "}}")?;
         }
 
+        if !self.record_types.is_empty() {
+            writeln!(f)?;
+        }
+
         for (name, functions) in self.modules.iter() {
-            writeln!(f, "{}", *name)?;
+            writeln!(f, "{}:", *name)?;
 
             for (name, signature) in functions.iter() {
                 write!(f, "  pub fn {}(", name)?;
 
                 for arg in signature.arguments {
-                    write!(f, "{}, {:?}", arg.name, arg.ty)?;
+                    write!(f, "{}: {:?}", arg.name, arg.ty)?;
                 }
-                write!(f, "  pub fn ) -> {:?}", signature.output_types)?;
+                write!(f, ") -> {:?}", signature.output_types)?;
             }
+
+            writeln!(f)?
         }
 
         Ok(())

@@ -686,6 +686,7 @@ dependencies = [
  "env_logger 0.7.1",
  "fce",
  "fluence-sdk-main 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "itertools",
  "log",
  "safe-transmute",
  "serde",
@@ -2657,9 +2658,8 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types-fl"
 version = "0.17.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9bc4a5bd821d81bddb8423a2ad0b66bb5fc30b3a1a137e02679ac7228fa9012d"
 dependencies = [
+ "log",
  "nom",
  "safe-transmute",
  "serde",
