@@ -17,8 +17,9 @@
 use fluence_faas::FluenceFaaS;
 use fluence_faas::IValue;
 
+use serde_json::json;
+
 #[test]
-#[ignore]
 pub fn records() {
     let records_config_path = "../examples/records/Config.toml";
 
@@ -27,17 +28,177 @@ pub fn records() {
 
     let mut records_config: fluence_faas::RawModulesConfig =
         toml::from_slice(&records_config_raw).expect("greeting config should be well-formed");
-    records_config.modules_dir = Some(String::from("../examples/records/artifacts/wasm_modules/"));
+    records_config.modules_dir = Some(String::from("../examples/records/artifacts/"));
 
     let mut faas = FluenceFaaS::with_raw_config(records_config)
         .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
 
-    let result = faas
+    let result1 = faas
         .call_with_ivalues("pure", "invoke", &[], <_>::default())
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     assert_eq!(
-        result,
+        result1,
+        vec![IValue::Record(
+            wasmer_wit::vec1::Vec1::new(vec![
+                IValue::I32(1),
+                IValue::S8(1),
+                IValue::S16(2),
+                IValue::S32(3),
+                IValue::S64(4),
+                IValue::U8(5),
+                IValue::U16(6),
+                IValue::U32(7),
+                IValue::U64(8),
+                IValue::F32(9.0),
+                IValue::F64(10.0),
+                IValue::String(String::from("field_11")),
+                IValue::ByteArray(vec![0x13, 0x37])
+            ])
+            .unwrap()
+        )]
+    );
+
+    let result2 = faas
+        .call_with_json(
+            "effector",
+            "mutate_struct",
+            json!({
+                "test_record": {
+                    "field_0": 0,
+                    "field_1": 0,
+                    "field_2": 0,
+                    "field_3": 0,
+                    "field_4": 0,
+                    "field_5": 0,
+                    "field_6": 0,
+                    "field_7": 0,
+                    "field_8": 0,
+                    "field_9": 0,
+                    "field_10": 0,
+                    "field_11": "field",
+                    "field_12": vec![1],
+
+                }
+            }),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
+
+    assert_eq!(
+        result2,
+        vec![IValue::Record(
+            wasmer_wit::vec1::Vec1::new(vec![
+                IValue::I32(1),
+                IValue::S8(1),
+                IValue::S16(2),
+                IValue::S32(3),
+                IValue::S64(4),
+                IValue::U8(5),
+                IValue::U16(6),
+                IValue::U32(7),
+                IValue::U64(8),
+                IValue::F32(9.0),
+                IValue::F64(10.0),
+                IValue::String(String::from("field_11")),
+                IValue::ByteArray(vec![0x13, 0x37])
+            ])
+            .unwrap()
+        )]
+    );
+
+    let result3 = faas
+        .call_with_json(
+            "effector",
+            "mutate_struct",
+            json!({
+                "test_record": [0,0,0,0,0,0,0,0,0,0,0,"",[1]]
+
+            }),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
+
+    assert_eq!(
+        result3,
+        vec![IValue::Record(
+            wasmer_wit::vec1::Vec1::new(vec![
+                IValue::I32(1),
+                IValue::S8(1),
+                IValue::S16(2),
+                IValue::S32(3),
+                IValue::S64(4),
+                IValue::U8(5),
+                IValue::U16(6),
+                IValue::U32(7),
+                IValue::U64(8),
+                IValue::F32(9.0),
+                IValue::F64(10.0),
+                IValue::String(String::from("field_11")),
+                IValue::ByteArray(vec![0x13, 0x37])
+            ])
+            .unwrap()
+        )]
+    );
+
+    let result4 = faas
+        .call_with_json(
+            "effector",
+            "mutate_struct",
+            json!([{
+                    "field_0": 0,
+                    "field_1": 0,
+                    "field_2": 0,
+                    "field_3": 0,
+                    "field_4": 0,
+                    "field_5": 0,
+                    "field_6": 0,
+                    "field_7": 0,
+                    "field_8": 0,
+                    "field_9": 0,
+                    "field_10": 0,
+                    "field_11": "",
+                    "field_12": vec![1],
+
+                }
+            ]),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
+
+    assert_eq!(
+        result4,
+        vec![IValue::Record(
+            wasmer_wit::vec1::Vec1::new(vec![
+                IValue::I32(1),
+                IValue::S8(1),
+                IValue::S16(2),
+                IValue::S32(3),
+                IValue::S64(4),
+                IValue::U8(5),
+                IValue::U16(6),
+                IValue::U32(7),
+                IValue::U64(8),
+                IValue::F32(9.0),
+                IValue::F64(10.0),
+                IValue::String(String::from("field_11")),
+                IValue::ByteArray(vec![0x13, 0x37])
+            ])
+            .unwrap()
+        )]
+    );
+
+    let result5 = faas
+        .call_with_json(
+            "effector",
+            "mutate_struct",
+            json!([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", [1]]]),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
+
+    assert_eq!(
+        result5,
         vec![IValue::Record(
             wasmer_wit::vec1::Vec1::new(vec![
                 IValue::I32(1),
