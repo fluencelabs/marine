@@ -38,7 +38,7 @@ static ARG_CONFIG: Lazy<fluence_faas::RawModulesConfig> = Lazy::new(|| {
 #[test]
 pub fn get_interfaces() {
     let faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let interface = faas.get_interface();
 
@@ -236,7 +236,7 @@ pub fn get_interfaces() {
 #[test]
 pub fn all_types() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas.call_with_json("pure", "all_types", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -312,7 +312,7 @@ pub fn all_types() {
 #[test]
 pub fn i32_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas.call_with_json("pure", "i32_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -334,7 +334,7 @@ pub fn i32_type() {
 #[test]
 pub fn i64_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas.call_with_json("pure", "i64_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -356,7 +356,7 @@ pub fn i64_type() {
 #[test]
 pub fn u32_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas.call_with_json("pure", "u32_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -378,7 +378,7 @@ pub fn u32_type() {
 #[test]
 pub fn u64_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas.call_with_json("pure", "u64_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -400,7 +400,7 @@ pub fn u64_type() {
 #[test]
 pub fn f32_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas.call_with_json("pure", "f32_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -422,7 +422,7 @@ pub fn f32_type() {
 #[test]
 pub fn f64_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas.call_with_json("pure", "f64_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -444,7 +444,7 @@ pub fn f64_type() {
 #[test]
 pub fn string_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas.call_with_json("pure", "string_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -481,7 +481,7 @@ pub fn string_type() {
 #[test]
 pub fn bytearray_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas.call_with_json("pure", "bytearray_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -513,7 +513,7 @@ pub fn bytearray_type() {
 #[test]
 pub fn bool_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas.call_with_json("pure", "bool_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -535,7 +535,7 @@ pub fn bool_type() {
 #[test]
 pub fn empty_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas
         .call_with_json("pure", "empty_type", json!({}), <_>::default())

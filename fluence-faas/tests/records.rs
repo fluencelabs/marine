@@ -31,10 +31,10 @@ pub fn records() {
     records_config.modules_dir = Some(String::from("../examples/records/artifacts/"));
 
     let mut faas = FluenceFaaS::with_raw_config(records_config)
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas
-        .call_with_ivalues("pure", "invoke", &[], <_>::default())
+        .call_with_ivalues("records_pure", "invoke", &[], <_>::default())
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     assert_eq!(
@@ -61,7 +61,7 @@ pub fn records() {
 
     let result2 = faas
         .call_with_json(
-            "effector",
+            "records_effector",
             "mutate_struct",
             json!({
                 "test_record": {
@@ -109,7 +109,7 @@ pub fn records() {
 
     let result3 = faas
         .call_with_json(
-            "effector",
+            "records_effector",
             "mutate_struct",
             json!({
                 "test_record": [0,0,0,0,0,0,0,0,0,0,0,"",[1]]
@@ -143,7 +143,7 @@ pub fn records() {
 
     let result4 = faas
         .call_with_json(
-            "effector",
+            "records_effector",
             "mutate_struct",
             json!([{
                     "field_0": 0,
@@ -189,7 +189,7 @@ pub fn records() {
 
     let result5 = faas
         .call_with_json(
-            "effector",
+            "records_effector",
             "mutate_struct",
             json!([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", [1]]]),
             <_>::default(),
@@ -235,11 +235,11 @@ fn inner_records() {
     ));
 
     let mut faas = FluenceFaaS::with_raw_config(inner_records_config)
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result = faas
         .call_with_json(
-            "pure",
+            "records_pure",
             "test_record",
             json!({
                 "test_record": {

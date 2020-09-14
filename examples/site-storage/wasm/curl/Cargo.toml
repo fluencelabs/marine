@@ -1,13 +1,13 @@
 [package]
-name = "ipfs-pure"
+name = "curl"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [[bin]]
-name = "ipfs_pure"
 path = "src/main.rs"
+name = "curl"
 
 [dependencies]
 fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "record_support", features = ["logger"] }
-log = "0.4.11"
+log = "0.4.8"

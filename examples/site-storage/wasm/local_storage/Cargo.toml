@@ -1,13 +1,13 @@
 [package]
-name = "ipfs-pure"
+name = "local_storage"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [[bin]]
-name = "ipfs_pure"
+name = "local_storage"
 path = "src/main.rs"
 
 [dependencies]
 fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "record_support", features = ["logger"] }
-log = "0.4.11"
+log = "0.4.8"

@@ -15,31 +15,23 @@
  */
 
 use fluence::fce;
+use fluence::WasmLogger;
 
-#[fce]
-pub struct TestRecord0 {
-    pub field_0: i32,
+/// Log level can be changed by `RUST_LOG` env as well.
+pub fn main() {
+    WasmLogger::init_with_level(log::Level::Info).unwrap();
 }
 
 #[fce]
-pub struct TestRecord1 {
-    pub field_0: i32,
-    pub field_1: String,
-    pub field_2: Vec<u8>,
-    pub test_record_0: TestRecord0,
+pub fn get(cmd: String) -> String {
+    log::info!("get called with url {}", cmd);
+
+    unsafe { curl(cmd) }
 }
 
+/// Permissions in `Config.toml` should exist to use host functions.
 #[fce]
-pub struct TestRecord2 {
-    pub test_record_0: TestRecord0,
-    pub test_record_1: TestRecord1,
-}
-
-fn main() {}
-
-#[fce]
-fn test_record(mut test_record: TestRecord2) -> TestRecord2 {
-    test_record.test_record_0 = TestRecord0 { field_0: 1 };
-
-    test_record
+#[link(wasm_import_module = "host")]
+extern "C" {
+    fn curl(cmd: String) -> String;
 }

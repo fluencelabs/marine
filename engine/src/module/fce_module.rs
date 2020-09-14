@@ -298,7 +298,12 @@ impl FCEModule {
                 );
 
                 // TODO: optimize by prevent copying stack values
-                outputs.unwrap_or_default().as_slice().iter().map(ival_to_wval).collect::<Vec<_>>()
+                outputs
+                    .unwrap_or_default()
+                    .as_slice()
+                    .iter()
+                    .map(ival_to_wval)
+                    .collect::<Vec<_>>()
             }
         }
 

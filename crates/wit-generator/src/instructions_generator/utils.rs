@@ -19,7 +19,7 @@ use crate::instructions_generator::WITResolver;
 use crate::Result;
 
 use fluence_sdk_wit::ParsedType;
-use fluence_sdk_wit::WasmType;
+use fluence_sdk_wit::RustType;
 
 // return error if there is no record with such name
 pub(crate) fn ptype_to_itype_checked(
@@ -54,11 +54,17 @@ pub(crate) fn ptype_to_itype_unchecked(pty: &ParsedType) -> IType {
     }
 }
 
-pub(crate) fn wtype_to_itype(pty: &WasmType) -> IType {
+pub(crate) fn wtype_to_itype(pty: &RustType) -> IType {
     match pty {
-        WasmType::I32 => IType::I32,
-        WasmType::I64 => IType::I64,
-        WasmType::F32 => IType::F32,
-        WasmType::F64 => IType::F64,
+        RustType::I8 => IType::S8,
+        RustType::I16 => IType::S16,
+        RustType::I32 => IType::S32,
+        RustType::I64 => IType::S64,
+        RustType::U8 => IType::U8,
+        RustType::U16 => IType::U16,
+        RustType::U32 => IType::U32,
+        RustType::U64 => IType::U64,
+        RustType::F32 => IType::F32,
+        RustType::F64 => IType::F64,
     }
 }

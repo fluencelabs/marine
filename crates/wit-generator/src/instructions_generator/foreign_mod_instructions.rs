@@ -268,7 +268,7 @@ impl ForeignModInstructionGenerator for ParsedType {
     }
 }
 
-use fluence_sdk_wit::WasmType;
+use fluence_sdk_wit::RustType;
 use wasmer_wit::types::InterfaceType as IType;
 
 pub fn to_raw_input_types(arg: &(String, ParsedType)) -> Vec<IFunctionArg> {
@@ -309,7 +309,7 @@ pub fn to_raw_input_types(arg: &(String, ParsedType)) -> Vec<IFunctionArg> {
     }
 }
 
-pub fn to_raw_output_type(ty: &ParsedType) -> Vec<WasmType> {
+pub fn to_raw_output_type(ty: &ParsedType) -> Vec<RustType> {
     match ty {
         ParsedType::Boolean
         | ParsedType::I8
@@ -317,10 +317,10 @@ pub fn to_raw_output_type(ty: &ParsedType) -> Vec<WasmType> {
         | ParsedType::I32
         | ParsedType::U8
         | ParsedType::U16
-        | ParsedType::U32 => vec![WasmType::I32],
-        ParsedType::I64 | ParsedType::U64 => vec![WasmType::I64],
-        ParsedType::F32 => vec![WasmType::F32],
-        ParsedType::F64 => vec![WasmType::F64],
+        | ParsedType::U32 => vec![RustType::I32],
+        ParsedType::I64 | ParsedType::U64 => vec![RustType::I64],
+        ParsedType::F32 => vec![RustType::F32],
+        ParsedType::F64 => vec![RustType::F64],
         ParsedType::Utf8String | ParsedType::ByteVector | ParsedType::Record(_) => vec![],
     }
 }

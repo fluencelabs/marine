@@ -19,24 +19,24 @@ use fce::IValue;
 
 #[test]
 pub fn records() {
-    let effector_wasm_bytes = std::fs::read("../examples/records/artifacts/effector.wasm")
-        .expect("../examples/records/artifacts/effector.wasm should presence");
+    let effector_wasm_bytes = std::fs::read("../examples/records/artifacts/records_effector.wasm")
+        .expect("../examples/records/artifacts/records_effector.wasm should presence");
 
-    let pure_wasm_bytes = std::fs::read("../examples/records/artifacts/pure.wasm")
-        .expect("../examples/records/artifacts/pure.wasm should presence");
+    let pure_wasm_bytes = std::fs::read("../examples/records/artifacts/records_pure.wasm")
+        .expect("../examples/records/artifacts/records_pure.wasm should presence");
 
     let mut fce = FCE::new();
     let load_result = fce.load_module("pure", &pure_wasm_bytes, <_>::default());
     assert!(load_result.is_err());
 
-    fce.load_module("effector", &effector_wasm_bytes, <_>::default())
+    fce.load_module("records_effector", &effector_wasm_bytes, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
 
-    fce.load_module("pure", &pure_wasm_bytes, <_>::default())
+    fce.load_module("records_pure", &pure_wasm_bytes, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
 
     let result = fce
-        .call("pure", "invoke", &[])
+        .call("records_pure", "invoke", &[])
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     assert_eq!(
