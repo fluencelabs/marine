@@ -48,7 +48,7 @@ impl<'a> WITResolver<'a> {
         match self.types.get(record_name) {
             Some(type_index) => match &self.interfaces.types[*type_index as usize] {
                 wasmer_wit::ast::Type::Function { .. } => {
-                    panic!("internal error inside WITResolver")
+                    panic!("internal error inside WITResolver: interfaces AST type should be record not record")
                 }
                 wasmer_wit::ast::Type::Record(record_type) => Ok(record_type),
             },
