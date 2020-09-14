@@ -50,5 +50,5 @@ pub fn call_parameters() {
         )
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
 
-    assert_eq!(result, vec![IValue::String(String::from("root"))]);
+    assert_eq!(result, vec![IValue::String(format!("{}\n{}\n{}", call_id, user_name, application_id))]);
 }
