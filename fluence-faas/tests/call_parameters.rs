@@ -31,7 +31,7 @@ pub fn call_parameters() {
         Some(String::from("../examples/call_parameters/artifacts"));
 
     let mut faas = FluenceFaaS::with_raw_config(call_parameters_config)
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let call_id = "0x1337";
     let user_name = "root";

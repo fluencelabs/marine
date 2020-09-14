@@ -30,7 +30,7 @@ pub fn records() {
     records_config.modules_dir = Some(String::from("../examples/records/artifacts/wasm_modules/"));
 
     let mut faas = FluenceFaaS::with_raw_config(records_config)
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result = faas
         .call("pure", "invoke", &[], <_>::default())
