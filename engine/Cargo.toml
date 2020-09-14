@@ -17,7 +17,7 @@ fce-wit-parser = { path = "../crates/wit-parser", version = "0.1.3" }
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
-wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.3" }
+wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.4" }
 wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.0" }
 
 multimap = "0.8.1"

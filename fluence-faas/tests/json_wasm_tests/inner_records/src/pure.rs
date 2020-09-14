@@ -17,43 +17,31 @@
 use fluence::fce;
 
 #[fce]
+pub struct TestRecord0 {
+    pub field_0: i32,
+}
+
+#[fce]
 pub struct TestRecord1 {
-    pub field_0: bool,
-    pub field_1: i8,
-    pub field_2: i16,
-    pub field_3: i32,
-    pub field_4: i64,
-    pub field_5: u8,
-    pub field_6: u16,
-    pub field_7: u32,
-    pub field_8: u64,
-    pub field_9: f32,
-    pub field_10: f64,
-    pub field_11: String,
-    pub field_12: Vec<u8>,
+    pub field_0: i32,
+    pub field_1: String,
+    pub field_2: Vec<u8>,
+    pub test_record_0: TestRecord0,
 }
 
 #[fce]
 pub struct TestRecord2 {
-    pub field_0: bool,
-    pub field_1: i8,
-    pub field_2: i16,
-    pub field_3: i32,
-    pub field_4: i64,
-    pub field_5: u8,
-    pub field_6: u16,
-    pub field_7: u32,
-    pub field_8: u64,
-    pub field_9: f32,
-    pub field_10: f64,
-    pub field_11: String,
-    pub field_12: Vec<u8>,
-    pub field_13: TestRecord1,
+    pub test_record_0: TestRecord0,
+    pub test_record_1: TestRecord1,
 }
 
 fn main() {}
 
 #[fce]
-fn test_record(test_record: TestRecord2) -> TestRecord2 {
+fn test_record(mut test_record: TestRecord2) -> TestRecord2 {
+    test_record.test_record_0 = TestRecord0 {
+        field_0: 1
+    };
+
     test_record
 }

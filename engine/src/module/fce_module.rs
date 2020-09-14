@@ -268,7 +268,10 @@ impl FCEModule {
             import_name: String,
         ) -> impl Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static {
             move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
+                use wasmer_wit::interpreter::stack::Stackable;
+
                 use super::type_converters::wval_to_ival;
+                use super::type_converters::ival_to_wval;
 
                 log::trace!(
                     "raw import for {}.{} called with {:?}\n",
@@ -280,13 +283,13 @@ impl FCEModule {
                 // copy here because otherwise wit_instance will be consumed by the closure
                 let wit_instance_callable = wit_instance.clone();
                 let wit_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
-                unsafe {
+                let outputs = unsafe {
                     // error here will be propagated by the special error instruction
-                    let _ = interpreter.run(
+                    interpreter.run(
                         &wit_inputs,
                         Arc::make_mut(&mut wit_instance_callable.assume_init()),
-                    );
-                }
+                    )
+                };
 
                 log::trace!(
                     "\nraw import for {}.{} finished",
@@ -294,9 +297,8 @@ impl FCEModule {
                     import_name
                 );
 
-                // wit import functions should only change the stack state -
-                // the result will be returned by an export function
-                vec![]
+                // TODO: optimize by prevent copying stack values
+                outputs.unwrap_or_default().as_slice().iter().map(ival_to_wval).collect::<Vec<_>>()
             }
         }
 
@@ -367,8 +369,6 @@ impl FCEModule {
         export_funcs: &'a HashMap<String, Arc<Callable>>,
         record_types: impl Iterator<Item = &'b IRecordType>,
     ) -> Vec<IRecordType> {
-        let mut export_record_types = Vec::new();
-
         let export_type_names = export_funcs
             .iter()
             .flat_map(|(_, ref mut callable)| {
@@ -384,6 +384,8 @@ impl FCEModule {
                 _ => None,
             })
             .collect::<std::collections::HashSet<_>>();
+
+        let mut export_record_types = Vec::new();
 
         for record_type in record_types {
             if export_type_names.get(&record_type.name).is_some() {
