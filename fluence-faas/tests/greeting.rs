@@ -29,7 +29,7 @@ pub fn greeting() {
     greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
 
     let mut faas = FluenceFaaS::with_raw_config(greeting_config)
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let result1 = faas
         .call(
@@ -65,7 +65,7 @@ pub fn get_interfaces() {
     greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
 
     let faas = FluenceFaaS::with_raw_config(greeting_config)
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let interface = faas.get_interface();
 
@@ -82,34 +82,4 @@ pub fn get_interfaces() {
     modules.insert("greeting", functions);
 
     assert_eq!(interface, fluence_faas::FaaSInterface { modules });
-}
-
-#[test]
-pub fn call_parameters() {
-    let greeting_config_path = "../examples/greeting/Config_cp.toml";
-
-    let greeting_config_raw = std::fs::read(greeting_config_path)
-        .expect("../examples/greeting/Config_cp.toml should presence");
-
-    let mut greeting_config: fluence_faas::RawModulesConfig =
-        toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
-    greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
-
-    let mut faas = FluenceFaaS::with_raw_config(greeting_config)
-        .unwrap_or_else(|e| panic!("can't crate Fluence FaaS instance: {:?}", e));
-
-    let result = faas
-        .call(
-            "greeting_cp",
-            "greeting",
-            &[],
-            fluence_sdk_main::CallParameters {
-                call_id: "0x1337".to_string(),
-                user_name: "root".to_string(),
-                application_id: "0x31337".to_string(),
-            },
-        )
-        .unwrap_or_else(|e| panic!("can't invoke greeting_cp: {:?}", e));
-
-    assert_eq!(result, vec![IValue::String(String::from("Hi, root"))]);
 }
