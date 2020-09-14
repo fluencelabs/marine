@@ -12,7 +12,7 @@ cargo update
 fce build --release
 
 cd ..
-rm artifacts/modules/*
+rm -f artifacts/modules/*
 cp ../../../target/wasm32-wasi/release/curl.wasm artifacts/modules
 cp ../../../target/wasm32-wasi/release/local_storage.wasm artifacts/modules
 cp ../../../target/wasm32-wasi/release/site-storage.wasm artifacts/modules
