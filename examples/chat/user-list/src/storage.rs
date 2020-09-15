@@ -24,8 +24,9 @@ pub fn init() {
 }
 
 pub fn user_exists(user: &str) -> bool {
+    let req = format!("SELECT * FROM users WHERE user = '{}'", user);
     let result = unsafe {
-        invoke(format!("SELECT * FROM users WHERE user = '{}'", user))
+        invoke(req)
     };
     log::info!("deletion result:");
     log::info!("{}", result.as_str());

@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
+use fluence::fce;
+
 pub fn init() {
     unsafe {
         invoke("CREATE TABLE IF NOT EXISTS history(msg_id INTEGER PRIMARY KEY, msg TEXT NOT NULL, author TEXT NOT NULL);".to_string());
     }
 }
 
-pub fn add_msg(msg: String, author: String) {
+pub fn add_msg(msg: String, author: String) -> String {
     unsafe {
-        invoke(format!("INSERT INTO history (msg,author) VALUES ('{}','{}')", msg, author));
+        invoke(format!("INSERT INTO history (msg,author) VALUES ('{}','{}')", msg, author))
     }
 }
 
-pub fn get_msg(limit: i32) {
+pub fn get_msg(limit: u64) -> String {
     unsafe {
-        invoke(format!("DELETE FROM user WHERE user = '{}';", user));
+        invoke(format!("SELECT * FROM history ORDER BY msg_id DESC LIMIT '{}';", limit))
     }
 }
 
-pub fn get_all_msgs() {
+pub fn get_all_msgs() -> String {
     unsafe {
-        invoke(format!("DELETE FROM user WHERE user = '{}';", user));
+        invoke(format!("SELECT * FROM history;"))
     }
 }
 

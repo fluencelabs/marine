@@ -18,39 +18,26 @@ mod storage;
 
 use fluence::fce;
 use fluence::WasmLogger;
+use crate::storage::{add_msg, init, get_all_msgs, get_msg};
+
+const OWNER: &str = "OWNER";
 
 pub fn main() {
     WasmLogger::init_with_level(log::Level::Info).unwrap();
+    init();
 }
 
 #[fce]
 fn add(author: String, msg: String) -> String {
-
-
-    "Ok".to_string()
+    add_msg(msg, author)
 }
 
 #[fce]
 fn get_all() -> String {
-
-
-    "Ok".to_string()
+    get_all_msgs()
 }
 
 #[fce]
-fn get_last(last: i32) -> String {
-
-
-    "Ok".to_string()
-}
-
-/// Importing `local_storage` module
-#[fce]
-#[link(wasm_import_module = "local_storage")]
-extern "C" {
-    #[link_name = "get"]
-    pub fn file_get(file_name: String) -> Vec<u8>;
-
-    #[link_name = "put"]
-    pub fn file_put(name: String, file_content: Vec<u8>) -> String;
+fn get_last(last: u64) -> String {
+    get_msg(last)
 }
