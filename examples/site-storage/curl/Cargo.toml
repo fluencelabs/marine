@@ -9,5 +9,5 @@ path = "src/main.rs"
 name = "curl"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "record_support", features = ["logger"] }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
 log = "0.4.8"

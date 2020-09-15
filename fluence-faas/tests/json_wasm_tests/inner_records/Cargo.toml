@@ -9,5 +9,5 @@ name = "inner_records_pure"
 path = "src/pure.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "record_support" }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
 safe-transmute = "0.11.0"

@@ -89,7 +89,7 @@ pub fn get_interfaces() {
     assert_eq!(
         interface,
         fluence_faas::FaaSInterface {
-            record_types: vec![],
+            record_types: <_>::default(),
             modules
         }
     );
