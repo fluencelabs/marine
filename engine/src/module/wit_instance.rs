@@ -70,10 +70,6 @@ impl WITInstance {
         })
     }
 
-    pub(super) fn record_types(&self) -> impl Iterator<Item = &IRecordType> {
-        self.record_types.iter()
-    }
-
     fn extract_raw_exports(
         wasmer_instance: &WasmerInstance,
         wit: &FCEWITInterfaces<'_>,

@@ -5,7 +5,7 @@ authors = ["Fluence Labs"]
 edition = "2018"
 
 [[bin]]
-name = "pure"
+name = "inner_records_pure"
 path = "src/pure.rs"
 
 [dependencies]
