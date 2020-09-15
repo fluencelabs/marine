@@ -374,7 +374,7 @@ impl FCEModule {
         wit_instance: &Arc<WITInstance>,
     ) -> Result<Vec<IRecordType>> {
         fn handle_record_type(
-            record_name: &String,
+            record_name: &str,
             wit_instance: &Arc<WITInstance>,
             export_record_types: &mut Vec<IRecordType>,
         ) -> Result<()> {
