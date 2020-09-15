@@ -1,0 +1,14 @@
+modules_dir = "artifacts"
+
+[[module]]
+    name = "sqlite"
+    mem_pages_count = 100
+    logger_enabled = true
+
+[[module]]
+    name = "user-list"
+    mem_pages_count = 100
+    logger_enabled = true
+
+    [module.wasi]
+    envs = ["OWNER=1234"]

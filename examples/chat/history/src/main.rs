@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+mod storage;
+
 use fluence::fce;
 use fluence::WasmLogger;
 
@@ -21,24 +23,25 @@ pub fn main() {
     WasmLogger::init_with_level(log::Level::Info).unwrap();
 }
 
-/// Combining of modules: `curl` and `local_storage`.
-/// Calls `curl` and stores returned result into a file.
 #[fce]
-fn get_n_save(url: String, file_name: String) -> String {
-    let result = unsafe { curl(url) };
-    println!("execution result {:?}", result);
-    let result = unsafe { file_put(file_name, result.into_bytes()) };
-    println!("{}", result);
+fn add(author: String, msg: String) -> String {
+
 
     "Ok".to_string()
 }
 
-/// Importing `curl` module
 #[fce]
-#[link(wasm_import_module = "curl")]
-extern "C" {
-    #[link_name = "get"]
-    pub fn curl(url: String) -> String;
+fn get_all() -> String {
+
+
+    "Ok".to_string()
+}
+
+#[fce]
+fn get_last(last: i32) -> String {
+
+
+    "Ok".to_string()
 }
 
 /// Importing `local_storage` module

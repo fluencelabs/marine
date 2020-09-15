@@ -1,0 +1,14 @@
+[package]
+name = "user-list"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[[bin]]
+name = "user-list"
+path = "src/main.rs"
+
+[dependencies]
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+anyhow = "1.0.31"
+log = "0.4.8"

@@ -13,6 +13,8 @@ members = [
     "examples/site-storage/site-storage",
     "examples/site-storage/curl",
     "examples/site-storage/local_storage",
+    "examples/chat/user-list",
+    "examples/chat/history",
     "examples/call_parameters",
     "fluence-app-service",
     "fluence-faas",
