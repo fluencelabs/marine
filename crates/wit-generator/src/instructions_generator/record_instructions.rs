@@ -20,7 +20,6 @@ use crate::Result;
 
 use fluence_sdk_wit::AstRecordItem;
 
-use wasmer_wit::ast::Type;
 use wasmer_wit::types::RecordFieldType as IRecordFieldType;
 use wasmer_wit::types::RecordType;
 use wasmer_wit::vec1::Vec1;
@@ -32,7 +31,7 @@ impl WITGenerator for AstRecordItem {
             .iter()
             .map(|field| IRecordFieldType {
                 name: field.name.clone().unwrap_or_default(),
-                ty: super::utils::ptype_to_itype_unchecked(&field.ty),
+                ty: super::utils::ptype_to_itype_unchecked(&field.ty, wit_resolver),
             })
             .collect::<Vec<_>>();
 
@@ -43,15 +42,12 @@ impl WITGenerator for AstRecordItem {
             ))
         })?;
 
-        wit_resolver.interfaces.types.push(Type::Record(RecordType {
+        let new_record_type = RecordType {
             name: self.name.clone(),
             fields,
-        }));
+        };
 
-        wit_resolver.types.insert(
-            self.name.clone(),
-            (wit_resolver.interfaces.types.len() - 1) as _,
-        );
+        wit_resolver.insert_record_type(new_record_type);
 
         Ok(())
     }

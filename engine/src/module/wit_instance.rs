@@ -36,13 +36,7 @@ pub(super) struct WITInstance {
     /// WIT memories.
     memories: Vec<WITMemory>,
 
-    record_types: Vec<IRecordType>,
-
-    /// All record types from interfaces indexed by id.
-    record_types_by_id: HashMap<u32, usize>,
-
-    /// All record types from interfaces indexed by name.
-    record_types_by_name: HashMap<String, usize>,
+    record_types_by_id: HashMap<u64, IRecordType>,
 }
 
 impl WITInstance {
@@ -58,15 +52,12 @@ impl WITInstance {
         exports.extend(imports);
         let funcs = exports;
 
-        let (record_types, record_types_by_id, record_types_by_name) =
-            Self::extract_record_types(wit);
+        let record_types_by_id = Self::extract_record_types(wit);
 
         Ok(Self {
             funcs,
             memories,
-            record_types,
             record_types_by_id,
-            record_types_by_name,
         })
     }
 
@@ -135,29 +126,21 @@ impl WITInstance {
         memories
     }
 
-    fn extract_record_types(
-        wit: &FCEWITInterfaces<'_>,
-    ) -> (
-        Vec<IRecordType>,
-        HashMap<u32, usize>,
-        HashMap<String, usize>,
-    ) {
-        let record_types = wit.types().fold(
-            (Vec::new(), HashMap::new(), HashMap::new(), 0),
-            |(mut records, mut record_types_by_id, mut record_types_by_name, id), ty| {
+    fn extract_record_types(wit: &FCEWITInterfaces<'_>) -> HashMap<u64, IRecordType> {
+        let record_types_by_id = wit.types().fold(
+            (HashMap::new(), 0u64),
+            |(mut record_types_by_id, id), ty| {
                 match ty {
                     WITAstType::Record(record_type) => {
-                        records.push(record_type.clone());
-                        record_types_by_id.insert(id, records.len() - 1);
-                        record_types_by_name.insert(record_type.name.clone(), records.len() - 1);
+                        record_types_by_id.insert(id, record_type.clone());
                     }
                     WITAstType::Function { .. } => {}
                 };
-                (records, record_types_by_id, record_types_by_name, id + 1)
+                (record_types_by_id, id + 1)
             },
         );
 
-        (record_types.0, record_types.1, record_types.2)
+        record_types_by_id.0
     }
 }
 
@@ -181,13 +164,7 @@ impl wasm::structures::Instance<WITExport, WITFunction, WITMemory, WITMemoryView
         }
     }
 
-    fn wit_record_by_id(&self, index: u32) -> Option<&IRecordType> {
-        let record_id = self.record_types_by_id.get(&index)?;
-        Some(&self.record_types[*record_id])
-    }
-
-    fn wit_record_by_name(&self, name: &str) -> Option<&IRecordType> {
-        let record_id = self.record_types_by_name.get(name)?;
-        Some(&self.record_types[*record_id])
+    fn wit_record_by_id(&self, index: u64) -> Option<&IRecordType> {
+        self.record_types_by_id.get(&index)
     }
 }

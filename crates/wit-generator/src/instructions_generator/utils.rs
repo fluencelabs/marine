@@ -24,18 +24,18 @@ use fluence_sdk_wit::RustType;
 // return error if there is no record with such name
 pub(crate) fn ptype_to_itype_checked(
     pty: &ParsedType,
-    wit_resolver: &WITResolver,
+    wit_resolver: &mut WITResolver,
 ) -> Result<IType> {
     match pty {
         ParsedType::Record(record_name) => {
-            wit_resolver.get_record_type(record_name)?;
-            Ok(IType::Record(record_name.clone()))
+            let record_type_id = wit_resolver.get_record_type_id(record_name)?;
+            Ok(IType::Record(record_type_id as _))
         }
-        _ => Ok(ptype_to_itype_unchecked(pty)),
+        _ => Ok(ptype_to_itype_unchecked(pty, wit_resolver)),
     }
 }
 
-pub(crate) fn ptype_to_itype_unchecked(pty: &ParsedType) -> IType {
+pub(crate) fn ptype_to_itype_unchecked(pty: &ParsedType, wit_resolver: &mut WITResolver) -> IType {
     match pty {
         ParsedType::I8 => IType::S8,
         ParsedType::I16 => IType::S16,
@@ -50,7 +50,10 @@ pub(crate) fn ptype_to_itype_unchecked(pty: &ParsedType) -> IType {
         ParsedType::Boolean => IType::I32,
         ParsedType::Utf8String => IType::String,
         ParsedType::ByteVector => IType::ByteArray,
-        ParsedType::Record(record_name) => IType::Record(record_name.clone()),
+        ParsedType::Record(record_name) => {
+            let record_type_id = wit_resolver.get_record_type_id_unchecked(record_name);
+            IType::Record(record_type_id as _)
+        }
     }
 }
 

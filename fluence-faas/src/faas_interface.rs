@@ -26,7 +26,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FaaSInterface<'a> {
-    pub record_types: Vec<&'a IRecordType>,
+    pub record_types: HashMap<u64, &'a IRecordType>,
     pub modules: HashMap<&'a str, HashMap<&'a str, FaaSFunctionSignature<'a>>>,
 }
 
@@ -38,11 +38,23 @@ pub struct FaaSFunctionSignature<'a> {
 
 impl<'a> fmt::Display for FaaSInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for record_type in &self.record_types {
+        let type_text_view = |arg_ty: &IType| {
+            match arg_ty {
+                IType::Record(record_type_id) => {
+                    // unwrap is safe because FaasInterface here is well-formed
+                    // (it was checked on the module startup stage)
+                    let record = self.record_types.get(record_type_id).unwrap();
+                    record.name.clone()
+                }
+                t => format!("{:?}", t),
+            }
+        };
+
+        for (_, record_type) in self.record_types.iter() {
             writeln!(f, "{} {{", record_type.name)?;
 
             for field in record_type.fields.iter() {
-                writeln!(f, "  {}: {:?}", field.name, field.ty)?;
+                writeln!(f, "  {}: {:?}", field.name, type_text_view(&field.ty))?;
             }
             writeln!(f, "}}")?;
         }
@@ -58,9 +70,16 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
                 write!(f, "  pub fn {}(", name)?;
 
                 for arg in signature.arguments {
-                    write!(f, "{}: {:?}", arg.name, arg.ty)?;
+                    write!(f, "{}: {}", arg.name, type_text_view(&arg.ty))?;
                 }
-                write!(f, ") -> {:?}", signature.output_types)?;
+                if signature.output_types.is_empty() {
+                    write!(f, ")")?;
+                } else if signature.output_types.len() == 1 {
+                    write!(f, ") -> {}", type_text_view(&signature.output_types[0]))?;
+                } else {
+                    // At now, multi values aren't supported - only one output type is possible
+                    unimplemented!()
+                }
             }
 
             writeln!(f)?
@@ -85,6 +104,7 @@ impl<'a> Serialize for FaaSInterface<'a> {
         #[derive(Serialize)]
         pub struct RecordType<'a> {
             pub name: &'a str,
+            pub id: u64,
             pub fields: Vec<(&'a String, &'a IType)>,
         }
 
@@ -103,7 +123,7 @@ impl<'a> Serialize for FaaSInterface<'a> {
         let record_types: Vec<_> = self
             .record_types
             .iter()
-            .map(|IRecordType { name, fields }| {
+            .map(|(id, IRecordType { name, fields })| {
                 let fields = fields
                     .iter()
                     .map(|field| (&field.name, &field.ty))
@@ -111,6 +131,7 @@ impl<'a> Serialize for FaaSInterface<'a> {
 
                 RecordType {
                     name: name.as_str(),
+                    id: *id,
                     fields,
                 }
             })

@@ -142,7 +142,7 @@ impl REPL {
             }
             Some("interface") => {
                 let interface = self.app_service.get_interface();
-                println!("application service interface:\n{}", interface);
+                println!("Application service interface:\n\n{}", interface);
             }
             Some("h") | Some("help") | None => {
                 println!(

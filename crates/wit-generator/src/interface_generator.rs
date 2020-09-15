@@ -122,8 +122,8 @@ fn validate_records(wit_resolver: &WITResolver) -> Result<()> {
 
         for field in record_type.fields.iter() {
             match &field.ty {
-                wasmer_wit::types::InterfaceType::Record(name) => {
-                    let inner_record_type = wit_resolver.get_record_type(&name)?;
+                wasmer_wit::types::InterfaceType::Record(record_type_id) => {
+                    let inner_record_type = wit_resolver.get_record_type(*record_type_id)?;
                     validate_record_type(&inner_record_type, recursion_level + 1, wit_resolver)?;
                 }
                 _ => continue,
@@ -131,6 +131,13 @@ fn validate_records(wit_resolver: &WITResolver) -> Result<()> {
         }
 
         Ok(())
+    }
+
+    if wit_resolver.unresolved_types_count() != 0 {
+        return Err(WITGeneratorError::CorruptedRecord(format!(
+            "{} types unresolved",
+            wit_resolver.unresolved_types_count()
+        )));
     }
 
     for ty in wit_resolver.interfaces.types.iter() {

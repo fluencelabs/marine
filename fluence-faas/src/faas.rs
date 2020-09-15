@@ -199,7 +199,7 @@ impl FluenceFaaS {
             let record_types = self
                 .fce
                 .module_record_types(module_name)?
-                .map(|ty| (&ty.name, &ty.fields))
+                .map(|(type_id, record_type)| (type_id, record_type))
                 .collect::<HashMap<_, _>>();
 
             crate::misc::json_to_ivalues(json_args, &func_signature, &record_types)?
@@ -215,7 +215,12 @@ impl FluenceFaaS {
     pub fn get_interface(&self) -> FaaSInterface<'_> {
         use itertools::Itertools;
 
-        let record_types = self.fce.record_types().unique().collect::<Vec<_>>();
+        let record_types = self
+            .fce
+            .record_types()
+            .map(|(id, record_type)| (*id, record_type))
+            .unique()
+            .collect::<HashMap<_, _>>();
 
         let modules = self
             .fce

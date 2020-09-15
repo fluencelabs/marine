@@ -142,7 +142,7 @@ impl FCE {
     }
 
     /// Return record types of export functions of all loaded info FCE modules.
-    pub fn record_types(&self) -> impl Iterator<Item = &IRecordType> {
+    pub fn record_types(&self) -> impl Iterator<Item = &(u64, IRecordType)> {
         self.modules
             .iter()
             .flat_map(|(_, module)| module.get_export_record_types())
@@ -152,7 +152,7 @@ impl FCE {
     pub fn module_record_types<S: AsRef<str>>(
         &self,
         module_name: S,
-    ) -> Result<impl Iterator<Item = &IRecordType>> {
+    ) -> Result<impl Iterator<Item = &(u64, IRecordType)>> {
         match self.modules.get(module_name.as_ref()) {
             Some(module) => Ok(module.get_export_record_types()),
             None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),

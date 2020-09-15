@@ -210,11 +210,11 @@ impl ForeignModInstructionGenerator for ParsedType {
                 Instruction::ByteArrayLiftMemory,
             ], 2),
             ParsedType::Record(record_name) => {
-                let type_index = wit_resolver.get_record_type_id(record_name)?;
+                let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 
                 (vec![
                     Instruction::ArgumentGet { index },
-                    Instruction::RecordLiftMemory { type_index },
+                    Instruction::RecordLiftMemory { record_type_id },
                 ], 1)
             }
         };
@@ -255,10 +255,10 @@ impl ForeignModInstructionGenerator for ParsedType {
                 Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
             ],
             ParsedType::Record(record_name) => {
-                let type_index = wit_resolver.get_record_type_id(record_name)?;
+                let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 
                 vec![
-                    Instruction::RecordLowerMemory {type_index},
+                    Instruction::RecordLowerMemory { record_type_id },
                     Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
                 ]
             },

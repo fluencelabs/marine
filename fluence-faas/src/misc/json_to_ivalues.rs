@@ -21,14 +21,14 @@ use crate::FaaSError;
 
 use serde_json::Value as SerdeValue;
 use wasmer_wit::vec1::Vec1;
-use wasmer_wit::types::RecordFieldType;
+use wasmer_wit::types::RecordType;
 
 use std::collections::HashMap;
 
 pub(crate) fn json_to_ivalues(
     json_args: serde_json::Value,
     func_signature: &fce::FCEFunctionSignature<'_>,
-    record_types: &HashMap<&String, &Vec1<RecordFieldType>>,
+    record_types: &HashMap<&u64, &RecordType>,
 ) -> Result<Vec<IValue>> {
     let ivalues = match json_args {
         SerdeValue::Object(json_map) => json_map_to_ivalues(
@@ -56,7 +56,7 @@ pub(crate) fn json_to_ivalues(
 fn json_map_to_ivalues<'a, 'b>(
     mut json_map: serde_json::Map<String, SerdeValue>,
     signature: impl Iterator<Item = (&'a String, &'a IType)>,
-    record_types: &'b HashMap<&'b String, &'b Vec1<RecordFieldType>>,
+    record_types: &'b HashMap<&'b u64, &'b RecordType>,
 ) -> Result<Vec<IValue>> {
     let mut iargs = Vec::new();
 
@@ -82,7 +82,7 @@ fn json_map_to_ivalues<'a, 'b>(
 fn json_array_to_ivalues<'a, 'b>(
     mut json_array: Vec<SerdeValue>,
     signature: impl Iterator<Item = &'a IType> + std::iter::ExactSizeIterator,
-    record_types: &'b HashMap<&'b String, &'b Vec1<RecordFieldType>>,
+    record_types: &'b HashMap<&'b u64, &'b RecordType>,
 ) -> Result<Vec<IValue>> {
     if json_array.len() != signature.len() {
         return Err(FaaSError::JsonArgumentsDeserializationError(format!(
@@ -168,7 +168,7 @@ fn json_null_to_ivalue(func_signature: &fce::FCEFunctionSignature<'_>) -> Result
 fn json_value_to_ivalue(
     json_value: SerdeValue,
     ty: &IType,
-    record_types: &HashMap<&String, &Vec1<RecordFieldType>>,
+    record_types: &HashMap<&u64, &RecordType>,
 ) -> Result<IValue> {
     // TODO: get rid of copy-past
     match ty {
@@ -242,8 +242,8 @@ fn json_value_to_ivalue(
                 .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::I64(value))
         }
-        IType::Record(ty_name) => {
-            let value = json_record_type_to_ivalue(json_value, ty_name, &record_types)?;
+        IType::Record(record_type_id) => {
+            let value = json_record_type_to_ivalue(json_value, record_type_id, &record_types)?;
             Ok(IValue::Record(value))
         }
         IType::Anyref => Err(FaaSError::JsonArgumentsDeserializationError(String::from(
@@ -255,32 +255,35 @@ fn json_value_to_ivalue(
 #[allow(clippy::ptr_arg)]
 fn json_record_type_to_ivalue(
     json_value: SerdeValue,
-    itype_name: &String,
-    record_types: &HashMap<&String, &Vec1<RecordFieldType>>,
+    record_type_id: &u64,
+    record_types: &HashMap<&u64, &RecordType>,
 ) -> Result<Vec1<IValue>> {
-    let record_type = record_types.get(itype_name).ok_or_else(|| {
+    let record_type = record_types.get(record_type_id).ok_or_else(|| {
         FaaSError::JsonArgumentsDeserializationError(format!(
-            "record with type `{}` wasn't found",
-            itype_name
+            "record with type id `{}` wasn't found",
+            record_type_id
         ))
     })?;
 
     match json_value {
         SerdeValue::Object(json_map) => Ok(Vec1::new(json_map_to_ivalues(
             json_map,
-            record_type.iter().map(|field| (&field.name, &field.ty)),
+            record_type
+                .fields
+                .iter()
+                .map(|field| (&field.name, &field.ty)),
             record_types,
         )?)
         .unwrap()),
         SerdeValue::Array(json_array) => Ok(Vec1::new(json_array_to_ivalues(
             json_array,
-            record_type.iter().map(|field| (&field.ty)),
+            record_type.fields.iter().map(|field| (&field.ty)),
             record_types,
         )?)
         .unwrap()),
         _ => Err(FaaSError::JsonArgumentsDeserializationError(format!(
-            "record with type `{}` should be encoded as array or map of fields",
-            itype_name
+            "record with type id `{}` should be encoded as array or map of fields",
+            record_type_id
         ))),
     }
 }

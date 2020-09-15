@@ -13,7 +13,7 @@ path = "src/lib.rs"
 [dependencies]
 walrus = "0.17.0"
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0"}
-wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.4" }
+wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.5" }
 fce-wit-interfaces = { path = "../wit-interfaces", version = "0.1.1" }
 
 anyhow = "1.0.31"

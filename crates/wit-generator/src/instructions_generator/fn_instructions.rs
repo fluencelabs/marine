@@ -154,11 +154,11 @@ impl FnInstructionGenerator for ParsedType {
                 Instruction::ByteArrayLowerMemory,
             ],
             ParsedType::Record(record_name) => {
-                let type_index = wit_resolver.get_record_type_id(record_name)?;
+                let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 
                 vec! [
                     Instruction::ArgumentGet { index },
-                    Instruction::RecordLowerMemory { type_index },
+                    Instruction::RecordLowerMemory { record_type_id },
                 ]
             },
         };
@@ -197,11 +197,11 @@ impl FnInstructionGenerator for ParsedType {
                 Instruction::CallCore { function_index: DEALLOCATE_FUNC.id },
             ],
             ParsedType::Record(record_name) => {
-                let type_index = wit_resolver.get_record_type_id(record_name)?;
+                let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 
                 vec! [
                     Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
-                    Instruction::RecordLiftMemory { type_index },
+                    Instruction::RecordLiftMemory { record_type_id },
                 ]
             },
         };

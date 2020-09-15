@@ -83,7 +83,7 @@ pub(crate) struct FCEModule {
     export_funcs: HashMap<String, Arc<Callable>>,
 
     // TODO: save refs instead of copies
-    record_types: Vec<IRecordType>,
+    record_types: Vec<(u64, IRecordType)>,
 }
 
 impl FCEModule {
@@ -159,7 +159,7 @@ impl FCEModule {
         })
     }
 
-    pub(crate) fn get_export_record_types(&self) -> impl Iterator<Item = &IRecordType> {
+    pub(crate) fn get_export_record_types(&self) -> impl Iterator<Item = &(u64, IRecordType)> {
         self.record_types.iter()
     }
 
@@ -372,34 +372,34 @@ impl FCEModule {
     fn extract_export_record_types(
         export_funcs: &HashMap<String, Arc<Callable>>,
         wit_instance: &Arc<WITInstance>,
-    ) -> Result<Vec<IRecordType>> {
+    ) -> Result<Vec<(u64, IRecordType)>> {
         fn handle_record_type(
-            record_name: &str,
+            record_type_id: u64,
             wit_instance: &Arc<WITInstance>,
-            export_record_types: &mut Vec<IRecordType>,
+            export_record_types: &mut Vec<(u64, IRecordType)>,
         ) -> Result<()> {
             use wasmer_wit::interpreter::wasm::structures::Instance;
 
             let record_type = wit_instance
-                .wit_record_by_name(record_name)
+                .wit_record_by_id(record_type_id)
                 .ok_or_else(|| {
                     FCEError::WasmerResolveError(format!(
-                        "record type with name {} not found",
-                        record_name
+                        "record type with type id {} not found",
+                        record_type_id
                     ))
                 })?;
-            export_record_types.push(record_type.clone());
+            export_record_types.push((record_type_id, record_type.clone()));
 
             for field in record_type.fields.iter() {
-                if let IType::Record(name) = &field.ty {
-                    handle_record_type(name, wit_instance, export_record_types)?;
+                if let IType::Record(record_type_id) = &field.ty {
+                    handle_record_type(*record_type_id, wit_instance, export_record_types)?;
                 }
             }
 
             Ok(())
         }
 
-        let export_record_names = export_funcs
+        let export_record_ids = export_funcs
             .iter()
             .flat_map(|(_, ref mut callable)| {
                 callable
@@ -410,13 +410,13 @@ impl FCEModule {
                     .chain(callable.wit_module_func.output_types.iter())
             })
             .filter_map(|itype| match itype {
-                IType::Record(name) => Some(name),
+                IType::Record(record_type_id) => Some(record_type_id),
                 _ => None,
             });
 
         let mut export_record_types = Vec::new();
-        for record_name in export_record_names {
-            handle_record_type(record_name, wit_instance, &mut export_record_types)?;
+        for record_type_id in export_record_ids {
+            handle_record_type(*record_type_id, wit_instance, &mut export_record_types)?;
         }
 
         Ok(export_record_types)

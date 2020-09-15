@@ -23,15 +23,17 @@ use crate::Result;
 
 use wasmer_wit::types::InterfaceType as IType;
 use wasmer_wit::ast::Interfaces;
+use wasmer_wit::types::RecordType;
 
 #[derive(PartialEq, Debug, Default)]
 pub(crate) struct WITResolver<'a> {
-    pub(crate) types: std::collections::HashMap<String, u32>,
+    types: std::collections::HashMap<String, usize>,
     pub(crate) interfaces: Interfaces<'a>,
+    not_resolved_types_count: usize,
 }
 
 impl<'a> WITResolver<'a> {
-    pub(crate) fn get_record_type_id(&self, record_name: &str) -> Result<u32> {
+    pub(crate) fn get_record_type_id(&self, record_name: &str) -> Result<usize> {
         match self.types.get(record_name) {
             Some(type_index) => Ok(*type_index),
             None => Err(crate::errors::WITGeneratorError::CorruptedRecord(format!(
@@ -41,22 +43,63 @@ impl<'a> WITResolver<'a> {
         }
     }
 
+    // adds a stub for type with such a name if it wasn't found
+    pub(crate) fn get_record_type_id_unchecked(&mut self, record_name: &str) -> usize {
+        use wasmer_wit::ast::Type;
+
+        match self.types.get(record_name) {
+            Some(type_index) => *type_index,
+            None => {
+                self.types
+                    .insert(record_name.to_string(), self.interfaces.types.len());
+                self.interfaces
+                    .types
+                    .push(Type::Record(RecordType::default()));
+
+                self.not_resolved_types_count += 1;
+                self.interfaces.types.len()
+            }
+        }
+    }
+
     pub(crate) fn get_record_type(
         &self,
-        record_name: &str,
+        record_type_id: u64,
     ) -> Result<&wasmer_wit::types::RecordType> {
-        match self.types.get(record_name) {
-            Some(type_index) => match &self.interfaces.types[*type_index as usize] {
-                wasmer_wit::ast::Type::Function { .. } => {
-                    panic!("internal error inside WITResolver: interfaces AST type should be record not record")
-                }
-                wasmer_wit::ast::Type::Record(record_type) => Ok(record_type),
-            },
-            None => Err(crate::errors::WITGeneratorError::CorruptedRecord(format!(
-                "Can't find record with name='{}', don't you forget to wrap it with #[fce]",
-                record_name
-            ))),
+        if record_type_id >= self.interfaces.types.len() as u64 {
+            return Err(crate::errors::WITGeneratorError::CorruptedRecord(format!(
+                "Can't find record with id {}, don't you forget to wrap it with #[fce]",
+                record_type_id
+            )));
         }
+
+        match &self.interfaces.types[record_type_id as usize] {
+            wasmer_wit::ast::Type::Function { .. } => {
+                panic!("internal error inside WITResolver: interfaces AST type should be record not record")
+            }
+            wasmer_wit::ast::Type::Record(record_type) => Ok(record_type),
+        }
+    }
+
+    pub(crate) fn insert_record_type(&mut self, record: RecordType) {
+        use wasmer_wit::ast::Type;
+
+        match self.types.get(&record.name) {
+            Some(pos) => {
+                self.interfaces.types[*pos] = Type::Record(record);
+                self.not_resolved_types_count -= 1;
+            }
+            None => {
+                self.types
+                    .insert(record.name.clone(), self.interfaces.types.len());
+
+                self.interfaces.types.push(Type::Record(record));
+            }
+        }
+    }
+
+    pub(crate) fn unresolved_types_count(&self) -> usize {
+        self.not_resolved_types_count
     }
 }
 
