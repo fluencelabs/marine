@@ -1,0 +1,12 @@
+[package]
+name = "call_parameters"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[[bin]]
+name = "call_parameters"
+path = "src/main.rs"
+
+[dependencies]
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
