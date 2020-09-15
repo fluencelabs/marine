@@ -20,10 +20,20 @@ pub fn init() {
     unsafe {
         invoke("CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, user TEXT NOT NULL, name TEXT NOT NULL);".to_string());
     }
+    log::info!("tables created");
 }
 
 pub fn user_exists(user: &str) -> bool {
-    true
+    let result = unsafe {
+        invoke(format!("SELECT * FROM users WHERE user = '{}'", user))
+    };
+    log::info!("deletion result:");
+    log::info!("{}", result.as_str());
+    if result.is_empty() || result == "OK" {
+        return false;
+    }
+
+    return true;
 }
 
 pub fn store_name(user: String, name: String) {
@@ -32,15 +42,21 @@ pub fn store_name(user: String, name: String) {
     }
 }
 
-pub fn add_user(user: String, name: String) {
+pub fn get_all_users() -> String {
     unsafe {
-        invoke(format!("INSERT INTO users (user,name) VALUES ('{}','{}')", user, name));
+        invoke(format!("SELECT * FROM users"))
     }
 }
 
-pub fn delete_user(user: &str) {
+pub fn add_user(user: String, name: String) -> String {
     unsafe {
-        invoke(format!("DELETE FROM users WHERE user = '{}';", user));
+        invoke(format!("INSERT INTO users (user,name) VALUES ('{}','{}')", user, name))
+    }
+}
+
+pub fn delete_user(user: &str) -> String {
+    unsafe {
+        invoke(format!("DELETE FROM users WHERE user = '{}';", user))
     }
 }
 

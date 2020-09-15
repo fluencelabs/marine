@@ -18,9 +18,9 @@ mod storage;
 
 use fluence::fce;
 use fluence::WasmLogger;
-use crate::storage::{init, user_exists, delete_user, store_name, add_user};
+use crate::storage::{init, user_exists, delete_user, store_name, add_user, get_all_users};
 
-const OWNER: &str = "owner";
+const OWNER: &str = "OWNER";
 
 pub fn main() {
     WasmLogger::init_with_level(log::Level::Info).unwrap();
@@ -31,12 +31,15 @@ pub fn main() {
 fn add(user: String, name: String, signature: String) -> String {
     let owner = std::env::var(OWNER).unwrap_or_else(|_| "".to_string());
     if owner != signature {
-        return "Error".to_string();
+        return format!("Error. Signature does not match owner. sig: {}, owner: {}", signature, owner);
     }
 
-    add_user(user, name);
+    add_user(user, name)
+}
 
-    "Ok".to_string()
+#[fce]
+fn get_users() -> String {
+    get_all_users()
 }
 
 #[fce]
@@ -55,37 +58,20 @@ fn change_name(user: String, name: String, signature: String) -> String {
 }
 
 #[fce]
-fn delete(user: String, name: String) -> String {
+fn delete(user: String, signature: String) -> String {
+    let owner = std::env::var(OWNER).unwrap_or_else(|_| "".to_string());
+    if user != signature && owner != signature {
+        return "Error. You cannot delete this user.".to_string();
+    }
 
     if !user_exists(user.as_str()) {
         return "Error. No such user.".to_string();
     }
 
-    delete_user(user.as_str());
-
-    "Ok".to_string()
+    delete_user(user.as_str())
 }
 
 #[fce]
 fn is_exists(user: String) -> bool {
     true
-}
-
-/// Importing `curl` module
-#[fce]
-#[link(wasm_import_module = "curl")]
-extern "C" {
-    #[link_name = "get"]
-    pub fn curl(url: String) -> String;
-}
-
-/// Importing `local_storage` module
-#[fce]
-#[link(wasm_import_module = "local_storage")]
-extern "C" {
-    #[link_name = "get"]
-    pub fn file_get(file_name: String) -> Vec<u8>;
-
-    #[link_name = "put"]
-    pub fn file_put(name: String, file_content: Vec<u8>) -> String;
 }
