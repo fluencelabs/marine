@@ -18,9 +18,9 @@ use fce::FCE;
 use fce::IValue;
 
 const REDIS_DOWNLOAD_URL: &str =
-    "https://github.com/fluencelabs/redis/releases/download/0.9.0_w/redis.wasm";
+    "https://github.com/fluencelabs/redis/releases/download/v0.10.0_w/redis.wasm";
 const SQLITE_DOWNLOAD_URL: &str =
-    "https://github.com/fluencelabs/sqlite/releases/download/0.4.0_w/sqlite3.wasm";
+    "https://github.com/fluencelabs/sqlite/releases/download/v0.6.0_w/sqlite3.wasm";
 
 pub async fn download(url: &str) -> bytes::Bytes {
     reqwest::get(url)
@@ -32,7 +32,6 @@ pub async fn download(url: &str) -> bytes::Bytes {
 }
 
 #[tokio::test]
-#[ignore]
 async fn redis() {
     let wasm_bytes = download(REDIS_DOWNLOAD_URL).await;
 
@@ -92,7 +91,6 @@ async fn redis() {
 }
 
 #[tokio::test]
-#[ignore]
 async fn sqlite() {
     let wasm_bytes = download(SQLITE_DOWNLOAD_URL).await;
 
@@ -126,7 +124,7 @@ async fn sqlite() {
             module_name,
             "invoke",
             &[IValue::String(String::from(
-                "SELECT * FROM users WHERE users MATCH 'A* OR B*",
+                "SELECT * FROM users WHERE users MATCH 'A* OR B*'",
             ))],
         )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
