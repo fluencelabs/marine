@@ -15,7 +15,7 @@
  */
 
 use super::fce_module::FCEModule;
-use super::{IType, IValue, WValue};
+use super::{IType, IFunctionArg, IValue, WValue};
 use super::fce_module::Callable;
 use crate::Result;
 
@@ -28,7 +28,7 @@ use std::sync::Arc;
 enum WITFunctionInner {
     Export {
         func: Arc<DynFunc<'static>>,
-        inputs: Vec<IType>,
+        arguments: Vec<IFunctionArg>,
         outputs: Vec<IType>,
     },
     Import {
@@ -49,10 +49,14 @@ impl WITFunction {
         use super::type_converters::wtype_to_itype;
 
         let signature = dyn_func.signature();
-        let inputs = signature
+        let arguments = signature
             .params()
             .iter()
-            .map(wtype_to_itype)
+            .map(|wtype| IFunctionArg {
+                // here it's considered as an anonymous arguments
+                name: String::new(),
+                ty: wtype_to_itype(wtype),
+            })
             .collect::<Vec<_>>();
         let outputs = signature
             .returns()
@@ -62,7 +66,7 @@ impl WITFunction {
 
         let inner = WITFunctionInner::Export {
             func: Arc::new(dyn_func),
-            inputs,
+            arguments,
             outputs,
         };
 
@@ -82,29 +86,31 @@ impl WITFunction {
 impl wasm::structures::LocalImport for WITFunction {
     fn inputs_cardinality(&self) -> usize {
         match &self.inner {
-            WITFunctionInner::Export { ref inputs, .. } => inputs.len(),
-            WITFunctionInner::Import { ref callable, .. } => callable.wit_module_func.inputs.len(),
+            WITFunctionInner::Export { arguments, .. } => arguments.len(),
+            WITFunctionInner::Import { callable, .. } => callable.wit_module_func.arguments.len(),
         }
     }
 
     fn outputs_cardinality(&self) -> usize {
         match &self.inner {
             WITFunctionInner::Export { ref outputs, .. } => outputs.len(),
-            WITFunctionInner::Import { ref callable, .. } => callable.wit_module_func.outputs.len(),
+            WITFunctionInner::Import { ref callable, .. } => {
+                callable.wit_module_func.output_types.len()
+            }
         }
     }
 
-    fn inputs(&self) -> &[IType] {
+    fn arguments(&self) -> &[IFunctionArg] {
         match &self.inner {
-            WITFunctionInner::Export { ref inputs, .. } => inputs,
-            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.inputs,
+            WITFunctionInner::Export { ref arguments, .. } => arguments,
+            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.arguments,
         }
     }
 
     fn outputs(&self) -> &[IType] {
         match &self.inner {
             WITFunctionInner::Export { ref outputs, .. } => outputs,
-            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.outputs,
+            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.output_types,
         }
     }
 

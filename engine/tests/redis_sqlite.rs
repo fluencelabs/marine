@@ -32,6 +32,7 @@ pub async fn download(url: &str) -> bytes::Bytes {
 }
 
 #[tokio::test]
+#[ignore]
 async fn redis() {
     let wasm_bytes = download(REDIS_DOWNLOAD_URL).await;
 

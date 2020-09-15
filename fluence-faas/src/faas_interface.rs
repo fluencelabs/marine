@@ -15,6 +15,8 @@
  */
 
 use super::IType;
+use super::IRecordType;
+use super::IFunctionArg;
 
 use serde::Serialize;
 use serde::Serializer;
@@ -24,27 +26,63 @@ use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FaaSInterface<'a> {
+    pub record_types: HashMap<u64, &'a IRecordType>,
     pub modules: HashMap<&'a str, HashMap<&'a str, FaaSFunctionSignature<'a>>>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FaaSFunctionSignature<'a> {
-    pub input_types: &'a Vec<IType>,
+    pub arguments: &'a Vec<IFunctionArg>,
     pub output_types: &'a Vec<IType>,
 }
 
 impl<'a> fmt::Display for FaaSInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let type_text_view = |arg_ty: &IType| {
+            match arg_ty {
+                IType::Record(record_type_id) => {
+                    // unwrap is safe because FaasInterface here is well-formed
+                    // (it was checked on the module startup stage)
+                    let record = self.record_types.get(record_type_id).unwrap();
+                    record.name.clone()
+                }
+                t => format!("{:?}", t),
+            }
+        };
+
+        for (_, record_type) in self.record_types.iter() {
+            writeln!(f, "{} {{", record_type.name)?;
+
+            for field in record_type.fields.iter() {
+                writeln!(f, "  {}: {:?}", field.name, type_text_view(&field.ty))?;
+            }
+            writeln!(f, "}}")?;
+        }
+
+        if !self.record_types.is_empty() {
+            writeln!(f)?;
+        }
+
         for (name, functions) in self.modules.iter() {
-            writeln!(f, "{}", *name)?;
+            writeln!(f, "{}:", *name)?;
 
             for (name, signature) in functions.iter() {
-                writeln!(
-                    f,
-                    "  pub fn {}({:?}) -> {:?}",
-                    name, signature.input_types, signature.output_types
-                )?;
+                write!(f, "  pub fn {}(", name)?;
+
+                for arg in signature.arguments {
+                    write!(f, "{}: {}", arg.name, type_text_view(&arg.ty))?;
+                }
+                if signature.output_types.is_empty() {
+                    write!(f, ")")?;
+                } else if signature.output_types.len() == 1 {
+                    write!(f, ") -> {}", type_text_view(&signature.output_types[0]))?;
+                } else {
+                    // At now, multi values aren't supported - only one output type is possible
+                    unimplemented!()
+                }
             }
+
+            writeln!(f)?
         }
 
         Ok(())
@@ -59,8 +97,15 @@ impl<'a> Serialize for FaaSInterface<'a> {
         #[derive(Serialize)]
         pub struct Function<'a> {
             pub name: &'a str,
-            pub input_types: &'a Vec<IType>,
+            pub arguments: Vec<(&'a String, &'a IType)>,
             pub output_types: &'a Vec<IType>,
+        }
+
+        #[derive(Serialize)]
+        pub struct RecordType<'a> {
+            pub name: &'a str,
+            pub id: u64,
+            pub fields: Vec<(&'a String, &'a IType)>,
         }
 
         #[derive(Serialize)]
@@ -71,8 +116,26 @@ impl<'a> Serialize for FaaSInterface<'a> {
 
         #[derive(Serialize)]
         pub struct Interface<'a> {
+            pub record_types: Vec<RecordType<'a>>,
             pub modules: Vec<Module<'a>>,
         }
+
+        let record_types: Vec<_> = self
+            .record_types
+            .iter()
+            .map(|(id, IRecordType { name, fields })| {
+                let fields = fields
+                    .iter()
+                    .map(|field| (&field.name, &field.ty))
+                    .collect::<Vec<_>>();
+
+                RecordType {
+                    name: name.as_str(),
+                    id: *id,
+                    fields,
+                }
+            })
+            .collect();
 
         let modules: Vec<_> = self
             .modules
@@ -84,13 +147,15 @@ impl<'a> Serialize for FaaSInterface<'a> {
                         |(
                             name,
                             FaaSFunctionSignature {
-                                input_types,
+                                arguments,
                                 output_types,
                             },
                         )| {
+                            let arguments =
+                                arguments.iter().map(|arg| (&arg.name, &arg.ty)).collect();
                             Function {
                                 name,
-                                input_types,
+                                arguments,
                                 output_types,
                             }
                         },
@@ -100,6 +165,10 @@ impl<'a> Serialize for FaaSInterface<'a> {
             })
             .collect();
 
-        Interface { modules }.serialize(serializer)
+        Interface {
+            record_types,
+            modules,
+        }
+        .serialize(serializer)
     }
 }

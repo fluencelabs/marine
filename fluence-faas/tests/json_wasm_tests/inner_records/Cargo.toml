@@ -1,0 +1,13 @@
+[package]
+name = "inner-records-test"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[[bin]]
+name = "inner_records_pure"
+path = "src/pure.rs"
+
+[dependencies]
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
+safe-transmute = "0.11.0"

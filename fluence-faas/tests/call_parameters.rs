@@ -38,7 +38,7 @@ pub fn call_parameters() {
     let application_id = "0x31337";
 
     let result = faas
-        .call(
+        .call_with_ivalues(
             "call_parameters",
             "call_parameters",
             &[],

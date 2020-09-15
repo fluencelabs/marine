@@ -16,39 +16,48 @@
 
 use super::WITGenerator;
 use super::WITResolver;
-use super::utils::ptype_to_itype;
+use super::utils::ptype_to_itype_checked;
 use crate::default_export_api_config::*;
 use crate::Result;
 
 use fluence_sdk_wit::AstFunctionItem;
 use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
+use wasmer_wit::ast::FunctionArg as IFunctionArg;
 
 impl WITGenerator for AstFunctionItem {
     fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
         use wasmer_wit::ast::Type;
         use wasmer_wit::ast::Adapter;
 
-        let inputs = self
+        let arguments = self
             .signature
-            .input_types
+            .arguments
             .iter()
-            .map(|input_type| ptype_to_itype(input_type, wit_resolver))
+            .map(|(arg_name, arg_type)| -> Result<IFunctionArg> {
+                Ok(IFunctionArg {
+                    name: arg_name.clone(),
+                    ty: ptype_to_itype_checked(arg_type, wit_resolver)?,
+                })
+            })
             .collect::<Result<Vec<_>>>()?;
 
-        let outputs = match self.signature.output_type {
-            Some(ref output_type) => vec![ptype_to_itype(output_type, wit_resolver)?],
+        let output_types = match self.signature.output_type {
+            Some(ref output_type) => vec![ptype_to_itype_checked(output_type, wit_resolver)?],
             None => vec![],
         };
 
         let interfaces = &mut wit_resolver.interfaces;
         interfaces.types.push(Type::Function {
-            inputs: inputs.clone(),
-            outputs: outputs.clone(),
+            arguments: arguments.clone(),
+            output_types: output_types.clone(),
         });
 
         // TODO: replace with Wasm types
-        interfaces.types.push(Type::Function { inputs, outputs });
+        interfaces.types.push(Type::Function {
+            arguments,
+            output_types,
+        });
 
         let adapter_idx = (interfaces.types.len() - 2) as u32;
         let export_idx = (interfaces.types.len() - 1) as u32;
@@ -60,16 +69,19 @@ impl WITGenerator for AstFunctionItem {
 
         let mut instructions = self
             .signature
-            .input_types
+            .arguments
             .iter()
             .enumerate()
-            .try_fold::<_, _, Result<_>>(Vec::new(), |mut instructions, (arg_id, input_type)| {
-                let mut new_instructions =
-                    input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
+            .try_fold::<_, _, Result<_>>(
+                Vec::new(),
+                |mut instructions, (arg_id, (_, input_type))| {
+                    let mut new_instructions = input_type
+                        .generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
 
-                instructions.append(&mut new_instructions);
-                Ok(instructions)
-            })?;
+                    instructions.append(&mut new_instructions);
+                    Ok(instructions)
+                },
+            )?;
 
         let export_function_index = (wit_resolver.interfaces.exports.len() - 1) as u32;
         instructions.push(Instruction::CallCore {
@@ -119,8 +131,8 @@ impl FnInstructionGenerator for ParsedType {
             ParsedType::Boolean => vec![Instruction::ArgumentGet { index }],
             ParsedType::I8 => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS8],
             ParsedType::I16 => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS16],
-            ParsedType::I32 => vec![Instruction::ArgumentGet { index }],
-            ParsedType::I64 => vec![Instruction::ArgumentGet { index }],
+            ParsedType::I32 => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS32],
+            ParsedType::I64 => vec![Instruction::ArgumentGet { index }, Instruction::I64FromS64],
             ParsedType::U8 => vec![Instruction::ArgumentGet { index }, Instruction::I32FromU8],
             ParsedType::U16 => vec![Instruction::ArgumentGet { index }, Instruction::I32FromU16],
             ParsedType::U32 => vec![Instruction::ArgumentGet { index }, Instruction::I32FromU32],
@@ -142,11 +154,11 @@ impl FnInstructionGenerator for ParsedType {
                 Instruction::ByteArrayLowerMemory,
             ],
             ParsedType::Record(record_name) => {
-                let type_index = wit_resolver.get_record_type_id(record_name)?;
+                let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 
                 vec! [
                     Instruction::ArgumentGet { index },
-                    Instruction::RecordLowerMemory { type_index },
+                    Instruction::RecordLowerMemory { record_type_id },
                 ]
             },
         };
@@ -160,8 +172,8 @@ impl FnInstructionGenerator for ParsedType {
             ParsedType::Boolean => vec![],
             ParsedType::I8 => vec![Instruction::S8FromI32],
             ParsedType::I16 => vec![Instruction::S16FromI32],
-            ParsedType::I32 => vec![],
-            ParsedType::I64 => vec![],
+            ParsedType::I32 => vec![Instruction::S32FromI32],
+            ParsedType::I64 => vec![Instruction::S64FromI64],
             ParsedType::U8 => vec![Instruction::U8FromI32],
             ParsedType::U16 => vec![Instruction::U16FromI32],
             ParsedType::U32 => vec![Instruction::U32FromI32],
@@ -185,11 +197,11 @@ impl FnInstructionGenerator for ParsedType {
                 Instruction::CallCore { function_index: DEALLOCATE_FUNC.id },
             ],
             ParsedType::Record(record_name) => {
-                let type_index = wit_resolver.get_record_type_id(record_name)?;
+                let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 
                 vec! [
                     Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
-                    Instruction::RecordLiftMemory { type_index },
+                    Instruction::RecordLiftMemory { record_type_id },
                 ]
             },
         };

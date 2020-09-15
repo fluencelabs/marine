@@ -16,6 +16,7 @@
 
 use super::IValue;
 use super::IType;
+use super::IFunctionArg;
 use wasmer_wit::interpreter::wasm;
 
 // In current implementation export simply does nothing, because there is no more
@@ -23,7 +24,7 @@ use wasmer_wit::interpreter::wasm;
 // but explicit Exports is still required by wasmer-interface-types::Interpreter.
 #[derive(Clone)]
 pub(crate) struct WITExport {
-    inputs: Vec<IType>,
+    arguments: Vec<IFunctionArg>,
     outputs: Vec<IType>,
     function: fn(arguments: &[IValue]) -> Result<Vec<IValue>, ()>,
 }
@@ -32,7 +33,7 @@ impl WITExport {
     #[allow(unused)]
     pub(crate) fn new() -> Self {
         Self {
-            inputs: vec![],
+            arguments: vec![],
             outputs: vec![],
             function: |_| -> _ { Ok(vec![]) },
         }
@@ -41,15 +42,15 @@ impl WITExport {
 
 impl wasm::structures::Export for WITExport {
     fn inputs_cardinality(&self) -> usize {
-        self.inputs.len() as usize
+        self.arguments.len()
     }
 
     fn outputs_cardinality(&self) -> usize {
         self.outputs.len()
     }
 
-    fn inputs(&self) -> &[IType] {
-        &self.inputs
+    fn arguments(&self) -> &[IFunctionArg] {
+        &self.arguments
     }
 
     fn outputs(&self) -> &[IType] {
