@@ -32,9 +32,9 @@ mod extractor;
 
 pub use errors::WITParserError;
 
-pub use embedder::embed_wit;
-pub use embedder::embed_text_wit;
 pub use deleter::delete_wit_section;
 pub use deleter::delete_wit_section_from_file;
+pub use embedder::embed_wit;
+pub use embedder::embed_text_wit;
 pub use extractor::extract_wit;
 pub use extractor::extract_text_wit;

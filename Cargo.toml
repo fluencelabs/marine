@@ -18,6 +18,8 @@ members = [
     "examples/call_parameters",
     "fluence-app-service",
     "fluence-faas",
+    "fluence-faas/tests/json_wasm_tests/arguments_passing",
+    "fluence-faas/tests/json_wasm_tests/inner_records",
     "tools/cli",
     "tools/repl",
 ]

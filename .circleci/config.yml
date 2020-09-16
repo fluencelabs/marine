@@ -10,7 +10,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - fce01-{{ checksum "Cargo.lock" }}
+            - fce02-{{ checksum "Cargo.lock" }}
       - run: |
           rustup toolchain install nightly
           rustup component add rustfmt
@@ -25,7 +25,7 @@ jobs:
           paths:
             - ~/.cargo
             - ~/.rustup
-          key: fce01-{{ checksum "Cargo.lock" }}
+          key: fce02-{{ checksum "Cargo.lock" }}
 
   examples:
     docker:

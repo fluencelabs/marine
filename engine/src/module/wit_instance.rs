@@ -16,6 +16,7 @@
 
 use super::wit_prelude::*;
 use super::fce_module::FCEModule;
+use super::IRecordType;
 use crate::Result;
 
 use fce_wit_interfaces::FCEWITInterfaces;
@@ -29,9 +30,13 @@ use std::collections::HashMap;
 /// Contains all import and export functions that could be called from WIT context by call-core.
 #[derive(Clone)]
 pub(super) struct WITInstance {
+    /// WIT functions indexed by id.
     funcs: HashMap<usize, WITFunction>,
+
+    /// WIT memories.
     memories: Vec<WITMemory>,
-    record_types: HashMap<u32, WITAstType>,
+
+    record_types_by_id: HashMap<u64, IRecordType>,
 }
 
 impl WITInstance {
@@ -47,12 +52,12 @@ impl WITInstance {
         exports.extend(imports);
         let funcs = exports;
 
-        let record_types = Self::extract_record_types(wit);
+        let record_types_by_id = Self::extract_record_types(wit);
 
         Ok(Self {
             funcs,
             memories,
-            record_types,
+            record_types_by_id,
         })
     }
 
@@ -121,14 +126,21 @@ impl WITInstance {
         memories
     }
 
-    fn extract_record_types(wit: &FCEWITInterfaces<'_>) -> HashMap<u32, WITAstType> {
-        wit.types()
-            .enumerate()
-            .filter_map(|(id, ty)| match ty {
-                WITAstType::Record(_) => Some((id as u32, ty.clone())),
-                _ => None,
-            })
-            .collect::<HashMap<_, _>>()
+    fn extract_record_types(wit: &FCEWITInterfaces<'_>) -> HashMap<u64, IRecordType> {
+        let record_types_by_id = wit.types().fold(
+            (HashMap::new(), 0u64),
+            |(mut record_types_by_id, id), ty| {
+                match ty {
+                    WITAstType::Record(record_type) => {
+                        record_types_by_id.insert(id, record_type.clone());
+                    }
+                    WITAstType::Function { .. } => {}
+                };
+                (record_types_by_id, id + 1)
+            },
+        );
+
+        record_types_by_id.0
     }
 }
 
@@ -140,10 +152,7 @@ impl wasm::structures::Instance<WITExport, WITFunction, WITMemory, WITMemoryView
         None
     }
 
-    fn local_or_import<I: TypedIndex + LocalImportIndex>(
-        &mut self,
-        index: I,
-    ) -> Option<&WITFunction> {
+    fn local_or_import<I: TypedIndex + LocalImportIndex>(&self, index: I) -> Option<&WITFunction> {
         self.funcs.get(&index.index())
     }
 
@@ -155,7 +164,7 @@ impl wasm::structures::Instance<WITExport, WITFunction, WITMemory, WITMemoryView
         }
     }
 
-    fn wit_type(&self, index: u32) -> Option<&WITAstType> {
-        self.record_types.get(&index)
+    fn wit_record_by_id(&self, index: u64) -> Option<&IRecordType> {
+        self.record_types_by_id.get(&index)
     }
 }

@@ -15,6 +15,7 @@
  */
 
 use crate::misc::ModulesConfig;
+use crate::misc::ModulesLoadStrategy;
 use crate::faas_interface::FaaSFunctionSignature;
 use crate::faas_interface::FaaSInterface;
 use crate::FaaSError;
@@ -31,69 +32,9 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::fs;
 use std::path::PathBuf;
-use std::path::Path;
 
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
-
-/// Strategies for module loading.
-pub enum ModulesLoadStrategy<'a> {
-    /// Try to load all files in a given directory
-    #[allow(dead_code)]
-    All,
-    /// Try to load only files contained in the set
-    Named(&'a HashSet<String>),
-    /// In a given directory, try to load all files ending with .wasm
-    WasmOnly,
-}
-
-impl<'a> ModulesLoadStrategy<'a> {
-    #[inline]
-    /// Returns true if `module` should be loaded.
-    pub fn should_load(&self, module: &Path) -> bool {
-        match self {
-            ModulesLoadStrategy::All => true,
-            ModulesLoadStrategy::Named(set) => set.contains(module.to_string_lossy().as_ref()),
-            ModulesLoadStrategy::WasmOnly => module.extension().map_or(false, |e| e == "wasm"),
-        }
-    }
-
-    #[inline]
-    /// Returns the number of modules that must be loaded.
-    pub fn required_modules_len(&self) -> usize {
-        match self {
-            ModulesLoadStrategy::Named(set) => set.len(),
-            _ => 0,
-        }
-    }
-
-    #[inline]
-    /// Returns difference between required and loaded modules.
-    pub fn missing_modules<'s>(&self, loaded: impl Iterator<Item = &'s String>) -> Vec<&'s String> {
-        match self {
-            ModulesLoadStrategy::Named(set) => loaded.fold(vec![], |mut vec, module| {
-                if !set.contains(module) {
-                    vec.push(module)
-                }
-                vec
-            }),
-            _ => <_>::default(),
-        }
-    }
-
-    #[inline]
-    pub fn extract_module_name(&self, module: String) -> String {
-        match self {
-            ModulesLoadStrategy::WasmOnly => {
-                let path: &Path = module.as_ref();
-                path.file_stem()
-                    .map(|s| s.to_string_lossy().to_string())
-                    .unwrap_or(module)
-            }
-            _ => module,
-        }
-    }
-}
 
 pub struct FluenceFaaS {
     /// The Fluence Compute Engine instance.
@@ -223,7 +164,7 @@ impl FluenceFaaS {
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub fn call<MN: AsRef<str>, FN: AsRef<str>>(
+    pub fn call_with_ivalues<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
         module_name: MN,
         func_name: FN,
@@ -237,8 +178,50 @@ impl FluenceFaaS {
             .map_err(Into::into)
     }
 
+    /// Call a specified function of loaded on a startup module by its name.
+    pub fn call_with_json<MN: AsRef<str>, FN: AsRef<str>>(
+        &mut self,
+        module_name: MN,
+        func_name: FN,
+        json_args: serde_json::Value,
+        call_parameters: fluence_sdk_main::CallParameters,
+    ) -> Result<Vec<IValue>> {
+        let module_name = module_name.as_ref();
+        let func_name = func_name.as_ref();
+
+        let iargs = {
+            let mut func_signatures = self.fce.module_interface(module_name)?;
+            let func_signature = func_signatures
+                .find(|sign| sign.name == func_name)
+                .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
+
+            // TODO: cache record types
+            let record_types = self
+                .fce
+                .module_record_types(module_name)?
+                .map(|(type_id, record_type)| (type_id, record_type))
+                .collect::<HashMap<_, _>>();
+
+            crate::misc::json_to_ivalues(json_args, &func_signature, &record_types)?
+        };
+
+        self.call_parameters.replace(call_parameters);
+        self.fce
+            .call(module_name, func_name, &iargs)
+            .map_err(Into::into)
+    }
+
     /// Return all export functions (name and signatures) of loaded modules.
     pub fn get_interface(&self) -> FaaSInterface<'_> {
+        use itertools::Itertools;
+
+        let record_types = self
+            .fce
+            .record_types()
+            .map(|(id, record_type)| (*id, record_type))
+            .unique()
+            .collect::<HashMap<_, _>>();
+
         let modules = self
             .fce
             .interface()
@@ -249,7 +232,7 @@ impl FluenceFaaS {
                         (
                             f.name,
                             FaaSFunctionSignature {
-                                input_types: f.input_types,
+                                arguments: f.arguments,
                                 output_types: f.output_types,
                             },
                         )
@@ -259,7 +242,10 @@ impl FluenceFaaS {
             })
             .collect();
 
-        FaaSInterface { modules }
+        FaaSInterface {
+            record_types,
+            modules,
+        }
     }
 }
 

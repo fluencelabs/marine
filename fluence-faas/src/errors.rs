@@ -16,6 +16,8 @@
 
 use fce::FCEError;
 
+use serde_json::error::Error as SerdeError;
+
 use std::io::Error as IOError;
 use std::error::Error;
 
@@ -30,6 +32,18 @@ pub enum FaaSError {
     /// Various errors related to file i/o.
     IOError(String),
 
+    /// A function with specified name is missing.
+    MissingFunctionError(String),
+
+    /// An argument with specified name is missing.
+    MissingArgumentError(String),
+
+    /// Not enough arguments provided for FCE call.
+    JsonArgumentsDeserializationError(String),
+
+    /// An error occurred when incorrect json argument is supplied.
+    ArgumentDeserializationError(SerdeError),
+
     /// FCE errors.
     EngineError(FCEError),
 }
@@ -41,6 +55,14 @@ impl std::fmt::Display for FaaSError {
         match self {
             FaaSError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
             FaaSError::InstantiationError(err_msg) => write!(f, "{}", err_msg),
+            FaaSError::MissingFunctionError(func_name) => {
+                write!(f, "function with name `{}` is missing", func_name)
+            }
+            FaaSError::MissingArgumentError(arg_name) => {
+                write!(f, "argument with name `{}` is missing", arg_name)
+            }
+            FaaSError::JsonArgumentsDeserializationError(args) => write!(f, "{}", args),
+            FaaSError::ArgumentDeserializationError(err_msg) => write!(f, "{:?}", err_msg),
             FaaSError::IOError(err_msg) => write!(f, "{}", err_msg),
             FaaSError::EngineError(err) => write!(f, "{}", err),
         }

@@ -1,0 +1,17 @@
+[package]
+name = "arguments-passing-test"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[[bin]]
+name = "pure"
+path = "src/pure.rs"
+
+[[bin]]
+name = "effector"
+path = "src/effector.rs"
+
+[dependencies]
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
+safe-transmute = "0.11.0"
