@@ -2,10 +2,12 @@ import Fluence from 'fluence';
 import {seedToPeerId} from "fluence/dist/seed";
 import {FluenceClient} from "fluence/dist/fluenceClient";
 import {Address} from "fluence/dist/address";
+import {WASM} from "../hist";
 
-const MULTIADDR = "";
 const CHAT_BLUEPRINT = "";
 const PEER_ID = "";
+let nodePeerId = "12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt"
+let MULTIADDR = '/ip4/127.0.0.1/tcp/9001/ws/p2p/' + nodePeerId
 
 let client: FluenceClient;
 
@@ -82,7 +84,28 @@ async function start() {
     console.log("hello world");
     let pid = await Fluence.generatePeerId();
     console.log(pid.toB58String())
+
 }
 
-start();
+// start();
+publishBlueprint();
+
+async function publishBlueprint() {
+    let pid = await Fluence.generatePeerId();
+    console.log("1111")
+    let cl = await Fluence.connect(MULTIADDR, pid);
+    console.log("2222")
+    let bps = await cl.getAvailableBlueprints()
+    console.log("333")
+    console.log(bps)
+    let services = await cl.getActiveInterfaces()
+    console.log("333")
+    console.log(services)
+    let modules = await cl.getAvailableModules()
+    console.log("4444")
+    console.log(modules)
+    // await cl.addBlueprint("chat", ["history", "user-list", "sqlite"])
+    let serv = await cl.createService("c51d5527-894e-43c5-aae7-76d4b5ad2a33");
+    console.log(serv)
+}
 
