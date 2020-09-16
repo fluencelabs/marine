@@ -23,6 +23,7 @@ use serde::Serializer;
 
 use std::fmt;
 use std::collections::HashMap;
+use itertools::Itertools;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FaaSInterface<'a> {
@@ -69,13 +70,21 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
             for (name, signature) in functions.iter() {
                 write!(f, "  pub fn {}(", name)?;
 
-                for arg in signature.arguments {
-                    write!(f, "{}: {}", arg.name, type_text_view(&arg.ty))?;
-                }
+                let args = signature
+                    .arguments
+                    .iter()
+                    .map(|arg| format!("{}: {}", arg.name, type_text_view(&arg.ty)))
+                    .join(", ");
+
                 if signature.output_types.is_empty() {
-                    writeln!(f, ")")?;
+                    writeln!(f, "{})", args)?;
                 } else if signature.output_types.len() == 1 {
-                    writeln!(f, ") -> {}", type_text_view(&signature.output_types[0]))?;
+                    writeln!(
+                        f,
+                        "{}) -> {}",
+                        args,
+                        type_text_view(&signature.output_types[0])
+                    )?;
                 } else {
                     // At now, multi values aren't supported - only one output type is possible
                     unimplemented!()
