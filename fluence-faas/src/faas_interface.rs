@@ -54,7 +54,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
             writeln!(f, "{} {{", record_type.name)?;
 
             for field in record_type.fields.iter() {
-                writeln!(f, "  {}: {:?}", field.name, type_text_view(&field.ty))?;
+                writeln!(f, "  {}: {}", field.name, type_text_view(&field.ty))?;
             }
             writeln!(f, "}}")?;
         }
@@ -64,7 +64,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
         }
 
         for (name, functions) in self.modules.iter() {
-            writeln!(f, "{}:", *name)?;
+            writeln!(f, "\n{}:", *name)?;
 
             for (name, signature) in functions.iter() {
                 write!(f, "  pub fn {}(", name)?;
@@ -73,16 +73,14 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
                     write!(f, "{}: {}", arg.name, type_text_view(&arg.ty))?;
                 }
                 if signature.output_types.is_empty() {
-                    write!(f, ")")?;
+                    writeln!(f, ")")?;
                 } else if signature.output_types.len() == 1 {
-                    write!(f, ") -> {}", type_text_view(&signature.output_types[0]))?;
+                    writeln!(f, ") -> {}", type_text_view(&signature.output_types[0]))?;
                 } else {
                     // At now, multi values aren't supported - only one output type is possible
                     unimplemented!()
                 }
             }
-
-            writeln!(f)?
         }
 
         Ok(())

@@ -9,6 +9,6 @@ name = "site-storage"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "record_support", features = ["logger"] }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
 anyhow = "1.0.31"
 log = "0.4.8"
