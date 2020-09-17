@@ -18,7 +18,7 @@ use fluence::fce;
 
 pub fn init() {
     unsafe {
-        invoke("CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, user TEXT NOT NULL, name TEXT NOT NULL);".to_string());
+        invoke("CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, user TEXT NOT NULL, relay TEXT NOT NULL, sig TEXT NOT NULL, name TEXT NOT NULL);".to_string());
     }
     log::info!("tables created");
 }
@@ -37,9 +37,15 @@ pub fn user_exists(user: &str) -> bool {
     return true;
 }
 
-pub fn store_name(user: String, name: String) {
+pub fn update_name(user: String, name: String) -> String {
     unsafe {
-        invoke(format!("UPDATE users SET name = '{}' WHERE user = '{}'", name, user));
+        invoke(format!("UPDATE users SET name = '{}' WHERE user = '{}'", name, user))
+    }
+}
+
+pub fn update_relay(user: String, relay: String, sig: String) -> String {
+    unsafe {
+        invoke(format!("UPDATE users SET relay = '{}', sig = '{}' WHERE user = '{}'", relay, sig, user))
     }
 }
 
@@ -49,9 +55,9 @@ pub fn get_all_users() -> String {
     }
 }
 
-pub fn add_user(user: String, name: String) -> String {
+pub fn add_user(user: String, relay: String, sig: String, name: String) -> String {
     unsafe {
-        invoke(format!("INSERT INTO users (user,name) VALUES ('{}','{}')", user, name))
+        invoke(format!("INSERT INTO users (user,relay,sig,name) VALUES ('{}','{}','{}','{}')", user, relay, sig, name))
     }
 }
 

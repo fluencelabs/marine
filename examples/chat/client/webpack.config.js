@@ -41,7 +41,7 @@ if (production) {
     config.devtool = 'inline-source-map';
     config.devServer = {
         contentBase: './bundle',
-        hot: true
+        hot: false
     };
     config.plugins = [
         ...config.plugins,
