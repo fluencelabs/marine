@@ -1,0 +1,11 @@
+modules_dir = "artifacts/"
+
+[[module]]
+    name = "sqlite3"
+    mem_pages_count = 100
+    logger_enabled = false
+
+[[module]]
+name = "sqlite_test"
+    mem_pages_count = 1
+    logger_enabled = false

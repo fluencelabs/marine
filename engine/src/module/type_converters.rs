@@ -44,7 +44,7 @@ pub(super) fn itype_to_wtype(ty: &IType) -> WType {
         ty => {
             eprintln!("trying to convert {:?}", ty);
             unimplemented!()
-        },
+        }
     }
 }
 

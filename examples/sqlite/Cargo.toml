@@ -1,0 +1,13 @@
+[package]
+name = "wasm-sqlite-test"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[[bin]]
+name = "sqlite_test"
+path = "src/main.rs"
+
+[dependencies]
+fluence = "0.2.3"
+fce-sqlite-connector = "0.1.0"
