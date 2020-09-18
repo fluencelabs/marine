@@ -21,10 +21,12 @@ let relays = [
     }
 ]
 
+const NAME_CHANGED = "NAME_CHANGED"
+const RELAY_CHANGED = "RELAY_CHANGED"
 const USER_ADDED = "USER_ADDED"
 const USER_DELETED = "USER_DELETED"
 const MESSAGE = "MESSAGE"
-const CHAT = "CHAT"
+const MODULE_CHAT = "CHAT"
 const HISTORY = "history"
 const USER_LIST = "user-list"
 
@@ -49,14 +51,15 @@ class FluenceChat {
         this.client = client;
         this.name = name;
         this.serviceId = serviceId;
-        this.members = members;
+        this.members = members.filter(m => m.clientId !== this.client.selfPeerIdStr);
         this.relay = relay;
         client.subscribe((args: any, target: Address, replyTo: Address, moduleId, fname) => {
             console.log(`MODULE: ${moduleId}, fname: ${fname}`)
-            if (moduleId === CHAT) {
+            let member: Member;
+            if (moduleId === MODULE_CHAT) {
                 switch (fname) {
                     case USER_ADDED:
-                        let member: Member = {
+                        member = {
                             clientId: args.member.clientId,
                             relay: args.member.relay,
                             sig: args.member.sig,
@@ -64,6 +67,27 @@ class FluenceChat {
                         }
                         console.log(`Member added to ${this.name}: ` + JSON.stringify(member))
                         this.addMember(member);
+                        break;
+                    case NAME_CHANGED:
+                        member = this.members.filter(m => m.clientId === args.clientId)[0]
+                        if (member) {
+                            member.name = args.name;
+                            this.members.push(member);
+                            console.log("Name changed: " + args.clientId)
+                        } else {
+                            console.log("Cannot change name. There is no member: " + JSON.stringify(member))
+                        }
+                        break;
+                    case RELAY_CHANGED:
+                        member = this.members.filter(m => m.clientId === args.clientId)[0]
+                        if (member) {
+                            member.relay = args.relay;
+                            member.sig = args.sig;
+                            this.members.push(member);
+                            console.log("Relay changed: " + args.clientId)
+                        } else {
+                            console.log("Cannot change relay. There is no member: " + JSON.stringify(member))
+                        }
                         break;
                     case USER_DELETED:
                         console.log("Member deleted: " + args.clientId)
@@ -91,18 +115,34 @@ class FluenceChat {
     }
 
     async changeName(name: string) {
-        let user = this.client.selfPeerIdStr;
+        let clientId = this.client.selfPeerIdStr;
         this.name = name;
-        let result = await client.callService(CHAT_PEER_ID, this.serviceId, USER_LIST, [user, name, user], "change_name")
+        let result = await client.callService(CHAT_PEER_ID, this.serviceId, USER_LIST, [clientId, name, clientId], "change_name")
+        await this.sendToAll({clientId: clientId, name: name}, NAME_CHANGED)
         console.log(result)
     }
 
+    async publishRelay() {
+        let clientId = this.client.selfPeerIdStr;
+        let relay = client.connection.nodePeerId.toB58String();
+        let sig = getSignature(client.connection.replyTo)
+        let result = await client.callService(CHAT_PEER_ID, this.serviceId, USER_LIST, [clientId, relay, sig, clientId], "change_relay")
+        await this.sendToAll({clientId: clientId, relay: relay, sig: sig}, RELAY_CHANGED)
+        console.log(result)
+    }
+
+    async reconnect(multiaddr: string) {
+        await this.client.connect(multiaddr);
+        await this.publishRelay();
+    }
+
     deleteMember(clientId: string) {
-        this.members = this.members.filter(m => m.clientId === clientId)
+        this.members = this.members.filter(m => m.clientId !== clientId)
     }
 
     addMember(member: Member) {
         if (member.clientId !== this.client.selfPeerIdStr) {
+            this.members = this.members.filter(m => m.clientId !== member.clientId)
             this.members.push(member)
         }
     }
@@ -117,15 +157,19 @@ class FluenceChat {
         return await client.callService(CHAT_PEER_ID, this.serviceId, HISTORY, [], "get_all")
     }
 
+    async sendToAll(args: any, fname: string) {
+        for (const member of this.members) {
+            console.log(`send command '${fname}' to: ` + JSON.stringify(member))
+            await client.fireClient(member.relay, member.clientId, member.sig, MODULE_CHAT, args, fname)
+        }
+    }
+
     async sendMessage(msg: string) {
         let result = await client.callService(CHAT_PEER_ID, this.serviceId, HISTORY, [this.client.selfPeerIdStr, msg], "add")
-        for (const member of this.members) {
-            console.log("send to: " + JSON.stringify(member))
-            await client.fireClient(member.relay, member.clientId, member.sig, CHAT, {
-                clientId: this.client.selfPeerIdStr,
-                message: msg
-            }, MESSAGE)
-        }
+        await this.sendToAll({
+            clientId: this.client.selfPeerIdStr,
+            message: msg
+        }, MESSAGE);
         console.log("result send message: " + JSON.stringify(result))
     }
 }
@@ -145,7 +189,28 @@ async function createChat(name: string, relay: string, relayAddress: string, see
 
 }
 
-async function joinChat(name: string, chatId: string, relay: string, relayAddress: string, seed?: string) {
+async function connectToChat(chatId: string, relay: string, relayAddress: string, seed: string): Promise<FluenceChat> {
+    let client = await connect(relayAddress, seed);
+    let sig = getSignature(client.connection.replyTo)
+
+    if (sig) {
+        let members = await getMembers(client, chatId);
+        let you = members.find(m => m.clientId === client.selfPeerIdStr)
+        if (you) {
+            let chat = new FluenceChat(client, chatId, name, relay, members);
+            await chat.publishRelay();
+            return chat;
+        } else {
+            console.error("You are not in chat. Use 'join'")
+            throw new Error("You are not in chat. Use 'join'")
+        }
+    } else {
+        console.error("Signature should be presented.")
+        throw new Error("Signature should be presented.")
+    }
+}
+
+async function joinChat(name: string, chatId: string, relay: string, relayAddress: string, seed?: string): Promise<FluenceChat> {
     let client = await connect(relayAddress, seed);
 
     let sig = getSignature(client.connection.replyTo)
@@ -155,7 +220,7 @@ async function joinChat(name: string, chatId: string, relay: string, relayAddres
         let result = await client.callService(CHAT_PEER_ID, chatId, USER_LIST, [client.selfPeerIdStr, relay, sig, name], "join")
         console.log(result)
         for (const member of members) {
-            await client.fireClient(member.relay, member.clientId, member.sig, CHAT, {
+            await client.fireClient(member.relay, member.clientId, member.sig, MODULE_CHAT, {
                 member: {
                     clientId: client.selfPeerIdStr,
                     sig: sig,
@@ -167,9 +232,8 @@ async function joinChat(name: string, chatId: string, relay: string, relayAddres
         return new FluenceChat(client, chatId, name, relay, members);
     } else {
         console.error("Signature should be presented.")
+        throw new Error("Signature should be presented.")
     }
-
-
 }
 
 async function getMembers(client: FluenceClient, chatId: string): Promise<Member[]> {
