@@ -4,9 +4,22 @@ import {FluenceClient} from "fluence/dist/fluenceClient";
 import {Address, getSignature} from "fluence/dist/address";
 
 const CHAT_BLUEPRINT = "cc5587c8-2d14-4e47-96f8-c3159b0c7206";
-const PEER_ID = "12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt";
-let nodePeerId = "12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt"
-let MULTIADDR = '/ip4/127.0.0.1/tcp/9001/ws/p2p/' + nodePeerId
+const CHAT_PEER_ID = "12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt"
+
+let relays = [
+    {
+        multiaddr: "/ip4/127.0.0.1/tcp/9001/ws/p2p/12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt",
+        peerId: "12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt"
+    },
+    {
+        multiaddr: "/ip4/127.0.0.1/tcp/9002/ws/p2p/12D3KooWGGv3ZkcbxNtM7jPzrtgxprd2Ws4zm9z1JkNSUwUgyaUN",
+        peerId: "12D3KooWGGv3ZkcbxNtM7jPzrtgxprd2Ws4zm9z1JkNSUwUgyaUN"
+    },
+    {
+        multiaddr: "/ip4/127.0.0.1/tcp/9003/ws/p2p/12D3KooWSGS1XxVx2fiYM5U66HKtF81ypbzA3v71jLBUVLZSNSNi",
+        peerId: "12D3KooWSGS1XxVx2fiYM5U66HKtF81ypbzA3v71jLBUVLZSNSNi"
+    }
+]
 
 const USER_ADDED = "USER_ADDED"
 const USER_DELETED = "USER_DELETED"
@@ -29,44 +42,46 @@ class FluenceChat {
     client: FluenceClient
     serviceId: string
     name: string
+    relay: string
     members: Member[]
 
-    constructor(client: FluenceClient, serviceId: string, name: string, members: Member[]) {
+    constructor(client: FluenceClient, serviceId: string, name: string, relay: string, members: Member[]) {
         this.client = client;
         this.name = name;
         this.serviceId = serviceId;
         this.members = members;
+        this.relay = relay;
         client.subscribe((args: any, target: Address, replyTo: Address, moduleId, fname) => {
             console.log(`MODULE: ${moduleId}, fname: ${fname}`)
             if (moduleId === CHAT) {
-              switch(fname) {
-                  case USER_ADDED:
-                      let member: Member = {
-                          clientId: args.member.clientId,
-                          relay: args.member.relay,
-                          sig: args.member.sig,
-                          name: args.member.name
-                      }
-                      console.log(`Member added to ${this.name}: ` + JSON.stringify(member))
-                      this.addMember(member);
-                      break;
-                  case USER_DELETED:
-                      console.log("Member deleted: " + args.clientId)
-                      this.deleteMember(args.clientId);
-                      break;
-                  case MESSAGE:
-                      console.log("message received")
-                      console.log(args)
-                      console.log(this.members)
-                      let m = this.members.find(m => m.clientId === args.clientId)
-                      if (m) {
-                          console.log(`${m.name}: ${args.message}`)
-                      }
-                      break;
-                  default:
-                      console.log("WHAT?!  " + fname)
-                      break;
-              }
+                switch (fname) {
+                    case USER_ADDED:
+                        let member: Member = {
+                            clientId: args.member.clientId,
+                            relay: args.member.relay,
+                            sig: args.member.sig,
+                            name: args.member.name
+                        }
+                        console.log(`Member added to ${this.name}: ` + JSON.stringify(member))
+                        this.addMember(member);
+                        break;
+                    case USER_DELETED:
+                        console.log("Member deleted: " + args.clientId)
+                        this.deleteMember(args.clientId);
+                        break;
+                    case MESSAGE:
+                        console.log("message received")
+                        console.log(args)
+                        console.log(this.members)
+                        let m = this.members.find(m => m.clientId === args.clientId)
+                        if (m) {
+                            console.log(`${m.name}: ${args.message}`)
+                        }
+                        break;
+                    default:
+                        console.log("WHAT?!  " + fname)
+                        break;
+                }
             } else {
                 console.log("Unhandled moduleId: " + moduleId + ", args: " + JSON.stringify(args));
             }
@@ -78,7 +93,7 @@ class FluenceChat {
     async changeName(name: string) {
         let user = this.client.selfPeerIdStr;
         this.name = name;
-        let result = await client.callService(PEER_ID, this.serviceId, USER_LIST, [user, name, user], "change_name")
+        let result = await client.callService(CHAT_PEER_ID, this.serviceId, USER_LIST, [user, name, user], "change_name")
         console.log(result)
     }
 
@@ -93,62 +108,72 @@ class FluenceChat {
     }
 
     async deleteUser(user: string) {
-        let result = await client.callService(PEER_ID, this.serviceId, USER_LIST, [user, user], "delete")
+        let result = await client.callService(CHAT_PEER_ID, this.serviceId, USER_LIST, [user, user], "delete")
         this.deleteMember(user)
         console.log(result)
     }
 
     async getHistory(): Promise<any> {
-        return await client.callService(PEER_ID, this.serviceId, HISTORY, [], "get_all")
+        return await client.callService(CHAT_PEER_ID, this.serviceId, HISTORY, [], "get_all")
     }
 
     async sendMessage(msg: string) {
-        let result = await client.callService(PEER_ID, this.serviceId, HISTORY, [this.client.selfPeerIdStr, msg], "add")
+        let result = await client.callService(CHAT_PEER_ID, this.serviceId, HISTORY, [this.client.selfPeerIdStr, msg], "add")
         for (const member of this.members) {
             console.log("send to: " + JSON.stringify(member))
-            await client.fireClient(member.relay, member.clientId, member.sig, CHAT, {clientId: this.client.selfPeerIdStr, message: msg}, MESSAGE)
+            await client.fireClient(member.relay, member.clientId, member.sig, CHAT, {
+                clientId: this.client.selfPeerIdStr,
+                message: msg
+            }, MESSAGE)
         }
         console.log("result send message: " + JSON.stringify(result))
     }
 }
 
-async function createChat(name: string, seed?: string) {
-    let client = await connect(seed);
+async function createChat(name: string, relay: string, relayAddress: string, seed?: string) {
+    let client = await connect(relayAddress, seed);
     let sig = getSignature(client.connection.replyTo)
     if (sig) {
-        let serviceId = await client.createService(CHAT_BLUEPRINT);
-        let result = await client.callService(PEER_ID, serviceId, USER_LIST, [client.selfPeerIdStr, nodePeerId, sig, name], "join")
+        let serviceId = await client.createService(CHAT_BLUEPRINT, CHAT_PEER_ID);
+        delay(1000)
+        let result = await client.callService(CHAT_PEER_ID, serviceId, USER_LIST, [client.selfPeerIdStr, relay, sig, name], "join")
         console.log("serviceId: " + serviceId)
-        return new FluenceChat(client, serviceId, name, []);
+        return new FluenceChat(client, serviceId, name, relay,[]);
     } else {
         console.error("Signature should be presented.")
     }
 
 }
 
-async function joinChat(name: string, chatId: string, seed?: string, relayAddress?: string) {
-    let client = await connect(seed, relayAddress);
+async function joinChat(name: string, chatId: string, relay: string, relayAddress: string, seed?: string) {
+    let client = await connect(relayAddress, seed);
 
     let sig = getSignature(client.connection.replyTo)
 
     if (sig) {
         let members = await getMembers(client, chatId);
-        let result = await client.callService(PEER_ID, chatId, USER_LIST, [client.selfPeerIdStr, nodePeerId, sig, name], "join")
+        let result = await client.callService(CHAT_PEER_ID, chatId, USER_LIST, [client.selfPeerIdStr, relay, sig, name], "join")
         console.log(result)
         for (const member of members) {
-            await client.fireClient(member.relay, member.clientId, member.sig, CHAT, {member: {clientId: client.selfPeerIdStr, sig: sig, relay: nodePeerId, name: name}}, USER_ADDED)
+            await client.fireClient(member.relay, member.clientId, member.sig, CHAT, {
+                member: {
+                    clientId: client.selfPeerIdStr,
+                    sig: sig,
+                    relay: relay,
+                    name: name
+                }
+            }, USER_ADDED)
         }
-        return new FluenceChat(client, chatId, name, members);
+        return new FluenceChat(client, chatId, name, relay, members);
     } else {
         console.error("Signature should be presented.")
     }
 
 
-
 }
 
 async function getMembers(client: FluenceClient, chatId: string): Promise<Member[]> {
-    let membersStr = (await client.callService(nodePeerId, chatId, USER_LIST, {}, "get_users")).result as string
+    let membersStr = (await client.callService(CHAT_PEER_ID, chatId, USER_LIST, {}, "get_users")).result as string
     let members: Member[] = []
     console.log("MEMBER RRAW")
     console.log(membersStr)
@@ -168,15 +193,15 @@ async function getMembers(client: FluenceClient, chatId: string): Promise<Member
 }
 
 function delay(ms: number) {
-    return new Promise( resolve => setTimeout(resolve, ms) );
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function scenario() {
     console.log("start")
-    let creator = await createChat("papa")
+    let creator = await createChat("papa", relays[1].peerId, relays[1].multiaddr)
     console.log("chat created")
     await delay(1000)
-    let user = await joinChat("mama", creator.serviceId)
+    let user = await joinChat("mama", creator.serviceId, relays[2].peerId, relays[2].multiaddr)
     console.log("user joined")
 
     await delay(1000)
@@ -208,7 +233,7 @@ window.joinChat = joinChat;
 window.createChat = createChat;
 window.scenario = scenario;
 
-async function connect(seed?: string, relayAddress?: string): Promise<FluenceClient> {
+async function connect(relayAddress: string, seed?: string): Promise<FluenceClient> {
 
     let pid;
     if (seed) {
@@ -218,7 +243,7 @@ async function connect(seed?: string, relayAddress?: string): Promise<FluenceCli
     }
     // Fluence.setLogLevel('trace')
     console.log("PID = " + pid.toB58String())
-    client = await Fluence.connect(relayAddress ?? MULTIADDR, pid);
+    client = await Fluence.connect(relayAddress, pid);
 
     return client;
 }
@@ -236,7 +261,7 @@ publishBlueprint();
 async function publishBlueprint() {
     let pid = await Fluence.generatePeerId();
     console.log("1111")
-    let cl = await Fluence.connect(MULTIADDR, pid);
+    let cl = await Fluence.connect(relays[0].multiaddr, pid);
     console.log("2222")
     let bps = await cl.getAvailableBlueprints()
     console.log("333")
