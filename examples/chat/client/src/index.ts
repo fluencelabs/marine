@@ -30,8 +30,6 @@ const MODULE_CHAT = "CHAT"
 const HISTORY = "history"
 const USER_LIST = "user-list"
 
-let client: FluenceClient;
-
 interface Member {
     clientId: string,
     relay: string,
@@ -96,15 +94,13 @@ class FluenceChat {
                         break;
                     case MESSAGE:
                         console.log("message received to " + this.name)
-                        console.log(args)
-                        console.log(this.members)
                         let m = this.members.find(m => m.clientId === args.clientId)
                         if (m) {
                             console.log(`${m.name}: ${args.message}`)
                         }
                         break;
                     default:
-                        console.log("WHAT?!  " + fname)
+                        console.log("Unexpected fname: " + fname)
                         break;
                 }
             } else {
@@ -118,18 +114,16 @@ class FluenceChat {
     async changeName(name: string) {
         let clientId = this.client.selfPeerIdStr;
         this.name = name;
-        let result = await client.callService(CHAT_PEER_ID, this.serviceId, USER_LIST, [clientId, name, clientId], "change_name")
+        await this.client.callService(CHAT_PEER_ID, this.serviceId, USER_LIST, [clientId, name, clientId], "change_name")
         await this.sendToAll({clientId: clientId, name: name}, NAME_CHANGED)
-        console.log(result)
     }
 
     async publishRelay() {
         let clientId = this.client.selfPeerIdStr;
-        let relay = client.connection.nodePeerId.toB58String();
-        let sig = getSignature(client.connection.replyTo)
-        let result = await client.callService(CHAT_PEER_ID, this.serviceId, USER_LIST, [clientId, relay, sig, clientId], "change_relay")
+        let relay = this.client.connection.nodePeerId.toB58String();
+        let sig = getSignature(this.client.connection.replyTo)
+        await this.client.callService(CHAT_PEER_ID, this.serviceId, USER_LIST, [clientId, relay, sig, clientId], "change_relay")
         await this.sendToAll({clientId: clientId, relay: relay, sig: sig}, RELAY_CHANGED)
-        console.log(result)
     }
 
     async reconnect(multiaddr: string) {
@@ -149,29 +143,27 @@ class FluenceChat {
     }
 
     async deleteUser(user: string) {
-        let result = await client.callService(CHAT_PEER_ID, this.serviceId, USER_LIST, [user, user], "delete")
+        await this.client.callService(CHAT_PEER_ID, this.serviceId, USER_LIST, [user, user], "delete")
         this.deleteMember(user)
-        console.log(result)
     }
 
     async getHistory(): Promise<any> {
-        return await client.callService(CHAT_PEER_ID, this.serviceId, HISTORY, [], "get_all")
+        return await this.client.callService(CHAT_PEER_ID, this.serviceId, HISTORY, [], "get_all")
     }
 
     async sendToAll(args: any, fname: string) {
         for (const member of this.members) {
             console.log(`send command '${fname}' to: ` + JSON.stringify(member))
-            await client.fireClient(member.relay, member.clientId, member.sig, MODULE_CHAT, args, fname)
+            await this.client.fireClient(member.relay, member.clientId, member.sig, MODULE_CHAT, args, fname)
         }
     }
 
     async sendMessage(msg: string) {
-        let result = await client.callService(CHAT_PEER_ID, this.serviceId, HISTORY, [this.client.selfPeerIdStr, msg], "add")
+        await this.client.callService(CHAT_PEER_ID, this.serviceId, HISTORY, [this.client.selfPeerIdStr, msg], "add")
         await this.sendToAll({
             clientId: this.client.selfPeerIdStr,
             message: msg
         }, MESSAGE);
-        console.log("result send message: " + JSON.stringify(result))
     }
 }
 
@@ -218,8 +210,7 @@ async function joinChat(name: string, chatId: string, relay: string, relayAddres
 
     if (sig) {
         let members = await getMembers(client, chatId);
-        let result = await client.callService(CHAT_PEER_ID, chatId, USER_LIST, [client.selfPeerIdStr, relay, sig, name], "join")
-        console.log(result)
+        await client.callService(CHAT_PEER_ID, chatId, USER_LIST, [client.selfPeerIdStr, relay, sig, name], "join")
         for (const member of members) {
             await client.fireClient(member.relay, member.clientId, member.sig, MODULE_CHAT, {
                 member: {
@@ -240,8 +231,6 @@ async function joinChat(name: string, chatId: string, relay: string, relayAddres
 async function getMembers(client: FluenceClient, chatId: string): Promise<Member[]> {
     let membersStr = (await client.callService(CHAT_PEER_ID, chatId, USER_LIST, {}, "get_users")).result as string
     let members: Member[] = []
-    console.log("MEMBER RRAW")
-    console.log(membersStr)
     let membersRaw = membersStr.split("|")
     membersRaw.forEach((v) => {
         let memberRaw = v.split(",")
@@ -253,7 +242,6 @@ async function getMembers(client: FluenceClient, chatId: string): Promise<Member
         }
         members.push(member);
     })
-    console.log(members)
     return members;
 }
 
@@ -293,8 +281,6 @@ async function scenario() {
     console.log("user send second message")
     await user.sendMessage("Not Bob")
 
-    /**/
-
     // let h1 = await creator.getHistory();
     // console.log("h1: " + JSON.stringify(h1))
     // let h2 = await user.getHistory();
@@ -307,41 +293,37 @@ declare global {
         joinChat: any;
         createChat: any;
         scenario: any;
+        connectToChat: any;
     }
 }
 
 window.joinChat = joinChat;
 window.createChat = createChat;
 window.scenario = scenario;
+window.connectToChat = connectToChat;
+// Fluence.setLogLevel('trace')
 
 async function connect(relayAddress: string, seed?: string): Promise<FluenceClient> {
-
     let pid;
     if (seed) {
         pid = await seedToPeerId(seed);
     } else {
         pid = await Fluence.generatePeerId();
     }
-    // Fluence.setLogLevel('trace')
-    console.log("PID = " + pid.toB58String())
-    client = await Fluence.connect(relayAddress, pid);
 
-    return client;
+    console.log("PID = " + pid.toB58String())
+
+    return await Fluence.connect(relayAddress, pid);
 }
 
 async function publishBlueprint() {
     let pid = await Fluence.generatePeerId();
-    console.log("1111")
     let cl = await Fluence.connect(relays[0].multiaddr, pid);
-    console.log("2222")
     let bps = await cl.getAvailableBlueprints()
-    console.log("333")
     console.log(bps)
     let services = await cl.getActiveInterfaces()
-    console.log("333")
     console.log(services)
     let modules = await cl.getAvailableModules()
-    console.log("4444")
     console.log(modules)
     // await cl.addBlueprint("chat", ["sqlite", "history", USER_LIST])
     // let serv = await cl.createService("cc5587c8-2d14-4e47-96f8-c3159b0c7206");

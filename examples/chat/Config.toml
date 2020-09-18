@@ -10,13 +10,7 @@ modules_dir = "artifacts"
     mem_pages_count = 100
     logger_enabled = true
 
-    [module.wasi]
-    envs = ["OWNER=1234"]
-
 [[module]]
     name = "history"
     mem_pages_count = 100
     logger_enabled = true
-
-    [module.wasi]
-    envs = ["OWNER=1234"]
