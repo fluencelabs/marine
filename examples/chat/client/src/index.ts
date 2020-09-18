@@ -69,17 +69,18 @@ class FluenceChat {
                         this.addMember(member);
                         break;
                     case NAME_CHANGED:
-                        member = this.members.filter(m => m.clientId === args.clientId)[0]
+                        member = this.members.filter(m => m.clientId === args.clientId)[0];
                         if (member) {
                             member.name = args.name;
-                            this.members.push(member);
+                            this.addMember(member);
                             console.log("Name changed: " + args.clientId)
                         } else {
                             console.log("Cannot change name. There is no member: " + JSON.stringify(member))
                         }
                         break;
                     case RELAY_CHANGED:
-                        member = this.members.filter(m => m.clientId === args.clientId)[0]
+                        member = this.members.filter(m => m.clientId === args.clientId)[0];
+                        this.addMember(member);
                         if (member) {
                             member.relay = args.relay;
                             member.sig = args.sig;
@@ -94,7 +95,7 @@ class FluenceChat {
                         this.deleteMember(args.clientId);
                         break;
                     case MESSAGE:
-                        console.log("message received")
+                        console.log("message received to " + this.name)
                         console.log(args)
                         console.log(this.members)
                         let m = this.members.find(m => m.clientId === args.clientId)
@@ -180,7 +181,7 @@ async function createChat(name: string, relay: string, relayAddress: string, see
     if (sig) {
         let serviceId = await client.createService(CHAT_BLUEPRINT, CHAT_PEER_ID);
         delay(1000)
-        let result = await client.callService(CHAT_PEER_ID, serviceId, USER_LIST, [client.selfPeerIdStr, relay, sig, name], "join")
+        await client.callService(CHAT_PEER_ID, serviceId, USER_LIST, [client.selfPeerIdStr, relay, sig, name], "join")
         console.log("serviceId: " + serviceId)
         return new FluenceChat(client, serviceId, name, relay,[]);
     } else {
@@ -262,10 +263,10 @@ function delay(ms: number) {
 
 async function scenario() {
     console.log("start")
-    let creator = await createChat("papa", relays[1].peerId, relays[1].multiaddr)
+    let creator = await createChat("Alice", relays[1].peerId, relays[1].multiaddr)
     console.log("chat created")
     await delay(1000)
-    let user = await joinChat("mama", creator.serviceId, relays[2].peerId, relays[2].multiaddr)
+    let user = await joinChat("Bob", creator.serviceId, relays[2].peerId, relays[2].multiaddr)
     console.log("user joined")
 
     await delay(1000)
@@ -275,6 +276,22 @@ async function scenario() {
     await delay(1000)
     console.log("user send message")
     await user.sendMessage("hi")
+
+    await user.reconnect(relays[0].multiaddr);
+
+    console.log("creator send second message")
+    await creator.sendMessage("how ya doin")
+    await delay(1000)
+    console.log("user send second message")
+    await user.sendMessage("ama fine")
+
+    await user.changeName("John")
+
+    console.log("creator send second message")
+    await creator.sendMessage("what is your name?")
+    await delay(1000)
+    console.log("user send second message")
+    await user.sendMessage("Not Bob")
 
     /**/
 
@@ -311,16 +328,6 @@ async function connect(relayAddress: string, seed?: string): Promise<FluenceClie
 
     return client;
 }
-
-async function start() {
-    console.log("hello world");
-    let pid = await Fluence.generatePeerId();
-    console.log(pid.toB58String())
-
-}
-
-// start();
-publishBlueprint();
 
 async function publishBlueprint() {
     let pid = await Fluence.generatePeerId();
