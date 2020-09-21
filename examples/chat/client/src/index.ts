@@ -2,11 +2,13 @@ import Fluence from 'fluence';
 import {seedToPeerId} from "fluence/dist/seed";
 import {FluenceClient} from "fluence/dist/fluenceClient";
 import {getSignature} from "fluence/dist/address";
-import {FluenceChat, Member, MODULE_CHAT, USER_ADDED, USER_LIST} from "./fluenceChat";
+import {FluenceChat, HISTORY, Member, MODULE_CHAT, USER_ADDED, USER_LIST} from "./fluenceChat";
 
+// change these constants in different environment
 const CHAT_BLUEPRINT = "cc5587c8-2d14-4e47-96f8-c3159b0c7206";
 const CHAT_PEER_ID = "12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt"
 
+// parameters from `fluence-playground` local network
 let relays = [
     {
         multiaddr: "/ip4/127.0.0.1/tcp/9001/ws/p2p/12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt",
@@ -22,17 +24,19 @@ let relays = [
     }
 ]
 
-async function createChat(name: string, relay: string, relayAddress: string, seed?: string) {
+async function createChat(name: string, relay: string, relayAddress: string, seed?: string): Promise<FluenceChat> {
     let client = await connect(relayAddress, seed);
     let sig = getSignature(client.connection.replyTo)
     if (sig) {
         let serviceId = await client.createService(CHAT_BLUEPRINT, CHAT_PEER_ID);
         delay(1000)
+        // TODO: implement a real signature check in the future
         await client.callService(CHAT_PEER_ID, serviceId, USER_LIST, [client.selfPeerIdStr, relay, sig, name], "join")
         console.log("serviceId: " + serviceId)
         return new FluenceChat(client, serviceId, CHAT_PEER_ID, name, relay,[]);
     } else {
         console.error("Signature should be presented.")
+        throw new Error("Signature should be presented.")
     }
 
 }
@@ -136,11 +140,12 @@ async function scenario() {
     console.log("user send second message")
     await user.sendMessage("Not Bob")
 
-    // let h1 = await creator.getHistory();
-    // console.log("h1: " + JSON.stringify(h1))
-    // let h2 = await user.getHistory();
-    // console.log("h2: " + JSON.stringify(h2))
-    // await getMembers(user.client, user.serviceId)
+    let h1 = await creator.getHistory();
+    console.log("history creator: " + JSON.stringify(h1))
+    let h2 = await user.getHistory();
+    console.log("history user: " + JSON.stringify(h2))
+    let members = await getMembers(user.client, user.serviceId)
+    console.log("members: " + JSON.stringify(members))
 }
 
 declare global {
@@ -171,17 +176,12 @@ async function connect(relayAddress: string, seed?: string): Promise<FluenceClie
     return await Fluence.connect(relayAddress, pid);
 }
 
+// publishes a blueprint for chat application and shows its id
 async function publishBlueprint() {
     let pid = await Fluence.generatePeerId();
     let cl = await Fluence.connect(relays[0].multiaddr, pid);
-    let bps = await cl.getAvailableBlueprints()
-    console.log(bps)
-    let services = await cl.getActiveInterfaces()
-    console.log(services)
-    let modules = await cl.getAvailableModules()
-    console.log(modules)
-    // await cl.addBlueprint("chat", ["sqlite", "history", USER_LIST])
-    // let serv = await cl.createService("cc5587c8-2d14-4e47-96f8-c3159b0c7206");
-    // console.log(serv)
+
+    let blueprintId = await cl.addBlueprint("chat", ["sqlite", HISTORY, USER_LIST])
+    console.log(`BLUEPRINT ID: ${blueprintId}`)
 }
 

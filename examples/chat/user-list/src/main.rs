@@ -39,6 +39,7 @@ fn get_users() -> String {
 
 #[fce]
 fn change_name(user: String, name: String, signature: String) -> String {
+    // TODO: implement a real signature check in the future
     if user != signature {
         return "Error. Invalid signature.".to_string();
     }

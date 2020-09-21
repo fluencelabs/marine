@@ -7,7 +7,7 @@ export const USER_ADDED = "USER_ADDED"
 const USER_DELETED = "USER_DELETED"
 const MESSAGE = "MESSAGE"
 export const MODULE_CHAT = "CHAT"
-const HISTORY = "history"
+export const HISTORY = "history"
 export const USER_LIST = "user-list"
 
 export interface Member {
@@ -100,6 +100,9 @@ export class FluenceChat {
         await this.sendToAll({clientId: clientId, name: name}, NAME_CHANGED)
     }
 
+    /**
+     * Publishes current relay to a chat.
+     */
     async publishRelay() {
         let clientId = this.client.selfPeerIdStr;
         let relay = this.client.connection.nodePeerId.toB58String();
@@ -108,16 +111,20 @@ export class FluenceChat {
         await this.sendToAll({clientId: clientId, relay: relay, sig: sig}, RELAY_CHANGED)
     }
 
+    /**
+     * Reconnects to other relay and publish new relay address.
+     * @param multiaddr
+     */
     async reconnect(multiaddr: string) {
         await this.client.connect(multiaddr);
         await this.publishRelay();
     }
 
-    deleteMember(clientId: string) {
+    private deleteMember(clientId: string) {
         this.members = this.members.filter(m => m.clientId !== clientId)
     }
 
-    addMember(member: Member) {
+    private addMember(member: Member) {
         if (member.clientId !== this.client.selfPeerIdStr) {
             this.members = this.members.filter(m => m.clientId !== member.clientId)
             this.members.push(member)
@@ -133,7 +140,7 @@ export class FluenceChat {
         return await this.client.callService(this.chatPeerId, this.serviceId, HISTORY, [], "get_all")
     }
 
-    async sendToAll(args: any, fname: string) {
+    private async sendToAll(args: any, fname: string) {
         for (const member of this.members) {
             console.log(`send command '${fname}' to: ` + JSON.stringify(member))
             await this.client.fireClient(member.relay, member.clientId, member.sig, MODULE_CHAT, args, fname)
