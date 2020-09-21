@@ -25,9 +25,7 @@ pub fn init() {
 
 pub fn user_exists(user: &str) -> bool {
     let req = format!("SELECT * FROM users WHERE user = '{}'", user);
-    let result = unsafe {
-        invoke(req)
-    };
+    let result = unsafe { invoke(req) };
     log::info!("deletion result:");
     log::info!("{}", result.as_str());
     if result.is_empty() || result == "OK" {
@@ -39,32 +37,37 @@ pub fn user_exists(user: &str) -> bool {
 
 pub fn update_name(user: String, name: String) -> String {
     unsafe {
-        invoke(format!("UPDATE users SET name = '{}' WHERE user = '{}'", name, user))
+        invoke(format!(
+            "UPDATE users SET name = '{}' WHERE user = '{}'",
+            name, user
+        ))
     }
 }
 
 pub fn update_relay(user: String, relay: String, sig: String) -> String {
     unsafe {
-        invoke(format!("UPDATE users SET relay = '{}', sig = '{}' WHERE user = '{}'", relay, sig, user))
+        invoke(format!(
+            "UPDATE users SET relay = '{}', sig = '{}' WHERE user = '{}'",
+            relay, sig, user
+        ))
     }
 }
 
 pub fn get_all_users() -> String {
-    unsafe {
-        invoke(format!("SELECT * FROM users"))
-    }
+    unsafe { invoke(format!("SELECT * FROM users")) }
 }
 
 pub fn add_user(user: String, relay: String, sig: String, name: String) -> String {
     unsafe {
-        invoke(format!("INSERT INTO users (user,relay,sig,name) VALUES ('{}','{}','{}','{}')", user, relay, sig, name))
+        invoke(format!(
+            "INSERT INTO users (user,relay,sig,name) VALUES ('{}','{}','{}','{}')",
+            user, relay, sig, name
+        ))
     }
 }
 
 pub fn delete_user(user: &str) -> String {
-    unsafe {
-        invoke(format!("DELETE FROM users WHERE user = '{}';", user))
-    }
+    unsafe { invoke(format!("DELETE FROM users WHERE user = '{}';", user)) }
 }
 
 #[fce]

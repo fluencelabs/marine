@@ -18,7 +18,9 @@ mod storage;
 
 use fluence::fce;
 use fluence::WasmLogger;
-use crate::storage::{init, user_exists, delete_user, update_name, add_user, get_all_users, update_relay};
+use crate::storage::{
+    init, user_exists, delete_user, update_name, add_user, get_all_users, update_relay,
+};
 
 const OWNER: &str = "owner_id";
 
