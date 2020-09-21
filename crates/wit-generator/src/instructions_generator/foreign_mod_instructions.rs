@@ -204,11 +204,15 @@ impl ForeignModInstructionGenerator for ParsedType {
                 Instruction::ArgumentGet { index: index + 1 },
                 Instruction::StringLiftMemory,
             ], 2),
-            ParsedType::ByteVector => (vec![
-                Instruction::ArgumentGet { index },
-                Instruction::ArgumentGet { index: index + 1 },
-                Instruction::ByteArrayLiftMemory,
-            ], 2),
+            ParsedType::Vector(value_type) => {
+                let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
+
+                (vec![
+                    Instruction::ArgumentGet { index },
+                    Instruction::ArgumentGet { index: index + 1 },
+                    Instruction::ArrayLiftMemory { value_type },
+                ], 2)
+            },
             ParsedType::Record(record_name) => {
                 let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 
@@ -245,15 +249,14 @@ impl ForeignModInstructionGenerator for ParsedType {
                 Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
                 Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
             ],
-            ParsedType::ByteVector => vec![
-                Instruction::Dup,
-                Instruction::ByteArraySize,
-                Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
-                Instruction::Swap2,
-                Instruction::ByteArrayLowerMemory,
-                Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
-                Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
-            ],
+            ParsedType::Vector(value_type) => {
+                let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
+
+                vec![
+                    Instruction::ArrayLowerMemory { value_type },
+                    Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
+                ]
+            },
             ParsedType::Record(record_name) => {
                 let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 
@@ -296,7 +299,7 @@ pub fn to_raw_input_types(arg: &(String, ParsedType)) -> Vec<IFunctionArg> {
             name: arg.0.clone(),
             ty: IType::F64,
         }],
-        ParsedType::Utf8String | ParsedType::ByteVector => vec![
+        ParsedType::Utf8String | ParsedType::Vector(_) => vec![
             IFunctionArg {
                 name: format!("{}_ptr", arg.0),
                 ty: IType::I32,
@@ -321,6 +324,6 @@ pub fn to_raw_output_type(ty: &ParsedType) -> Vec<RustType> {
         ParsedType::I64 | ParsedType::U64 => vec![RustType::I64],
         ParsedType::F32 => vec![RustType::F32],
         ParsedType::F64 => vec![RustType::F64],
-        ParsedType::Utf8String | ParsedType::ByteVector | ParsedType::Record(_) => vec![],
+        ParsedType::Utf8String | ParsedType::Vector(_) | ParsedType::Record(_) => vec![],
     }
 }

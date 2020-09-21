@@ -27,11 +27,26 @@ pub(crate) fn ptype_to_itype_checked(
     wit_resolver: &mut WITResolver,
 ) -> Result<IType> {
     match pty {
+        ParsedType::I8 => Ok(IType::S8),
+        ParsedType::I16 => Ok(IType::S16),
+        ParsedType::I32 => Ok(IType::S32),
+        ParsedType::I64 => Ok(IType::S64),
+        ParsedType::U8 => Ok(IType::U8),
+        ParsedType::U16 => Ok(IType::U16),
+        ParsedType::U32 => Ok(IType::U32),
+        ParsedType::U64 => Ok(IType::U64),
+        ParsedType::F32 => Ok(IType::F32),
+        ParsedType::F64 => Ok(IType::F64),
+        ParsedType::Boolean => Ok(IType::I32),
+        ParsedType::Utf8String => Ok(IType::String),
+        ParsedType::Vector(ty) => {
+            let array_itype = ptype_to_itype_checked(ty, wit_resolver)?;
+            Ok(IType::Array(Box::new(array_itype)))
+        }
         ParsedType::Record(record_name) => {
             let record_type_id = wit_resolver.get_record_type_id(record_name)?;
             Ok(IType::Record(record_type_id as _))
         }
-        _ => Ok(ptype_to_itype_unchecked(pty, wit_resolver)),
     }
 }
 
@@ -49,7 +64,10 @@ pub(crate) fn ptype_to_itype_unchecked(pty: &ParsedType, wit_resolver: &mut WITR
         ParsedType::F64 => IType::F64,
         ParsedType::Boolean => IType::I32,
         ParsedType::Utf8String => IType::String,
-        ParsedType::ByteVector => IType::ByteArray,
+        ParsedType::Vector(ty) => {
+            let array_itype = ptype_to_itype_unchecked(ty, wit_resolver);
+            IType::Array(Box::new(array_itype))
+        }
         ParsedType::Record(record_name) => {
             let record_type_id = wit_resolver.get_record_type_id_unchecked(record_name);
             IType::Record(record_type_id as _)

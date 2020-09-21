@@ -68,7 +68,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
             writeln!(f, "\n{}:", *name)?;
 
             for (name, signature) in functions.iter() {
-                write!(f, "  pub fn {}(", name)?;
+                write!(f, "  fn {}(", name)?;
 
                 let args = signature
                     .arguments

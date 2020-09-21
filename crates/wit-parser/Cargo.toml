@@ -16,4 +16,5 @@ fce-wit-interfaces = { path = "../wit-interfaces", version = "0.1.3" }
 anyhow = "1.0.31"
 walrus = "0.17.0"
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0"}
-wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.6" }
+wasmer-wit = { package = "wasmer-interface-types-fl", path = "/Users/mike/dev/work/fluence/wasm/interface-types", version = "=0.17.6" }
+#wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.6" }

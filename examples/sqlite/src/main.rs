@@ -74,3 +74,23 @@ pub fn test2() {
         println!("age = {}", row[1].as_integer().unwrap());
     }
 }
+
+#[fce]
+pub fn test3() {
+    let db_path = "/tmp/users.sqlite";
+    let connection = fce_sqlite_connector::open(db_path).unwrap();
+
+    let execute_result = connection.execute(
+        "
+            CREATE TABLE users (name TEXT, age INTEGER);
+            INSERT INTO users VALUES ('Alice', 42);
+            INSERT INTO users VALUES ('Bob', 69);
+        ",
+    );
+
+    println!("execute result: {:?}", execute_result);
+
+    let file_size = std::fs::metadata(db_path).unwrap().len();
+
+    println!("{} file size is {}", db_path, file_size);
+}

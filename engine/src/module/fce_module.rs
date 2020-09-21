@@ -209,7 +209,8 @@ impl FCEModule {
                         arguments,
                         output_types,
                     } => {
-                        let interpreter: WITInterpreter = adapter_instructions.try_into()?;
+                        let interpreter: WITInterpreter =
+                            adapter_instructions.clone().try_into()?;
                         let wit_module_func = WITModuleFunc {
                             interpreter: Arc::new(interpreter),
                             arguments: arguments.clone(),
@@ -330,7 +331,8 @@ impl FCEModule {
                         arguments,
                         output_types,
                     } => {
-                        let interpreter: WITInterpreter = adapter_instructions.try_into()?;
+                        let interpreter: WITInterpreter =
+                            adapter_instructions.clone().try_into()?;
 
                         let raw_import = create_raw_import(
                             wit_instance.clone(),
