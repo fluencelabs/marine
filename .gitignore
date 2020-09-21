@@ -16,6 +16,7 @@ target/
 !/examples/greeting/artifacts/*.wasm
 !/examples/ipfs_node/artifacts/*.wasm
 !/examples/records/artifacts/*.wasm
+!/examples/sqlite/artifacts/sqlite_test.wasm
 !/examples/site-storage/artifacts/*.wasm
 !/examples/chat/artifacts/*.wasm
 

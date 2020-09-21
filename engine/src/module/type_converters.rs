@@ -29,11 +29,22 @@ pub(super) fn wtype_to_itype(ty: &WType) -> IType {
 
 pub(super) fn itype_to_wtype(ty: &IType) -> WType {
     match ty {
+        IType::S8 => WType::I32,
+        IType::S16 => WType::I32,
+        IType::S32 => WType::I32,
+        IType::S64 => WType::I64,
+        IType::U8 => WType::I32,
+        IType::U16 => WType::I32,
+        IType::U32 => WType::I32,
+        IType::U64 => WType::I64,
         IType::I32 => WType::I32,
         IType::I64 => WType::I64,
         IType::F32 => WType::F32,
         IType::F64 => WType::F64,
-        _ => unimplemented!(),
+        ty => {
+            eprintln!("trying to convert {:?}", ty);
+            unimplemented!()
+        }
     }
 }
 
