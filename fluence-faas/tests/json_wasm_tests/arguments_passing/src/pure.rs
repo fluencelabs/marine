@@ -131,7 +131,7 @@ mod effector {
     use fluence::fce;
 
     #[fce]
-    #[link(wasm_import_module = "effector")]
+    #[link(wasm_import_module = "arguments_passing_effector")]
     extern "C" {
         pub fn all_types(
             arg_0: i8,

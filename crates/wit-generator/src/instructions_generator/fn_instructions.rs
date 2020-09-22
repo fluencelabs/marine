@@ -146,13 +146,15 @@ impl FnInstructionGenerator for ParsedType {
                 Instruction::ArgumentGet { index },
                 Instruction::StringLowerMemory,
             ],
-            ParsedType::ByteVector => vec![
-                Instruction::ArgumentGet { index },
-                Instruction::ByteArraySize,
-                Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
-                Instruction::ArgumentGet { index },
-                Instruction::ByteArrayLowerMemory,
-            ],
+            ParsedType::Vector(value_type) => {
+                let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
+                vec![
+                    Instruction::ArgumentGet { index },
+                    Instruction::ArrayLowerMemory {
+                        value_type
+                    },
+                ]
+            },
             ParsedType::Record(record_name) => {
                 let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 
@@ -188,14 +190,15 @@ impl FnInstructionGenerator for ParsedType {
                 Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
                 Instruction::CallCore { function_index: DEALLOCATE_FUNC.id },
             ],
-            ParsedType::ByteVector => vec![
-                Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
-                Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
-                Instruction::ByteArrayLiftMemory,
-                Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
-                Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
-                Instruction::CallCore { function_index: DEALLOCATE_FUNC.id },
-            ],
+            ParsedType::Vector(value_type) => {
+                let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
+
+                vec![
+                    Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
+                    Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
+                    Instruction::ArrayLiftMemory { value_type },
+                ]
+            },
             ParsedType::Record(record_name) => {
                 let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 

@@ -227,10 +227,25 @@ fn json_value_to_ivalue(
                 .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::String(value))
         }
-        IType::ByteArray => {
-            let value = serde_json::from_value(json_value)
-                .map_err(FaaSError::ArgumentDeserializationError)?;
-            Ok(IValue::ByteArray(value))
+        IType::Array(value_type) => {
+            let value = match json_value {
+                SerdeValue::Array(json_array) => {
+                    let mut iargs = Vec::with_capacity(json_array.len());
+
+                    for json_value in json_array {
+                        let iarg = json_value_to_ivalue(json_value, value_type, record_types)?;
+                        iargs.push(iarg);
+                    }
+
+                    Ok(iargs)
+                }
+                _ => Err(FaaSError::JsonArgumentsDeserializationError(format!(
+                    "expected array of {:?} types, got {:?}",
+                    value_type, json_value
+                ))),
+            }?;
+
+            Ok(IValue::Array(value))
         }
         IType::I32 => {
             let value = serde_json::from_value(json_value)

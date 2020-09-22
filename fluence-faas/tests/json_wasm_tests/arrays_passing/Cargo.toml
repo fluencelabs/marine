@@ -1,15 +1,15 @@
 [package]
-name = "arguments-passing-test"
+name = "arrays-passing-test"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [[bin]]
-name = "arguments_passing_pure"
+name = "arrays_passing_pure"
 path = "src/pure.rs"
 
 [[bin]]
-name = "arguments_passing_effector"
+name = "arrays_passing_effector"
 path = "src/effector.rs"
 
 [dependencies]

@@ -55,7 +55,7 @@ pub fn records() {
                 IValue::F32(9.0),
                 IValue::F64(10.0),
                 IValue::String(String::from("field_11")),
-                IValue::ByteArray(vec![0x13, 0x37])
+                IValue::Array(vec![IValue::U8(0x13), IValue::U8(0x37)])
             ])
             .unwrap()
         )]
