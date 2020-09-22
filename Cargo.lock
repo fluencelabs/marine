@@ -57,7 +57,7 @@ checksum = "a4c527152e37cf757a3f78aae5a06fbeefdb07ccc535c980a3208ee3060dd544"
 name = "arrays-passing-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.6",
+ "fluence 0.2.4",
  "safe-transmute",
 ]
 
@@ -641,7 +641,7 @@ name = "fce-wit-generator"
 version = "0.1.7"
 dependencies = [
  "fce-wit-parser",
- "fluence-sdk-wit 0.2.6",
+ "fluence-sdk-wit 0.2.4",
  "once_cell",
  "serde",
  "serde_json",
@@ -701,14 +701,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence"
-version = "0.2.6"
-dependencies = [
- "fluence-sdk-macro 0.2.6",
- "fluence-sdk-main 0.2.6",
-]
-
-[[package]]
 name = "fluence-app-service"
 version = "0.1.7"
 dependencies = [
@@ -759,13 +751,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-macro"
-version = "0.2.6"
-dependencies = [
- "fluence-sdk-wit 0.2.6",
-]
-
-[[package]]
 name = "fluence-sdk-main"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -782,15 +767,6 @@ version = "0.2.4"
 source = "git+https://github.com/fluencelabs/rust-sdk#f247a84f6d4df96616ad3224b2b7b713a06777b6"
 dependencies = [
  "fluence-sdk-macro 0.2.4",
- "log",
- "serde",
-]
-
-[[package]]
-name = "fluence-sdk-main"
-version = "0.2.6"
-dependencies = [
- "fluence-sdk-macro 0.2.6",
  "log",
  "serde",
 ]
@@ -813,18 +789,6 @@ dependencies = [
 name = "fluence-sdk-wit"
 version = "0.2.4"
 source = "git+https://github.com/fluencelabs/rust-sdk#f247a84f6d4df96616ad3224b2b7b713a06777b6"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn",
- "uuid",
-]
-
-[[package]]
-name = "fluence-sdk-wit"
-version = "0.2.6"
 dependencies = [
  "proc-macro2",
  "quote",
