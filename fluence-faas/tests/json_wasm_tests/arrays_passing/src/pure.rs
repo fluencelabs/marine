@@ -123,42 +123,30 @@ mod effector {
     #[fce]
     #[link(wasm_import_module = "arrays_passing_effector")]
     extern "C" {
-        #[fce]
         pub fn inner_arrays_1(arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<u8>;
 
-        #[fce]
         pub fn inner_arrays_2(arg: Vec<Vec<Vec<Vec<TestRecord>>>>) -> Vec<u8>;
 
-        #[fce]
         pub fn string_type(arg: Vec<String>) -> Vec<String>;
 
-        #[fce]
         pub fn byte_type(arg: Vec<u8>) -> Vec<u8>;
 
         /*
-        #[fce]
         pub fn bool_type(arg: Vec<bool>) -> Vec<bool>;
          */
 
-        #[fce]
         pub fn f32_type(arg: Vec<f32>) -> Vec<f32>;
 
-        #[fce]
         pub fn f64_type(arg: Vec<f64>) -> Vec<f64>;
 
-        #[fce]
         pub fn u32_type(arg: Vec<u32>) -> Vec<u32>;
 
-        #[fce]
         pub fn u64_type(arg: Vec<u64>) -> Vec<u64>;
 
-        #[fce]
         pub fn i32_type(arg: Vec<i32>) -> Vec<i32>;
 
-        #[fce]
         pub fn i64_type(arg: Vec<i64>) -> Vec<i64>;
 
-        #[fce]
         pub fn empty_type() -> Vec<String>;
     }
 }
