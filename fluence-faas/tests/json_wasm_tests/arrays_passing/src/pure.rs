@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// mod expand;
-
 use fluence::fce;
 
 pub fn main() {}
@@ -124,7 +122,7 @@ mod effector {
     use super::TestRecord;
 
     #[fce]
-    #[link(wasm_import_module = "effector")]
+    #[link(wasm_import_module = "arrays_passing_effector")]
     extern "C" {
         #[fce]
         pub fn inner_arrays_1(arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<u8>;

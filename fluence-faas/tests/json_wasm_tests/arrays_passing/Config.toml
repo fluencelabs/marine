@@ -1,11 +1,11 @@
 modules_dir = "./artifacts/"
 
 [[module]]
-    name = "effector"
+    name = "arrays_passing_effector"
     mem_pages_count = 1
     logger_enabled = true
 
 [[module]]
-    name = "pure"
+    name = "arrays_passing_pure"
     mem_pages_count = 1
     logger_enabled = true

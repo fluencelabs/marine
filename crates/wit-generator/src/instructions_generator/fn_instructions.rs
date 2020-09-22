@@ -150,7 +150,7 @@ impl FnInstructionGenerator for ParsedType {
                 let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
                 vec![
                     Instruction::ArgumentGet { index },
-                    Instruction::ArrayLiftMemory {
+                    Instruction::ArrayLowerMemory {
                         value_type
                     },
                 ]
