@@ -1,13 +1,13 @@
 [package]
 name = "fluence-faas"
 description = "Fluence FaaS"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-fce = { path = "../engine", version = "0.1.5" }
+fce = { path = "../engine", version = "0.1.6" }
 fluence-sdk-main = "=0.2.3"
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }

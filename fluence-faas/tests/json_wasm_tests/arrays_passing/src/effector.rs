@@ -29,7 +29,7 @@ pub fn inner_arrays_1(mut arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<Vec<Vec<Vec<u8>>>>
     arg.push(vec![]);
     arg.push(vec![vec![]]);
     arg.push(vec![vec![vec![]]]);
-    arg.push(vec![vec![vec![1,2,3,4,5,6,7,8,9,10]]]);
+    arg.push(vec![vec![vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]]);
 
     arg
 }
@@ -47,7 +47,7 @@ pub fn inner_arrays_2(mut arg: Vec<Vec<Vec<Vec<TestRecord>>>>) -> Vec<Vec<Vec<Ve
     arg.push(vec![vec![vec![]]]);
     arg.push(vec![vec![vec![TestRecord {
         field_0: 0,
-        field_1: vec![vec![1,2,3,4]],
+        field_1: vec![vec![1, 2, 3, 4]],
     }]]]);
 
     arg
