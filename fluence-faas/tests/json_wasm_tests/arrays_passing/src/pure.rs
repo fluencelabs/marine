@@ -91,7 +91,6 @@ pub fn u32_type(arg: Vec<u32>) -> Vec<u32> {
 #[fce]
 pub fn u64_type(arg: Vec<u64>) -> Vec<u64> {
     let mut arg = unsafe { effector::u64_type(arg) };
-
     arg.push(0);
     arg
 }

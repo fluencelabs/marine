@@ -94,6 +94,7 @@ pub fn u64_type(mut arg: Vec<u64>) -> Vec<u64> {
     arg.push(2);
     arg.push(3);
     arg.push(4);
+
     arg
 }
 

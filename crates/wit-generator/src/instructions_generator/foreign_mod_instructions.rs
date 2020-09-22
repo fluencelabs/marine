@@ -255,6 +255,7 @@ impl ForeignModInstructionGenerator for ParsedType {
                 vec![
                     Instruction::ArrayLowerMemory { value_type },
                     Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
+                    Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
                 ]
             },
             ParsedType::Record(record_name) => {

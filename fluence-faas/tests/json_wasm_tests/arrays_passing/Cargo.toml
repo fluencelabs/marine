@@ -13,5 +13,6 @@ name = "arrays_passing_effector"
 path = "src/effector.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
+fluence = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk", features = [ "logger" ] }
+log = "0.4.11"
 safe-transmute = "0.11.0"

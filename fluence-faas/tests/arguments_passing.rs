@@ -37,7 +37,6 @@ static ARG_CONFIG: Lazy<fluence_faas::RawModulesConfig> = Lazy::new(|| {
 });
 
 #[test]
-#[ignore]
 pub fn get_interfaces() {
     let faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
@@ -224,7 +223,7 @@ pub fn get_interfaces() {
 
     let mut modules = std::collections::HashMap::new();
     modules.insert("arguments_passing_pure", functions.clone());
-    modules.insert("effector", functions);
+    modules.insert("arguments_passing_effector", functions);
 
     assert_eq!(
         interface,
@@ -236,7 +235,6 @@ pub fn get_interfaces() {
 }
 
 #[test]
-#[ignore]
 pub fn all_types() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
@@ -289,7 +287,7 @@ pub fn all_types() {
                 117, 101, 110, 99, 101, 19, 55
             ]
             .iter()
-            .map(|v| IValue::I32(*v))
+            .map(|v| IValue::U8(*v))
             .collect::<Vec<_>>()
         )]
     );
@@ -326,7 +324,7 @@ pub fn all_types() {
                 117, 101, 110, 99, 101, 19, 55
             ]
             .iter()
-            .map(|v| IValue::I32(*v))
+            .map(|v| IValue::U8(*v))
             .collect::<Vec<_>>()
         )]
     );
@@ -637,7 +635,6 @@ pub fn string_type() {
 }
 
 #[test]
-#[ignore]
 pub fn bytearray_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
@@ -671,7 +668,7 @@ pub fn bytearray_type() {
         vec![IValue::Array(vec![
             IValue::U8(0x13),
             IValue::U8(0x37),
-            IValue::U8(0),
+            IValue::U8(1),
             IValue::U8(1)
         ])]
     );
@@ -690,7 +687,7 @@ pub fn bytearray_type() {
             IValue::U8(0x13),
             IValue::U8(0x37),
             IValue::U8(1),
-            IValue::U8(2)
+            IValue::U8(1)
         ])]
     );
 }
