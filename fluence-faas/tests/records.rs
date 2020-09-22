@@ -53,7 +53,7 @@ pub fn records() {
                 IValue::F32(9.0),
                 IValue::F64(10.0),
                 IValue::String(String::from("field_11")),
-                IValue::ByteArray(vec![0x13, 0x37])
+                IValue::Array(vec![IValue::U8(0x13), IValue::U8(0x37)])
             ])
             .unwrap()
         )]
@@ -101,7 +101,7 @@ pub fn records() {
                 IValue::F32(9.0),
                 IValue::F64(10.0),
                 IValue::String(String::from("field_11")),
-                IValue::ByteArray(vec![0x13, 0x37])
+                IValue::Array(vec![IValue::U8(0x13), IValue::U8(0x37)])
             ])
             .unwrap()
         )]
@@ -135,7 +135,7 @@ pub fn records() {
                 IValue::F32(9.0),
                 IValue::F64(10.0),
                 IValue::String(String::from("field_11")),
-                IValue::ByteArray(vec![0x13, 0x37])
+                IValue::Array(vec![IValue::U8(0x13), IValue::U8(0x37)])
             ])
             .unwrap()
         )]
@@ -181,7 +181,7 @@ pub fn records() {
                 IValue::F32(9.0),
                 IValue::F64(10.0),
                 IValue::String(String::from("field_11")),
-                IValue::ByteArray(vec![0x13, 0x37])
+                IValue::Array(vec![IValue::U8(0x13), IValue::U8(0x37)])
             ])
             .unwrap()
         )]
@@ -212,7 +212,7 @@ pub fn records() {
                 IValue::F32(9.0),
                 IValue::F64(10.0),
                 IValue::String(String::from("field_11")),
-                IValue::ByteArray(vec![0x13, 0x37])
+                IValue::Array(vec![IValue::U8(0x13), IValue::U8(0x37)])
             ])
             .unwrap()
         )]
@@ -268,7 +268,7 @@ fn inner_records() {
                     wasmer_wit::vec1::Vec1::new(vec![
                         IValue::S32(1),
                         IValue::String(String::new()),
-                        IValue::ByteArray(vec![1]),
+                        IValue::Array(vec![IValue::U8(1)]),
                         IValue::Record(wasmer_wit::vec1::Vec1::new(vec![IValue::S32(1),]).unwrap())
                     ])
                     .unwrap()
