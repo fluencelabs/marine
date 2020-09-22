@@ -17,9 +17,7 @@ jobs:
           rustup component add clippy --toolchain nightly
 
           cargo fmt --all -- --check --color always
-          #cargo +nightly check -v --all-features
           cargo +nightly test -v --all-features
-          #cargo +nightly clippy -v
 
       - save_cache:
           paths:
