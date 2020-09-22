@@ -57,7 +57,7 @@ checksum = "a4c527152e37cf757a3f78aae5a06fbeefdb07ccc535c980a3208ee3060dd544"
 name = "arrays-passing-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.5",
+ "fluence 0.2.6",
  "safe-transmute",
 ]
 
@@ -641,7 +641,7 @@ name = "fce-wit-generator"
 version = "0.1.7"
 dependencies = [
  "fce-wit-parser",
- "fluence-sdk-wit 0.2.5",
+ "fluence-sdk-wit 0.2.6",
  "once_cell",
  "serde",
  "serde_json",
@@ -702,10 +702,10 @@ dependencies = [
 
 [[package]]
 name = "fluence"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
- "fluence-sdk-macro 0.2.5",
- "fluence-sdk-main 0.2.5",
+ "fluence-sdk-macro 0.2.6",
+ "fluence-sdk-main 0.2.6",
 ]
 
 [[package]]
@@ -760,9 +760,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-macro"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
- "fluence-sdk-wit 0.2.5",
+ "fluence-sdk-wit 0.2.6",
 ]
 
 [[package]]
@@ -788,9 +788,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
- "fluence-sdk-macro 0.2.5",
+ "fluence-sdk-macro 0.2.6",
  "log",
  "serde",
 ]
@@ -824,7 +824,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-wit"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2728,6 +2728,8 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types-fl"
 version = "0.17.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "475cafb8bf9763895f6fde0d7417b9090145fc461ad7aef21b1a866b8357c091"
 dependencies = [
  "log",
  "nom",
