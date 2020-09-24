@@ -263,7 +263,7 @@ fn from_raw_module_config(config: RawModuleConfig) -> Result<(String, ModuleConf
         config.name,
         ModuleConfig {
             mem_pages_count: config.mem_pages_count,
-            logger_enabled: config.logger_enabled.unwrap_or_default(),
+            logger_enabled: config.logger_enabled.unwrap_or(true),
             imports,
             wasi,
         },
@@ -275,7 +275,7 @@ fn from_raw_default_module_config(config: RawDefaultModuleConfig) -> Result<Modu
     let wasi = config.wasi.map(from_raw_wasi_config);
     Ok(ModuleConfig {
         mem_pages_count: config.mem_pages_count,
-        logger_enabled: config.logger_enabled.unwrap_or_default(),
+        logger_enabled: config.logger_enabled.unwrap_or(true),
         imports,
         wasi,
     })
