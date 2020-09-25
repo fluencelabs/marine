@@ -183,7 +183,7 @@ macro_rules! init_wasm_func_once {
             let raw_func =
                 match super::utils::get_export_func_by_name::<$args, $rets>($ctx, $func_name) {
                     Ok(func) => func,
-                    Err(_) => return vec![Value::I32($ret_error_code)],
+                    Err(_) => return vec![WValue::I32($ret_error_code)],
                 };
 
             // assumed that this function will be used only in the context of closure
