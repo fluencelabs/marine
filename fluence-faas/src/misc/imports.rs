@@ -445,82 +445,51 @@ fn lower_record(
     mem_address as _
 }
 
-fn ivalues_to_wvalues(
+fn ivalue_to_wvalues(
     ctx: &mut Ctx,
-    ivalues: Vec<IValue>,
+    ivalue: Option<IValue>,
     allocate_func: &Box<RefCell<Option<Func<'static, i32, i32>>>>,
 ) -> Vec<WValue> {
-    let mut result = Vec::new();
+    match ivalue {
+        Some(IValue::S8(v)) => vec![WValue::I32(v as _)],
+        Some(IValue::S16(v)) => vec![WValue::I32(v as _)],
+        Some(IValue::S32(v)) => vec![WValue::I32(v as _)],
+        Some(IValue::S64(v)) => vec![WValue::I64(v as _)],
+        Some(IValue::U8(v)) => vec![WValue::I32(v as _)],
+        Some(IValue::U16(v)) => vec![WValue::I32(v as _)],
+        Some(IValue::U32(v)) => vec![WValue::I32(v as _)],
+        Some(IValue::U64(v)) => vec![WValue::I64(v as _)],
+        Some(IValue::I32(v)) => vec![WValue::I32(v as _)],
+        Some(IValue::I64(v)) => vec![WValue::I64(v as _)],
+        Some(IValue::F32(v)) => vec![WValue::F32(v)],
+        Some(IValue::F64(v)) => vec![WValue::F64(v)],
+        Some(IValue::String(str)) => {
+            let mem_address = call_wasm_func!(allocate_func, str.len() as i32);
+            write_to_mem(ctx, mem_address as usize, str.as_bytes());
 
-    for ivalue in ivalues {
-        match ivalue {
-            IValue::S8(v) => {
-                result.push(WValue::I32(v as _));
-            }
-            IValue::S16(v) => {
-                result.push(WValue::I32(v as _));
-            }
-            IValue::S32(v) => {
-                result.push(WValue::I32(v as _));
-            }
-            IValue::S64(v) => {
-                result.push(WValue::I64(v as _));
-            }
-            IValue::U8(v) => {
-                result.push(WValue::I32(v as _));
-            }
-            IValue::U16(v) => {
-                result.push(WValue::I32(v as _));
-            }
-            IValue::U32(v) => {
-                result.push(WValue::I32(v as _));
-            }
-            IValue::U64(v) => {
-                result.push(WValue::I64(v as _));
-            }
-            IValue::I32(v) => {
-                result.push(WValue::I32(v as _));
-            }
-            IValue::I64(v) => {
-                result.push(WValue::I64(v as _));
-            }
-            IValue::F32(v) => {
-                result.push(WValue::F32(v));
-            }
-            IValue::F64(v) => {
-                result.push(WValue::F64(v));
-            }
-            IValue::String(str) => {
-                let mem_address = call_wasm_func!(allocate_func, str.len() as i32);
-                write_to_mem(ctx, mem_address as usize, str.as_bytes());
-
-                result.push(WValue::I32(mem_address as _));
-                result.push(WValue::I32(str.len() as _));
-            }
-            IValue::Array(values) => {
-                let (offset, size) = lower_array(ctx, values, allocate_func);
-                result.push(WValue::I32(offset as _));
-                result.push(WValue::I32(size as _));
-            }
-            IValue::Record(values) => {
-                let offset = lower_record(ctx, values, allocate_func);
-                result.push(WValue::I32(offset));
-            }
+            vec![WValue::I32(mem_address as _), WValue::I32(str.len() as _)]
         }
+        Some(IValue::Array(values)) => {
+            let (offset, size) = lower_array(ctx, values, allocate_func);
+            vec![WValue::I32(offset as _), WValue::I32(size as _)]
+        }
+        Some(IValue::Record(values)) => {
+            let offset = lower_record(ctx, values, allocate_func);
+            vec![WValue::I32(offset)]
+        }
+        None => vec![],
     }
-
-    result
 }
 
 // #[rustfmt::skip]
-pub(super) fn create_host_import_func<'a, F>(
+pub(super) fn create_host_import_func<F>(
     closure: Box<F>,
     argument_types: Vec<IType>,
-    output_types: Vec<IType>,
+    output_type: Option<IType>,
     record_types: HashMap<u64, RecordType>,
 ) -> DynamicFunc<'static>
 where
-    F: Fn(&mut Ctx, &[IValue]) -> IValue + 'static,
+    F: Fn(Vec<IValue>) -> Option<IValue> + 'static,
 {
     let allocate_func: Box<RefCell<Option<Func<'static, i32, i32>>>> = Box::new(RefCell::new(None));
     let set_result_ptr_func: Box<RefCell<Option<Func<'static, i32, ()>>>> =
@@ -528,8 +497,13 @@ where
     let set_result_size_func: Box<RefCell<Option<Func<'static, i32, ()>>>> =
         Box::new(RefCell::new(None));
 
+    let output_type_to_types = |output_type| match output_type {
+        Some(ty) => vec![ty],
+        None => vec![],
+    };
+
     let raw_args = itypes_to_wtypes(&argument_types);
-    let raw_output = itypes_to_wtypes(&output_types);
+    let raw_output = itypes_to_wtypes(&output_type_to_types(output_type));
 
     let func = move |ctx: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
         init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 2);
@@ -537,8 +511,8 @@ where
         init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
 
         let ivalues = wvalues_to_ivalues(inputs, &argument_types, ctx, &record_types);
-        let result = closure(ctx, &ivalues);
-        let wvalues = ivalues_to_wvalues(ctx, vec![result], &allocate_func);
+        let result = closure(ivalues);
+        let wvalues = ivalue_to_wvalues(ctx, result, &allocate_func);
 
         match wvalues.len() {
             2 => {
@@ -548,7 +522,7 @@ where
             }
             1 => {
                 call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
-                vec![wvalues[0]]
+                vec![wvalues[0].clone()]
             }
             0 => vec![],
             _ => unimplemented!(),
@@ -568,56 +542,54 @@ pub(super) fn create_get_call_parameters_func(
 
     // TODO: refactor this approach after switching on the new Wasmer
     let func = move |ctx: &mut Ctx, _inputs: &[WValue]| -> Vec<WValue> {
-        unsafe {
-            init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 2);
+        init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 2);
 
-            let call_id_ptr =
-                call_wasm_func!(allocate_func, call_parameters.borrow().call_id.len() as i32);
-            let user_name_ptr = call_wasm_func!(
-                allocate_func,
-                call_parameters.borrow().user_name.len() as i32
-            );
-            let application_id_ptr = call_wasm_func!(
-                allocate_func,
-                call_parameters.borrow().application_id.len() as i32
-            );
+        let call_id_ptr =
+            call_wasm_func!(allocate_func, call_parameters.borrow().call_id.len() as i32);
+        let user_name_ptr = call_wasm_func!(
+            allocate_func,
+            call_parameters.borrow().user_name.len() as i32
+        );
+        let application_id_ptr = call_wasm_func!(
+            allocate_func,
+            call_parameters.borrow().application_id.len() as i32
+        );
 
-            write_to_mem(
-                ctx,
-                call_id_ptr as usize,
-                call_parameters.borrow().call_id.as_bytes(),
-            );
-            write_to_mem(
-                ctx,
-                user_name_ptr as usize,
-                call_parameters.borrow().user_name.as_bytes(),
-            );
-            write_to_mem(
-                ctx,
-                application_id_ptr as usize,
-                call_parameters.borrow().application_id.as_bytes(),
-            );
+        write_to_mem(
+            ctx,
+            call_id_ptr as usize,
+            call_parameters.borrow().call_id.as_bytes(),
+        );
+        write_to_mem(
+            ctx,
+            user_name_ptr as usize,
+            call_parameters.borrow().user_name.as_bytes(),
+        );
+        write_to_mem(
+            ctx,
+            application_id_ptr as usize,
+            call_parameters.borrow().application_id.as_bytes(),
+        );
 
-            let mut serialized_call_parameters = Vec::new();
-            serialized_call_parameters.push(call_id_ptr as u64);
-            serialized_call_parameters.push(call_parameters.borrow().call_id.len() as u64);
-            serialized_call_parameters.push(user_name_ptr as u64);
-            serialized_call_parameters.push(call_parameters.borrow().user_name.len() as u64);
-            serialized_call_parameters.push(application_id_ptr as u64);
-            serialized_call_parameters.push(call_parameters.borrow().application_id.len() as u64);
+        let mut serialized_call_parameters = Vec::new();
+        serialized_call_parameters.push(call_id_ptr as u64);
+        serialized_call_parameters.push(call_parameters.borrow().call_id.len() as u64);
+        serialized_call_parameters.push(user_name_ptr as u64);
+        serialized_call_parameters.push(call_parameters.borrow().user_name.len() as u64);
+        serialized_call_parameters.push(application_id_ptr as u64);
+        serialized_call_parameters.push(call_parameters.borrow().application_id.len() as u64);
 
-            let serialized_call_parameters_ptr =
-                call_wasm_func!(allocate_func, serialized_call_parameters.len() as i32);
-            let serialized_call_parameters_bytes =
-                safe_transmute::transmute_to_bytes::<u64>(&serialized_call_parameters);
-            write_to_mem(
-                ctx,
-                serialized_call_parameters_ptr as usize,
-                serialized_call_parameters_bytes,
-            );
+        let serialized_call_parameters_ptr =
+            call_wasm_func!(allocate_func, serialized_call_parameters.len() as i32);
+        let serialized_call_parameters_bytes =
+            safe_transmute::transmute_to_bytes::<u64>(&serialized_call_parameters);
+        write_to_mem(
+            ctx,
+            serialized_call_parameters_ptr as usize,
+            serialized_call_parameters_bytes,
+        );
 
-            vec![WValue::I32(serialized_call_parameters_ptr as _)]
-        }
+        vec![WValue::I32(serialized_call_parameters_ptr as _)]
     };
 
     DynamicFunc::new(

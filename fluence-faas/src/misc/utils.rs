@@ -107,6 +107,8 @@ pub(crate) fn make_fce_config(
     use super::imports::create_host_import_func;
     use super::imports::create_get_call_parameters_func;
     use super::imports::log_utf8_string;
+    use wasmer_wit::values::InterfaceValue as IValue;
+    use wasmer_wit::types::InterfaceType as IType;
     use wasmer_core::import::Namespace;
     use std::path::PathBuf;
 
@@ -157,7 +159,30 @@ pub(crate) fn make_fce_config(
 
     if let Some(imports) = module_config.imports {
         for (import_name, host_cmd) in imports {
-            let host_import = create_host_import_func(host_cmd);
+            let host_cmd_closure = move |args: Vec<IValue>| {
+                let arg = match &args[0] {
+                    IValue::String(str) => str,
+                    _ => unreachable!(),
+                };
+
+                let result = match cmd_lib::run_fun!("{} {}", host_cmd, arg) {
+                    Ok(result) => result,
+                    Err(e) => {
+                        log::error!("error occurred while calling `{} {}`: {:?} ", host_cmd, arg, e);
+                        String::new()
+                    }
+                };
+
+                Some(IValue::String(result))
+            };
+
+            let host_import = create_host_import_func(
+                Box::new(host_cmd_closure),
+                vec![IType::String],
+                Some(IType::String),
+                std::collections::HashMap::new(),
+            );
+
             namespace.insert(import_name, host_import);
         }
     }
@@ -179,14 +204,15 @@ pub(crate) fn make_fce_config(
 /// Initialize Wasm function in form of Box<RefCell<Option<Func<'static, args, rets>>>> only once.
 macro_rules! init_wasm_func_once {
     ($func:ident, $ctx:ident, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
-        unsafe {
-            if $func.borrow().is_none() {
-                let raw_func =
-                    match super::utils::get_export_func_by_name::<$args, $rets>($ctx, $func_name) {
-                        Ok(func) => func,
-                        Err(_) => return vec![WValue::I32($ret_error_code)],
-                    };
+        if $func.borrow().is_none() {
+            let raw_func = match unsafe {
+                super::utils::get_export_func_by_name::<$args, $rets>($ctx, $func_name)
+            } {
+                Ok(func) => func,
+                Err(_) => return vec![WValue::I32($ret_error_code)],
+            };
 
+            unsafe {
                 // assumed that this function will be used only in the context of closure
                 // linked to a corresponding Wasm import, so it is safe to make is static
                 let raw_func = std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_func);
