@@ -19,6 +19,7 @@ use crate::call_wasm_func;
 use crate::IValue;
 use crate::IType;
 
+use wasmer_core::Func;
 use wasmer_core::memory::ptr::{Array, WasmPtr};
 use wasmer_core::vm::Ctx;
 use wasmer_core::typed_func::DynamicFunc;
@@ -26,6 +27,7 @@ use wasmer_core::types::Value as WValue;
 use wasmer_core::types::Type as WType;
 use wasmer_core::types::FuncSig;
 use wasmer_wit::types::RecordType;
+use wasmer_wit::vec1::Vec1;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -70,7 +72,7 @@ fn wvalues_to_ivalues(
     wvalues: &[WValue],
     itypes: &[IType],
     ctx: &Ctx,
-    record_types: &HashMap<&u64, &RecordType>,
+    record_types: &HashMap<u64, RecordType>,
 ) -> Vec<IValue> {
     let mut result = Vec::new();
     let mut wvalue = wvalues.iter();
@@ -222,8 +224,8 @@ fn lift_array(ctx: &Ctx, value_type: &IType, offset: usize, size: usize) -> Vec<
 
 pub(super) fn lower_array(
     ctx: &mut Ctx,
-    array_values: Vec<InterfaceValue>,
-    allocate_func: Box<RefCell<Option<Func<'static, i32, i32>>>>,
+    array_values: Vec<IValue>,
+    allocate_func: &Box<RefCell<Option<Func<'static, i32, i32>>>>,
 ) -> (usize, usize) {
     let mut result: Vec<u64> = Vec::with_capacity(array_values.len());
 
@@ -243,15 +245,15 @@ pub(super) fn lower_array(
             IValue::F64(value) => result.push(value.to_bits()),
             IValue::String(value) => {
                 let mem_address = call_wasm_func!(allocate_func, value.len() as _);
-                write_to_mem(ctx, mem_address as usize, str.as_bytes());
+                write_to_mem(ctx, mem_address as usize, value.as_bytes());
 
                 result.push(mem_address as _);
                 result.push(value.len() as _);
             }
 
-            InterfaceValue::Array(values) => {
+            IValue::Array(values) => {
                 let (array_offset, array_size) = if !values.is_empty() {
-                    lower_array(values, ctx, allocate_func.clone())?
+                    lower_array(ctx, values, allocate_func)
                 } else {
                     (0, 0)
                 };
@@ -260,16 +262,16 @@ pub(super) fn lower_array(
                 result.push(array_size as _);
             }
 
-            InterfaceValue::Record(values) => {
-                let record_offset = lower_record(values, ctx, allocate_func.clone())?;
+            IValue::Record(values) => {
+                let record_offset = lower_record(ctx, values, allocate_func);
                 result.push(record_offset as _);
             }
         }
     }
 
     let result = safe_transmute::transmute_to_bytes::<u64>(&result);
-    let mem_address = call_wasm_func!(allocate_func, result.len() as _);
-    let result_pointer = write_to_mem(ctx, mem_address as _, result)?;
+    let result_pointer = call_wasm_func!(allocate_func, result.len() as _);
+    write_to_mem(ctx, result_pointer as _, result);
 
     (result_pointer as _, result.len() as _)
 }
@@ -278,10 +280,8 @@ pub(super) fn lift_record(
     ctx: &Ctx,
     record_type: &RecordType,
     offset: usize,
-    record_types: &HashMap<&u64, &RecordType>,
+    record_types: &HashMap<u64, RecordType>,
 ) -> IValue {
-    use wasmer_wit::vec1::Vec1;
-
     fn record_size(record_type: &RecordType) -> usize {
         let mut record_size = 0;
 
@@ -387,29 +387,29 @@ pub(super) fn lift_record(
 
 fn lower_record(
     ctx: &mut Ctx,
-    values: Vec1<InterfaceValue>,
-    allocate_func: Box<RefCell<Option<Func<'static, i32, i32>>>>,
+    values: Vec1<IValue>,
+    allocate_func: &Box<RefCell<Option<Func<'static, i32, i32>>>>,
 ) -> i32 {
     let mut result: Vec<u64> = Vec::with_capacity(values.len());
 
     for value in values.into_vec() {
         match value {
-            InterfaceValue::S8(value) => result.push(value as _),
-            InterfaceValue::S16(value) => result.push(value as _),
-            InterfaceValue::S32(value) => result.push(value as _),
-            InterfaceValue::S64(value) => result.push(value as _),
-            InterfaceValue::U8(value) => result.push(value as _),
-            InterfaceValue::U16(value) => result.push(value as _),
-            InterfaceValue::U32(value) => result.push(value as _),
-            InterfaceValue::U64(value) => result.push(value as _),
-            InterfaceValue::I32(value) => result.push(value as _),
-            InterfaceValue::I64(value) => result.push(value as _),
-            InterfaceValue::F32(value) => result.push(value as _),
-            InterfaceValue::F64(value) => result.push(value.to_bits()),
-            InterfaceValue::String(value) => {
+            IValue::S8(value) => result.push(value as _),
+            IValue::S16(value) => result.push(value as _),
+            IValue::S32(value) => result.push(value as _),
+            IValue::S64(value) => result.push(value as _),
+            IValue::U8(value) => result.push(value as _),
+            IValue::U16(value) => result.push(value as _),
+            IValue::U32(value) => result.push(value as _),
+            IValue::U64(value) => result.push(value as _),
+            IValue::I32(value) => result.push(value as _),
+            IValue::I64(value) => result.push(value as _),
+            IValue::F32(value) => result.push(value as _),
+            IValue::F64(value) => result.push(value.to_bits()),
+            IValue::String(value) => {
                 let string_pointer = if !value.is_empty() {
-                    let mem_address = call_wasm_func!(allocate_func, str.len() as i32);
-                    write_to_mem(ctx, mem_address as usize, str.as_bytes());
+                    let mem_address = call_wasm_func!(allocate_func, value.len() as i32);
+                    write_to_mem(ctx, mem_address as usize, value.as_bytes());
                     mem_address
                 } else {
                     0
@@ -419,9 +419,9 @@ fn lower_record(
                 result.push(value.len() as _);
             }
 
-            InterfaceValue::Array(values) => {
+            IValue::Array(values) => {
                 let (offset, size) = if !values.is_empty() {
-                    lower_array(ctx, values, allocate_func.clone())
+                    lower_array(ctx, values, allocate_func)
                 } else {
                     (0, 0)
                 };
@@ -430,8 +430,8 @@ fn lower_record(
                 result.push(size as _);
             }
 
-            InterfaceValue::Record(values) => {
-                let record_ptr = loer_record(ctx, values, allocate_func.clone())?;
+            IValue::Record(values) => {
+                let record_ptr = lower_record(ctx, values, allocate_func);
 
                 result.push(record_ptr as _);
             }
@@ -440,16 +440,15 @@ fn lower_record(
 
     let result = safe_transmute::transmute_to_bytes::<u64>(&result);
     let mem_address = call_wasm_func!(allocate_func, result.len() as _);
-    write_to_mem(ctx, mem_address as usize, str.as_bytes());
+    write_to_mem(ctx, mem_address as usize, result);
 
-    Ok(result_pointer as _)
+    mem_address as _
 }
 
 fn ivalues_to_wvalues(
-    ivalues: Vec<IValue>,
     ctx: &mut Ctx,
-    allocate_func: Box<RefCell<Option<Func<'static, i32, i32>>>>,
-    record_types: &HashMap<&u64, &RecordType>,
+    ivalues: Vec<IValue>,
+    allocate_func: &Box<RefCell<Option<Func<'static, i32, i32>>>>,
 ) -> Vec<WValue> {
     let mut result = Vec::new();
 
@@ -479,6 +478,12 @@ fn ivalues_to_wvalues(
             IValue::U64(v) => {
                 result.push(WValue::I64(v as _));
             }
+            IValue::I32(v) => {
+                result.push(WValue::I32(v as _));
+            }
+            IValue::I64(v) => {
+                result.push(WValue::I64(v as _));
+            }
             IValue::F32(v) => {
                 result.push(WValue::F32(v));
             }
@@ -493,7 +498,13 @@ fn ivalues_to_wvalues(
                 result.push(WValue::I32(str.len() as _));
             }
             IValue::Array(values) => {
-
+                let (offset, size) = lower_array(ctx, values, allocate_func);
+                result.push(WValue::I32(offset as _));
+                result.push(WValue::I32(size as _));
+            }
+            IValue::Record(values) => {
+                let offset = lower_record(ctx, values, allocate_func);
+                result.push(WValue::I32(offset));
             }
         }
     }
@@ -502,17 +513,15 @@ fn ivalues_to_wvalues(
 }
 
 // #[rustfmt::skip]
-pub(super) fn create_host_import_func<F>(
+pub(super) fn create_host_import_func<'a, F>(
     closure: Box<F>,
     argument_types: Vec<IType>,
     output_types: Vec<IType>,
-    record_types: &HashMap<&u64, &RecordType>,
+    record_types: HashMap<u64, RecordType>,
 ) -> DynamicFunc<'static>
 where
-    F: Fn(&mut Ctx, &[IValue]) -> Vec<IValue> + 'static,
+    F: Fn(&mut Ctx, &[IValue]) -> IValue + 'static,
 {
-    use wasmer_core::Func;
-
     let allocate_func: Box<RefCell<Option<Func<'static, i32, i32>>>> = Box::new(RefCell::new(None));
     let set_result_ptr_func: Box<RefCell<Option<Func<'static, i32, ()>>>> =
         Box::new(RefCell::new(None));
@@ -523,21 +532,26 @@ where
     let raw_output = itypes_to_wtypes(&output_types);
 
     let func = move |ctx: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
-        let ivalues = wvalues_to_ivalues(inputs, &argument_types, ctx, record_types);
+        init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 2);
+        init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 3);
+        init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
 
+        let ivalues = wvalues_to_ivalues(inputs, &argument_types, ctx, &record_types);
         let result = closure(ctx, &ivalues);
+        let wvalues = ivalues_to_wvalues(ctx, vec![result], &allocate_func);
 
-        unsafe {
-            init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 2);
-            init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 3);
-            init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
-
-            let mem_address = call_wasm_func!(allocate_func, result.len() as i32);
-            write_to_mem(ctx, mem_address as usize, result.as_bytes());
-            call_wasm_func!(set_result_ptr_func, mem_address);
-            call_wasm_func!(set_result_size_func, result.len() as i32);
-
-            vec![]
+        match wvalues.len() {
+            2 => {
+                call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
+                call_wasm_func!(set_result_size_func, wvalues[1].to_u128() as _);
+                vec![]
+            }
+            1 => {
+                call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
+                vec![wvalues[0]]
+            }
+            0 => vec![],
+            _ => unimplemented!(),
         }
     };
 
@@ -550,8 +564,6 @@ where
 pub(super) fn create_get_call_parameters_func(
     call_parameters: Rc<RefCell<crate::CallParameters>>,
 ) -> DynamicFunc<'static> {
-    use wasmer_core::Func;
-
     let allocate_func: Box<RefCell<Option<Func<'static, i32, i32>>>> = Box::new(RefCell::new(None));
 
     // TODO: refactor this approach after switching on the new Wasmer

@@ -179,18 +179,20 @@ pub(crate) fn make_fce_config(
 /// Initialize Wasm function in form of Box<RefCell<Option<Func<'static, args, rets>>>> only once.
 macro_rules! init_wasm_func_once {
     ($func:ident, $ctx:ident, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
-        if $func.borrow().is_none() {
-            let raw_func =
-                match super::utils::get_export_func_by_name::<$args, $rets>($ctx, $func_name) {
-                    Ok(func) => func,
-                    Err(_) => return vec![WValue::I32($ret_error_code)],
-                };
+        unsafe {
+            if $func.borrow().is_none() {
+                let raw_func =
+                    match super::utils::get_export_func_by_name::<$args, $rets>($ctx, $func_name) {
+                        Ok(func) => func,
+                        Err(_) => return vec![WValue::I32($ret_error_code)],
+                    };
 
-            // assumed that this function will be used only in the context of closure
-            // linked to a corresponding Wasm import, so it is safe to make is static
-            let raw_func = std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_func);
+                // assumed that this function will be used only in the context of closure
+                // linked to a corresponding Wasm import, so it is safe to make is static
+                let raw_func = std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_func);
 
-            *$func.borrow_mut() = Some(raw_func);
+                *$func.borrow_mut() = Some(raw_func);
+            }
         }
     };
 }
