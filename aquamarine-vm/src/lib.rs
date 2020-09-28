@@ -31,7 +31,11 @@ pub use aquamarine_vm::AquamarineVM;
 pub use aquamarine_vm::StepperOutcome;
 pub use errors::AquamarineVMError;
 
-/// Reimports
-pub use fluence_faas::{HostImportDescriptor, HostImportError, IValue, IType};
+// Re-exports
+pub use fluence_faas::HostImportDescriptor;
+pub use fluence_faas::HostImportError;
+pub use fluence_faas::IValue;
+pub use fluence_faas::IType;
+pub use fluence_faas::vec1;
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineVMError>;
