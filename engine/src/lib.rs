@@ -30,13 +30,16 @@
 mod config;
 mod engine;
 mod errors;
-mod module;
+mod host_imports;
 mod misc;
+mod module;
 
 pub use config::FCEModuleConfig;
+pub use config::HostImportDescriptor;
 pub use engine::FCE;
 pub use engine::FCEFunctionSignature;
 pub use errors::FCEError;
+pub use host_imports::HostImportError;
 pub use module::IValue;
 pub use module::IRecordType;
 pub use module::IFunctionArg;

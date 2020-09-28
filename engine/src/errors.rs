@@ -16,6 +16,7 @@
 
 use fce_wit_interfaces::FCEWITInterfacesError;
 use fce_wit_parser::WITParserError;
+use crate::HostImportError;
 
 use wasmer_wit::errors::InstructionError;
 use wasmer_runtime::error::{
@@ -50,6 +51,9 @@ pub enum FCEError {
     /// Returns when there is no module with such name.
     NoSuchModule(String),
 
+    /// An error occurred when host functions tries to lift IValues from WValues and lowering back.
+    HostImportError(HostImportError),
+
     /// WIT section parse error.
     WITParseError(WITParserError),
 
@@ -79,10 +83,17 @@ impl std::fmt::Display for FCEError {
             FCEError::NoSuchModule(module_name) => {
                 write!(f, "FCE doesn't have a module with name {}", module_name)
             }
+            FCEError::HostImportError(host_import_error) => write!(f, "{}", host_import_error),
             FCEError::WITParseError(err) => write!(f, "{}", err),
             FCEError::IncorrectWIT(err_msg) => write!(f, "{}", err_msg),
             FCEError::InvalidConfig(err_msg) => write!(f, "{}", err_msg),
         }
+    }
+}
+
+impl From<HostImportError> for FCEError {
+    fn from(err: HostImportError) -> Self {
+        FCEError::HostImportError(err)
     }
 }
 

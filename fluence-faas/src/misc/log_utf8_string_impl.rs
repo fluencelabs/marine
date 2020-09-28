@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-mod config;
-mod json_to_ivalues;
-mod log_utf8_string_impl;
-mod modules_load_strategy;
-mod utils;
+use wasmer_core::vm::Ctx;
+use wasmer_core::memory::ptr::{Array, WasmPtr};
 
-pub use config::RawModulesConfig;
-pub use config::RawModuleConfig;
-pub use config::ModulesConfig;
-pub use config::ModuleConfig;
-pub use config::WASIConfig;
-
-pub(crate) use config::load_config;
-pub(crate) use json_to_ivalues::json_to_ivalues;
-pub(crate) use modules_load_strategy::ModulesLoadStrategy;
-pub(crate) use utils::make_fce_config;
-
-pub(self) use log_utf8_string_impl::log_utf8_string;
+pub(super) fn log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
+    let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
+    match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
+        Some(msg) => log::info!("{}", msg),
+        None => log::warn!("logger: incorrect UTF8 string's been supplied to logger"),
+    }
+}

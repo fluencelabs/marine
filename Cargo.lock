@@ -620,6 +620,7 @@ dependencies = [
  "parity-wasm",
  "pwasm-utils",
  "reqwest",
+ "safe-transmute",
  "tokio",
  "wasmer-interface-types-fl",
  "wasmer-runtime-core-fl",

@@ -13,22 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
 
-mod config;
-mod json_to_ivalues;
-mod log_utf8_string_impl;
-mod modules_load_strategy;
-mod utils;
-
-pub use config::RawModulesConfig;
-pub use config::RawModuleConfig;
-pub use config::ModulesConfig;
-pub use config::ModuleConfig;
-pub use config::WASIConfig;
-
-pub(crate) use config::load_config;
-pub(crate) use json_to_ivalues::json_to_ivalues;
-pub(crate) use modules_load_strategy::ModulesLoadStrategy;
-pub(crate) use utils::make_fce_config;
-
-pub(self) use log_utf8_string_impl::log_utf8_string;
+mod aquamarine_vm;

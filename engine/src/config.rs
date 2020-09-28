@@ -14,19 +14,41 @@
  * limitations under the License.
  */
 
+use super::IValue;
+use super::IType;
+use crate::HostImportError;
+
 use wasmer_wasi::WasiVersion;
 use wasmer_runtime::ImportObject;
 
 use std::path::PathBuf;
+use std::collections::HashMap;
 
-#[derive(Clone)]
+pub struct HostImportDescriptor {
+    /// This closure will be invoked for corresponding import.
+    pub closure: Box<dyn Fn(Vec<IValue>) -> Option<IValue> + 'static>,
+
+    /// Type of the closure arguments.
+    pub argument_types: Vec<IType>,
+
+    /// Types of output of the closure.
+    pub output_type: Option<IType>,
+
+    /// If Some, this closure is called with error when errors is encountered while lifting.
+    /// If None, panic will occur.
+    pub error_handler: Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + 'static>>,
+}
+
 pub struct FCEModuleConfig {
     /// Maximum number of Wasm memory pages that loaded module can use.
     /// Each Wasm pages is 65536 bytes long.
     pub mem_pages_count: u32,
 
     /// Import object that will be used in module instantiation process.
-    pub imports: ImportObject,
+    pub raw_imports: ImportObject,
+
+    /// Imports that will be used in module instantiation process.
+    pub imports: HashMap<String, HostImportDescriptor>,
 
     /// Desired WASI version.
     pub wasi_version: WasiVersion,
@@ -47,7 +69,8 @@ impl Default for FCEModuleConfig {
         Self {
             // 65536*1600 ~ 100 Mb
             mem_pages_count: 1600,
-            imports: ImportObject::new(),
+            raw_imports: ImportObject::new(),
+            imports: <_>::default(),
             wasi_version: WasiVersion::Latest,
             wasi_envs: vec![],
             wasi_preopened_files: vec![],

@@ -72,12 +72,17 @@ pub(crate) struct FCEModule {
     // import_object is needed because ImportObject::extend doesn't really deep copy
     // imports, so we need to store imports of this module to prevent their removing.
     #[allow(unused)]
-    import_object: ImportObject,
+    wit_import_object: ImportObject,
 
     // host_import_object is needed because ImportObject::extend doesn't really deep copy
     // imports, so we need to store imports of this module to prevent their removing.
     #[allow(unused)]
     host_import_object: ImportObject,
+
+    // host_closures_import_object is needed because ImportObject::extend doesn't really deep copy
+    // imports, so we need to store imports of this module to prevent their removing.
+    #[allow(unused)]
+    host_closures_import_object: ImportObject,
 
     // TODO: replace with dyn Trait
     export_funcs: HashMap<String, Arc<Callable>>,
@@ -92,12 +97,14 @@ impl FCEModule {
         config: FCEModuleConfig,
         modules: &HashMap<String, FCEModule>,
     ) -> Result<Self> {
+        use crate::host_imports::create_host_import_func;
+
         let wasmer_module = compile(&wasm_bytes)?;
         let wit = extract_wit(&wasmer_module)?;
         let fce_wit = FCEWITInterfaces::new(wit);
 
         let mut wit_instance = Arc::new_uninit();
-        let import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
+        let wit_import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
 
         let mut wasi_import_object = wasmer_wasi::generate_import_object_for_version(
             config.wasi_version,
@@ -107,8 +114,20 @@ impl FCEModule {
             config.wasi_mapped_dirs.clone(),
         );
 
-        wasi_import_object.extend(import_object.clone());
-        wasi_import_object.extend(config.imports.clone());
+        wasi_import_object.extend(wit_import_object.clone());
+        wasi_import_object.extend(config.raw_imports.clone());
+
+        let mut host_closures_namespace = Namespace::new();
+        let record_types = fce_wit
+            .record_types()
+            .map(|(id, r)| (id, r.clone()))
+            .collect::<HashMap<_, _>>();
+        for (import_name, descriptor) in config.imports {
+            let host_import = create_host_import_func(descriptor, record_types.clone());
+            host_closures_namespace.insert(import_name, host_import);
+        }
+        let mut host_closures_import_object = ImportObject::new();
+        host_closures_import_object.register("host", host_closures_namespace);
 
         let wasmer_instance = wasmer_module.instantiate(&wasi_import_object)?;
         let wit_instance = unsafe {
@@ -130,8 +149,9 @@ impl FCEModule {
 
         Ok(Self {
             wasmer_instance: Box::new(wasmer_instance),
-            import_object,
-            host_import_object: config.imports,
+            wit_import_object,
+            host_import_object: config.raw_imports,
+            host_closures_import_object,
             export_funcs,
             record_types,
         })
