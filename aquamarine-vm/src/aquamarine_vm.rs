@@ -67,10 +67,39 @@ impl AquamarineVM {
     }
 
     pub fn call(&mut self, args: serde_json::Value) -> Result<StepperOutcome> {
-        let result = self
+        use fluence_faas::IValue;
+
+        let mut result = self
             .faas
             .call_with_json("aquamarine", "invoke", args, <_>::default())?;
 
-        Ok(fluence_faas::from_interface_values::<StepperOutcome>(&result).unwrap())
+        let outcome = match result.remove(0) {
+            IValue::Record(record_values) => {
+                let mut record_values = record_values.into_vec();
+                let data = match record_values.remove(0) {
+                    IValue::String(str) => str,
+                    _ => unreachable!(),
+                };
+
+                let next_peer_pks = match record_values.remove(0) {
+                    IValue::Array(ar_values) => ar_values
+                        .into_iter()
+                        .map(|v| match v {
+                            IValue::String(str) => str,
+                            _ => unreachable!(),
+                        })
+                        .collect::<Vec<String>>(),
+                    _ => unreachable!(),
+                };
+
+                StepperOutcome {
+                    data,
+                    next_peer_pks,
+                }
+            }
+            _ => unreachable!(),
+        };
+
+        Ok(outcome)
     }
 }
