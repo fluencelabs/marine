@@ -15,14 +15,16 @@
  */
 
 use crate::Result;
-use crate::AquamarineVMError;
 
 use fluence_faas::FluenceFaaS;
-use fluence_faas::ModulesConfig;
+use fluence_faas::RawModuleConfig;
+use fluence_faas::RawModulesConfig;
 use fluence_faas::HostImportDescriptor;
 
-use std::convert::TryInto;
+use std::path::PathBuf;
 use std::collections::HashMap;
+
+const AQUAMARINE_NAME: &str = "aquamarine";
 
 // TODO: remove and use mutex instead
 unsafe impl Send for AquamarineVM {}
@@ -39,13 +41,23 @@ pub struct AquamarineVM {
 }
 
 impl AquamarineVM {
-    /// Create Service with given modules and service id.
-    pub fn new<C>(config: C, host_closures: Vec<(String, HostImportDescriptor)>) -> Result<Self>
+    /// Create Aquamarine with path to the aquamarine.wasm and a list of host closures.
+    pub fn new<P>(path: P, host_closures: Vec<(String, HostImportDescriptor)>) -> Result<Self>
     where
-        C: TryInto<ModulesConfig>,
-        AquamarineVMError: From<C::Error>,
+        P: Into<PathBuf>,
     {
-        let config: ModulesConfig = config.try_into()?;
+        let to_string =
+            |path: &PathBuf| -> Option<_> { path.to_string_lossy().into_owned().into() };
+
+        let mut stepper_config = RawModuleConfig::new(AQUAMARINE_NAME);
+        stepper_config.logger_enabled = Some(true);
+
+        let config = RawModulesConfig {
+            modules_dir: to_string(&path.into()),
+            service_base_dir: None,
+            module: vec![stepper_config],
+            default: None,
+        };
         let mut closures = HashMap::new();
         closures.insert(String::from("aquamarine"), host_closures);
 

@@ -111,9 +111,12 @@ pub struct RawDefaultModuleConfig {
 }
 
 impl RawModuleConfig {
-    pub fn new(name: String) -> Self {
+    pub fn new<S>(name: S) -> Self
+    where
+        S: Into<String>,
+    {
         Self {
-            name,
+            name: name.into(),
             mem_pages_count: None,
             logger_enabled: None,
             imports: None,
