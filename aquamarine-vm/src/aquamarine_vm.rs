@@ -19,7 +19,7 @@ use crate::Result;
 use fluence_faas::FluenceFaaS;
 use fluence_faas::RawModuleConfig;
 use fluence_faas::RawModulesConfig;
-pub use fluence_faas::HostImportDescriptor;
+use fluence_faas::HostImportDescriptor;
 
 use std::path::PathBuf;
 use std::collections::HashMap;

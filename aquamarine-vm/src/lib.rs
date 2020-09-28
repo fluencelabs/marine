@@ -30,5 +30,6 @@ mod errors;
 pub use aquamarine_vm::AquamarineVM;
 pub use aquamarine_vm::StepperOutcome;
 pub use errors::AquamarineVMError;
+pub use fluence_faas::HostImportDescriptor;
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineVMError>;
