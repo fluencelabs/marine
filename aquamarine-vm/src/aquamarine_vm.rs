@@ -15,52 +15,50 @@
  */
 
 use crate::Result;
-use super::AppServiceError;
+use crate::AquamarineVMError;
 
 use fluence_faas::FluenceFaaS;
 use fluence_faas::ModulesConfig;
-use fluence_faas::IType;
-use fluence_faas::IValue;
+use fluence_faas::HostImportDescriptor;
 
 use std::convert::TryInto;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
-use std::io::ErrorKind;
-
-const SERVICE_ID_ENV_NAME: &str = "service_id";
 
 // TODO: remove and use mutex instead
-unsafe impl Send for AquaStepper {}
+unsafe impl Send for AquamarineVM {}
 
-pub struct AquaStepper {
+// delete this once aquamarine become public
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct StepperOutcome {
+    pub data: String,
+    pub next_peer_pks: Vec<String>,
+}
+
+pub struct AquamarineVM {
     faas: FluenceFaaS,
-    init_user_id: String,
 }
 
-pub struct ClosureDescriptor {
-    pub name: String,
-    pub closure: Box<dyn Fn(Vec<IValue>) -> IValue>,
-    pub arguments_types: Vec<IType>,
-    pub output_types: Vec<IType>,
-}
-
-impl AquaStepper {
+impl AquamarineVM {
     /// Create Service with given modules and service id.
-    pub fn new<C, S>(config: C, closures: impl Iter<Item = &ClosureDescriptor>) -> Result<Self>
+    pub fn new<C>(config: C, host_closures: Vec<(String, HostImportDescriptor)>) -> Result<Self>
     where
         C: TryInto<ModulesConfig>,
-        AppServiceError: From<C::Error>,
+        AquamarineVMError: From<C::Error>,
     {
         let config: ModulesConfig = config.try_into()?;
+        let mut closures = HashMap::new();
+        closures.insert(String::from("aquamarine"), host_closures);
 
-        let faas = FluenceFaaS::with_raw_config(config)?;
+        let faas = FluenceFaaS::with_raw_config(config, closures)?;
 
         Ok(Self { faas })
     }
 
     pub fn call(&mut self, args: serde_json::Value) -> Result<StepperOutcome> {
-        self.faas
-            .call_with_json("aquamarine", "invoke", args, <_>::default())
-            .map_err(Into::into)
+        let result = self
+            .faas
+            .call_with_json("aquamarine", "invoke", args, <_>::default())?;
+
+        Ok(fluence_faas::from_interface_values::<StepperOutcome>(&result).unwrap())
     }
 }

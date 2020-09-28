@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "aquamarine-vm",
     "crates/wit-generator",
     "crates/wit-interfaces",
     "crates/wit-parser",

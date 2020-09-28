@@ -25,3 +25,10 @@
 )]
 
 mod aquamarine_vm;
+mod errors;
+
+pub use aquamarine_vm::AquamarineVM;
+pub use aquamarine_vm::StepperOutcome;
+pub use errors::AquamarineVMError;
+
+pub(crate) type Result<T> = std::result::Result<T, AquamarineVMError>;

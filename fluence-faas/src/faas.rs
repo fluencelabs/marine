@@ -19,6 +19,7 @@ use crate::misc::ModulesLoadStrategy;
 use crate::faas_interface::FaaSFunctionSignature;
 use crate::faas_interface::FaaSInterface;
 use crate::FaaSError;
+use crate::HostImportDescriptor;
 use crate::Result;
 use crate::IValue;
 
@@ -48,11 +49,14 @@ impl FluenceFaaS {
     /// Creates FaaS from config on filesystem.
     pub fn new<P: Into<PathBuf>>(config_file_path: P) -> Result<Self> {
         let config = crate::misc::load_config(config_file_path.into())?;
-        Self::with_raw_config(config)
+        Self::with_raw_config(config, HashMap::new())
     }
 
     /// Creates FaaS from config deserialized from TOML.
-    pub fn with_raw_config<C>(config: C) -> Result<Self>
+    pub fn with_raw_config<C>(
+        config: C,
+        host_closures: HashMap<String, Vec<(String, HostImportDescriptor)>>,
+    ) -> Result<Self>
     where
         C: TryInto<ModulesConfig>,
         FaaSError: From<C::Error>,
@@ -65,11 +69,15 @@ impl FluenceFaaS {
                 Self::load_modules(dir, ModulesLoadStrategy::WasmOnly)
             })?;
 
-        Self::with_modules::<ModulesConfig>(modules, config)
+        Self::with_modules::<ModulesConfig>(modules, config, host_closures)
     }
 
     /// Creates FaaS with given modules.
-    pub fn with_modules<C>(mut modules: HashMap<String, Vec<u8>>, config: C) -> Result<Self>
+    pub fn with_modules<C>(
+        mut modules: HashMap<String, Vec<u8>>,
+        config: C,
+        mut host_closures: HashMap<String, Vec<(String, HostImportDescriptor)>>,
+    ) -> Result<Self>
     where
         C: TryInto<ModulesConfig>,
         FaaSError: From<C::Error>,
@@ -85,8 +93,13 @@ impl FluenceFaaS {
                     module_name
                 ))
             })?;
-            let fce_module_config =
-                crate::misc::make_fce_config(Some(module_config), call_parameters.clone())?;
+            let module_host_closures = host_closures.remove(&module_name).unwrap_or_default();
+
+            let fce_module_config = crate::misc::make_fce_config(
+                Some(module_config),
+                call_parameters.clone(),
+                module_host_closures.into_iter(),
+            )?;
             fce.load_module(module_name, &module_bytes, fce_module_config)?;
         }
 
@@ -110,7 +123,7 @@ impl FluenceFaaS {
                 Self::load_modules(dir, ModulesLoadStrategy::Named(names))
             })?;
 
-        Self::with_modules::<ModulesConfig>(modules, config)
+        Self::with_modules::<ModulesConfig>(modules, config, HashMap::new())
     }
 
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.

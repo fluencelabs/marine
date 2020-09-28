@@ -37,6 +37,7 @@ pub use fce::IValue;
 pub use fce::IRecordType;
 pub use fce::IFunctionArg;
 pub use fce::IType;
+pub use fce::HostImportDescriptor;
 pub use fce::to_interface_value;
 pub use fce::from_interface_values;
 

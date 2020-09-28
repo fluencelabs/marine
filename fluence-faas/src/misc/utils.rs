@@ -27,11 +27,13 @@ use wasmer_wit::types::InterfaceType as IType;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::ops::Deref;
 
 /// Make FCE config based on parsed config.
 pub(crate) fn make_fce_config(
     module_config: Option<ModuleConfig>,
     call_parameters: std::rc::Rc<std::cell::RefCell<fluence_sdk_main::CallParameters>>,
+    module_host_closures: impl Iterator<Item = (String, HostImportDescriptor)>,
 ) -> crate::Result<FCEModuleConfig> {
     let mut wasm_module_config = FCEModuleConfig::default();
 
@@ -112,8 +114,7 @@ pub(crate) fn make_fce_config(
     }
 
     let call_parameters_closure = move |_args: Vec<IValue>| {
-        let call_parameters_ret = call_parameters.borrow().clone();
-        let result = crate::to_interface_value(&call_parameters_ret).unwrap();
+        let result = crate::to_interface_value(call_parameters.borrow().deref()).unwrap();
         Some(result)
     };
 
@@ -126,6 +127,10 @@ pub(crate) fn make_fce_config(
             error_handler: None,
         },
     );
+
+    for (import_name, import_descriptor) in module_host_closures {
+        host_imports.insert(import_name, import_descriptor);
+    }
 
     let mut import_object = ImportObject::new();
     import_object.register("host", namespace);

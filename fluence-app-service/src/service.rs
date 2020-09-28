@@ -48,7 +48,7 @@ impl AppService {
         let service_id = service_id.as_ref();
         let config = Self::set_env_and_dirs(config, service_id, envs)?;
 
-        let faas = FluenceFaaS::with_raw_config(config)?;
+        let faas = FluenceFaaS::with_raw_config(config, std::collections::HashMap::new())?;
 
         Ok(Self { faas })
     }

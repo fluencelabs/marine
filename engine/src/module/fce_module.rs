@@ -114,20 +114,22 @@ impl FCEModule {
             config.wasi_mapped_dirs.clone(),
         );
 
-        wasi_import_object.extend(wit_import_object.clone());
-        wasi_import_object.extend(config.raw_imports.clone());
-
         let mut host_closures_namespace = Namespace::new();
         let record_types = fce_wit
             .record_types()
             .map(|(id, r)| (id, r.clone()))
             .collect::<HashMap<_, _>>();
+
         for (import_name, descriptor) in config.imports {
             let host_import = create_host_import_func(descriptor, record_types.clone());
             host_closures_namespace.insert(import_name, host_import);
         }
         let mut host_closures_import_object = ImportObject::new();
         host_closures_import_object.register("host", host_closures_namespace);
+
+        wasi_import_object.extend(wit_import_object.clone());
+        wasi_import_object.extend(config.raw_imports.clone());
+        wasi_import_object.extend(host_closures_import_object.clone());
 
         let wasmer_instance = wasmer_module.instantiate(&wasi_import_object)?;
         let wit_instance = unsafe {
