@@ -19,7 +19,7 @@ use std::path::PathBuf;
 
 /// Describes behaviour of the Aquamarine VM stepper.
 pub struct AquamarineVMConfig {
-    /// Path to the aquamarine stepper wasm file.
+    /// Path to a folder with aquamarine stepper Wasm file.
     pub aquamarine_wasm_path: PathBuf,
 
     /// Descriptor of a closure that will be invoked on call_service call from Aquamarine stepper.

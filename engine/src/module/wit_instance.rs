@@ -100,7 +100,10 @@ impl WITInstance {
                     let func = WITFunction::from_import(module, import.name)?;
                     Ok((start_index + idx as usize, func))
                 }
-                None => Err(FCEError::NoSuchModule(import.namespace.to_string())),
+                None => Err(FCEError::NoSuchModule(format!(
+                    "trying to get imports from module with name {} that is not loaded",
+                    import.namespace
+                ))),
             })
             .collect::<Result<HashMap<_, _>>>()
     }

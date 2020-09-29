@@ -20,6 +20,7 @@ use crate::HostImportError;
 
 use wasmer_wasi::WasiVersion;
 use wasmer_runtime::ImportObject;
+use wasmer_core::vm::Ctx;
 
 use std::path::PathBuf;
 use std::collections::HashMap;
@@ -27,7 +28,7 @@ use std::collections::HashSet;
 
 pub struct HostImportDescriptor {
     /// This closure will be invoked for corresponding import.
-    pub closure: Box<dyn Fn(Vec<IValue>) -> Option<IValue> + 'static>,
+    pub host_exported_func: Box<dyn Fn(&mut Ctx, Vec<IValue>) -> Option<IValue> + 'static>,
 
     /// Type of the closure arguments.
     pub argument_types: Vec<IType>,

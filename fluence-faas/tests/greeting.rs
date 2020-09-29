@@ -24,7 +24,7 @@ pub fn greeting() {
     let greeting_config_raw = std::fs::read(greeting_config_path)
         .expect("../examples/greeting/Config.toml should presence");
 
-    let mut greeting_config: fluence_faas::RawModulesConfig =
+    let mut greeting_config: fluence_faas::TomlFaaSConfig =
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
     greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
 
@@ -60,7 +60,7 @@ pub fn get_interfaces() {
     let greeting_config_raw = std::fs::read(greeting_config_path)
         .expect("../examples/greeting/Config.toml should presence");
 
-    let mut greeting_config: fluence_faas::RawModulesConfig =
+    let mut greeting_config: fluence_faas::TomlFaaSConfig =
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
     greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
 

@@ -33,17 +33,18 @@ use wasmer_wit::types::RecordType;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 pub(crate) fn create_host_import_func(
     descriptor: HostImportDescriptor,
-    record_types: HashMap<u64, RecordType>,
+    record_types: Rc<HashMap<u64, RecordType>>,
 ) -> DynamicFunc<'static> {
     let allocate_func: AllocateFunc = Box::new(RefCell::new(None));
     let set_result_ptr_func: SetResultPtrFunc = Box::new(RefCell::new(None));
     let set_result_size_func: SetResultSizeFunc = Box::new(RefCell::new(None));
 
     let HostImportDescriptor {
-        closure,
+        host_exported_func,
         argument_types,
         output_type,
         error_handler,
@@ -61,7 +62,7 @@ pub(crate) fn create_host_import_func(
         init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 2);
 
         let result = match wvalues_to_ivalues(ctx, inputs, &argument_types, &record_types) {
-            Ok(ivalues) => closure(ivalues),
+            Ok(ivalues) => host_exported_func(ctx, ivalues),
             Err(e) => {
                 log::error!("error occurred while lifting values in host import: {}", e);
                 error_handler

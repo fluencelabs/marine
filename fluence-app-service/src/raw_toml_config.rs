@@ -28,7 +28,7 @@ use std::path::PathBuf;
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlAppServiceConfig {
-    pub service_base_dir: String,
+    pub service_base_dir: Option<String>,
 
     #[serde(flatten)]
     pub toml_faas_config: TomlFaaSConfig,
@@ -50,9 +50,14 @@ impl TryInto<AppServiceConfig> for TomlAppServiceConfig {
 
     fn try_into(self) -> Result<AppServiceConfig> {
         let faas_config = from_toml_faas_config(self.toml_faas_config)?;
+        let service_base_dir = match self.service_base_dir {
+            Some(service_base_dir) => PathBuf::from(service_base_dir),
+            // use tmp dir for service base dir if it isn't defined
+            None => std::env::temp_dir(),
+        };
 
         Ok(AppServiceConfig {
-            service_base_dir: PathBuf::from(self.service_base_dir),
+            service_base_dir,
             faas_config,
         })
     }

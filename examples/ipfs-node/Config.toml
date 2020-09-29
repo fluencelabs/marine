@@ -5,11 +5,11 @@ modules_dir = "artifacts"
     mem_pages_count = 100
     logger_enabled = true
 
-    [module.imports]
+    [module.mounted_binaries]
     ipfs = "/usr/local/bin/ipfs"
 
     [module.wasi]
-    envs = ["IPFS_ADDR=/dns4/relay02.fluence.dev/tcp/15001", "timeout=1s"]
+    envs = { "IPFS_ADDR" = "/dns4/relay02.fluence.dev/tcp/15001", "timeout" = "1s" }
 
 [[module]]
     name = "ipfs_pure"

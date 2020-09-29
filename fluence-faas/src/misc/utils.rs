@@ -21,15 +21,18 @@ use fce::FCEModuleConfig;
 use fce::HostImportDescriptor;
 use wasmer_core::import::ImportObject;
 use wasmer_core::import::Namespace;
+use wasmer_core::vm::Ctx;
 use wasmer_runtime::func;
 use wasmer_wit::values::InterfaceValue as IValue;
 use wasmer_wit::types::InterfaceType as IType;
 
 use std::collections::HashMap;
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::ops::Deref;
 
 pub(crate) fn create_host_import(host_cmd: String) -> HostImportDescriptor {
-    let host_cmd_closure = move |args: Vec<IValue>| {
+    let host_cmd_closure = move |_ctx: &mut Ctx, args: Vec<IValue>| {
         let arg = match &args[0] {
             IValue::String(str) => str,
             _ => unreachable!(),
@@ -47,7 +50,7 @@ pub(crate) fn create_host_import(host_cmd: String) -> HostImportDescriptor {
     };
 
     HostImportDescriptor {
-        closure: Box::new(host_cmd_closure),
+        host_exported_func: Box::new(host_cmd_closure),
         argument_types: vec![IType::String],
         output_type: Some(IType::String),
         error_handler: None,
@@ -55,15 +58,15 @@ pub(crate) fn create_host_import(host_cmd: String) -> HostImportDescriptor {
 }
 
 fn create_call_parameters_import(
-    call_parameters: std::rc::Rc<std::cell::RefCell<fluence_sdk_main::CallParameters>>,
+    call_parameters: Rc<RefCell<fluence_sdk_main::CallParameters>>,
 ) -> HostImportDescriptor {
-    let call_parameters_closure = move |_args: Vec<IValue>| {
+    let call_parameters_closure = move |_ctx: &mut Ctx, _args: Vec<IValue>| {
         let result = crate::to_interface_value(call_parameters.borrow().deref()).unwrap();
         Some(result)
     };
 
     HostImportDescriptor {
-        closure: Box::new(call_parameters_closure),
+        host_exported_func: Box::new(call_parameters_closure),
         argument_types: vec![],
         output_type: Some(IType::Record(0)),
         error_handler: None,
@@ -73,7 +76,7 @@ fn create_call_parameters_import(
 /// Make FCE config from provided FaaS config.
 pub(crate) fn make_fce_config(
     faas_module_config: Option<FaaSModuleConfig>,
-    call_parameters: std::rc::Rc<std::cell::RefCell<fluence_sdk_main::CallParameters>>,
+    call_parameters: Rc<RefCell<fluence_sdk_main::CallParameters>>,
 ) -> crate::Result<FCEModuleConfig> {
     let mut fce_module_config = FCEModuleConfig::default();
 

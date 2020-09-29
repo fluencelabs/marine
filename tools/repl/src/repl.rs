@@ -176,7 +176,7 @@ impl REPL {
             .map(|p| TomlAppServiceConfig::load(p.into()))
             .transpose()?
             .unwrap_or_default();
-        config.service_base_dir = tmp_path;
+        config.service_base_dir = Some(tmp_path);
 
         let app_service = AppService::new(config, &service_id, HashMap::new())?;
 

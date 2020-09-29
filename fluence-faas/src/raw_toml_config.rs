@@ -134,7 +134,7 @@ pub fn from_toml_faas_config(config: TomlFaaSConfig) -> Result<FaaSConfig> {
         .module
         .into_iter()
         .map(from_toml_named_module_config)
-        .collect::<Result<HashMap<_, _>>>()?;
+        .collect::<Result<Vec<_>>>()?;
 
     let default_modules_config = config.default.map(from_toml_module_config).transpose()?;
 
@@ -180,9 +180,9 @@ pub fn from_toml_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
     let to_vec = |elem: (String, toml::Value)| -> Result<(Vec<u8>, Vec<u8>)> {
         let to = elem
             .1
-            .try_into::<Vec<u8>>()
+            .try_into::<String>()
             .map_err(|e| FaaSError::ParseConfigError(e))?;
-        Ok((elem.0.into_bytes(), to))
+        Ok((elem.0.into_bytes(), to.into_bytes()))
     };
 
     let to_path = |elem: (String, toml::Value)| -> Result<(String, PathBuf)> {

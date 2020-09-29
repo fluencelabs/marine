@@ -21,14 +21,11 @@ use fluence_faas::IType;
 use once_cell::sync::Lazy;
 use serde_json::json;
 
-static ARG_CONFIG: Lazy<fluence_faas::RawModulesConfig> = Lazy::new(|| {
-    let argument_passing_config_raw =
-        std::fs::read("./tests/json_wasm_tests/arguments_passing/Config.toml")
-            .expect("../examples/greeting/artifacts/greeting.wasm should presence");
+static ARG_CONFIG: Lazy<fluence_faas::TomlFaaSConfig> = Lazy::new(|| {
+    let mut arguments_passing_config =
+        fluence_faas::TomlFaaSConfig::load("./tests/json_wasm_tests/arguments_passing/Config.toml")
+            .expect("toml faas config should created");
 
-    let mut arguments_passing_config: fluence_faas::RawModulesConfig =
-        toml::from_slice(&argument_passing_config_raw)
-            .expect("argument passing test config should be well-formed");
     arguments_passing_config.modules_dir = Some(String::from(
         "./tests/json_wasm_tests/arguments_passing/artifacts",
     ));

@@ -208,6 +208,7 @@ impl FCEModule {
             .record_types()
             .map(|(id, r)| (id, r.clone()))
             .collect::<HashMap<_, _>>();
+        let record_types = std::rc::Rc::new(record_types);
 
         for (import_name, descriptor) in config.host_imports {
             let host_import = create_host_import_func(descriptor, record_types.clone());

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use crate::{Result, AquamarineVMError};
+use crate::Result;
+use crate::AquamarineVMError;
 use crate::config::AquamarineVMConfig;
 
 use fluence_faas::FluenceFaaS;
@@ -38,7 +39,7 @@ pub struct AquamarineVM {
 }
 
 impl AquamarineVM {
-    /// Create Aquamarine with provided config.
+    /// Create AquamarineVM with provided config.
     pub fn new(config: AquamarineVMConfig) -> Result<Self> {
         use fluence_faas::FaaSConfig;
         use fluence_faas::FaaSModuleConfig;
@@ -53,12 +54,9 @@ impl AquamarineVM {
             wasi: None,
         };
 
-        let mut modules_config = HashMap::new();
-        modules_config.insert(String::from(AQUAMARINE_NAME), aquamarine_module_config);
-
         let faas_config = FaaSConfig {
             modules_dir: Some(config.aquamarine_wasm_path),
-            modules_config,
+            modules_config: vec![(String::from(AQUAMARINE_NAME), aquamarine_module_config)],
             default_modules_config: None,
         };
 

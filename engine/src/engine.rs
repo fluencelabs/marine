@@ -60,7 +60,10 @@ impl FCE {
         match self.modules.get_mut(module_name) {
             // TODO: refactor errors
             Some(module) => module.call(func_name.as_ref(), argument),
-            None => Err(FCEError::NoSuchModule(module_name.to_string())),
+            None => Err(FCEError::NoSuchModule(format!(
+                "trying to call module with name {} that is not loaded",
+                module_name
+            ))),
         }
     }
 
@@ -101,7 +104,10 @@ impl FCE {
     fn unload_module_(&mut self, module_name: &str) -> Result<()> {
         match self.modules.remove(module_name) {
             Some(_) => Ok(()),
-            None => Err(FCEError::NoSuchModule(module_name.to_string())),
+            None => Err(FCEError::NoSuchModule(format!(
+                "trying to unload module with name {} that is not loaded",
+                module_name
+            ))),
         }
     }
 
@@ -115,7 +121,10 @@ impl FCE {
     fn module_wasi_state_(&mut self, module_name: &str) -> Result<&wasmer_wasi::state::WasiState> {
         match self.modules.get_mut(module_name) {
             Some(module) => Ok(module.get_wasi_state()),
-            None => Err(FCEError::NoSuchModule(module_name.to_string())),
+            None => Err(FCEError::NoSuchModule(format!(
+                "trying to get wasi state from module with name {} that is not loaded",
+                module_name
+            ))),
         }
     }
 
@@ -136,7 +145,10 @@ impl FCE {
     ) -> Result<impl Iterator<Item = FCEFunctionSignature<'_>>> {
         match self.modules.get(module_name.as_ref()) {
             Some(module) => Ok(Self::get_module_function_signatures(module)),
-            None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
+            None => Err(FCEError::NoSuchModule(format!(
+                "trying to get interface from module with name {} that is not loaded",
+                module_name.as_ref()
+            ))),
         }
     }
 
@@ -154,7 +166,10 @@ impl FCE {
     ) -> Result<impl Iterator<Item = &(u64, IRecordType)>> {
         match self.modules.get(module_name.as_ref()) {
             Some(module) => Ok(module.get_export_record_types()),
-            None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
+            None => Err(FCEError::NoSuchModule(format!(
+                "trying to get record types from module with name {} that is not loaded",
+                module_name.as_ref()
+            ))),
         }
     }
 

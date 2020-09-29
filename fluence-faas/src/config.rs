@@ -26,8 +26,8 @@ pub struct FaaSConfig {
     /// Path to a dir where compiled Wasm modules are located.
     pub modules_dir: Option<PathBuf>,
 
-    /// Settings for a module with particular name.
-    pub modules_config: HashMap<String, FaaSModuleConfig>,
+    /// Settings for a module with particular name (not HashMap because the order is matter).
+    pub modules_config: Vec<(String, FaaSModuleConfig)>,
 
     /// Settings for a module that name's not been found in modules_config.
     pub default_modules_config: Option<FaaSModuleConfig>,
