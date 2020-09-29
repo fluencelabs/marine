@@ -9,4 +9,4 @@ name = "call_parameters"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk" }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
