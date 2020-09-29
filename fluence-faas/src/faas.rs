@@ -46,7 +46,7 @@ pub struct FluenceFaaS {
 
 impl FluenceFaaS {
     /// Creates FaaS from config on filesystem.
-    pub fn new<P: Into<PathBuf>>(config_file_path: P) -> Result<Self> {
+    pub fn with_config_path<P: Into<PathBuf>>(config_file_path: P) -> Result<Self> {
         let config = crate::raw_toml_config::TomlFaaSConfig::load(config_file_path.into())?;
         Self::with_raw_config(config)
     }

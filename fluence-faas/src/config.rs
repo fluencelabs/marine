@@ -50,7 +50,7 @@ pub struct FaaSModuleConfig {
 }
 
 impl FaaSModuleConfig {
-    pub fn extend_wasi_envs(mut self, new_envs: HashMap<Vec<u8>, Vec<u8>>) -> Self {
+    pub fn extend_wasi_envs(&mut self, new_envs: HashMap<Vec<u8>, Vec<u8>>) {
         match &mut self.wasi {
             Some(FaaSWASIConfig { envs, .. }) => envs.extend(new_envs),
             w @ None => {
@@ -60,17 +60,15 @@ impl FaaSModuleConfig {
                     mapped_dirs: HashMap::new(),
                 })
             }
-        }
-
-        self
+        };
     }
 
     #[rustfmt::skip]
     pub fn extend_wasi_files(
-        mut self,
+        &mut self,
         new_preopened_files: HashSet<PathBuf>,
         new_mapped_dirs: HashMap<String, PathBuf>,
-    ) -> Self {
+    ) {
         match &mut self.wasi {
             Some(FaaSWASIConfig {
                      preopened_files,
@@ -87,9 +85,7 @@ impl FaaSModuleConfig {
                     mapped_dirs: new_mapped_dirs,
                 })
             }
-        }
-
-        self
+        };
     }
 }
 

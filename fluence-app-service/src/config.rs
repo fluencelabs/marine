@@ -17,11 +17,10 @@
 use std::path::PathBuf;
 
 /// Describes behaviour of a Fluence AppService.
-#[derive(Debug, Clone, Default)]
+#[derive(Default)]
 pub struct AppServiceConfig {
     /// Used for preparing filesystem on the service initialization stage.
     pub service_base_dir: PathBuf,
 
-    #[serde(flatten)]
     pub faas_config: fluence_faas::FaaSConfig,
 }

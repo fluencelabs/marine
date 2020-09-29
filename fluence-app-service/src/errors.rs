@@ -25,15 +25,17 @@ pub enum AppServiceError {
     /// An error related to config parsing.
     InvalidConfig(String),
 
+    /// Various errors related to file i/o.
+    IOError(IOError),
+
     /// FaaS errors.
     FaaSError(FaaSError),
 
     /// Directory creation failed
     CreateDir { err: IOError, path: PathBuf },
 
-    /// Base service dir wasn't specified in config
-    /// TODO: do we need that dir to be optional?
-    MissingServiceDir,
+    /// Errors related to malformed config.
+    ConfigParseError(String),
 }
 
 impl Error for AppServiceError {}
@@ -42,13 +44,12 @@ impl std::fmt::Display for AppServiceError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             AppServiceError::InvalidConfig(err_msg) => write!(f, "{}", err_msg),
+            AppServiceError::IOError(err) => write!(f, "{}", err),
             AppServiceError::FaaSError(err) => write!(f, "{}", err),
             AppServiceError::CreateDir { err, path } => {
                 write!(f, "Failed to create dir {:?}: {:?}", path, err)
             }
-            AppServiceError::MissingServiceDir => {
-                write!(f, "service base dir should be specified in config")
-            }
+            AppServiceError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
         }
     }
 }
@@ -56,6 +57,12 @@ impl std::fmt::Display for AppServiceError {
 impl From<FaaSError> for AppServiceError {
     fn from(err: FaaSError) -> Self {
         AppServiceError::FaaSError(err)
+    }
+}
+
+impl From<IOError> for AppServiceError {
+    fn from(err: IOError) -> Self {
+        AppServiceError::IOError(err)
     }
 }
 

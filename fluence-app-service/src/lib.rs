@@ -27,22 +27,14 @@
 mod config;
 mod errors;
 mod service;
+mod raw_toml_config;
 
 pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 
-use config::AppServiceConfig;
 pub use errors::AppServiceError;
 pub use service::AppService;
 
-pub use fluence_faas::CallParameters;
-pub use fluence_faas::IValue;
-pub use fluence_faas::IType;
-pub use fluence_faas::FaaSInterface;
-pub use fluence_faas::RawModulesConfig;
-pub use fluence_faas::RawModuleConfig;
-pub use fluence_faas::ModulesConfig;
-pub use fluence_faas::ModuleConfig;
-pub use fluence_faas::FaaSWASIConfig;
-pub use fluence_faas::to_interface_value;
-pub use fluence_faas::from_interface_values;
-pub use fluence_faas::vec1;
+pub use config::*;
+pub use raw_toml_config::*;
+
+pub use fluence_faas::*;

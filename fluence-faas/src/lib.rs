@@ -37,14 +37,8 @@ pub use faas::FluenceFaaS;
 pub use faas_interface::FaaSInterface;
 pub use faas_interface::FaaSFunctionSignature;
 
-pub use config::FaaSConfig;
-pub use config::FaaSModuleConfig;
-pub use config::FaaSWASIConfig;
-
-pub use raw_toml_config::TomlFaaSConfig;
-pub use raw_toml_config::TomlFaaSNamedModuleConfig;
-pub use raw_toml_config::TomlFaaSModuleConfig;
-pub use raw_toml_config::TomlWASIConfig;
+pub use config::*;
+pub use raw_toml_config::*;
 
 pub use errors::FaaSError;
 

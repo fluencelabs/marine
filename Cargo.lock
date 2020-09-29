@@ -720,6 +720,7 @@ dependencies = [
  "log",
  "serde",
  "serde_derive",
+ "serde_json",
  "toml",
  "wasmer-wasi-fl",
 ]

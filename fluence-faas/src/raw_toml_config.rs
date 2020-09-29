@@ -82,7 +82,7 @@ impl TryInto<FaaSConfig> for TomlFaaSConfig {
     type Error = FaaSError;
 
     fn try_into(self) -> Result<FaaSConfig> {
-        from_raw_modules_config(self)
+        from_toml_faas_config(self)
     }
 }
 
@@ -129,7 +129,7 @@ pub struct TomlWASIConfig {
 }
 
 /// Prepare config after parsing it from TOML.
-fn from_raw_modules_config(config: TomlFaaSConfig) -> Result<FaaSConfig> {
+pub fn from_toml_faas_config(config: TomlFaaSConfig) -> Result<FaaSConfig> {
     let modules_config = config
         .module
         .into_iter()
@@ -145,14 +145,14 @@ fn from_raw_modules_config(config: TomlFaaSConfig) -> Result<FaaSConfig> {
     })
 }
 
-fn from_toml_named_module_config(
+pub fn from_toml_named_module_config(
     config: TomlFaaSNamedModuleConfig,
 ) -> Result<(String, FaaSModuleConfig)> {
     let module_config = from_toml_module_config(config.config)?;
     Ok((config.name, module_config))
 }
 
-fn from_toml_module_config(config: TomlFaaSModuleConfig) -> Result<FaaSModuleConfig> {
+pub fn from_toml_module_config(config: TomlFaaSModuleConfig) -> Result<FaaSModuleConfig> {
     let mounted_binaries = config.mounted_binaries.unwrap_or_default();
     let mounted_binaries = mounted_binaries
         .into_iter()
@@ -176,7 +176,7 @@ fn from_toml_module_config(config: TomlFaaSModuleConfig) -> Result<FaaSModuleCon
     })
 }
 
-fn from_toml_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
+pub fn from_toml_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
     let to_vec = |elem: (String, toml::Value)| -> Result<(Vec<u8>, Vec<u8>)> {
         let to = elem
             .1
