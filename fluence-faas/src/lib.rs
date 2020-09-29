@@ -55,5 +55,6 @@ pub use fce::IType;
 pub use fce::{HostImportDescriptor, HostImportError};
 pub use fce::to_interface_value;
 pub use fce::from_interface_values;
+pub use fce::vec1;
 
 pub use fluence_sdk_main::CallParameters;

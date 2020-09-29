@@ -48,5 +48,10 @@ pub use module::from_interface_values;
 pub use module::to_interface_value;
 
 pub use wasmer_wit::types::RecordFieldType as IRecordFieldType;
+pub mod vec1 {
+    pub use wasmer_wit::vec1::Vec1;
+    // re-export vec1! macro
+    pub use wasmer_wit::vec1;
+}
 
 pub(crate) type Result<T> = std::result::Result<T, FCEError>;

@@ -30,7 +30,7 @@ const AQUAMARINE_NAME: &str = "aquamarine";
 unsafe impl Send for AquamarineVM {}
 
 // delete this once aquamarine become public
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct StepperOutcome {
     pub data: String,
     pub next_peer_pks: Vec<String>,

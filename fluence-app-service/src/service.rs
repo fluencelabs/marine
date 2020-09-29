@@ -29,9 +29,6 @@ const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
 const SERVICE_TMP_DIR_NAME: &str = "tmp";
 
-// TODO: remove and use mutex instead
-unsafe impl Send for AppService {}
-
 pub struct AppService {
     faas: FluenceFaaS,
 }
