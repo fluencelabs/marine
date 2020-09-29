@@ -91,7 +91,7 @@ pub struct TomlFaaSModuleConfig {
     pub name: String,
     pub mem_pages_count: Option<u32>,
     pub logger_enabled: Option<bool>,
-    pub imports: Option<toml::value::Table>,
+    pub cli_imports: Option<toml::value::Table>,
     pub wasi: Option<TomlWASIConfig>,
 }
 
@@ -120,7 +120,7 @@ impl TomlFaaSModuleConfig {
             name: name.into(),
             mem_pages_count: None,
             logger_enabled: None,
-            imports: None,
+            cli_imports: None,
             wasi: None,
         }
     }
@@ -154,8 +154,15 @@ fn from_raw_modules_config(config: TomlFaaSConfig) -> Result<FaaSConfig> {
 }
 
 fn from_toml_module_config(config: TomlFaaSModuleConfig) -> Result<(String, FaaSModuleConfig)> {
-    let imports = config.imports.map(parse_imports).transpose()?;
-    let wasi = config.wasi.map(from_raw_wasi_config);
+    let cli_imports = config.cli_imports.unwrap_or_default();
+    let imports = parse_imports(cli_imports)?;
+
+    let host_cli_imports
+    for (import_name, host_cmd) in imports {
+
+    }
+
+    let wasi = config.wasi.map(from_raw_wasi_config).transpose()?;
     Ok((
         config.name,
         FaaSModuleConfig {
@@ -169,7 +176,7 @@ fn from_toml_module_config(config: TomlFaaSModuleConfig) -> Result<(String, FaaS
 
 fn from_raw_default_module_config(config: TomlDefaultFaaSModuleConfig) -> Result<FaaSModuleConfig> {
     let imports = config.imports.map(parse_imports).transpose()?;
-    let wasi = config.wasi.map(from_raw_wasi_config);
+    let wasi = config.wasi.map(from_raw_wasi_config).transpose()?;
     Ok(FaaSModuleConfig {
         mem_pages_count: config.mem_pages_count,
         logger_enabled: config.logger_enabled.unwrap_or(true),
@@ -178,23 +185,37 @@ fn from_raw_default_module_config(config: TomlDefaultFaaSModuleConfig) -> Result
     })
 }
 
-fn from_raw_wasi_config(wasi: TomlWASIConfig) -> WASIConfig {
-    let envs = wasi
-        .envs
-        .map(|env| env.into_iter().map(|e| e.into_bytes()).collect::<Vec<_>>());
+fn from_raw_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
+    let to_vec = |(from: String, to: toml::Value)| -> Result<(Vec<u8>, Vec<u8>)> {
+        let to = to
+            .try_into::<Vec<u8>>()
+            .map_err(|e| FaaSError::ParseConfigError(e))?;
+        Ok((from.into_bytes(), to))
+    };
 
-    let mapped_dirs = wasi.mapped_dirs.map(|mapped_dir| {
-        mapped_dir
-            .into_iter()
-            .map(|(from, to)| (from, to.try_into::<String>().unwrap()))
-            .collect::<Vec<_>>()
-    });
+    let envs = wasi.envs.unwrap_or_default();
+    let envs = envs
+        .into_iter()
+        .map(to_vec)
+        .collect::<Result<HashMap<_, _>>>()?;
 
-    WASIConfig {
+    let preopened_files = wasi.preopened_files.unwrap_or_default();
+    let preopened_files = preopened_files
+        .into_iter()
+        .map(PathBuf::from)
+        .collect::<HashSet<_>>();
+
+    let mapped_dirs = wasi.mapped_dirs.unwrap_or_default();
+    let mapped_dirs = mapped_dirs
+        .into_iter()
+        .map(to_vec)
+        .collect::<Result<HashMap<_, _>>>()?;
+
+    Ok(FaaSWASIConfig {
         envs,
-        preopened_files: wasi.preopened_files,
+        preopened_files,
         mapped_dirs,
-    }
+    })
 }
 
 fn parse_imports(imports: toml::value::Table) -> Result<Vec<(String, String)>> {

@@ -59,9 +59,6 @@ pub enum FCEError {
 
     /// Incorrect WIT section.
     IncorrectWIT(String),
-
-    /// Invalid FCE config (such as duplicated envs, preopened_files or mapped_dirs).
-    InvalidConfig(String),
 }
 
 impl Error for FCEError {}
@@ -86,7 +83,6 @@ impl std::fmt::Display for FCEError {
             FCEError::HostImportError(host_import_error) => write!(f, "{}", host_import_error),
             FCEError::WITParseError(err) => write!(f, "{}", err),
             FCEError::IncorrectWIT(err_msg) => write!(f, "{}", err_msg),
-            FCEError::InvalidConfig(err_msg) => write!(f, "{}", err_msg),
         }
     }
 }

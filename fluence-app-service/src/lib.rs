@@ -42,7 +42,7 @@ pub use fluence_faas::RawModulesConfig;
 pub use fluence_faas::RawModuleConfig;
 pub use fluence_faas::ModulesConfig;
 pub use fluence_faas::ModuleConfig;
-pub use fluence_faas::WASIConfig;
+pub use fluence_faas::FaaSWASIConfig;
 pub use fluence_faas::to_interface_value;
 pub use fluence_faas::from_interface_values;
 pub use fluence_faas::vec1;

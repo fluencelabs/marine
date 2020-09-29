@@ -30,7 +30,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::ops::Deref;
 
-fn create_host_import(host_cmd: String) -> HostImportDescriptor {
+pub(super) fn create_host_import(host_cmd: String) -> HostImportDescriptor {
     let host_cmd_closure = move |args: Vec<IValue>| {
         let arg = match &args[0] {
             IValue::String(str) => str,

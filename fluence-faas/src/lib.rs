@@ -39,7 +39,7 @@ pub use faas_interface::FaaSFunctionSignature;
 
 pub use config::FaaSConfig;
 pub use config::FaaSModuleConfig;
-pub use config::WASIConfig;
+pub use config::FaaSWASIConfig;
 
 pub use raw_toml_config::TomlFaaSConfig;
 pub use raw_toml_config::TomlFaaSModuleConfig;

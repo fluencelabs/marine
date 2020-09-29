@@ -46,15 +46,15 @@ pub struct FaaSModuleConfig {
     pub host_imports: HashMap<String, HostImportDescriptor>,
 
     /// A WASI config.
-    pub wasi: Option<WASIConfig>,
+    pub wasi: Option<FaaSWASIConfig>,
 }
 
 impl FaaSModuleConfig {
     pub fn extend_wasi_envs(mut self, new_envs: HashMap<Vec<u8>, Vec<u8>>) -> Self {
         match &mut self.wasi {
-            Some(WASIConfig { envs, .. }) => envs.extend(new_envs),
+            Some(FaaSWASIConfig { envs, .. }) => envs.extend(new_envs),
             w @ None => {
-                *w = Some(WASIConfig {
+                *w = Some(FaaSWASIConfig {
                     envs: new_envs,
                     preopened_files: HashSet::new(),
                     mapped_dirs: HashMap::new(),
@@ -72,7 +72,7 @@ impl FaaSModuleConfig {
         new_mapped_dirs: HashMap<String, PathBuf>,
     ) -> Self {
         match &mut self.wasi {
-            Some(WASIConfig {
+            Some(FaaSWASIConfig {
                      preopened_files,
                      mapped_dirs,
                      ..
@@ -81,7 +81,7 @@ impl FaaSModuleConfig {
                     mapped_dirs.extend(new_mapped_dirs);
             },
             w @ None => {
-                *w = Some(WASIConfig {
+                *w = Some(FaaSWASIConfig {
                     envs: HashMap::new(),
                     preopened_files: new_preopened_files,
                     mapped_dirs: new_mapped_dirs,
@@ -94,7 +94,7 @@ impl FaaSModuleConfig {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct WASIConfig {
+pub struct FaaSWASIConfig {
     /// A list of environment variables available for this module.
     pub envs: HashMap<Vec<u8>, Vec<u8>>,
 
