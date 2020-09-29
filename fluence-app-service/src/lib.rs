@@ -24,11 +24,13 @@
     unreachable_patterns
 )]
 
+mod config;
 mod errors;
 mod service;
 
 pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 
+use config::AppServiceConfig;
 pub use errors::AppServiceError;
 pub use service::AppService;
 

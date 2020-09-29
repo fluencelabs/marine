@@ -23,6 +23,7 @@ use wasmer_runtime::ImportObject;
 
 use std::path::PathBuf;
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 pub struct HostImportDescriptor {
     /// This closure will be invoked for corresponding import.
@@ -47,20 +48,20 @@ pub struct FCEModuleConfig {
     /// Import object that will be used in module instantiation process.
     pub raw_imports: ImportObject,
 
-    /// Imports that will be used in module instantiation process.
-    pub imports: HashMap<String, HostImportDescriptor>,
+    /// Imports from the host side that will be used in module instantiation process.
+    pub host_imports: HashMap<String, HostImportDescriptor>,
 
     /// Desired WASI version.
     pub wasi_version: WasiVersion,
 
     /// Environment variables for loaded modules.
-    pub wasi_envs: Vec<Vec<u8>>,
+    pub wasi_envs: HashMap<Vec<u8>, Vec<u8>>,
 
     /// List of available directories for loaded modules.
-    pub wasi_preopened_files: Vec<PathBuf>,
+    pub wasi_preopened_files: HashSet<PathBuf>,
 
     /// Mapping between paths.
-    pub wasi_mapped_dirs: Vec<(String, PathBuf)>,
+    pub wasi_mapped_dirs: HashMap<String, PathBuf>,
 }
 
 impl Default for FCEModuleConfig {
@@ -70,11 +71,11 @@ impl Default for FCEModuleConfig {
             // 65536*1600 ~ 100 Mb
             mem_pages_count: 1600,
             raw_imports: ImportObject::new(),
-            imports: <_>::default(),
+            host_imports: HashMap::new(),
             wasi_version: WasiVersion::Latest,
-            wasi_envs: vec![],
-            wasi_preopened_files: vec![],
-            wasi_mapped_dirs: vec![],
+            wasi_envs: HashMap::new(),
+            wasi_preopened_files: HashSet::new(),
+            wasi_mapped_dirs: HashMap::new(),
         }
     }
 }
@@ -95,19 +96,19 @@ impl FCEModuleConfig {
     }
 
     #[allow(dead_code)]
-    pub fn with_wasi_envs(mut self, envs: Vec<Vec<u8>>) -> Self {
+    pub fn with_wasi_envs(mut self, envs: HashMap<Vec<u8>, Vec<u8>>) -> Self {
         self.wasi_envs = envs;
         self
     }
 
     #[allow(dead_code)]
-    pub fn with_wasi_preopened_files(mut self, preopened_files: Vec<PathBuf>) -> Self {
+    pub fn with_wasi_preopened_files(mut self, preopened_files: HashSet<PathBuf>) -> Self {
         self.wasi_preopened_files = preopened_files;
         self
     }
 
     #[allow(dead_code)]
-    pub fn with_wasi_mapped_dirs(mut self, mapped_dirs: Vec<(String, PathBuf)>) -> Self {
+    pub fn with_wasi_mapped_dirs(mut self, mapped_dirs: HashMap<String, PathBuf>) -> Self {
         self.wasi_mapped_dirs = mapped_dirs;
         self
     }

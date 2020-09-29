@@ -97,39 +97,15 @@ impl FCEModule {
         config: FCEModuleConfig,
         modules: &HashMap<String, FCEModule>,
     ) -> Result<Self> {
-        use crate::host_imports::create_host_import_func;
-
         let wasmer_module = compile(&wasm_bytes)?;
         let wit = extract_wit(&wasmer_module)?;
         let fce_wit = FCEWITInterfaces::new(wit);
 
         let mut wit_instance = Arc::new_uninit();
         let wit_import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
-
-        let mut wasi_import_object = wasmer_wasi::generate_import_object_for_version(
-            config.wasi_version,
-            vec![],
-            config.wasi_envs.clone(),
-            config.wasi_preopened_files.clone(),
-            config.wasi_mapped_dirs.clone(),
-        );
-
-        let mut host_closures_namespace = Namespace::new();
-        let record_types = fce_wit
-            .record_types()
-            .map(|(id, r)| (id, r.clone()))
-            .collect::<HashMap<_, _>>();
-
-        for (import_name, descriptor) in config.imports {
-            let host_import = create_host_import_func(descriptor, record_types.clone());
-            host_closures_namespace.insert(import_name, host_import);
-        }
-        let mut host_closures_import_object = ImportObject::new();
-        host_closures_import_object.register("host", host_closures_namespace);
-
-        wasi_import_object.extend(wit_import_object.clone());
-        wasi_import_object.extend(config.raw_imports.clone());
-        wasi_import_object.extend(host_closures_import_object.clone());
+        let raw_imports = config.raw_imports.clone();
+        let (wasi_import_object, host_closures_import_object) =
+            Self::create_import_objects(config, &fce_wit, wit_import_object.clone());
 
         let wasmer_instance = wasmer_module.instantiate(&wasi_import_object)?;
         let wit_instance = unsafe {
@@ -152,7 +128,7 @@ impl FCEModule {
         Ok(Self {
             wasmer_instance: Box::new(wasmer_instance),
             wit_import_object,
-            host_import_object: config.raw_imports,
+            host_import_object: raw_imports,
             host_closures_import_object,
             export_funcs,
             record_types,
@@ -198,6 +174,53 @@ impl FCEModule {
                 function_name
             ))),
         }
+    }
+
+    fn create_import_objects(
+        config: FCEModuleConfig,
+        fce_wit: &FCEWITInterfaces<'_>,
+        wit_import_object: ImportObject,
+    ) -> (ImportObject, ImportObject) {
+        use crate::host_imports::create_host_import_func;
+
+        let wasi_envs = config
+            .wasi_envs
+            .into_iter()
+            .map(|(mut left, right)| {
+                left.push(61); // 61 is ASCII code of '='
+                left.extend(right);
+                left
+            })
+            .collect::<Vec<_>>();
+        let wasi_preopened_files = config.wasi_preopened_files.into_iter().collect::<Vec<_>>();
+        let wasi_mapped_dirs = config.wasi_mapped_dirs.into_iter().collect::<Vec<_>>();
+
+        let mut wasi_import_object = wasmer_wasi::generate_import_object_for_version(
+            config.wasi_version,
+            vec![],
+            wasi_envs,
+            wasi_preopened_files,
+            wasi_mapped_dirs,
+        );
+
+        let mut host_closures_namespace = Namespace::new();
+        let record_types = fce_wit
+            .record_types()
+            .map(|(id, r)| (id, r.clone()))
+            .collect::<HashMap<_, _>>();
+
+        for (import_name, descriptor) in config.host_imports {
+            let host_import = create_host_import_func(descriptor, record_types.clone());
+            host_closures_namespace.insert(import_name, host_import);
+        }
+        let mut host_closures_import_object = ImportObject::new();
+        host_closures_import_object.register("host", host_closures_namespace);
+
+        wasi_import_object.extend(wit_import_object);
+        wasi_import_object.extend(config.raw_imports);
+        wasi_import_object.extend(host_closures_import_object.clone());
+
+        (wasi_import_object, host_closures_import_object)
     }
 
     fn instantiate_wit_exports(

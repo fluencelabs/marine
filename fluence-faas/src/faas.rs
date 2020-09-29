@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::misc::ModulesConfig;
+use crate::config::FaaSConfig;
 use crate::misc::ModulesLoadStrategy;
 use crate::faas_interface::FaaSFunctionSignature;
 use crate::faas_interface::FaaSInterface;
@@ -48,7 +48,7 @@ pub struct FluenceFaaS {
 impl FluenceFaaS {
     /// Creates FaaS from config on filesystem.
     pub fn new<P: Into<PathBuf>>(config_file_path: P) -> Result<Self> {
-        let config = crate::misc::load_config(config_file_path.into())?;
+        let config = crate::raw_toml_config::load_config(config_file_path.into())?;
         Self::with_raw_config(config, HashMap::new())
     }
 
@@ -58,7 +58,7 @@ impl FluenceFaaS {
         host_closures: HashMap<String, Vec<(String, HostImportDescriptor)>>,
     ) -> Result<Self>
     where
-        C: TryInto<ModulesConfig>,
+        C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
@@ -69,7 +69,7 @@ impl FluenceFaaS {
                 Self::load_modules(dir, ModulesLoadStrategy::WasmOnly)
             })?;
 
-        Self::with_modules::<ModulesConfig>(modules, config, host_closures)
+        Self::with_modules::<FaaSConfig>(modules, config, host_closures)
     }
 
     /// Creates FaaS with given modules.
@@ -79,7 +79,7 @@ impl FluenceFaaS {
         mut host_closures: HashMap<String, Vec<(String, HostImportDescriptor)>>,
     ) -> Result<Self>
     where
-        C: TryInto<ModulesConfig>,
+        C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,
     {
         let mut fce = FCE::new();
@@ -112,7 +112,7 @@ impl FluenceFaaS {
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
     pub fn with_module_names<C>(names: &HashSet<String>, config: C) -> Result<Self>
     where
-        C: TryInto<ModulesConfig>,
+        C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
@@ -123,7 +123,7 @@ impl FluenceFaaS {
                 Self::load_modules(dir, ModulesLoadStrategy::Named(names))
             })?;
 
-        Self::with_modules::<ModulesConfig>(modules, config, HashMap::new())
+        Self::with_modules::<FaaSConfig>(modules, config, HashMap::new())
     }
 
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.

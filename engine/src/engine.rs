@@ -80,7 +80,6 @@ impl FCE {
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
     ) -> Result<()> {
-        Self::validate_config(&config)?;
         let _prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
         let module = FCEModule::new(&wasm_bytes, config, &self.modules)?;
@@ -169,43 +168,6 @@ impl FCE {
                 arguments,
                 output_types,
             })
-    }
-
-    #[rustfmt::skip]
-    fn validate_config(config: &FCEModuleConfig) -> Result<()> {
-        use boolinator::Boolinator;
-
-        fn has_only_unique_elements<T>(mut iter: T) -> bool
-        where
-            T: Iterator,
-            T::Item: Eq + std::hash::Hash,
-        {
-            let mut uniq = std::collections::HashSet::new();
-            iter.all(move |x| uniq.insert(x))
-        }
-
-        has_only_unique_elements(config.wasi_envs.iter()).as_result(
-            (),
-            FCEError::InvalidConfig(String::from(
-                "Supplied config contains environment variable with the same names",
-            )),
-        )?;
-
-        has_only_unique_elements(config.wasi_mapped_dirs.iter().map(|(alias, _)| alias)).as_result(
-            (),
-            FCEError::InvalidConfig(String::from(
-                "Supplied config contains mapped dirs with the same aliases",
-            )),
-        )?;
-
-        has_only_unique_elements(config.wasi_preopened_files.iter()).as_result(
-            (),
-            FCEError::InvalidConfig(String::from(
-                "Supplied config contains preopened files with the same file names",
-            )),
-        )?;
-
-        Ok(())
     }
 }
 

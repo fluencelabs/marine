@@ -24,12 +24,27 @@
     unreachable_patterns
 )]
 
+mod config;
 mod errors;
 mod faas;
 mod faas_interface;
 mod misc;
+mod raw_toml_config;
 
 pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
+
+pub use faas::FluenceFaaS;
+pub use faas_interface::FaaSInterface;
+pub use faas_interface::FaaSFunctionSignature;
+
+pub use config::FaaSConfig;
+pub use config::FaaSModuleConfig;
+pub use config::WASIConfig;
+
+pub use raw_toml_config::TomlFaaSConfig;
+pub use raw_toml_config::TomlFaaSModuleConfig;
+pub use raw_toml_config::TomlDefaultFaaSModuleConfig;
+pub use raw_toml_config::TomlWASIConfig;
 
 pub use errors::FaaSError;
 
@@ -42,13 +57,3 @@ pub use fce::to_interface_value;
 pub use fce::from_interface_values;
 
 pub use fluence_sdk_main::CallParameters;
-
-pub use faas::FluenceFaaS;
-pub use faas_interface::FaaSInterface;
-pub use faas_interface::FaaSFunctionSignature;
-
-pub use misc::RawModulesConfig;
-pub use misc::RawModuleConfig;
-pub use misc::ModulesConfig;
-pub use misc::ModuleConfig;
-pub use misc::WASIConfig;
