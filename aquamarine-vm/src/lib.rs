@@ -25,6 +25,7 @@
 )]
 
 mod aquamarine_vm;
+mod config;
 mod errors;
 
 pub use aquamarine_vm::AquamarineVM;

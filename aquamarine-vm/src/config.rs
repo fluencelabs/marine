@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+use fluence_faas::HostImportDescriptor;
 use std::path::PathBuf;
 
-/// Describes behaviour of the Fluence AppService.
-#[derive(Default)]
-pub struct AppServiceConfig {
-    /// Used for preparing filesystem on the service initialization stage.
-    pub service_base_dir: PathBuf,
+/// Describes behaviour of the Aquamarine VM stepper.
+pub struct AquamarineVMConfig {
+    /// Path to the aquamarine stepper wasm file.
+    pub aquamarine_wasm_path: PathBuf,
 
-    pub faas_config: fluence_faas::FaaSConfig,
+    /// Descriptor of a closure that will be invoked on call_service call from Aquamarine stepper.
+    pub call_service: HostImportDescriptor,
 }

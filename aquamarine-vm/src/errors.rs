@@ -22,6 +22,9 @@ use std::error::Error;
 pub enum AquamarineVMError {
     /// FaaS errors.
     FaaSError(FaaSError),
+
+    /// Aquamarine result deserialization errors.
+    AquamarineResultError(String),
 }
 
 impl Error for AquamarineVMError {}
@@ -30,6 +33,7 @@ impl std::fmt::Display for AquamarineVMError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             AquamarineVMError::FaaSError(err) => write!(f, "{}", err),
+            AquamarineVMError::AquamarineResultError(err_msg) => write!(f, "{}", err_msg),
         }
     }
 }

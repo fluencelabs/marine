@@ -24,7 +24,7 @@ use std::path::PathBuf;
 #[derive(Default)]
 pub struct FaaSConfig {
     /// Path to a dir where compiled Wasm modules are located.
-    pub modules_dir: Option<String>,
+    pub modules_dir: Option<PathBuf>,
 
     /// Settings for a module with particular name.
     pub modules_config: HashMap<String, FaaSModuleConfig>,

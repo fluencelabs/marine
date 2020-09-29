@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-use crate::Result;
+use crate::{Result, AquamarineVMError};
+use crate::config::AquamarineVMConfig;
 
 use fluence_faas::FluenceFaaS;
-use fluence_faas::RawModuleConfig;
-use fluence_faas::RawModulesConfig;
-use fluence_faas::HostImportDescriptor;
 
-use std::path::PathBuf;
 use std::collections::HashMap;
 
 const AQUAMARINE_NAME: &str = "aquamarine";
+const CALL_SERVICE_NAME: &str = "call_service";
 
-// TODO: remove and use mutex instead
 unsafe impl Send for AquamarineVM {}
 
 // delete this once aquamarine become public
@@ -41,31 +38,36 @@ pub struct AquamarineVM {
 }
 
 impl AquamarineVM {
-    /// Create Aquamarine with path to the aquamarine.wasm and a list of host closures.
-    pub fn new<P>(path: P, host_closures: Vec<(String, HostImportDescriptor)>) -> Result<Self>
-    where
-        P: Into<PathBuf>,
-    {
-        let to_string =
-            |path: &PathBuf| -> Option<_> { path.to_string_lossy().into_owned().into() };
+    /// Create Aquamarine with provided config.
+    pub fn new(config: AquamarineVMConfig) -> Result<Self> {
+        use fluence_faas::FaaSConfig;
+        use fluence_faas::FaaSModuleConfig;
 
-        let mut stepper_config = RawModuleConfig::new(AQUAMARINE_NAME);
-        stepper_config.logger_enabled = Some(true);
+        let mut host_imports = HashMap::new();
+        host_imports.insert(String::from(CALL_SERVICE_NAME), config.call_service);
 
-        let config = RawModulesConfig {
-            modules_dir: to_string(&path.into()),
-            service_base_dir: None,
-            module: vec![stepper_config],
-            default: None,
+        let aquamarine_module_config = FaaSModuleConfig {
+            mem_pages_count: None,
+            logger_enabled: true,
+            host_imports,
+            wasi: None,
         };
-        let mut closures = HashMap::new();
-        closures.insert(String::from("aquamarine"), host_closures);
 
-        let faas = FluenceFaaS::with_raw_config(config, closures)?;
+        let mut modules_config = HashMap::new();
+        modules_config.insert(String::from(AQUAMARINE_NAME), aquamarine_module_config);
+
+        let faas_config = FaaSConfig {
+            modules_dir: Some(config.aquamarine_wasm_path),
+            modules_config,
+            default_modules_config: None,
+        };
+
+        let faas = FluenceFaaS::with_raw_config(faas_config)?;
 
         Ok(Self { faas })
     }
 
+    #[rustfmt::skip]
     pub fn call(&mut self, args: serde_json::Value) -> Result<StepperOutcome> {
         use fluence_faas::IValue;
 
@@ -76,28 +78,36 @@ impl AquamarineVM {
         let outcome = match result.remove(0) {
             IValue::Record(record_values) => {
                 let mut record_values = record_values.into_vec();
+                if record_values.len() != 2 {
+                    return Err(AquamarineVMError::AquamarineResultError(format!("expected StepperOutcome struct with 2 fields, got {:?}", record_values)));
+                }
+
                 let data = match record_values.remove(0) {
                     IValue::String(str) => str,
-                    _ => unreachable!(),
+                    v => return Err(AquamarineVMError::AquamarineResultError(format!("expected string for data, got {:?}", v))),
                 };
 
                 let next_peer_pks = match record_values.remove(0) {
-                    IValue::Array(ar_values) => ar_values
-                        .into_iter()
-                        .map(|v| match v {
-                            IValue::String(str) => str,
-                            _ => unreachable!(),
-                        })
-                        .collect::<Vec<String>>(),
-                    _ => unreachable!(),
-                };
+                    IValue::Array(ar_values) => {
+                        let array = ar_values
+                            .into_iter()
+                            .map(|v| match v {
+                                IValue::String(str) => Ok(str),
+                                v => Err(AquamarineVMError::AquamarineResultError(format!("expected string for next_peer_pks, got {:?}", v))),
+                            })
+                            .collect::<Result<Vec<String>>>()?;
+
+                        Ok(array)
+                    },
+                    v => Err(AquamarineVMError::AquamarineResultError(format!("expected array for next_peer_pks, got {:?}", v))),
+                }?;
 
                 StepperOutcome {
                     data,
                     next_peer_pks,
                 }
             }
-            _ => unreachable!(),
+            v => return Err(AquamarineVMError::AquamarineResultError(format!("expected record for StepperOutcome, got {:?}", v))),
         };
 
         Ok(outcome)

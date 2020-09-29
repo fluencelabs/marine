@@ -116,13 +116,13 @@ impl FluenceFaaS {
 
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
     fn load_modules(
-        modules_dir: &str,
+        modules_dir: &PathBuf,
         modules: ModulesLoadStrategy<'_>,
     ) -> Result<HashMap<String, Vec<u8>>> {
         use FaaSError::IOError;
 
         let mut dir_entries =
-            fs::read_dir(modules_dir).map_err(|e| IOError(format!("{}: {}", modules_dir, e)))?;
+            fs::read_dir(modules_dir).map_err(|e| IOError(format!("{:?}: {}", modules_dir, e)))?;
 
         let loaded = dir_entries.try_fold(HashMap::new(), |mut hash_map, entry| {
             let entry = entry?;
@@ -261,8 +261,7 @@ impl FluenceFaaS {
     {
         let config = config.map(|c| c.try_into()).transpose()?;
 
-        let fce_module_config =
-            crate::misc::make_fce_config(config, self.call_parameters.clone())?;
+        let fce_module_config = crate::misc::make_fce_config(config, self.call_parameters.clone())?;
         self.fce
             .load_module(name, &wasm_bytes, fce_module_config)
             .map_err(Into::into)

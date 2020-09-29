@@ -139,7 +139,7 @@ pub fn from_toml_faas_config(config: TomlFaaSConfig) -> Result<FaaSConfig> {
     let default_modules_config = config.default.map(from_toml_module_config).transpose()?;
 
     Ok(FaaSConfig {
-        modules_dir: config.modules_dir,
+        modules_dir: config.modules_dir.map(PathBuf::from),
         modules_config,
         default_modules_config,
     })
