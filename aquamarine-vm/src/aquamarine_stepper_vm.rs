@@ -22,7 +22,7 @@ use fluence_faas::FluenceFaaS;
 
 use std::collections::HashMap;
 
-const AQUAMARINE_NAME: &str = "aquamarine";
+const AQUAMARINE_WASM_FILE_NAME: &str = "aquamarine";
 const CALL_SERVICE_NAME: &str = "call_service";
 
 unsafe impl Send for AquamarineVM {}
@@ -56,7 +56,10 @@ impl AquamarineVM {
 
         let faas_config = FaaSConfig {
             modules_dir: Some(config.aquamarine_wasm_path),
-            modules_config: vec![(String::from(AQUAMARINE_NAME), aquamarine_module_config)],
+            modules_config: vec![(
+                String::from(AQUAMARINE_WASM_FILE_NAME),
+                aquamarine_module_config,
+            )],
             default_modules_config: None,
         };
 
@@ -71,7 +74,7 @@ impl AquamarineVM {
 
         let mut result = self
             .faas
-            .call_with_json("aquamarine", "invoke", args, <_>::default())?;
+            .call_with_json(AQUAMARINE_WASM_FILE_NAME, "invoke", args, <_>::default())?;
 
         let outcome = match result.remove(0) {
             IValue::Record(record_values) => {
