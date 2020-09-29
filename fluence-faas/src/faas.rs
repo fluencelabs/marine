@@ -256,13 +256,13 @@ impl FluenceFaaS {
     pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
     where
         S: Into<String>,
-        C: TryInto<crate::ModuleConfig>,
+        C: TryInto<crate::FaaSModuleConfig>,
         FaaSError: From<C::Error>,
     {
         let config = config.map(|c| c.try_into()).transpose()?;
 
         let fce_module_config =
-            crate::misc::make_fce_config(config, self.call_parameters.clone(), std::iter::empty())?;
+            crate::misc::make_fce_config(config, self.call_parameters.clone())?;
         self.fce
             .load_module(name, &wasm_bytes, fce_module_config)
             .map_err(Into::into)

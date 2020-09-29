@@ -134,7 +134,7 @@ impl AppService {
     pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
     where
         S: Into<String>,
-        C: TryInto<crate::ModuleConfig>,
+        C: TryInto<crate::FaaSModuleConfig>,
         fluence_faas::FaaSError: From<C::Error>,
     {
         self.faas
