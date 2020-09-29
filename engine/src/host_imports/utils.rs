@@ -126,7 +126,7 @@ pub(super) fn itypes_output_to_wtypes(itypes: &[IType]) -> Vec<WType> {
             IType::F32 => vec![WType::F32],
             IType::F64 => vec![WType::F64],
             IType::I64 | IType::U64 => vec![WType::I64],
-            IType::String | IType::Array(_) => vec![],
+            IType::String | IType::Array(_) | IType::Record(_) => vec![],
             _ => vec![WType::I32],
         })
         .flatten()
