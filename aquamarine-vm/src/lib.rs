@@ -24,12 +24,12 @@
     unreachable_patterns
 )]
 
-mod aquamarine_vm;
+mod aquamarine_stepper_vm;
 mod config;
 mod errors;
 
-pub use aquamarine_vm::AquamarineVM;
-pub use aquamarine_vm::StepperOutcome;
+pub use aquamarine_stepper_vm::AquamarineVM;
+pub use aquamarine_stepper_vm::StepperOutcome;
 pub use errors::AquamarineVMError;
 
 // Re-exports
