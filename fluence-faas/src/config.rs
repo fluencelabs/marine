@@ -21,7 +21,7 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 
 /// Describes the behaviour of FluenceFaaS.
-#[derive(Debug, Clone, Default)]
+#[derive(Default)]
 pub struct FaaSConfig {
     /// Path to a dir where compiled Wasm modules are located.
     pub modules_dir: Option<String>,
@@ -34,7 +34,7 @@ pub struct FaaSConfig {
 }
 
 /// Various settings that could be used to guide FCE how to load a module in a proper way.
-#[derive(Debug, Clone, Default)]
+#[derive(Default)]
 pub struct FaaSModuleConfig {
     /// Maximum memory size accessible by a module in Wasm pages (64 Kb).
     pub mem_pages_count: Option<u32>,

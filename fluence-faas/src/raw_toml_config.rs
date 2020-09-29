@@ -63,8 +63,8 @@ modules_dir = "wasm/artifacts/wasm_modules"
 pub struct TomlFaaSConfig {
     pub modules_dir: Option<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub module: Vec<TomlFaaSModuleConfig>,
-    pub default: Option<TomlDefaultFaaSModuleConfig>,
+    pub module: Vec<TomlFaaSNamedModuleConfig>,
+    pub default: Option<TomlFaaSModuleConfig>,
 }
 
 impl TomlFaaSConfig {
@@ -87,41 +87,36 @@ impl TryInto<FaaSConfig> for TomlFaaSConfig {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
-pub struct TomlFaaSModuleConfig {
+pub struct TomlFaaSNamedModuleConfig {
     pub name: String,
-    pub mem_pages_count: Option<u32>,
-    pub logger_enabled: Option<bool>,
-    pub cli_imports: Option<toml::value::Table>,
-    pub wasi: Option<TomlWASIConfig>,
+    #[serde(flatten)]
+    pub config: TomlFaaSModuleConfig,
 }
 
-impl TryInto<FaaSModuleConfig> for TomlFaaSModuleConfig {
+impl TryInto<FaaSModuleConfig> for TomlFaaSNamedModuleConfig {
     type Error = FaaSError;
 
     fn try_into(self) -> Result<FaaSModuleConfig> {
-        from_toml_module_config(self).map(|(_, module_config)| module_config)
+        from_toml_named_module_config(self).map(|(_, module_config)| module_config)
     }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
-pub struct TomlDefaultFaaSModuleConfig {
+pub struct TomlFaaSModuleConfig {
     pub mem_pages_count: Option<u32>,
     pub logger_enabled: Option<bool>,
-    pub imports: Option<toml::value::Table>,
+    pub mounted_binaries: Option<toml::value::Table>,
     pub wasi: Option<TomlWASIConfig>,
 }
 
-impl TomlFaaSModuleConfig {
+impl TomlFaaSNamedModuleConfig {
     pub fn new<S>(name: S) -> Self
     where
         S: Into<String>,
     {
         Self {
             name: name.into(),
-            mem_pages_count: None,
-            logger_enabled: None,
-            cli_imports: None,
-            wasi: None,
+            config: <_>::default(),
         }
     }
 }
@@ -138,13 +133,10 @@ fn from_raw_modules_config(config: TomlFaaSConfig) -> Result<FaaSConfig> {
     let modules_config = config
         .module
         .into_iter()
-        .map(from_toml_module_config)
+        .map(from_toml_named_module_config)
         .collect::<Result<HashMap<_, _>>>()?;
 
-    let default_modules_config = config
-        .default
-        .map(from_raw_default_module_config)
-        .transpose()?;
+    let default_modules_config = config.default.map(from_toml_module_config).transpose()?;
 
     Ok(FaaSConfig {
         modules_dir: config.modules_dir,
@@ -153,44 +145,52 @@ fn from_raw_modules_config(config: TomlFaaSConfig) -> Result<FaaSConfig> {
     })
 }
 
-fn from_toml_module_config(config: TomlFaaSModuleConfig) -> Result<(String, FaaSModuleConfig)> {
-    let cli_imports = config.cli_imports.unwrap_or_default();
-    let imports = parse_imports(cli_imports)?;
-
-    let host_cli_imports
-    for (import_name, host_cmd) in imports {
-
-    }
-
-    let wasi = config.wasi.map(from_raw_wasi_config).transpose()?;
-    Ok((
-        config.name,
-        FaaSModuleConfig {
-            mem_pages_count: config.mem_pages_count,
-            logger_enabled: config.logger_enabled.unwrap_or(true),
-            host_cli_imports: imports,
-            wasi,
-        },
-    ))
+fn from_toml_named_module_config(
+    config: TomlFaaSNamedModuleConfig,
+) -> Result<(String, FaaSModuleConfig)> {
+    let module_config = from_toml_module_config(config.config)?;
+    Ok((config.name, module_config))
 }
 
-fn from_raw_default_module_config(config: TomlDefaultFaaSModuleConfig) -> Result<FaaSModuleConfig> {
-    let imports = config.imports.map(parse_imports).transpose()?;
-    let wasi = config.wasi.map(from_raw_wasi_config).transpose()?;
+fn from_toml_module_config(config: TomlFaaSModuleConfig) -> Result<FaaSModuleConfig> {
+    let mounted_binaries = config.mounted_binaries.unwrap_or_default();
+    let mounted_binaries = mounted_binaries
+        .into_iter()
+        .map(|(import_func_name, host_cmd)| {
+            let host_cmd = host_cmd.try_into::<String>()?;
+            Ok((import_func_name, host_cmd))
+        })
+        .collect::<Result<Vec<_>>>()?;
+
+    let mut host_cli_imports = HashMap::new();
+    for (import_name, host_cmd) in mounted_binaries {
+        host_cli_imports.insert(import_name, crate::misc::create_host_import(host_cmd));
+    }
+
+    let wasi = config.wasi.map(from_toml_wasi_config).transpose()?;
     Ok(FaaSModuleConfig {
         mem_pages_count: config.mem_pages_count,
         logger_enabled: config.logger_enabled.unwrap_or(true),
-        host_cli_imports: imports,
+        host_imports: host_cli_imports,
         wasi,
     })
 }
 
-fn from_raw_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
-    let to_vec = |(from: String, to: toml::Value)| -> Result<(Vec<u8>, Vec<u8>)> {
-        let to = to
+fn from_toml_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
+    let to_vec = |elem: (String, toml::Value)| -> Result<(Vec<u8>, Vec<u8>)> {
+        let to = elem
+            .1
             .try_into::<Vec<u8>>()
             .map_err(|e| FaaSError::ParseConfigError(e))?;
-        Ok((from.into_bytes(), to))
+        Ok((elem.0.into_bytes(), to))
+    };
+
+    let to_path = |elem: (String, toml::Value)| -> Result<(String, PathBuf)> {
+        let to = elem
+            .1
+            .try_into::<String>()
+            .map_err(|e| FaaSError::ParseConfigError(e))?;
+        Ok((elem.0, PathBuf::from(to)))
     };
 
     let envs = wasi.envs.unwrap_or_default();
@@ -208,7 +208,7 @@ fn from_raw_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
     let mapped_dirs = wasi.mapped_dirs.unwrap_or_default();
     let mapped_dirs = mapped_dirs
         .into_iter()
-        .map(to_vec)
+        .map(to_path)
         .collect::<Result<HashMap<_, _>>>()?;
 
     Ok(FaaSWASIConfig {
@@ -216,14 +216,4 @@ fn from_raw_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
         preopened_files,
         mapped_dirs,
     })
-}
-
-fn parse_imports(imports: toml::value::Table) -> Result<Vec<(String, String)>> {
-    imports
-        .into_iter()
-        .map(|(import_func_name, host_cmd)| {
-            let host_cmd = host_cmd.try_into::<String>()?;
-            Ok((import_func_name, host_cmd))
-        })
-        .collect::<Result<Vec<_>>>()
 }

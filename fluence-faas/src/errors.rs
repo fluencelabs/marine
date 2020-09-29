@@ -47,7 +47,7 @@ pub enum FaaSError {
     /// FCE errors.
     EngineError(FCEError),
 
-    ParseConfigError(SeredError),
+    ParseConfigError(toml::de::Error),
 }
 
 impl Error for FaaSError {}

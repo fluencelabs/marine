@@ -42,8 +42,8 @@ pub use config::FaaSModuleConfig;
 pub use config::FaaSWASIConfig;
 
 pub use raw_toml_config::TomlFaaSConfig;
+pub use raw_toml_config::TomlFaaSNamedModuleConfig;
 pub use raw_toml_config::TomlFaaSModuleConfig;
-pub use raw_toml_config::TomlDefaultFaaSModuleConfig;
 pub use raw_toml_config::TomlWASIConfig;
 
 pub use errors::FaaSError;

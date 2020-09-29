@@ -18,7 +18,6 @@ use crate::config::FaaSModuleConfig;
 use super::log_utf8_string;
 
 use fce::FCEModuleConfig;
-use fce::HostImportError;
 use fce::HostImportDescriptor;
 use wasmer_core::import::ImportObject;
 use wasmer_core::import::Namespace;
@@ -27,10 +26,9 @@ use wasmer_wit::values::InterfaceValue as IValue;
 use wasmer_wit::types::InterfaceType as IType;
 
 use std::collections::HashMap;
-use std::path::PathBuf;
 use std::ops::Deref;
 
-pub(super) fn create_host_import(host_cmd: String) -> HostImportDescriptor {
+pub(crate) fn create_host_import(host_cmd: String) -> HostImportDescriptor {
     let host_cmd_closure = move |args: Vec<IValue>| {
         let arg = match &args[0] {
             IValue::String(str) => str,
@@ -97,8 +95,13 @@ pub(crate) fn make_fce_config(
         let mapped_dirs = fce_module_config
             .wasi_mapped_dirs
             .iter()
-            .map(|(from, to)| (format!("{}={}", from, to.as_path().to_str().unwrap()).into_bytes()))
-            .collect::<Vec<_>>();
+            .map(|(from, to)| {
+                (
+                    from.as_bytes().to_vec(),
+                    to.to_string_lossy().as_bytes().to_vec(),
+                )
+            })
+            .collect::<HashMap<_, _>>();
 
         fce_module_config.wasi_envs.extend(mapped_dirs);
     };
