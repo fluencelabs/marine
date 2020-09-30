@@ -37,8 +37,18 @@ pub use faas::FluenceFaaS;
 pub use faas_interface::FaaSInterface;
 pub use faas_interface::FaaSFunctionSignature;
 
-pub use config::*;
-pub use raw_toml_config::*;
+pub use config::FaaSConfig;
+pub use config::FaaSModuleConfig;
+pub use config::FaaSWASIConfig;
+
+pub use raw_toml_config::TomlFaaSConfig;
+pub use raw_toml_config::TomlFaaSModuleConfig;
+pub use raw_toml_config::TomlFaaSNamedModuleConfig;
+pub use raw_toml_config::TomlWASIConfig;
+pub use raw_toml_config::from_toml_faas_config;
+pub use raw_toml_config::from_toml_module_config;
+pub use raw_toml_config::from_toml_named_module_config;
+pub use raw_toml_config::from_toml_wasi_config;
 
 pub use errors::FaaSError;
 
@@ -46,7 +56,8 @@ pub use fce::IValue;
 pub use fce::IRecordType;
 pub use fce::IFunctionArg;
 pub use fce::IType;
-pub use fce::{HostImportDescriptor, HostImportError};
+pub use fce::HostImportDescriptor;
+pub use fce::HostImportError;
 pub use fce::to_interface_value;
 pub use fce::from_interface_values;
 pub use fce::vec1;
