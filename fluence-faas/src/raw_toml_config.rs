@@ -93,6 +93,14 @@ pub struct TomlFaaSNamedModuleConfig {
     pub config: TomlFaaSModuleConfig,
 }
 
+impl TryInto<(String, FaaSModuleConfig)> for TomlFaaSNamedModuleConfig {
+    type Error = FaaSError;
+
+    fn try_into(self) -> Result<(String, FaaSModuleConfig)> {
+        from_toml_named_module_config(self)
+    }
+}
+
 impl TryInto<FaaSModuleConfig> for TomlFaaSNamedModuleConfig {
     type Error = FaaSError;
 
