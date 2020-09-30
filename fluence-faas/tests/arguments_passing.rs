@@ -24,7 +24,7 @@ use serde_json::json;
 static ARG_CONFIG: Lazy<fluence_faas::TomlFaaSConfig> = Lazy::new(|| {
     let mut arguments_passing_config =
         fluence_faas::TomlFaaSConfig::load("./tests/json_wasm_tests/arguments_passing/Config.toml")
-            .expect("toml faas config should created");
+            .expect("toml faas config should be created");
 
     arguments_passing_config.modules_dir = Some(String::from(
         "./tests/json_wasm_tests/arguments_passing/artifacts",
