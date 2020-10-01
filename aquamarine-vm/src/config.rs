@@ -24,4 +24,7 @@ pub struct AquamarineVMConfig {
 
     /// Descriptor of a closure that will be invoked on call_service call from Aquamarine stepper.
     pub call_service: HostImportDescriptor,
+
+    /// Current peer id.
+    pub current_peer_id: String,
 }

@@ -25,6 +25,7 @@ use std::path::PathBuf;
 
 const AQUAMARINE_WASM_FILE_NAME: &str = "aquamarine";
 const CALL_SERVICE_NAME: &str = "call_service";
+const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
 
 unsafe impl Send for AquamarineVM {}
 
@@ -49,12 +50,19 @@ impl AquamarineVM {
         let mut host_imports = HashMap::new();
         host_imports.insert(String::from(CALL_SERVICE_NAME), config.call_service);
 
-        let aquamarine_module_config = FaaSModuleConfig {
+        let mut aquamarine_module_config = FaaSModuleConfig {
             mem_pages_count: None,
             logger_enabled: true,
             host_imports,
             wasi: None,
         };
+
+        let mut envs = HashMap::new();
+        envs.insert(
+            CURRENT_PEER_ID_ENV_NAME.as_bytes().to_vec(),
+            config.current_peer_id.into_bytes(),
+        );
+        aquamarine_module_config.extend_wasi_envs(envs);
 
         let mut aquamarine_wasm_dir = config.aquamarine_wasm_path;
         // faas config requires a path to the directory with Wasm modules
