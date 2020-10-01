@@ -15,7 +15,7 @@ this will add `fce` binary to your system.
 ### Recommendations:
 
 - Modules architecture should be upwards from `effectors` (modules that persist data and WASI modules) that will work with local binaries, local storage and syscalls to `pure modules` that perform business logic.
-- Splitting app to small FCE modules are easier to support, reuse and distribute
+- Split app to small FCE modules are easier to support, reuse and distribute
 - Each module for its own task (npm like)
 
 ### Module project structure
@@ -44,7 +44,7 @@ pub fn get(url: String) -> String {
 ```
 - Multiple arguments with primitive Rust types (`bool, u8, u16, u32, u64, i8, i16, i32, i64, f32, f64, String, Vec<u8>`) and only one return argument could be used
 
-- Build project with `fce build` (supports --release and all other cargo flags now)
+- Build project with `fce build` (supports --release and all other cargo flags as usual)
 
 - Copy wasm file from `target/wasm32-wasi/debug` or `target/wasm32-wasi/release` to directory with other modules
 
@@ -84,15 +84,16 @@ modules_dir = "wasm/artifacts/modules/"
     name = "curl"
     logger_enabled = true
 
-    [module.imports]
+    [module.mounted_binaries]
     curl = "/usr/bin/curl"
 
 [[module]]
     name = "site-storage"
     mem_pages_count = 10000
     logger_enabled = true
+
     [module.wasi]
-    envs = ["ENV_ONE=parameter-one"]
+    envs = { "ENV_ONE" = "parameter-one" }
 ```
 
 `modules_dir` - path to directory with all modules. All subsequent paths will be relative to this path
@@ -103,7 +104,7 @@ modules_dir = "wasm/artifacts/modules/"
 
 `mem_pages_count` - a maximum number of Wasm memory pages that loaded module can use. Each Wasm pages is 65536 bytes long
 
-`[module.imports]` - list of available imports
+`[module.mounted_binaries]` - list of mounted binary executable files
 
 `curl = "/usr/bin/curl"` - gives possibility to call binary file `/usr/bin/curl` as method `curl` in Rust code
 
