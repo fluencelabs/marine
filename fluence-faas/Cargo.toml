@@ -1,14 +1,14 @@
 [package]
 name = "fluence-faas"
 description = "Fluence FaaS"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-fce = { path = "../engine", version = "0.1.6" }
-fluence-sdk-main = "=0.2.7"
+fce = { path = "../engine", version = "0.1.7" }
+fluence-sdk-main = "=0.2.8"
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
