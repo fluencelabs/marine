@@ -55,8 +55,12 @@ impl AquamarineVM {
             wasi: None,
         };
 
+        let mut aquamarine_wasm_dir = config.aquamarine_wasm_path;
+        // faas config requires a path to the directory with Wasm modules
+        aquamarine_wasm_dir.pop();
+
         let faas_config = FaaSConfig {
-            modules_dir: Some(config.aquamarine_wasm_path),
+            modules_dir: Some(PathBuf::from(aquamarine_wasm_dir)),
             modules_config: vec![(
                 String::from(AQUAMARINE_WASM_FILE_NAME),
                 aquamarine_module_config,
