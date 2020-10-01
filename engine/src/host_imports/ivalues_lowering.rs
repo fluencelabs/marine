@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/// Contain functions intended to put (lower) IValues to Wasm memory
+/// and pass it to a Wasm module as raw WValues (Wasm types).
 use super::WValue;
 use super::AllocateFunc;
 use super::utils::write_to_wasm_mem;

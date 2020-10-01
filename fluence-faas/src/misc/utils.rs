@@ -35,6 +35,8 @@ pub(crate) fn create_host_import(host_cmd: String) -> HostImportDescriptor {
     let host_cmd_closure = move |_ctx: &mut Ctx, args: Vec<IValue>| {
         let arg = match &args[0] {
             IValue::String(str) => str,
+            // this closure will be linked to import function with signature from supplied
+            // HostImportDescriptor. So it should be invoked only with string as an arg.
             _ => unreachable!(),
         };
 

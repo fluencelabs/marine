@@ -148,7 +148,7 @@ macro_rules! init_wasm_func_once {
             unsafe {
                 // assumed that this function will be used only in the context of closure
                 // linked to a corresponding Wasm import, so it is safe to make is static
-                // because all Wasm imports live in the Wasmer instances, which 
+                // because all Wasm imports live in the Wasmer instances, which
                 // is itself static (i.e., lives until the end of the program)
                 let raw_func = std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_func);
 

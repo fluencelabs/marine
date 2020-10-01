@@ -72,7 +72,9 @@ pub(crate) fn create_host_import_func(
         };
         let wvalues = ivalue_to_wvalues(ctx, result, &allocate_func);
 
+        // TODO: refactor this when multi-value is supported
         match wvalues.len() {
+            // strings and arrays are passed back to the Wasm module by pointer and size
             2 => {
                 init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 4);
                 init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
@@ -81,13 +83,21 @@ pub(crate) fn create_host_import_func(
                 call_wasm_func!(set_result_size_func, wvalues[1].to_u128() as _);
                 vec![]
             }
+
+            // records and primitive types are passed to the Wasm module by pointer
+            // and value on the stack
             1 => {
                 init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 3);
 
                 call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
                 vec![wvalues[0].clone()]
             }
+
+            // when None is passed
             0 => vec![],
+
+            // at now while multi-values aren't supported ivalue_to_wvalues returns only Vec with
+            // 0, 1, 2 values
             _ => unimplemented!(),
         }
     };

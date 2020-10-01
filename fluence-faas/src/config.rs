@@ -63,7 +63,6 @@ impl FaaSModuleConfig {
         };
     }
 
-    #[rustfmt::skip]
     pub fn extend_wasi_files(
         &mut self,
         new_preopened_files: HashSet<PathBuf>,
@@ -71,13 +70,13 @@ impl FaaSModuleConfig {
     ) {
         match &mut self.wasi {
             Some(FaaSWASIConfig {
-                     preopened_files,
-                     mapped_dirs,
-                     ..
-                 }) => {
-                    preopened_files.extend(new_preopened_files);
-                    mapped_dirs.extend(new_mapped_dirs);
-            },
+                preopened_files,
+                mapped_dirs,
+                ..
+            }) => {
+                preopened_files.extend(new_preopened_files);
+                mapped_dirs.extend(new_mapped_dirs);
+            }
             w @ None => {
                 *w = Some(FaaSWASIConfig {
                     envs: HashMap::new(),
