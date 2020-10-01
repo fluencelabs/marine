@@ -30,6 +30,7 @@ unsafe impl Send for AquamarineVM {}
 // delete this once aquamarine become public
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct StepperOutcome {
+    pub ret_code: i32,
     pub data: String,
     pub next_peer_pks: Vec<String>,
 }
@@ -79,9 +80,14 @@ impl AquamarineVM {
         let outcome = match result.remove(0) {
             IValue::Record(record_values) => {
                 let mut record_values = record_values.into_vec();
-                if record_values.len() != 2 {
-                    return Err(AquamarineVMError::AquamarineResultError(format!("expected StepperOutcome struct with 2 fields, got {:?}", record_values)));
+                if record_values.len() != 3 {
+                    return Err(AquamarineVMError::AquamarineResultError(format!("expected StepperOutcome struct with 3 fields, got {:?}", record_values)));
                 }
+
+                let ret_code = match record_values.remove(0) {
+                    IValue::I32(ret_code) => ret_code,
+                    v => return Err(AquamarineVMError::AquamarineResultError(format!("expected i32 for ret_code, got {:?}", v))),
+                };
 
                 let data = match record_values.remove(0) {
                     IValue::String(str) => str,
@@ -104,6 +110,7 @@ impl AquamarineVM {
                 }?;
 
                 StepperOutcome {
+                    ret_code,
                     data,
                     next_peer_pks,
                 }
