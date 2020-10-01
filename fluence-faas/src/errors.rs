@@ -46,6 +46,8 @@ pub enum FaaSError {
 
     /// FCE errors.
     EngineError(FCEError),
+
+    ParseConfigError(toml::de::Error),
 }
 
 impl Error for FaaSError {}
@@ -65,6 +67,7 @@ impl std::fmt::Display for FaaSError {
             FaaSError::ArgumentDeserializationError(err_msg) => write!(f, "{:?}", err_msg),
             FaaSError::IOError(err_msg) => write!(f, "{}", err_msg),
             FaaSError::EngineError(err) => write!(f, "{}", err),
+            FaaSError::ParseConfigError(err) => write!(f, "{}", err),
         }
     }
 }

@@ -24,7 +24,7 @@ pub fn call_parameters() {
     let call_parameters_config_raw = std::fs::read(call_parameters_config_path)
         .expect("../examples/call_parameters/Config.toml should presence");
 
-    let mut call_parameters_config: fluence_faas::RawModulesConfig =
+    let mut call_parameters_config: fluence_faas::TomlFaaSConfig =
         toml::from_slice(&call_parameters_config_raw)
             .expect("call_parameters config should be well-formed");
     call_parameters_config.modules_dir =

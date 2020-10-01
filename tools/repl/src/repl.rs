@@ -16,10 +16,12 @@
 
 use crate::Result;
 
-use fluence_app_service::{AppService, RawModulesConfig};
+use fluence_app_service::AppService;
+use fluence_app_service::TomlAppServiceConfig;
 
-use std::path::PathBuf;
+use std::collections::HashMap;
 use std::fs;
+use std::path::PathBuf;
 use std::time::Instant;
 
 macro_rules! next_argument {
@@ -64,7 +66,7 @@ impl REPL {
                 let start = Instant::now();
                 let result_msg = match self
                     .app_service
-                    .load_module::<String, fluence_app_service::ModuleConfig>(
+                    .load_module::<String, fluence_app_service::FaaSModuleConfig>(
                         module_name.into(),
                         &wasm_bytes.unwrap(),
                         None,
@@ -171,12 +173,12 @@ impl REPL {
         let start = Instant::now();
 
         let mut config = config_file_path
-            .map(|p| RawModulesConfig::load(p.into()))
+            .map(|p| TomlAppServiceConfig::load(p.into()))
             .transpose()?
             .unwrap_or_default();
         config.service_base_dir = Some(tmp_path);
 
-        let app_service = AppService::new(config, &service_id, vec![])?;
+        let app_service = AppService::new(config, &service_id, HashMap::new())?;
 
         let duration = start.elapsed();
 

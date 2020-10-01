@@ -13,7 +13,7 @@ modules_dir = "artifacts/"
     name = "curl"
     logger_enabled = true
 
-    [module.imports]
+    [module.mounted_binaries]
     curl = "/usr/bin/curl"
 
 [[module]]

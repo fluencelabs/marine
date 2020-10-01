@@ -1,0 +1,14 @@
+[package]
+name = "aquamarine-vm"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+
+[lib]
+name = "aquamarine_vm"
+path = "src/lib.rs"
+
+[dependencies]
+fluence-faas = { path = "../fluence-faas" }
+serde_json = "1.0.57"
+serde = "1.0.116"

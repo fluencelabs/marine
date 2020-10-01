@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-mod json_to_ivalues;
-mod log_utf8_string_impl;
-mod modules_load_strategy;
-mod utils;
+use std::path::PathBuf;
+use fluence_faas::FaaSConfig;
 
-pub(crate) use json_to_ivalues::json_to_ivalues;
-pub(crate) use modules_load_strategy::ModulesLoadStrategy;
-pub(crate) use utils::create_host_import;
-pub(crate) use utils::make_fce_config;
-
-pub(self) use log_utf8_string_impl::log_utf8_string;
+/// Describes behaviour of the Fluence AppService.
+#[derive(Default)]
+pub struct AppServiceConfig {
+    /// Used for preparing filesystem on the service initialization stage.
+    pub service_base_dir: PathBuf,
+    pub faas_config: FaaSConfig,
+}

@@ -60,7 +60,10 @@ impl FCE {
         match self.modules.get_mut(module_name) {
             // TODO: refactor errors
             Some(module) => module.call(func_name.as_ref(), argument),
-            None => Err(FCEError::NoSuchModule(module_name.to_string())),
+            None => Err(FCEError::NoSuchModule(format!(
+                "trying to call module with name {} that is not loaded",
+                module_name
+            ))),
         }
     }
 
@@ -80,7 +83,6 @@ impl FCE {
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
     ) -> Result<()> {
-        Self::validate_config(&config)?;
         let _prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
         let module = FCEModule::new(&wasm_bytes, config, &self.modules)?;
@@ -102,7 +104,10 @@ impl FCE {
     fn unload_module_(&mut self, module_name: &str) -> Result<()> {
         match self.modules.remove(module_name) {
             Some(_) => Ok(()),
-            None => Err(FCEError::NoSuchModule(module_name.to_string())),
+            None => Err(FCEError::NoSuchModule(format!(
+                "trying to unload module with name {} that is not loaded",
+                module_name
+            ))),
         }
     }
 
@@ -116,7 +121,10 @@ impl FCE {
     fn module_wasi_state_(&mut self, module_name: &str) -> Result<&wasmer_wasi::state::WasiState> {
         match self.modules.get_mut(module_name) {
             Some(module) => Ok(module.get_wasi_state()),
-            None => Err(FCEError::NoSuchModule(module_name.to_string())),
+            None => Err(FCEError::NoSuchModule(format!(
+                "trying to get wasi state from module with name {} that is not loaded",
+                module_name
+            ))),
         }
     }
 
@@ -137,7 +145,10 @@ impl FCE {
     ) -> Result<impl Iterator<Item = FCEFunctionSignature<'_>>> {
         match self.modules.get(module_name.as_ref()) {
             Some(module) => Ok(Self::get_module_function_signatures(module)),
-            None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
+            None => Err(FCEError::NoSuchModule(format!(
+                "trying to get interface from module with name {} that is not loaded",
+                module_name.as_ref()
+            ))),
         }
     }
 
@@ -155,7 +166,10 @@ impl FCE {
     ) -> Result<impl Iterator<Item = &(u64, IRecordType)>> {
         match self.modules.get(module_name.as_ref()) {
             Some(module) => Ok(module.get_export_record_types()),
-            None => Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
+            None => Err(FCEError::NoSuchModule(format!(
+                "trying to get record types from module with name {} that is not loaded",
+                module_name.as_ref()
+            ))),
         }
     }
 
@@ -169,43 +183,6 @@ impl FCE {
                 arguments,
                 output_types,
             })
-    }
-
-    #[rustfmt::skip]
-    fn validate_config(config: &FCEModuleConfig) -> Result<()> {
-        use boolinator::Boolinator;
-
-        fn has_only_unique_elements<T>(mut iter: T) -> bool
-        where
-            T: Iterator,
-            T::Item: Eq + std::hash::Hash,
-        {
-            let mut uniq = std::collections::HashSet::new();
-            iter.all(move |x| uniq.insert(x))
-        }
-
-        has_only_unique_elements(config.wasi_envs.iter()).as_result(
-            (),
-            FCEError::InvalidConfig(String::from(
-                "Supplied config contains environment variable with the same names",
-            )),
-        )?;
-
-        has_only_unique_elements(config.wasi_mapped_dirs.iter().map(|(alias, _)| alias)).as_result(
-            (),
-            FCEError::InvalidConfig(String::from(
-                "Supplied config contains mapped dirs with the same aliases",
-            )),
-        )?;
-
-        has_only_unique_elements(config.wasi_preopened_files.iter()).as_result(
-            (),
-            FCEError::InvalidConfig(String::from(
-                "Supplied config contains preopened files with the same file names",
-            )),
-        )?;
-
-        Ok(())
     }
 }
 

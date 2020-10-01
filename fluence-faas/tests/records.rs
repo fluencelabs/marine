@@ -26,7 +26,7 @@ pub fn records() {
     let records_config_raw = std::fs::read(records_config_path)
         .expect("../examples/records/Config.toml should presence");
 
-    let mut records_config: fluence_faas::RawModulesConfig =
+    let mut records_config: fluence_faas::TomlFaaSConfig =
         toml::from_slice(&records_config_raw).expect("records config should be well-formed");
     records_config.modules_dir = Some(String::from("../examples/records/artifacts/"));
 
@@ -225,7 +225,7 @@ fn inner_records() {
         std::fs::read("./tests/json_wasm_tests/inner_records/Config.toml")
             .expect("../examples/greeting/artifacts/greeting.wasm should presence");
 
-    let mut inner_records_config: fluence_faas::RawModulesConfig =
+    let mut inner_records_config: fluence_faas::TomlFaaSConfig =
         toml::from_slice(&inner_records_config_raw)
             .expect("argument passing test config should be well-formed");
 

@@ -262,7 +262,7 @@ fn json_value_to_ivalue(
             Ok(IValue::Record(value))
         }
         IType::Anyref => Err(FaaSError::JsonArgumentsDeserializationError(String::from(
-            "anyref interface-type is unsupported now",
+            "anyrefs aren't supported now",
         ))),
     }
 }

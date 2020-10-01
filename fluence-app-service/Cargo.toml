@@ -10,7 +10,9 @@ edition = "2018"
 fluence-faas = { path = "../fluence-faas", version = "0.1.7" }
 
 log = "0.4.8"
-serde_json = "1.0.53"
+serde = "1.0.116"
+serde_derive = "1.0.116"
+serde_json = "1.0.57"
 toml = "0.5.6"
 wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.0" }
 

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 #![warn(rust_2018_idioms)]
-#![feature(get_mut_unchecked)]
-#![feature(new_uninit)]
-#![feature(stmt_expr_attributes)]
 #![deny(
     dead_code,
     nonstandard_style,
@@ -27,29 +24,22 @@
     unreachable_patterns
 )]
 
+mod aquamarine_stepper_vm;
 mod config;
-mod engine;
 mod errors;
-mod host_imports;
-mod misc;
-mod module;
 
-pub use config::FCEModuleConfig;
-pub use config::HostImportDescriptor;
-pub use engine::FCE;
-pub use engine::FCEFunctionSignature;
-pub use errors::FCEError;
-pub use host_imports::HostImportError;
-pub use module::IValue;
-pub use module::IRecordType;
-pub use module::IFunctionArg;
-pub use module::IType;
-pub use module::from_interface_values;
-pub use module::to_interface_value;
+pub use aquamarine_stepper_vm::AquamarineVM;
+pub use aquamarine_stepper_vm::StepperOutcome;
 
-pub use wasmer_wit::types::RecordFieldType as IRecordFieldType;
-pub mod vec1 {
-    pub use wasmer_wit::vec1::Vec1;
-}
+pub use config::AquamarineVMConfig;
 
-pub(crate) type Result<T> = std::result::Result<T, FCEError>;
+pub use errors::AquamarineVMError;
+
+// Re-exports
+pub use fluence_faas::HostImportDescriptor;
+pub use fluence_faas::HostImportError;
+pub use fluence_faas::IValue;
+pub use fluence_faas::IType;
+pub use fluence_faas::vec1;
+
+pub(crate) type Result<T> = std::result::Result<T, AquamarineVMError>;

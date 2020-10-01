@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::misc::ModulesConfig;
+use crate::config::FaaSConfig;
 use crate::misc::ModulesLoadStrategy;
 use crate::faas_interface::FaaSFunctionSignature;
 use crate::faas_interface::FaaSInterface;
@@ -46,15 +46,15 @@ pub struct FluenceFaaS {
 
 impl FluenceFaaS {
     /// Creates FaaS from config on filesystem.
-    pub fn new<P: Into<PathBuf>>(config_file_path: P) -> Result<Self> {
-        let config = crate::misc::load_config(config_file_path.into())?;
+    pub fn with_config_path<P: Into<PathBuf>>(config_file_path: P) -> Result<Self> {
+        let config = crate::raw_toml_config::TomlFaaSConfig::load(config_file_path.into())?;
         Self::with_raw_config(config)
     }
 
     /// Creates FaaS from config deserialized from TOML.
     pub fn with_raw_config<C>(config: C) -> Result<Self>
     where
-        C: TryInto<ModulesConfig>,
+        C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
@@ -65,13 +65,13 @@ impl FluenceFaaS {
                 Self::load_modules(dir, ModulesLoadStrategy::WasmOnly)
             })?;
 
-        Self::with_modules::<ModulesConfig>(modules, config)
+        Self::with_modules::<FaaSConfig>(modules, config)
     }
 
     /// Creates FaaS with given modules.
     pub fn with_modules<C>(mut modules: HashMap<String, Vec<u8>>, config: C) -> Result<Self>
     where
-        C: TryInto<ModulesConfig>,
+        C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,
     {
         let mut fce = FCE::new();
@@ -85,6 +85,7 @@ impl FluenceFaaS {
                     module_name
                 ))
             })?;
+
             let fce_module_config =
                 crate::misc::make_fce_config(Some(module_config), call_parameters.clone())?;
             fce.load_module(module_name, &module_bytes, fce_module_config)?;
@@ -99,7 +100,7 @@ impl FluenceFaaS {
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
     pub fn with_module_names<C>(names: &HashSet<String>, config: C) -> Result<Self>
     where
-        C: TryInto<ModulesConfig>,
+        C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
@@ -110,18 +111,18 @@ impl FluenceFaaS {
                 Self::load_modules(dir, ModulesLoadStrategy::Named(names))
             })?;
 
-        Self::with_modules::<ModulesConfig>(modules, config)
+        Self::with_modules::<FaaSConfig>(modules, config)
     }
 
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
     fn load_modules(
-        modules_dir: &str,
+        modules_dir: &PathBuf,
         modules: ModulesLoadStrategy<'_>,
     ) -> Result<HashMap<String, Vec<u8>>> {
         use FaaSError::IOError;
 
         let mut dir_entries =
-            fs::read_dir(modules_dir).map_err(|e| IOError(format!("{}: {}", modules_dir, e)))?;
+            fs::read_dir(modules_dir).map_err(|e| IOError(format!("{:?}: {}", modules_dir, e)))?;
 
         let loaded = dir_entries.try_fold(HashMap::new(), |mut hash_map, entry| {
             let entry = entry?;
@@ -255,7 +256,7 @@ impl FluenceFaaS {
     pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
     where
         S: Into<String>,
-        C: TryInto<crate::ModuleConfig>,
+        C: TryInto<crate::FaaSModuleConfig>,
         FaaSError: From<C::Error>,
     {
         let config = config.map(|c| c.try_into()).transpose()?;

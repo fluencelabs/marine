@@ -108,21 +108,3 @@ pub fn non_exist_module_func() {
         fce::FCEError::NoSuchModule(non_exist_name)
     ));
 }
-
-#[test]
-// test loading module with an incorrect FCE module config
-pub fn invalid_config() {
-    let mut fce = FCE::new();
-    let config = fce::FCEModuleConfig::default().with_wasi_mapped_dirs(vec![
-        (String::from("tmp"), std::path::PathBuf::new()),
-        (String::from("tmp"), std::path::PathBuf::new()),
-    ]);
-
-    let load_result = fce.load_module("greeting", &*GREETING_WASM_BYTES, config);
-
-    assert!(load_result.is_err());
-    assert!(std::matches!(
-        load_result.err().unwrap(),
-        fce::FCEError::InvalidConfig(_)
-    ));
-}

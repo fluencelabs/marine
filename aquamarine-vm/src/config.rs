@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-mod json_to_ivalues;
-mod log_utf8_string_impl;
-mod modules_load_strategy;
-mod utils;
+use fluence_faas::HostImportDescriptor;
+use std::path::PathBuf;
 
-pub(crate) use json_to_ivalues::json_to_ivalues;
-pub(crate) use modules_load_strategy::ModulesLoadStrategy;
-pub(crate) use utils::create_host_import;
-pub(crate) use utils::make_fce_config;
+/// Describes behaviour of the Aquamarine VM stepper.
+pub struct AquamarineVMConfig {
+    /// Path to a aquamarine stepper Wasm file.
+    pub aquamarine_wasm_path: PathBuf,
 
-pub(self) use log_utf8_string_impl::log_utf8_string;
+    /// Descriptor of a closure that will be invoked on call_service call from Aquamarine stepper.
+    pub call_service: HostImportDescriptor,
+}

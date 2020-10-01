@@ -24,22 +24,44 @@
     unreachable_patterns
 )]
 
+mod config;
 mod errors;
 mod service;
+mod raw_toml_config;
 
 pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 
 pub use errors::AppServiceError;
 pub use service::AppService;
 
-pub use fluence_faas::CallParameters;
+pub use config::AppServiceConfig;
+pub use raw_toml_config::TomlAppServiceConfig;
+
+pub use fluence_faas::FaaSInterface as ServiceInterface;
+pub use fluence_faas::FaaSFunctionSignature as ServiceFunctionSignature;
+
+pub use fluence_faas::FaaSConfig;
+pub use fluence_faas::FaaSModuleConfig;
+pub use fluence_faas::FaaSWASIConfig;
+pub use fluence_faas::TomlFaaSConfig;
+pub use fluence_faas::TomlFaaSModuleConfig;
+pub use fluence_faas::TomlFaaSNamedModuleConfig;
+pub use fluence_faas::TomlWASIConfig;
+pub use fluence_faas::from_toml_faas_config;
+pub use fluence_faas::from_toml_module_config;
+pub use fluence_faas::from_toml_named_module_config;
+pub use fluence_faas::from_toml_wasi_config;
+
+pub use fluence_faas::FaaSError;
+
 pub use fluence_faas::IValue;
+pub use fluence_faas::IRecordType;
+pub use fluence_faas::IFunctionArg;
 pub use fluence_faas::IType;
-pub use fluence_faas::FaaSInterface;
-pub use fluence_faas::RawModulesConfig;
-pub use fluence_faas::RawModuleConfig;
-pub use fluence_faas::ModulesConfig;
-pub use fluence_faas::ModuleConfig;
-pub use fluence_faas::WASIConfig;
+pub use fluence_faas::HostImportDescriptor;
+pub use fluence_faas::HostImportError;
 pub use fluence_faas::to_interface_value;
 pub use fluence_faas::from_interface_values;
+pub use fluence_faas::vec1;
+
+pub use fluence_faas::CallParameters;

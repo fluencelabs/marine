@@ -18,6 +18,7 @@ use super::errors::FCEWITInterfacesError;
 
 use wasmer_wit::interpreter::Instruction;
 use wasmer_wit::ast::*;
+use wasmer_wit::types::RecordType;
 use multimap::MultiMap;
 
 use std::iter::Iterator;
@@ -106,6 +107,13 @@ impl<'a> FCEWITInterfaces<'a> {
 
     pub fn types(&self) -> impl Iterator<Item = &Type> {
         self.types.iter()
+    }
+
+    pub fn record_types(&self) -> impl Iterator<Item = (u64, &RecordType)> {
+        self.types.iter().enumerate().filter_map(|(id, t)| match t {
+            WITAstType::Record(r) => Some((id as u64, r)),
+            _ => None,
+        })
     }
 
     pub fn type_by_idx(&self, idx: u32) -> Option<&Type> {
