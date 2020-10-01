@@ -90,7 +90,7 @@ impl AquamarineVM {
                 }
 
                 let ret_code = match record_values.remove(0) {
-                    IValue::I32(ret_code) => ret_code,
+                    IValue::S32(ret_code) => ret_code,
                     v => return Err(AquamarineVMError::AquamarineResultError(format!("expected i32 for ret_code, got {:?}", v))),
                 };
 
