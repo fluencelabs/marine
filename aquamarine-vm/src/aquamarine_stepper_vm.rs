@@ -21,6 +21,7 @@ use crate::config::AquamarineVMConfig;
 use fluence_faas::FluenceFaaS;
 
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 const AQUAMARINE_WASM_FILE_NAME: &str = "aquamarine";
 const CALL_SERVICE_NAME: &str = "call_service";
