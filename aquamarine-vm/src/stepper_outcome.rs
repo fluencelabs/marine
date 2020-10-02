@@ -86,39 +86,28 @@ impl std::fmt::Display for StepperError {
 
 impl Into<Result<StepperOutcome>> for RawStepperOutcome {
     fn into(self) -> Result<StepperOutcome> {
-        // TODO: introduce macro to reduce copy-past code
+        macro_rules! to_vm_error {
+            ($error_variant:ident) => {
+                Err(AquamarineVMError::StepperError(
+                    StepperError::$error_variant(self.data),
+                ))
+            };
+        }
+
         match self.ret_code {
             0 => Ok(StepperOutcome {
                 data: self.data,
                 next_peer_pks: self.next_peer_pks,
             }),
-            1 => Err(AquamarineVMError::StepperError(
-                StepperError::SExprParseError(self.data),
-            )),
-            2 => Err(AquamarineVMError::StepperError(
-                StepperError::DataParseError(self.data),
-            )),
-            3 => Err(AquamarineVMError::StepperError(
-                StepperError::CurrentPeerIdNotSet(self.data),
-            )),
-            4 => Err(AquamarineVMError::StepperError(
-                StepperError::InstructionError(self.data),
-            )),
-            5 => Err(AquamarineVMError::StepperError(
-                StepperError::LocalServiceError(self.data),
-            )),
-            6 => Err(AquamarineVMError::StepperError(
-                StepperError::VariableNotFound(self.data),
-            )),
-            7 => Err(AquamarineVMError::StepperError(
-                StepperError::VariableNotInJsonPath(self.data),
-            )),
-            8 => Err(AquamarineVMError::StepperError(
-                StepperError::MultipleValuesInJsonPath(self.data),
-            )),
-            _ => Err(AquamarineVMError::StepperError(StepperError::UnknownError(
-                self.data,
-            ))),
+            1 => to_vm_error!(SExprParseError),
+            2 => to_vm_error!(DataParseError),
+            3 => to_vm_error!(CurrentPeerIdNotSet),
+            4 => to_vm_error!(InstructionError),
+            5 => to_vm_error!(LocalServiceError),
+            6 => to_vm_error!(VariableNotFound),
+            7 => to_vm_error!(VariableNotInJsonPath),
+            8 => to_vm_error!(MultipleValuesInJsonPath),
+            _ => to_vm_error!(UnknownError),
         }
     }
 }
