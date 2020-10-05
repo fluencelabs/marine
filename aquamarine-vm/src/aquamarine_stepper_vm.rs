@@ -23,6 +23,7 @@ use crate::stepper_outcome::RawStepperOutcome;
 use fluence_faas::FluenceFaaS;
 
 use std::collections::HashMap;
+use std::convert::TryInto;
 
 const AQUAMARINE_WASM_FILE_NAME: &str = "aquamarine";
 const CALL_SERVICE_NAME: &str = "call_service";
@@ -124,6 +125,6 @@ impl AquamarineVM {
             v => return Err(AquamarineVMError::AquamarineResultError(format!("expected record for StepperOutcome, got {:?}", v))),
         };
 
-        raw_outcome.into()
+        raw_outcome.try_into()
     }
 }

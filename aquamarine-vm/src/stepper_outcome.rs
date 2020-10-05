@@ -17,10 +17,9 @@
 // This file is an adapted copy of the StepperOutcome structure and stepper errors.
 // Maybe it is better to depend on aquamarine when it become public.
 
-use crate::Result;
 use crate::AquamarineVMError;
 
-use std::convert::Into;
+use std::convert::TryFrom;
 use std::error::Error;
 
 #[derive(Debug)]
@@ -69,7 +68,7 @@ pub enum StepperError {
 impl Error for StepperError {}
 
 impl std::fmt::Display for StepperError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             StepperError::SExprParseError(err_msg) => write!(f, "{}", err_msg),
             StepperError::DataParseError(err_msg) => write!(f, "{}", err_msg),
@@ -84,20 +83,22 @@ impl std::fmt::Display for StepperError {
     }
 }
 
-impl Into<Result<StepperOutcome>> for RawStepperOutcome {
-    fn into(self) -> Result<StepperOutcome> {
+impl TryFrom<RawStepperOutcome> for StepperOutcome {
+    type Error = AquamarineVMError;
+
+    fn try_from(raw_outcome: RawStepperOutcome) -> Result<Self, Self::Error> {
         macro_rules! to_vm_error {
             ($error_variant:ident) => {
                 Err(AquamarineVMError::StepperError(
-                    StepperError::$error_variant(self.data),
+                    StepperError::$error_variant(raw_outcome.data),
                 ))
             };
         }
 
-        match self.ret_code {
+        match raw_outcome.ret_code {
             0 => Ok(StepperOutcome {
-                data: self.data,
-                next_peer_pks: self.next_peer_pks,
+                data: raw_outcome.data,
+                next_peer_pks: raw_outcome.next_peer_pks,
             }),
             1 => to_vm_error!(SExprParseError),
             2 => to_vm_error!(DataParseError),
