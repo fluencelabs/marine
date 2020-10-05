@@ -41,5 +41,6 @@ pub use fluence_faas::HostImportError;
 pub use fluence_faas::IValue;
 pub use fluence_faas::IType;
 pub use fluence_faas::vec1;
+pub use fluence_faas::Ctx;
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineVMError>;

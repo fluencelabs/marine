@@ -63,3 +63,5 @@ pub use fce::from_interface_values;
 pub use fce::vec1;
 
 pub use fluence_sdk_main::CallParameters;
+
+pub use wasmer_core::vm::Ctx;
