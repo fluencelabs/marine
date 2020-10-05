@@ -113,8 +113,8 @@ impl TryInto<FaaSModuleConfig> for TomlFaaSNamedModuleConfig {
 pub struct TomlFaaSModuleConfig {
     pub mem_pages_count: Option<u32>,
     pub logger_enabled: Option<bool>,
-    pub mounted_binaries: Option<toml::value::Table>,
     pub wasi: Option<TomlWASIConfig>,
+    pub mounted_binaries: Option<toml::value::Table>,
 }
 
 impl TomlFaaSNamedModuleConfig {
@@ -131,8 +131,8 @@ impl TomlFaaSNamedModuleConfig {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlWASIConfig {
-    pub envs: Option<toml::value::Table>,
     pub preopened_files: Option<Vec<String>>,
+    pub envs: Option<toml::value::Table>,
     pub mapped_dirs: Option<toml::value::Table>,
 }
 
@@ -224,4 +224,27 @@ pub fn from_toml_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
         preopened_files,
         mapped_dirs,
     })
+}
+
+mod tests {
+    use crate::{TomlFaaSNamedModuleConfig, TomlFaaSModuleConfig, TomlWASIConfig};
+
+    #[test]
+    fn serialize_named() {
+        let config = TomlFaaSNamedModuleConfig {
+            name: "name".to_string(),
+            config: TomlFaaSModuleConfig {
+                mem_pages_count: Some(100),
+                logger_enabled: Some(false),
+                wasi: Some(TomlWASIConfig {
+                    preopened_files: Some(vec!["a".to_string()]),
+                    envs: None,
+                    mapped_dirs: None,
+                }),
+                mounted_binaries: None,
+            },
+        };
+
+        assert!(toml::to_string(&config).is_ok())
+    }
 }
