@@ -17,25 +17,19 @@
 use crate::Result;
 use crate::AquamarineVMError;
 use crate::config::AquamarineVMConfig;
+use crate::stepper_outcome::StepperOutcome;
+use crate::stepper_outcome::RawStepperOutcome;
 
 use fluence_faas::FluenceFaaS;
 
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::convert::TryInto;
 
 const AQUAMARINE_WASM_FILE_NAME: &str = "aquamarine";
 const CALL_SERVICE_NAME: &str = "call_service";
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
 
 unsafe impl Send for AquamarineVM {}
-
-// delete this once aquamarine become public
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct StepperOutcome {
-    pub ret_code: i32,
-    pub data: String,
-    pub next_peer_pks: Vec<String>,
-}
 
 pub struct AquamarineVM {
     faas: FluenceFaaS,
@@ -69,7 +63,7 @@ impl AquamarineVM {
         aquamarine_wasm_dir.pop();
 
         let faas_config = FaaSConfig {
-            modules_dir: Some(PathBuf::from(aquamarine_wasm_dir)),
+            modules_dir: Some(aquamarine_wasm_dir),
             modules_config: vec![(
                 String::from(AQUAMARINE_WASM_FILE_NAME),
                 aquamarine_module_config,
@@ -90,7 +84,7 @@ impl AquamarineVM {
             .faas
             .call_with_json(AQUAMARINE_WASM_FILE_NAME, "invoke", args, <_>::default())?;
 
-        let outcome = match result.remove(0) {
+        let raw_outcome = match result.remove(0) {
             IValue::Record(record_values) => {
                 let mut record_values = record_values.into_vec();
                 if record_values.len() != 3 {
@@ -122,7 +116,7 @@ impl AquamarineVM {
                     v => Err(AquamarineVMError::AquamarineResultError(format!("expected array for next_peer_pks, got {:?}", v))),
                 }?;
 
-                StepperOutcome {
+                RawStepperOutcome {
                     ret_code,
                     data,
                     next_peer_pks,
@@ -131,6 +125,6 @@ impl AquamarineVM {
             v => return Err(AquamarineVMError::AquamarineResultError(format!("expected record for StepperOutcome, got {:?}", v))),
         };
 
-        Ok(outcome)
+        raw_outcome.try_into()
     }
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::stepper_outcome::StepperError;
 use fluence_faas::FaaSError;
 
 use std::error::Error;
@@ -25,6 +26,9 @@ pub enum AquamarineVMError {
 
     /// Aquamarine result deserialization errors.
     AquamarineResultError(String),
+
+    /// Errors related to stepper execution.
+    StepperError(StepperError),
 }
 
 impl Error for AquamarineVMError {}
@@ -34,6 +38,7 @@ impl std::fmt::Display for AquamarineVMError {
         match self {
             AquamarineVMError::FaaSError(err) => write!(f, "{}", err),
             AquamarineVMError::AquamarineResultError(err_msg) => write!(f, "{}", err_msg),
+            AquamarineVMError::StepperError(err) => write!(f, "{}", err),
         }
     }
 }
@@ -41,6 +46,12 @@ impl std::fmt::Display for AquamarineVMError {
 impl From<FaaSError> for AquamarineVMError {
     fn from(err: FaaSError) -> Self {
         AquamarineVMError::FaaSError(err)
+    }
+}
+
+impl From<StepperError> for AquamarineVMError {
+    fn from(err: StepperError) -> Self {
+        AquamarineVMError::StepperError(err)
     }
 }
 

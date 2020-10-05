@@ -189,7 +189,7 @@ pub fn from_toml_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
         let to = elem
             .1
             .try_into::<String>()
-            .map_err(|e| FaaSError::ParseConfigError(e))?;
+            .map_err(FaaSError::ParseConfigError)?;
         Ok((elem.0.into_bytes(), to.into_bytes()))
     };
 
@@ -197,7 +197,7 @@ pub fn from_toml_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
         let to = elem
             .1
             .try_into::<String>()
-            .map_err(|e| FaaSError::ParseConfigError(e))?;
+            .map_err(FaaSError::ParseConfigError)?;
         Ok((elem.0, PathBuf::from(to)))
     };
 
