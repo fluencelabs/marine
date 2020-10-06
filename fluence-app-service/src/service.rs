@@ -151,6 +151,18 @@ impl AppService {
 // This API is intended for testing purposes (mostly in FCE REPL)
 #[cfg(feature = "raw-module-api")]
 impl AppService {
+    pub fn call_with_module_name<MN: AsRef<str>, FN: AsRef<str>>(
+        &mut self,
+        module_name: MN,
+        func_name: FN,
+        arguments: serde_json::Value,
+        call_parameters: crate::CallParameters,
+    ) -> Result<Vec<IValue>> {
+        self.faas
+            .call_with_json(module_name, func_name, arguments, call_parameters)
+            .map_err(Into::into)
+    }
+
     pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
     where
         S: Into<String>,
