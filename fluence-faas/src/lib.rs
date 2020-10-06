@@ -52,10 +52,12 @@ pub use raw_toml_config::from_toml_wasi_config;
 
 pub use errors::FaaSError;
 
+// Re-exports from FCE
 pub use fce::IValue;
 pub use fce::IRecordType;
 pub use fce::IFunctionArg;
 pub use fce::IType;
+pub use fce::HostExportedFunc;
 pub use fce::HostImportDescriptor;
 pub use fce::HostImportError;
 pub use fce::to_interface_value;

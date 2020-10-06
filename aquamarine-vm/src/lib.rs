@@ -36,6 +36,7 @@ pub use stepper_outcome::StepperOutcome;
 pub use stepper_outcome::StepperError;
 
 // Re-exports
+pub use fluence_faas::HostExportedFunc;
 pub use fluence_faas::HostImportDescriptor;
 pub use fluence_faas::HostImportError;
 pub use fluence_faas::IValue;

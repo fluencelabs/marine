@@ -35,6 +35,7 @@ mod misc;
 mod module;
 
 pub use config::FCEModuleConfig;
+pub use config::HostExportedFunc;
 pub use config::HostImportDescriptor;
 pub use engine::FCE;
 pub use engine::FCEFunctionSignature;

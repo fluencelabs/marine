@@ -26,9 +26,11 @@ use std::path::PathBuf;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
+pub type HostExportedFunc = Box<dyn Fn(&mut Ctx, Vec<IValue>) -> Option<IValue> + 'static>;
+
 pub struct HostImportDescriptor {
     /// This closure will be invoked for corresponding import.
-    pub host_exported_func: Box<dyn Fn(&mut Ctx, Vec<IValue>) -> Option<IValue> + 'static>,
+    pub host_exported_func: HostExportedFunc,
 
     /// Type of the closure arguments.
     pub argument_types: Vec<IType>,

@@ -142,9 +142,9 @@ dependencies = [
 
 [[package]]
 name = "blake3"
-version = "0.3.6"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce4f9586c9a3151c4b49b19e82ba163dd073614dd057e53c969e1a4db5b52720"
+checksum = "e9ff35b701f3914bdb8fad3368d822c766ef2858b2583198e41639b936f09d3f"
 dependencies = [
  "arrayref",
  "arrayvec",
@@ -706,7 +706,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#de9259b842302fca53fe705040e18e3b1904f46c"
+source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
 dependencies = [
  "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
  "fluence-sdk-main 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
@@ -759,7 +759,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#de9259b842302fca53fe705040e18e3b1904f46c"
+source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
 dependencies = [
  "fluence-sdk-wit 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
@@ -778,7 +778,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#de9259b842302fca53fe705040e18e3b1904f46c"
+source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
 dependencies = [
  "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
@@ -802,7 +802,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#de9259b842302fca53fe705040e18e3b1904f46c"
+source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -868,36 +868,36 @@ checksum = "3dcaa9ae7725d12cdb85b3ad99a434db70b468c09ded17e012d86b5c1010f7a7"
 
 [[package]]
 name = "futures-channel"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f366ad74c28cca6ba456d95e6422883cfb4b252a83bed929c83abfdbbf2967d5"
+checksum = "a7a4d35f7401e948629c9c3d6638fb9bf94e0b2121e96c3b428cc4e631f3eb74"
 dependencies = [
  "futures-core",
 ]
 
 [[package]]
 name = "futures-core"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59f5fff90fd5d971f936ad674802482ba441b6f09ba5e15fd8b39145582ca399"
+checksum = "d674eaa0056896d5ada519900dbf97ead2e46a7b6621e8160d79e2f2e1e2784b"
 
 [[package]]
 name = "futures-sink"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f2032893cb734c7a05d85ce0cc8b8c4075278e93b24b66f9de99d6eb0fa8acc"
+checksum = "0d8764258ed64ebc5d9ed185cf86a95db5cac810269c5d20ececb32e0088abbd"
 
 [[package]]
 name = "futures-task"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdb66b5f09e22019b1ab0830f7785bcea8e7a42148683f99214f73f8ec21a626"
+checksum = "4dd26820a9f3637f1302da8bceba3ff33adbe53464b54ca24d4e2d4f1db30f94"
 
 [[package]]
 name = "futures-util"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8764574ff08b701a084482c3c7031349104b07ac897393010494beaa18ce32c6"
+checksum = "8a894a0acddba51a2d49a6f4263b1e64b8c579ece8af50fa86503d52cd1eea34"
 dependencies = [
  "futures-core",
  "futures-task",
@@ -907,9 +907,9 @@ dependencies = [
 
 [[package]]
 name = "fuzzy-matcher"
-version = "0.3.5"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cda28c4acb13182d935e0ab6bc12329d1d22134d69801d0836d1ae4b47054f2a"
+checksum = "54614a3312934d066701a80f20f15fa3b56d67ac7722b39eea5b4c9dd1d66c94"
 dependencies = [
  "thread_local",
 ]
@@ -1023,9 +1023,9 @@ dependencies = [
 
 [[package]]
 name = "hermit-abi"
-version = "0.1.16"
+version = "0.1.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c30f6d0bc6b00693347368a67d41b58f2fb851215ff1da49e90fe2c5c667151"
+checksum = "5aca5565f760fb5b220e499d72710ed156fdb74e631659e99377d9ebfbd13ae8"
 dependencies = [
  "libc",
 ]
@@ -1271,9 +1271,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.78"
+version = "0.2.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa7087f49d294270db4e1928fc110c976cd4b9e5a16348e0a1df09afa99e6c98"
+checksum = "2448f6066e80e3bfc792e9c98bf705b4b0fc6e8ef5b43e5889aff0eaa9c58743"
 
 [[package]]
 name = "local_storage"
@@ -1610,18 +1610,18 @@ checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
 name = "pin-project"
-version = "0.4.24"
+version = "0.4.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f48fad7cfbff853437be7cf54d7b993af21f53be7f0988cbfe4a51535aa77205"
+checksum = "13fbdfd6bdee3dc9be46452f86af4a4072975899cf8592466668620bebfbcc17"
 dependencies = [
  "pin-project-internal",
 ]
 
 [[package]]
 name = "pin-project-internal"
-version = "0.4.24"
+version = "0.4.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24c6d293bdd3ca5a1697997854c6cf7855e43fb6a0ba1c47af57a5bcafd158ae"
+checksum = "c82fb1329f632c3552cf352d14427d57a511b1cf41db93b3a7d77906a82dcc8e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1630,9 +1630,9 @@ dependencies = [
 
 [[package]]
 name = "pin-project-lite"
-version = "0.1.9"
+version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fe74897791e156a0cd8cce0db31b9b2198e67877316bf3086c3acd187f719f0"
+checksum = "e555d9e657502182ac97b539fb3dae8b79cda19e3e4f8ffb5e8de4f18df93c95"
 
 [[package]]
 name = "pin-utils"
