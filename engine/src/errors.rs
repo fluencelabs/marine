@@ -77,9 +77,7 @@ impl std::fmt::Display for FCEError {
             FCEError::NoSuchFunction(msg) => {
                 write!(f, "FCE doesn't have a function with such a name: {}", msg)
             }
-            FCEError::NoSuchModule(module_name) => {
-                write!(f, "FCE doesn't have a module with name {}", module_name)
-            }
+            FCEError::NoSuchModule(err_msg) => write!(f, "{}", err_msg),
             FCEError::HostImportError(host_import_error) => write!(f, "{}", host_import_error),
             FCEError::WITParseError(err) => write!(f, "{}", err),
             FCEError::IncorrectWIT(err_msg) => write!(f, "{}", err_msg),

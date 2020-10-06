@@ -33,6 +33,7 @@ const SERVICE_TMP_DIR_NAME: &str = "tmp";
 
 pub struct AppService {
     faas: FluenceFaaS,
+    facade_module_name: String,
 }
 
 impl AppService {
@@ -44,25 +45,44 @@ impl AppService {
         AppServiceError: From<C::Error>,
     {
         let mut config: AppServiceConfig = config.try_into()?;
+        let facade_module_name = config
+            .faas_config
+            .modules_config
+            .last()
+            .ok_or_else(|| {
+                AppServiceError::ConfigParseError(String::from(
+                    "config should contain at least one module",
+                ))
+            })?
+            .0
+            .clone();
+
         let service_id = service_id.into();
         Self::set_env_and_dirs(&mut config, service_id, envs)?;
 
         let faas = FluenceFaaS::with_raw_config(config.faas_config)?;
 
-        Ok(Self { faas })
+        Ok(Self {
+            faas,
+            facade_module_name,
+        })
     }
 
     /// Call a specified function of loaded module by its name.
     // TODO: replace serde_json::Value with Vec<u8>?
-    pub fn call<MN: AsRef<str>, FN: AsRef<str>>(
+    pub fn call<S: AsRef<str>>(
         &mut self,
-        module_name: MN,
-        func_name: FN,
+        func_name: S,
         arguments: serde_json::Value,
         call_parameters: crate::CallParameters,
     ) -> Result<Vec<IValue>> {
         self.faas
-            .call_with_json(module_name, func_name, arguments, call_parameters)
+            .call_with_json(
+                &self.facade_module_name,
+                func_name,
+                arguments,
+                call_parameters,
+            )
             .map_err(Into::into)
     }
 
