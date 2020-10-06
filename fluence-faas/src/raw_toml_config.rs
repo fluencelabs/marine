@@ -226,6 +226,7 @@ pub fn from_toml_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
     })
 }
 
+#[cfg(test)]
 mod tests {
     use crate::{TomlFaaSNamedModuleConfig, TomlFaaSModuleConfig, TomlWASIConfig};
 
