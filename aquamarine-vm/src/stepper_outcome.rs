@@ -22,14 +22,14 @@ use crate::AquamarineVMError;
 use std::convert::TryFrom;
 use std::error::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct RawStepperOutcome {
     pub ret_code: i32,
     pub data: String,
     pub next_peer_pks: Vec<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StepperOutcome {
     pub data: String,
     pub next_peer_pks: Vec<String>,
