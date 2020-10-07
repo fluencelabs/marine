@@ -35,9 +35,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.32"
+version = "1.0.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b602bfe940d21c130f3895acd65221e8a61270debe89d628b9cb4e3ccb8569b"
+checksum = "a1fd36ffbb1fb7c834eac128ea8d0e310c5aeb635548f9d58861e1308d46e71c"
 
 [[package]]
 name = "aquamarine-vm"
@@ -696,20 +696,20 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12efe44782ef6842b824dd281f79f808597a2c280d1facc06bb62b9cf8fbc2ef"
+source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
 dependencies = [
- "fluence-sdk-macro 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "fluence-sdk-main 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-main 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
 name = "fluence"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "12efe44782ef6842b824dd281f79f808597a2c280d1facc06bb62b9cf8fbc2ef"
 dependencies = [
- "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-main 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -750,6 +750,14 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.8"
+source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
+dependencies = [
+ "fluence-sdk-wit 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+]
+
+[[package]]
+name = "fluence-sdk-macro"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4b1720124376ac6bb13e523e3eceeef4475041a03a6434ca7d988cbdc031a5c4"
 dependencies = [
@@ -757,11 +765,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-macro"
+name = "fluence-sdk-main"
 version = "0.2.8"
 source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
 dependencies = [
- "fluence-sdk-wit 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+ "log",
+ "serde",
 ]
 
 [[package]]
@@ -776,20 +786,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-main"
-version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
-dependencies = [
- "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
- "log",
- "serde",
-]
-
-[[package]]
 name = "fluence-sdk-wit"
 version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "560baf91197ded38a99a5c94ff366a3dd971ebf33f5d987ecce31d3dedf86d17"
+source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -802,7 +801,8 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "560baf91197ded38a99a5c94ff366a3dd971ebf33f5d987ecce31d3dedf86d17"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2219,18 +2219,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.20"
+version = "1.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7dfdd070ccd8ccb78f4ad66bf1982dc37f620ef696c6b5028fe2ed83dd3d0d08"
+checksum = "318234ffa22e0920fe9a40d7b8369b5f649d490980cf7aadcf1eb91594869b42"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.20"
+version = "1.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd80fc12f73063ac132ac92aceea36734f04a1d93c1240c6944e23a3b8841793"
+checksum = "cae2447b6282786c3493999f40a9be2a6ad20cb8bd268b0a0dbf5a065535c0ab"
 dependencies = [
  "proc-macro2",
  "quote",
