@@ -140,9 +140,7 @@ impl FluenceFaaS {
                 .into_string()
                 .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
 
-            let should = modules.should_load(&module_name.as_ref());
-            log::info!("About to load module {}, should I? {}", module_name, should);
-            if should {
+            if modules.should_load(&module_name.as_ref()) {
                 let module_bytes = fs::read(path)?;
                 let module_name = modules.extract_module_name(module_name);
                 if hash_map.insert(module_name, module_bytes).is_some() {
