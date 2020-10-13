@@ -122,8 +122,20 @@ impl FluenceFaaS {
     ) -> Result<HashMap<String, Vec<u8>>> {
         use FaaSError::IOError;
 
-        let mut dir_entries =
-            fs::read_dir(modules_dir).map_err(|e| IOError(format!("{:?}: {}", modules_dir, e)))?;
+        let mut dir_entries = fs::read_dir(modules_dir)
+            .map_err(|e| IOError(format!("{:?}: {}", modules_dir, e)))?
+            .peekable();
+
+        log::info!(
+            "Loaded dir entries from module_dir {:?}, peek: {:?}",
+            modules_dir,
+            dir_entries.peek()
+        );
+        println!(
+            "Loaded dir entries from module_dir {:?}, peek: {:?}",
+            modules_dir,
+            dir_entries.peek()
+        );
 
         let loaded = dir_entries.try_fold(HashMap::new(), |mut hash_map, entry| {
             let entry = entry?;
