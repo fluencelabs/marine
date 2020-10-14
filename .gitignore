@@ -13,6 +13,7 @@ target/
 *.repl_history
 
 # Allowed Wasm files for examples
+!/examples/call_parameters/artifacts/*.wasm
 !/examples/greeting/artifacts/*.wasm
 !/examples/ipfs-node/artifacts/*.wasm
 !/examples/records/artifacts/*.wasm
