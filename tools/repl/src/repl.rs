@@ -179,7 +179,7 @@ impl REPL {
             .unwrap_or_default();
         config.service_base_dir = Some(tmp_path);
 
-        let app_service = AppService::new(config, &service_id, HashMap::new())?;
+        let app_service = AppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
 
         let duration = start.elapsed();
 

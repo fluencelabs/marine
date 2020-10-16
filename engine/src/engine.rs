@@ -46,20 +46,20 @@ impl FCE {
         &mut self,
         module_name: MN,
         func_name: FN,
-        argument: &[IValue],
+        arguments: &[IValue],
     ) -> Result<Vec<IValue>> {
-        self.call_(module_name.as_ref(), func_name.as_ref(), argument)
+        self.call_(module_name.as_ref(), func_name.as_ref(), arguments)
     }
 
     fn call_(
         &mut self,
         module_name: &str,
         func_name: &str,
-        argument: &[IValue],
+        arguments: &[IValue],
     ) -> Result<Vec<IValue>> {
         match self.modules.get_mut(module_name) {
             // TODO: refactor errors
-            Some(module) => module.call(func_name.as_ref(), argument),
+            Some(module) => module.call(func_name.as_ref(), arguments),
             None => Err(FCEError::NoSuchModule(format!(
                 "trying to call module with name {} that is not loaded",
                 module_name

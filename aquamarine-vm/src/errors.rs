@@ -17,7 +17,9 @@
 use crate::stepper_outcome::StepperError;
 use fluence_faas::FaaSError;
 
+use std::io::Error as IOError;
 use std::error::Error;
+use std::path::PathBuf;
 
 #[derive(Debug)]
 pub enum AquamarineVMError {
@@ -29,6 +31,12 @@ pub enum AquamarineVMError {
 
     /// Errors related to stepper execution.
     StepperError(StepperError),
+
+    /// I/O errors while persisting resulted data.
+    PersistDataError(IOError, PathBuf),
+
+    /// Errors related to particle_data_store path from supplied config.
+    InvalidDataStorePath(IOError, PathBuf),
 }
 
 impl Error for AquamarineVMError {}
@@ -39,6 +47,16 @@ impl std::fmt::Display for AquamarineVMError {
             AquamarineVMError::FaaSError(err) => write!(f, "{}", err),
             AquamarineVMError::AquamarineResultError(err_msg) => write!(f, "{}", err_msg),
             AquamarineVMError::StepperError(err) => write!(f, "{}", err),
+            AquamarineVMError::PersistDataError(err, path) => write!(
+                f,
+                "an error occurred while saving prev data {:?} by {:?} path",
+                err, path
+            ),
+            AquamarineVMError::InvalidDataStorePath(err, path) => write!(
+                f,
+                "an error occurred while creating data storage {:?} by {:?} path",
+                err, path
+            ),
         }
     }
 }

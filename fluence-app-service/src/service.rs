@@ -151,6 +151,28 @@ impl AppService {
 // This API is intended for testing purposes (mostly in FCE REPL)
 #[cfg(feature = "raw-module-api")]
 impl AppService {
+    pub fn new_with_empty_facade<C, S>(
+        config: C,
+        service_id: S,
+        envs: HashMap<Vec<u8>, Vec<u8>>,
+    ) -> Result<Self>
+    where
+        C: TryInto<AppServiceConfig>,
+        S: Into<String>,
+        AppServiceError: From<C::Error>,
+    {
+        let mut config: AppServiceConfig = config.try_into()?;
+        let service_id = service_id.into();
+        Self::set_env_and_dirs(&mut config, service_id, envs)?;
+
+        let faas = FluenceFaaS::with_raw_config(config.faas_config)?;
+
+        Ok(Self {
+            faas,
+            facade_module_name: String::new(),
+        })
+    }
+
     pub fn call_with_module_name<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
         module_name: MN,

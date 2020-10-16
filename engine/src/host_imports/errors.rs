@@ -48,27 +48,22 @@ impl std::fmt::Display for HostImportError {
             HostImportError::MismatchWValues(expected_type, found_value) => write!(
                 f,
                 "Expected {} type, but found {:?} value during interface values lifting from Wasm memory",
-                expected_type,
-                found_value
+                expected_type, found_value
             ),
-            HostImportError::MismatchWValuesCount => write!(
-                f,
-                "Not enough WValue arguments are provided from the Wasm side"
-            ),
+            HostImportError::MismatchWValuesCount => {
+                write!(f, "Not enough WValue arguments are provided from the Wasm side")
+            }
             HostImportError::InvalidMemoryAccess(offset, size) => write!(
                 f,
-                "Invalid memory access while lifting IValues, offset {}, size {}", offset, size
+                "Invalid memory access while lifting IValues, offset {}, size {}",
+                offset, size
             ),
-            HostImportError::OddPointersCount(itype) => write!(
-                f,
-                "Arrays of pointers for value type {:?} contains odd count",
-                itype
-            ),
-            HostImportError::RecordTypeNotFound(record_type_id) => write!(
-                f,
-                "Record with type id {} not found",
-                record_type_id
-            ),
+            HostImportError::OddPointersCount(itype) => {
+                write!(f, "Arrays of pointers for value type {:?} contains odd count", itype)
+            }
+            HostImportError::RecordTypeNotFound(record_type_id) => {
+                write!(f, "Record with type id {} not found", record_type_id)
+            }
         }
     }
 }

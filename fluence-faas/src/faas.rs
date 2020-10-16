@@ -80,12 +80,13 @@ impl FluenceFaaS {
 
         let modules_dir = config.modules_dir;
         for (module_name, module_config) in config.modules_config {
-            let module_bytes = modules.remove(&module_name).ok_or_else(|| {
-                FaaSError::InstantiationError(format!(
+            let module_bytes =
+                modules.remove(&module_name).ok_or_else(|| {
+                    FaaSError::InstantiationError(format!(
                     "module with name {} is specified in config (dir: {:?}), but not found in provided modules: {:?}",
                     module_name, modules_dir, modules.keys().collect::<Vec<_>>()
                 ))
-            })?;
+                })?;
 
             let fce_module_config =
                 crate::misc::make_fce_config(Some(module_config), call_parameters.clone())?;
