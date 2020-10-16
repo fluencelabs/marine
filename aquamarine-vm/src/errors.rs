@@ -46,8 +46,12 @@ impl std::fmt::Display for AquamarineVMError {
             AquamarineVMError::FaaSError(err) => write!(f, "{}", err),
             AquamarineVMError::AquamarineResultError(err_msg) => write!(f, "{}", err_msg),
             AquamarineVMError::StepperError(err) => write!(f, "{}", err),
-            AquamarineVMError::PersistDataError(err) => write!(f, "an error occurred while saving prev data {}", err),
-            AquamarineVMError::InvalidDataStorePath(err) => write!(f, "an error occurred while creating data storage {}", err),
+            AquamarineVMError::PersistDataError(err) => {
+                write!(f, "an error occurred while saving prev data {}", err)
+            }
+            AquamarineVMError::InvalidDataStorePath(err) => {
+                write!(f, "an error occurred while creating data storage {}", err)
+            }
         }
     }
 }

@@ -87,6 +87,24 @@ pub enum StepperError {
 
     /// Related to such ret_code that doesn't have match with current StepperError.
     UnknownError(String),
+
+    /// Errors occurred on call evidence deserialization.
+    CallEvidenceDeserializationError(String),
+
+    /// Errors occurred on call evidence serialization.
+    CallEvidenceSerializationError(String),
+
+    /// Errors occurred when reserved keyword is used for variable name.
+    ReservedKeywordError(String),
+
+    /// Errors occurred when previous and current evidence states are incompatible.
+    IncompatibleEvidenceStates(String),
+
+    /// Errors occurred when previous and current call results are incompatible.
+    IncompatibleCallResults(String),
+
+    /// Errors occurred when evidence path contains less elements then corresponding Par has.
+    EvidencePathTooSmall(String),
 }
 
 impl Error for StepperError {}
@@ -110,6 +128,12 @@ impl std::fmt::Display for StepperError {
             StepperError::FoldStateNotFound(err_msg) => write!(f, "{}", err_msg),
             StepperError::MultipleFoldStates(err_msg) => write!(f, "{}", err_msg),
             StepperError::InvalidEvidenceState(err_msg) => write!(f, "{}", err_msg),
+            StepperError::CallEvidenceDeserializationError(err_msg) => write!(f, "{}", err_msg),
+            StepperError::CallEvidenceSerializationError(err_msg) => write!(f, "{}", err_msg),
+            StepperError::ReservedKeywordError(err_msg) => write!(f, "{}", err_msg),
+            StepperError::IncompatibleEvidenceStates(err_msg) => write!(f, "{}", err_msg),
+            StepperError::IncompatibleCallResults(err_msg) => write!(f, "{}", err_msg),
+            StepperError::EvidencePathTooSmall(err_msg) => write!(f, "{}", err_msg),
             StepperError::UnknownError(err_msg) => write!(f, "{}", err_msg),
         }
     }
@@ -147,7 +171,12 @@ impl TryFrom<RawStepperOutcome> for StepperOutcome {
             13 => to_vm_error!(MultipleValuesInJsonPath),
             14 => to_vm_error!(FoldStateNotFound),
             15 => to_vm_error!(MultipleFoldStates),
-            16 => to_vm_error!(InvalidEvidenceState),
+            16 => to_vm_error!(CallEvidenceDeserializationError),
+            17 => to_vm_error!(CallEvidenceSerializationError),
+            18 => to_vm_error!(ReservedKeywordError),
+            19 => to_vm_error!(IncompatibleEvidenceStates),
+            20 => to_vm_error!(IncompatibleCallResults),
+            21 => to_vm_error!(EvidencePathTooSmall),
             _ => to_vm_error!(UnknownError),
         }
     }

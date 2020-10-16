@@ -71,6 +71,7 @@ impl AquamarineVM {
         use AquamarineVMError::PersistDataError;
 
         let prev_data_path = self.particle_data_store.join(particle_id);
+        // TODO: check for errors related to invalid file content (such as invalid UTF8 string)
         let prev_data =
             std::fs::read_to_string(prev_data_path.clone()).unwrap_or(String::from("{}"));
         let args = vec![
