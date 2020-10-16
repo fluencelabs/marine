@@ -27,4 +27,8 @@ pub struct AquamarineVMConfig {
 
     /// Current peer id.
     pub current_peer_id: String,
+
+    /// Path to a folder contains prev data.
+    /// AquamarineVM uses it to store data obtained after stepper execution, and load it as a prev_data by particle_id.
+    pub particle_data_store: PathBuf,
 }

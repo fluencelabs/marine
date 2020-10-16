@@ -72,9 +72,8 @@ impl TomlFaaSConfig {
     pub fn load<P: Into<PathBuf>>(path: P) -> Result<Self> {
         let path = path.into();
         let file_content = std::fs::read(&path)?;
-        toml::from_slice(&file_content).map_err(|e| {
-            FaaSError::ConfigParseError(format!("Error parsing config {:?}: {:?}", path, e))
-        })
+        toml::from_slice(&file_content)
+            .map_err(|e| FaaSError::ConfigParseError(format!("Error parsing config {:?}: {:?}", path, e)))
     }
 }
 
@@ -153,9 +152,7 @@ pub fn from_toml_faas_config(config: TomlFaaSConfig) -> Result<FaaSConfig> {
     })
 }
 
-pub fn from_toml_named_module_config(
-    config: TomlFaaSNamedModuleConfig,
-) -> Result<(String, FaaSModuleConfig)> {
+pub fn from_toml_named_module_config(config: TomlFaaSNamedModuleConfig) -> Result<(String, FaaSModuleConfig)> {
     let module_config = from_toml_module_config(config.config)?;
     Ok((config.name, module_config))
 }
@@ -186,32 +183,20 @@ pub fn from_toml_module_config(config: TomlFaaSModuleConfig) -> Result<FaaSModul
 
 pub fn from_toml_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
     let to_vec = |elem: (String, toml::Value)| -> Result<(Vec<u8>, Vec<u8>)> {
-        let to = elem
-            .1
-            .try_into::<String>()
-            .map_err(FaaSError::ParseConfigError)?;
+        let to = elem.1.try_into::<String>().map_err(FaaSError::ParseConfigError)?;
         Ok((elem.0.into_bytes(), to.into_bytes()))
     };
 
     let to_path = |elem: (String, toml::Value)| -> Result<(String, PathBuf)> {
-        let to = elem
-            .1
-            .try_into::<String>()
-            .map_err(FaaSError::ParseConfigError)?;
+        let to = elem.1.try_into::<String>().map_err(FaaSError::ParseConfigError)?;
         Ok((elem.0, PathBuf::from(to)))
     };
 
     let envs = wasi.envs.unwrap_or_default();
-    let envs = envs
-        .into_iter()
-        .map(to_vec)
-        .collect::<Result<HashMap<_, _>>>()?;
+    let envs = envs.into_iter().map(to_vec).collect::<Result<HashMap<_, _>>>()?;
 
     let preopened_files = wasi.preopened_files.unwrap_or_default();
-    let preopened_files = preopened_files
-        .into_iter()
-        .map(PathBuf::from)
-        .collect::<HashSet<_>>();
+    let preopened_files = preopened_files.into_iter().map(PathBuf::from).collect::<HashSet<_>>();
 
     let mapped_dirs = wasi.mapped_dirs.unwrap_or_default();
     let mapped_dirs = mapped_dirs

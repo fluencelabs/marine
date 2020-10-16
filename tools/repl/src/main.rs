@@ -176,11 +176,7 @@ impl Highlighter for REPLHelper {
         self.highlighter.highlight(line, pos)
     }
 
-    fn highlight_prompt<'b, 's: 'b, 'p: 'b>(
-        &'s self,
-        prompt: &'p str,
-        default: bool,
-    ) -> Cow<'b, str> {
+    fn highlight_prompt<'b, 's: 'b, 'p: 'b>(&'s self, prompt: &'p str, default: bool) -> Cow<'b, str> {
         if default {
             Borrowed(&self.colored_prompt)
         } else {
@@ -198,10 +194,7 @@ impl Highlighter for REPLHelper {
 }
 
 impl Validator for REPLHelper {
-    fn validate(
-        &self,
-        ctx: &mut validate::ValidationContext<'_>,
-    ) -> rustyline::Result<validate::ValidationResult> {
+    fn validate(&self, ctx: &mut validate::ValidationContext<'_>) -> rustyline::Result<validate::ValidationResult> {
         self.validator.validate(ctx)
     }
 

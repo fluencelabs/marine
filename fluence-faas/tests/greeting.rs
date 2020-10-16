@@ -21,8 +21,8 @@ use fluence_faas::IValue;
 pub fn greeting() {
     let greeting_config_path = "../examples/greeting/Config.toml";
 
-    let greeting_config_raw = std::fs::read(greeting_config_path)
-        .expect("../examples/greeting/Config.toml should presence");
+    let greeting_config_raw =
+        std::fs::read(greeting_config_path).expect("../examples/greeting/Config.toml should presence");
 
     let mut greeting_config: fluence_faas::TomlFaaSConfig =
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
@@ -57,8 +57,8 @@ pub fn greeting() {
 pub fn get_interfaces() {
     let greeting_config_path = "../examples/greeting/Config.toml";
 
-    let greeting_config_raw = std::fs::read(greeting_config_path)
-        .expect("../examples/greeting/Config.toml should presence");
+    let greeting_config_raw =
+        std::fs::read(greeting_config_path).expect("../examples/greeting/Config.toml should presence");
 
     let mut greeting_config: fluence_faas::TomlFaaSConfig =
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");

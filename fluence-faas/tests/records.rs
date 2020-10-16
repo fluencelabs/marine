@@ -23,8 +23,8 @@ use serde_json::json;
 pub fn records() {
     let records_config_path = "../examples/records/Config.toml";
 
-    let records_config_raw = std::fs::read(records_config_path)
-        .expect("../examples/records/Config.toml should presence");
+    let records_config_raw =
+        std::fs::read(records_config_path).expect("../examples/records/Config.toml should presence");
 
     let mut records_config: fluence_faas::TomlFaaSConfig =
         toml::from_slice(&records_config_raw).expect("records config should be well-formed");
@@ -221,17 +221,13 @@ pub fn records() {
 
 #[test]
 fn inner_records() {
-    let inner_records_config_raw =
-        std::fs::read("./tests/json_wasm_tests/inner_records/Config.toml")
-            .expect("../examples/greeting/artifacts/greeting.wasm should presence");
+    let inner_records_config_raw = std::fs::read("./tests/json_wasm_tests/inner_records/Config.toml")
+        .expect("../examples/greeting/artifacts/greeting.wasm should presence");
 
     let mut inner_records_config: fluence_faas::TomlFaaSConfig =
-        toml::from_slice(&inner_records_config_raw)
-            .expect("argument passing test config should be well-formed");
+        toml::from_slice(&inner_records_config_raw).expect("argument passing test config should be well-formed");
 
-    inner_records_config.modules_dir = Some(String::from(
-        "./tests/json_wasm_tests/inner_records/artifacts",
-    ));
+    inner_records_config.modules_dir = Some(String::from("./tests/json_wasm_tests/inner_records/artifacts"));
 
     let mut faas = FluenceFaaS::with_raw_config(inner_records_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));

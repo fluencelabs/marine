@@ -22,10 +22,7 @@ use fluence_sdk_wit::ParsedType;
 use fluence_sdk_wit::RustType;
 
 // return error if there is no record with such name
-pub(crate) fn ptype_to_itype_checked(
-    pty: &ParsedType,
-    wit_resolver: &mut WITResolver,
-) -> Result<IType> {
+pub(crate) fn ptype_to_itype_checked(pty: &ParsedType, wit_resolver: &mut WITResolver) -> Result<IType> {
     match pty {
         ParsedType::I8 => Ok(IType::S8),
         ParsedType::I16 => Ok(IType::S16),

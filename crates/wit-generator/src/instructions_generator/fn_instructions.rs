@@ -72,16 +72,13 @@ impl WITGenerator for AstFunctionItem {
             .arguments
             .iter()
             .enumerate()
-            .try_fold::<_, _, Result<_>>(
-                Vec::new(),
-                |mut instructions, (arg_id, (_, input_type))| {
-                    let mut new_instructions = input_type
-                        .generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
+            .try_fold::<_, _, Result<_>>(Vec::new(), |mut instructions, (arg_id, (_, input_type))| {
+                let mut new_instructions =
+                    input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
 
-                    instructions.append(&mut new_instructions);
-                    Ok(instructions)
-                },
-            )?;
+                instructions.append(&mut new_instructions);
+                Ok(instructions)
+            })?;
 
         let export_function_index = (wit_resolver.interfaces.exports.len() - 1) as u32;
         instructions.push(Instruction::CallCore {
@@ -118,10 +115,8 @@ trait FnInstructionGenerator {
         wit_resolver: &mut WITResolver<'a>,
     ) -> Result<Vec<Instruction>>;
 
-    fn generate_instructions_for_output_type<'a>(
-        &self,
-        wit_resolver: &mut WITResolver<'a>,
-    ) -> Result<Vec<Instruction>>;
+    fn generate_instructions_for_output_type<'a>(&self, wit_resolver: &mut WITResolver<'a>)
+        -> Result<Vec<Instruction>>;
 }
 
 impl FnInstructionGenerator for ParsedType {

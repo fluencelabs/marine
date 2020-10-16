@@ -50,10 +50,7 @@ pub fn get(hash: String) -> String {
     let result_file_path = to_full_path(RESULT_FILE_PATH);
 
     let timeout = std::env::var(TIMEOUT_ENV_NAME).unwrap_or_else(|_| "1s".to_string());
-    let cmd = format!(
-        "get --timeout {} -o {}  {}",
-        timeout, result_file_path, hash
-    );
+    let cmd = format!("get --timeout {} -o {}  {}", timeout, result_file_path, hash);
 
     unsafe { ipfs(cmd) };
 
@@ -64,10 +61,7 @@ pub fn get(hash: String) -> String {
 pub fn get_address() -> String {
     match std::env::var(IPFS_ADDR_ENV_NAME) {
         Ok(addr) => addr,
-        Err(e) => format!(
-            "getting {} env variable failed with error {:?}",
-            IPFS_ADDR_ENV_NAME, e
-        ),
+        Err(e) => format!("getting {} env variable failed with error {:?}", IPFS_ADDR_ENV_NAME, e),
     }
 }
 

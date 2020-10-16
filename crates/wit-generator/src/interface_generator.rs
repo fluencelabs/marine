@@ -35,9 +35,9 @@ pub fn embed_wit(path: std::path::PathBuf) -> Result<()> {
     let wasm_module = fce_wit_parser::delete_wit_section(wasm_module);
     let mut wasm_module = fce_wit_parser::embed_wit(wasm_module, &interfaces);
 
-    wasm_module.emit_wasm_file(path).map_err(|e| {
-        WITGeneratorError::IOError(format!("resulted Wasm file can't be emitted: {:?}", e))
-    })
+    wasm_module
+        .emit_wasm_file(path)
+        .map_err(|e| WITGeneratorError::IOError(format!("resulted Wasm file can't be emitted: {:?}", e)))
 }
 
 pub(crate) struct ModuleAST {
@@ -55,11 +55,11 @@ fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<ModuleAST> {
     let mut extern_mods: Vec<AstExternModItem> = Vec::new();
 
     // consider only sections name of that starts with GENERATED_SECTION_PREFIX
-    for custom_module in wasm_module.customs.iter().filter(|(_, section)| {
-        section
-            .name()
-            .starts_with(fluence_sdk_wit::GENERATED_SECTION_PREFIX)
-    }) {
+    for custom_module in wasm_module
+        .customs
+        .iter()
+        .filter(|(_, section)| section.name().starts_with(fluence_sdk_wit::GENERATED_SECTION_PREFIX))
+    {
         let default_ids = walrus::IdsToIndices::default();
         let raw_data = custom_module.1.data(&default_ids);
         let decoded_json: FCEAst = serde_json::from_slice(&raw_data)?;

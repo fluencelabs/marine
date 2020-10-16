@@ -21,14 +21,12 @@ use fluence_faas::IValue;
 pub fn call_parameters() {
     let call_parameters_config_path = "../examples/call_parameters/Config.toml";
 
-    let call_parameters_config_raw = std::fs::read(call_parameters_config_path)
-        .expect("../examples/call_parameters/Config.toml should presence");
+    let call_parameters_config_raw =
+        std::fs::read(call_parameters_config_path).expect("../examples/call_parameters/Config.toml should presence");
 
     let mut call_parameters_config: fluence_faas::TomlFaaSConfig =
-        toml::from_slice(&call_parameters_config_raw)
-            .expect("call_parameters config should be well-formed");
-    call_parameters_config.modules_dir =
-        Some(String::from("../examples/call_parameters/artifacts"));
+        toml::from_slice(&call_parameters_config_raw).expect("call_parameters config should be well-formed");
+    call_parameters_config.modules_dir = Some(String::from("../examples/call_parameters/artifacts"));
 
     let mut faas = FluenceFaaS::with_raw_config(call_parameters_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));

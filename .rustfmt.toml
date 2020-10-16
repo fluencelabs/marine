@@ -2,3 +2,4 @@ edition = "2018"
 
 reorder_imports = false
 reorder_modules = false
+max_width = 120

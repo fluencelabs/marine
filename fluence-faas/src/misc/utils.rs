@@ -100,12 +100,7 @@ pub(crate) fn make_fce_config(
         let mapped_dirs = fce_module_config
             .wasi_mapped_dirs
             .iter()
-            .map(|(from, to)| {
-                (
-                    from.as_bytes().to_vec(),
-                    to.to_string_lossy().as_bytes().to_vec(),
-                )
-            })
+            .map(|(from, to)| (from.as_bytes().to_vec(), to.to_string_lossy().as_bytes().to_vec()))
             .collect::<HashMap<_, _>>();
 
         fce_module_config.wasi_envs.extend(mapped_dirs);

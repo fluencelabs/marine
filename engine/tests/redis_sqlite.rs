@@ -17,10 +17,8 @@
 use fce::FCE;
 use fce::IValue;
 
-const REDIS_DOWNLOAD_URL: &str =
-    "https://github.com/fluencelabs/redis/releases/download/v0.10.0_w/redis.wasm";
-const SQLITE_DOWNLOAD_URL: &str =
-    "https://github.com/fluencelabs/sqlite/releases/download/v0.6.0_w/sqlite3.wasm";
+const REDIS_DOWNLOAD_URL: &str = "https://github.com/fluencelabs/redis/releases/download/v0.10.0_w/redis.wasm";
+const SQLITE_DOWNLOAD_URL: &str = "https://github.com/fluencelabs/sqlite/releases/download/v0.6.0_w/sqlite3.wasm";
 
 pub async fn download(url: &str) -> bytes::Bytes {
     reqwest::get(url)
@@ -43,32 +41,16 @@ async fn redis() {
         .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
 
     let result1 = fce
-        .call(
-            module_name,
-            "invoke",
-            &[IValue::String(String::from("SET A 10"))],
-        )
+        .call(module_name, "invoke", &[IValue::String(String::from("SET A 10"))])
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
     let result2 = fce
-        .call(
-            module_name,
-            "invoke",
-            &[IValue::String(String::from("SADD B 20"))],
-        )
+        .call(module_name, "invoke", &[IValue::String(String::from("SADD B 20"))])
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
     let result3 = fce
-        .call(
-            module_name,
-            "invoke",
-            &[IValue::String(String::from("GET A"))],
-        )
+        .call(module_name, "invoke", &[IValue::String(String::from("GET A"))])
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
     let result4 = fce
-        .call(
-            module_name,
-            "invoke",
-            &[IValue::String(String::from("SMEMBERS B"))],
-        )
+        .call(module_name, "invoke", &[IValue::String(String::from("SMEMBERS B"))])
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
     let result5 = fce
         .call(
@@ -83,10 +65,7 @@ async fn redis() {
     assert_eq!(result1, vec![IValue::String(String::from("+OK\r\n"))]);
     assert_eq!(result2, vec![IValue::String(String::from(":1\r\n"))]);
     assert_eq!(result3, vec![IValue::String(String::from("$2\r\n10\r\n"))]);
-    assert_eq!(
-        result4,
-        vec![IValue::String(String::from("*1\r\n$2\r\n20\r\n"))]
-    );
+    assert_eq!(result4, vec![IValue::String(String::from("*1\r\n$2\r\n20\r\n"))]);
     assert_eq!(result5, vec![IValue::String(String::from(":93\r\n"))]);
 }
 

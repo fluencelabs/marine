@@ -55,20 +55,13 @@ impl std::fmt::Display for WITParserError {
                 f,
                 "Loaded module contains multiple WIT sections that is unsupported now"
             ),
-            WITParserError::WITRemainderNotEmpty => write!(
-                f,
-                "WIT section remainder isn't empty - WIT section possibly corrupted"
-            ),
+            WITParserError::WITRemainderNotEmpty => {
+                write!(f, "WIT section remainder isn't empty - WIT section possibly corrupted")
+            }
             WITParserError::CorruptedWITSection => write!(f, "WIT section is corrupted"),
-            WITParserError::CorruptedWATFile(err) => {
-                write!(f, "an error occurred while parsing wat file: {}", err)
-            }
-            WITParserError::CorruptedWasmFile(err) => {
-                write!(f, "Failed to parse the Wasm module: {}", err)
-            }
-            WITParserError::AstToBytesError(err) => {
-                write!(f, "Wasm AST converting to bytes failed with: {}", err)
-            }
+            WITParserError::CorruptedWATFile(err) => write!(f, "an error occurred while parsing wat file: {}", err),
+            WITParserError::CorruptedWasmFile(err) => write!(f, "Failed to parse the Wasm module: {}", err),
+            WITParserError::AstToBytesError(err) => write!(f, "Wasm AST converting to bytes failed with: {}", err),
             WITParserError::WasmEmitError(err) => write!(f, "Failed to emit Wasm file: {}", err),
         }
     }

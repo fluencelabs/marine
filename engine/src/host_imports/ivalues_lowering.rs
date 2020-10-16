@@ -25,11 +25,7 @@ use crate::IValue;
 use wasmer_core::vm::Ctx;
 use wasmer_wit::vec1::Vec1;
 
-pub(super) fn ivalue_to_wvalues(
-    ctx: &mut Ctx,
-    ivalue: Option<IValue>,
-    allocate_func: &AllocateFunc,
-) -> Vec<WValue> {
+pub(super) fn ivalue_to_wvalues(ctx: &mut Ctx, ivalue: Option<IValue>, allocate_func: &AllocateFunc) -> Vec<WValue> {
     match ivalue {
         Some(IValue::S8(v)) => vec![WValue::I32(v as _)],
         Some(IValue::S16(v)) => vec![WValue::I32(v as _)],
@@ -61,11 +57,7 @@ pub(super) fn ivalue_to_wvalues(
     }
 }
 
-fn lower_array(
-    ctx: &mut Ctx,
-    array_values: Vec<IValue>,
-    allocate_func: &AllocateFunc,
-) -> (usize, usize) {
+fn lower_array(ctx: &mut Ctx, array_values: Vec<IValue>, allocate_func: &AllocateFunc) -> (usize, usize) {
     let mut result: Vec<u64> = Vec::with_capacity(array_values.len());
 
     for value in array_values {

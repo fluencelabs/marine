@@ -102,15 +102,9 @@ pub(crate) fn create_host_import_func(
         }
     };
 
-    DynamicFunc::new(
-        std::sync::Arc::new(FuncSig::new(raw_args, raw_output)),
-        func,
-    )
+    DynamicFunc::new(std::sync::Arc::new(FuncSig::new(raw_args, raw_output)), func)
 }
 
 fn default_error_handler(err: &HostImportError) -> Option<crate::IValue> {
-    panic!(
-        "an error is occurred while lifting values to interface values: {}",
-        err
-    )
+    panic!("an error is occurred while lifting values to interface values: {}", err)
 }

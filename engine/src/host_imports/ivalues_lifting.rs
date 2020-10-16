@@ -173,13 +173,7 @@ fn lift_array(
                 let array_size = data
                     .next()
                     .ok_or_else(|| HostImportError::OddPointersCount(IType::Array(ty.clone())))?;
-                let array = lift_array(
-                    ctx,
-                    ty,
-                    array_offset.get() as _,
-                    array_size.get() as _,
-                    record_types,
-                )?;
+                let array = lift_array(ctx, ty, array_offset.get() as _, array_size.get() as _, record_types)?;
 
                 result.push(IValue::Array(array));
             }
@@ -194,8 +188,7 @@ fn lift_array(
             let mut result = Vec::with_capacity(data.len() / 2);
 
             for record_offset in data {
-                let record =
-                    lift_record(ctx, &record_type, record_offset.get() as _, record_types)?;
+                let record = lift_record(ctx, &record_type, record_offset.get() as _, record_types)?;
 
                 result.push(record);
             }
@@ -296,8 +289,7 @@ fn lift_record(
                 let array_size = data[field_id].get();
 
                 if array_size != 0 {
-                    let array =
-                        lift_array(ctx, &ty, array_offset as _, array_size as _, record_types)?;
+                    let array = lift_array(ctx, &ty, array_offset as _, array_size as _, record_types)?;
                     values.push(IValue::Array(array));
                 } else {
                     values.push(IValue::Array(vec![]));
@@ -316,7 +308,6 @@ fn lift_record(
     }
 
     Ok(IValue::Record(
-        Vec1::new(values.into_iter().collect())
-            .expect("Record must have at least one field, zero given"),
+        Vec1::new(values.into_iter().collect()).expect("Record must have at least one field, zero given"),
     ))
 }

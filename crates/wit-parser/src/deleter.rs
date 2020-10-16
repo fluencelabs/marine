@@ -22,10 +22,7 @@ use walrus::ModuleConfig;
 use std::path::PathBuf;
 
 /// Delete all custom sections with WIT from provided Wasm file.
-pub fn delete_wit_section_from_file(
-    in_wasm_path: PathBuf,
-    out_wasm_path: PathBuf,
-) -> Result<(), WITParserError> {
+pub fn delete_wit_section_from_file(in_wasm_path: PathBuf, out_wasm_path: PathBuf) -> Result<(), WITParserError> {
     let module = ModuleConfig::new()
         .parse_file(&in_wasm_path)
         .map_err(WITParserError::CorruptedWasmFile)?;

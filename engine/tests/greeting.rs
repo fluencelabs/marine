@@ -31,11 +31,7 @@ pub fn greeting_basic() {
         .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
 
     let result1 = fce
-        .call(
-            "greeting",
-            "greeting",
-            &[IValue::String(String::from("Fluence"))],
-        )
+        .call("greeting", "greeting", &[IValue::String(String::from("Fluence"))])
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
     let result2 = fce

@@ -57,12 +57,8 @@ impl std::fmt::Display for FaaSError {
         match self {
             FaaSError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
             FaaSError::InstantiationError(err_msg) => write!(f, "{}", err_msg),
-            FaaSError::MissingFunctionError(func_name) => {
-                write!(f, "function with name `{}` is missing", func_name)
-            }
-            FaaSError::MissingArgumentError(arg_name) => {
-                write!(f, "argument with name `{}` is missing", arg_name)
-            }
+            FaaSError::MissingFunctionError(func_name) => write!(f, "function with name `{}` is missing", func_name),
+            FaaSError::MissingArgumentError(arg_name) => write!(f, "argument with name `{}` is missing", arg_name),
             FaaSError::JsonArgumentsDeserializationError(args) => write!(f, "{}", args),
             FaaSError::ArgumentDeserializationError(err_msg) => write!(f, "{:?}", err_msg),
             FaaSError::IOError(err_msg) => write!(f, "{}", err_msg),
