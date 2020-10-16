@@ -52,9 +52,10 @@ impl AquamarineVM {
         );
         let faas = FluenceFaaS::with_raw_config(faas_config)?;
 
-        std::fs::create_dir_all(&config.particle_data_store).map_err(InvalidDataStorePath)?;
-
         let particle_data_store = config.particle_data_store;
+        std::fs::create_dir_all(&particle_data_store)
+            .map_err(|e| InvalidDataStorePath(e, particle_data_store.clone()))?;
+
         Ok(Self {
             faas,
             particle_data_store,
@@ -72,8 +73,7 @@ impl AquamarineVM {
 
         let prev_data_path = self.particle_data_store.join(particle_id);
         // TODO: check for errors related to invalid file content (such as invalid UTF8 string)
-        let prev_data =
-            std::fs::read_to_string(prev_data_path.clone()).unwrap_or(String::from("{}"));
+        let prev_data = std::fs::read_to_string(&prev_data_path).unwrap_or(String::from("{}"));
         let args = vec![
             IValue::String(init_user_id.into()),
             IValue::String(aqua.into()),
@@ -89,7 +89,8 @@ impl AquamarineVM {
         )?;
 
         let raw_outcome = Self::make_raw_outcome(result)?;
-        std::fs::write(prev_data_path, &raw_outcome.data).map_err(PersistDataError)?;
+        std::fs::write(&prev_data_path, &raw_outcome.data)
+            .map_err(|e| PersistDataError(e, prev_data_path))?;
 
         raw_outcome.try_into()
     }
