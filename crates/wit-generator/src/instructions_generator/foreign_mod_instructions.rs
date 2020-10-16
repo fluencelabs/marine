@@ -84,7 +84,10 @@ fn generate_wit_for_import<'a>(
         .collect::<Vec<_>>();
 
     let raw_outputs = match import.signature.output_type {
-        Some(ref output_type) => to_raw_output_type(output_type).iter().map(wtype_to_itype).collect(),
+        Some(ref output_type) => to_raw_output_type(output_type)
+            .iter()
+            .map(wtype_to_itype)
+            .collect(),
         None => vec![],
     };
 
@@ -123,18 +126,22 @@ fn generate_wit_for_import<'a>(
         .signature
         .arguments
         .iter()
-        .try_fold::<_, _, Result<_>>((0, Vec::new()), |(arg_id, mut instructions), (_, input_type)| {
-            let (mut new_instructions, shift) =
-                input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
+        .try_fold::<_, _, Result<_>>(
+            (0, Vec::new()),
+            |(arg_id, mut instructions), (_, input_type)| {
+                let (mut new_instructions, shift) =
+                    input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
 
-            instructions.append(&mut new_instructions);
-            Ok((arg_id + shift, instructions))
-        })?
+                instructions.append(&mut new_instructions);
+                Ok((arg_id + shift, instructions))
+            },
+        )?
         .1;
 
     // TODO: refactor
-    let import_function_index =
-        (wit_resolver.interfaces.exports.len() + wit_resolver.interfaces.imports.len() / 2 - 1) as u32;
+    let import_function_index = (wit_resolver.interfaces.exports.len()
+        + wit_resolver.interfaces.imports.len() / 2
+        - 1) as u32;
     instructions.push(Instruction::CallCore {
         function_index: import_function_index,
     });
@@ -167,8 +174,10 @@ trait ForeignModInstructionGenerator {
         wit_resolver: &mut WITResolver<'a>,
     ) -> Result<(Vec<Instruction>, u32)>;
 
-    fn generate_instructions_for_output_type<'a>(&self, wit_resolver: &mut WITResolver<'a>)
-        -> Result<Vec<Instruction>>;
+    fn generate_instructions_for_output_type<'a>(
+        &self,
+        wit_resolver: &mut WITResolver<'a>,
+    ) -> Result<Vec<Instruction>>;
 }
 
 #[rustfmt::skip]

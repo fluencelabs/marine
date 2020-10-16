@@ -50,7 +50,9 @@ impl AppService {
             .modules_config
             .last()
             .ok_or_else(|| {
-                AppServiceError::ConfigParseError(String::from("config should contain at least one module"))
+                AppServiceError::ConfigParseError(String::from(
+                    "config should contain at least one module",
+                ))
             })?
             .0
             .clone();
@@ -75,7 +77,12 @@ impl AppService {
         call_parameters: crate::CallParameters,
     ) -> Result<Vec<IValue>> {
         self.faas
-            .call_with_json(&self.facade_module_name, func_name, arguments, call_parameters)
+            .call_with_json(
+                &self.facade_module_name,
+                func_name,
+                arguments,
+                call_parameters,
+            )
             .map_err(Into::into)
     }
 
@@ -96,7 +103,10 @@ impl AppService {
     ) -> Result<()> {
         let create = |dir: &PathBuf| match std::fs::create_dir(dir) {
             Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
-            Err(err) => Err(AppServiceError::CreateDir { err, path: dir.clone() }),
+            Err(err) => Err(AppServiceError::CreateDir {
+                err,
+                path: dir.clone(),
+            }),
             _ => Ok(()),
         };
 
@@ -118,10 +128,16 @@ impl AppService {
         preopened_files.insert(PathBuf::from(tmp_dir.clone()));
 
         let mut mapped_dirs = HashMap::new();
-        mapped_dirs.insert(String::from(SERVICE_LOCAL_DIR_NAME), PathBuf::from(local_dir));
+        mapped_dirs.insert(
+            String::from(SERVICE_LOCAL_DIR_NAME),
+            PathBuf::from(local_dir),
+        );
         mapped_dirs.insert(String::from(SERVICE_TMP_DIR_NAME), PathBuf::from(tmp_dir));
 
-        envs.insert(SERVICE_ID_ENV_NAME.as_bytes().to_vec(), service_id.into_bytes());
+        envs.insert(
+            SERVICE_ID_ENV_NAME.as_bytes().to_vec(),
+            service_id.into_bytes(),
+        );
 
         for (_, module_config) in &mut config.faas_config.modules_config {
             module_config.extend_wasi_envs(envs.clone());
@@ -153,14 +169,19 @@ impl AppService {
         C: TryInto<crate::FaaSModuleConfig>,
         fluence_faas::FaaSError: From<C::Error>,
     {
-        self.faas.load_module(name, &wasm_bytes, config).map_err(Into::into)
+        self.faas
+            .load_module(name, &wasm_bytes, config)
+            .map_err(Into::into)
     }
 
     pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
         self.faas.unload_module(module_name).map_err(Into::into)
     }
 
-    pub fn get_wasi_state<S: AsRef<str>>(&mut self, module_name: S) -> Result<&wasmer_wasi::state::WasiState> {
+    pub fn get_wasi_state<S: AsRef<str>>(
+        &mut self,
+        module_name: S,
+    ) -> Result<&wasmer_wasi::state::WasiState> {
         self.faas.module_wasi_state(module_name).map_err(Into::into)
     }
 }

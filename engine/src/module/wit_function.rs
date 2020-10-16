@@ -58,7 +58,11 @@ impl WITFunction {
                 ty: wtype_to_itype(wtype),
             })
             .collect::<Vec<_>>();
-        let outputs = signature.returns().iter().map(wtype_to_itype).collect::<Vec<_>>();
+        let outputs = signature
+            .returns()
+            .iter()
+            .map(wtype_to_itype)
+            .collect::<Vec<_>>();
 
         let inner = WITFunctionInner::Export {
             func: Arc::new(dyn_func),
@@ -90,7 +94,9 @@ impl wasm::structures::LocalImport for WITFunction {
     fn outputs_cardinality(&self) -> usize {
         match &self.inner {
             WITFunctionInner::Export { ref outputs, .. } => outputs.len(),
-            WITFunctionInner::Import { ref callable, .. } => callable.wit_module_func.output_types.len(),
+            WITFunctionInner::Import { ref callable, .. } => {
+                callable.wit_module_func.output_types.len()
+            }
         }
     }
 
@@ -117,9 +123,9 @@ impl wasm::structures::LocalImport for WITFunction {
                 .call(&arguments.iter().map(ival_to_wval).collect::<Vec<WValue>>())
                 .map(|result| result.iter().map(wval_to_ival).collect())
                 .map_err(|_| ()),
-            WITFunctionInner::Import { callable } => {
-                Arc::make_mut(&mut callable.clone()).call(arguments).map_err(|_| ())
-            }
+            WITFunctionInner::Import { callable } => Arc::make_mut(&mut callable.clone())
+                .call(arguments)
+                .map_err(|_| ()),
         }
     }
 }

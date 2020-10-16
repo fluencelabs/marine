@@ -46,7 +46,9 @@ impl std::fmt::Display for AppServiceError {
             AppServiceError::InvalidConfig(err_msg) => write!(f, "{}", err_msg),
             AppServiceError::IOError(err) => write!(f, "{}", err),
             AppServiceError::FaaSError(err) => write!(f, "{}", err),
-            AppServiceError::CreateDir { err, path } => write!(f, "Failed to create dir {:?}: {:?}", path, err),
+            AppServiceError::CreateDir { err, path } => {
+                write!(f, "Failed to create dir {:?}: {:?}", path, err)
+            }
             AppServiceError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
         }
     }

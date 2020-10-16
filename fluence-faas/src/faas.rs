@@ -58,9 +58,12 @@ impl FluenceFaaS {
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
-        let modules = config.modules_dir.as_ref().map_or(Ok(HashMap::new()), |dir| {
-            Self::load_modules(dir, ModulesLoadStrategy::WasmOnly)
-        })?;
+        let modules = config
+            .modules_dir
+            .as_ref()
+            .map_or(Ok(HashMap::new()), |dir| {
+                Self::load_modules(dir, ModulesLoadStrategy::WasmOnly)
+            })?;
 
         Self::with_modules::<FaaSConfig>(modules, config)
     }
@@ -85,11 +88,15 @@ impl FluenceFaaS {
                 ))
                 })?;
 
-            let fce_module_config = crate::misc::make_fce_config(Some(module_config), call_parameters.clone())?;
+            let fce_module_config =
+                crate::misc::make_fce_config(Some(module_config), call_parameters.clone())?;
             fce.load_module(module_name, &module_bytes, fce_module_config)?;
         }
 
-        Ok(Self { fce, call_parameters })
+        Ok(Self {
+            fce,
+            call_parameters,
+        })
     }
 
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
@@ -99,18 +106,25 @@ impl FluenceFaaS {
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
-        let modules = config.modules_dir.as_ref().map_or(Ok(HashMap::new()), |dir| {
-            Self::load_modules(dir, ModulesLoadStrategy::Named(names))
-        })?;
+        let modules = config
+            .modules_dir
+            .as_ref()
+            .map_or(Ok(HashMap::new()), |dir| {
+                Self::load_modules(dir, ModulesLoadStrategy::Named(names))
+            })?;
 
         Self::with_modules::<FaaSConfig>(modules, config)
     }
 
     /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
-    fn load_modules(modules_dir: &PathBuf, modules: ModulesLoadStrategy<'_>) -> Result<HashMap<String, Vec<u8>>> {
+    fn load_modules(
+        modules_dir: &PathBuf,
+        modules: ModulesLoadStrategy<'_>,
+    ) -> Result<HashMap<String, Vec<u8>>> {
         use FaaSError::IOError;
 
-        let mut dir_entries = fs::read_dir(modules_dir).map_err(|e| IOError(format!("{:?}: {}", modules_dir, e)))?;
+        let mut dir_entries =
+            fs::read_dir(modules_dir).map_err(|e| IOError(format!("{:?}: {}", modules_dir, e)))?;
 
         let loaded = dir_entries.try_fold(HashMap::new(), |mut hash_map, entry| {
             let entry = entry?;
@@ -162,7 +176,9 @@ impl FluenceFaaS {
     ) -> Result<Vec<IValue>> {
         self.call_parameters.replace(call_parameters);
 
-        self.fce.call(module_name, func_name, args).map_err(Into::into)
+        self.fce
+            .call(module_name, func_name, args)
+            .map_err(Into::into)
     }
 
     /// Call a specified function of loaded on a startup module by its name.
@@ -193,7 +209,9 @@ impl FluenceFaaS {
         };
 
         self.call_parameters.replace(call_parameters);
-        self.fce.call(module_name, func_name, &iargs).map_err(Into::into)
+        self.fce
+            .call(module_name, func_name, &iargs)
+            .map_err(Into::into)
     }
 
     /// Return all export functions (name and signatures) of loaded modules.
@@ -227,7 +245,10 @@ impl FluenceFaaS {
             })
             .collect();
 
-        FaaSInterface { record_types, modules }
+        FaaSInterface {
+            record_types,
+            modules,
+        }
     }
 }
 
@@ -252,7 +273,10 @@ impl FluenceFaaS {
         self.fce.unload_module(module_name).map_err(Into::into)
     }
 
-    pub fn module_wasi_state<S: AsRef<str>>(&mut self, module_name: S) -> Result<&wasmer_wasi::state::WasiState> {
+    pub fn module_wasi_state<S: AsRef<str>>(
+        &mut self,
+        module_name: S,
+    ) -> Result<&wasmer_wasi::state::WasiState> {
         self.fce.module_wasi_state(module_name).map_err(Into::into)
     }
 }

@@ -27,7 +27,11 @@ use wasmer_wit::{
 use std::path::PathBuf;
 
 /// Embed provided WIT to a Wasm file by path.
-pub fn embed_text_wit(in_wasm_path: PathBuf, out_wasm_path: PathBuf, wit: &str) -> Result<(), WITParserError> {
+pub fn embed_text_wit(
+    in_wasm_path: PathBuf,
+    out_wasm_path: PathBuf,
+    wit: &str,
+) -> Result<(), WITParserError> {
     let module = ModuleConfig::new()
         .parse_file(&in_wasm_path)
         .map_err(WITParserError::CorruptedWasmFile)?;

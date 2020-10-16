@@ -33,7 +33,10 @@ pub(crate) fn json_to_ivalues(
     let ivalues = match json_args {
         SerdeValue::Object(json_map) => json_map_to_ivalues(
             json_map,
-            func_signature.arguments.iter().map(|arg| (&arg.name, &arg.ty)),
+            func_signature
+                .arguments
+                .iter()
+                .map(|arg| (&arg.name, &arg.ty)),
             &record_types,
         )?,
         SerdeValue::Array(json_array) => json_array_to_ivalues(
@@ -101,7 +104,10 @@ fn json_array_to_ivalues<'a, 'b>(
     Ok(iargs)
 }
 
-fn json_string_to_ivalue(json_string: String, func_signature: &fce::FCEFunctionSignature<'_>) -> Result<Vec<IValue>> {
+fn json_string_to_ivalue(
+    json_string: String,
+    func_signature: &fce::FCEFunctionSignature<'_>,
+) -> Result<Vec<IValue>> {
     if func_signature.arguments.len() != 1 || func_signature.arguments[0].ty != IType::String {
         return Err(FaaSError::JsonArgumentsDeserializationError(format!(
             "the called function has the following signature: {:?}, but only one string argument is provided",
@@ -112,7 +118,10 @@ fn json_string_to_ivalue(json_string: String, func_signature: &fce::FCEFunctionS
     Ok(vec![IValue::String(json_string)])
 }
 
-fn json_bool_to_ivalue(json_bool: SerdeValue, func_signature: &fce::FCEFunctionSignature<'_>) -> Result<Vec<IValue>> {
+fn json_bool_to_ivalue(
+    json_bool: SerdeValue,
+    func_signature: &fce::FCEFunctionSignature<'_>,
+) -> Result<Vec<IValue>> {
     if func_signature.arguments.len() != 1 {
         return Err(FaaSError::JsonArgumentsDeserializationError(format!(
             "the called function has the following signature: {:?}, but only one bool argument is provided",
@@ -164,47 +173,58 @@ fn json_value_to_ivalue(
     // TODO: get rid of copy-past
     match ty {
         IType::S8 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::S8(value))
         }
         IType::S16 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::S16(value))
         }
         IType::S32 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::S32(value))
         }
         IType::S64 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::S64(value))
         }
         IType::U8 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::U8(value))
         }
         IType::U16 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::U16(value))
         }
         IType::U32 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::U32(value))
         }
         IType::U64 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::U64(value))
         }
         IType::F32 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::F32(value))
         }
         IType::F64 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::F64(value))
         }
         IType::String => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::String(value))
         }
         IType::Array(value_type) => {
@@ -228,11 +248,13 @@ fn json_value_to_ivalue(
             Ok(IValue::Array(value))
         }
         IType::I32 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::I32(value))
         }
         IType::I64 => {
-            let value = serde_json::from_value(json_value).map_err(FaaSError::ArgumentDeserializationError)?;
+            let value = serde_json::from_value(json_value)
+                .map_err(FaaSError::ArgumentDeserializationError)?;
             Ok(IValue::I64(value))
         }
         IType::Record(record_type_id) => {
@@ -252,13 +274,19 @@ fn json_record_type_to_ivalue(
     record_types: &HashMap<&u64, &RecordType>,
 ) -> Result<Vec1<IValue>> {
     let record_type = record_types.get(record_type_id).ok_or_else(|| {
-        FaaSError::JsonArgumentsDeserializationError(format!("record with type id `{}` wasn't found", record_type_id))
+        FaaSError::JsonArgumentsDeserializationError(format!(
+            "record with type id `{}` wasn't found",
+            record_type_id
+        ))
     })?;
 
     match json_value {
         SerdeValue::Object(json_map) => Ok(Vec1::new(json_map_to_ivalues(
             json_map,
-            record_type.fields.iter().map(|field| (&field.name, &field.ty)),
+            record_type
+                .fields
+                .iter()
+                .map(|field| (&field.name, &field.ty)),
             record_types,
         )?)
         .unwrap()),

@@ -34,7 +34,9 @@ pub fn test1() {
         )
         .unwrap();
 
-    let mut statement = connection.prepare("SELECT * FROM users WHERE age > ?").unwrap();
+    let mut statement = connection
+        .prepare("SELECT * FROM users WHERE age > ?")
+        .unwrap();
 
     statement.bind(1, 50).unwrap();
 

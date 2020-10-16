@@ -34,9 +34,11 @@ impl Error for WITGeneratorError {}
 impl std::fmt::Display for WITGeneratorError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            WITGeneratorError::DeserializationError(err) => {
-                write!(f, "Embedded by rust-sdk metadata could't be parsed by serde: {:?}", err)
-            }
+            WITGeneratorError::DeserializationError(err) => write!(
+                f,
+                "Embedded by rust-sdk metadata could't be parsed by serde: {:?}",
+                err
+            ),
             WITGeneratorError::CorruptedRecord(err) => write!(f, "{:?}", err),
             WITGeneratorError::IOError(err) => write!(f, "I/O error occurred: {:?}", err),
         }

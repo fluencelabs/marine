@@ -76,7 +76,8 @@ impl WITInstance {
                 unsafe {
                     // TODO: refactor this with new Wasmer API when it is ready
                     // here it is safe because dyn func is never lives WITInstance
-                    let export_func = std::mem::transmute::<DynFunc<'_>, DynFunc<'static>>(export_func);
+                    let export_func =
+                        std::mem::transmute::<DynFunc<'_>, DynFunc<'static>>(export_func);
                     Ok((export_id, WITFunction::from_export(export_func)?))
                 }
             })
@@ -129,9 +130,9 @@ impl WITInstance {
     }
 
     fn extract_record_types(wit: &FCEWITInterfaces<'_>) -> HashMap<u64, IRecordType> {
-        let record_types_by_id = wit
-            .types()
-            .fold((HashMap::new(), 0u64), |(mut record_types_by_id, id), ty| {
+        let record_types_by_id = wit.types().fold(
+            (HashMap::new(), 0u64),
+            |(mut record_types_by_id, id), ty| {
                 match ty {
                     WITAstType::Record(record_type) => {
                         record_types_by_id.insert(id, record_type.clone());
@@ -139,13 +140,16 @@ impl WITInstance {
                     WITAstType::Function { .. } => {}
                 };
                 (record_types_by_id, id + 1)
-            });
+            },
+        );
 
         record_types_by_id.0
     }
 }
 
-impl wasm::structures::Instance<WITExport, WITFunction, WITMemory, WITMemoryView<'_>> for WITInstance {
+impl wasm::structures::Instance<WITExport, WITFunction, WITMemory, WITMemoryView<'_>>
+    for WITInstance
+{
     fn export(&self, _export_name: &str) -> Option<&WITExport> {
         // exports aren't used in this version of WIT
         None

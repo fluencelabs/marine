@@ -115,17 +115,18 @@ impl REPL {
 
                 let start = Instant::now();
                 // TODO: add support of call parameters
-                let result =
-                    match self
-                        .app_service
-                        .call_with_module_name(module_name, func_name, module_arg, <_>::default())
-                    {
-                        Ok(result) => {
-                            let elapsed_time = start.elapsed();
-                            format!("result: {:?}\n elapsed time: {:?}", result, elapsed_time)
-                        }
-                        Err(e) => format!("execution failed with {:?}", e),
-                    };
+                let result = match self.app_service.call_with_module_name(
+                    module_name,
+                    func_name,
+                    module_arg,
+                    <_>::default(),
+                ) {
+                    Ok(result) => {
+                        let elapsed_time = start.elapsed();
+                        format!("result: {:?}\n elapsed time: {:?}", result, elapsed_time)
+                    }
+                    Err(e) => format!("execution failed with {:?}", e),
+                };
                 println!("{}", result);
             }
             Some("envs") => {

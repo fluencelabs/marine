@@ -37,15 +37,22 @@ where
 {
     let module_inner = &(*ctx.module);
 
-    let export_index = module_inner
-        .info
-        .exports
-        .get(name)
-        .ok_or_else(|| ResolveError::ExportNotFound { name: name.to_string() })?;
+    let export_index =
+        module_inner
+            .info
+            .exports
+            .get(name)
+            .ok_or_else(|| ResolveError::ExportNotFound {
+                name: name.to_string(),
+            })?;
 
     let export_func_index = match export_index {
         ExportIndex::Func(func_index) => func_index,
-        _ => return Err(ResolveError::ExportWrongType { name: name.to_string() }),
+        _ => {
+            return Err(ResolveError::ExportWrongType {
+                name: name.to_string(),
+            })
+        }
     };
 
     let export_func_signature_idx = *module_inner
@@ -57,7 +64,9 @@ where
     let export_func_signature = &module_inner.info.signatures[export_func_signature_idx];
     let export_func_signature_ref = SigRegistry.lookup_signature_ref(export_func_signature);
 
-    if export_func_signature_ref.params() != Args::types() || export_func_signature_ref.returns() != Rets::types() {
+    if export_func_signature_ref.params() != Args::types()
+        || export_func_signature_ref.returns() != Rets::types()
+    {
         return Err(ResolveError::Signature {
             expected: (*export_func_signature).clone(),
             found: Args::types().to_vec(),
@@ -74,7 +83,11 @@ where
             .runnable_module
             .get_func(&module_inner.info, local_func_index)
             .unwrap(),
-        _ => return Err(ResolveError::ExportNotFound { name: name.to_string() }),
+        _ => {
+            return Err(ResolveError::ExportNotFound {
+                name: name.to_string(),
+            })
+        }
     };
 
     let typed_func: Func<'_, Args, Rets, wasmer_core::typed_func::Wasm> =
@@ -125,7 +138,9 @@ pub(super) fn itypes_output_to_wtypes(itypes: &[IType]) -> Vec<WType> {
 macro_rules! init_wasm_func_once {
     ($func:ident, $ctx:ident, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
         if $func.borrow().is_none() {
-            let raw_func = match unsafe { super::utils::get_export_func_by_name::<$args, $rets>($ctx, $func_name) } {
+            let raw_func = match unsafe {
+                super::utils::get_export_func_by_name::<$args, $rets>($ctx, $func_name)
+            } {
                 Ok(func) => func,
                 Err(_) => return vec![WValue::I32($ret_error_code)],
             };

@@ -42,62 +42,68 @@ impl ApiExportFuncDescriptor {
     }
 }
 
-pub(crate) static ALLOCATE_FUNC: Lazy<ApiExportFuncDescriptor> = Lazy::new(|| ApiExportFuncDescriptor {
-    name: "allocate",
-    id: 0,
-    arguments: vec![IFunctionArg {
-        name: String::from("size"),
-        ty: IType::I32,
-    }],
-    output_types: vec![IType::I32],
-});
-
-pub(crate) static DEALLOCATE_FUNC: Lazy<ApiExportFuncDescriptor> = Lazy::new(|| ApiExportFuncDescriptor {
-    name: "deallocate",
-    id: 1,
-    arguments: vec![
-        IFunctionArg {
-            name: String::from("pointer"),
-            ty: IType::I32,
-        },
-        IFunctionArg {
+pub(crate) static ALLOCATE_FUNC: Lazy<ApiExportFuncDescriptor> =
+    Lazy::new(|| ApiExportFuncDescriptor {
+        name: "allocate",
+        id: 0,
+        arguments: vec![IFunctionArg {
             name: String::from("size"),
             ty: IType::I32,
-        },
-    ],
-    output_types: vec![],
-});
+        }],
+        output_types: vec![IType::I32],
+    });
 
-pub(crate) static GET_RESULT_SIZE_FUNC: Lazy<ApiExportFuncDescriptor> = Lazy::new(|| ApiExportFuncDescriptor {
-    name: "get_result_size",
-    id: 2,
-    arguments: vec![],
-    output_types: vec![IType::I32],
-});
+pub(crate) static DEALLOCATE_FUNC: Lazy<ApiExportFuncDescriptor> =
+    Lazy::new(|| ApiExportFuncDescriptor {
+        name: "deallocate",
+        id: 1,
+        arguments: vec![
+            IFunctionArg {
+                name: String::from("pointer"),
+                ty: IType::I32,
+            },
+            IFunctionArg {
+                name: String::from("size"),
+                ty: IType::I32,
+            },
+        ],
+        output_types: vec![],
+    });
 
-pub(crate) static GET_RESULT_PTR_FUNC: Lazy<ApiExportFuncDescriptor> = Lazy::new(|| ApiExportFuncDescriptor {
-    name: "get_result_ptr",
-    id: 3,
-    arguments: vec![],
-    output_types: vec![IType::I32],
-});
+pub(crate) static GET_RESULT_SIZE_FUNC: Lazy<ApiExportFuncDescriptor> =
+    Lazy::new(|| ApiExportFuncDescriptor {
+        name: "get_result_size",
+        id: 2,
+        arguments: vec![],
+        output_types: vec![IType::I32],
+    });
 
-pub(crate) static SET_RESULT_SIZE_FUNC: Lazy<ApiExportFuncDescriptor> = Lazy::new(|| ApiExportFuncDescriptor {
-    name: "set_result_size",
-    id: 4,
-    arguments: vec![IFunctionArg {
-        name: String::from("result_size"),
-        ty: IType::I32,
-    }],
-    output_types: vec![],
-});
+pub(crate) static GET_RESULT_PTR_FUNC: Lazy<ApiExportFuncDescriptor> =
+    Lazy::new(|| ApiExportFuncDescriptor {
+        name: "get_result_ptr",
+        id: 3,
+        arguments: vec![],
+        output_types: vec![IType::I32],
+    });
 
-pub(crate) static SET_RESULT_PTR_FUNC: Lazy<ApiExportFuncDescriptor> = Lazy::new(|| ApiExportFuncDescriptor {
-    name: "set_result_ptr",
-    id: 5,
-    arguments: vec![IFunctionArg {
-        name: String::from("result_ptr"),
-        ty: IType::I32,
-    }],
-    output_types: vec![],
-});
+pub(crate) static SET_RESULT_SIZE_FUNC: Lazy<ApiExportFuncDescriptor> =
+    Lazy::new(|| ApiExportFuncDescriptor {
+        name: "set_result_size",
+        id: 4,
+        arguments: vec![IFunctionArg {
+            name: String::from("result_size"),
+            ty: IType::I32,
+        }],
+        output_types: vec![],
+    });
+
+pub(crate) static SET_RESULT_PTR_FUNC: Lazy<ApiExportFuncDescriptor> =
+    Lazy::new(|| ApiExportFuncDescriptor {
+        name: "set_result_ptr",
+        id: 5,
+        arguments: vec![IFunctionArg {
+            name: String::from("result_ptr"),
+            ty: IType::I32,
+        }],
+        output_types: vec![],
+    });

@@ -32,7 +32,8 @@ use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
 
-type WITInterpreter = Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
+type WITInterpreter =
+    Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
 
 #[derive(Clone)]
 pub(super) struct WITModuleFunc {
@@ -144,7 +145,9 @@ impl FCEModule {
         }
     }
 
-    pub(crate) fn get_exports_signatures(&self) -> impl Iterator<Item = (&String, &Vec<IFunctionArg>, &Vec<IType>)> {
+    pub(crate) fn get_exports_signatures(
+        &self,
+    ) -> impl Iterator<Item = (&String, &Vec<IFunctionArg>, &Vec<IType>)> {
         self.export_funcs.iter().map(|(func_name, func)| {
             (
                 func_name,
@@ -230,7 +233,9 @@ impl FCEModule {
         wit.implementations()
             .filter_map(|(adapter_function_type, core_function_type)| {
                 match wit.exports_by_type(*core_function_type) {
-                    Some(export_function_name) => Some((adapter_function_type, export_function_name)),
+                    Some(export_function_name) => {
+                        Some((adapter_function_type, export_function_name))
+                    }
                     // pass functions that aren't export
                     None => None,
                 }
@@ -250,7 +255,8 @@ impl FCEModule {
                         arguments,
                         output_types,
                     } => {
-                        let interpreter: WITInterpreter = adapter_instructions.clone().try_into()?;
+                        let interpreter: WITInterpreter =
+                            adapter_instructions.clone().try_into()?;
                         let wit_module_func = WITModuleFunc {
                             interpreter: Arc::new(interpreter),
                             arguments: arguments.clone(),
@@ -325,10 +331,17 @@ impl FCEModule {
                 let wit_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
                 let outputs = unsafe {
                     // error here will be propagated by the special error instruction
-                    interpreter.run(&wit_inputs, Arc::make_mut(&mut wit_instance_callable.assume_init()))
+                    interpreter.run(
+                        &wit_inputs,
+                        Arc::make_mut(&mut wit_instance_callable.assume_init()),
+                    )
                 };
 
-                log::trace!("\nraw import for {}.{} finished", import_namespace, import_name);
+                log::trace!(
+                    "\nraw import for {}.{} finished",
+                    import_namespace,
+                    import_name
+                );
 
                 // TODO: optimize by prevent copying stack values
                 outputs
@@ -364,7 +377,8 @@ impl FCEModule {
                         arguments,
                         output_types,
                     } => {
-                        let interpreter: WITInterpreter = adapter_instructions.clone().try_into()?;
+                        let interpreter: WITInterpreter =
+                            adapter_instructions.clone().try_into()?;
 
                         let raw_import = create_raw_import(
                             wit_instance.clone(),
@@ -414,9 +428,14 @@ impl FCEModule {
         ) -> Result<()> {
             use wasmer_wit::interpreter::wasm::structures::Instance;
 
-            let record_type = wit_instance.wit_record_by_id(record_type_id).ok_or_else(|| {
-                FCEError::WasmerResolveError(format!("record type with type id {} not found", record_type_id))
-            })?;
+            let record_type = wit_instance
+                .wit_record_by_id(record_type_id)
+                .ok_or_else(|| {
+                    FCEError::WasmerResolveError(format!(
+                        "record type with type id {} not found",
+                        record_type_id
+                    ))
+                })?;
             export_record_types.push((record_type_id, record_type.clone()));
 
             for field in record_type.fields.iter() {

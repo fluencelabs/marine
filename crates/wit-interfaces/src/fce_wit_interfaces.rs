@@ -74,13 +74,23 @@ impl<'a> FCEWITInterfaces<'a> {
         let adapter_type_to_core = interfaces
             .implementations
             .iter()
-            .map(|implementation| (implementation.adapter_function_type, implementation.core_function_type))
+            .map(|implementation| {
+                (
+                    implementation.adapter_function_type,
+                    implementation.core_function_type,
+                )
+            })
             .collect::<MultiMap<_, _>>();
 
         let core_type_to_adapter = interfaces
             .implementations
             .iter()
-            .map(|implementation| (implementation.core_function_type, implementation.adapter_function_type))
+            .map(|implementation| {
+                (
+                    implementation.core_function_type,
+                    implementation.adapter_function_type,
+                )
+            })
             .collect::<MultiMap<_, _>>();
 
         Self {
@@ -170,7 +180,9 @@ impl<'a> FCEWITInterfaces<'a> {
             .ok_or_else(|| FCEWITInterfacesError::NoSuchImport(export_type))
     }
 
-    pub fn implementations(&self) -> impl Iterator<Item = (&AdapterFunctionType, &CoreFunctionType)> {
+    pub fn implementations(
+        &self,
+    ) -> impl Iterator<Item = (&AdapterFunctionType, &CoreFunctionType)> {
         self.adapter_type_to_core.iter()
     }
 

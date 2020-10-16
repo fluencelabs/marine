@@ -51,7 +51,12 @@ impl FCE {
         self.call_(module_name.as_ref(), func_name.as_ref(), arguments)
     }
 
-    fn call_(&mut self, module_name: &str, func_name: &str, arguments: &[IValue]) -> Result<Vec<IValue>> {
+    fn call_(
+        &mut self,
+        module_name: &str,
+        func_name: &str,
+        arguments: &[IValue],
+    ) -> Result<Vec<IValue>> {
         match self.modules.get_mut(module_name) {
             // TODO: refactor errors
             Some(module) => module.call(func_name.as_ref(), arguments),
@@ -63,11 +68,21 @@ impl FCE {
     }
 
     /// Load a new module inside FCE.
-    pub fn load_module<S: Into<String>>(&mut self, name: S, wasm_bytes: &[u8], config: FCEModuleConfig) -> Result<()> {
+    pub fn load_module<S: Into<String>>(
+        &mut self,
+        name: S,
+        wasm_bytes: &[u8],
+        config: FCEModuleConfig,
+    ) -> Result<()> {
         self.load_module_(name.into(), wasm_bytes, config)
     }
 
-    fn load_module_(&mut self, name: String, wasm_bytes: &[u8], config: FCEModuleConfig) -> Result<()> {
+    fn load_module_(
+        &mut self,
+        name: String,
+        wasm_bytes: &[u8],
+        config: FCEModuleConfig,
+    ) -> Result<()> {
         let _prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
         let module = FCEModule::new(&wasm_bytes, config, &self.modules)?;
@@ -96,7 +111,10 @@ impl FCE {
         }
     }
 
-    pub fn module_wasi_state<S: AsRef<str>>(&mut self, module_name: S) -> Result<&wasmer_wasi::state::WasiState> {
+    pub fn module_wasi_state<S: AsRef<str>>(
+        &mut self,
+        module_name: S,
+    ) -> Result<&wasmer_wasi::state::WasiState> {
         self.module_wasi_state_(module_name.as_ref())
     }
 
@@ -155,7 +173,9 @@ impl FCE {
         }
     }
 
-    fn get_module_function_signatures(module: &FCEModule) -> impl Iterator<Item = FCEFunctionSignature<'_>> {
+    fn get_module_function_signatures(
+        module: &FCEModule,
+    ) -> impl Iterator<Item = FCEFunctionSignature<'_>> {
         module
             .get_exports_signatures()
             .map(|(name, arguments, output_types)| FCEFunctionSignature {

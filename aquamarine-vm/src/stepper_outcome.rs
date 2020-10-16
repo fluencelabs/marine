@@ -121,9 +121,9 @@ impl TryFrom<RawStepperOutcome> for StepperOutcome {
     fn try_from(raw_outcome: RawStepperOutcome) -> Result<Self, Self::Error> {
         macro_rules! to_vm_error {
             ($error_variant:ident) => {
-                Err(AquamarineVMError::StepperError(StepperError::$error_variant(
-                    raw_outcome.data,
-                )))
+                Err(AquamarineVMError::StepperError(
+                    StepperError::$error_variant(raw_outcome.data),
+                ))
             };
         }
 

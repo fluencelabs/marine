@@ -79,7 +79,12 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
                 if signature.output_types.is_empty() {
                     writeln!(f, "{})", args)?;
                 } else if signature.output_types.len() == 1 {
-                    writeln!(f, "{}) -> {}", args, type_text_view(&signature.output_types[0]))?;
+                    writeln!(
+                        f,
+                        "{}) -> {}",
+                        args,
+                        type_text_view(&signature.output_types[0])
+                    )?;
                 } else {
                     // At now, multi values aren't supported - only one output type is possible
                     unimplemented!()
@@ -126,7 +131,10 @@ impl<'a> Serialize for FaaSInterface<'a> {
             .record_types
             .iter()
             .map(|(id, IRecordType { name, fields })| {
-                let fields = fields.iter().map(|field| (&field.name, &field.ty)).collect::<Vec<_>>();
+                let fields = fields
+                    .iter()
+                    .map(|field| (&field.name, &field.ty))
+                    .collect::<Vec<_>>();
 
                 RecordType {
                     name: name.as_str(),
@@ -150,7 +158,8 @@ impl<'a> Serialize for FaaSInterface<'a> {
                                 output_types,
                             },
                         )| {
-                            let arguments = arguments.iter().map(|arg| (&arg.name, &arg.ty)).collect();
+                            let arguments =
+                                arguments.iter().map(|arg| (&arg.name, &arg.ty)).collect();
                             Function {
                                 name,
                                 arguments,
@@ -163,6 +172,10 @@ impl<'a> Serialize for FaaSInterface<'a> {
             })
             .collect();
 
-        Interface { record_types, modules }.serialize(serializer)
+        Interface {
+            record_types,
+            modules,
+        }
+        .serialize(serializer)
     }
 }

@@ -19,7 +19,9 @@ use fce_wit_parser::WITParserError;
 use crate::HostImportError;
 
 use wasmer_wit::errors::InstructionError;
-use wasmer_runtime::error::{CallError, CompileError, CreationError, Error as WasmerError, ResolveError, RuntimeError};
+use wasmer_runtime::error::{
+    CallError, CompileError, CreationError, Error as WasmerError, ResolveError, RuntimeError,
+};
 
 use std::error::Error;
 
@@ -68,9 +70,13 @@ impl std::fmt::Display for FCEError {
             FCEError::WasmerInvokeError(msg) => write!(f, "WasmerInvokeError: {}", msg),
             FCEError::WasmerCompileError(msg) => write!(f, "WasmerCompileError: {}", msg),
             FCEError::WasmerCreationError(msg) => write!(f, "WasmerCreationError: {}", msg),
-            FCEError::PrepareError(msg) => write!(f, "Prepare error: {}, probably module is mailformed", msg),
+            FCEError::PrepareError(msg) => {
+                write!(f, "Prepare error: {}, probably module is mailformed", msg)
+            }
             FCEError::NonUniqueModuleName => write!(f, "FCE already has module with such a name"),
-            FCEError::NoSuchFunction(msg) => write!(f, "FCE doesn't have a function with such a name: {}", msg),
+            FCEError::NoSuchFunction(msg) => {
+                write!(f, "FCE doesn't have a function with such a name: {}", msg)
+            }
             FCEError::NoSuchModule(err_msg) => write!(f, "{}", err_msg),
             FCEError::HostImportError(host_import_error) => write!(f, "{}", host_import_error),
             FCEError::WITParseError(err) => write!(f, "{}", err),

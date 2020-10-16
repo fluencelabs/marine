@@ -43,8 +43,11 @@ pub struct AquamarineVM {
 impl AquamarineVM {
     /// Create AquamarineVM with provided config.
     pub fn new(config: AquamarineVMConfig) -> Result<Self> {
-        let faas_config =
-            Self::make_faas_config(config.aquamarine_wasm_path, config.call_service, config.current_peer_id);
+        let faas_config = Self::make_faas_config(
+            config.aquamarine_wasm_path,
+            config.call_service,
+            config.current_peer_id,
+        );
         let faas = FluenceFaaS::with_raw_config(faas_config)?;
 
         let particle_data_store = config.particle_data_store;
@@ -61,17 +64,20 @@ impl AquamarineVM {
         data: impl Into<String>,
         particle_id: impl AsRef<Path>,
     ) -> Result<StepperOutcome> {
-        let prev_data =
-            std::fs::read_to_string(self.particle_data_store.join(particle_id)).unwrap_or(String::from("{}"));
+        let prev_data = std::fs::read_to_string(self.particle_data_store.join(particle_id))
+            .unwrap_or(String::from("{}"));
         let args = vec![
             IValue::String(init_user_id.into()),
             IValue::String(aqua.into()),
             IValue::String(prev_data.into()),
             IValue::String(data.into()),
         ];
-        let result = self
-            .faas
-            .call_with_ivalues(AQUAMARINE_WASM_FILE_NAME, "invoke", &args, <_>::default())?;
+        let result = self.faas.call_with_ivalues(
+            AQUAMARINE_WASM_FILE_NAME,
+            "invoke",
+            &args,
+            <_>::default(),
+        )?;
 
         let raw_outcome = Self::make_raw_outcome(result)?;
         raw_outcome.try_into()
@@ -112,7 +118,10 @@ impl AquamarineVM {
 
         FaaSConfig {
             modules_dir: Some(aquamarine_wasm_dir),
-            modules_config: vec![(String::from(AQUAMARINE_WASM_FILE_NAME), aquamarine_module_config)],
+            modules_config: vec![(
+                String::from(AQUAMARINE_WASM_FILE_NAME),
+                aquamarine_module_config,
+            )],
             default_modules_config: None,
         }
     }
@@ -132,12 +141,22 @@ impl AquamarineVM {
 
                 let ret_code = match record_values.remove(0) {
                     IValue::S32(ret_code) => ret_code,
-                    v => return Err(AquamarineResultError(format!("expected i32 for ret_code, got {:?}", v))),
+                    v => {
+                        return Err(AquamarineResultError(format!(
+                            "expected i32 for ret_code, got {:?}",
+                            v
+                        )))
+                    }
                 };
 
                 let data = match record_values.remove(0) {
                     IValue::String(str) => str,
-                    v => return Err(AquamarineResultError(format!("expected string for data, got {:?}", v))),
+                    v => {
+                        return Err(AquamarineResultError(format!(
+                            "expected string for data, got {:?}",
+                            v
+                        )))
+                    }
                 };
 
                 let next_peer_pks = match record_values.remove(0) {

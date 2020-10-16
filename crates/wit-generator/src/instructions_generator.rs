@@ -50,8 +50,11 @@ impl<'a> WITResolver<'a> {
         match self.types.get(record_name) {
             Some(type_index) => *type_index,
             None => {
-                self.types.insert(record_name.to_string(), self.interfaces.types.len());
-                self.interfaces.types.push(Type::Record(RecordType::default()));
+                self.types
+                    .insert(record_name.to_string(), self.interfaces.types.len());
+                self.interfaces
+                    .types
+                    .push(Type::Record(RecordType::default()));
 
                 self.not_resolved_types_count += 1;
                 self.interfaces.types.len()
@@ -59,7 +62,10 @@ impl<'a> WITResolver<'a> {
         }
     }
 
-    pub(crate) fn get_record_type(&self, record_type_id: u64) -> Result<&wasmer_wit::types::RecordType> {
+    pub(crate) fn get_record_type(
+        &self,
+        record_type_id: u64,
+    ) -> Result<&wasmer_wit::types::RecordType> {
         if record_type_id >= self.interfaces.types.len() as u64 {
             return Err(crate::errors::WITGeneratorError::CorruptedRecord(format!(
                 "Can't find record with id {}, don't you forget to wrap it with #[fce]",
@@ -84,7 +90,8 @@ impl<'a> WITResolver<'a> {
                 self.not_resolved_types_count -= 1;
             }
             None => {
-                self.types.insert(record.name.clone(), self.interfaces.types.len());
+                self.types
+                    .insert(record.name.clone(), self.interfaces.types.len());
 
                 self.interfaces.types.push(Type::Record(record));
             }
