@@ -43,12 +43,16 @@ pub struct AquamarineVM {
 impl AquamarineVM {
     /// Create AquamarineVM with provided config.
     pub fn new(config: AquamarineVMConfig) -> Result<Self> {
+        use AquamarineVMError::InvalidDataStorePath;
+
         let faas_config = Self::make_faas_config(
             config.aquamarine_wasm_path,
             config.call_service,
             config.current_peer_id,
         );
         let faas = FluenceFaaS::with_raw_config(faas_config)?;
+
+        std::fs::create_dir_all(&config.particle_data_store).map_err(InvalidDataStorePath)?;
 
         let particle_data_store = config.particle_data_store;
         Ok(Self {
@@ -64,14 +68,18 @@ impl AquamarineVM {
         data: impl Into<String>,
         particle_id: impl AsRef<Path>,
     ) -> Result<StepperOutcome> {
-        let prev_data = std::fs::read_to_string(self.particle_data_store.join(particle_id))
-            .unwrap_or(String::from("{}"));
+        use AquamarineVMError::PersistDataError;
+
+        let prev_data_path = self.particle_data_store.join(particle_id);
+        let prev_data =
+            std::fs::read_to_string(prev_data_path.clone()).unwrap_or(String::from("{}"));
         let args = vec![
             IValue::String(init_user_id.into()),
             IValue::String(aqua.into()),
             IValue::String(prev_data.into()),
             IValue::String(data.into()),
         ];
+
         let result = self.faas.call_with_ivalues(
             AQUAMARINE_WASM_FILE_NAME,
             "invoke",
@@ -80,6 +88,8 @@ impl AquamarineVM {
         )?;
 
         let raw_outcome = Self::make_raw_outcome(result)?;
+        std::fs::write(prev_data_path, &raw_outcome.data).map_err(PersistDataError)?;
+
         raw_outcome.try_into()
     }
 
