@@ -631,7 +631,7 @@ dependencies = [
 
 [[package]]
 name = "fce"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "boolinator",
  "bytes",
@@ -664,7 +664,7 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-generator"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "fce-wit-parser",
  "fluence-sdk-wit 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -677,7 +677,7 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-interfaces"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -685,7 +685,7 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-parser"
-version = "0.1.7"
+version = "0.1.8"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
@@ -696,7 +696,7 @@ dependencies = [
 
 [[package]]
 name = "fcli"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "anyhow",
  "clap",
@@ -710,6 +710,15 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.8"
+source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
+dependencies = [
+ "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-main 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+]
+
+[[package]]
+name = "fluence"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "12efe44782ef6842b824dd281f79f808597a2c280d1facc06bb62b9cf8fbc2ef"
 dependencies = [
@@ -718,17 +727,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence"
-version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
-dependencies = [
- "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-main 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
-]
-
-[[package]]
 name = "fluence-app-service"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "fluence-faas",
  "log",
@@ -742,7 +742,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -766,6 +766,14 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.8"
+source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
+dependencies = [
+ "fluence-sdk-wit 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+]
+
+[[package]]
+name = "fluence-sdk-macro"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4b1720124376ac6bb13e523e3eceeef4475041a03a6434ca7d988cbdc031a5c4"
 dependencies = [
@@ -773,11 +781,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-macro"
+name = "fluence-sdk-main"
 version = "0.2.8"
 source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
 dependencies = [
- "fluence-sdk-wit 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
+ "log",
+ "serde",
 ]
 
 [[package]]
@@ -792,20 +802,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-main"
-version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
-dependencies = [
- "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
- "log",
- "serde",
-]
-
-[[package]]
 name = "fluence-sdk-wit"
 version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "560baf91197ded38a99a5c94ff366a3dd971ebf33f5d987ecce31d3dedf86d17"
+source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -818,7 +817,8 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#4d6c4f6b862c22ebd8db7244daac0adf3f1bd2fd"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "560baf91197ded38a99a5c94ff366a3dd971ebf33f5d987ecce31d3dedf86d17"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -851,7 +851,7 @@ checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 
 [[package]]
 name = "frepl"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "anyhow",
  "clap",
