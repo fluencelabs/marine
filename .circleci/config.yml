@@ -28,7 +28,7 @@ jobs:
           ./fluence-faas/tests/wasm_tests/build.sh
 
           cargo +nightly check -v --all-features
-          cargo +nightly test -v --all-features
+          cargo +nightly test --release -v --all-features
           cargo +nightly clippy -v
 
       - save_cache:
