@@ -38,7 +38,7 @@ jobs:
           cd ../site-storage/
           ./build.sh
 
-          cd ../../fluence-faas/tests/wasm_tests/build.sh
+          cd ../../fluence-faas/tests/wasm_tests/
 
           cd ../../
 
