@@ -21,6 +21,6 @@ target/
 !/examples/sqlite/artifacts/sqlite_test.wasm
 
 # Allowed Wasm files for test
-!/fluence-faas/tests/json_wasm_tests/arguments_passing/artifacts/*.wasm
-!/fluence-faas/tests/json_wasm_tests/arrays_passing/artifacts/*.wasm
-!/fluence-faas/tests/json_wasm_tests/inner_records/artifacts/inner_records_pure.wasm
+!/fluence-faas/tests/wasm_tests/arguments_passing/artifacts/*.wasm
+!/fluence-faas/tests/wasm_tests/arrays_passing/artifacts/*.wasm
+!/fluence-faas/tests/wasm_tests/inner_records/artifacts/inner_records_pure.wasm

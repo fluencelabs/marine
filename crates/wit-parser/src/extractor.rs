@@ -34,7 +34,7 @@ pub fn extract_text_wit(wasm_file_path: PathBuf) -> Result<String, WITParserErro
 pub fn extract_wit(wasmer_module: &WasmerModule) -> Result<Interfaces<'_>, WITParserError> {
     let wit_sections = wasmer_module
         .custom_sections(WIT_SECTION_NAME)
-        .ok_or_else(|| WITParserError::NoWITSection)?;
+        .ok_or(WITParserError::NoWITSection)?;
 
     if wit_sections.len() > 1 {
         return Err(WITParserError::MultipleWITSections);

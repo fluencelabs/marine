@@ -16,7 +16,6 @@
 
 use crate::config::FaaSConfig;
 use crate::misc::ModulesLoadStrategy;
-use crate::faas_interface::FaaSFunctionSignature;
 use crate::faas_interface::FaaSInterface;
 use crate::FaaSError;
 use crate::Result;
@@ -193,19 +192,21 @@ impl FluenceFaaS {
         let func_name = func_name.as_ref();
 
         let iargs = {
-            let mut func_signatures = self.fce.module_interface(module_name)?;
-            let func_signature = func_signatures
+            // TODO: cache module interface
+            let module_interface = self
+                .fce
+                .module_interface(module_name)
+                .ok_or_else(|| FaaSError::NoSuchModule(module_name.to_string()))?;
+
+            let func_signature = module_interface
+                .function_signatures
+                .iter()
                 .find(|sign| sign.name == func_name)
                 .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
 
-            // TODO: cache record types
-            let record_types = self
-                .fce
-                .module_record_types(module_name)?
-                .map(|(type_id, record_type)| (type_id, record_type))
-                .collect::<HashMap<_, _>>();
+            let record_types = module_interface.record_types;
 
-            crate::misc::json_to_ivalues(json_args, &func_signature, &record_types)?
+            crate::misc::json_to_ivalues(json_args, func_signature, &record_types)?
         };
 
         self.call_parameters.replace(call_parameters);
@@ -216,39 +217,9 @@ impl FluenceFaaS {
 
     /// Return all export functions (name and signatures) of loaded modules.
     pub fn get_interface(&self) -> FaaSInterface<'_> {
-        use itertools::Itertools;
+        let modules = self.fce.interface().collect();
 
-        let record_types = self
-            .fce
-            .record_types()
-            .map(|(id, record_type)| (*id, record_type))
-            .unique()
-            .collect::<HashMap<_, _>>();
-
-        let modules = self
-            .fce
-            .interface()
-            .map(|(name, signatures)| {
-                let signatures = signatures
-                    .iter()
-                    .map(|f| {
-                        (
-                            f.name,
-                            FaaSFunctionSignature {
-                                arguments: f.arguments,
-                                output_types: f.output_types,
-                            },
-                        )
-                    })
-                    .collect();
-                (name, signatures)
-            })
-            .collect();
-
-        FaaSInterface {
-            record_types,
-            modules,
-        }
+        FaaSInterface { modules }
     }
 }
 
@@ -277,6 +248,10 @@ impl FluenceFaaS {
         &mut self,
         module_name: S,
     ) -> Result<&wasmer_wasi::state::WasiState> {
-        self.fce.module_wasi_state(module_name).map_err(Into::into)
+        let module_name = module_name.as_ref();
+
+        self.fce
+            .module_wasi_state(module_name)
+            .ok_or_else(|| FaaSError::NoSuchModule(module_name.to_string()))
     }
 }

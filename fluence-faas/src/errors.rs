@@ -38,6 +38,9 @@ pub enum FaaSError {
     /// An argument with specified name is missing.
     MissingArgumentError(String),
 
+    /// Returns when there is no module with such name.
+    NoSuchModule(String),
+
     /// Not enough arguments provided for FCE call.
     JsonArgumentsDeserializationError(String),
 
@@ -61,7 +64,10 @@ impl std::fmt::Display for FaaSError {
                 write!(f, "function with name `{}` is missing", func_name)
             }
             FaaSError::MissingArgumentError(arg_name) => {
-                write!(f, "argument with name `{}` is missing", arg_name)
+                write!(f, r#"argument with name "{}" is missing"#, arg_name)
+            }
+            FaaSError::NoSuchModule(module_name) => {
+                write!(f, r#"module with name "{}" is missing"#, module_name)
             }
             FaaSError::JsonArgumentsDeserializationError(args) => write!(f, "{}", args),
             FaaSError::ArgumentDeserializationError(err_msg) => write!(f, "{:?}", err_msg),

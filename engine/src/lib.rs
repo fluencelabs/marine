@@ -38,13 +38,14 @@ pub use config::FCEModuleConfig;
 pub use config::HostExportedFunc;
 pub use config::HostImportDescriptor;
 pub use engine::FCE;
-pub use engine::FCEFunctionSignature;
+pub use engine::FCEModuleInterface;
 pub use errors::FCEError;
 pub use host_imports::HostImportError;
 pub use module::IValue;
 pub use module::IRecordType;
 pub use module::IFunctionArg;
 pub use module::IType;
+pub use module::FCEFunctionSignature;
 pub use module::from_interface_values;
 pub use module::to_interface_value;
 

@@ -17,6 +17,8 @@
 use fluence_faas::FluenceFaaS;
 use fluence_faas::IValue;
 
+use pretty_assertions::assert_eq;
+
 #[test]
 pub fn call_parameters() {
     let call_parameters_config_path = "../examples/call_parameters/Config.toml";

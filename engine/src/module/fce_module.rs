@@ -48,6 +48,14 @@ pub(super) struct Callable {
     pub(super) wit_module_func: WITModuleFunc,
 }
 
+/// Represent a function type inside FCE module.
+#[derive(PartialEq, Eq, Debug, Clone, Hash)]
+pub struct FCEFunctionSignature<'a> {
+    pub name: &'a str,
+    pub arguments: &'a Vec<IFunctionArg>,
+    pub outputs: &'a Vec<IType>,
+}
+
 impl Callable {
     pub fn call(&mut self, args: &[IValue]) -> Result<Vec<IValue>> {
         use wasmer_wit::interpreter::stack::Stackable;
@@ -88,7 +96,7 @@ pub(crate) struct FCEModule {
     export_funcs: HashMap<String, Arc<Callable>>,
 
     // TODO: save refs instead of copies
-    record_types: Vec<(u64, IRecordType)>,
+    record_types: HashMap<u64, IRecordType>,
 }
 
 impl FCEModule {
@@ -136,29 +144,33 @@ impl FCEModule {
     }
 
     pub(crate) fn call(&mut self, function_name: &str, args: &[IValue]) -> Result<Vec<IValue>> {
-        match self.export_funcs.get_mut(function_name) {
-            Some(func) => Arc::make_mut(func).call(args),
-            None => Err(FCEError::NoSuchFunction(format!(
-                "{} hasn't been found while calling",
-                function_name
-            ))),
-        }
+        self.export_funcs.get_mut(function_name).map_or_else(
+            || {
+                Err(FCEError::NoSuchFunction(format!(
+                    "{} hasn't been found while calling",
+                    function_name
+                )))
+            },
+            |func| Arc::make_mut(func).call(args),
+        )
     }
 
-    pub(crate) fn get_exports_signatures(
-        &self,
-    ) -> impl Iterator<Item = (&String, &Vec<IFunctionArg>, &Vec<IType>)> {
-        self.export_funcs.iter().map(|(func_name, func)| {
-            (
-                func_name,
-                &func.wit_module_func.arguments,
-                &func.wit_module_func.output_types,
-            )
-        })
+    pub(crate) fn get_exports_signatures(&self) -> impl Iterator<Item = FCEFunctionSignature<'_>> {
+        self.export_funcs
+            .iter()
+            .map(|(func_name, func)| FCEFunctionSignature {
+                name: func_name.as_str(),
+                arguments: &func.wit_module_func.arguments,
+                outputs: &func.wit_module_func.output_types,
+            })
     }
 
-    pub(crate) fn get_export_record_types(&self) -> impl Iterator<Item = &(u64, IRecordType)> {
-        self.record_types.iter()
+    pub(crate) fn export_record_types(&self) -> &HashMap<u64, IRecordType> {
+        &self.record_types
+    }
+
+    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&IRecordType> {
+        self.record_types.get(&record_type)
     }
 
     pub(crate) fn get_wasi_state(&mut self) -> &wasmer_wasi::state::WasiState {
@@ -420,11 +432,11 @@ impl FCEModule {
     fn extract_export_record_types(
         export_funcs: &HashMap<String, Arc<Callable>>,
         wit_instance: &Arc<WITInstance>,
-    ) -> Result<Vec<(u64, IRecordType)>> {
+    ) -> Result<HashMap<u64, IRecordType>> {
         fn handle_record_type(
             record_type_id: u64,
             wit_instance: &Arc<WITInstance>,
-            export_record_types: &mut Vec<(u64, IRecordType)>,
+            export_record_types: &mut HashMap<u64, IRecordType>,
         ) -> Result<()> {
             use wasmer_wit::interpreter::wasm::structures::Instance;
 
@@ -436,7 +448,7 @@ impl FCEModule {
                         record_type_id
                     ))
                 })?;
-            export_record_types.push((record_type_id, record_type.clone()));
+            export_record_types.insert(record_type_id, record_type.clone());
 
             for field in record_type.fields.iter() {
                 if let IType::Record(record_type_id) = &field.ty {
@@ -445,6 +457,14 @@ impl FCEModule {
             }
 
             Ok(())
+        }
+
+        fn extract_record_type_from_itype(itype: &IType) -> Option<u64> {
+            match itype {
+                IType::Record(record_id) => Some(*record_id),
+                IType::Array(itype) => extract_record_type_from_itype(itype),
+                _ => None,
+            }
         }
 
         let export_record_ids = export_funcs
@@ -457,14 +477,11 @@ impl FCEModule {
                     .map(|arg| &arg.ty)
                     .chain(callable.wit_module_func.output_types.iter())
             })
-            .filter_map(|itype| match itype {
-                IType::Record(record_type_id) => Some(record_type_id),
-                _ => None,
-            });
+            .filter_map(extract_record_type_from_itype);
 
-        let mut export_record_types = Vec::new();
+        let mut export_record_types = HashMap::new();
         for record_type_id in export_record_ids {
-            handle_record_type(*record_type_id, wit_instance, &mut export_record_types)?;
+            handle_record_type(record_type_id, wit_instance, &mut export_record_types)?;
         }
 
         Ok(export_record_types)

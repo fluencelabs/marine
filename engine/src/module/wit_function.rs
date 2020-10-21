@@ -34,6 +34,8 @@ enum WITFunctionInner {
     Import {
         // TODO: use dyn Callable here
         callable: Arc<Callable>,
+        arguments: Vec<IFunctionArg>,
+        outputs: Vec<IType>,
     },
 }
 
@@ -74,10 +76,19 @@ impl WITFunction {
     }
 
     /// Creates function from a module import.
-    pub(super) fn from_import(wit_module: &FCEModule, function_name: &str) -> Result<Self> {
+    pub(super) fn from_import(
+        wit_module: &FCEModule,
+        function_name: &str,
+        arguments: Vec<IFunctionArg>,
+        outputs: Vec<IType>,
+    ) -> Result<Self> {
         let callable = wit_module.get_callable(function_name)?;
 
-        let inner = WITFunctionInner::Import { callable };
+        let inner = WITFunctionInner::Import {
+            callable,
+            arguments,
+            outputs,
+        };
 
         Ok(Self { inner })
     }
@@ -87,30 +98,28 @@ impl wasm::structures::LocalImport for WITFunction {
     fn inputs_cardinality(&self) -> usize {
         match &self.inner {
             WITFunctionInner::Export { arguments, .. } => arguments.len(),
-            WITFunctionInner::Import { callable, .. } => callable.wit_module_func.arguments.len(),
+            WITFunctionInner::Import { arguments, .. } => arguments.len(),
         }
     }
 
     fn outputs_cardinality(&self) -> usize {
         match &self.inner {
-            WITFunctionInner::Export { ref outputs, .. } => outputs.len(),
-            WITFunctionInner::Import { ref callable, .. } => {
-                callable.wit_module_func.output_types.len()
-            }
+            WITFunctionInner::Export { outputs, .. } => outputs.len(),
+            WITFunctionInner::Import { outputs, .. } => outputs.len(),
         }
     }
 
     fn arguments(&self) -> &[IFunctionArg] {
         match &self.inner {
-            WITFunctionInner::Export { ref arguments, .. } => arguments,
-            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.arguments,
+            WITFunctionInner::Export { arguments, .. } => arguments,
+            WITFunctionInner::Import { arguments, .. } => arguments,
         }
     }
 
     fn outputs(&self) -> &[IType] {
         match &self.inner {
-            WITFunctionInner::Export { ref outputs, .. } => outputs,
-            WITFunctionInner::Import { ref callable, .. } => &callable.wit_module_func.output_types,
+            WITFunctionInner::Export { outputs, .. } => outputs,
+            WITFunctionInner::Import { outputs, .. } => outputs,
         }
     }
 
@@ -123,7 +132,7 @@ impl wasm::structures::LocalImport for WITFunction {
                 .call(&arguments.iter().map(ival_to_wval).collect::<Vec<WValue>>())
                 .map(|result| result.iter().map(wval_to_ival).collect())
                 .map_err(|_| ()),
-            WITFunctionInner::Import { callable } => Arc::make_mut(&mut callable.clone())
+            WITFunctionInner::Import { callable, .. } => Arc::make_mut(&mut callable.clone())
                 .call(arguments)
                 .map_err(|_| ()),
         }

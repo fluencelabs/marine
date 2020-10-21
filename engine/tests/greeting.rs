@@ -50,14 +50,15 @@ pub fn greeting_basic() {
 // test loading module with the same name twice
 pub fn non_unique_module_name() {
     let mut fce = FCE::new();
-    fce.load_module("greeting", &*GREETING_WASM_BYTES, <_>::default())
+    let module_name = String::from("greeting");
+    fce.load_module(&module_name, &*GREETING_WASM_BYTES, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
 
-    let load_result = fce.load_module("greeting", &*GREETING_WASM_BYTES, <_>::default());
+    let load_result = fce.load_module(&module_name, &*GREETING_WASM_BYTES, <_>::default());
     assert!(load_result.is_err());
     assert!(std::matches!(
         load_result.err().unwrap(),
-        fce::FCEError::NonUniqueModuleName
+        fce::FCEError::NonUniqueModuleName(_)
     ));
 }
 
