@@ -162,7 +162,9 @@ mod effector {
     extern "C" {
         pub fn inner_arrays_1(arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<Vec<Vec<Vec<u8>>>>;
 
-        pub fn inner_arrays_2(arg: Vec<Vec<Vec<Vec<TestRecord>>>>) -> Vec<Vec<Vec<Vec<TestRecord>>>>;
+        pub fn inner_arrays_2(
+            arg: Vec<Vec<Vec<Vec<TestRecord>>>>,
+        ) -> Vec<Vec<Vec<Vec<TestRecord>>>>;
 
         pub fn string_type(arg: Vec<String>) -> Vec<String>;
 

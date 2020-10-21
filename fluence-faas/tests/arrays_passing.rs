@@ -803,44 +803,54 @@ pub fn inner_arrays_2_type() {
         result3,
         vec![IValue::Array(vec![
             IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
-                ]).unwrap())
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![
+                        IValue::S32(0),
+                        IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
+                    ])
+                    .unwrap()
+                )
             ])])]),
             IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
-                ]).unwrap()),
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::Array(vec![]),
-                ]).unwrap())
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![
+                        IValue::S32(0),
+                        IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
+                    ])
+                    .unwrap()
+                ),
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![IValue::S32(0), IValue::Array(vec![]),]).unwrap()
+                )
             ])])]),
             IValue::Array(vec![]),
             IValue::Array(vec![IValue::Array(vec![])]),
             IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![])])]),
             IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::Array(vec![IValue::Array(vec![
-                        IValue::U8(1),
-                        IValue::U8(2),
-                        IValue::U8(3),
-                        IValue::U8(4),
-                    ])])
-                ]).unwrap()),
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![
+                        IValue::S32(0),
+                        IValue::Array(vec![IValue::Array(vec![
+                            IValue::U8(1),
+                            IValue::U8(2),
+                            IValue::U8(3),
+                            IValue::U8(4),
+                        ])])
+                    ])
+                    .unwrap()
+                ),
             ])])]),
             IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(1),
-                    IValue::Array(vec![IValue::Array(vec![IValue::U8(2)])])
-                ]).unwrap()),
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::Array(vec![])
-                ]).unwrap())
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![
+                        IValue::S32(1),
+                        IValue::Array(vec![IValue::Array(vec![IValue::U8(2)])])
+                    ])
+                    .unwrap()
+                ),
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![IValue::S32(0), IValue::Array(vec![])]).unwrap()
+                )
             ])])]),
         ]),]
     );
@@ -857,47 +867,56 @@ pub fn inner_arrays_2_type() {
         result4,
         vec![IValue::Array(vec![
             IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
-                ]).unwrap())
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![
+                        IValue::S32(0),
+                        IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
+                    ])
+                    .unwrap()
+                )
             ])])]),
             IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
-                ]).unwrap()),
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::Array(vec![]),
-                ]).unwrap())
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![
+                        IValue::S32(0),
+                        IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
+                    ])
+                    .unwrap()
+                ),
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![IValue::S32(0), IValue::Array(vec![]),]).unwrap()
+                )
             ])])]),
             IValue::Array(vec![]),
             IValue::Array(vec![IValue::Array(vec![])]),
             IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![])])]),
             IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::Array(vec![IValue::Array(vec![
-                        IValue::U8(1),
-                        IValue::U8(2),
-                        IValue::U8(3),
-                        IValue::U8(4),
-                    ])])
-                ]).unwrap()),
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![
+                        IValue::S32(0),
+                        IValue::Array(vec![IValue::Array(vec![
+                            IValue::U8(1),
+                            IValue::U8(2),
+                            IValue::U8(3),
+                            IValue::U8(4),
+                        ])])
+                    ])
+                    .unwrap()
+                ),
             ])])]),
             IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(1),
-                    IValue::Array(vec![IValue::Array(vec![IValue::U8(2)])])
-                ]).unwrap()),
-                IValue::Record(fce::vec1::Vec1::new(vec![
-                    IValue::S32(0),
-                    IValue::Array(vec![])
-                ]).unwrap())
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![
+                        IValue::S32(1),
+                        IValue::Array(vec![IValue::Array(vec![IValue::U8(2)])])
+                    ])
+                    .unwrap()
+                ),
+                IValue::Record(
+                    fce::vec1::Vec1::new(vec![IValue::S32(0), IValue::Array(vec![])]).unwrap()
+                )
             ])])]),
-        ]),
-        ]
+        ]),]
     );
 }
 
