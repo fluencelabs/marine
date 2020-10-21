@@ -88,7 +88,7 @@ pub(crate) struct FCEModule {
     export_funcs: HashMap<String, Arc<Callable>>,
 
     // TODO: save refs instead of copies
-    record_types: Vec<(u64, IRecordType)>,
+    record_types: HashMap<u64, IRecordType>,
 }
 
 impl FCEModule {
@@ -136,13 +136,15 @@ impl FCEModule {
     }
 
     pub(crate) fn call(&mut self, function_name: &str, args: &[IValue]) -> Result<Vec<IValue>> {
-        match self.export_funcs.get_mut(function_name) {
-            Some(func) => Arc::make_mut(func).call(args),
-            None => Err(FCEError::NoSuchFunction(format!(
-                "{} hasn't been found while calling",
-                function_name
-            ))),
-        }
+        self.export_funcs.get_mut(function_name).map_or_else(
+            || {
+                Err(FCEError::NoSuchFunction(format!(
+                    "{} hasn't been found while calling",
+                    function_name
+                )))
+            },
+            |func| Arc::make_mut(func).call(args),
+        )
     }
 
     pub(crate) fn get_exports_signatures(
@@ -157,8 +159,12 @@ impl FCEModule {
         })
     }
 
-    pub(crate) fn get_export_record_types(&self) -> impl Iterator<Item = &(u64, IRecordType)> {
+    pub(crate) fn export_record_types(&self) -> impl Iterator<Item = (&u64, &IRecordType)> {
         self.record_types.iter()
+    }
+
+    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&IRecordType> {
+        self.record_types.get(&record_type)
     }
 
     pub(crate) fn get_wasi_state(&mut self) -> &wasmer_wasi::state::WasiState {
@@ -420,11 +426,11 @@ impl FCEModule {
     fn extract_export_record_types(
         export_funcs: &HashMap<String, Arc<Callable>>,
         wit_instance: &Arc<WITInstance>,
-    ) -> Result<Vec<(u64, IRecordType)>> {
+    ) -> Result<HashMap<u64, IRecordType>> {
         fn handle_record_type(
             record_type_id: u64,
             wit_instance: &Arc<WITInstance>,
-            export_record_types: &mut Vec<(u64, IRecordType)>,
+            export_record_types: &mut HashMap<u64, IRecordType>,
         ) -> Result<()> {
             use wasmer_wit::interpreter::wasm::structures::Instance;
 
@@ -436,7 +442,7 @@ impl FCEModule {
                         record_type_id
                     ))
                 })?;
-            export_record_types.push((record_type_id, record_type.clone()));
+            export_record_types.insert(record_type_id, record_type.clone());
 
             for field in record_type.fields.iter() {
                 if let IType::Record(record_type_id) = &field.ty {
@@ -462,7 +468,7 @@ impl FCEModule {
                 _ => None,
             });
 
-        let mut export_record_types = Vec::new();
+        let mut export_record_types = HashMap::new();
         for record_type_id in export_record_ids {
             handle_record_type(*record_type_id, wit_instance, &mut export_record_types)?;
         }

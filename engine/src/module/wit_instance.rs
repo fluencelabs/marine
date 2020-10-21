@@ -97,7 +97,24 @@ impl WITInstance {
             .enumerate()
             .map(|(idx, import)| match modules.get(import.namespace) {
                 Some(module) => {
-                    let func = WITFunction::from_import(module, import.name)?;
+                    use wasmer_wit::ast::Type;
+                    let (arguments, output_types) =
+                        match wit.type_by_idx_r(import.function_type - 2)? {
+                            Type::Function {
+                                arguments,
+                                output_types,
+                            } => (arguments.clone(), output_types.clone()),
+                            ty => {
+                                return Err(FCEError::IncorrectWIT(format!(
+                                    "WIT should has Type::Function, but {:?} met",
+                                    ty
+                                )))
+                            }
+                        };
+
+                    let func =
+                        WITFunction::from_import(module, import.name, arguments, output_types)?;
+
                     Ok((start_index + idx as usize, func))
                 }
                 None => Err(FCEError::NoSuchModule(format!(

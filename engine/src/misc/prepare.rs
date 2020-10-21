@@ -55,7 +55,7 @@ impl<'a> ModuleBootstrapper {
 
         module
             .memory_section_mut()
-            .unwrap_or_else(|| &mut default_mem_section)
+            .unwrap_or(&mut default_mem_section)
             .entries_mut()
             .push(memory_entry);
 

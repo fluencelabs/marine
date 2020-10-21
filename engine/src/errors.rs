@@ -43,7 +43,7 @@ pub enum FCEError {
     PrepareError(String),
 
     /// Indicates that there is already a module with such name.
-    NonUniqueModuleName,
+    NonUniqueModuleName(String),
 
     /// Returns when there is no module with such name.
     NoSuchFunction(String),
@@ -71,12 +71,16 @@ impl std::fmt::Display for FCEError {
             FCEError::WasmerCompileError(msg) => write!(f, "WasmerCompileError: {}", msg),
             FCEError::WasmerCreationError(msg) => write!(f, "WasmerCreationError: {}", msg),
             FCEError::PrepareError(msg) => {
-                write!(f, "Prepare error: {}, probably module is mailformed", msg)
+                write!(f, "Prepare error: {}, probably module is malformed", msg)
             }
-            FCEError::NonUniqueModuleName => write!(f, "FCE already has module with such a name"),
-            FCEError::NoSuchFunction(msg) => {
-                write!(f, "FCE doesn't have a function with such a name: {}", msg)
+            FCEError::NonUniqueModuleName(module_name) => {
+                write!(f, r#"FCE already has module with name "{}""#, module_name)
             }
+            FCEError::NoSuchFunction(function_name) => write!(
+                f,
+                r#"FCE doesn't have a function with name: {}"#,
+                function_name
+            ),
             FCEError::NoSuchModule(err_msg) => write!(f, "{}", err_msg),
             FCEError::HostImportError(host_import_error) => write!(f, "{}", host_import_error),
             FCEError::WITParseError(err) => write!(f, "{}", err),

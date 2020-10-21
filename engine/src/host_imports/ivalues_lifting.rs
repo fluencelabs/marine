@@ -83,7 +83,7 @@ pub(super) fn wvalues_to_ivalues(
                 let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
                 let str = wasm_ptr
                     .get_utf8_string(ctx.memory(0), size as _)
-                    .ok_or_else(|| HostImportError::InvalidMemoryAccess(offset, size))?;
+                    .ok_or(HostImportError::InvalidMemoryAccess(offset, size))?;
 
                 result.push(IValue::String(str.to_string()));
             }
@@ -155,7 +155,7 @@ fn lift_array(
             while let Some(string_offset) = data.next() {
                 let string_size = data
                     .next()
-                    .ok_or_else(|| HostImportError::OddPointersCount(IType::String))?;
+                    .ok_or(HostImportError::OddPointersCount(IType::String))?;
 
                 let string = WasmPtr::<u8, Array>::new(string_offset.get() as _)
                     .get_utf8_string(ctx.memory(0), string_size.get() as _)
@@ -284,7 +284,7 @@ fn lift_record(
                 if string_size != 0 {
                     let string = WasmPtr::<u8, Array>::new(string_offset as _)
                         .get_utf8_string(ctx.memory(0), size as _)
-                        .ok_or_else(|| HostImportError::OddPointersCount(IType::String))?;
+                        .ok_or(HostImportError::OddPointersCount(IType::String))?;
                     values.push(IValue::String(string.to_string()));
                 } else {
                     values.push(IValue::String(String::new()));

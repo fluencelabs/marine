@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fluence_faas::FluenceFaaS;
+use fluence_faas::{FluenceFaaS, FaaSModuleInterface};
 use fluence_faas::IValue;
 use fluence_faas::IType;
 
@@ -218,17 +218,16 @@ pub fn get_interfaces() {
     functions.insert("bool_type", bool_type_sign);
     functions.insert("all_types", all_types_sign);
 
-    let mut modules = std::collections::HashMap::new();
-    modules.insert("arguments_passing_pure", functions.clone());
-    modules.insert("arguments_passing_effector", functions);
+    let module_interface = FaaSModuleInterface {
+        record_types: <_>::default(),
+        function_signatures: functions,
+    };
 
-    assert_eq!(
-        interface,
-        fluence_faas::FaaSInterface {
-            record_types: <_>::default(),
-            modules
-        }
-    );
+    let mut modules = std::collections::HashMap::new();
+    modules.insert("arguments_passing_pure", module_interface.clone());
+    modules.insert("arguments_passing_effector", module_interface);
+
+    assert_eq!(interface, fluence_faas::FaaSInterface { modules });
 }
 
 #[test]

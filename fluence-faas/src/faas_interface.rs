@@ -16,74 +16,87 @@
 
 use super::IType;
 use super::IRecordType;
-use super::IFunctionArg;
+use crate::FaaSModuleInterface;
+use crate::FaaSFunctionSignature;
 
 use serde::Serialize;
 use serde::Serializer;
 
 use std::fmt;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use itertools::Itertools;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FaaSInterface<'a> {
-    pub record_types: HashMap<u64, &'a IRecordType>,
-    pub modules: HashMap<&'a str, HashMap<&'a str, FaaSFunctionSignature<'a>>>,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct FaaSFunctionSignature<'a> {
-    pub arguments: &'a Vec<IFunctionArg>,
-    pub output_types: &'a Vec<IType>,
+    pub modules: HashMap<&'a str, FaaSModuleInterface<'a>>,
 }
 
 impl<'a> fmt::Display for FaaSInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let type_text_view = |arg_ty: &IType| {
+        let type_text_view = |arg_ty: &IType, record_types: &HashMap<&u64, &IRecordType>| {
             match arg_ty {
                 IType::Record(record_type_id) => {
-                    // unwrap is safe because FaasInterface here is well-formed
+                    // unwrap is safe because FaaSInterface here is well-formed
                     // (it was checked on the module startup stage)
-                    let record = self.record_types.get(record_type_id).unwrap();
+                    let record = record_types.get(record_type_id).unwrap();
                     record.name.clone()
                 }
                 t => format!("{:?}", t),
             }
         };
 
-        for (_, record_type) in self.record_types.iter() {
-            writeln!(f, "{} {{", record_type.name)?;
+        let mut printed_record_types: HashSet<&IRecordType> = HashSet::new();
 
-            for field in record_type.fields.iter() {
-                writeln!(f, "  {}: {}", field.name, type_text_view(&field.ty))?;
+        for (_, module_interface) in self.modules.iter() {
+            for (_, record_type) in module_interface.record_types.iter() {
+                if printed_record_types.insert(*record_type) {
+                    // do not print record if it has been already printed
+                    continue;
+                }
+
+                writeln!(f, "{} {{", record_type.name)?;
+
+                for field in record_type.fields.iter() {
+                    writeln!(
+                        f,
+                        "  {}: {}",
+                        field.name,
+                        type_text_view(&field.ty, &module_interface.record_types)
+                    )?;
+                }
+
+                writeln!(f, "}}")?;
             }
-            writeln!(f, "}}")?;
         }
 
-        if !self.record_types.is_empty() {
-            writeln!(f)?;
-        }
-
-        for (name, functions) in self.modules.iter() {
+        for (name, module_interface) in self.modules.iter() {
             writeln!(f, "\n{}:", *name)?;
 
-            for (name, signature) in functions.iter() {
+            for (name, sign) in module_interface.function_signatures.iter() {
                 write!(f, "  fn {}(", name)?;
 
-                let args = signature
+                let args = sign
                     .arguments
                     .iter()
-                    .map(|arg| format!("{}: {}", arg.name, type_text_view(&arg.ty)))
+                    .map(|arg| {
+                        format!(
+                            "{}: {}",
+                            arg.name,
+                            type_text_view(&arg.ty, &module_interface.record_types)
+                        )
+                    })
                     .join(", ");
 
-                if signature.output_types.is_empty() {
+                let output_types = sign.output_types;
+                if output_types.is_empty() {
                     writeln!(f, "{})", args)?;
-                } else if signature.output_types.len() == 1 {
+                } else if output_types.len() == 1 {
                     writeln!(
                         f,
                         "{}) -> {}",
                         args,
-                        type_text_view(&signature.output_types[0])
+                        type_text_view(&output_types[0], &module_interface.record_types)
                     )?;
                 } else {
                     // At now, multi values aren't supported - only one output type is possible
@@ -102,7 +115,7 @@ impl<'a> Serialize for FaaSInterface<'a> {
         S: Serializer,
     {
         #[derive(Serialize)]
-        pub struct Function<'a> {
+        pub struct FunctionSignature<'a> {
             pub name: &'a str,
             pub arguments: Vec<(&'a String, &'a IType)>,
             pub output_types: &'a Vec<IType>,
@@ -118,64 +131,71 @@ impl<'a> Serialize for FaaSInterface<'a> {
         #[derive(Serialize)]
         pub struct Module<'a> {
             pub name: &'a str,
-            pub functions: Vec<Function<'a>>,
+            pub function_signatures: Vec<FunctionSignature<'a>>,
+            pub record_types: Vec<RecordType<'a>>,
         }
 
         #[derive(Serialize)]
         pub struct Interface<'a> {
-            pub record_types: Vec<RecordType<'a>>,
             pub modules: Vec<Module<'a>>,
         }
 
-        let record_types: Vec<_> = self
-            .record_types
-            .iter()
-            .map(|(id, IRecordType { name, fields })| {
-                let fields = fields
-                    .iter()
-                    .map(|field| (&field.name, &field.ty))
-                    .collect::<Vec<_>>();
+        fn serialize_function_signature<'a>(
+            signature: (&&'a str, &'a FaaSFunctionSignature<'_>),
+        ) -> FunctionSignature<'a> {
+            let arguments = signature
+                .1
+                .arguments
+                .iter()
+                .map(|arg| (&arg.name, &arg.ty))
+                .collect();
 
-                RecordType {
-                    name: name.as_str(),
-                    id: *id,
-                    fields,
-                }
-            })
-            .collect();
+            FunctionSignature {
+                name: *signature.0,
+                arguments,
+                output_types: signature.1.output_types,
+            }
+        }
+
+        fn serialize_record_type<'a, 'b>(record: (&&'a u64, &&'b IRecordType)) -> RecordType<'b> {
+            let fields = record
+                .1
+                .fields
+                .iter()
+                .map(|field| (&field.name, &field.ty))
+                .collect::<Vec<_>>();
+
+            RecordType {
+                name: record.1.name.as_str(),
+                id: **record.0,
+                fields,
+            }
+        }
 
         let modules: Vec<_> = self
             .modules
             .iter()
-            .map(|(name, functions)| {
-                let functions = functions
+            .map(|(name, interface)| {
+                let function_signatures = interface
+                    .function_signatures
                     .iter()
-                    .map(
-                        |(
-                            name,
-                            FaaSFunctionSignature {
-                                arguments,
-                                output_types,
-                            },
-                        )| {
-                            let arguments =
-                                arguments.iter().map(|arg| (&arg.name, &arg.ty)).collect();
-                            Function {
-                                name,
-                                arguments,
-                                output_types,
-                            }
-                        },
-                    )
+                    .map(serialize_function_signature)
                     .collect();
-                Module { name, functions }
+
+                let record_types: Vec<_> = interface
+                    .record_types
+                    .iter()
+                    .map(serialize_record_type)
+                    .collect();
+
+                Module {
+                    name,
+                    function_signatures,
+                    record_types,
+                }
             })
             .collect();
 
-        Interface {
-            record_types,
-            modules,
-        }
-        .serialize(serializer)
+        Interface { modules }.serialize(serializer)
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fluence_faas::FluenceFaaS;
+use fluence_faas::{FluenceFaaS, FaaSModuleInterface};
 use fluence_faas::IValue;
 
 #[test]
@@ -82,15 +82,13 @@ pub fn get_interfaces() {
 
     let mut functions = std::collections::HashMap::new();
     functions.insert("greeting", greeting_sign);
+    let module_interface = FaaSModuleInterface {
+        record_types: <_>::default(),
+        function_signatures: functions,
+    };
 
     let mut modules = std::collections::HashMap::new();
-    modules.insert("greeting", functions);
+    modules.insert("greeting", module_interface);
 
-    assert_eq!(
-        interface,
-        fluence_faas::FaaSInterface {
-            record_types: <_>::default(),
-            modules
-        }
-    );
+    assert_eq!(interface, fluence_faas::FaaSInterface { modules });
 }

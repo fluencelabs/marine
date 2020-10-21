@@ -27,7 +27,7 @@ use std::collections::HashMap;
 
 pub(crate) fn json_to_ivalues(
     json_args: serde_json::Value,
-    func_signature: &fce::FCEFunctionSignature<'_>,
+    func_signature: &crate::FaaSFunctionSignature<'_>,
     record_types: &HashMap<&u64, &RecordType>,
 ) -> Result<Vec<IValue>> {
     let ivalues = match json_args {
