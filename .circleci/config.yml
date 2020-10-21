@@ -17,6 +17,15 @@ jobs:
           rustup component add clippy --toolchain nightly
 
           cargo fmt --all -- --check --color always
+
+          ./examples/call_parameters/build.sh
+          ./examples/greeting/build.sh
+          ./examples/ipfs-node/build.sh
+          ./examples/records/build.sh
+          ./examples/site-storage/build.sh
+
+          ./fluence-faas/tests/wasm_tests/build.sh
+
           cargo +nightly check -v --all-features
           cargo +nightly test -v --all-features
           cargo +nightly clippy -v
@@ -27,47 +36,8 @@ jobs:
             - ~/.rustup
           key: fce03-{{ checksum "Cargo.lock" }}
 
-  examples:
-    docker:
-      - image: circleci/rust:latest
-    environment:
-      RUST_BACKTRACE: 1
-      #RUST_TEST_THREADS: 1
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - examples01-{{ checksum "examples/ipfs-node/effector/Cargo.toml" }}-{{ checksum "examples/ipfs-node/pure/Cargo.toml" }}
-      - run: |
-          rustup toolchain install nightly
-          rustup component add rustfmt
-          rustup component add clippy
-          cargo install cargo-wasi
-
-          cd examples/ipfs-node/effector
-          cargo fmt --all -- --check --color always
-          cargo wasi build
-          cargo clippy -v --target wasm32-wasi
-
-          cd ../pure
-          cargo fmt --all -- --check --color always
-          cargo wasi build
-          cargo clippy -v --target wasm32-wasi
-
-#          cd ../../../../tools/wit_embedder
-#          cargo fmt --all -- --check --color always
-#          cargo build -v --all-features
-#          cargo clippy -v
-
-      - save_cache:
-          paths:
-            - ~/.cargo
-            - ~/.rustup
-          key: examples01-{{ checksum "examples/ipfs_node/wasm/ipfs_node/Cargo.toml" }}-{{ checksum "examples/ipfs_node/wasm/ipfs_rpc/Cargo.toml" }}-{{ checksum "examples/ipfs_node/Cargo.toml" }}
-
 workflows:
   version: 2.1
   fce:
     jobs:
       - fce
-      - examples
