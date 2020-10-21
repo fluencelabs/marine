@@ -20,16 +20,28 @@ jobs:
           cargo install fcli
 
           cargo fmt --all -- --check --color always
-
-          ./examples/call_parameters/build.sh
-          ./examples/greeting/build.sh
-          ./examples/ipfs-node/build.sh
-          ./examples/records/build.sh
-          ./examples/site-storage/build.sh
-
-          ./fluence-faas/tests/wasm_tests/build.sh
-
           cargo +nightly check -v --all-features
+
+
+          cd ./examples/call_parameters/
+          ./build.sh
+
+          cd ../greeting/
+          ./build.sh
+
+          cd ../ipfs-node/
+          ./build.sh
+
+          cd ../records/
+          ./build.sh
+
+          cd ../site-storage/
+          ./build.sh
+
+          cd ../../fluence-faas/tests/wasm_tests/build.sh
+
+          cd ../../
+
           cargo +nightly test --release -v --all-features
           cargo +nightly clippy -v
 
