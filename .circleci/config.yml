@@ -15,8 +15,8 @@ jobs:
           rustup toolchain install nightly
           rustup component add rustfmt
           rustup component add clippy --toolchain nightly
+          rustup target add wasm32-wasi
 
-          cargo install cargo-wasi
           cargo install fcli
 
           cargo fmt --all -- --check --color always
