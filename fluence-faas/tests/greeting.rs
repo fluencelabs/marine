@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use fluence_faas::{FluenceFaaS, FaaSModuleInterface};
+use fluence_faas::FluenceFaaS;
+use fluence_faas::FaaSModuleInterface;
 use fluence_faas::IValue;
 
 #[test]
