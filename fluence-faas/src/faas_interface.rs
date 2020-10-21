@@ -27,14 +27,14 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use itertools::Itertools;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct FaaSInterface<'a> {
     pub modules: HashMap<&'a str, FaaSModuleInterface<'a>>,
 }
 
 impl<'a> fmt::Display for FaaSInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let type_text_view = |arg_ty: &IType, record_types: &HashMap<&u64, &IRecordType>| {
+        let type_text_view = |arg_ty: &IType, record_types: &HashMap<u64, IRecordType>| {
             match arg_ty {
                 IType::Record(record_type_id) => {
                     // unwrap is safe because FaaSInterface here is well-formed
@@ -50,7 +50,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
 
         for (_, module_interface) in self.modules.iter() {
             for (_, record_type) in module_interface.record_types.iter() {
-                if printed_record_types.insert(*record_type) {
+                if printed_record_types.insert(record_type) {
                     // do not print record if it has been already printed
                     continue;
                 }
@@ -73,10 +73,10 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
         for (name, module_interface) in self.modules.iter() {
             writeln!(f, "\n{}:", *name)?;
 
-            for (name, sign) in module_interface.function_signatures.iter() {
-                write!(f, "  fn {}(", name)?;
+            for function_signature in module_interface.function_signatures.iter() {
+                write!(f, "  fn {}(", function_signature.name)?;
 
-                let args = sign
+                let args = function_signature
                     .arguments
                     .iter()
                     .map(|arg| {
@@ -88,15 +88,15 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
                     })
                     .join(", ");
 
-                let output_types = sign.output_types;
-                if output_types.is_empty() {
+                let outputs = function_signature.outputs;
+                if outputs.is_empty() {
                     writeln!(f, "{})", args)?;
-                } else if output_types.len() == 1 {
+                } else if outputs.len() == 1 {
                     writeln!(
                         f,
                         "{}) -> {}",
                         args,
-                        type_text_view(&output_types[0], &module_interface.record_types)
+                        type_text_view(&outputs[0], &module_interface.record_types)
                     )?;
                 } else {
                     // At now, multi values aren't supported - only one output type is possible
@@ -141,23 +141,22 @@ impl<'a> Serialize for FaaSInterface<'a> {
         }
 
         fn serialize_function_signature<'a>(
-            signature: (&&'a str, &'a FaaSFunctionSignature<'_>),
+            signature: &'a FaaSFunctionSignature<'_>,
         ) -> FunctionSignature<'a> {
             let arguments = signature
-                .1
                 .arguments
                 .iter()
                 .map(|arg| (&arg.name, &arg.ty))
                 .collect();
 
             FunctionSignature {
-                name: *signature.0,
+                name: signature.name,
                 arguments,
-                output_types: signature.1.output_types,
+                output_types: signature.outputs,
             }
         }
 
-        fn serialize_record_type<'a, 'b>(record: (&&'a u64, &&'b IRecordType)) -> RecordType<'b> {
+        fn serialize_record_type<'a, 'b>(record: (&'a u64, &'b IRecordType)) -> RecordType<'b> {
             let fields = record
                 .1
                 .fields
@@ -167,7 +166,7 @@ impl<'a> Serialize for FaaSInterface<'a> {
 
             RecordType {
                 name: record.1.name.as_str(),
-                id: **record.0,
+                id: *record.0,
                 fields,
             }
         }

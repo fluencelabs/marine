@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-use fluence_faas::{FluenceFaaS, FaaSModuleInterface};
+use fluence_faas::FluenceFaaS;
 use fluence_faas::IValue;
 use fluence_faas::IType;
 
+use pretty_assertions::assert_eq;
 use once_cell::sync::Lazy;
 use serde_json::json;
 
 static ARG_CONFIG: Lazy<fluence_faas::TomlFaaSConfig> = Lazy::new(|| {
     let mut arguments_passing_config =
-        fluence_faas::TomlFaaSConfig::load("./tests/json_wasm_tests/arguments_passing/Config.toml")
+        fluence_faas::TomlFaaSConfig::load("./tests/wasm_tests/arguments_passing/Config.toml")
             .expect("toml faas config should be created");
 
     arguments_passing_config.modules_dir = Some(String::from(
-        "./tests/json_wasm_tests/arguments_passing/artifacts",
+        "./tests/wasm_tests/arguments_passing/artifacts",
     ));
 
     arguments_passing_config
@@ -35,6 +36,8 @@ static ARG_CONFIG: Lazy<fluence_faas::TomlFaaSConfig> = Lazy::new(|| {
 
 #[test]
 pub fn get_interfaces() {
+    use std::collections::HashSet;
+
     let faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
@@ -44,33 +47,36 @@ pub fn get_interfaces() {
         name: String::from("arg"),
         ty: IType::String,
     }];
-    let string_type_output_types = vec![IType::String];
+    let string_type_outputs = vec![IType::String];
 
     let string_type_sign = fluence_faas::FaaSFunctionSignature {
+        name: "string_type",
         arguments: &string_type_arguments,
-        output_types: &string_type_output_types,
+        outputs: &string_type_outputs,
     };
 
     let bytearray_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
         ty: IType::Array(Box::new(IType::U8)),
     }];
-    let bytearray_type_output_types = vec![IType::Array(Box::new(IType::U8))];
+    let bytearray_type_outputs = vec![IType::Array(Box::new(IType::U8))];
 
     let bytearray_type_sign = fluence_faas::FaaSFunctionSignature {
+        name: "bytearray_type",
         arguments: &bytearray_type_arguments,
-        output_types: &bytearray_type_output_types,
+        outputs: &bytearray_type_outputs,
     };
 
     let i32_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
         ty: IType::S32,
     }];
-    let i32_type_output_types = vec![IType::S32];
+    let i32_type_outputs = vec![IType::S32];
 
     let i32_type_sign = fluence_faas::FaaSFunctionSignature {
+        name: "i32_type",
         arguments: &i32_type_arguments,
-        output_types: &i32_type_output_types,
+        outputs: &i32_type_outputs,
     };
 
     let i64_type_arguments = vec![fluence_faas::IFunctionArg {
@@ -78,74 +84,81 @@ pub fn get_interfaces() {
         ty: IType::S64,
     }];
 
-    let i64_type_output_types = vec![IType::S64];
+    let i64_type_outputs = vec![IType::S64];
 
     let i64_type_sign = fluence_faas::FaaSFunctionSignature {
+        name: "i64_type",
         arguments: &i64_type_arguments,
-        output_types: &i64_type_output_types,
+        outputs: &i64_type_outputs,
     };
 
     let u32_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
         ty: IType::U32,
     }];
-    let u32_type_output_types = vec![IType::U32];
+    let u32_type_outputs = vec![IType::U32];
 
     let u32_type_sign = fluence_faas::FaaSFunctionSignature {
+        name: "u32_type",
         arguments: &u32_type_arguments,
-        output_types: &u32_type_output_types,
+        outputs: &u32_type_outputs,
     };
 
     let u64_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
         ty: IType::U64,
     }];
-    let u64_type_output_types = vec![IType::U64];
+    let u64_type_outputs = vec![IType::U64];
 
     let u64_type_sign = fluence_faas::FaaSFunctionSignature {
+        name: "u64_type",
         arguments: &u64_type_arguments,
-        output_types: &u64_type_output_types,
+        outputs: &u64_type_outputs,
     };
 
     let f32_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
         ty: IType::F32,
     }];
-    let f32_type_output_types = vec![IType::F32];
+    let f32_type_outputs = vec![IType::F32];
 
     let f32_type_sign = fluence_faas::FaaSFunctionSignature {
+        name: "f32_type",
         arguments: &f32_type_arguments,
-        output_types: &f32_type_output_types,
+        outputs: &f32_type_outputs,
     };
 
     let f64_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
         ty: IType::F64,
     }];
-    let f64_type_output_types = vec![IType::F64];
+    let f64_type_outputs = vec![IType::F64];
 
     let f64_type_sign = fluence_faas::FaaSFunctionSignature {
+        name: "f64_type",
         arguments: &f64_type_arguments,
-        output_types: &f64_type_output_types,
+        outputs: &f64_type_outputs,
     };
 
     let empty_type_arguments = vec![];
-    let empty_type_output_types = vec![IType::String];
+    let empty_type_outputs = vec![IType::String];
 
     let empty_type_sign = fluence_faas::FaaSFunctionSignature {
+        name: "empty_type",
         arguments: &empty_type_arguments,
-        output_types: &empty_type_output_types,
+        outputs: &empty_type_outputs,
     };
 
     let bool_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
         ty: IType::I32,
     }];
-    let bool_type_output_types = vec![IType::I32];
+    let bool_type_outputs = vec![IType::I32];
 
     let bool_type_sign = fluence_faas::FaaSFunctionSignature {
+        name: "bool_type",
         arguments: &bool_type_arguments,
-        output_types: &bool_type_output_types,
+        outputs: &bool_type_outputs,
     };
 
     let all_types_arguments = vec![
@@ -198,36 +211,54 @@ pub fn get_interfaces() {
             ty: IType::Array(Box::new(IType::U8)),
         },
     ];
-    let all_types_output_types = vec![IType::Array(Box::new(IType::U8))];
+    let all_types_outputs = vec![IType::Array(Box::new(IType::U8))];
 
     let all_types_sign = fluence_faas::FaaSFunctionSignature {
+        name: "all_types",
         arguments: &all_types_arguments,
-        output_types: &all_types_output_types,
+        outputs: &all_types_outputs,
     };
 
-    let mut functions = std::collections::HashMap::new();
-    functions.insert("string_type", string_type_sign);
-    functions.insert("bytearray_type", bytearray_type_sign);
-    functions.insert("i32_type", i32_type_sign);
-    functions.insert("i64_type", i64_type_sign);
-    functions.insert("u32_type", u32_type_sign);
-    functions.insert("u64_type", u64_type_sign);
-    functions.insert("f32_type", f32_type_sign);
-    functions.insert("f64_type", f64_type_sign);
-    functions.insert("empty_type", empty_type_sign);
-    functions.insert("bool_type", bool_type_sign);
-    functions.insert("all_types", all_types_sign);
+    let functions = vec![
+        string_type_sign,
+        bytearray_type_sign,
+        i32_type_sign,
+        i64_type_sign,
+        u32_type_sign,
+        u64_type_sign,
+        f32_type_sign,
+        f64_type_sign,
+        empty_type_sign,
+        bool_type_sign,
+        all_types_sign,
+    ];
 
-    let module_interface = FaaSModuleInterface {
-        record_types: <_>::default(),
-        function_signatures: functions,
-    };
+    let pure_module_name = "arguments_passing_pure";
+    let effector_module_name = "arguments_passing_effector";
 
-    let mut modules = std::collections::HashMap::new();
-    modules.insert("arguments_passing_pure", module_interface.clone());
-    modules.insert("arguments_passing_effector", module_interface);
+    let pure_module_interface = interface
+        .modules
+        .get(pure_module_name)
+        .expect(&format!("{} should present in interface", pure_module_name));
+    let effector_module_interface = interface
+        .modules
+        .get(effector_module_name)
+        .expect(&format!("{} should present in interface", pure_module_name));
 
-    assert_eq!(interface, fluence_faas::FaaSInterface { modules });
+    assert!(pure_module_interface.record_types.is_empty());
+    assert!(effector_module_interface.record_types.is_empty());
+
+    let pure_module_functions: HashSet<_> =
+        pure_module_interface.function_signatures.iter().collect();
+    let effector_module_functions: HashSet<_> = effector_module_interface
+        .function_signatures
+        .iter()
+        .collect();
+
+    let functions: HashSet<_> = functions.iter().collect();
+
+    assert_eq!(pure_module_functions, functions);
+    assert_eq!(effector_module_functions, functions);
 }
 
 #[test]

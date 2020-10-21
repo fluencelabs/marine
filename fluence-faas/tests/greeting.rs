@@ -18,6 +18,8 @@ use fluence_faas::FluenceFaaS;
 use fluence_faas::FaaSModuleInterface;
 use fluence_faas::IValue;
 
+use pretty_assertions::assert_eq;
+
 #[test]
 pub fn greeting() {
     let greeting_config_path = "../examples/greeting/Config.toml";
@@ -77,15 +79,15 @@ pub fn get_interfaces() {
     let output_types = vec![fluence_faas::IType::String];
 
     let greeting_sign = fluence_faas::FaaSFunctionSignature {
+        name: "greeting",
         arguments: &arguments,
-        output_types: &output_types,
+        outputs: &output_types,
     };
 
-    let mut functions = std::collections::HashMap::new();
-    functions.insert("greeting", greeting_sign);
+    let record_types = std::collections::HashMap::new();
     let module_interface = FaaSModuleInterface {
-        record_types: <_>::default(),
-        function_signatures: functions,
+        record_types: &record_types,
+        function_signatures: vec![greeting_sign],
     };
 
     let mut modules = std::collections::HashMap::new();

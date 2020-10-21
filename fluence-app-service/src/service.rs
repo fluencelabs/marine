@@ -101,6 +101,8 @@ impl AppService {
         service_id: String,
         mut envs: HashMap<Vec<u8>, Vec<u8>>,
     ) -> Result<()> {
+        use maplit::hashmap;
+
         let create = |dir: &PathBuf| match std::fs::create_dir(dir) {
             Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
             Err(err) => Err(AppServiceError::CreateDir {
@@ -127,12 +129,10 @@ impl AppService {
         preopened_files.insert(PathBuf::from(local_dir.clone()));
         preopened_files.insert(PathBuf::from(tmp_dir.clone()));
 
-        let mut mapped_dirs = HashMap::new();
-        mapped_dirs.insert(
-            String::from(SERVICE_LOCAL_DIR_NAME),
-            PathBuf::from(local_dir),
-        );
-        mapped_dirs.insert(String::from(SERVICE_TMP_DIR_NAME), PathBuf::from(tmp_dir));
+        let mapped_dirs = hashmap! {
+            String::from(SERVICE_LOCAL_DIR_NAME) => PathBuf::from(local_dir),
+            String::from(SERVICE_TMP_DIR_NAME) => PathBuf::from(tmp_dir),
+        };
 
         envs.insert(
             SERVICE_ID_ENV_NAME.as_bytes().to_vec(),

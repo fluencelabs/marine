@@ -139,13 +139,13 @@ impl AquamarineVM {
     }
 
     fn make_raw_outcome(mut result: Vec<IValue>) -> Result<RawStepperOutcome> {
-        use AquamarineVMError::AquamarineResultError;
+        use AquamarineVMError::AquamarineResultError as ResultError;
 
         match result.remove(0) {
             IValue::Record(record_values) => {
                 let mut record_values = record_values.into_vec();
                 if record_values.len() != 3 {
-                    return Err(AquamarineResultError(format!(
+                    return Err(ResultError(format!(
                         "expected StepperOutcome struct with 3 fields, got {:?}",
                         record_values
                     )));
@@ -154,7 +154,7 @@ impl AquamarineVM {
                 let ret_code = match record_values.remove(0) {
                     IValue::S32(ret_code) => ret_code,
                     v => {
-                        return Err(AquamarineResultError(format!(
+                        return Err(ResultError(format!(
                             "expected i32 for ret_code, got {:?}",
                             v
                         )))
@@ -164,7 +164,7 @@ impl AquamarineVM {
                 let data = match record_values.remove(0) {
                     IValue::String(str) => str,
                     v => {
-                        return Err(AquamarineResultError(format!(
+                        return Err(ResultError(format!(
                             "expected string for data, got {:?}",
                             v
                         )))
@@ -177,7 +177,7 @@ impl AquamarineVM {
                             .into_iter()
                             .map(|v| match v {
                                 IValue::String(str) => Ok(str),
-                                v => Err(AquamarineResultError(format!(
+                                v => Err(ResultError(format!(
                                     "expected string for next_peer_pks, got {:?}",
                                     v
                                 ))),
@@ -186,7 +186,7 @@ impl AquamarineVM {
 
                         Ok(array)
                     }
-                    v => Err(AquamarineResultError(format!(
+                    v => Err(ResultError(format!(
                         "expected array for next_peer_pks, got {:?}",
                         v
                     ))),
@@ -199,7 +199,7 @@ impl AquamarineVM {
                 })
             }
             v => {
-                return Err(AquamarineResultError(format!(
+                return Err(ResultError(format!(
                     "expected record for StepperOutcome, got {:?}",
                     v
                 )))

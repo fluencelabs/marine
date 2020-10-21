@@ -25,6 +25,7 @@ pub use wasmer_wit::types::InterfaceType as IType;
 pub use wasmer_wit::types::RecordType as IRecordType;
 pub use wasmer_wit::ast::FunctionArg as IFunctionArg;
 pub use wasmer_wit::values::InterfaceValue as IValue;
+pub use fce_module::FCEFunctionSignature;
 pub use wasmer_wit::values::from_interface_values;
 pub use wasmer_wit::values::to_interface_value;
 

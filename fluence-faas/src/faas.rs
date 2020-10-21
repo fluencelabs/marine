@@ -198,10 +198,10 @@ impl FluenceFaaS {
                 .module_interface(module_name)
                 .ok_or_else(|| FaaSError::NoSuchModule(module_name.to_string()))?;
 
-            let (_, func_signature) = module_interface
+            let func_signature = module_interface
                 .function_signatures
                 .iter()
-                .find(|(name, _)| **name == func_name)
+                .find(|sign| sign.name == func_name)
                 .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
 
             let record_types = module_interface.record_types;

@@ -21,17 +21,10 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 /// Represent FCE module interface.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct FCEModuleInterface<'a> {
-    pub record_types: HashMap<&'a u64, &'a IRecordType>,
-    pub function_signatures: HashMap<&'a str, FCEFunctionSignature<'a>>,
-}
-
-/// Represent a function type inside FCE.
-#[derive(Debug, Clone, PartialEq)]
-pub struct FCEFunctionSignature<'a> {
-    pub arguments: &'a Vec<IFunctionArg>,
-    pub output_types: &'a Vec<IType>,
+    pub record_types: &'a HashMap<u64, IRecordType>,
+    pub function_signatures: Vec<FCEFunctionSignature<'a>>,
 }
 
 /// The base struct of the Fluence Compute Engine.
@@ -138,7 +131,7 @@ impl FCE {
     pub fn module_record_types<S: AsRef<str>>(
         &self,
         module_name: S,
-    ) -> Option<impl Iterator<Item = (&u64, &IRecordType)>> {
+    ) -> Option<&HashMap<u64, IRecordType>> {
         self.modules
             .get(module_name.as_ref())
             .map(|module| module.export_record_types())
@@ -156,20 +149,9 @@ impl FCE {
     }
 
     fn get_module_interface(module: &FCEModule) -> FCEModuleInterface<'_> {
-        let record_types = module.export_record_types().collect::<HashMap<_, _>>();
+        let record_types = module.export_record_types();
 
-        let function_signatures = module
-            .get_exports_signatures()
-            .map(|(name, arguments, output_types)| {
-                (
-                    name.as_str(),
-                    FCEFunctionSignature {
-                        arguments,
-                        output_types,
-                    },
-                )
-            })
-            .collect::<HashMap<_, _>>();
+        let function_signatures = module.get_exports_signatures().collect::<Vec<_>>();
 
         FCEModuleInterface {
             record_types,
