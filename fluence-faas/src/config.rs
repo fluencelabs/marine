@@ -49,7 +49,7 @@ pub struct FaaSModuleConfig {
     pub wasi: Option<FaaSWASIConfig>,
 
     /// Mask used to filter logs, for details see `log_utf8_string`
-    pub logging_mask: u64,
+    pub logging_mask: i64,
 }
 
 impl FaaSModuleConfig {
