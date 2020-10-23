@@ -115,6 +115,7 @@ pub struct TomlFaaSModuleConfig {
     pub logger_enabled: Option<bool>,
     pub wasi: Option<TomlWASIConfig>,
     pub mounted_binaries: Option<toml::value::Table>,
+    pub logging_mask: Option<u64>,
 }
 
 impl TomlFaaSNamedModuleConfig {
@@ -181,6 +182,7 @@ pub fn from_toml_module_config(config: TomlFaaSModuleConfig) -> Result<FaaSModul
         logger_enabled: config.logger_enabled.unwrap_or(true),
         host_imports: host_cli_imports,
         wasi,
+        logging_mask: config.logging_mask.unwrap_or(u64::max_value()),
     })
 }
 
@@ -243,6 +245,7 @@ mod tests {
                     mapped_dirs: None,
                 }),
                 mounted_binaries: None,
+                logging_mask: None,
             },
         };
 

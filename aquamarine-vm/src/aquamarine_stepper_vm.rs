@@ -114,6 +114,7 @@ impl AquamarineVM {
                 logger_enabled: true,
                 host_imports,
                 wasi: None,
+                logging_mask: u64::max_value(),
             }
         };
 
