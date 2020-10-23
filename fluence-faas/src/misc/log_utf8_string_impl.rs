@@ -22,7 +22,7 @@ pub(super) fn log_utf8_string_closure(
     module: String,
 ) -> impl for<'a> Fn(&'a mut Ctx, i32, i64, i32, i32) {
     move |ctx, level, target, msg_offset, msg_size| {
-        if target & logging_mask != 0 {
+        if target == 0 || target & logging_mask != 0 {
             log_utf8_string(&module, ctx, level, msg_offset, msg_size)
         }
     }
