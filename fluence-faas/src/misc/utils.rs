@@ -15,7 +15,7 @@
  */
 
 use crate::config::FaaSModuleConfig;
-use super::log_utf8_string;
+use super::log_utf8_string_closure;
 
 use fce::FCEModuleConfig;
 use fce::HostImportDescriptor;
@@ -77,6 +77,7 @@ fn create_call_parameters_import(
 
 /// Make FCE config from provided FaaS config.
 pub(crate) fn make_fce_config(
+    module_name: String,
     faas_module_config: Option<FaaSModuleConfig>,
     call_parameters: Rc<RefCell<fluence_sdk_main::CallParameters>>,
 ) -> crate::Result<FCEModuleConfig> {
@@ -119,7 +120,10 @@ pub(crate) fn make_fce_config(
 
     let mut namespace = Namespace::new();
     if faas_module_config.logger_enabled {
-        namespace.insert("log_utf8_string", func!(log_utf8_string));
+        namespace.insert(
+            "log_utf8_string",
+            func!(log_utf8_string_closure(module_name)),
+        );
     }
 
     let mut raw_host_imports = ImportObject::new();

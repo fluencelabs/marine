@@ -87,8 +87,11 @@ impl FluenceFaaS {
                 ))
                 })?;
 
-            let fce_module_config =
-                crate::misc::make_fce_config(Some(module_config), call_parameters.clone())?;
+            let fce_module_config = crate::misc::make_fce_config(
+                module_name.clone(),
+                Some(module_config),
+                call_parameters.clone(),
+            )?;
             fce.load_module(module_name, &module_bytes, fce_module_config)?;
         }
 
@@ -233,8 +236,10 @@ impl FluenceFaaS {
         FaaSError: From<C::Error>,
     {
         let config = config.map(|c| c.try_into()).transpose()?;
+        let name = name.into();
 
-        let fce_module_config = crate::misc::make_fce_config(config, self.call_parameters.clone())?;
+        let fce_module_config =
+            crate::misc::make_fce_config(name.clone(), config, self.call_parameters.clone())?;
         self.fce
             .load_module(name, &wasm_bytes, fce_module_config)
             .map_err(Into::into)
