@@ -17,10 +17,38 @@
 use wasmer_core::vm::Ctx;
 use wasmer_core::memory::ptr::{Array, WasmPtr};
 
-pub(super) fn log_utf8_string(ctx: &mut Ctx, offset: i32, size: i32) {
+pub(super) fn log_utf8_string(
+    ctx: &mut Ctx,
+    level: i32,
+    target_offset: i32,
+    target_size: i32,
+    msg_offset: i32,
+    msg_size: i32,
+) {
+    let level = level_from_i32(level);
+    let target = read_string(ctx, target_offset, target_size);
+    let msg = read_string(ctx, msg_offset, msg_size);
+    match (msg, target) {
+        (Some(msg), Some(target)) => log::log!(target: target, level, "{}", msg),
+        (Some(msg), None) => log::log!(level, "{}", msg),
+        (None, _) => log::warn!("logger: incorrect UTF8 string's been supplied to logger"),
+    }
+}
+
+#[inline]
+fn read_string(ctx: &Ctx, offset: i32, size: i32) -> Option<&str> {
     let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
-    match wasm_ptr.get_utf8_string(ctx.memory(0), size as _) {
-        Some(msg) => log::info!("{}", msg),
-        None => log::warn!("logger: incorrect UTF8 string's been supplied to logger"),
+    wasm_ptr.get_utf8_string(ctx.memory(0), size as _)
+}
+
+#[inline]
+fn level_from_i32(level: i32) -> log::Level {
+    match level {
+        1 => log::Level::Error,
+        2 => log::Level::Warn,
+        3 => log::Level::Info,
+        4 => log::Level::Debug,
+        5 => log::Level::Trace,
+        _ => log::Level::max(),
     }
 }
