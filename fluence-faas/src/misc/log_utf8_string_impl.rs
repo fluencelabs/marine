@@ -20,9 +20,14 @@ use wasmer_core::memory::ptr::{Array, WasmPtr};
 pub(super) fn log_utf8_string_closure(
     module: String,
 ) -> impl for<'a> Fn(&'a mut Ctx, i32, i32, i32, i32, i32) {
+    let module = if module == "aquamarine" {
+        None
+    } else {
+        Some(module)
+    };
     move |ctx, level, target_offset, target_size, msg_offset, msg_size| {
         log_utf8_string(
-            &module,
+            module.as_deref(),
             ctx,
             level,
             target_offset,
@@ -34,7 +39,7 @@ pub(super) fn log_utf8_string_closure(
 }
 
 pub(super) fn log_utf8_string(
-    module: &str,
+    module: Option<&str>,
     ctx: &mut Ctx,
     level: i32,
     target_offset: i32,
@@ -46,8 +51,10 @@ pub(super) fn log_utf8_string(
     let target = read_string(ctx, target_offset, target_size);
     let msg = read_string(ctx, msg_offset, msg_size);
 
-    let module_path = target.map(|t| format!("{}::{}", module, t));
-    let module_path = module_path.as_deref().unwrap_or(module);
+    log::error!("log_utf8_string: target {:?}, module {:?}", target, module);
+
+    let module_path = module.and_then(|m| target.map(|t| format!("{}::{}", m, t)));
+    let module_path = module_path.as_deref().or(module).or(target);
 
     match msg {
         Some(msg) => log::logger().log(
