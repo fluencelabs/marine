@@ -120,9 +120,10 @@ pub(crate) fn make_fce_config(
 
     let mut namespace = Namespace::new();
     if faas_module_config.logger_enabled {
+        let logging_mask = faas_module_config.logging_mask;
         namespace.insert(
             "log_utf8_string",
-            func!(log_utf8_string_closure(module_name)),
+            func!(log_utf8_string_closure(logging_mask, module_name)),
         );
     }
 

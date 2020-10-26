@@ -18,18 +18,13 @@ use wasmer_core::vm::Ctx;
 use wasmer_core::memory::ptr::{Array, WasmPtr};
 
 pub(super) fn log_utf8_string_closure(
+    logging_mask: i64,
     module: String,
-) -> impl for<'a> Fn(&'a mut Ctx, i32, i32, i32, i32, i32) {
-    move |ctx, level, target_offset, target_size, msg_offset, msg_size| {
-        log_utf8_string(
-            &module,
-            ctx,
-            level,
-            target_offset,
-            target_size,
-            msg_offset,
-            msg_size,
-        )
+) -> impl for<'a> Fn(&'a mut Ctx, i32, i64, i32, i32) {
+    move |ctx, level, target, msg_offset, msg_size| {
+        if target == 0 || target & logging_mask != 0 {
+            log_utf8_string(&module, ctx, level, msg_offset, msg_size)
+        }
     }
 }
 
@@ -37,24 +32,18 @@ pub(super) fn log_utf8_string(
     module: &str,
     ctx: &mut Ctx,
     level: i32,
-    target_offset: i32,
-    target_size: i32,
     msg_offset: i32,
     msg_size: i32,
 ) {
     let level = level_from_i32(level);
-    let target = read_string(ctx, target_offset, target_size);
     let msg = read_string(ctx, msg_offset, msg_size);
-
-    let module_path = target.map(|t| format!("{}::{}", module, t));
-    let module_path = module_path.as_deref().unwrap_or(module);
 
     match msg {
         Some(msg) => log::logger().log(
             &log::Record::builder()
                 .args(format_args!("{}", msg))
                 .level(level)
-                .module_path(module_path.into())
+                .module_path(module.into())
                 .build(),
         ),
         None => log::warn!("logger: incorrect UTF8 string's been supplied to logger"),
