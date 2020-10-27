@@ -44,6 +44,7 @@ pub(super) fn log_utf8_string(
                 .args(format_args!("{}", msg))
                 .level(level)
                 .module_path(module.into())
+                .target(module)
                 .build(),
         ),
         None => log::warn!("logger: incorrect UTF8 string's been supplied to logger"),
