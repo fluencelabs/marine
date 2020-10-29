@@ -210,8 +210,8 @@ impl AquamarineVM {
 }
 
 // This API is intended for testing purposes
-#[cfg(feature = "raw-aquamarine-api")]
-impl AppService {
+#[cfg(feature = "raw-aquamarine-vm-api")]
+impl AquamarineVM {
     pub fn call_with_prev_data(
         &mut self,
         init_user_id: impl Into<String>,

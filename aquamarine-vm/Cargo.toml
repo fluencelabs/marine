@@ -1,7 +1,7 @@
 [package]
 name = "aquamarine-vm"
 description = "Fluence Aquamarine VM"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -19,4 +19,4 @@ serde = "1.0.116"
 
 [features]
 # enable raw AquamarineVM API intended for testing
-raw-aquamarine-api = []
+raw-aquamarine-vm-api = []
