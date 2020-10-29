@@ -208,3 +208,32 @@ impl AquamarineVM {
         }
     }
 }
+
+// This API is intended for testing purposes
+#[cfg(feature = "raw-aquamarine-api")]
+impl AppService {
+    pub fn call(
+        &mut self,
+        init_user_id: impl Into<String>,
+        aqua: impl Into<String>,
+        prev_data: impl Into<String>,
+        data: impl Into<String>,
+    ) -> Result<StepperOutcome> {
+        let args = vec![
+            IValue::String(init_user_id.into()),
+            IValue::String(aqua.into()),
+            IValue::String(prev_data.into()),
+            IValue::String(data.into()),
+        ];
+
+        let result = self.faas.call_with_ivalues(
+            AQUAMARINE_WASM_FILE_NAME,
+            "invoke",
+            &args,
+            <_>::default(),
+        )?;
+
+        let raw_outcome = Self::make_raw_outcome(result)?;
+        raw_outcome.try_into()
+    }
+}

@@ -16,3 +16,7 @@ fluence-faas = { path = "../fluence-faas", version = "0.1.10" }
 maplit = "1.0.2"
 serde_json = "1.0.57"
 serde = "1.0.116"
+
+[features]
+# enable raw AquamarineVM API intended for testing
+raw-aquamarine-api = []
