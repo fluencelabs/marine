@@ -49,6 +49,7 @@ impl AquamarineVM {
             config.aquamarine_wasm_path,
             config.call_service,
             config.current_peer_id,
+            config.logging_mask,
         );
         let faas = FluenceFaaS::with_raw_config(faas_config)?;
 
@@ -99,6 +100,7 @@ impl AquamarineVM {
         aquamarine_wasm_path: PathBuf,
         call_service: HostImportDescriptor,
         current_peer_id: String,
+        logging_mask: i64,
     ) -> FaaSConfig {
         use maplit::hashmap;
 
@@ -114,7 +116,7 @@ impl AquamarineVM {
                 logger_enabled: true,
                 host_imports,
                 wasi: None,
-                logging_mask: i64::max_value(),
+                logging_mask,
             }
         };
 

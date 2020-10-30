@@ -36,7 +36,7 @@ modules_dir = "wasm/artifacts/wasm_modules"
     mem_pages_count = 100
     logger_enabled = true
 
-    [module.imports]
+    [module.mounted_binaries]
     mysql = "/usr/bin/mysql"
     ipfs = "/usr/local/bin/ipfs"
 
@@ -49,7 +49,7 @@ modules_dir = "wasm/artifacts/wasm_modules"
     mem_pages_count = 100
     logger_enabled = true
 
-    [default.imports]
+    [default.mounted_binaries]
     mysql = "/usr/bin/mysql"
     ipfs = "/usr/local/bin/ipfs"
 

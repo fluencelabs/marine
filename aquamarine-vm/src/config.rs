@@ -31,4 +31,7 @@ pub struct AquamarineVMConfig {
     /// Path to a folder contains prev data.
     /// AquamarineVM uses it to store data obtained after stepper execution, and load it as a prev_data by particle_id.
     pub particle_data_store: PathBuf,
+
+    /// Mask used to filter logs, for details see `log_utf8_string` in fluence-faas.
+    pub logging_mask: i64,
 }
