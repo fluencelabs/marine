@@ -19,7 +19,10 @@ use fluence::WasmLogger;
 
 /// Log level can be changed by `RUST_LOG` env as well.
 pub fn main() {
-    WasmLogger::init_with_level(log::Level::Info).unwrap();
+    WasmLogger::new()
+        .with_log_level(log::Level::Info)
+        .build()
+        .unwrap();
 }
 
 #[fce]

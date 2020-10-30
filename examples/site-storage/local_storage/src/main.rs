@@ -23,7 +23,10 @@ const RPC_TMP_FILEPATH: &str = "/sites/";
 
 /// Log level can be changed by `RUST_LOG` env as well.
 pub fn main() {
-    WasmLogger::init_with_level(log::Level::Info).unwrap();
+    WasmLogger::new()
+        .with_log_level(log::Level::Info)
+        .build()
+        .unwrap();
 }
 
 /// You can read or write files from the file system if there is permission to use directories described in `Config.toml`.

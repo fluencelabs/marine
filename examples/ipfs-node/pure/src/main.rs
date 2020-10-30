@@ -23,7 +23,10 @@ use std::path::PathBuf;
 const RPC_TMP_FILEPATH: &str = "/tmp/ipfs_rpc_file";
 
 pub fn main() {
-    WasmLogger::init_with_level(log::Level::Info).unwrap();
+    WasmLogger::new()
+        .with_log_level(log::Level::Info)
+        .build()
+        .unwrap();
 }
 
 #[fce]

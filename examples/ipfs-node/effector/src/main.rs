@@ -26,7 +26,10 @@ const IPFS_ADDR_ENV_NAME: &str = "IPFS_ADDR";
 const TIMEOUT_ENV_NAME: &str = "timeout";
 
 pub fn main() {
-    WasmLogger::init_with_level(log::Level::Info).unwrap();
+    WasmLogger::new()
+        .with_log_level(log::Level::Info)
+        .build()
+        .unwrap();
 }
 
 /// Put file from specified path to IPFS and return its hash.

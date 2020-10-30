@@ -737,7 +737,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#8c0a02916519872c3d6073de16c950d10da0b2f4"
+source = "git+https://github.com/fluencelabs/rust-sdk#a6c587db0b6f22c3d3af81f10b187f148f8e9d30"
 dependencies = [
  "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
  "fluence-sdk-main 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
@@ -792,7 +792,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#8c0a02916519872c3d6073de16c950d10da0b2f4"
+source = "git+https://github.com/fluencelabs/rust-sdk#a6c587db0b6f22c3d3af81f10b187f148f8e9d30"
 dependencies = [
  "fluence-sdk-wit 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
@@ -811,7 +811,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#8c0a02916519872c3d6073de16c950d10da0b2f4"
+source = "git+https://github.com/fluencelabs/rust-sdk#a6c587db0b6f22c3d3af81f10b187f148f8e9d30"
 dependencies = [
  "fluence-sdk-macro 0.2.8 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
@@ -835,7 +835,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.8"
-source = "git+https://github.com/fluencelabs/rust-sdk#8c0a02916519872c3d6073de16c950d10da0b2f4"
+source = "git+https://github.com/fluencelabs/rust-sdk#a6c587db0b6f22c3d3af81f10b187f148f8e9d30"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1524,9 +1524,9 @@ dependencies = [
 
 [[package]]
 name = "num-integer"
-version = "0.1.43"
+version = "0.1.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d59457e662d541ba17869cf51cf177c0b5f0cbf476c66bdc90bf1edac4f875b"
+checksum = "d2cc698a63b549a70bc047073d2949cce27cd1c7b0a4a862d08a8031bc2801db"
 dependencies = [
  "autocfg",
  "num-traits",
@@ -1534,9 +1534,9 @@ dependencies = [
 
 [[package]]
 name = "num-traits"
-version = "0.2.12"
+version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac267bcc07f48ee5f8935ab0d24f316fb722d7a1292e2913f0cc196b29ffd611"
+checksum = "9a64b1ec5cda2586e284722486d802acf1f7dbdc623e2bfc57e65ca1cd099290"
 dependencies = [
  "autocfg",
 ]
