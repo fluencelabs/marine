@@ -25,77 +25,80 @@ use std::error::Error;
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub(crate) struct RawStepperOutcome {
     pub ret_code: i32,
-    pub data: err_msg,
-    pub next_peer_pks: Vec<err_msg>,
+    pub data: String,
+    pub next_peer_pks: Vec<String>,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct StepperOutcome {
-    pub data: err_msg,
-    pub next_peer_pks: Vec<err_msg>,
+    pub data: String,
+    pub next_peer_pks: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StepperError {
     /// Errors occurred while parsing aqua script in the form of S expressions.
-    SExprParseError(err_msg),
+    SExprParseError(String),
 
     /// Errors occurred while parsing function arguments of an expression.
-    FuncArgsSerializationError(err_msg),
+    FuncArgsSerializationError(String),
 
     /// Errors occurred while parsing returned by call_service value.
-    CallServiceResultDeserializationError(err_msg),
+    CallServiceResultDeserializationError(String),
 
     /// Indicates that environment variable with name CURRENT_PEER_ID isn't set.
-    CurrentPeerIdEnvError(err_msg),
+    CurrentPeerIdEnvError(String),
 
     /// Semantic errors in instructions.
-    InstructionError(err_msg),
+    InstructionError(String),
 
     /// An error is occurred while calling local service via call_service.
-    LocalServiceError(err_msg),
+    LocalServiceError(String),
 
     /// Value for such name isn't presence in data.
-    VariableNotFound(err_msg),
+    VariableNotFound(String),
 
     /// Multiple values for such name found.
-    MultipleVariablesFound(err_msg),
+    MultipleVariablesFound(String),
 
     /// Value with such path wasn't found in data with such error.
-    VariableNotInJsonPath(err_msg),
+    VariableNotInJsonPath(String),
 
     /// Provided JValue has incompatible with target type.
-    IncompatibleJValueType(err_msg),
+    IncompatibleJValueType(String),
 
     /// Provided AValue has incompatible with target type.
-    IncompatibleAValueType(err_msg),
+    IncompatibleAValueType(String),
 
     /// Multiple values found for such json path.
-    MultipleValuesInJsonPath(err_msg),
+    MultipleValuesInJsonPath(String),
 
     /// Fold state wasn't found for such iterator name.
-    FoldStateNotFound(err_msg),
+    FoldStateNotFound(String),
 
     /// Multiple fold states found for such iterator name.
-    MultipleFoldStates(err_msg),
+    MultipleFoldStates(String),
 
     /// Expected evidence state of different type.
-    InvalidEvidenceState(err_msg),
+    InvalidEvidenceState(String),
 
     /// Errors occurred on call evidence deserialization.
-    CallEvidenceDeserializationError(err_msg),
+    CallEvidenceDeserializationError(String),
 
     /// Errors occurred on call evidence serialization.
-    CallEvidenceSerializationError(err_msg),
+    CallEvidenceSerializationError(String),
 
     /// Errors occurred when previous and current evidence states are incompatible.
-    IncompatibleEvidenceStates(err_msg),
+    IncompatibleEvidenceStates(String),
 
     /// Errors occurred when previous and current call results are incompatible.
-    IncompatibleCallResults(err_msg),
+    IncompatibleCallResults(String),
 
     /// Errors occurred when evidence path contains less elements then corresponding Par has.
-    EvidencePathTooSmall(err_msg),
+    EvidencePathTooSmall(String),
+
+    /// Related to such ret_code that doesn't have match with current StepperError.
+    UnknownError(String),
 }
 
 impl Error for StepperError {}
@@ -125,6 +128,7 @@ impl std::fmt::Display for StepperError {
             StepperError::IncompatibleEvidenceStates(err_msg) => writeln!(f, "{}", err_msg),
             StepperError::IncompatibleCallResults(err_msg) => writeln!(f, "{}", err_msg),
             StepperError::EvidencePathTooSmall(err_msg) => writeln!(f, "{}", err_msg),
+            StepperError::UnknownError(err_msg) => writeln!(f, "{}", err_msg),
         }
     }
 }
