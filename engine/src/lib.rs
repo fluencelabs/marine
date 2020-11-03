@@ -39,6 +39,7 @@ pub use config::HostExportedFunc;
 pub use config::HostImportDescriptor;
 pub use engine::FCE;
 pub use engine::FCEModuleInterface;
+pub use engine::RecordTypes;
 pub use errors::FCEError;
 pub use host_imports::HostImportError;
 pub use module::IValue;

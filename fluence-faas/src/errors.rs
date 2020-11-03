@@ -16,8 +16,6 @@
 
 use fce::FCEError;
 
-use serde_json::error::Error as SerdeError;
-
 use std::io::Error as IOError;
 use std::error::Error;
 
@@ -41,16 +39,17 @@ pub enum FaaSError {
     /// Returns when there is no module with such name.
     NoSuchModule(String),
 
-    /// Not enough arguments provided for FCE call.
+    /// Provided arguments aren't compatible with a called function signature.
     JsonArgumentsDeserializationError(String),
 
-    /// An error occurred when incorrect json argument is supplied.
-    ArgumentDeserializationError(SerdeError),
+    /// Returned outputs aren't compatible with a called function signature.
+    JsonOutputSerializationError(String),
+
+    /// Errors related to invalid config.
+    ParseConfigError(toml::de::Error),
 
     /// FCE errors.
     EngineError(FCEError),
-
-    ParseConfigError(toml::de::Error),
 }
 
 impl Error for FaaSError {}
@@ -70,7 +69,7 @@ impl std::fmt::Display for FaaSError {
                 write!(f, r#"module with name "{}" is missing"#, module_name)
             }
             FaaSError::JsonArgumentsDeserializationError(args) => write!(f, "{}", args),
-            FaaSError::ArgumentDeserializationError(err_msg) => write!(f, "{:?}", err_msg),
+            FaaSError::JsonOutputSerializationError(args) => write!(f, "{}", args),
             FaaSError::IOError(err_msg) => write!(f, "{}", err_msg),
             FaaSError::EngineError(err) => write!(f, "{}", err),
             FaaSError::ParseConfigError(err) => write!(f, "{}", err),

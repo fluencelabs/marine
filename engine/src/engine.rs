@@ -20,10 +20,12 @@ use super::*;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
+pub type RecordTypes<'a> = &'a HashMap<u64, IRecordType>;
+
 /// Represent FCE module interface.
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct FCEModuleInterface<'a> {
-    pub record_types: &'a HashMap<u64, IRecordType>,
+    pub record_types: RecordTypes<'a>,
     pub function_signatures: Vec<FCEFunctionSignature<'a>>,
 }
 

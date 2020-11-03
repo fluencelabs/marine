@@ -15,21 +15,22 @@
  */
 
 use crate::config::FaaSConfig;
-use crate::misc::ModulesLoadStrategy;
 use crate::faas_interface::FaaSInterface;
 use crate::FaaSError;
 use crate::Result;
 use crate::IValue;
+use crate::misc::load_modules_from_fs;
+use crate::misc::ModulesLoadStrategy;
 
 use fce::FCE;
 use fluence_sdk_main::CallParameters;
 
+use serde_json::Value as JValue;
 use std::cell::RefCell;
 use std::convert::TryInto;
 use std::collections::HashSet;
 use std::collections::HashMap;
 use std::rc::Rc;
-use std::fs;
 use std::path::PathBuf;
 
 // TODO: remove and use mutex instead
@@ -61,7 +62,7 @@ impl FluenceFaaS {
             .modules_dir
             .as_ref()
             .map_or(Ok(HashMap::new()), |dir| {
-                Self::load_modules(dir, ModulesLoadStrategy::WasmOnly)
+                load_modules_from_fs(dir, ModulesLoadStrategy::WasmOnly)
             })?;
 
         Self::with_modules::<FaaSConfig>(modules, config)
@@ -112,60 +113,10 @@ impl FluenceFaaS {
             .modules_dir
             .as_ref()
             .map_or(Ok(HashMap::new()), |dir| {
-                Self::load_modules(dir, ModulesLoadStrategy::Named(names))
+                load_modules_from_fs(dir, ModulesLoadStrategy::Named(names))
             })?;
 
         Self::with_modules::<FaaSConfig>(modules, config)
-    }
-
-    /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
-    fn load_modules(
-        modules_dir: &PathBuf,
-        modules: ModulesLoadStrategy<'_>,
-    ) -> Result<HashMap<String, Vec<u8>>> {
-        use FaaSError::IOError;
-
-        let mut dir_entries =
-            fs::read_dir(modules_dir).map_err(|e| IOError(format!("{:?}: {}", modules_dir, e)))?;
-
-        let loaded = dir_entries.try_fold(HashMap::new(), |mut hash_map, entry| {
-            let entry = entry?;
-            let path = entry.path();
-            // Skip directories
-            if path.is_dir() {
-                return Ok(hash_map);
-            }
-
-            let module_name = path
-                .file_name()
-                .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?
-                .to_os_string()
-                .into_string()
-                .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
-
-            if modules.should_load(&module_name.as_ref()) {
-                let module_bytes = fs::read(path)?;
-                let module_name = modules.extract_module_name(module_name);
-                if hash_map.insert(module_name, module_bytes).is_some() {
-                    return Err(FaaSError::ConfigParseError(String::from(
-                        "module {} is duplicated in config",
-                    )));
-                }
-            }
-
-            Ok(hash_map)
-        })?;
-
-        if modules.required_modules_len() > loaded.len() {
-            let loaded = loaded.iter().map(|(n, _)| n);
-            let not_found = modules.missing_modules(loaded);
-            return Err(FaaSError::ConfigParseError(format!(
-                "the following modules were not found: {:?}",
-                not_found
-            )));
-        }
-
-        Ok(loaded)
     }
 
     /// Call a specified function of loaded on a startup module by its name.
@@ -188,34 +139,35 @@ impl FluenceFaaS {
         &mut self,
         module_name: MN,
         func_name: FN,
-        json_args: serde_json::Value,
+        json_args: JValue,
         call_parameters: fluence_sdk_main::CallParameters,
-    ) -> Result<Vec<IValue>> {
+    ) -> Result<JValue> {
+        use crate::misc::json_to_ivalues;
+        use crate::misc::ivalues_to_json;
+
         let module_name = module_name.as_ref();
         let func_name = func_name.as_ref();
 
-        let iargs = {
-            // TODO: cache module interface
-            let module_interface = self
-                .fce
-                .module_interface(module_name)
-                .ok_or_else(|| FaaSError::NoSuchModule(module_name.to_string()))?;
+        // TODO: cache module interface
+        let module_interface = self
+            .fce
+            .module_interface(module_name)
+            .ok_or_else(|| FaaSError::NoSuchModule(module_name.to_string()))?;
 
-            let func_signature = module_interface
-                .function_signatures
-                .iter()
-                .find(|sign| sign.name == func_name)
-                .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
+        let func_signature = module_interface
+            .function_signatures
+            .iter()
+            .find(|sign| sign.name == func_name)
+            .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
 
-            let record_types = module_interface.record_types;
+        let record_types = module_interface.record_types;
 
-            crate::misc::json_to_ivalues(json_args, func_signature, &record_types)?
-        };
+        let iargs = json_to_ivalues(json_args, func_signature, &record_types)?;
 
         self.call_parameters.replace(call_parameters);
-        self.fce
-            .call(module_name, func_name, &iargs)
-            .map_err(Into::into)
+        let result = self.fce.call(module_name, func_name, &iargs)?;
+
+        ivalues_to_json(result, func_signature.outputs, record_types)
     }
 
     /// Return all export functions (name and signatures) of loaded modules.
