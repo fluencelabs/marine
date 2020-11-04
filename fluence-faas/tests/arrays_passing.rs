@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+mod utils;
+
 use fluence_faas::FluenceFaaS;
 use fluence_faas::IType;
 
@@ -326,24 +328,15 @@ pub fn u32_type() {
 
     let right_result = json!([1, 0, 13, 37, 2]);
 
-    let result3 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "u32_type",
-            json!({ "arg": [1] }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke u32_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "u32_type",
+        json!({ "arg": [1] })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "u32_type",
-            json!([[1]]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke u32_type: {:?}", e));
+    let result4 = call_faas!(faas, "arrays_passing_pure", "u32_type", json!([[1]]));
     assert_eq!(result4, right_result);
 }
 
@@ -360,24 +353,15 @@ pub fn u64_type() {
 
     let right_result = json!([1, 0, 1, 2, 3, 4, 2]);
 
-    let result3 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "u64_type",
-            json!({ "arg": [1] }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke u64_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "u64_type",
+        json!({ "arg": [1] })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "u64_type",
-            json!([[1]]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke u64_type: {:?}", e));
+    let result4 = call_faas!(faas, "arrays_passing_pure", "u64_type", json!([[1]]));
     assert_eq!(result4, right_result);
 }
 
@@ -394,24 +378,15 @@ pub fn f64_type_() {
 
     let right_result = json!([1.0, 0.0, 13.37, 1.0]);
 
-    let result3 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "f64_type",
-            json!({ "arg": [1.0] }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "f64_type",
+        json!({ "arg": [1.0] })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "f64_type",
-            json!([[1.0]]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
+    let result4 = call_faas!(faas, "arrays_passing_pure", "f64_type", json!([[1.0]]));
     assert_eq!(result4, right_result);
 }
 
@@ -429,24 +404,15 @@ pub fn f64_type() {
 
     let right_result = json!([3.0]);
 
-    let result3 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "f64_type",
-            json!({ "arg": 1.0 }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "f64_type",
+        json!({ "arg": 1.0 })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "f64_type",
-            json!(1.0),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
+    let result4 = call_faas!(faas, "arrays_passing_pure", "f64_type", json!(1.0));
     assert_eq!(result4, right_result);
 }
 
@@ -473,24 +439,20 @@ pub fn string_type() {
 
     let right_result = json!(["Fluence", "fce", "from effector", "test"]);
 
-    let result3 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "string_type",
-            json!({ "arg": ["Fluence"] }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke string_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "string_type",
+        json!({ "arg": ["Fluence"] })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "string_type",
-            json!([["Fluence"]]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke string_type: {:?}", e));
+    let result4 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "string_type",
+        json!([["Fluence"]])
+    );
     assert_eq!(result4, right_result);
 }
 
@@ -516,24 +478,20 @@ pub fn byte_type() {
     assert!(result2.is_err());
 
     let right_result = json!([0x13, 0x37, 0, 1, 2]);
-    let result3 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "byte_type",
-            json!({ "arg": [0x13, 0x37] }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "byte_type",
+        json!({ "arg": [0x13, 0x37] })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "byte_type",
-            json!([[0x13, 0x37]]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
+    let result4 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "byte_type",
+        json!([[0x13, 0x37]])
+    );
     assert_eq!(result4, right_result);
 }
 
@@ -567,24 +525,20 @@ pub fn inner_arrays_1_type() {
         [[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]],
         [[[2]]]
     ]);
-    let result3 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "inner_arrays_1",
-            json!({ "arg": [[[[0x13, 0x37]]]] }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "inner_arrays_1",
+        json!({ "arg": [[[[0x13, 0x37]]]] })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "inner_arrays_1",
-            json!([[[[[0x13, 0x37]]]]]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
+    let result4 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "inner_arrays_1",
+        json!([[[[[0x13, 0x37]]]]])
+    );
     assert_eq!(result4, right_result);
 }
 
@@ -643,24 +597,20 @@ pub fn inner_arrays_2_type() {
     ]]],
      ]);
 
-    let result3 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "inner_arrays_2",
-            json!({ "arg": [[[[[0, [[1]]]]]]] }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "inner_arrays_2",
+        json!({ "arg": [[[[[0, [[1]]]]]]] })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "inner_arrays_2",
-            json!([[[[[{"field_0": 0, "field_1": [[1]]}]]]]]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
+    let result4 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "inner_arrays_2",
+        json!([[[[[{"field_0": 0, "field_1": [[1]]}]]]]])
+    );
     assert_eq!(result4, right_result);
 }
 
@@ -688,19 +638,15 @@ pub fn bool_type() {
 
     let right_result = json!(1);
 
-    let result3 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "bool_type",
-            json!({ "arg": 0 }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke bool_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arrays_passing_pure",
+        "bool_type",
+        json!({ "arg": 0 })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json("arrays_passing_pure", "bool_type", json!(0), <_>::default())
-        .unwrap_or_else(|e| panic!("can't invoke bool_type: {:?}", e));
+    let result4 = call_faas!(faas, "arrays_passing_pure", "bool_type", json!(0));
     assert_eq!(result4, right_result);
 }
 
@@ -710,34 +656,13 @@ pub fn empty_type() {
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let right_result = json!(["from effector"]);
-    let result1 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "empty_type",
-            json!({}),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
+    let result1 = call_faas!(faas, "arrays_passing_pure", "empty_type", json!({}));
     assert_eq!(result1, right_result);
 
-    let result2 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "empty_type",
-            json!([]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
+    let result2 = call_faas!(faas, "arrays_passing_pure", "empty_type", json!([]));
     assert_eq!(result2, right_result);
 
-    let result3 = faas
-        .call_with_json(
-            "arrays_passing_pure",
-            "empty_type",
-            json!([]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
+    let result3 = call_faas!(faas, "arrays_passing_pure", "empty_type", json!([]));
     assert_eq!(result3, right_result);
 
     let result4 = faas.call_with_json(

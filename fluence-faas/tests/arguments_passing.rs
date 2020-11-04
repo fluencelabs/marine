@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+mod utils;
+
 use fluence_faas::FluenceFaaS;
 use fluence_faas::IType;
 
@@ -288,50 +290,38 @@ pub fn all_types() {
         65, 1, 153, 154, 64, 34, 51, 51, 51, 51, 51, 51, 102, 108, 117, 101, 110, 99, 101, 19, 55
     ]);
 
-    let result3 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "all_types",
-            json!({
-              "arg_0": 0,
-              "arg_1": 1,
-              "arg_2": 2,
-              "arg_3": 3,
-              "arg_4": 4,
-              "arg_5": 5,
-              "arg_6": 6,
-              "arg_7": 7,
-              "arg_8": 8.1,
-              "arg_9": 9.1,
-              "arg_10": "fluence",
-              "arg_11": vec! [0x13, 0x37],
-            }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke all_types: {:?}", e));
+    let faas_arg = json!({
+      "arg_0": 0,
+      "arg_1": 1,
+      "arg_2": 2,
+      "arg_3": 3,
+      "arg_4": 4,
+      "arg_5": 5,
+      "arg_6": 6,
+      "arg_7": 7,
+      "arg_8": 8.1,
+      "arg_9": 9.1,
+      "arg_10": "fluence",
+      "arg_11": vec! [0x13, 0x37],
+    });
+    let result3 = call_faas!(faas, "arguments_passing_pure", "all_types", faas_arg);
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "all_types",
-            json!([
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8.1,
-                9.1,
-                "fluence",
-                vec![0x13, 0x37]
-            ]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke all_types: {:?}", e));
+    let faas_arg = json!([
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8.1,
+        9.1,
+        "fluence",
+        vec![0x13, 0x37]
+    ]);
+    let result4 = call_faas!(faas, "arguments_passing_pure", "all_types", faas_arg);
     assert_eq!(result4, right_result);
 }
 
@@ -357,24 +347,15 @@ pub fn i32_type() {
     assert!(result2.is_err());
 
     let right_result = json!(3);
-    let result3 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "i32_type",
-            json!({ "arg": 1 }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "i32_type",
+        json!({ "arg": 1 })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "i32_type",
-            json!(1),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
+    let result4 = call_faas!(faas, "arguments_passing_pure", "i32_type", json!(1));
     assert_eq!(result4, right_result);
 }
 
@@ -400,24 +381,15 @@ pub fn i64_type() {
     assert!(result2.is_err());
 
     let right_result = json!(3);
-    let result3 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "i64_type",
-            json!({ "arg": 1 }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke i64_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "i64_type",
+        json!({ "arg": 1 })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "i64_type",
-            json!(1),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke i64_type: {:?}", e));
+    let result4 = call_faas!(faas, "arguments_passing_pure", "i64_type", json!(1));
     assert_eq!(result4, right_result);
 }
 
@@ -443,24 +415,15 @@ pub fn u32_type() {
     assert!(result2.is_err());
 
     let right_result = json!(3);
-    let result3 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "u32_type",
-            json!({ "arg": 1 }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke u32_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "u32_type",
+        json!({ "arg": 1 })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "u32_type",
-            json!(1),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke u32_type: {:?}", e));
+    let result4 = call_faas!(faas, "arguments_passing_pure", "u32_type", json!(1));
     assert_eq!(result4, right_result);
 }
 
@@ -486,24 +449,15 @@ pub fn u64_type() {
     assert!(result2.is_err());
 
     let right_result = json!(3);
-    let result3 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "u64_type",
-            json!({ "arg": 1 }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke u64_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "u64_type",
+        json!({ "arg": 1 })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "u64_type",
-            json!(1),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke u64_type: {:?}", e));
+    let result4 = call_faas!(faas, "arguments_passing_pure", "u64_type", json!(1));
     assert_eq!(result4, right_result);
 }
 
@@ -529,24 +483,15 @@ pub fn f32_type() {
     assert!(result2.is_err());
 
     let right_result = json!(3.0);
-    let result3 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "f32_type",
-            json!({ "arg": 1.0 }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke f32_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "f32_type",
+        json!({ "arg": 1.0 })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "f32_type",
-            json!(1.0),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke f32_type: {:?}", e));
+    let result4 = call_faas!(faas, "arguments_passing_pure", "f32_type", json!(1.0));
     assert_eq!(result4, right_result);
 }
 
@@ -572,24 +517,15 @@ pub fn f64_type() {
     assert!(result2.is_err());
 
     let right_result = json!(3.0);
-    let result3 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "f64_type",
-            json!({ "arg": 1.0 }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "f64_type",
+        json!({ "arg": 1.0 })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "f64_type",
-            json!(1.0),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
+    let result4 = call_faas!(faas, "arguments_passing_pure", "f64_type", json!(1.0));
     assert_eq!(result4, right_result);
 }
 
@@ -615,24 +551,20 @@ pub fn string_type() {
     assert!(result2.is_err());
 
     let right_result = json!("Fluence_Fluence_Fluence_Fluence");
-    let result3 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "string_type",
-            json!({ "arg": "Fluence" }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke string_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "string_type",
+        json!({ "arg": "Fluence" })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "string_type",
-            json!("Fluence"),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke string_type: {:?}", e));
+    let result4 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "string_type",
+        json!("Fluence")
+    );
     assert_eq!(result4, right_result);
 }
 
@@ -658,24 +590,20 @@ pub fn bytearray_type() {
     assert!(result2.is_err());
 
     let right_result = json!([0x13, 0x37, 1, 1]);
-    let result3 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "bytearray_type",
-            json!({ "arg": [0x13, 0x37] }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "bytearray_type",
+        json!({ "arg": [0x13, 0x37] })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "bytearray_type",
-            json!([[0x13, 0x37]]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
+    let result4 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "bytearray_type",
+        json!([[0x13, 0x37]])
+    );
     assert_eq!(result4, right_result);
 }
 
@@ -701,24 +629,15 @@ pub fn bool_type() {
     assert!(result2.is_err());
 
     let right_result = json!(1);
-    let result3 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "bool_type",
-            json!({ "arg": 0 }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke bool_type: {:?}", e));
+    let result3 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "bool_type",
+        json!({ "arg": 0 })
+    );
     assert_eq!(result3, right_result);
 
-    let result4 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "bool_type",
-            json!(0),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke bool_type: {:?}", e));
+    let result4 = call_faas!(faas, "arguments_passing_pure", "bool_type", json!(0));
     assert_eq!(result4, right_result);
 }
 
@@ -728,34 +647,13 @@ pub fn empty_type() {
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
     let right_result = json!("success");
-    let result1 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "empty_type",
-            json!({}),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
+    let result1 = call_faas!(faas, "arguments_passing_pure", "empty_type", json!({}));
     assert_eq!(result1, right_result);
 
-    let result2 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "empty_type",
-            json!([]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
+    let result2 = call_faas!(faas, "arguments_passing_pure", "empty_type", json!([]));
     assert_eq!(result2, right_result);
 
-    let result3 = faas
-        .call_with_json(
-            "arguments_passing_pure",
-            "empty_type",
-            json!([]),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
+    let result3 = call_faas!(faas, "arguments_passing_pure", "empty_type", json!([]));
     assert_eq!(result3, right_result);
 
     let result4 = faas.call_with_json(
