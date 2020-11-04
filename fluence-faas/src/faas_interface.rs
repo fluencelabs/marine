@@ -19,12 +19,14 @@ use super::IRecordType;
 use crate::FaaSModuleInterface;
 use crate::FaaSFunctionSignature;
 
+use fce::RecordTypes;
 use serde::Serialize;
 use serde::Serializer;
 
 use std::fmt;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::rc::Rc;
 use itertools::Itertools;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -34,7 +36,7 @@ pub struct FaaSInterface<'a> {
 
 impl<'a> fmt::Display for FaaSInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let type_text_view = |arg_ty: &IType, record_types: &HashMap<u64, IRecordType>| {
+        let type_text_view = |arg_ty: &IType, record_types: &RecordTypes| {
             match arg_ty {
                 IType::Record(record_type_id) => {
                     // unwrap is safe because FaaSInterface here is well-formed
@@ -156,7 +158,7 @@ impl<'a> Serialize for FaaSInterface<'a> {
             }
         }
 
-        fn serialize_record_type<'a, 'b>(record: (&'a u64, &'b IRecordType)) -> RecordType<'b> {
+        fn serialize_record_type<'a, 'b>(record: (&'a u64, &'b Rc<IRecordType>)) -> RecordType<'b> {
             let fields = record
                 .1
                 .fields

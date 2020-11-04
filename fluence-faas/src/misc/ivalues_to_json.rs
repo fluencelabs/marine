@@ -20,15 +20,12 @@ use crate::Result;
 use crate::errors::FaaSError::JsonOutputSerializationError as OutputDeError;
 
 use fce::RecordTypes;
-use wasmer_wit::types::RecordType;
 use serde_json::Value as JValue;
-
-use std::collections::HashMap;
 
 pub(crate) fn ivalues_to_json(
     mut ivalues: Vec<IValue>,
     outputs: &[IType],
-    record_types: RecordTypes<'_>,
+    record_types: &RecordTypes,
 ) -> Result<JValue> {
     if outputs.len() != ivalues.len() {
         return Err(OutputDeError(format!(
@@ -45,11 +42,7 @@ pub(crate) fn ivalues_to_json(
     }
 }
 
-fn ivalue_to_json(
-    ivalue: IValue,
-    output: &IType,
-    record_types: &HashMap<u64, RecordType>,
-) -> Result<JValue> {
+fn ivalue_to_json(ivalue: IValue, output: &IType, record_types: &RecordTypes) -> Result<JValue> {
     use serde_json::json;
 
     // clone here needed because binding by-value and by-ref in the same pattern in unstable

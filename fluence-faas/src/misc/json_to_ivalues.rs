@@ -28,7 +28,7 @@ use std::collections::HashMap;
 pub(crate) fn json_to_ivalues(
     json_args: JValue,
     func_signature: &crate::FaaSFunctionSignature<'_>,
-    record_types: RecordTypes<'_>,
+    record_types: &RecordTypes,
 ) -> Result<Vec<IValue>> {
     let ivalues = match json_args {
         JValue::Object(json_map) => json_map_to_ivalues(
@@ -56,7 +56,7 @@ pub(crate) fn json_to_ivalues(
 fn json_map_to_ivalues<'a, 'b>(
     mut json_map: serde_json::Map<String, JValue>,
     signature: impl Iterator<Item = (&'a String, &'a IType)>,
-    record_types: RecordTypes<'b>,
+    record_types: &'b RecordTypes,
 ) -> Result<Vec<IValue>> {
     let mut iargs = Vec::new();
 
@@ -82,7 +82,7 @@ fn json_map_to_ivalues<'a, 'b>(
 fn json_array_to_ivalues<'a, 'b>(
     mut json_array: Vec<JValue>,
     signature: impl Iterator<Item = &'a IType> + std::iter::ExactSizeIterator,
-    record_types: RecordTypes<'b>,
+    record_types: &'b RecordTypes,
 ) -> Result<Vec<IValue>> {
     if json_array.len() != signature.len() {
         return Err(ArgDeError(format!(
@@ -168,7 +168,7 @@ fn json_null_to_ivalue(func_signature: &fce::FCEFunctionSignature<'_>) -> Result
 fn json_value_to_ivalue(
     json_value: JValue,
     ty: &IType,
-    record_types: RecordTypes<'_>,
+    record_types: &RecordTypes,
 ) -> Result<IValue> {
     macro_rules! to_ivalue(
         ($json_value:expr, $ty:ident) => {
@@ -231,7 +231,7 @@ fn json_value_to_ivalue(
 fn json_record_type_to_ivalue(
     json_value: JValue,
     record_type_id: &u64,
-    record_types: RecordTypes<'_>,
+    record_types: &RecordTypes,
 ) -> Result<Vec1<IValue>> {
     let record_type = record_types.get(record_type_id).ok_or_else(|| {
         ArgDeError(format!(

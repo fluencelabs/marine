@@ -16,6 +16,7 @@
 
 use super::wit_prelude::*;
 use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
+use super::RecordTypes;
 use crate::Result;
 use crate::FCEModuleConfig;
 
@@ -31,6 +32,7 @@ use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
+use std::rc::Rc;
 
 type WITInterpreter =
     Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
@@ -95,8 +97,9 @@ pub(crate) struct FCEModule {
     // TODO: replace with dyn Trait
     export_funcs: HashMap<String, Arc<Callable>>,
 
-    // TODO: save refs instead of copies
-    record_types: HashMap<u64, IRecordType>,
+    // TODO: save refs instead copying of a record types HashMap.
+    /// Record types used in exported functions as arguments or return values.
+    export_record_types: RecordTypes,
 }
 
 impl FCEModule {
@@ -125,7 +128,7 @@ impl FCEModule {
         };
 
         let export_funcs = Self::instantiate_wit_exports(&wit_instance, &fce_wit)?;
-        let record_types = Self::extract_export_record_types(&export_funcs, &wit_instance)?;
+        let export_record_types = Self::extract_export_record_types(&export_funcs, &wit_instance)?;
 
         // call _start to populate the WASI state of the module
         #[rustfmt::skip]
@@ -139,7 +142,7 @@ impl FCEModule {
             host_import_object: raw_imports,
             host_closures_import_object,
             export_funcs,
-            record_types,
+            export_record_types,
         })
     }
 
@@ -165,12 +168,12 @@ impl FCEModule {
             })
     }
 
-    pub(crate) fn export_record_types(&self) -> &HashMap<u64, IRecordType> {
-        &self.record_types
+    pub(crate) fn export_record_types(&self) -> &RecordTypes {
+        &self.export_record_types
     }
 
-    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&IRecordType> {
-        self.record_types.get(&record_type)
+    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&Rc<IRecordType>> {
+        self.export_record_types.get(&record_type)
     }
 
     pub(crate) fn get_wasi_state(&mut self) -> &wasmer_wasi::state::WasiState {
@@ -432,11 +435,11 @@ impl FCEModule {
     fn extract_export_record_types(
         export_funcs: &HashMap<String, Arc<Callable>>,
         wit_instance: &Arc<WITInstance>,
-    ) -> Result<HashMap<u64, IRecordType>> {
+    ) -> Result<RecordTypes> {
         fn handle_record_type(
             record_type_id: u64,
             wit_instance: &Arc<WITInstance>,
-            export_record_types: &mut HashMap<u64, IRecordType>,
+            export_record_types: &mut RecordTypes,
         ) -> Result<()> {
             use wasmer_wit::interpreter::wasm::structures::Instance;
 

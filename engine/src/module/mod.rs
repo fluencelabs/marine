@@ -21,6 +21,8 @@ mod wit_instance;
 mod type_converters;
 mod fce_module;
 
+pub use wit_instance::RecordTypes;
+
 pub use wasmer_wit::types::InterfaceType as IType;
 pub use wasmer_wit::types::RecordType as IRecordType;
 pub use wasmer_wit::ast::FunctionArg as IFunctionArg;

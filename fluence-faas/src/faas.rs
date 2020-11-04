@@ -97,7 +97,7 @@ impl FluenceFaaS {
         }
 
         Ok(Self {
-            fce: fce,
+            fce,
             call_parameters,
         })
     }
