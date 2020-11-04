@@ -177,9 +177,9 @@ impl AppService {
         &mut self,
         module_name: MN,
         func_name: FN,
-        arguments: serde_json::Value,
+        arguments: JValue,
         call_parameters: crate::CallParameters,
-    ) -> Result<Vec<IValue>> {
+    ) -> Result<JValue> {
         self.faas
             .call_with_json(module_name, func_name, arguments, call_parameters)
             .map_err(Into::into)
