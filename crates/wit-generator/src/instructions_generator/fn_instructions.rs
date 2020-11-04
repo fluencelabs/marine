@@ -25,6 +25,8 @@ use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
 
+use std::rc::Rc;
+
 impl WITGenerator for AstFunctionItem {
     fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
         use wasmer_wit::ast::Type;
@@ -42,10 +44,13 @@ impl WITGenerator for AstFunctionItem {
             })
             .collect::<Result<Vec<_>>>()?;
 
+        let arguments = Rc::new(arguments);
+
         let output_types = match self.signature.output_type {
             Some(ref output_type) => vec![ptype_to_itype_checked(output_type, wit_resolver)?],
             None => vec![],
         };
+        let output_types = Rc::new(output_types);
 
         let interfaces = &mut wit_resolver.interfaces;
         interfaces.types.push(Type::Function {

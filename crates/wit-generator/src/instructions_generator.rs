@@ -25,6 +25,8 @@ use wasmer_wit::types::InterfaceType as IType;
 use wasmer_wit::ast::Interfaces;
 use wasmer_wit::types::RecordType;
 
+use std::rc::Rc;
+
 #[derive(PartialEq, Debug, Default)]
 pub(crate) struct WITResolver<'a> {
     types: std::collections::HashMap<String, usize>,
@@ -54,7 +56,7 @@ impl<'a> WITResolver<'a> {
                     .insert(record_name.to_string(), self.interfaces.types.len());
                 self.interfaces
                     .types
-                    .push(Type::Record(RecordType::default()));
+                    .push(Type::Record(Rc::new(RecordType::default())));
 
                 self.not_resolved_types_count += 1;
                 self.interfaces.types.len()
@@ -86,14 +88,14 @@ impl<'a> WITResolver<'a> {
 
         match self.types.get(&record.name) {
             Some(pos) => {
-                self.interfaces.types[*pos] = Type::Record(record);
+                self.interfaces.types[*pos] = Type::Record(Rc::new(record));
                 self.not_resolved_types_count -= 1;
             }
             None => {
                 self.types
                     .insert(record.name.clone(), self.interfaces.types.len());
 
-                self.interfaces.types.push(Type::Record(record));
+                self.interfaces.types.push(Type::Record(Rc::new(record)));
             }
         }
     }
