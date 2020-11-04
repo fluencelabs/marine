@@ -156,7 +156,7 @@ impl WITInstance {
             |(mut record_types_by_id, id), ty| {
                 match ty {
                     WITAstType::Record(record_type) => {
-                        record_types_by_id.insert(id, Rc::new(record_type.clone()));
+                        record_types_by_id.insert(id, record_type.clone());
                     }
                     WITAstType::Function { .. } => {}
                 };

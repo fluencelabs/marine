@@ -23,6 +23,7 @@ use multimap::MultiMap;
 
 use std::iter::Iterator;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 pub type CoreFunctionType = u32;
 pub type AdapterFunctionType = u32;
@@ -109,7 +110,7 @@ impl<'a> FCEWITInterfaces<'a> {
         self.types.iter()
     }
 
-    pub fn record_types(&self) -> impl Iterator<Item = (u64, &RecordType)> {
+    pub fn record_types(&self) -> impl Iterator<Item = (u64, &Rc<RecordType>)> {
         self.types.iter().enumerate().filter_map(|(id, t)| match t {
             WITAstType::Record(r) => Some((id as u64, r)),
             _ => None,

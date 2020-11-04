@@ -40,8 +40,8 @@ type WITInterpreter =
 #[derive(Clone)]
 pub(super) struct WITModuleFunc {
     interpreter: Arc<WITInterpreter>,
-    pub(super) arguments: Vec<IFunctionArg>,
-    pub(super) output_types: Vec<IType>,
+    pub(super) arguments: Rc<Vec<IFunctionArg>>,
+    pub(super) output_types: Rc<Vec<IType>>,
 }
 
 #[derive(Clone)]
@@ -95,7 +95,7 @@ pub(crate) struct FCEModule {
     host_closures_import_object: ImportObject,
 
     // TODO: replace with dyn Trait
-    export_funcs: HashMap<String, Arc<Callable>>,
+    export_funcs: HashMap<String, Rc<Callable>>,
 
     // TODO: save refs instead copying of a record types HashMap.
     /// Record types used in exported functions as arguments or return values.
@@ -154,7 +154,7 @@ impl FCEModule {
                     function_name
                 )))
             },
-            |func| Arc::make_mut(func).call(args),
+            |func| Rc::make_mut(func).call(args),
         )
     }
 
@@ -181,7 +181,7 @@ impl FCEModule {
     }
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
-    pub(super) fn get_callable(&self, function_name: &str) -> Result<Arc<Callable>> {
+    pub(super) fn get_callable(&self, function_name: &str) -> Result<Rc<Callable>> {
         match self.export_funcs.get(function_name) {
             Some(func) => Ok(func.clone()),
             None => Err(FCEError::NoSuchFunction(format!(
@@ -223,7 +223,7 @@ impl FCEModule {
             .record_types()
             .map(|(id, r)| (id, r.clone()))
             .collect::<HashMap<_, _>>();
-        let record_types = std::rc::Rc::new(record_types);
+        let record_types = Rc::new(record_types);
 
         for (import_name, descriptor) in config.host_imports {
             let host_import = create_host_import_func(descriptor, record_types.clone());
@@ -242,7 +242,7 @@ impl FCEModule {
     fn instantiate_wit_exports(
         wit_instance: &Arc<WITInstance>,
         wit: &FCEWITInterfaces<'_>,
-    ) -> Result<HashMap<String, Arc<Callable>>> {
+    ) -> Result<HashMap<String, Rc<Callable>>> {
         use fce_wit_interfaces::WITAstType;
 
         wit.implementations()
@@ -280,7 +280,7 @@ impl FCEModule {
 
                         Ok((
                             export_function_name.to_string(),
-                            Arc::new(Callable {
+                            Rc::new(Callable {
                                 wit_instance: wit_instance.clone(),
                                 wit_module_func,
                             }),
@@ -292,7 +292,7 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<HashMap<String, Arc<Callable>>>>()
+            .collect::<Result<HashMap<String, Rc<Callable>>>>()
     }
 
     // this function deals only with import functions that have an adaptor implementation
@@ -433,7 +433,7 @@ impl FCEModule {
     }
 
     fn extract_export_record_types(
-        export_funcs: &HashMap<String, Arc<Callable>>,
+        export_funcs: &HashMap<String, Rc<Callable>>,
         wit_instance: &Arc<WITInstance>,
     ) -> Result<RecordTypes> {
         fn handle_record_type(
