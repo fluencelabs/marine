@@ -17,9 +17,9 @@
 use crate::Result;
 use crate::config::AppServiceConfig;
 use super::AppServiceError;
-use super::IValue;
 
 use fluence_faas::FluenceFaaS;
+use serde_json::Value as JValue;
 
 use std::convert::TryInto;
 use std::collections::HashMap;
@@ -73,9 +73,9 @@ impl AppService {
     pub fn call<S: AsRef<str>>(
         &mut self,
         func_name: S,
-        arguments: serde_json::Value,
+        arguments: JValue,
         call_parameters: crate::CallParameters,
-    ) -> Result<Vec<IValue>> {
+    ) -> Result<JValue> {
         self.faas
             .call_with_json(
                 &self.facade_module_name,

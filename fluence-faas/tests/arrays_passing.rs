@@ -15,7 +15,6 @@
  */
 
 use fluence_faas::FluenceFaaS;
-use fluence_faas::IValue;
 use fluence_faas::IType;
 
 use once_cell::sync::Lazy;
@@ -246,6 +245,8 @@ pub fn i32_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
+    let right_result = json!([0, 1, 2, 3, 4, 0, 2]);
+
     let result1 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -254,18 +255,7 @@ pub fn i32_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
-    assert_eq!(
-        result1,
-        vec![IValue::Array(vec![
-            IValue::S32(0),
-            IValue::S32(1),
-            IValue::S32(2),
-            IValue::S32(3),
-            IValue::S32(4),
-            IValue::S32(0),
-            IValue::S32(2)
-        ])]
-    );
+    assert_eq!(result1, right_result);
 
     let result2 = faas
         .call_with_json(
@@ -275,19 +265,9 @@ pub fn i32_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
-    assert_eq!(
-        result2,
-        vec![IValue::Array(vec![
-            IValue::S32(0),
-            IValue::S32(1),
-            IValue::S32(2),
-            IValue::S32(3),
-            IValue::S32(4),
-            IValue::S32(0),
-            IValue::S32(2)
-        ])]
-    );
+    assert_eq!(result2, right_result);
 
+    let right_result = json!([1, 0, 1, 2, 3, 4, 0, 2]);
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -296,19 +276,7 @@ pub fn i32_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
-    assert_eq!(
-        result3,
-        vec![IValue::Array(vec![
-            IValue::S32(1),
-            IValue::S32(0),
-            IValue::S32(1),
-            IValue::S32(2),
-            IValue::S32(3),
-            IValue::S32(4),
-            IValue::S32(0),
-            IValue::S32(2)
-        ])]
-    );
+    assert_eq!(result3, right_result);
 }
 
 #[test]
@@ -322,6 +290,8 @@ pub fn i64_type() {
     let result2 = faas.call_with_json("arrays_passing_pure", "i64_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
+    let right_result = json!([1, 0, 1, 2, 3, 4, 1, 1]);
+
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -330,19 +300,7 @@ pub fn i64_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke i64_type: {:?}", e));
-    assert_eq!(
-        result3,
-        vec![IValue::Array(vec![
-            IValue::S64(1),
-            IValue::S64(0),
-            IValue::S64(1),
-            IValue::S64(2),
-            IValue::S64(3),
-            IValue::S64(4),
-            IValue::S64(1),
-            IValue::S64(1)
-        ])]
-    );
+    assert_eq!(result3, right_result);
 
     let result4 = faas
         .call_with_json(
@@ -352,19 +310,7 @@ pub fn i64_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke i64_type: {:?}", e));
-    assert_eq!(
-        result4,
-        vec![IValue::Array(vec![
-            IValue::S64(1),
-            IValue::S64(0),
-            IValue::S64(1),
-            IValue::S64(2),
-            IValue::S64(3),
-            IValue::S64(4),
-            IValue::S64(1),
-            IValue::S64(1)
-        ])]
-    );
+    assert_eq!(result4, right_result);
 }
 
 #[test]
@@ -378,6 +324,8 @@ pub fn u32_type() {
     let result2 = faas.call_with_json("arrays_passing_pure", "u32_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
+    let right_result = json!([1, 0, 13, 37, 2]);
+
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -386,16 +334,7 @@ pub fn u32_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke u32_type: {:?}", e));
-    assert_eq!(
-        result3,
-        vec![IValue::Array(vec![
-            IValue::U32(1),
-            IValue::U32(0),
-            IValue::U32(13),
-            IValue::U32(37),
-            IValue::U32(2),
-        ])]
-    );
+    assert_eq!(result3, right_result);
 
     let result4 = faas
         .call_with_json(
@@ -405,16 +344,7 @@ pub fn u32_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke u32_type: {:?}", e));
-    assert_eq!(
-        result4,
-        vec![IValue::Array(vec![
-            IValue::U32(1),
-            IValue::U32(0),
-            IValue::U32(13),
-            IValue::U32(37),
-            IValue::U32(2),
-        ])]
-    );
+    assert_eq!(result4, right_result);
 }
 
 #[test]
@@ -428,6 +358,8 @@ pub fn u64_type() {
     let result2 = faas.call_with_json("arrays_passing_pure", "u64_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
+    let right_result = json!([1, 0, 1, 2, 3, 4, 2]);
+
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -436,18 +368,7 @@ pub fn u64_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke u64_type: {:?}", e));
-    assert_eq!(
-        result3,
-        vec![IValue::Array(vec![
-            IValue::U64(1),
-            IValue::U64(0),
-            IValue::U64(1),
-            IValue::U64(2),
-            IValue::U64(3),
-            IValue::U64(4),
-            IValue::U64(2),
-        ])]
-    );
+    assert_eq!(result3, right_result);
 
     let result4 = faas
         .call_with_json(
@@ -457,18 +378,7 @@ pub fn u64_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke u64_type: {:?}", e));
-    assert_eq!(
-        result4,
-        vec![IValue::Array(vec![
-            IValue::U64(1),
-            IValue::U64(0),
-            IValue::U64(1),
-            IValue::U64(2),
-            IValue::U64(3),
-            IValue::U64(4),
-            IValue::U64(2),
-        ])]
-    );
+    assert_eq!(result4, right_result);
 }
 
 #[test]
@@ -482,6 +392,8 @@ pub fn f64_type_() {
     let result2 = faas.call_with_json("arrays_passing_pure", "f32_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
+    let right_result = json!([1.0, 0.0, 13.37, 1.0]);
+
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -490,15 +402,7 @@ pub fn f64_type_() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
-    assert_eq!(
-        result3,
-        vec![IValue::Array(vec![
-            IValue::F64(1.0),
-            IValue::F64(0.0),
-            IValue::F64(13.37),
-            IValue::F64(1.0),
-        ])]
-    );
+    assert_eq!(result3, right_result);
 
     let result4 = faas
         .call_with_json(
@@ -508,15 +412,7 @@ pub fn f64_type_() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
-    assert_eq!(
-        result4,
-        vec![IValue::Array(vec![
-            IValue::F64(1.0),
-            IValue::F64(0.0),
-            IValue::F64(13.37),
-            IValue::F64(1.0),
-        ])]
-    );
+    assert_eq!(result4, right_result);
 }
 
 #[test]
@@ -531,6 +427,8 @@ pub fn f64_type() {
     let result2 = faas.call_with_json("arrays_passing_pure", "f64_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
+    let right_result = json!([3.0]);
+
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -539,7 +437,7 @@ pub fn f64_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
-    assert_eq!(result3, vec![IValue::F64(3.0)]);
+    assert_eq!(result3, right_result);
 
     let result4 = faas
         .call_with_json(
@@ -549,7 +447,7 @@ pub fn f64_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke f64_type: {:?}", e));
-    assert_eq!(result4, vec![IValue::F64(3.0)]);
+    assert_eq!(result4, right_result);
 }
 
 #[test]
@@ -573,6 +471,8 @@ pub fn string_type() {
     );
     assert!(result2.is_err());
 
+    let right_result = json!(["Fluence", "fce", "from effector", "test"]);
+
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -581,15 +481,7 @@ pub fn string_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke string_type: {:?}", e));
-    assert_eq!(
-        result3,
-        vec![IValue::Array(vec![
-            IValue::String(String::from("Fluence")),
-            IValue::String(String::from("fce")),
-            IValue::String(String::from("from effector")),
-            IValue::String(String::from("test")),
-        ])]
-    );
+    assert_eq!(result3, right_result);
 
     let result4 = faas
         .call_with_json(
@@ -599,15 +491,7 @@ pub fn string_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke string_type: {:?}", e));
-    assert_eq!(
-        result4,
-        vec![IValue::Array(vec![
-            IValue::String(String::from("Fluence")),
-            IValue::String(String::from("fce")),
-            IValue::String(String::from("from effector")),
-            IValue::String(String::from("test")),
-        ])]
-    );
+    assert_eq!(result4, right_result);
 }
 
 #[test]
@@ -631,6 +515,7 @@ pub fn byte_type() {
     );
     assert!(result2.is_err());
 
+    let right_result = json!([0x13, 0x37, 0, 1, 2]);
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -639,16 +524,7 @@ pub fn byte_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
-    assert_eq!(
-        result3,
-        vec![IValue::Array(vec![
-            IValue::U8(0x13),
-            IValue::U8(0x37),
-            IValue::U8(0),
-            IValue::U8(1),
-            IValue::U8(2),
-        ])]
-    );
+    assert_eq!(result3, right_result);
 
     let result4 = faas
         .call_with_json(
@@ -658,16 +534,7 @@ pub fn byte_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
-    assert_eq!(
-        result4,
-        vec![IValue::Array(vec![
-            IValue::U8(0x13),
-            IValue::U8(0x37),
-            IValue::U8(0),
-            IValue::U8(1),
-            IValue::U8(2),
-        ])]
-    );
+    assert_eq!(result4, right_result);
 }
 
 #[test]
@@ -691,6 +558,15 @@ pub fn inner_arrays_1_type() {
     );
     assert!(result2.is_err());
 
+    let right_result = json!([
+        [[[0x13, 0x37]]],
+        [[[0]]],
+        [],
+        [[]],
+        [[[]]],
+        [[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]],
+        [[[2]]]
+    ]);
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -699,36 +575,7 @@ pub fn inner_arrays_1_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
-    assert_eq!(
-        result3,
-        vec![IValue::Array(vec![
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::U8(0x13),
-                IValue::U8(0x37),
-            ])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![IValue::U8(
-                0
-            ),])])]),
-            IValue::Array(vec![]),
-            IValue::Array(vec![IValue::Array(vec![])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::U8(1),
-                IValue::U8(2),
-                IValue::U8(3),
-                IValue::U8(4),
-                IValue::U8(5),
-                IValue::U8(6),
-                IValue::U8(7),
-                IValue::U8(8),
-                IValue::U8(9),
-                IValue::U8(10),
-            ])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![IValue::U8(
-                2
-            ),])])]),
-        ]),]
-    );
+    assert_eq!(result3, right_result);
 
     let result4 = faas
         .call_with_json(
@@ -738,36 +585,7 @@ pub fn inner_arrays_1_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
-    assert_eq!(
-        result4,
-        vec![IValue::Array(vec![
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::U8(0x13),
-                IValue::U8(0x37),
-            ])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![IValue::U8(
-                0
-            ),])])]),
-            IValue::Array(vec![]),
-            IValue::Array(vec![IValue::Array(vec![])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::U8(1),
-                IValue::U8(2),
-                IValue::U8(3),
-                IValue::U8(4),
-                IValue::U8(5),
-                IValue::U8(6),
-                IValue::U8(7),
-                IValue::U8(8),
-                IValue::U8(9),
-                IValue::U8(10),
-            ])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![IValue::U8(
-                2
-            ),])])]),
-        ]),]
-    );
+    assert_eq!(result4, right_result);
 }
 
 #[test]
@@ -791,6 +609,40 @@ pub fn inner_arrays_2_type() {
     );
     assert!(result2.is_err());
 
+    let right_result = json!([
+    [[[{
+        "field_0": 0,
+        "field_1": [[1]]
+    }]]],
+    [[[
+    {
+        "field_0": 0,
+        "field_1": [[1]]
+    },
+    {
+        "field_0": 0,
+        "field_1": []
+    },
+    ]]],
+    [],
+    [[]],
+    [[[]]],
+    [[[{
+        "field_0": 0,
+        "field_1": [[1,2,3,4]]
+    }]]],
+    [[[
+    {
+        "field_0": 1,
+        "field_1": [[2]]
+    },
+    {
+        "field_0": 0,
+        "field_1": []
+    },
+    ]]],
+     ]);
+
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -799,61 +651,7 @@ pub fn inner_arrays_2_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
-    assert_eq!(
-        result3,
-        vec![IValue::Array(vec![
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![
-                        IValue::S32(0),
-                        IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
-                    ])
-                    .unwrap()
-                )
-            ])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![
-                        IValue::S32(0),
-                        IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
-                    ])
-                    .unwrap()
-                ),
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![IValue::S32(0), IValue::Array(vec![]),]).unwrap()
-                )
-            ])])]),
-            IValue::Array(vec![]),
-            IValue::Array(vec![IValue::Array(vec![])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![
-                        IValue::S32(0),
-                        IValue::Array(vec![IValue::Array(vec![
-                            IValue::U8(1),
-                            IValue::U8(2),
-                            IValue::U8(3),
-                            IValue::U8(4),
-                        ])])
-                    ])
-                    .unwrap()
-                ),
-            ])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![
-                        IValue::S32(1),
-                        IValue::Array(vec![IValue::Array(vec![IValue::U8(2)])])
-                    ])
-                    .unwrap()
-                ),
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![IValue::S32(0), IValue::Array(vec![])]).unwrap()
-                )
-            ])])]),
-        ]),]
-    );
+    assert_eq!(result3, right_result);
 
     let result4 = faas
         .call_with_json(
@@ -863,61 +661,7 @@ pub fn inner_arrays_2_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke bytearray_type: {:?}", e));
-    assert_eq!(
-        result4,
-        vec![IValue::Array(vec![
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![
-                        IValue::S32(0),
-                        IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
-                    ])
-                    .unwrap()
-                )
-            ])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![
-                        IValue::S32(0),
-                        IValue::Array(vec![IValue::Array(vec![IValue::U8(1)])])
-                    ])
-                    .unwrap()
-                ),
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![IValue::S32(0), IValue::Array(vec![]),]).unwrap()
-                )
-            ])])]),
-            IValue::Array(vec![]),
-            IValue::Array(vec![IValue::Array(vec![])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![
-                        IValue::S32(0),
-                        IValue::Array(vec![IValue::Array(vec![
-                            IValue::U8(1),
-                            IValue::U8(2),
-                            IValue::U8(3),
-                            IValue::U8(4),
-                        ])])
-                    ])
-                    .unwrap()
-                ),
-            ])])]),
-            IValue::Array(vec![IValue::Array(vec![IValue::Array(vec![
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![
-                        IValue::S32(1),
-                        IValue::Array(vec![IValue::Array(vec![IValue::U8(2)])])
-                    ])
-                    .unwrap()
-                ),
-                IValue::Record(
-                    fce::vec1::Vec1::new(vec![IValue::S32(0), IValue::Array(vec![])]).unwrap()
-                )
-            ])])]),
-        ]),]
-    );
+    assert_eq!(result4, right_result);
 }
 
 #[test]
@@ -942,6 +686,8 @@ pub fn bool_type() {
     );
     assert!(result2.is_err());
 
+    let right_result = json!(1);
+
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -950,12 +696,12 @@ pub fn bool_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke bool_type: {:?}", e));
-    assert_eq!(result3, vec![IValue::I32(1)]);
+    assert_eq!(result3, right_result);
 
     let result4 = faas
         .call_with_json("arrays_passing_pure", "bool_type", json!(0), <_>::default())
         .unwrap_or_else(|e| panic!("can't invoke bool_type: {:?}", e));
-    assert_eq!(result4, vec![IValue::I32(1)]);
+    assert_eq!(result4, right_result);
 }
 
 #[test]
@@ -963,6 +709,7 @@ pub fn empty_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
+    let right_result = json!(["from effector"]);
     let result1 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -971,12 +718,7 @@ pub fn empty_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
-    assert_eq!(
-        result1,
-        vec![IValue::Array(vec![IValue::String(String::from(
-            "from effector"
-        ))])]
-    );
+    assert_eq!(result1, right_result);
 
     let result2 = faas
         .call_with_json(
@@ -986,12 +728,7 @@ pub fn empty_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
-    assert_eq!(
-        result2,
-        vec![IValue::Array(vec![IValue::String(String::from(
-            "from effector"
-        ))])]
-    );
+    assert_eq!(result2, right_result);
 
     let result3 = faas
         .call_with_json(
@@ -1001,12 +738,7 @@ pub fn empty_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke empty_type: {:?}", e));
-    assert_eq!(
-        result3,
-        vec![IValue::Array(vec![IValue::String(String::from(
-            "from effector"
-        ))])]
-    );
+    assert_eq!(result3, right_result);
 
     let result4 = faas.call_with_json(
         "arrays_passing_pure",

@@ -64,6 +64,8 @@ fn ivalue_to_json(
         (IValue::U64(value), IType::U64) => Ok(json!(value)),
         (IValue::I32(value), IType::I32) => Ok(json!(value)),
         (IValue::I64(value), IType::I64) => Ok(json!(value)),
+        (IValue::F32(value), IType::F32) => Ok(json!(value)),
+        (IValue::F64(value), IType::F64) => Ok(json!(value)),
         (IValue::String(value), IType::String) => Ok(json!(value)),
         (IValue::Array(value), IType::Array(array_ty)) => {
             let result: Result<Vec<_>> = value

@@ -97,7 +97,7 @@ impl FluenceFaaS {
         }
 
         Ok(Self {
-            fce,
+            fce: fce,
             call_parameters,
         })
     }
@@ -160,14 +160,15 @@ impl FluenceFaaS {
             .find(|sign| sign.name == func_name)
             .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
 
-        let record_types = module_interface.record_types;
+        let record_types = module_interface.record_types.clone();
 
         let iargs = json_to_ivalues(json_args, func_signature, &record_types)?;
+        let outputs = func_signature.outputs.clone();
 
         self.call_parameters.replace(call_parameters);
         let result = self.fce.call(module_name, func_name, &iargs)?;
 
-        ivalues_to_json(result, func_signature.outputs, record_types)
+        ivalues_to_json(result, &outputs, &record_types)
     }
 
     /// Return all export functions (name and signatures) of loaded modules.
