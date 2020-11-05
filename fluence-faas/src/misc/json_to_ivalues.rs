@@ -24,47 +24,39 @@ use serde_json::Value as JValue;
 use wasmer_wit::vec1::Vec1;
 
 use std::collections::HashMap;
+use std::iter::ExactSizeIterator;
 
-pub(crate) fn json_to_ivalues(
+/// Convert json to an array of ivalues according to the supplied argument types.
+pub(crate) fn json_to_ivalues<'a, 'b>(
     json_args: JValue,
-    func_signature: &crate::FaaSFunctionSignature,
-    record_types: &RecordTypes,
+    arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
+    record_types: &'b RecordTypes,
 ) -> Result<Vec<IValue>> {
     let ivalues = match json_args {
-        JValue::Object(json_map) => json_map_to_ivalues(
-            json_map,
-            func_signature
-                .arguments
-                .iter()
-                .map(|arg| (&arg.name, &arg.ty)),
-            &record_types,
-        )?,
-        JValue::Array(json_array) => json_array_to_ivalues(
-            json_array,
-            func_signature.arguments.iter().map(|arg| &arg.ty),
-            &record_types,
-        )?,
-        JValue::String(json_string) => json_string_to_ivalue(json_string, func_signature)?,
-        json_bool @ JValue::Bool(_) => json_bool_to_ivalue(json_bool, func_signature)?,
-        json_number @ JValue::Number(_) => json_number_to_ivalue(json_number, func_signature)?,
-        JValue::Null => json_null_to_ivalue(func_signature)?,
+        JValue::Object(json_map) => json_map_to_ivalues(json_map, arg_types, &record_types)?,
+        JValue::Array(json_array) => {
+            json_array_to_ivalues(json_array, arg_types.map(|arg| arg.1), &record_types)?
+        }
+        JValue::Null => json_null_to_ivalue(arg_types)?,
+        json_value => json_value_to_ivalue(json_value, arg_types)?,
     };
 
     Ok(ivalues)
 }
 
+/// Convert json map to an array of ivalues according to the supplied argument types.
 fn json_map_to_ivalues<'a, 'b>(
     mut json_map: serde_json::Map<String, JValue>,
-    signature: impl Iterator<Item = (&'a String, &'a IType)>,
+    arg_types: impl Iterator<Item = (&'a String, &'a IType)>,
     record_types: &'b RecordTypes,
 ) -> Result<Vec<IValue>> {
     let mut iargs = Vec::new();
 
-    for (arg_name, arg_type) in signature {
+    for (arg_name, arg_type) in arg_types {
         let json_value = json_map
             .remove(arg_name)
             .ok_or_else(|| ArgDeError(format!("missing argument with name {}", arg_name)))?;
-        let iarg = json_value_to_ivalue(json_value, arg_type, record_types)?;
+        let iarg = jvalue_to_ivalue(json_value, arg_type, record_types)?;
         iargs.push(iarg);
     }
 
@@ -79,97 +71,61 @@ fn json_map_to_ivalues<'a, 'b>(
     Ok(iargs)
 }
 
+/// Convert json array to an array of ivalues according to the supplied argument types.
 fn json_array_to_ivalues<'a, 'b>(
-    mut json_array: Vec<JValue>,
-    signature: impl Iterator<Item = &'a IType> + std::iter::ExactSizeIterator,
+    json_array: Vec<JValue>,
+    arg_types: impl Iterator<Item = &'a IType> + ExactSizeIterator,
     record_types: &'b RecordTypes,
 ) -> Result<Vec<IValue>> {
-    if json_array.len() != signature.len() {
+    if json_array.len() != arg_types.len() {
         return Err(ArgDeError(format!(
             "function requires {} arguments, {} provided",
-            signature.len(),
+            arg_types.len(),
             json_array.len()
         )));
     }
 
-    let mut iargs = Vec::with_capacity(signature.len());
-
-    for arg_type in signature {
-        // remove here is safe because we've already checked sizes
-        let json_value = json_array.remove(0);
-        let iarg = json_value_to_ivalue(json_value, arg_type, record_types)?;
-        iargs.push(iarg);
-    }
+    let iargs = json_array
+        .into_iter()
+        .zip(arg_types)
+        .map(|(json_value, arg_type)| jvalue_to_ivalue(json_value, arg_type, record_types))
+        .collect::<Result<Vec<_>>>()?;
 
     Ok(iargs)
 }
 
-fn json_string_to_ivalue(
-    json_string: String,
-    func_signature: &fce::FCEFunctionSignature,
+/// Convert json value (Number, String or Bool) to an array of ivalues according to the supplied argument types.
+fn json_value_to_ivalue<'a>(
+    json_value: JValue,
+    mut arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
 ) -> Result<Vec<IValue>> {
-    if func_signature.arguments.len() != 1 || func_signature.arguments[0].ty != IType::String {
+    if arg_types.len() != 1 {
         return Err(ArgDeError(format!(
             "the called function has the following signature: {:?}, but only one string argument is provided",
-            func_signature
+            arg_types.collect::<Vec<_>>()
         )));
     }
 
-    Ok(vec![IValue::String(json_string)])
+    let ivalue = jvalue_to_ivalue(json_value, arg_types.next().unwrap().1, &HashMap::new())?;
+    Ok(vec![ivalue])
 }
 
-fn json_bool_to_ivalue(
-    json_bool: JValue,
-    func_signature: &fce::FCEFunctionSignature,
+/// Convert json Null to an empty array of ivalues.
+fn json_null_to_ivalue<'a>(
+    arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
 ) -> Result<Vec<IValue>> {
-    if func_signature.arguments.len() != 1 {
-        return Err(ArgDeError(format!(
-            "the called function has the following signature: {:?}, but only one bool argument is provided",
-            func_signature
-        )));
-    }
-
-    Ok(vec![json_value_to_ivalue(
-        json_bool,
-        &func_signature.arguments[0].ty,
-        &HashMap::new(),
-    )?])
-}
-
-fn json_number_to_ivalue(
-    json_number: JValue,
-    func_signature: &fce::FCEFunctionSignature,
-) -> Result<Vec<IValue>> {
-    if func_signature.arguments.len() != 1 {
-        return Err(ArgDeError(format!(
-            "the called function has the following signature: {:?}, but only one number argument is provided",
-            func_signature
-        )));
-    }
-
-    Ok(vec![json_value_to_ivalue(
-        json_number,
-        &func_signature.arguments[0].ty,
-        &HashMap::new(),
-    )?])
-}
-
-fn json_null_to_ivalue(func_signature: &fce::FCEFunctionSignature) -> Result<Vec<IValue>> {
-    if !func_signature.arguments.is_empty() {
+    if arg_types.len() != 0 {
         return Err(ArgDeError(format!(
             "the called function has the following signature: {:?}, but no arguments is provided",
-            func_signature
+            arg_types.collect::<Vec<_>>()
         )));
     }
 
     Ok(vec![])
 }
 
-fn json_value_to_ivalue(
-    json_value: JValue,
-    ty: &IType,
-    record_types: &RecordTypes,
-) -> Result<IValue> {
+/// Convert one JValue to an array of ivalues according to the supplied argument type.
+fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &RecordTypes) -> Result<IValue> {
     macro_rules! to_ivalue(
         ($json_value:expr, $ty:ident) => {
             {
@@ -186,41 +142,39 @@ fn json_value_to_ivalue(
     );
 
     match ty {
-        IType::S8 => to_ivalue!(json_value, S8),
-        IType::S16 => to_ivalue!(json_value, S16),
-        IType::S32 => to_ivalue!(json_value, S32),
-        IType::S64 => to_ivalue!(json_value, S64),
-        IType::U8 => to_ivalue!(json_value, U8),
-        IType::U16 => to_ivalue!(json_value, U16),
-        IType::U32 => to_ivalue!(json_value, U32),
-        IType::U64 => to_ivalue!(json_value, U64),
-        IType::F32 => to_ivalue!(json_value, F32),
-        IType::F64 => to_ivalue!(json_value, F64),
-        IType::String => to_ivalue!(json_value, String),
+        IType::S8 => to_ivalue!(jvalue, S8),
+        IType::S16 => to_ivalue!(jvalue, S16),
+        IType::S32 => to_ivalue!(jvalue, S32),
+        IType::S64 => to_ivalue!(jvalue, S64),
+        IType::U8 => to_ivalue!(jvalue, U8),
+        IType::U16 => to_ivalue!(jvalue, U16),
+        IType::U32 => to_ivalue!(jvalue, U32),
+        IType::U64 => to_ivalue!(jvalue, U64),
+        IType::F32 => to_ivalue!(jvalue, F32),
+        IType::F64 => to_ivalue!(jvalue, F64),
+        IType::String => to_ivalue!(jvalue, String),
         IType::Array(value_type) => {
-            let value = match json_value {
+            let value = match jvalue {
                 JValue::Array(json_array) => {
-                    let iargs: Result<Vec<_>> = json_array
+                    let iargs = json_array
                         .into_iter()
-                        .map(|json_value| {
-                            json_value_to_ivalue(json_value, value_type, record_types)
-                        })
-                        .collect();
+                        .map(|json_value| jvalue_to_ivalue(json_value, value_type, record_types))
+                        .collect::<Result<Vec<_>>>()?;
 
-                    Ok(iargs?)
+                    Ok(iargs)
                 }
                 _ => Err(ArgDeError(format!(
                     "expected array of {:?} types, got {:?}",
-                    value_type, json_value
+                    value_type, jvalue
                 ))),
             }?;
 
             Ok(IValue::Array(value))
         }
-        IType::I32 => to_ivalue!(json_value, I32),
-        IType::I64 => to_ivalue!(json_value, I64),
+        IType::I32 => to_ivalue!(jvalue, I32),
+        IType::I64 => to_ivalue!(jvalue, I64),
         IType::Record(record_type_id) => {
-            let value = json_record_type_to_ivalue(json_value, record_type_id, &record_types)?;
+            let value = json_record_type_to_ivalue(jvalue, record_type_id, &record_types)?;
             Ok(IValue::Record(value))
         }
         IType::Anyref => Err(ArgDeError(String::from("anyrefs aren't supported now"))),
@@ -228,6 +182,8 @@ fn json_value_to_ivalue(
 }
 
 #[allow(clippy::ptr_arg)]
+/// Convert JValue of array or object types to an IValue record type.
+// TODO: after introducing new Record type wrapper change the result type
 fn json_record_type_to_ivalue(
     json_value: JValue,
     record_type_id: &u64,
