@@ -90,7 +90,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
                     })
                     .join(", ");
 
-                let outputs = function_signature.outputs;
+                let outputs = &function_signature.outputs;
                 if outputs.is_empty() {
                     writeln!(f, "{})", args)?;
                 } else if outputs.len() == 1 {
@@ -118,9 +118,9 @@ impl<'a> Serialize for FaaSInterface<'a> {
     {
         #[derive(Serialize)]
         pub struct FunctionSignature<'a> {
-            pub name: &'a str,
+            pub name: &'a Rc<String>,
             pub arguments: Vec<(&'a String, &'a IType)>,
-            pub output_types: &'a Vec<IType>,
+            pub output_types: &'a Rc<Vec<IType>>,
         }
 
         #[derive(Serialize)]
@@ -142,9 +142,9 @@ impl<'a> Serialize for FaaSInterface<'a> {
             pub modules: Vec<Module<'a>>,
         }
 
-        fn serialize_function_signature<'a>(
-            signature: &'a FaaSFunctionSignature<'_>,
-        ) -> FunctionSignature<'a> {
+        fn serialize_function_signature(
+            signature: &FaaSFunctionSignature,
+        ) -> FunctionSignature<'_> {
             let arguments = signature
                 .arguments
                 .iter()
@@ -152,9 +152,9 @@ impl<'a> Serialize for FaaSInterface<'a> {
                 .collect();
 
             FunctionSignature {
-                name: signature.name,
+                name: &signature.name,
                 arguments,
-                output_types: signature.outputs,
+                output_types: &signature.outputs,
             }
         }
 

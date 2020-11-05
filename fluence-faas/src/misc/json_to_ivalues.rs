@@ -27,7 +27,7 @@ use std::collections::HashMap;
 
 pub(crate) fn json_to_ivalues(
     json_args: JValue,
-    func_signature: &crate::FaaSFunctionSignature<'_>,
+    func_signature: &crate::FaaSFunctionSignature,
     record_types: &RecordTypes,
 ) -> Result<Vec<IValue>> {
     let ivalues = match json_args {
@@ -106,7 +106,7 @@ fn json_array_to_ivalues<'a, 'b>(
 
 fn json_string_to_ivalue(
     json_string: String,
-    func_signature: &fce::FCEFunctionSignature<'_>,
+    func_signature: &fce::FCEFunctionSignature,
 ) -> Result<Vec<IValue>> {
     if func_signature.arguments.len() != 1 || func_signature.arguments[0].ty != IType::String {
         return Err(ArgDeError(format!(
@@ -120,7 +120,7 @@ fn json_string_to_ivalue(
 
 fn json_bool_to_ivalue(
     json_bool: JValue,
-    func_signature: &fce::FCEFunctionSignature<'_>,
+    func_signature: &fce::FCEFunctionSignature,
 ) -> Result<Vec<IValue>> {
     if func_signature.arguments.len() != 1 {
         return Err(ArgDeError(format!(
@@ -138,7 +138,7 @@ fn json_bool_to_ivalue(
 
 fn json_number_to_ivalue(
     json_number: JValue,
-    func_signature: &fce::FCEFunctionSignature<'_>,
+    func_signature: &fce::FCEFunctionSignature,
 ) -> Result<Vec<IValue>> {
     if func_signature.arguments.len() != 1 {
         return Err(ArgDeError(format!(
@@ -154,7 +154,7 @@ fn json_number_to_ivalue(
     )?])
 }
 
-fn json_null_to_ivalue(func_signature: &fce::FCEFunctionSignature<'_>) -> Result<Vec<IValue>> {
+fn json_null_to_ivalue(func_signature: &fce::FCEFunctionSignature) -> Result<Vec<IValue>> {
     if !func_signature.arguments.is_empty() {
         return Err(ArgDeError(format!(
             "the called function has the following signature: {:?}, but no arguments is provided",

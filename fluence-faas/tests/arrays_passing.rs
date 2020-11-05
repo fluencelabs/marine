@@ -22,6 +22,8 @@ use fluence_faas::IType;
 use once_cell::sync::Lazy;
 use serde_json::json;
 
+use std::rc::Rc;
+
 static ARG_CONFIG: Lazy<fluence_faas::TomlFaaSConfig> = Lazy::new(|| {
     let mut arrays_passing_config =
         fluence_faas::TomlFaaSConfig::load("./tests/wasm_tests/arrays_passing/Config.toml")
@@ -49,9 +51,9 @@ pub fn get_interfaces() {
     let byte_type_outputs = vec![IType::Array(Box::new(IType::U8))];
 
     let byte_type_sign = fluence_faas::FaaSFunctionSignature {
-        name: "byte_type",
-        arguments: &byte_type_arguments,
-        outputs: &byte_type_outputs,
+        name: Rc::new(String::from("byte_type")),
+        arguments: Rc::new(byte_type_arguments),
+        outputs: Rc::new(byte_type_outputs),
     };
 
     let inner_arrays_1_arguments = vec![fluence_faas::IFunctionArg {
@@ -65,9 +67,9 @@ pub fn get_interfaces() {
     ))))];
 
     let inner_arrays_1_sign = fluence_faas::FaaSFunctionSignature {
-        name: "inner_arrays_1",
-        arguments: &inner_arrays_1_arguments,
-        outputs: &inner_arrays_1_outputs,
+        name: Rc::new(String::from("inner_arrays_1")),
+        arguments: Rc::new(inner_arrays_1_arguments),
+        outputs: Rc::new(inner_arrays_1_outputs),
     };
 
     // save it until record will be refactored in the future
@@ -96,9 +98,9 @@ pub fn get_interfaces() {
     let string_type_outputs = vec![IType::Array(Box::new(IType::String))];
 
     let string_type_sign = fluence_faas::FaaSFunctionSignature {
-        name: "string_type",
-        arguments: &string_type_arguments,
-        outputs: &string_type_outputs,
+        name: Rc::new(String::from("string_type")),
+        arguments: Rc::new(string_type_arguments),
+        outputs: Rc::new(string_type_outputs),
     };
 
     let i32_type_arguments = vec![fluence_faas::IFunctionArg {
@@ -108,9 +110,9 @@ pub fn get_interfaces() {
     let i32_type_outputs = vec![IType::Array(Box::new(IType::S32))];
 
     let i32_type_sign = fluence_faas::FaaSFunctionSignature {
-        name: "i32_type",
-        arguments: &i32_type_arguments,
-        outputs: &i32_type_outputs,
+        name: Rc::new(String::from("i32_type")),
+        arguments: Rc::new(i32_type_arguments),
+        outputs: Rc::new(i32_type_outputs),
     };
 
     let i64_type_arguments = vec![fluence_faas::IFunctionArg {
@@ -121,9 +123,9 @@ pub fn get_interfaces() {
     let i64_type_outputs = vec![IType::Array(Box::new(IType::S64))];
 
     let i64_type_sign = fluence_faas::FaaSFunctionSignature {
-        name: "i64_type",
-        arguments: &i64_type_arguments,
-        outputs: &i64_type_outputs,
+        name: Rc::new(String::from("i64_type")),
+        arguments: Rc::new(i64_type_arguments),
+        outputs: Rc::new(i64_type_outputs),
     };
 
     let u32_type_arguments = vec![fluence_faas::IFunctionArg {
@@ -133,9 +135,9 @@ pub fn get_interfaces() {
     let u32_type_outputs = vec![IType::Array(Box::new(IType::U32))];
 
     let u32_type_sign = fluence_faas::FaaSFunctionSignature {
-        name: "u32_type",
-        arguments: &u32_type_arguments,
-        outputs: &u32_type_outputs,
+        name: Rc::new(String::from("u32_type")),
+        arguments: Rc::new(u32_type_arguments),
+        outputs: Rc::new(u32_type_outputs),
     };
 
     let u64_type_arguments = vec![fluence_faas::IFunctionArg {
@@ -145,9 +147,9 @@ pub fn get_interfaces() {
     let u64_type_outputs = vec![IType::Array(Box::new(IType::U64))];
 
     let u64_type_sign = fluence_faas::FaaSFunctionSignature {
-        name: "u64_type",
-        arguments: &u64_type_arguments,
-        outputs: &u64_type_outputs,
+        name: Rc::new(String::from("u64_type")),
+        arguments: Rc::new(u64_type_arguments),
+        outputs: Rc::new(u64_type_outputs),
     };
 
     let f32_type_arguments = vec![fluence_faas::IFunctionArg {
@@ -157,9 +159,9 @@ pub fn get_interfaces() {
     let f32_type_outputs = vec![IType::Array(Box::new(IType::F32))];
 
     let f32_type_sign = fluence_faas::FaaSFunctionSignature {
-        name: "f32_type",
-        arguments: &f32_type_arguments,
-        outputs: &f32_type_outputs,
+        name: Rc::new(String::from("f32_type")),
+        arguments: Rc::new(f32_type_arguments),
+        outputs: Rc::new(f32_type_outputs),
     };
 
     let f64_type_arguments = vec![fluence_faas::IFunctionArg {
@@ -169,18 +171,18 @@ pub fn get_interfaces() {
     let f64_type_outputs = vec![IType::Array(Box::new(IType::F64))];
 
     let f64_type_sign = fluence_faas::FaaSFunctionSignature {
-        name: "f64_type",
-        arguments: &f64_type_arguments,
-        outputs: &f64_type_outputs,
+        name: Rc::new(String::from("f64_type")),
+        arguments: Rc::new(f64_type_arguments),
+        outputs: Rc::new(f64_type_outputs),
     };
 
     let empty_type_arguments = vec![];
     let empty_type_outputs = vec![IType::Array(Box::new(IType::String))];
 
     let empty_type_sign = fluence_faas::FaaSFunctionSignature {
-        name: "empty_type",
-        arguments: &empty_type_arguments,
-        outputs: &empty_type_outputs,
+        name: Rc::new(String::from("empty_type")),
+        arguments: Rc::new(empty_type_arguments),
+        outputs: Rc::new(empty_type_outputs),
     };
 
     /*
@@ -228,12 +230,12 @@ pub fn get_interfaces() {
     let pure_module_functions: HashSet<_> = pure_module_interface
         .function_signatures
         .iter()
-        .filter(|f| f.name != "inner_arrays_2")
+        .filter(|f| f.name.as_str() != "inner_arrays_2")
         .collect();
     let effector_module_functions: HashSet<_> = effector_module_interface
         .function_signatures
         .iter()
-        .filter(|f| f.name != "inner_arrays_2")
+        .filter(|f| f.name.as_str() != "inner_arrays_2")
         .collect();
 
     let functions: HashSet<_> = functions.iter().collect();

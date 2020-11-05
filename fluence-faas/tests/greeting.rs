@@ -20,6 +20,8 @@ use fluence_faas::IValue;
 
 use pretty_assertions::assert_eq;
 
+use std::rc::Rc;
+
 #[test]
 pub fn greeting() {
     let greeting_config_path = "../examples/greeting/Config.toml";
@@ -79,9 +81,9 @@ pub fn get_interfaces() {
     let output_types = vec![fluence_faas::IType::String];
 
     let greeting_sign = fluence_faas::FaaSFunctionSignature {
-        name: "greeting",
-        arguments: &arguments,
-        outputs: &output_types,
+        name: Rc::new(String::from("greeting")),
+        arguments: Rc::new(arguments),
+        outputs: Rc::new(output_types),
     };
 
     let record_types = std::collections::HashMap::new();

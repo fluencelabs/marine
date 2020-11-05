@@ -157,7 +157,7 @@ impl FluenceFaaS {
         let func_signature = module_interface
             .function_signatures
             .iter()
-            .find(|sign| sign.name == func_name)
+            .find(|sign| sign.name.as_str() == func_name)
             .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
 
         let record_types = module_interface.record_types.clone();

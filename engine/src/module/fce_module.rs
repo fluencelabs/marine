@@ -44,18 +44,18 @@ pub(super) struct WITModuleFunc {
     pub(super) output_types: Rc<Vec<IType>>,
 }
 
+/// Represent a function type inside FCE module.
+#[derive(PartialEq, Eq, Debug, Clone, Hash)]
+pub struct FCEFunctionSignature {
+    pub name: Rc<String>,
+    pub arguments: Rc<Vec<IFunctionArg>>,
+    pub outputs: Rc<Vec<IType>>,
+}
+
 #[derive(Clone)]
 pub(super) struct Callable {
     pub(super) wit_instance: Arc<WITInstance>,
     pub(super) wit_module_func: WITModuleFunc,
-}
-
-/// Represent a function type inside FCE module.
-#[derive(PartialEq, Eq, Debug, Clone, Hash)]
-pub struct FCEFunctionSignature<'a> {
-    pub name: &'a str,
-    pub arguments: &'a Vec<IFunctionArg>,
-    pub outputs: &'a Vec<IType>,
 }
 
 impl Callable {
@@ -72,6 +72,17 @@ impl Callable {
         Ok(result)
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Default, Hash)]
+struct SharedString(pub Rc<String>);
+
+impl std::borrow::Borrow<str> for SharedString {
+    fn borrow(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+type ExportFunctions = HashMap<SharedString, Rc<Callable>>;
 
 pub(crate) struct FCEModule {
     // wasmer_instance is needed because WITInstance contains dynamic functions
@@ -95,7 +106,7 @@ pub(crate) struct FCEModule {
     host_closures_import_object: ImportObject,
 
     // TODO: replace with dyn Trait
-    export_funcs: HashMap<String, Rc<Callable>>,
+    export_funcs: ExportFunctions,
 
     // TODO: save refs instead copying of a record types HashMap.
     /// Record types used in exported functions as arguments or return values.
@@ -158,13 +169,13 @@ impl FCEModule {
         )
     }
 
-    pub(crate) fn get_exports_signatures(&self) -> impl Iterator<Item = FCEFunctionSignature<'_>> {
+    pub(crate) fn get_exports_signatures(&self) -> impl Iterator<Item = FCEFunctionSignature> + '_ {
         self.export_funcs
             .iter()
             .map(|(func_name, func)| FCEFunctionSignature {
-                name: func_name.as_str(),
-                arguments: &func.wit_module_func.arguments,
-                outputs: &func.wit_module_func.output_types,
+                name: func_name.0.clone(),
+                arguments: func.wit_module_func.arguments.clone(),
+                outputs: func.wit_module_func.output_types.clone(),
             })
     }
 
@@ -242,7 +253,7 @@ impl FCEModule {
     fn instantiate_wit_exports(
         wit_instance: &Arc<WITInstance>,
         wit: &FCEWITInterfaces<'_>,
-    ) -> Result<HashMap<String, Rc<Callable>>> {
+    ) -> Result<ExportFunctions> {
         use fce_wit_interfaces::WITAstType;
 
         wit.implementations()
@@ -278,13 +289,13 @@ impl FCEModule {
                             output_types: output_types.clone(),
                         };
 
-                        Ok((
-                            export_function_name.to_string(),
-                            Rc::new(Callable {
-                                wit_instance: wit_instance.clone(),
-                                wit_module_func,
-                            }),
-                        ))
+                        let shared_string = SharedString(Rc::new(export_function_name.to_string()));
+                        let callable = Rc::new(Callable {
+                            wit_instance: wit_instance.clone(),
+                            wit_module_func,
+                        });
+
+                        Ok((shared_string, callable))
                     }
                     _ => Err(FCEError::IncorrectWIT(format!(
                         "type with idx = {} isn't a function type",
@@ -292,7 +303,7 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<HashMap<String, Rc<Callable>>>>()
+            .collect::<Result<ExportFunctions>>()
     }
 
     // this function deals only with import functions that have an adaptor implementation
@@ -433,7 +444,7 @@ impl FCEModule {
     }
 
     fn extract_export_record_types(
-        export_funcs: &HashMap<String, Rc<Callable>>,
+        export_funcs: &ExportFunctions,
         wit_instance: &Arc<WITInstance>,
     ) -> Result<RecordTypes> {
         fn handle_record_type(

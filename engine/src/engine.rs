@@ -26,7 +26,7 @@ use std::rc::Rc;
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct FCEModuleInterface<'a> {
     pub record_types: &'a RecordTypes,
-    pub function_signatures: Vec<FCEFunctionSignature<'a>>,
+    pub function_signatures: Vec<FCEFunctionSignature>,
 }
 
 /// The base struct of the Fluence Compute Engine.
