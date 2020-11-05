@@ -1,0 +1,11 @@
+[package]
+name = "fce-utils"
+description = "Fluence FCE utils crate"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+license = "Apache-2.0"
+edition = "2018"
+
+[lib]
+name = "fce_utils"
+path = "src/lib.rs"

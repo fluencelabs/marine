@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #![warn(rust_2018_idioms)]
 #![deny(
-dead_code,
-nonstandard_style,
-unused_imports,
-unused_mut,
-unused_variables,
-unused_unsafe,
-unreachable_patterns
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
 )]
 
-mod default_export_api_config;
-mod errors;
-mod instructions_generator;
-mod interface_generator;
+use std::rc::Rc;
 
-pub use interface_generator::embed_wit;
-pub use errors::WITGeneratorError;
+#[derive(Debug, Clone, PartialEq, Eq, Default, Hash)]
+pub struct SharedString(pub Rc<String>);
 
-pub(crate) type Result<T> = std::result::Result<T, WITGeneratorError>;
+impl std::borrow::Borrow<str> for SharedString {
+    fn borrow(&self) -> &str {
+        self.0.as_str()
+    }
+}

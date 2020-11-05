@@ -19,10 +19,15 @@ use crate::faas_interface::FaaSInterface;
 use crate::FaaSError;
 use crate::Result;
 use crate::IValue;
+use crate::IType;
 use crate::misc::load_modules_from_fs;
 use crate::misc::ModulesLoadStrategy;
 
 use fce::FCE;
+use fce::IRecordType;
+use fce::IFunctionArg;
+use fce_utils::SharedString;
+use fce::RecordTypes;
 use fluence_sdk_main::CallParameters;
 
 use serde_json::Value as JValue;
@@ -33,6 +38,11 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::path::PathBuf;
 
+struct ModuleInterface {
+    function_signatures: HashMap<SharedString, (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>)>,
+    record_types: RecordTypes,
+}
+
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
 
@@ -42,6 +52,9 @@ pub struct FluenceFaaS {
 
     /// Parameters of call accessible by Wasm modules.
     call_parameters: Rc<RefCell<CallParameters>>,
+
+    /// Cached module interfaces by names.
+    module_interfaces_cache: HashMap<String, ModuleInterface>,
 }
 
 impl FluenceFaaS {
@@ -99,6 +112,7 @@ impl FluenceFaaS {
         Ok(Self {
             fce,
             call_parameters,
+            module_interfaces_cache: HashMap::new(),
         })
     }
 
@@ -148,20 +162,6 @@ impl FluenceFaaS {
         let module_name = module_name.as_ref();
         let func_name = func_name.as_ref();
 
-        // TODO: cache module interface
-        let module_interface = self
-            .fce
-            .module_interface(module_name)
-            .ok_or_else(|| FaaSError::NoSuchModule(module_name.to_string()))?;
-
-        let func_signature = module_interface
-            .function_signatures
-            .iter()
-            .find(|sign| sign.name.as_str() == func_name)
-            .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
-
-        let record_types = module_interface.record_types.clone();
-
         let iargs = json_to_ivalues(json_args, func_signature, &record_types)?;
         let outputs = func_signature.outputs.clone();
 
@@ -176,6 +176,21 @@ impl FluenceFaaS {
         let modules = self.fce.interface().collect();
 
         FaaSInterface { modules }
+    }
+
+    fn lookup_module_interface(&self, module_name: &str) -> Result(Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>, RecordTypes) {
+        let module_interface = self
+            .fce
+            .module_interface(module_name)
+            .ok_or_else(|| FaaSError::NoSuchModule(module_name.to_string()))?;
+
+        let func_signature = module_interface
+            .function_signatures
+            .iter()
+            .find(|sign| sign.name.as_str() == func_name)
+            .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
+
+        Ok((func_signature.arguments.clone(), func_signature.outputs.clone(), module_interface.record_types.clone()))
     }
 }
 
