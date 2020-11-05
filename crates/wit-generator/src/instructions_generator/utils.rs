@@ -50,7 +50,10 @@ pub(crate) fn ptype_to_itype_checked(
     }
 }
 
-pub(crate) fn ptype_to_itype_unchecked(pty: &ParsedType, wit_resolver: &mut WITResolver<'_>) -> IType {
+pub(crate) fn ptype_to_itype_unchecked(
+    pty: &ParsedType,
+    wit_resolver: &mut WITResolver<'_>,
+) -> IType {
     match pty {
         ParsedType::I8 => IType::S8,
         ParsedType::I16 => IType::S16,
