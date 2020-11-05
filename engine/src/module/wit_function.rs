@@ -22,20 +22,21 @@ use crate::Result;
 use wasmer_wit::interpreter::wasm;
 use wasmer_core::instance::DynFunc;
 
-use std::sync::Arc;
+// use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone)]
 enum WITFunctionInner {
     Export {
-        func: Arc<DynFunc<'static>>,
-        arguments: Vec<IFunctionArg>,
-        outputs: Vec<IType>,
+        func: Rc<DynFunc<'static>>,
+        arguments: Rc<Vec<IFunctionArg>>,
+        outputs: Rc<Vec<IType>>,
     },
     Import {
         // TODO: use dyn Callable here
-        callable: Arc<Callable>,
-        arguments: Vec<IFunctionArg>,
-        outputs: Vec<IType>,
+        callable: Rc<Callable>,
+        arguments: Rc<Vec<IFunctionArg>>,
+        outputs: Rc<Vec<IType>>,
     },
 }
 
@@ -67,9 +68,9 @@ impl WITFunction {
             .collect::<Vec<_>>();
 
         let inner = WITFunctionInner::Export {
-            func: Arc::new(dyn_func),
-            arguments,
-            outputs,
+            func: Rc::new(dyn_func),
+            arguments: Rc::new(arguments),
+            outputs: Rc::new(outputs),
         };
 
         Ok(Self { inner })
@@ -79,8 +80,8 @@ impl WITFunction {
     pub(super) fn from_import(
         wit_module: &FCEModule,
         function_name: &str,
-        arguments: Vec<IFunctionArg>,
-        outputs: Vec<IType>,
+        arguments: Rc<Vec<IFunctionArg>>,
+        outputs: Rc<Vec<IType>>,
     ) -> Result<Self> {
         let callable = wit_module.get_callable(function_name)?;
 
@@ -132,7 +133,7 @@ impl wasm::structures::LocalImport for WITFunction {
                 .call(&arguments.iter().map(ival_to_wval).collect::<Vec<WValue>>())
                 .map(|result| result.iter().map(wval_to_ival).collect())
                 .map_err(|_| ()),
-            WITFunctionInner::Import { callable, .. } => Arc::make_mut(&mut callable.clone())
+            WITFunctionInner::Import { callable, .. } => Rc::make_mut(&mut callable.clone())
                 .call(arguments)
                 .map_err(|_| ()),
         }

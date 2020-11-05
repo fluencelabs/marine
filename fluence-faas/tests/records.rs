@@ -38,6 +38,22 @@ pub fn records() {
         .call_with_ivalues("records_pure", "invoke", &[], <_>::default())
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
+    let right_result = json!({
+        "field_0": 1,
+        "field_1": 1,
+        "field_2": 2,
+        "field_3": 3,
+        "field_4": 4,
+        "field_5": 5,
+        "field_6": 6,
+        "field_7": 7,
+        "field_8": 8,
+        "field_9": 9.0,
+        "field_10": 10.0,
+        "field_11": "field_11",
+        "field_12": [0x13, 0x37],
+    });
+
     assert_eq!(
         result1,
         vec![IValue::Record(
@@ -86,27 +102,7 @@ pub fn records() {
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    assert_eq!(
-        result2,
-        vec![IValue::Record(
-            wasmer_wit::vec1::Vec1::new(vec![
-                IValue::I32(1),
-                IValue::S8(1),
-                IValue::S16(2),
-                IValue::S32(3),
-                IValue::S64(4),
-                IValue::U8(5),
-                IValue::U16(6),
-                IValue::U32(7),
-                IValue::U64(8),
-                IValue::F32(9.0),
-                IValue::F64(10.0),
-                IValue::String(String::from("field_11")),
-                IValue::Array(vec![IValue::U8(0x13), IValue::U8(0x37)])
-            ])
-            .unwrap()
-        )]
-    );
+    assert_eq!(result2, right_result);
 
     let result3 = faas
         .call_with_json(
@@ -120,27 +116,7 @@ pub fn records() {
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    assert_eq!(
-        result3,
-        vec![IValue::Record(
-            wasmer_wit::vec1::Vec1::new(vec![
-                IValue::I32(1),
-                IValue::S8(1),
-                IValue::S16(2),
-                IValue::S32(3),
-                IValue::S64(4),
-                IValue::U8(5),
-                IValue::U16(6),
-                IValue::U32(7),
-                IValue::U64(8),
-                IValue::F32(9.0),
-                IValue::F64(10.0),
-                IValue::String(String::from("field_11")),
-                IValue::Array(vec![IValue::U8(0x13), IValue::U8(0x37)])
-            ])
-            .unwrap()
-        )]
-    );
+    assert_eq!(result3, right_result);
 
     let result4 = faas
         .call_with_json(
@@ -166,27 +142,7 @@ pub fn records() {
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    assert_eq!(
-        result4,
-        vec![IValue::Record(
-            wasmer_wit::vec1::Vec1::new(vec![
-                IValue::I32(1),
-                IValue::S8(1),
-                IValue::S16(2),
-                IValue::S32(3),
-                IValue::S64(4),
-                IValue::U8(5),
-                IValue::U16(6),
-                IValue::U32(7),
-                IValue::U64(8),
-                IValue::F32(9.0),
-                IValue::F64(10.0),
-                IValue::String(String::from("field_11")),
-                IValue::Array(vec![IValue::U8(0x13), IValue::U8(0x37)])
-            ])
-            .unwrap()
-        )]
-    );
+    assert_eq!(result4, right_result);
 
     let result5 = faas
         .call_with_json(
@@ -197,27 +153,7 @@ pub fn records() {
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    assert_eq!(
-        result5,
-        vec![IValue::Record(
-            wasmer_wit::vec1::Vec1::new(vec![
-                IValue::I32(1),
-                IValue::S8(1),
-                IValue::S16(2),
-                IValue::S32(3),
-                IValue::S64(4),
-                IValue::U8(5),
-                IValue::U16(6),
-                IValue::U32(7),
-                IValue::U64(8),
-                IValue::F32(9.0),
-                IValue::F64(10.0),
-                IValue::String(String::from("field_11")),
-                IValue::Array(vec![IValue::U8(0x13), IValue::U8(0x37)])
-            ])
-            .unwrap()
-        )]
-    );
+    assert_eq!(result5, right_result);
 }
 
 #[test]
@@ -258,22 +194,19 @@ fn inner_records() {
         )
         .unwrap_or_else(|e| panic!("can't invoke inner_records_pure: {:?}", e));
 
-    assert_eq!(
-        result,
-        vec![IValue::Record(
-            wasmer_wit::vec1::Vec1::new(vec![
-                IValue::Record(wasmer_wit::vec1::Vec1::new(vec![IValue::S32(1),]).unwrap()),
-                IValue::Record(
-                    wasmer_wit::vec1::Vec1::new(vec![
-                        IValue::S32(1),
-                        IValue::String(String::new()),
-                        IValue::Array(vec![IValue::U8(1)]),
-                        IValue::Record(wasmer_wit::vec1::Vec1::new(vec![IValue::S32(1),]).unwrap())
-                    ])
-                    .unwrap()
-                ),
-            ])
-            .unwrap()
-        )]
-    );
+    let right_result = json!({
+            "test_record_0": {
+                "field_0": 1
+            },
+            "test_record_1": {
+                "field_0": 1,
+                "field_1": "",
+                "field_2": vec![1],
+                "test_record_0": {
+                    "field_0": 1
+                }
+            }
+    });
+
+    assert_eq!(result, right_result);
 }

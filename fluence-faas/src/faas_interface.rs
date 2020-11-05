@@ -19,12 +19,14 @@ use super::IRecordType;
 use crate::FaaSModuleInterface;
 use crate::FaaSFunctionSignature;
 
+use fce::RecordTypes;
 use serde::Serialize;
 use serde::Serializer;
 
 use std::fmt;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::rc::Rc;
 use itertools::Itertools;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -34,7 +36,7 @@ pub struct FaaSInterface<'a> {
 
 impl<'a> fmt::Display for FaaSInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let type_text_view = |arg_ty: &IType, record_types: &HashMap<u64, IRecordType>| {
+        let type_text_view = |arg_ty: &IType, record_types: &RecordTypes| {
             match arg_ty {
                 IType::Record(record_type_id) => {
                     // unwrap is safe because FaaSInterface here is well-formed
@@ -88,7 +90,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
                     })
                     .join(", ");
 
-                let outputs = function_signature.outputs;
+                let outputs = &function_signature.outputs;
                 if outputs.is_empty() {
                     writeln!(f, "{})", args)?;
                 } else if outputs.len() == 1 {
@@ -116,9 +118,9 @@ impl<'a> Serialize for FaaSInterface<'a> {
     {
         #[derive(Serialize)]
         pub struct FunctionSignature<'a> {
-            pub name: &'a str,
+            pub name: &'a Rc<String>,
             pub arguments: Vec<(&'a String, &'a IType)>,
-            pub output_types: &'a Vec<IType>,
+            pub output_types: &'a Rc<Vec<IType>>,
         }
 
         #[derive(Serialize)]
@@ -140,9 +142,9 @@ impl<'a> Serialize for FaaSInterface<'a> {
             pub modules: Vec<Module<'a>>,
         }
 
-        fn serialize_function_signature<'a>(
-            signature: &'a FaaSFunctionSignature<'_>,
-        ) -> FunctionSignature<'a> {
+        fn serialize_function_signature(
+            signature: &FaaSFunctionSignature,
+        ) -> FunctionSignature<'_> {
             let arguments = signature
                 .arguments
                 .iter()
@@ -150,13 +152,13 @@ impl<'a> Serialize for FaaSInterface<'a> {
                 .collect();
 
             FunctionSignature {
-                name: signature.name,
+                name: &signature.name,
                 arguments,
-                output_types: signature.outputs,
+                output_types: &signature.outputs,
             }
         }
 
-        fn serialize_record_type<'a, 'b>(record: (&'a u64, &'b IRecordType)) -> RecordType<'b> {
+        fn serialize_record_type<'a, 'b>(record: (&'a u64, &'b Rc<IRecordType>)) -> RecordType<'b> {
             let fields = record
                 .1
                 .fields

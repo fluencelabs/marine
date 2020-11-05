@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-use super::module::FCEModule;
 use super::*;
+use crate::module::FCEModule;
+use crate::module::RecordTypes;
 
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 /// Represent FCE module interface.
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct FCEModuleInterface<'a> {
-    pub record_types: &'a HashMap<u64, IRecordType>,
-    pub function_signatures: Vec<FCEFunctionSignature<'a>>,
+    pub record_types: &'a RecordTypes,
+    pub function_signatures: Vec<FCEFunctionSignature>,
 }
 
 /// The base struct of the Fluence Compute Engine.
@@ -128,10 +130,7 @@ impl FCE {
     }
 
     /// Return record types exported by module with given name.
-    pub fn module_record_types<S: AsRef<str>>(
-        &self,
-        module_name: S,
-    ) -> Option<&HashMap<u64, IRecordType>> {
+    pub fn module_record_types<S: AsRef<str>>(&self, module_name: S) -> Option<&RecordTypes> {
         self.modules
             .get(module_name.as_ref())
             .map(|module| module.export_record_types())
@@ -142,7 +141,7 @@ impl FCE {
         &self,
         module_name: S,
         record_id: u64,
-    ) -> Option<&'_ IRecordType> {
+    ) -> Option<&Rc<IRecordType>> {
         self.modules
             .get(module_name.as_ref())
             .and_then(|module| module.export_record_type_by_id(record_id))

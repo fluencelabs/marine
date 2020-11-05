@@ -19,6 +19,7 @@ use super::WType;
 use super::WValue;
 use super::HostImportError;
 use crate::IValue;
+use crate::RecordTypes;
 use crate::IType;
 use super::Result;
 
@@ -27,14 +28,13 @@ use wasmer_core::vm::Ctx;
 use wasmer_wit::types::RecordType;
 use wasmer_wit::vec1::Vec1;
 
-use std::collections::HashMap;
 use std::rc::Rc;
 
 pub(super) fn wvalues_to_ivalues(
     ctx: &Ctx,
     wvalues: &[WValue],
     itypes: &[IType],
-    record_types: &Rc<HashMap<u64, RecordType>>,
+    record_types: &Rc<RecordTypes>,
 ) -> Result<Vec<IValue>> {
     let mut result = Vec::new();
     let mut wvalue = wvalues.iter();
@@ -114,7 +114,7 @@ fn lift_array(
     value_type: &IType,
     offset: usize,
     size: usize,
-    record_types: &Rc<HashMap<u64, RecordType>>,
+    record_types: &Rc<RecordTypes>,
 ) -> Result<Vec<IValue>> {
     if size == 0 {
         return Ok(vec![]);
@@ -211,7 +211,7 @@ fn lift_record(
     ctx: &Ctx,
     record_type: &RecordType,
     offset: usize,
-    record_types: &Rc<HashMap<u64, RecordType>>,
+    record_types: &Rc<RecordTypes>,
 ) -> Result<IValue> {
     // TODO: make it export from wasmer-interface-types crate
     fn record_size(record_type: &RecordType) -> usize {

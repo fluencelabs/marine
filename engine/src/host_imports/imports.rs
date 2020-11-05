@@ -19,6 +19,7 @@ use super::ivalues_lifting::wvalues_to_ivalues;
 use super::ivalues_lowering::ivalue_to_wvalues;
 use super::utils::itypes_args_to_wtypes;
 use super::utils::itypes_output_to_wtypes;
+use crate::RecordTypes;
 
 use crate::init_wasm_func_once;
 use crate::call_wasm_func;
@@ -29,15 +30,13 @@ use wasmer_core::vm::Ctx;
 use wasmer_core::typed_func::DynamicFunc;
 use wasmer_core::types::Value as WValue;
 use wasmer_core::types::FuncSig;
-use wasmer_wit::types::RecordType;
 
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::rc::Rc;
 
 pub(crate) fn create_host_import_func(
     descriptor: HostImportDescriptor,
-    record_types: Rc<HashMap<u64, RecordType>>,
+    record_types: Rc<RecordTypes>,
 ) -> DynamicFunc<'static> {
     let allocate_func: AllocateFunc = Box::new(RefCell::new(None));
     let set_result_ptr_func: SetResultPtrFunc = Box::new(RefCell::new(None));

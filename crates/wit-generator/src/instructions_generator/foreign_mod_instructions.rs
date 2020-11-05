@@ -27,6 +27,8 @@ use wasmer_wit::ast::FunctionArg as IFunctionArg;
 use wasmer_wit::interpreter::Instruction;
 use crate::instructions_generator::utils::wtype_to_itype;
 
+use std::rc::Rc;
+
 const HOST_NAMESPACE_NAME: &str = "host";
 
 impl WITGenerator for AstExternModItem {
@@ -63,11 +65,13 @@ fn generate_wit_for_import<'a>(
             })
         })
         .collect::<Result<Vec<_>>>()?;
+    let arguments = Rc::new(arguments);
 
     let output_types = match import.signature.output_type {
         Some(ref output_type) => vec![ptype_to_itype_checked(output_type, wit_resolver)?],
         None => vec![],
     };
+    let output_types = Rc::new(output_types);
 
     let interfaces = &mut wit_resolver.interfaces;
     interfaces.types.push(Type::Function {
@@ -82,6 +86,7 @@ fn generate_wit_for_import<'a>(
         .map(to_raw_input_types)
         .flatten()
         .collect::<Vec<_>>();
+    let raw_inputs = Rc::new(raw_inputs);
 
     let raw_outputs = match import.signature.output_type {
         Some(ref output_type) => to_raw_output_type(output_type)
@@ -90,6 +95,7 @@ fn generate_wit_for_import<'a>(
             .collect(),
         None => vec![],
     };
+    let raw_outputs = Rc::new(raw_outputs);
 
     interfaces.types.push(Type::Function {
         arguments: raw_inputs.clone(),

@@ -16,6 +16,7 @@
 
 use super::wit_prelude::*;
 use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
+use super::RecordTypes;
 use crate::Result;
 use crate::FCEModuleConfig;
 
@@ -31,6 +32,7 @@ use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
+use std::rc::Rc;
 
 type WITInterpreter =
     Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
@@ -38,22 +40,22 @@ type WITInterpreter =
 #[derive(Clone)]
 pub(super) struct WITModuleFunc {
     interpreter: Arc<WITInterpreter>,
-    pub(super) arguments: Vec<IFunctionArg>,
-    pub(super) output_types: Vec<IType>,
+    pub(super) arguments: Rc<Vec<IFunctionArg>>,
+    pub(super) output_types: Rc<Vec<IType>>,
+}
+
+/// Represent a function type inside FCE module.
+#[derive(PartialEq, Eq, Debug, Clone, Hash)]
+pub struct FCEFunctionSignature {
+    pub name: Rc<String>,
+    pub arguments: Rc<Vec<IFunctionArg>>,
+    pub outputs: Rc<Vec<IType>>,
 }
 
 #[derive(Clone)]
 pub(super) struct Callable {
     pub(super) wit_instance: Arc<WITInstance>,
     pub(super) wit_module_func: WITModuleFunc,
-}
-
-/// Represent a function type inside FCE module.
-#[derive(PartialEq, Eq, Debug, Clone, Hash)]
-pub struct FCEFunctionSignature<'a> {
-    pub name: &'a str,
-    pub arguments: &'a Vec<IFunctionArg>,
-    pub outputs: &'a Vec<IType>,
 }
 
 impl Callable {
@@ -70,6 +72,17 @@ impl Callable {
         Ok(result)
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Default, Hash)]
+struct SharedString(pub Rc<String>);
+
+impl std::borrow::Borrow<str> for SharedString {
+    fn borrow(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+type ExportFunctions = HashMap<SharedString, Rc<Callable>>;
 
 pub(crate) struct FCEModule {
     // wasmer_instance is needed because WITInstance contains dynamic functions
@@ -93,10 +106,11 @@ pub(crate) struct FCEModule {
     host_closures_import_object: ImportObject,
 
     // TODO: replace with dyn Trait
-    export_funcs: HashMap<String, Arc<Callable>>,
+    export_funcs: ExportFunctions,
 
-    // TODO: save refs instead of copies
-    record_types: HashMap<u64, IRecordType>,
+    // TODO: save refs instead copying of a record types HashMap.
+    /// Record types used in exported functions as arguments or return values.
+    export_record_types: RecordTypes,
 }
 
 impl FCEModule {
@@ -125,7 +139,7 @@ impl FCEModule {
         };
 
         let export_funcs = Self::instantiate_wit_exports(&wit_instance, &fce_wit)?;
-        let record_types = Self::extract_export_record_types(&export_funcs, &wit_instance)?;
+        let export_record_types = Self::extract_export_record_types(&export_funcs, &wit_instance)?;
 
         // call _start to populate the WASI state of the module
         #[rustfmt::skip]
@@ -139,7 +153,7 @@ impl FCEModule {
             host_import_object: raw_imports,
             host_closures_import_object,
             export_funcs,
-            record_types,
+            export_record_types,
         })
     }
 
@@ -151,26 +165,26 @@ impl FCEModule {
                     function_name
                 )))
             },
-            |func| Arc::make_mut(func).call(args),
+            |func| Rc::make_mut(func).call(args),
         )
     }
 
-    pub(crate) fn get_exports_signatures(&self) -> impl Iterator<Item = FCEFunctionSignature<'_>> {
+    pub(crate) fn get_exports_signatures(&self) -> impl Iterator<Item = FCEFunctionSignature> + '_ {
         self.export_funcs
             .iter()
             .map(|(func_name, func)| FCEFunctionSignature {
-                name: func_name.as_str(),
-                arguments: &func.wit_module_func.arguments,
-                outputs: &func.wit_module_func.output_types,
+                name: func_name.0.clone(),
+                arguments: func.wit_module_func.arguments.clone(),
+                outputs: func.wit_module_func.output_types.clone(),
             })
     }
 
-    pub(crate) fn export_record_types(&self) -> &HashMap<u64, IRecordType> {
-        &self.record_types
+    pub(crate) fn export_record_types(&self) -> &RecordTypes {
+        &self.export_record_types
     }
 
-    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&IRecordType> {
-        self.record_types.get(&record_type)
+    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&Rc<IRecordType>> {
+        self.export_record_types.get(&record_type)
     }
 
     pub(crate) fn get_wasi_state(&mut self) -> &wasmer_wasi::state::WasiState {
@@ -178,7 +192,7 @@ impl FCEModule {
     }
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
-    pub(super) fn get_callable(&self, function_name: &str) -> Result<Arc<Callable>> {
+    pub(super) fn get_callable(&self, function_name: &str) -> Result<Rc<Callable>> {
         match self.export_funcs.get(function_name) {
             Some(func) => Ok(func.clone()),
             None => Err(FCEError::NoSuchFunction(format!(
@@ -220,7 +234,7 @@ impl FCEModule {
             .record_types()
             .map(|(id, r)| (id, r.clone()))
             .collect::<HashMap<_, _>>();
-        let record_types = std::rc::Rc::new(record_types);
+        let record_types = Rc::new(record_types);
 
         for (import_name, descriptor) in config.host_imports {
             let host_import = create_host_import_func(descriptor, record_types.clone());
@@ -239,7 +253,7 @@ impl FCEModule {
     fn instantiate_wit_exports(
         wit_instance: &Arc<WITInstance>,
         wit: &FCEWITInterfaces<'_>,
-    ) -> Result<HashMap<String, Arc<Callable>>> {
+    ) -> Result<ExportFunctions> {
         use fce_wit_interfaces::WITAstType;
 
         wit.implementations()
@@ -275,13 +289,13 @@ impl FCEModule {
                             output_types: output_types.clone(),
                         };
 
-                        Ok((
-                            export_function_name.to_string(),
-                            Arc::new(Callable {
-                                wit_instance: wit_instance.clone(),
-                                wit_module_func,
-                            }),
-                        ))
+                        let shared_string = SharedString(Rc::new(export_function_name.to_string()));
+                        let callable = Rc::new(Callable {
+                            wit_instance: wit_instance.clone(),
+                            wit_module_func,
+                        });
+
+                        Ok((shared_string, callable))
                     }
                     _ => Err(FCEError::IncorrectWIT(format!(
                         "type with idx = {} isn't a function type",
@@ -289,7 +303,7 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<HashMap<String, Arc<Callable>>>>()
+            .collect::<Result<ExportFunctions>>()
     }
 
     // this function deals only with import functions that have an adaptor implementation
@@ -430,13 +444,13 @@ impl FCEModule {
     }
 
     fn extract_export_record_types(
-        export_funcs: &HashMap<String, Arc<Callable>>,
+        export_funcs: &ExportFunctions,
         wit_instance: &Arc<WITInstance>,
-    ) -> Result<HashMap<u64, IRecordType>> {
+    ) -> Result<RecordTypes> {
         fn handle_record_type(
             record_type_id: u64,
             wit_instance: &Arc<WITInstance>,
-            export_record_types: &mut HashMap<u64, IRecordType>,
+            export_record_types: &mut RecordTypes,
         ) -> Result<()> {
             use wasmer_wit::interpreter::wasm::structures::Instance;
 

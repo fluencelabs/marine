@@ -1,7 +1,7 @@
 [package]
 name = "fce-wit-interfaces"
 description = "Fluence FCE interface type helper crate"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -11,5 +11,5 @@ name = "fce_wit_interfaces"
 path = "src/lib.rs"
 
 [dependencies]
-wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.10" }
+wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.12" }
 multimap = "0.8.1"

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-use crate::config::FaaSModuleConfig;
 use super::log_utf8_string_closure;
+use crate::Result;
+use crate::config::FaaSModuleConfig;
+use crate::errors::FaaSError;
 
 use fce::FCEModuleConfig;
 use fce::HostImportDescriptor;
@@ -28,6 +30,7 @@ use wasmer_wit::types::InterfaceType as IType;
 
 use std::collections::HashMap;
 use std::cell::RefCell;
+use std::path::PathBuf;
 use std::rc::Rc;
 use std::ops::Deref;
 
@@ -80,7 +83,7 @@ pub(crate) fn make_fce_config(
     module_name: String,
     faas_module_config: Option<FaaSModuleConfig>,
     call_parameters: Rc<RefCell<fluence_sdk_main::CallParameters>>,
-) -> crate::Result<FCEModuleConfig> {
+) -> Result<FCEModuleConfig> {
     let mut fce_module_config = FCEModuleConfig::default();
 
     let faas_module_config = match faas_module_config {
@@ -134,4 +137,56 @@ pub(crate) fn make_fce_config(
     fce_module_config.wasi_version = wasmer_wasi::WasiVersion::Latest;
 
     Ok(fce_module_config)
+}
+
+use crate::misc::ModulesLoadStrategy;
+
+/// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
+pub(crate) fn load_modules_from_fs(
+    modules_dir: &PathBuf,
+    modules: ModulesLoadStrategy<'_>,
+) -> Result<HashMap<String, Vec<u8>>> {
+    use FaaSError::IOError;
+
+    let mut dir_entries =
+        std::fs::read_dir(modules_dir).map_err(|e| IOError(format!("{:?}: {}", modules_dir, e)))?;
+
+    let loaded = dir_entries.try_fold(HashMap::new(), |mut hash_map, entry| {
+        let entry = entry?;
+        let path = entry.path();
+        // Skip directories
+        if path.is_dir() {
+            return Ok(hash_map);
+        }
+
+        let module_name = path
+            .file_name()
+            .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?
+            .to_os_string()
+            .into_string()
+            .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
+
+        if modules.should_load(&module_name.as_ref()) {
+            let module_bytes = std::fs::read(path)?;
+            let module_name = modules.extract_module_name(module_name);
+            if hash_map.insert(module_name, module_bytes).is_some() {
+                return Err(FaaSError::ConfigParseError(String::from(
+                    "module {} is duplicated in config",
+                )));
+            }
+        }
+
+        Ok(hash_map)
+    })?;
+
+    if modules.required_modules_len() > loaded.len() {
+        let loaded = loaded.iter().map(|(n, _)| n);
+        let not_found = modules.missing_modules(loaded);
+        return Err(FaaSError::ConfigParseError(format!(
+            "the following modules were not found: {:?}",
+            not_found
+        )));
+    }
+
+    Ok(loaded)
 }

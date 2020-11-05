@@ -26,6 +26,9 @@ use wasmer_wit::interpreter::wasm::structures::{LocalImportIndex, TypedIndex};
 use wasmer_core::Instance as WasmerInstance;
 
 use std::collections::HashMap;
+use std::rc::Rc;
+
+pub type RecordTypes = HashMap<u64, Rc<IRecordType>>;
 
 /// Contains all import and export functions that could be called from WIT context by call-core.
 #[derive(Clone)]
@@ -36,7 +39,8 @@ pub(super) struct WITInstance {
     /// WIT memories.
     memories: Vec<WITMemory>,
 
-    record_types_by_id: HashMap<u64, IRecordType>,
+    /// All record types that instance contains.
+    record_types_by_id: RecordTypes,
 }
 
 impl WITInstance {
@@ -146,8 +150,8 @@ impl WITInstance {
         memories
     }
 
-    fn extract_record_types(wit: &FCEWITInterfaces<'_>) -> HashMap<u64, IRecordType> {
-        let record_types_by_id = wit.types().fold(
+    fn extract_record_types(wit: &FCEWITInterfaces<'_>) -> RecordTypes {
+        let (record_types_by_id, _) = wit.types().fold(
             (HashMap::new(), 0u64),
             |(mut record_types_by_id, id), ty| {
                 match ty {
@@ -160,7 +164,7 @@ impl WITInstance {
             },
         );
 
-        record_types_by_id.0
+        record_types_by_id
     }
 }
 
@@ -184,7 +188,7 @@ impl wasm::structures::Instance<WITExport, WITFunction, WITMemory, WITMemoryView
         }
     }
 
-    fn wit_record_by_id(&self, index: u64) -> Option<&IRecordType> {
+    fn wit_record_by_id(&self, index: u64) -> Option<&Rc<IRecordType>> {
         self.record_types_by_id.get(&index)
     }
 }
