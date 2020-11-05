@@ -19,10 +19,14 @@ use crate::faas_interface::FaaSInterface;
 use crate::FaaSError;
 use crate::Result;
 use crate::IValue;
+use crate::IType;
 use crate::misc::load_modules_from_fs;
 use crate::misc::ModulesLoadStrategy;
 
 use fce::FCE;
+use fce::IFunctionArg;
+use fce_utils::SharedString;
+use fce::RecordTypes;
 use fluence_sdk_main::CallParameters;
 
 use serde_json::Value as JValue;
@@ -33,6 +37,11 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::path::PathBuf;
 
+struct ModuleInterface {
+    function_signatures: HashMap<SharedString, (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>)>,
+    record_types: Rc<RecordTypes>,
+}
+
 // TODO: remove and use mutex instead
 unsafe impl Send for FluenceFaaS {}
 
@@ -42,6 +51,9 @@ pub struct FluenceFaaS {
 
     /// Parameters of call accessible by Wasm modules.
     call_parameters: Rc<RefCell<CallParameters>>,
+
+    /// Cached module interfaces by names.
+    module_interfaces_cache: HashMap<String, ModuleInterface>,
 }
 
 impl FluenceFaaS {
@@ -99,6 +111,7 @@ impl FluenceFaaS {
         Ok(Self {
             fce,
             call_parameters,
+            module_interfaces_cache: HashMap::new(),
         })
     }
 
@@ -148,27 +161,18 @@ impl FluenceFaaS {
         let module_name = module_name.as_ref();
         let func_name = func_name.as_ref();
 
-        // TODO: cache module interface
-        let module_interface = self
-            .fce
-            .module_interface(module_name)
-            .ok_or_else(|| FaaSError::NoSuchModule(module_name.to_string()))?;
-
-        let func_signature = module_interface
-            .function_signatures
-            .iter()
-            .find(|sign| sign.name.as_str() == func_name)
-            .ok_or_else(|| FaaSError::MissingFunctionError(func_name.to_string()))?;
-
-        let record_types = module_interface.record_types.clone();
-
-        let iargs = json_to_ivalues(json_args, func_signature, &record_types)?;
-        let outputs = func_signature.outputs.clone();
+        let (func_signature, output_types, record_types) =
+            self.lookup_module_interface(module_name, func_name)?;
+        let iargs = json_to_ivalues(
+            json_args,
+            func_signature.iter().map(|arg| (&arg.name, &arg.ty)),
+            &record_types,
+        )?;
 
         self.call_parameters.replace(call_parameters);
         let result = self.fce.call(module_name, func_name, &iargs)?;
 
-        ivalues_to_json(result, &outputs, &record_types)
+        ivalues_to_json(result, &output_types, &record_types)
     }
 
     /// Return all export functions (name and signatures) of loaded modules.
@@ -176,6 +180,59 @@ impl FluenceFaaS {
         let modules = self.fce.interface().collect();
 
         FaaSInterface { modules }
+    }
+
+    /// At first, tries to find function signature and record types in module_interface_cache,
+    /// if there is no them, tries to look
+    fn lookup_module_interface<'faas>(
+        &'faas mut self,
+        module_name: &str,
+        func_name: &str,
+    ) -> Result<(Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>, Rc<RecordTypes>)> {
+        use FaaSError::NoSuchModule;
+        use FaaSError::MissingFunctionError;
+
+        if let Some(module_interface) = self.module_interfaces_cache.get(module_name) {
+            if let Some(function) = module_interface.function_signatures.get(func_name) {
+                return Ok((
+                    function.0.clone(),
+                    function.1.clone(),
+                    module_interface.record_types.clone(),
+                ));
+            }
+
+            return Err(MissingFunctionError(func_name.to_string()));
+        }
+
+        let module_interface = self
+            .fce
+            .module_interface(module_name)
+            .ok_or_else(|| NoSuchModule(module_name.to_string()))?;
+
+        let function_signatures = module_interface
+            .function_signatures
+            .iter()
+            .cloned()
+            .map(|f| (SharedString(f.name), (f.arguments, f.outputs)))
+            .collect::<HashMap<_, _>>();
+
+        let (arg_types, output_types) = function_signatures
+            .get(func_name)
+            .ok_or_else(|| MissingFunctionError(func_name.to_string()))?;
+
+        let arg_types = arg_types.clone();
+        let output_types = output_types.clone();
+        let record_types = Rc::new(module_interface.record_types.clone());
+
+        let module_interface = ModuleInterface {
+            function_signatures,
+            record_types: record_types.clone(),
+        };
+
+        self.module_interfaces_cache
+            .insert(func_name.to_string(), module_interface);
+
+        Ok((arg_types, output_types, record_types))
     }
 }
 

@@ -96,7 +96,7 @@ fn generate_interfaces(module_ast: &ModuleAST) -> Result<Interfaces<'_>> {
     Ok(wit_resolver.interfaces)
 }
 
-fn generate_default_export_api(interfaces: &mut Interfaces) {
+fn generate_default_export_api(interfaces: &mut Interfaces<'_>) {
     // TODO: the order is matter
     ALLOCATE_FUNC.update_interfaces(interfaces);
     DEALLOCATE_FUNC.update_interfaces(interfaces);
@@ -106,13 +106,13 @@ fn generate_default_export_api(interfaces: &mut Interfaces) {
     SET_RESULT_PTR_FUNC.update_interfaces(interfaces);
 }
 
-fn validate_records(wit_resolver: &WITResolver) -> Result<()> {
+fn validate_records(wit_resolver: &WITResolver<'_>) -> Result<()> {
     const TYPE_RESOLVE_RECURSION_LIMIT: u32 = 1024;
 
     fn validate_record_type(
         record_type: &wasmer_wit::types::RecordType,
         recursion_level: u32,
-        wit_resolver: &WITResolver,
+        wit_resolver: &WITResolver<'_>,
     ) -> Result<()> {
         if recursion_level >= TYPE_RESOLVE_RECURSION_LIMIT {
             return Err(WITGeneratorError::CorruptedRecord(String::from(

@@ -652,6 +652,7 @@ version = "0.1.10"
 dependencies = [
  "boolinator",
  "bytes",
+ "fce-utils",
  "fce-wit-interfaces",
  "fce-wit-parser",
  "log",
@@ -678,6 +679,10 @@ checksum = "b4a9bfc24744f8dae557b121d241479e08c692c1d76c13e66a8477121a623c1d"
 dependencies = [
  "fluence 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "fce-utils"
+version = "0.1.0"
 
 [[package]]
 name = "fce-wit-generator"
@@ -764,6 +769,7 @@ dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
  "fce",
+ "fce-utils",
  "fluence-sdk-main 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools",
  "log",

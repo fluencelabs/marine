@@ -22,6 +22,7 @@ use crate::FCEModuleConfig;
 
 use fce_wit_interfaces::FCEWITInterfaces;
 use fce_wit_parser::extract_wit;
+use fce_utils::SharedString;
 use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
 use wasmer_runtime::compile;
@@ -70,15 +71,6 @@ impl Callable {
             .to_owned();
 
         Ok(result)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Default, Hash)]
-struct SharedString(pub Rc<String>);
-
-impl std::borrow::Borrow<str> for SharedString {
-    fn borrow(&self) -> &str {
-        self.0.as_str()
     }
 }
 
