@@ -47,7 +47,12 @@ const HISTORY_FILE_PATH: &str = ".repl_history";
 pub(crate) type Result<T> = std::result::Result<T, anyhow::Error>;
 
 fn main() -> Result<()> {
-    env_logger::init();
+    use std::io::Write;
+
+    env_logger::builder()
+        // this filter is only for host logs (mainly from the IT side)
+        .format(|buf, record| writeln!(buf, "[host] {}", record.args()))
+        .init();
 
     let (args, _) = rustop::opts! {
         synopsis "Fluence Application service REPL";
