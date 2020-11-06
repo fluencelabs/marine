@@ -29,26 +29,25 @@ use std::rc::Rc;
 enum WITFunctionInner {
     Export {
         func: Rc<DynFunc<'static>>,
-        arguments: Rc<Vec<IFunctionArg>>,
-        outputs: Rc<Vec<IType>>,
     },
     Import {
         // TODO: use dyn Callable here
         callable: Rc<Callable>,
-        arguments: Rc<Vec<IFunctionArg>>,
-        outputs: Rc<Vec<IType>>,
     },
 }
 
 /// Represents all import and export functions that could be called from WIT context by call-core.
 #[derive(Clone)]
 pub(super) struct WITFunction {
+    name: String,
+    arguments: Rc<Vec<IFunctionArg>>,
+    outputs: Rc<Vec<IType>>,
     inner: WITFunctionInner,
 }
 
 impl WITFunction {
     /// Creates functions from a "usual" (not WIT) module export.
-    pub(super) fn from_export(dyn_func: DynFunc<'static>) -> Result<Self> {
+    pub(super) fn from_export(dyn_func: DynFunc<'static>, name: String) -> Result<Self> {
         use super::type_converters::wtype_to_itype;
 
         let signature = dyn_func.signature();
@@ -69,11 +68,17 @@ impl WITFunction {
 
         let inner = WITFunctionInner::Export {
             func: Rc::new(dyn_func),
-            arguments: Rc::new(arguments),
-            outputs: Rc::new(outputs),
         };
 
-        Ok(Self { inner })
+        let arguments = Rc::new(arguments);
+        let outputs = Rc::new(outputs);
+
+        Ok(Self {
+            name,
+            arguments,
+            outputs,
+            inner,
+        })
     }
 
     /// Creates function from a module import.
@@ -85,43 +90,38 @@ impl WITFunction {
     ) -> Result<Self> {
         let callable = wit_module.get_callable(function_name)?;
 
-        let inner = WITFunctionInner::Import {
-            callable,
+        let inner = WITFunctionInner::Import { callable };
+
+        let name = function_name.to_string();
+
+        Ok(Self {
+            name,
             arguments,
             outputs,
-        };
-
-        Ok(Self { inner })
+            inner,
+        })
     }
 }
 
 impl wasm::structures::LocalImport for WITFunction {
+    fn name(&self) -> &str {
+        self.name.as_str()
+    }
+
     fn inputs_cardinality(&self) -> usize {
-        match &self.inner {
-            WITFunctionInner::Export { arguments, .. } => arguments.len(),
-            WITFunctionInner::Import { arguments, .. } => arguments.len(),
-        }
+        self.arguments.len()
     }
 
     fn outputs_cardinality(&self) -> usize {
-        match &self.inner {
-            WITFunctionInner::Export { outputs, .. } => outputs.len(),
-            WITFunctionInner::Import { outputs, .. } => outputs.len(),
-        }
+        self.outputs.len()
     }
 
     fn arguments(&self) -> &[IFunctionArg] {
-        match &self.inner {
-            WITFunctionInner::Export { arguments, .. } => arguments,
-            WITFunctionInner::Import { arguments, .. } => arguments,
-        }
+        &self.arguments
     }
 
     fn outputs(&self) -> &[IType] {
-        match &self.inner {
-            WITFunctionInner::Export { outputs, .. } => outputs,
-            WITFunctionInner::Import { outputs, .. } => outputs,
-        }
+        &self.outputs
     }
 
     fn call(&self, arguments: &[IValue]) -> std::result::Result<Vec<IValue>, ()> {
