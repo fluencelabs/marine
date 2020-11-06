@@ -24,6 +24,7 @@ use wasmer_wit::interpreter::wasm;
 // but explicit Exports is still required by wasmer-interface-types::Interpreter.
 #[derive(Clone)]
 pub(crate) struct WITExport {
+    name: String,
     arguments: Vec<IFunctionArg>,
     outputs: Vec<IType>,
     function: fn(arguments: &[IValue]) -> Result<Vec<IValue>, ()>,
@@ -33,6 +34,7 @@ impl WITExport {
     #[allow(unused)]
     pub(crate) fn new() -> Self {
         Self {
+            name: String::new(),
             arguments: vec![],
             outputs: vec![],
             function: |_| -> _ { Ok(vec![]) },
@@ -41,6 +43,10 @@ impl WITExport {
 }
 
 impl wasm::structures::Export for WITExport {
+    fn name(&self) -> &str {
+        self.name.as_str()
+    }
+
     fn inputs_cardinality(&self) -> usize {
         self.arguments.len()
     }

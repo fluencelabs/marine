@@ -82,7 +82,10 @@ impl WITInstance {
                     // here it is safe because dyn func is never lives WITInstance
                     let export_func =
                         std::mem::transmute::<DynFunc<'_>, DynFunc<'static>>(export_func);
-                    Ok((export_id, WITFunction::from_export(export_func)?))
+                    Ok((
+                        export_id,
+                        WITFunction::from_export(export_func, export.name.to_string())?,
+                    ))
                 }
             })
             .collect()
