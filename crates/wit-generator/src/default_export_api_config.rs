@@ -14,34 +14,16 @@
  * limitations under the License.
  */
 
-use wasmer_wit::ast::Interfaces;
-use wasmer_wit::types::InterfaceType as IType;
-use wasmer_wit::ast::FunctionArg as IFunctionArg;
-use once_cell::sync::Lazy;
+use crate::IType;
+use crate::IFunctionArg;
 
-use std::rc::Rc;
+use once_cell::sync::Lazy;
 
 pub(crate) struct ApiExportFuncDescriptor {
     pub(crate) name: &'static str,
     pub(crate) id: u32,
     pub(crate) arguments: Vec<IFunctionArg>,
     pub(crate) output_types: Vec<IType>,
-}
-
-impl ApiExportFuncDescriptor {
-    pub fn update_interfaces(&self, interfaces: &mut Interfaces<'_>) {
-        let func_type = wasmer_wit::ast::Type::Function {
-            arguments: Rc::new(self.arguments.clone()),
-            output_types: Rc::new(self.output_types.clone()),
-        };
-        interfaces.types.push(func_type);
-
-        let export = wasmer_wit::ast::Export {
-            name: self.name,
-            function_type: self.id,
-        };
-        interfaces.exports.push(export);
-    }
 }
 
 pub(crate) static ALLOCATE_FUNC: Lazy<ApiExportFuncDescriptor> =
@@ -76,7 +58,7 @@ pub(crate) static GET_RESULT_SIZE_FUNC: Lazy<ApiExportFuncDescriptor> =
     Lazy::new(|| ApiExportFuncDescriptor {
         name: "get_result_size",
         id: 2,
-        arguments: vec![],
+        arguments: Vec::<IFunctionArg>::new(),
         output_types: vec![IType::I32],
     });
 
@@ -84,7 +66,7 @@ pub(crate) static GET_RESULT_PTR_FUNC: Lazy<ApiExportFuncDescriptor> =
     Lazy::new(|| ApiExportFuncDescriptor {
         name: "get_result_ptr",
         id: 3,
-        arguments: vec![],
+        arguments: Vec::<IFunctionArg>::new(),
         output_types: vec![IType::I32],
     });
 

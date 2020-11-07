@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
+use super::add_function_type;
 use super::WITGenerator;
 use super::WITResolver;
 use super::utils::ptype_to_itype_checked;
+use crate::*;
 use crate::default_export_api_config::*;
-use crate::Result;
 
 use fluence_sdk_wit::AstExternModItem;
 use fluence_sdk_wit::AstExternFnItem;
 use fluence_sdk_wit::ParsedType;
-use wasmer_wit::ast::FunctionArg as IFunctionArg;
 use wasmer_wit::interpreter::Instruction;
-use crate::instructions_generator::utils::wtype_to_itype;
-
-use std::rc::Rc;
 
 const HOST_NAMESPACE_NAME: &str = "host";
 
 impl WITGenerator for AstExternModItem {
-    fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
+    fn generate_wit<'ast_type, 'resolver>(&'ast_type self, wit_resolver: &'resolver mut WITResolver<'ast_type>) -> Result<()> {
         // host imports should be left as is
         if self.namespace == HOST_NAMESPACE_NAME {
             return Ok(());
@@ -51,86 +48,51 @@ fn generate_wit_for_import<'a>(
     namespace: &'a str,
     wit_resolver: &mut WITResolver<'a>,
 ) -> Result<()> {
-    use wasmer_wit::ast::Type;
-    use wasmer_wit::ast::Adapter;
+    let arguments = &import.signature.arguments;
+    let output_type = &import.signature.output_type;
 
-    let arguments = import
-        .signature
-        .arguments
-        .iter()
-        .map(|(arg_name, arg_type)| -> Result<IFunctionArg> {
-            Ok(IFunctionArg {
-                name: arg_name.clone(),
-                ty: ptype_to_itype_checked(arg_type, wit_resolver)?,
-            })
-        })
-        .collect::<Result<Vec<_>>>()?;
-    let arguments = Rc::new(arguments);
-
-    let output_types = match import.signature.output_type {
-        Some(ref output_type) => vec![ptype_to_itype_checked(output_type, wit_resolver)?],
-        None => vec![],
-    };
-    let output_types = Rc::new(output_types);
-
-    let interfaces = &mut wit_resolver.interfaces;
-    interfaces.types.push(Type::Function {
-        arguments,
-        output_types,
-    });
-
-    let raw_inputs = import
-        .signature
-        .arguments
-        .iter()
-        .map(to_raw_input_types)
-        .flatten()
-        .collect::<Vec<_>>();
-    let raw_inputs = Rc::new(raw_inputs);
-
-    let raw_outputs = match import.signature.output_type {
-        Some(ref output_type) => to_raw_output_type(output_type)
-            .iter()
-            .map(wtype_to_itype)
-            .collect(),
-        None => vec![],
-    };
-    let raw_outputs = Rc::new(raw_outputs);
-
-    interfaces.types.push(Type::Function {
-        arguments: raw_inputs.clone(),
-        output_types: raw_outputs.clone(),
-    });
-
-    interfaces.types.push(Type::Function {
-        arguments: raw_inputs,
-        output_types: raw_outputs,
-    });
-
-    let adapter_idx = (interfaces.types.len() - 2) as u32;
-    let import_idx = (interfaces.types.len() - 3) as u32;
-    let raw_import_idx = (interfaces.types.len() - 1) as u32;
+    let function_type_id = add_function_type(arguments, output_type, wit_resolver)?;
 
     let link_name = match &import.link_name {
         Some(link_name) => link_name,
         None => &import.signature.name,
     };
-
-    interfaces.imports.push(wasmer_wit::ast::Import {
-        namespace: &namespace,
+    let import_type = AstImport {
         name: link_name,
-        function_type: import_idx,
-    });
+        namespace,
+        function_type: function_type_id,
+    };
+    let import_function_id = wit_resolver.insert_import_type(import_type);
 
-    interfaces.imports.push(wasmer_wit::ast::Import {
-        namespace: &namespace,
-        name: link_name,
-        function_type: raw_import_idx,
-    });
+    let adapter_instructions = generate_import_adapter_instructions(
+        arguments,
+        output_type,
+        wit_resolver,
+        import_function_id,
+    )?;
 
-    let mut instructions = import
-        .signature
-        .arguments
+    let adapter = crate::AstAdapter {
+        function_type: function_type_id,
+        instructions: adapter_instructions,
+    };
+    let adapter_id = wit_resolver.insert_adapter(adapter);
+
+    let implementation = crate::AstImplementation {
+        core_function_id: import_function_id,
+        adapter_function_id: adapter_id,
+    };
+    wit_resolver.insert_implementation(implementation);
+
+    Ok(())
+}
+
+fn generate_import_adapter_instructions(
+    arguments: &[(String, ParsedType)],
+    output_type: &Option<ParsedType>,
+    wit_resolver: &mut WITResolver<'_>,
+    import_function_id: u32,
+) -> Result<Vec<Instruction>> {
+    let mut instructions = arguments
         .iter()
         .try_fold::<_, _, Result<_>>(
             (0, Vec::new()),
@@ -144,32 +106,16 @@ fn generate_wit_for_import<'a>(
         )?
         .1;
 
-    // TODO: refactor
-    let import_function_index = (wit_resolver.interfaces.exports.len()
-        + wit_resolver.interfaces.imports.len() / 2
-        - 1) as u32;
     instructions.push(Instruction::CallCore {
-        function_index: import_function_index,
+        function_index: import_function_id,
     });
 
-    instructions.extend(match &import.signature.output_type {
+    instructions.extend(match output_type {
         Some(output_type) => output_type.generate_instructions_for_output_type(wit_resolver)?,
         None => vec![],
     });
 
-    let adapter = Adapter {
-        function_type: adapter_idx,
-        instructions,
-    };
-    wit_resolver.interfaces.adapters.push(adapter);
-
-    let implementation = wasmer_wit::ast::Implementation {
-        core_function_type: raw_import_idx,
-        adapter_function_type: adapter_idx,
-    };
-    wit_resolver.interfaces.implementations.push(implementation);
-
-    Ok(())
+    Ok(instructions)
 }
 
 /// Generate WIT instructions for a foreign mod.
@@ -275,62 +221,5 @@ impl ForeignModInstructionGenerator for ParsedType {
         };
 
         Ok(instructions)
-    }
-}
-
-use fluence_sdk_wit::RustType;
-use wasmer_wit::types::InterfaceType as IType;
-
-pub fn to_raw_input_types(arg: &(String, ParsedType)) -> Vec<IFunctionArg> {
-    match arg.1 {
-        ParsedType::Boolean
-        | ParsedType::I8
-        | ParsedType::I16
-        | ParsedType::I32
-        | ParsedType::U8
-        | ParsedType::U16
-        | ParsedType::U32
-        | ParsedType::Record(_) => vec![IFunctionArg {
-            name: arg.0.clone(),
-            ty: IType::I32,
-        }],
-        ParsedType::I64 | ParsedType::U64 => vec![IFunctionArg {
-            name: arg.0.clone(),
-            ty: IType::I64,
-        }],
-        ParsedType::F32 => vec![IFunctionArg {
-            name: arg.0.clone(),
-            ty: IType::F32,
-        }],
-        ParsedType::F64 => vec![IFunctionArg {
-            name: arg.0.clone(),
-            ty: IType::F64,
-        }],
-        ParsedType::Utf8String | ParsedType::Vector(_) => vec![
-            IFunctionArg {
-                name: format!("{}_ptr", arg.0),
-                ty: IType::I32,
-            },
-            IFunctionArg {
-                name: format!("{}_ptr", arg.0),
-                ty: IType::I32,
-            },
-        ],
-    }
-}
-
-pub fn to_raw_output_type(ty: &ParsedType) -> Vec<RustType> {
-    match ty {
-        ParsedType::Boolean
-        | ParsedType::I8
-        | ParsedType::I16
-        | ParsedType::I32
-        | ParsedType::U8
-        | ParsedType::U16
-        | ParsedType::U32 => vec![RustType::I32],
-        ParsedType::I64 | ParsedType::U64 => vec![RustType::I64],
-        ParsedType::F32 => vec![RustType::F32],
-        ParsedType::F64 => vec![RustType::F64],
-        ParsedType::Utf8String | ParsedType::Vector(_) | ParsedType::Record(_) => vec![],
     }
 }

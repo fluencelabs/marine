@@ -79,7 +79,7 @@ impl WITInstance {
                 let export_func = module_exports.get(export.name)?;
                 unsafe {
                     // TODO: refactor this with new Wasmer API when it is ready
-                    // here it is safe because dyn func is never lives WITInstance
+                    // here it is safe because dyn func is never leaves WITInstance
                     let export_func =
                         std::mem::transmute::<DynFunc<'_>, DynFunc<'static>>(export_func);
                     Ok((

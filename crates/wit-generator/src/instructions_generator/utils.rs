@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-use super::IType;
+use crate::IType;
+use crate::IFunctionArg;
+use crate::IFunctionType;
 use crate::instructions_generator::WITResolver;
 use crate::Result;
 
 use fluence_sdk_wit::ParsedType;
-use fluence_sdk_wit::RustType;
 
 // return error if there is no record with such name
 pub(crate) fn ptype_to_itype_checked(
@@ -78,17 +79,30 @@ pub(crate) fn ptype_to_itype_unchecked(
     }
 }
 
-pub(crate) fn wtype_to_itype(pty: &RustType) -> IType {
-    match pty {
-        RustType::I8 => IType::S8,
-        RustType::I16 => IType::S16,
-        RustType::I32 => IType::S32,
-        RustType::I64 => IType::S64,
-        RustType::U8 => IType::U8,
-        RustType::U16 => IType::U16,
-        RustType::U32 => IType::U32,
-        RustType::U64 => IType::U64,
-        RustType::F32 => IType::F32,
-        RustType::F64 => IType::F64,
-    }
+pub(crate) fn add_function_type(
+    arguments: &Vec<(String, ParsedType)>,
+    output_type: &Option<ParsedType>,
+    wit_resolver: &mut WITResolver<'_>,
+) -> Result<u32> {
+    let arguments = arguments
+        .iter()
+        .map(|(arg_name, arg_type)| -> Result<IFunctionArg> {
+            Ok(IFunctionArg {
+                name: arg_name.clone(),
+                ty: ptype_to_itype_checked(&arg_type, wit_resolver)?,
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+
+    let output_types = match output_type {
+        Some(output_type) => vec![ptype_to_itype_checked(output_type, wit_resolver)?],
+        None => vec![],
+    };
+
+    let function_type = IFunctionType {
+        arguments,
+        output_types,
+    };
+
+    Ok(wit_resolver.insert_function_type(function_type))
 }

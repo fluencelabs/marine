@@ -34,3 +34,14 @@ pub use interface_generator::embed_wit;
 pub use errors::WITGeneratorError;
 
 pub(crate) type Result<T> = std::result::Result<T, WITGeneratorError>;
+
+pub(crate) use wasmer_wit::ast::Interfaces;
+pub(crate) use wasmer_wit::ast::Adapter as AstAdapter;
+pub(crate) use wasmer_wit::ast::Type as AstType;
+pub(crate) use wasmer_wit::ast::Export as AstExport;
+pub(crate) use wasmer_wit::ast::Import as AstImport;
+pub(crate) use wasmer_wit::ast::Implementation as AstImplementation;
+pub(crate) use wasmer_wit::types::InterfaceType as IType;
+pub(crate) use wasmer_wit::types::RecordType as IRecordType;
+pub(crate) use wasmer_wit::types::FunctionArg as IFunctionArg;
+pub(crate) use wasmer_wit::types::FunctionType as IFunctionType;

@@ -77,8 +77,8 @@ impl<'a> FCEWITInterfaces<'a> {
             .iter()
             .map(|implementation| {
                 (
-                    implementation.adapter_function_type,
-                    implementation.core_function_type,
+                    implementation.adapter_function_id,
+                    implementation.core_function_id,
                 )
             })
             .collect::<MultiMap<_, _>>();
@@ -88,8 +88,8 @@ impl<'a> FCEWITInterfaces<'a> {
             .iter()
             .map(|implementation| {
                 (
-                    implementation.core_function_type,
-                    implementation.adapter_function_type,
+                    implementation.core_function_id,
+                    implementation.adapter_function_id,
                 )
             })
             .collect::<MultiMap<_, _>>();
@@ -189,15 +189,15 @@ impl<'a> FCEWITInterfaces<'a> {
 
     pub fn adapter_types_by_core_type(
         &self,
-        core_function_type: CoreFunctionType,
+        core_function_id: CoreFunctionType,
     ) -> Option<&Vec<AdapterFunctionType>> {
-        self.core_type_to_adapter.get_vec(&core_function_type)
+        self.core_type_to_adapter.get_vec(&core_function_id)
     }
 
     pub fn core_types_by_adapter_type(
         &self,
-        adapter_function_type: AdapterFunctionType,
+        adapter_function_id: AdapterFunctionType,
     ) -> Option<&Vec<CoreFunctionType>> {
-        self.adapter_type_to_core.get_vec(&adapter_function_type)
+        self.adapter_type_to_core.get_vec(&adapter_function_id)
     }
 }

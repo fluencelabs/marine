@@ -14,105 +14,80 @@
  * limitations under the License.
  */
 
+use super::add_function_type;
 use super::WITGenerator;
 use super::WITResolver;
 use super::utils::ptype_to_itype_checked;
 use crate::default_export_api_config::*;
+use crate::AstExport;
 use crate::Result;
 
 use fluence_sdk_wit::AstFunctionItem;
 use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
-use wasmer_wit::ast::FunctionArg as IFunctionArg;
-
-use std::rc::Rc;
 
 impl WITGenerator for AstFunctionItem {
-    fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
-        use wasmer_wit::ast::Type;
-        use wasmer_wit::ast::Adapter;
+    fn generate_wit<'ast_type, 'resolver>(&'ast_type self, wit_resolver: &'resolver mut WITResolver<'ast_type>) -> Result<()> {
+        let arguments = &self.signature.arguments;
+        let output_type = &self.signature.output_type;
 
-        let arguments = self
-            .signature
-            .arguments
-            .iter()
-            .map(|(arg_name, arg_type)| -> Result<IFunctionArg> {
-                Ok(IFunctionArg {
-                    name: arg_name.clone(),
-                    ty: ptype_to_itype_checked(arg_type, wit_resolver)?,
-                })
-            })
-            .collect::<Result<Vec<_>>>()?;
-
-        let arguments = Rc::new(arguments);
-
-        let output_types = match self.signature.output_type {
-            Some(ref output_type) => vec![ptype_to_itype_checked(output_type, wit_resolver)?],
-            None => vec![],
-        };
-        let output_types = Rc::new(output_types);
-
-        let interfaces = &mut wit_resolver.interfaces;
-        interfaces.types.push(Type::Function {
-            arguments: arguments.clone(),
-            output_types: output_types.clone(),
-        });
-
-        // TODO: replace with Wasm types
-        interfaces.types.push(Type::Function {
-            arguments,
-            output_types,
-        });
-
-        let adapter_idx = (interfaces.types.len() - 2) as u32;
-        let export_idx = (interfaces.types.len() - 1) as u32;
-
-        interfaces.exports.push(wasmer_wit::ast::Export {
+        let function_type_id = add_function_type(arguments, output_type, wit_resolver)?;
+        let export_type = AstExport {
             name: &self.signature.name,
-            function_type: export_idx,
-        });
-
-        let mut instructions = self
-            .signature
-            .arguments
-            .iter()
-            .enumerate()
-            .try_fold::<_, _, Result<_>>(
-                Vec::new(),
-                |mut instructions, (arg_id, (_, input_type))| {
-                    let mut new_instructions = input_type
-                        .generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
-
-                    instructions.append(&mut new_instructions);
-                    Ok(instructions)
-                },
-            )?;
-
-        let export_function_index = (wit_resolver.interfaces.exports.len() - 1) as u32;
-        instructions.push(Instruction::CallCore {
-            function_index: export_function_index,
-        });
-
-        instructions.extend(match &self.signature.output_type {
-            Some(output_type) => output_type.generate_instructions_for_output_type(wit_resolver)?,
-            None => vec![],
-        });
-
-        let adapter = Adapter {
-            function_type: adapter_idx,
-            instructions,
+            function_type: function_type_id,
         };
+        let export_function_id = wit_resolver.insert_export_type(export_type);
 
-        wit_resolver.interfaces.adapters.push(adapter);
+        let adapter_instructions = generate_export_adapter_instructions(
+            arguments,
+            output_type,
+            wit_resolver,
+            export_function_id,
+        )?;
 
-        let implementation = wasmer_wit::ast::Implementation {
-            core_function_type: export_idx,
-            adapter_function_type: adapter_idx,
+        let adapter = crate::AstAdapter {
+            function_type: function_type_id,
+            instructions: adapter_instructions,
         };
-        wit_resolver.interfaces.implementations.push(implementation);
+        let adapter_id = wit_resolver.insert_adapter(adapter);
+
+        let implementation = crate::AstImplementation {
+            core_function_id: export_function_id,
+            adapter_function_id: adapter_id,
+        };
+        wit_resolver.insert_implementation(implementation);
 
         Ok(())
     }
+}
+
+fn generate_export_adapter_instructions(
+    arguments: &[(String, ParsedType)],
+    output_type: &Option<ParsedType>,
+    wit_resolver: &mut WITResolver<'_>,
+    export_function_id: u32,
+) -> Result<Vec<Instruction>> {
+    let mut instructions = arguments.iter().enumerate().try_fold::<_, _, Result<_>>(
+        Vec::with_capacity(arguments.len()),
+        |mut instructions, (arg_id, (_, input_type))| {
+            let mut new_instructions =
+                input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
+
+            instructions.append(&mut new_instructions);
+            Ok(instructions)
+        },
+    )?;
+
+    instructions.push(Instruction::CallCore {
+        function_index: export_function_id,
+    });
+
+    instructions.extend(match output_type {
+        Some(output_type) => output_type.generate_instructions_for_output_type(wit_resolver)?,
+        None => vec![],
+    });
+
+    Ok(instructions)
 }
 
 /// Generate WIT instructions for a function.

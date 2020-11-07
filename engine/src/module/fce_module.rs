@@ -249,24 +249,24 @@ impl FCEModule {
         use fce_wit_interfaces::WITAstType;
 
         wit.implementations()
-            .filter_map(|(adapter_function_type, core_function_type)| {
-                match wit.exports_by_type(*core_function_type) {
+            .filter_map(|(adapter_function_id, core_function_id)| {
+                match wit.exports_by_type(*core_function_id) {
                     Some(export_function_name) => {
-                        Some((adapter_function_type, export_function_name))
+                        Some((adapter_function_id, export_function_name))
                     }
                     // pass functions that aren't export
                     None => None,
                 }
             })
-            .map(|(adapter_function_type, export_function_names)| {
+            .map(|(adapter_function_id, export_function_names)| {
                 export_function_names
                     .iter()
-                    .map(move |export_function_name| (*adapter_function_type, export_function_name))
+                    .map(move |export_function_name| (*adapter_function_id, export_function_name))
             })
             .flatten()
-            .map(|(adapter_function_type, export_function_name)| {
-                let adapter_instructions = wit.adapter_by_type_r(adapter_function_type)?;
-                let wit_type = wit.type_by_idx_r(adapter_function_type)?;
+            .map(|(adapter_function_id, export_function_name)| {
+                let adapter_instructions = wit.adapter_by_type_r(adapter_function_id)?;
+                let wit_type = wit.type_by_idx_r(adapter_function_id)?;
 
                 match wit_type {
                     WITAstType::Function {
@@ -291,7 +291,7 @@ impl FCEModule {
                     }
                     _ => Err(FCEError::IncorrectWIT(format!(
                         "type with idx = {} isn't a function type",
-                        adapter_function_type
+                        adapter_function_id
                     ))),
                 }
             })
@@ -373,22 +373,22 @@ impl FCEModule {
 
         let wit_import_funcs = wit
             .implementations()
-            .filter_map(|(adapter_function_type, core_function_type)| {
-                match wit.imports_by_type(*core_function_type) {
-                    Some(import) => Some((adapter_function_type, import)),
+            .filter_map(|(adapter_function_id, core_function_id)| {
+                match wit.imports_by_type(*core_function_id) {
+                    Some(import) => Some((adapter_function_id, import)),
                     // skip functions that aren't import
                     None => None,
                 }
             })
-            .map(|(adapter_function_type, import_function_names)| {
+            .map(|(adapter_function_id, import_function_names)| {
                 import_function_names
                     .iter()
-                    .map(move |import_function_name| (*adapter_function_type, import_function_name))
+                    .map(move |import_function_name| (*adapter_function_id, import_function_name))
             })
             .flatten()
-            .map(|(adapter_function_type, (import_namespace, import_name))| {
-                let adapter_instructions = wit.adapter_by_type_r(adapter_function_type)?;
-                let wit_type = wit.type_by_idx_r(adapter_function_type)?;
+            .map(|(adapter_function_id, (import_namespace, import_name))| {
+                let adapter_instructions = wit.adapter_by_type_r(adapter_function_id)?;
+                let wit_type = wit.type_by_idx_r(adapter_function_id)?;
 
                 match wit_type {
                     WITAstType::Function {
@@ -415,7 +415,7 @@ impl FCEModule {
                     }
                     _ => Err(FCEError::IncorrectWIT(format!(
                         "type with idx = {} isn't a function type",
-                        adapter_function_type
+                        adapter_function_id
                     ))),
                 }
             })
