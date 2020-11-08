@@ -2808,9 +2808,9 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.17.15"
+version = "0.17.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88cf928132b7cc391adc52c47ae48aaebff01a85649b815b3e0142f8111c5529"
+checksum = "ef60ec039cdc3dc9450d17b9eb8fe21cf3243c6cdd554f96a7a48accf44bc1ce"
 dependencies = [
  "log",
  "nom",
