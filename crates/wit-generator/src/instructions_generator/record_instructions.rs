@@ -25,7 +25,10 @@ use wasmer_wit::types::RecordType;
 use wasmer_wit::vec1::Vec1;
 
 impl WITGenerator for AstRecordItem {
-    fn generate_wit<'ast_type, 'resolver>(&'ast_type self, wit_resolver: &'resolver mut WITResolver<'ast_type>) -> Result<()> {
+    fn generate_wit<'ast_type, 'resolver>(
+        &'ast_type self,
+        wit_resolver: &'resolver mut WITResolver<'ast_type>,
+    ) -> Result<()> {
         use super::utils::ptype_to_itype_unchecked;
 
         let fields = self

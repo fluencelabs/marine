@@ -15,8 +15,8 @@
  */
 
 use super::*;
-use crate::module::FCEModule;
-use crate::module::RecordTypes;
+use crate::block::FCEModule;
+use crate::block::RecordTypes;
 
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;

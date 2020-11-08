@@ -225,5 +225,8 @@ impl<'a> WITResolver<'a> {
 }
 
 pub(crate) trait WITGenerator {
-    fn generate_wit<'ast_type, 'resolver>(&'ast_type self, wit_resolver: &'resolver mut WITResolver<'ast_type>) -> Result<()>;
+    fn generate_wit<'ast_type, 'resolver>(
+        &'ast_type self,
+        wit_resolver: &'resolver mut WITResolver<'ast_type>,
+    ) -> Result<()>;
 }

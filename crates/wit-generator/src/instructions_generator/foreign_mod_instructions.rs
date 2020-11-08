@@ -29,7 +29,10 @@ use wasmer_wit::interpreter::Instruction;
 const HOST_NAMESPACE_NAME: &str = "host";
 
 impl WITGenerator for AstExternModItem {
-    fn generate_wit<'ast_type, 'resolver>(&'ast_type self, wit_resolver: &'resolver mut WITResolver<'ast_type>) -> Result<()> {
+    fn generate_wit<'ast_type, 'resolver>(
+        &'ast_type self,
+        wit_resolver: &'resolver mut WITResolver<'ast_type>,
+    ) -> Result<()> {
         // host imports should be left as is
         if self.namespace == HOST_NAMESPACE_NAME {
             return Ok(());

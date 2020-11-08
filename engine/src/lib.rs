@@ -27,13 +27,21 @@
     unreachable_patterns
 )]
 
+mod block;
 mod config;
 mod engine;
 mod errors;
 mod host_imports;
 mod misc;
-mod module;
 
+pub use block::IValue;
+pub use block::IRecordType;
+pub use block::IFunctionArg;
+pub use block::IType;
+pub use block::RecordTypes;
+pub use block::FCEFunctionSignature;
+pub use block::from_interface_values;
+pub use block::to_interface_value;
 pub use config::FCEModuleConfig;
 pub use config::HostExportedFunc;
 pub use config::HostImportDescriptor;
@@ -41,14 +49,6 @@ pub use engine::FCE;
 pub use engine::FCEModuleInterface;
 pub use errors::FCEError;
 pub use host_imports::HostImportError;
-pub use module::IValue;
-pub use module::IRecordType;
-pub use module::IFunctionArg;
-pub use module::IType;
-pub use module::RecordTypes;
-pub use module::FCEFunctionSignature;
-pub use module::from_interface_values;
-pub use module::to_interface_value;
 
 pub use wasmer_wit::types::RecordFieldType as IRecordFieldType;
 pub mod vec1 {

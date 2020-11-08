@@ -27,7 +27,10 @@ use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
 
 impl WITGenerator for AstFunctionItem {
-    fn generate_wit<'ast_type, 'resolver>(&'ast_type self, wit_resolver: &'resolver mut WITResolver<'ast_type>) -> Result<()> {
+    fn generate_wit<'ast_type, 'resolver>(
+        &'ast_type self,
+        wit_resolver: &'resolver mut WITResolver<'ast_type>,
+    ) -> Result<()> {
         let arguments = &self.signature.arguments;
         let output_type = &self.signature.output_type;
 

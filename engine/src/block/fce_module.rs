@@ -251,9 +251,7 @@ impl FCEModule {
         wit.implementations()
             .filter_map(|(adapter_function_id, core_function_id)| {
                 match wit.exports_by_type(*core_function_id) {
-                    Some(export_function_name) => {
-                        Some((adapter_function_id, export_function_name))
-                    }
+                    Some(export_function_name) => Some((adapter_function_id, export_function_name)),
                     // pass functions that aren't export
                     None => None,
                 }
