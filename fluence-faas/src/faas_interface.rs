@@ -44,6 +44,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
                     let record = record_types.get(record_type_id).unwrap();
                     record.name.clone()
                 }
+                IType::Array(array_ty) => format!("Array<{:?}>", array_ty),
                 t => format!("{:?}", t),
             }
         };
@@ -52,7 +53,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
 
         for (_, module_interface) in self.modules.iter() {
             for (_, record_type) in module_interface.record_types.iter() {
-                if printed_record_types.insert(record_type) {
+                if !printed_record_types.insert(record_type) {
                     // do not print record if it has been already printed
                     continue;
                 }
