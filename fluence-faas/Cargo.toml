@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 fce = { path = "../engine", version = "0.1.11" }
 fce-utils = { path = "../crates/utils", version = "0.1.0" }
-fluence-sdk-main = "=0.2.8"
+fluence-sdk-main = "=0.2.9"
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
