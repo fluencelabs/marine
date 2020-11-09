@@ -648,7 +648,7 @@ dependencies = [
 
 [[package]]
 name = "fce"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "boolinator",
  "bytes",
@@ -750,7 +750,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "fluence-faas",
  "log",
@@ -764,7 +764,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -884,7 +884,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.1.15"
+version = "0.1.16"
 dependencies = [
  "anyhow",
  "clap",

@@ -36,7 +36,7 @@ pub struct FaaSInterface<'a> {
 
 impl<'a> fmt::Display for FaaSInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let type_text_view = |arg_ty: &IType, record_types: &RecordTypes| {
+        fn type_text_view(arg_ty: &IType, record_types: &RecordTypes) -> String {
             match arg_ty {
                 IType::Record(record_type_id) => {
                     // unwrap is safe because FaaSInterface here is well-formed
@@ -44,7 +44,9 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
                     let record = record_types.get(record_type_id).unwrap();
                     record.name.clone()
                 }
-                IType::Array(array_ty) => format!("Array<{:?}>", array_ty),
+                IType::Array(array_ty) => {
+                    format!("Array<{}>", type_text_view(array_ty, record_types))
+                }
                 t => format!("{:?}", t),
             }
         };

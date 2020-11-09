@@ -439,55 +439,62 @@ impl FCEModule {
         export_funcs: &ExportFunctions,
         wit_instance: &Arc<WITInstance>,
     ) -> Result<RecordTypes> {
-        fn handle_record_type(
-            record_type_id: u64,
+        fn handle_itype(
+            itype: &IType,
             wit_instance: &Arc<WITInstance>,
             export_record_types: &mut RecordTypes,
         ) -> Result<()> {
             use wasmer_wit::interpreter::wasm::structures::Instance;
 
-            let record_type = wit_instance
-                .wit_record_by_id(record_type_id)
-                .ok_or_else(|| {
-                    FCEError::WasmerResolveError(format!(
-                        "record type with type id {} not found",
-                        record_type_id
-                    ))
-                })?;
-            export_record_types.insert(record_type_id, record_type.clone());
+            fn handle_record_type(
+                record_type_id: u64,
+                wit_instance: &Arc<WITInstance>,
+                export_record_types: &mut RecordTypes,
+            ) -> Result<()> {
+                let record_type =
+                    wit_instance
+                        .wit_record_by_id(record_type_id)
+                        .ok_or_else(|| {
+                            FCEError::WasmerResolveError(format!(
+                                "record type with type id {} not found",
+                                record_type_id
+                            ))
+                        })?;
+                export_record_types.insert(record_type_id, record_type.clone());
 
-            for field in record_type.fields.iter() {
-                if let IType::Record(record_type_id) = &field.ty {
-                    handle_record_type(*record_type_id, wit_instance, export_record_types)?;
+                for field in record_type.fields.iter() {
+                    handle_itype(&field.ty, wit_instance, export_record_types)?;
                 }
+
+                Ok(())
+            }
+
+            match itype {
+                IType::Record(record_type_id) => {
+                    handle_record_type(*record_type_id, wit_instance, export_record_types)?
+                }
+                IType::Array(array_ty) => {
+                    handle_itype(array_ty, wit_instance, export_record_types)?
+                }
+                _ => {}
             }
 
             Ok(())
         }
 
-        fn extract_record_type_from_itype(itype: &IType) -> Option<u64> {
-            match itype {
-                IType::Record(record_id) => Some(*record_id),
-                IType::Array(itype) => extract_record_type_from_itype(itype),
-                _ => None,
-            }
-        }
-
-        let export_record_ids = export_funcs
-            .iter()
-            .flat_map(|(_, ref mut callable)| {
-                callable
-                    .wit_module_func
-                    .arguments
-                    .iter()
-                    .map(|arg| &arg.ty)
-                    .chain(callable.wit_module_func.output_types.iter())
-            })
-            .filter_map(extract_record_type_from_itype);
-
         let mut export_record_types = HashMap::new();
-        for record_type_id in export_record_ids {
-            handle_record_type(record_type_id, wit_instance, &mut export_record_types)?;
+
+        let itypes = export_funcs.iter().flat_map(|(_, ref mut callable)| {
+            callable
+                .wit_module_func
+                .arguments
+                .iter()
+                .map(|arg| &arg.ty)
+                .chain(callable.wit_module_func.output_types.iter())
+        });
+
+        for itype in itypes {
+            handle_itype(itype, wit_instance, &mut export_record_types)?;
         }
 
         Ok(export_record_types)

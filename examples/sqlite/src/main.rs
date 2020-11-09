@@ -21,7 +21,7 @@ use fce_sqlite_connector::State;
 pub fn main() {}
 
 #[fce]
-pub fn test1() {
+pub fn test1(age: i64) {
     let connection = fce_sqlite_connector::open(":memory:").unwrap();
 
     connection
@@ -38,7 +38,7 @@ pub fn test1() {
         .prepare("SELECT * FROM users WHERE age > ?")
         .unwrap();
 
-    statement.bind(1, 50).unwrap();
+    statement.bind(1, age).unwrap();
 
     while let State::Row = statement.next().unwrap() {
         println!("name = {}", statement.read::<String>(0).unwrap());
@@ -47,7 +47,7 @@ pub fn test1() {
 }
 
 #[fce]
-pub fn test2() {
+pub fn test2(age: i64) {
     use fce_sqlite_connector::Value;
 
     let connection = fce_sqlite_connector::open(":memory:").unwrap();
@@ -67,7 +67,7 @@ pub fn test2() {
         .unwrap()
         .cursor();
 
-    cursor.bind(&[Value::Integer(50)]).unwrap();
+    cursor.bind(&[Value::Integer(age)]).unwrap();
 
     while let Some(row) = cursor.next().unwrap() {
         println!("name = {}", row[0].as_string().unwrap());
@@ -77,7 +77,7 @@ pub fn test2() {
 
 #[fce]
 pub fn test3() {
-    let db_path = "/tmp/users.sqlite";
+    let db_path = "/var/folders/ww/v__xg0cj17x7h7sf3bgwpx8h0000gn/T/4589ab6f-5440-4933-ace5-a62714784142/tmp/users.sqlite";
     let connection = fce_sqlite_connector::open(db_path).unwrap();
 
     let execute_result = connection.execute(
