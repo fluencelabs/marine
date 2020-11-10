@@ -47,15 +47,11 @@ const HISTORY_FILE_PATH: &str = ".repl_history";
 pub(crate) type Result<T> = std::result::Result<T, anyhow::Error>;
 
 fn main() -> Result<()> {
-    use std::io::Write;
-
-    env_logger::builder()
-        // this filter is only for host logs (mainly from the IT side)
-        .format(|buf, record| writeln!(buf, "[host] {}", record.args()))
-        .init();
+    init_logger();
 
     let (args, _) = rustop::opts! {
         synopsis "Fluence Application service REPL";
+        version env!("CARGO_PKG_VERSION");
         param config_file_path: Option<String>, desc: "Path to a service config";
     }
     .parse_or_exit();
@@ -120,6 +116,24 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn init_logger() {
+    use std::io::Write;
+
+    env_logger::builder()
+        .format(|buf, record| {
+            const WIT_MODULE_PATH: &'static str = "wasmer_interface_types_fl";
+            match record.module_path() {
+                Some(module_path) if module_path.starts_with(WIT_MODULE_PATH) => {
+                    writeln!(buf, "[host] {}", record.args())
+                }
+                // because of the log_utf8_string implementation, log from a wasm module always has module path
+                None => writeln!(buf, "[host] {}", record.args()),
+                Some(module_path) => writeln!(buf, "[{}] {}", module_path, record.args()),
+            }
+        })
+        .init();
 }
 
 #[derive(Helper)]

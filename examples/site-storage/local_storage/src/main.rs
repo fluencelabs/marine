@@ -41,7 +41,7 @@ pub fn put(name: String, file_content: Vec<u8>) -> String {
         return format!("file can't be written: {}", e);
     }
 
-    return "Ok".to_string();
+    String::from("Ok")
 }
 
 #[fce]
