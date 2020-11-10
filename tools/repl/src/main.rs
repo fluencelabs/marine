@@ -128,7 +128,7 @@ fn init_logger() {
                 Some(module_path) if module_path.starts_with(WIT_MODULE_PATH) => {
                     writeln!(buf, "[host] {}", record.args())
                 }
-                // because of log_utf8_string implementation log from wasm module always has module path
+                // because of the log_utf8_string implementation, log from a wasm module always has module path
                 None => writeln!(buf, "[host] {}", record.args()),
                 Some(module_path) => writeln!(buf, "[{}] {}", module_path, record.args()),
             }
