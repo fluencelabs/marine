@@ -884,7 +884,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.1.16"
+version = "0.1.17"
 dependencies = [
  "anyhow",
  "clap",
@@ -2808,9 +2808,9 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.17.17"
+version = "0.17.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35785dfb889bbd6f83f5239fb1b950889368ceba23acf1603c371f337e8c4d1c"
+checksum = "9c01499babf417b51c28db8e735579d0645d89ee77a57f23492d61a610bb42b8"
 dependencies = [
  "log",
  "nom",
