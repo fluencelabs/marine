@@ -29,11 +29,9 @@ pub fn main() {
 #[fce]
 fn get_n_save(url: String, file_name: String) -> String {
     let result = unsafe { curl(url) };
-    println!("execution result {:?}", result);
-    let a = unsafe { file_put(file_name, result.into_bytes()) };
-    println!("{}", a);
+    unsafe { file_put(file_name, result.into_bytes()) };
 
-    "Ok".to_string()
+    String::from("Ok")
 }
 
 /// Importing `curl` module

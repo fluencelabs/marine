@@ -732,20 +732,20 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1099731bb64286758969fb8dd6f903d1e4a7398d8e63bdec1be6387576f4d8ab"
+source = "git+https://github.com/fluencelabs/rust-sdk#fd9672636e8d7a91275e5e0b8b88a34494336e5a"
 dependencies = [
- "fluence-sdk-macro 0.2.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "fluence-sdk-main 0.2.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-macro 0.2.9 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-main 0.2.9 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
 name = "fluence"
 version = "0.2.9"
-source = "git+https://github.com/fluencelabs/rust-sdk#fd9672636e8d7a91275e5e0b8b88a34494336e5a"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1099731bb64286758969fb8dd6f903d1e4a7398d8e63bdec1be6387576f4d8ab"
 dependencies = [
- "fluence-sdk-macro 0.2.9 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-main 0.2.9 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.2.9 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -789,6 +789,14 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.9"
+source = "git+https://github.com/fluencelabs/rust-sdk#fd9672636e8d7a91275e5e0b8b88a34494336e5a"
+dependencies = [
+ "fluence-sdk-wit 0.2.9 (git+https://github.com/fluencelabs/rust-sdk)",
+]
+
+[[package]]
+name = "fluence-sdk-macro"
+version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ca5ffdf0ccf817b1e4e8438f6da7e8fa024679c706a69bde7aa8cad8b43e90ee"
 dependencies = [
@@ -796,11 +804,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-macro"
+name = "fluence-sdk-main"
 version = "0.2.9"
 source = "git+https://github.com/fluencelabs/rust-sdk#fd9672636e8d7a91275e5e0b8b88a34494336e5a"
 dependencies = [
- "fluence-sdk-wit 0.2.9 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.9 (git+https://github.com/fluencelabs/rust-sdk)",
+ "log",
+ "serde",
 ]
 
 [[package]]
@@ -815,20 +825,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-main"
-version = "0.2.9"
-source = "git+https://github.com/fluencelabs/rust-sdk#fd9672636e8d7a91275e5e0b8b88a34494336e5a"
-dependencies = [
- "fluence-sdk-macro 0.2.9 (git+https://github.com/fluencelabs/rust-sdk)",
- "log",
- "serde",
-]
-
-[[package]]
 name = "fluence-sdk-wit"
 version = "0.2.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9c68c4d07e821e1be23b01c278acdae4e825d03c46879f453426ea3160b3e25"
+source = "git+https://github.com/fluencelabs/rust-sdk#fd9672636e8d7a91275e5e0b8b88a34494336e5a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -841,7 +840,8 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.9"
-source = "git+https://github.com/fluencelabs/rust-sdk#fd9672636e8d7a91275e5e0b8b88a34494336e5a"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9c68c4d07e821e1be23b01c278acdae4e825d03c46879f453426ea3160b3e25"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -917,36 +917,36 @@ checksum = "3dcaa9ae7725d12cdb85b3ad99a434db70b468c09ded17e012d86b5c1010f7a7"
 
 [[package]]
 name = "futures-channel"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0448174b01148032eed37ac4aed28963aaaa8cfa93569a08e5b479bbc6c2c151"
+checksum = "4b7109687aa4e177ef6fe84553af6280ef2778bdb7783ba44c9dc3399110fe64"
 dependencies = [
  "futures-core",
 ]
 
 [[package]]
 name = "futures-core"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18eaa56102984bed2c88ea39026cff3ce3b4c7f508ca970cedf2450ea10d4e46"
+checksum = "847ce131b72ffb13b6109a221da9ad97a64cbe48feb1028356b836b47b8f1748"
 
 [[package]]
 name = "futures-sink"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e3ca3f17d6e8804ae5d3df7a7d35b2b3a6fe89dac84b31872720fc3060a0b11"
+checksum = "f878195a49cee50e006b02b93cf7e0a95a38ac7b776b4c4d9cc1207cd20fcb3d"
 
 [[package]]
 name = "futures-task"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96d502af37186c4fef99453df03e374683f8a1eec9dcc1e66b3b82dc8278ce3c"
+checksum = "7c554eb5bf48b2426c4771ab68c6b14468b6e76cc90996f528c3338d761a4d0d"
 
 [[package]]
 name = "futures-util"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "abcb44342f62e6f3e8ac427b8aa815f724fd705dfad060b18ac7866c15bb8e34"
+checksum = "d304cff4a7b99cfb7986f7d43fbe93d175e72e704a8860787cc95e9ffd85cbd2"
 dependencies = [
  "futures-core",
  "futures-task",
@@ -1462,9 +1462,9 @@ dependencies = [
 
 [[package]]
 name = "native-tls"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a1cda389c26d6b88f3d2dc38aa1b750fe87d298cc5d795ec9e975f402f00372"
+checksum = "6fcc7939b5edc4e4f86b1b4a04bb1498afaaf871b1a6691838ed06fcb48d3a3f"
 dependencies = [
  "lazy_static",
  "libc",
