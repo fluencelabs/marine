@@ -5,7 +5,7 @@ FCE is a general purpose Wasm runtime that could be used in different scenarios,
 Fluence [nodes](https://github.com/fluencelabs/fluence) use FCE to execute [aquamarine](https://github.com/fluencelabs/aquamarine) and services compiled to Wasm:
 
 <p align="center" width="100%">
-    <img alt="fluence stack" align="center" src="images/fluence_stack_overview.png"/>
+    <img alt="fluence stack" align="center" src="images/fluence_stack_overview.png" width="663"/>
 </p>
 
 At now, it is in the heavily developing phase, docs and tutorials are also in the work-in-progress state.
@@ -127,13 +127,13 @@ extern "C" {
 
 Call binary with arguments: `curl("-vvv ya.ru")`
 
-`[module.wasi]` - this block manages communication with the "outside" world
+`[module.wasi]` - this block manages communication with host environment through WASI
 `env` - environment variables. Usage: `std::env::var("IPFS_ADDR")`
-`preopened_files` - list of available directories for loaded modules
-`mapped_dirs` - mapping between paths
+`preopened_files` - list of available directories for this module
+`mapped_dirs` - mapping between directory paths
 
 Working with files as usual:
 ```rust
-fs::write(PathBuf::from("/tmp/somefile"), vec!(1,2,3));
+fs::write(PathBuf::from("/tmp/somefile"), vec![1,2,3]);
 fs::read(...);
 ```
