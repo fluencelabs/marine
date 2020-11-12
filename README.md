@@ -1,6 +1,14 @@
 # Fluence Compute Engine
 
-FCE is intended to run various Wasm binaries. At now, it is in the heavily developing phase. Docs and tutorials are also in the work-in-progress state.
+FCE is a general purpose Wasm runtime that could be used in different scenarios, especially in programs based on the [ECS](https://en.wikipedia.org/wiki/Entity_component_system) pattern or plugin architecture. It runs multi-module WebAssembly applications with interface-types and shared-nothing linking scheme.
+
+Fluence [nodes](https://github.com/fluencelabs/fluence) use FCE to execute [aquamarine](https://github.com/fluencelabs/aquamarine) and services compiled to Wasm:
+
+<p width="100%">
+<img alt="fluence stack" align="center" src="images/fluence_stack_overview.png"/>
+</p>
+
+At now, it is in the heavily developing phase, docs and tutorials are also in the work-in-progress state.
 
 ## Installation
 - `cargo install fcli`
@@ -10,7 +18,7 @@ this will add `fce` binary to your system.
 ## Usage
 - `fce build` in Rust project
 
-## HOW TO: Create App with FCE Modules
+## HOW TO: Create an App with FCE Modules
 
 ### Recommendations:
 
