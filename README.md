@@ -18,7 +18,7 @@ this will add `fce` binary to your system.
 ## Usage
 - `fce build` in Rust project
 
-## HOW TO: Create App with FCE Modules
+## HOW TO: Create an App with FCE Modules
 
 ### Recommendations:
 
