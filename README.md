@@ -4,7 +4,7 @@ FCE is a general purpose Wasm runtime that could be used in different scenarios,
 
 Fluence [nodes](https://github.com/fluencelabs/fluence) use FCE to execute [aquamarine](https://github.com/fluencelabs/aquamarine) and services compiled to Wasm modules:
 
-<p width="70%">
+<p width="20%">
 <img alt="fluence stack" align="center" src="images/fluence_stack_overview.png"/>
 </p>
 
