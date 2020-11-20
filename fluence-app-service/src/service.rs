@@ -86,9 +86,13 @@ impl AppService {
             .map_err(Into::into)
     }
 
-    /// Return all export functions (name and signatures) of loaded modules.
-    pub fn get_interface(&self) -> fluence_faas::FaaSInterface<'_> {
-        self.faas.get_interface()
+    /// Return all export functions (name and signatures) of service facade module.
+    pub fn get_interface(&self) -> crate::ServiceInterface<'_> {
+        self.faas
+            .get_interface()
+            .modules
+            .remove(self.facade_module_name.as_str())
+            .unwrap()
     }
 
     /// Prepare service before starting by:
