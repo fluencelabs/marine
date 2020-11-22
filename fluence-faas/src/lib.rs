@@ -35,6 +35,7 @@ pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
 
 pub use faas::FluenceFaaS;
 pub use faas_interface::FaaSInterface;
+pub use faas_interface::itype_text_view;
 
 pub use config::FaaSConfig;
 pub use config::FaaSModuleConfig;
@@ -58,6 +59,7 @@ pub use fce::IFunctionArg;
 pub use fce::IType;
 pub use fce::FCEModuleInterface as FaaSModuleInterface;
 pub use fce::FCEFunctionSignature as FaaSFunctionSignature;
+pub use fce::RecordTypes;
 pub use fce::HostExportedFunc;
 pub use fce::HostImportDescriptor;
 pub use fce::HostImportError;

@@ -49,7 +49,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
                         f,
                         "  {}: {}",
                         field.name,
-                        type_text_view(&field.ty, &module_interface.record_types)
+                        itype_text_view(&field.ty, &module_interface.record_types)
                     )?;
                 }
 
@@ -70,7 +70,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
                         format!(
                             "{}: {}",
                             arg.name,
-                            type_text_view(&arg.ty, &module_interface.record_types)
+                            itype_text_view(&arg.ty, &module_interface.record_types)
                         )
                     })
                     .join(", ");
@@ -83,7 +83,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
                         f,
                         "{}) -> {}",
                         args,
-                        type_text_view(&outputs[0], &module_interface.record_types)
+                        itype_text_view(&outputs[0], &module_interface.record_types)
                     )?;
                 } else {
                     // At now, multi values aren't supported - only one output type is possible
@@ -96,7 +96,7 @@ impl<'a> fmt::Display for FaaSInterface<'a> {
     }
 }
 
-fn type_text_view(arg_ty: &IType, record_types: &RecordTypes) -> String {
+pub fn itype_text_view(arg_ty: &IType, record_types: &RecordTypes) -> String {
     match arg_ty {
         IType::Record(record_type_id) => {
             // unwrap is safe because FaaSInterface here is well-formed
@@ -104,7 +104,7 @@ fn type_text_view(arg_ty: &IType, record_types: &RecordTypes) -> String {
             let record = record_types.get(record_type_id).unwrap();
             record.name.clone()
         }
-        IType::Array(array_ty) => format!("Array<{}>", type_text_view(array_ty, record_types)),
+        IType::Array(array_ty) => format!("Array<{}>", itype_text_view(array_ty, record_types)),
         t => format!("{:?}", t),
     }
 }
