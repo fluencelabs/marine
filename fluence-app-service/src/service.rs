@@ -211,6 +211,7 @@ impl AppService {
         self.faas.unload_module(module_name).map_err(Into::into)
     }
 
+    /// Return raw interface of the underlying [[FluenceFaaS]] instance
     pub fn get_full_interface(&self) -> fluence_faas::FaaSInterface<'_> {
         self.faas.get_interface()
     }
