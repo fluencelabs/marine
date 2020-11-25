@@ -29,6 +29,9 @@ use wasmer_runtime::compile;
 use wasmer_runtime::ImportObject;
 use wasmer_wit::interpreter::Interpreter;
 
+use serde::Serialize;
+use serde::Deserialize;
+
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
@@ -46,7 +49,7 @@ pub(super) struct WITModuleFunc {
 }
 
 /// Represent a function type inside FCE module.
-#[derive(PartialEq, Eq, Debug, Clone, Hash)]
+#[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
 pub struct FCEFunctionSignature {
     pub name: Rc<String>,
     pub arguments: Rc<Vec<IFunctionArg>>,

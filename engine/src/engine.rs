@@ -18,12 +18,14 @@ use super::*;
 use crate::module::FCEModule;
 use crate::module::RecordTypes;
 
+use serde::Serialize;
+
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::rc::Rc;
 
 /// Represent FCE module interface.
-#[derive(PartialEq, Eq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone, Serialize)]
 pub struct FCEModuleInterface<'a> {
     pub record_types: &'a RecordTypes,
     pub function_signatures: Vec<FCEFunctionSignature>,

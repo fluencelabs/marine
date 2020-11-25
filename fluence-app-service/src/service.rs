@@ -16,6 +16,7 @@
 
 use crate::Result;
 use crate::config::AppServiceConfig;
+use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
 use fluence_faas::FluenceFaaS;
@@ -86,9 +87,19 @@ impl AppService {
             .map_err(Into::into)
     }
 
-    /// Return all export functions (name and signatures) of loaded modules.
-    pub fn get_interface(&self) -> fluence_faas::FaaSInterface<'_> {
-        self.faas.get_interface()
+    /// Return interface (function signatures and record types) of this service.
+    pub fn get_interface(&self) -> ServiceInterface {
+        use crate::service_interface::into_service_interface;
+
+        let faas_facade_interface = self
+            .faas
+            .get_interface()
+            .modules
+            .remove(self.facade_module_name.as_str())
+            // facade module must be loaded in FaaS, so unwrap is safe here
+            .unwrap();
+
+        into_service_interface(faas_facade_interface)
     }
 
     /// Prepare service before starting by:
@@ -198,6 +209,11 @@ impl AppService {
 
     pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
         self.faas.unload_module(module_name).map_err(Into::into)
+    }
+
+    /// Return raw interface of the underlying [[FluenceFaaS]] instance
+    pub fn get_full_interface(&self) -> fluence_faas::FaaSInterface<'_> {
+        self.faas.get_interface()
     }
 
     pub fn get_wasi_state<S: AsRef<str>>(

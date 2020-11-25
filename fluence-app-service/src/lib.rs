@@ -27,19 +27,19 @@
 mod config;
 mod errors;
 mod service;
+mod service_interface;
 mod raw_toml_config;
 
 pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 
 pub use errors::AppServiceError;
 pub use service::AppService;
+pub use service_interface::FunctionSignature;
+pub use service_interface::RecordType;
+pub use service_interface::ServiceInterface;
 
 pub use config::AppServiceConfig;
 pub use raw_toml_config::TomlAppServiceConfig;
-
-pub use fluence_faas::FaaSInterface as ServiceInterface;
-pub use fluence_faas::FaaSModuleInterface as ServiceModuleInterface;
-pub use fluence_faas::FaaSFunctionSignature as ServiceFunctionSignature;
 
 pub use fluence_faas::FaaSConfig;
 pub use fluence_faas::FaaSModuleConfig;
