@@ -34,6 +34,9 @@ pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 
 pub use errors::AppServiceError;
 pub use service::AppService;
+pub use service_interface::FunctionSignature;
+pub use service_interface::RecordType;
+pub use service_interface::ServiceInterface;
 
 pub use config::AppServiceConfig;
 pub use raw_toml_config::TomlAppServiceConfig;
