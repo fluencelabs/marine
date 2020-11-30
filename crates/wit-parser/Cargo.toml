@@ -17,3 +17,5 @@ anyhow = "1.0.31"
 walrus = "0.17.0"
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0"}
 wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.19" }
+
+serde = "1.0.117"

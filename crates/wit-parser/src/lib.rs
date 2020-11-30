@@ -38,3 +38,6 @@ pub use embedder::embed_wit;
 pub use embedder::embed_text_wit;
 pub use extractor::extract_wit;
 pub use extractor::extract_text_wit;
+pub use extractor::module_interface;
+
+pub(crate) type Result<T> = std::result::Result<T, WITParserError>;

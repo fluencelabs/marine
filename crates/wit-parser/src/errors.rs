@@ -32,6 +32,9 @@ pub enum WITParserError {
     /// An error occurred while parsing WIT section.
     CorruptedWITSection,
 
+    // An error related to incorrect wit section.
+    IncorrectWIT(String),
+
     /// An error occurred while parsing file in Wat format.
     CorruptedWATFile(WATError),
 
@@ -59,6 +62,7 @@ impl std::fmt::Display for WITParserError {
                 f,
                 "WIT section remainder isn't empty - WIT section possibly corrupted"
             ),
+            WITParserError::IncorrectWIT(err_msg) => write!(f, "{}", err_msg),
             WITParserError::CorruptedWITSection => write!(f, "WIT section is corrupted"),
             WITParserError::CorruptedWATFile(err) => {
                 write!(f, "an error occurred while parsing wat file: {}", err)

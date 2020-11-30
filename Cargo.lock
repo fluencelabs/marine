@@ -712,6 +712,7 @@ version = "0.1.10"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
+ "serde",
  "walrus",
  "wasmer-interface-types-fl",
  "wasmer-runtime-core-fl",

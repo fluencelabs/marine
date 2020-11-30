@@ -14,61 +14,21 @@
  * limitations under the License.
  */
 
-use super::custom::WIT_SECTION_NAME;
-use super::errors::WITParserError;
+mod functions;
+mod wit;
 
-use walrus::{IdsToIndices, ModuleConfig};
-use wasmer_wit::ast::Interfaces;
-use wasmer_core::Module as WasmerModule;
+pub use functions::*;
+pub use wit::*;
 
+use crate::Result;
 use std::path::PathBuf;
 
-/// Extracts WIT section of provided Wasm binary and converts it to a string.
-pub fn extract_text_wit(wasm_file_path: PathBuf) -> Result<String, WITParserError> {
-    let wit_section_bytes = extract_wit_section_bytes(wasm_file_path)?;
+pub fn module_interface(module_path: PathBuf) -> Result<ServiceInterface> {
+    use fce_wit_interfaces::FCEWITInterfaces;
+
+    let wit_section_bytes = extract_wit_section_bytes(module_path)?;
     let wit = extract_wit_with_fn(&wit_section_bytes)?;
-    Ok((&wit).to_string())
-}
+    let fce_interface = FCEWITInterfaces::new(wit);
 
-/// Extracts WIT section of provided Wasm binary and converts it to a FCEWITInterfaces.
-pub fn extract_wit(wasmer_module: &WasmerModule) -> Result<Interfaces<'_>, WITParserError> {
-    let wit_sections = wasmer_module
-        .custom_sections(WIT_SECTION_NAME)
-        .ok_or(WITParserError::NoWITSection)?;
-
-    if wit_sections.len() > 1 {
-        return Err(WITParserError::MultipleWITSections);
-    }
-
-    extract_wit_with_fn(&wit_sections[0])
-}
-
-fn extract_wit_with_fn(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>, WITParserError> {
-    match wasmer_wit::decoders::binary::parse::<()>(&wit_section_bytes) {
-        Ok((remainder, wit)) if remainder.is_empty() => Ok(wit),
-        Ok(_) => Err(WITParserError::WITRemainderNotEmpty),
-        Err(_) => Err(WITParserError::CorruptedWITSection),
-    }
-}
-
-fn extract_wit_section_bytes(wasm_file_path: PathBuf) -> Result<Vec<u8>, WITParserError> {
-    let module = ModuleConfig::new()
-        .parse_file(wasm_file_path)
-        .map_err(WITParserError::CorruptedWasmFile)?;
-
-    let sections = module
-        .customs
-        .iter()
-        .filter(|(_, section)| section.name() == WIT_SECTION_NAME)
-        .collect::<Vec<_>>();
-
-    if sections.is_empty() {
-        return Err(WITParserError::NoWITSection);
-    }
-    if sections.len() > 1 {
-        return Err(WITParserError::MultipleWITSections);
-    }
-
-    let default_ids = IdsToIndices::default();
-    Ok(sections[0].1.data(&default_ids).into_owned())
+    get_interface(&fce_interface)
 }
