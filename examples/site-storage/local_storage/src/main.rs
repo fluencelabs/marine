@@ -19,7 +19,7 @@ use fluence::fce;
 use fluence::WasmLogger;
 use std::path::PathBuf;
 
-const RPC_TMP_FILEPATH: &str = "/sites/";
+const SITES_DIR: &str = "/sites/";
 
 /// Log level can be changed by `RUST_LOG` env as well.
 pub fn main() {
@@ -34,7 +34,7 @@ pub fn main() {
 pub fn put(name: String, file_content: Vec<u8>) -> String {
     log::info!("put called with {:?}", file_content);
 
-    let rpc_tmp_filepath = format!("{}{}", RPC_TMP_FILEPATH, name);
+    let rpc_tmp_filepath = format!("{}{}", SITES_DIR, name);
 
     let result = fs::write(PathBuf::from(rpc_tmp_filepath.clone()), file_content);
     if let Err(e) = result {
@@ -48,7 +48,7 @@ pub fn put(name: String, file_content: Vec<u8>) -> String {
 pub fn get(file_name: String) -> Vec<u8> {
     log::info!("get called with file name: {}", file_name);
 
-    let tmp_filepath = format!("{}{}", RPC_TMP_FILEPATH, file_name);
+    let tmp_filepath = format!("{}{}", SITES_DIR, file_name);
 
     fs::read(tmp_filepath).unwrap_or_else(|_| b"error while reading file".to_vec())
 }

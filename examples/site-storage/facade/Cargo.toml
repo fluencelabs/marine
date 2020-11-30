@@ -1,11 +1,11 @@
 [package]
-name = "site-storage"
+name = "facade"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 
 [[bin]]
-name = "site-storage"
+name = "facade"
 path = "src/main.rs"
 
 [dependencies]

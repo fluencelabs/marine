@@ -17,5 +17,5 @@ modules_dir = "artifacts/"
     curl = "/usr/bin/curl"
 
 [[module]]
-    name = "site-storage"
+    name = "facade"
     logger_enabled = true
