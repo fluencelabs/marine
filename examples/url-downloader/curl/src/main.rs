@@ -26,10 +26,10 @@ pub fn main() {
 }
 
 #[fce]
-pub fn get(cmd: String) -> String {
-    log::info!("get called with url {}", cmd);
+pub fn download(url: String) -> String {
+    log::info!("get called with url {}", url);
 
-    unsafe { curl(cmd) }
+    unsafe { curl(url) }
 }
 
 /// Permissions in `Config.toml` should exist to use host functions.

@@ -28,7 +28,7 @@ pub fn main() {
 /// Calls `curl` and stores returned result into a file.
 #[fce]
 fn get_n_save(url: String, file_name: String) -> String {
-    let result = unsafe { curl(url) };
+    let result = unsafe { download(url) };
     unsafe { file_put(file_name, result.into_bytes()) };
 
     String::from("Ok")
@@ -38,8 +38,7 @@ fn get_n_save(url: String, file_name: String) -> String {
 #[fce]
 #[link(wasm_import_module = "curl")]
 extern "C" {
-    #[link_name = "get"]
-    pub fn curl(url: String) -> String;
+    pub fn download(url: String) -> String;
 }
 
 /// Importing `local_storage` module

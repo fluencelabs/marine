@@ -35,7 +35,7 @@ jobs:
           cd ../records/
           ./build.sh
 
-          cd ../site-storage/
+          cd ../url-downloader/
           ./build.sh
 
           cd ../../fluence-faas/tests/wasm_tests/

@@ -17,8 +17,8 @@ target/
 !/examples/greeting/artifacts/*.wasm
 !/examples/ipfs-node/artifacts/*.wasm
 !/examples/records/artifacts/*.wasm
-!/examples/site-storage/artifacts/*.wasm
 !/examples/sqlite/artifacts/sqlite_test.wasm
+!/examples/url-downloader/artifacts/*.wasm
 
 # Allowed Wasm files for test
 !/fluence-faas/tests/wasm_tests/arguments_passing/artifacts/*.wasm
