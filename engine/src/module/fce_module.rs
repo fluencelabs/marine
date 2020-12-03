@@ -122,7 +122,7 @@ impl FCEModule {
         let wit_import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
         let raw_imports = config.raw_imports.clone();
         let (wasi_import_object, host_closures_import_object) =
-            Self::create_import_objects(config, &fce_wit, wit_import_object.clone());
+            Self::create_import_objects(config, &fce_wit, wit_import_object.clone())?;
 
         let wasmer_instance = wasmer_module.instantiate(&wasi_import_object)?;
         let wit_instance = unsafe {
@@ -201,7 +201,7 @@ impl FCEModule {
         config: FCEModuleConfig,
         fce_wit: &FCEWITInterfaces<'_>,
         wit_import_object: ImportObject,
-    ) -> (ImportObject, ImportObject) {
+    ) -> Result<(ImportObject, ImportObject)> {
         use crate::host_imports::create_host_import_func;
 
         let wasi_envs = config
@@ -222,7 +222,7 @@ impl FCEModule {
             wasi_envs,
             wasi_preopened_files,
             wasi_mapped_dirs,
-        );
+        ).map_err(|e| FCEError::PrepareError(e))?;
 
         let mut host_closures_namespace = Namespace::new();
         let record_types = fce_wit
@@ -242,7 +242,7 @@ impl FCEModule {
         wasi_import_object.extend(config.raw_imports);
         wasi_import_object.extend(host_closures_import_object.clone());
 
-        (wasi_import_object, host_closures_import_object)
+        Ok((wasi_import_object, host_closures_import_object))
     }
 
     fn instantiate_wit_exports(

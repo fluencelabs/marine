@@ -649,7 +649,7 @@ dependencies = [
 
 [[package]]
 name = "fce"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "boolinator",
  "bytes",
@@ -751,7 +751,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "fluence-faas",
  "log",
@@ -765,7 +765,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -885,7 +885,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.1.17"
+version = "0.1.18"
 dependencies = [
  "anyhow",
  "clap",
@@ -1417,9 +1417,9 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "0.6.22"
+version = "0.6.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fce347092656428bc8eaf6201042cb551b8d67855af7374542a92a0fbfcac430"
+checksum = "4afd66f5b91bf2a3bc13fad0e21caedac168ca4c707504e75585648ae80e4cc4"
 dependencies = [
  "cfg-if 0.1.10",
  "fuchsia-zircon",
@@ -2932,9 +2932,9 @@ dependencies = [
 
 [[package]]
 name = "wasmer-wasi-fl"
-version = "0.17.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e2493c1ef951a7a1704ecfd39abbbbb2346bf3768d761ef64ed53249a32b181"
+checksum = "3e0f331ec6fb16590946f61b2418cd5295c4f3aa772c77eb054bea250a8fdb71"
 dependencies = [
  "bincode",
  "byteorder",
