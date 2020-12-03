@@ -222,7 +222,8 @@ impl FCEModule {
             wasi_envs,
             wasi_preopened_files,
             wasi_mapped_dirs,
-        ).map_err(|e| FCEError::PrepareError(e))?;
+        )
+        .map_err(|e| FCEError::PrepareError(e))?;
 
         let mut host_closures_namespace = Namespace::new();
         let record_types = fce_wit
