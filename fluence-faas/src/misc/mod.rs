@@ -16,7 +16,6 @@
 
 mod ivalues_to_json;
 mod json_to_ivalues;
-mod log_utf8_string_impl;
 mod modules_load_strategy;
 mod utils;
 
@@ -26,5 +25,3 @@ pub(crate) use modules_load_strategy::ModulesLoadStrategy;
 pub(crate) use utils::create_host_import;
 pub(crate) use utils::make_fce_config;
 pub(crate) use utils::load_modules_from_fs;
-
-pub(self) use log_utf8_string_impl::log_utf8_string_closure;

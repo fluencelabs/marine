@@ -26,6 +26,7 @@
 
 mod config;
 mod errors;
+mod logger;
 mod faas;
 mod faas_interface;
 mod misc;

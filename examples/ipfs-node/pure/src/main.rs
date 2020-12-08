@@ -15,7 +15,7 @@
  */
 
 use fluence::fce;
-use fluence::WasmLogger;
+use fluence::WasmLoggerBuilder;
 
 use std::fs;
 use std::path::PathBuf;
@@ -23,7 +23,7 @@ use std::path::PathBuf;
 const RPC_TMP_FILEPATH: &str = "/tmp/ipfs_rpc_file";
 
 pub fn main() {
-    WasmLogger::new()
+    WasmLoggerBuilder::new()
         .with_log_level(log::Level::Info)
         .build()
         .unwrap();

@@ -15,13 +15,10 @@
  */
 
 use fluence::fce;
-use fluence::WasmLogger;
+use fluence::WasmLoggerBuilder;
 
 pub fn main() {
-    WasmLogger::new()
-        .with_log_level(log::Level::Info)
-        .build()
-        .unwrap();
+    WasmLoggerBuilder::new().build().unwrap();
 }
 
 /// Combining of modules: `curl` and `local_storage`.

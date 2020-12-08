@@ -19,14 +19,14 @@ mod path;
 use crate::path::to_full_path;
 
 use fluence::fce;
-use fluence::WasmLogger;
+use fluence::WasmLoggerBuilder;
 
 const RESULT_FILE_PATH: &str = "/tmp/ipfs_rpc_file";
 const IPFS_ADDR_ENV_NAME: &str = "IPFS_ADDR";
 const TIMEOUT_ENV_NAME: &str = "timeout";
 
 pub fn main() {
-    WasmLogger::new()
+    WasmLoggerBuilder::new()
         .with_log_level(log::Level::Info)
         .build()
         .unwrap();

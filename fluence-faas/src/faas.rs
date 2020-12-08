@@ -22,6 +22,8 @@ use crate::IValue;
 use crate::IType;
 use crate::misc::load_modules_from_fs;
 use crate::misc::ModulesLoadStrategy;
+use crate::logger::LoggerFilter;
+use crate::logger::WASM_LOG_ENV_NAME;
 
 use fce::FCE;
 use fce::IFunctionArg;
@@ -91,6 +93,11 @@ impl FluenceFaaS {
         let call_parameters = Rc::new(RefCell::new(<_>::default()));
 
         let modules_dir = config.modules_dir;
+
+        // LoggerFilter can be initialized with an empty string
+        let wasm_log_env = std::env::var(WASM_LOG_ENV_NAME).unwrap_or_default();
+        let logger_filter = LoggerFilter::from_env_string(&wasm_log_env);
+
         for (module_name, module_config) in config.modules_config {
             let module_bytes =
                 modules.remove(&module_name).ok_or_else(|| {
@@ -104,6 +111,7 @@ impl FluenceFaaS {
                 module_name.clone(),
                 Some(module_config),
                 call_parameters.clone(),
+                &logger_filter
             )?;
             fce.load_module(module_name, &module_bytes, fce_module_config)?;
         }

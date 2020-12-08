@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-use super::log_utf8_string_closure;
 use crate::Result;
 use crate::config::FaaSModuleConfig;
 use crate::errors::FaaSError;
+use crate::logger::log_utf8_string_closure;
+use crate::logger::LoggerFilter;
+use crate::logger::WASM_LOG_ENV_NAME;
 
 use fce::FCEModuleConfig;
 use fce::HostImportDescriptor;
@@ -83,6 +85,7 @@ pub(crate) fn make_fce_config(
     module_name: String,
     faas_module_config: Option<FaaSModuleConfig>,
     call_parameters: Rc<RefCell<fluence_sdk_main::CallParameters>>,
+    logger_filter: &LoggerFilter<'_>
 ) -> Result<FCEModuleConfig> {
     let mut fce_module_config = FCEModuleConfig::default();
 
@@ -123,6 +126,20 @@ pub(crate) fn make_fce_config(
 
     let mut namespace = Namespace::new();
     if faas_module_config.logger_enabled {
+        if let Some(level_filter) = logger_filter.module_level(&module_name) {
+            let log_level = level_filter.to_level();
+            let log_level_str = match log_level {
+                Some(log_level) => log_level.to_string(),
+                None => String::from("off")
+            };
+
+            // overwrite possibly installed log variable in config
+            fce_module_config.wasi_envs.insert(
+                WASM_LOG_ENV_NAME.as_bytes().to_owned(),
+                log_level_str.into_bytes(),
+            );
+        }
+
         let logging_mask = faas_module_config.logging_mask;
         namespace.insert(
             "log_utf8_string",
@@ -190,3 +207,4 @@ pub(crate) fn load_modules_from_fs(
 
     Ok(loaded)
 }
+

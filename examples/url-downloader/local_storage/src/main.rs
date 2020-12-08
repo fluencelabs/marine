@@ -16,17 +16,14 @@
 
 use std::fs;
 use fluence::fce;
-use fluence::WasmLogger;
+use fluence::WasmLoggerBuilder;
 use std::path::PathBuf;
 
 const SITES_DIR: &str = "/sites/";
 
 /// Log level can be changed by `RUST_LOG` env as well.
 pub fn main() {
-    WasmLogger::new()
-        .with_log_level(log::Level::Info)
-        .build()
-        .unwrap();
+    WasmLoggerBuilder::new().build().unwrap();
 }
 
 /// You can read or write files from the file system if there is permission to use directories described in `Config.toml`.
@@ -46,7 +43,7 @@ pub fn put(name: String, file_content: Vec<u8>) -> String {
 
 #[fce]
 pub fn get(file_name: String) -> Vec<u8> {
-    log::info!("get called with file name: {}", file_name);
+    log::debug!("get called with file name: {}", file_name);
 
     let tmp_filepath = format!("{}{}", SITES_DIR, file_name);
 
