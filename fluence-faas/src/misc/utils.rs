@@ -85,7 +85,7 @@ pub(crate) fn make_fce_config(
     module_name: String,
     faas_module_config: Option<FaaSModuleConfig>,
     call_parameters: Rc<RefCell<fluence_sdk_main::CallParameters>>,
-    logger_filter: &LoggerFilter<'_>
+    logger_filter: &LoggerFilter<'_>,
 ) -> Result<FCEModuleConfig> {
     let mut fce_module_config = FCEModuleConfig::default();
 
@@ -130,7 +130,7 @@ pub(crate) fn make_fce_config(
             let log_level = level_filter.to_level();
             let log_level_str = match log_level {
                 Some(log_level) => log_level.to_string(),
-                None => String::from("off")
+                None => String::from("off"),
             };
 
             // overwrite possibly installed log variable in config
@@ -207,4 +207,3 @@ pub(crate) fn load_modules_from_fs(
 
     Ok(loaded)
 }
-

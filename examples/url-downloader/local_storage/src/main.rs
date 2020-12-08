@@ -43,7 +43,7 @@ pub fn put(name: String, file_content: Vec<u8>) -> String {
 
 #[fce]
 pub fn get(file_name: String) -> Vec<u8> {
-    log::debug!("get called with file name: {}", file_name);
+    log::info!("get called with file name: {}", file_name);
 
     let tmp_filepath = format!("{}{}", SITES_DIR, file_name);
 

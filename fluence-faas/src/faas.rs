@@ -111,7 +111,7 @@ impl FluenceFaaS {
                 module_name.clone(),
                 Some(module_config),
                 call_parameters.clone(),
-                &logger_filter
+                &logger_filter,
             )?;
             fce.load_module(module_name, &module_bytes, fce_module_config)?;
         }
