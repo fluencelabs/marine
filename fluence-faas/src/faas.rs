@@ -256,8 +256,16 @@ impl FluenceFaaS {
         let config = config.map(|c| c.try_into()).transpose()?;
         let name = name.into();
 
-        let fce_module_config =
-            crate::misc::make_fce_config(name.clone(), config, self.call_parameters.clone())?;
+        // LoggerFilter can be initialized with an empty string
+        let wasm_log_env = std::env::var(WASM_LOG_ENV_NAME).unwrap_or_default();
+        let logger_filter = LoggerFilter::from_env_string(&wasm_log_env);
+
+        let fce_module_config = crate::misc::make_fce_config(
+            name.clone(),
+            config,
+            self.call_parameters.clone(),
+            &logger_filter,
+        )?;
         self.fce
             .load_module(name, &wasm_bytes, fce_module_config)
             .map_err(Into::into)
