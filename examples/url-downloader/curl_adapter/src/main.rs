@@ -24,7 +24,7 @@ pub fn main() {
 
 #[fce]
 pub fn download(url: String) -> String {
-    log::info!("get called with url {}", url);
+    log::debug!("get called with url {}", url);
 
     unsafe { curl(url) }
 }
