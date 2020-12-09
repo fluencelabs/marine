@@ -29,7 +29,7 @@ pub fn main() {
 /// You can read or write files from the file system if there is permission to use directories described in `Config.toml`.
 #[fce]
 pub fn put(name: String, file_content: Vec<u8>) -> String {
-    log::info!("put called with {:?}", file_content);
+    log::info!("put called with file name {}", name);
 
     let rpc_tmp_filepath = format!("{}{}", SITES_DIR, name);
 
@@ -43,7 +43,7 @@ pub fn put(name: String, file_content: Vec<u8>) -> String {
 
 #[fce]
 pub fn get(file_name: String) -> Vec<u8> {
-    log::debug!("get called with file name: {}", file_name);
+    log::info!("get called with file name: {}", file_name);
 
     let tmp_filepath = format!("{}{}", SITES_DIR, file_name);
 

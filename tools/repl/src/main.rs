@@ -120,10 +120,23 @@ fn main() -> Result<()> {
 
 fn init_logger() {
     use std::io::Write;
+    use std::env::var;
+    use log::LevelFilter::Info;
+    use fluence_sdk_main::WASM_LOG_ENV_NAME;
+
+    const WIT_MODULE_PATH: &str = "wasmer_interface_types_fl";
+    const RUST_LOG_ENV_NAME: &str = "RUST_LOG";
+
+    match (var(RUST_LOG_ENV_NAME), var(WASM_LOG_ENV_NAME)) {
+        (Ok(_), _) => {}
+        (Err(_), Ok(wasm_log_env)) if !wasm_log_env.starts_with("off") => {
+            std::env::set_var(RUST_LOG_ENV_NAME, "trace")
+        }
+        _ => return,
+    };
 
     env_logger::builder()
         .format(|buf, record| {
-            const WIT_MODULE_PATH: &'static str = "wasmer_interface_types_fl";
             match record.module_path() {
                 Some(module_path) if module_path.starts_with(WIT_MODULE_PATH) => {
                     writeln!(buf, "[host] {}", record.args())
@@ -133,6 +146,13 @@ fn init_logger() {
                 Some(module_path) => writeln!(buf, "[{}] {}", module_path, record.args()),
             }
         })
+        // set a default level Info for Wasmer components
+        .filter(Some("cranelift_codegen"), Info)
+        .filter(Some("wasmer_wasi"), Info)
+        .filter(Some(WIT_MODULE_PATH), Info)
+        // the same for rustyline and fce
+        .filter(Some("rustyline"), Info)
+        .filter(Some("fce"), Info)
         .init();
 }
 

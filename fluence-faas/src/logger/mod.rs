@@ -17,7 +17,7 @@
 mod logger_filter;
 mod log_utf8_string_impl;
 
-pub const WASM_LOG_ENV_NAME: &str = "WASM_LOG";
+pub use fluence_sdk_main::WASM_LOG_ENV_NAME;
 
 pub(crate) use logger_filter::LoggerFilter;
 pub(crate) use log_utf8_string_impl::log_utf8_string_closure;

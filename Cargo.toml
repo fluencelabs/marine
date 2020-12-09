@@ -14,7 +14,7 @@ members = [
     "examples/records/pure",
     "examples/records/test-record",
     "examples/sqlite",
-    "examples/url-downloader/curl",
+    "examples/url-downloader/curl_adapter",
     "examples/url-downloader/facade",
     "examples/url-downloader/local_storage",
     "fluence-app-service",
