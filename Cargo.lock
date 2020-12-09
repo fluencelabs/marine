@@ -752,7 +752,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.1.13"
+version = "0.1.14"
 dependencies = [
  "fluence-faas",
  "log",
@@ -766,7 +766,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.1.13"
+version = "0.1.14"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -886,7 +886,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.1.18"
+version = "0.1.19"
 dependencies = [
  "anyhow",
  "clap",

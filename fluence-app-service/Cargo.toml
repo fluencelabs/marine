@@ -1,13 +1,13 @@
 [package]
 name = "fluence-app-service"
 description = "Fluence Application Service"
-version = "0.1.13"
+version = "0.1.14"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-fluence-faas = { path = "../fluence-faas", version = "0.1.13" }
+fluence-faas = { path = "../fluence-faas", version = "0.1.14" }
 
 maplit = "1.0.2"
 log = "0.4.8"
