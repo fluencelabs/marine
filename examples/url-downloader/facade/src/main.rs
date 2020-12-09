@@ -33,7 +33,7 @@ fn get_n_save(url: String, file_name: String) -> String {
 
 /// Importing `curl` module
 #[fce]
-#[link(wasm_import_module = "curl")]
+#[link(wasm_import_module = "curl_adapter")]
 extern "C" {
     pub fn download(url: String) -> String;
 }

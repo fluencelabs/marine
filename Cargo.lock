@@ -413,7 +413,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "curl"
+name = "curl_adapter"
 version = "0.1.0"
 dependencies = [
  "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
