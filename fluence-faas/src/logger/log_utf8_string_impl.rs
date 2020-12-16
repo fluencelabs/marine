@@ -18,9 +18,9 @@ use wasmer_core::vm::Ctx;
 use wasmer_core::memory::ptr::{Array, WasmPtr};
 
 pub(crate) fn log_utf8_string_closure(
-    logging_mask: i64,
+    logging_mask: i32,
     module: String,
-) -> impl Fn(&mut Ctx, i32, i64, i32, i32) {
+) -> impl Fn(&mut Ctx, i32, i32, i32, i32) {
     move |ctx, level, target, msg_offset, msg_size| {
         if target == 0 || target & logging_mask != 0 {
             log_utf8_string(&module, ctx, level, msg_offset, msg_size)
