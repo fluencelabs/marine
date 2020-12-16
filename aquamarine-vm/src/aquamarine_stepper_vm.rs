@@ -136,25 +136,20 @@ fn make_faas_config(
     current_peer_id: String,
     logging_mask: i64,
 ) -> FaaSConfig {
+    use fluence_faas::FaaSModuleConfig;
     use maplit::hashmap;
 
-    let make_faas_module_config = |call_service: HostImportDescriptor| {
-        use fluence_faas::FaaSModuleConfig;
-
-        let host_imports = hashmap! {
-            String::from(CALL_SERVICE_NAME) => call_service
-        };
-
-        FaaSModuleConfig {
-            mem_pages_count: None,
-            logger_enabled: true,
-            host_imports,
-            wasi: None,
-            logging_mask,
-        }
+    let host_imports = hashmap! {
+        String::from(CALL_SERVICE_NAME) => call_service
     };
 
-    let mut aquamarine_module_config = make_faas_module_config(call_service);
+    let mut aquamarine_module_config = FaaSModuleConfig {
+        mem_pages_count: None,
+        logger_enabled: true,
+        host_imports,
+        wasi: None,
+        logging_mask,
+    };
 
     let envs = hashmap! {
         CURRENT_PEER_ID_ENV_NAME.as_bytes().to_vec() => current_peer_id.into_bytes(),
@@ -203,19 +198,15 @@ fn make_outcome(mut result: Vec<IValue>) -> Result<StepperOutcome> {
 
             let data = match record_values.remove(0) {
                 IValue::Array(array) => {
-                    let array: Result<Vec<_>> = array.into_iter().map(|v| {
-                        match v {
+                    let array: Result<Vec<_>> = array
+                        .into_iter()
+                        .map(|v| match v {
                             IValue::U8(byte) => Ok(byte),
-                            v => {
-                                Err(ResultError(format!(
-                                    "expected a byte, got {:?}",
-                                    v
-                                )))
-                            }
-                        }
-                    }).collect();
+                            v => Err(ResultError(format!("expected a byte, got {:?}", v))),
+                        })
+                        .collect();
                     array?
-                },
+                }
                 v => {
                     return Err(ResultError(format!(
                         "expected Vec<u8> for data, got {:?}",
