@@ -47,7 +47,7 @@ impl AquamarineVM {
     pub fn new(config: AquamarineVMConfig) -> Result<Self> {
         use AquamarineVMError::InvalidDataStorePath;
 
-        let (wasm_dir, wasm_filename) = split_basename(config.aquamarine_wasm_path)?;
+        let (wasm_dir, wasm_filename) = split_dirname(config.aquamarine_wasm_path)?;
 
         let faas_config = make_faas_config(
             wasm_dir,
@@ -100,7 +100,11 @@ impl AquamarineVM {
     }
 }
 
-fn split_basename(path: PathBuf) -> Result<(PathBuf, String)> {
+/// Splits given path into its directory and file stem
+///
+/// # Example
+/// For path `/path/to/aquamarine.wasm` result will be `Ok(PathBuf(/path/to), "aquamarine")`
+fn split_dirname(path: PathBuf) -> Result<(PathBuf, String)> {
     let metadata = path.metadata().map_err(|err| InvalidAquamarinePath {
         invalid_path: path.clone(),
         reason: "failed to get file's metadata (doesn't exist or invalid permissions)",
@@ -115,16 +119,16 @@ fn split_basename(path: PathBuf) -> Result<(PathBuf, String)> {
         });
     }
 
-    let file_name = path
-        .file_name()
+    let file_stem = path
+        .file_stem()
         .expect("checked to be a file, file name must be defined");
-    let file_name = file_name.to_string_lossy().into_owned();
+    let file_stem = file_stem.to_string_lossy().into_owned();
 
     let mut path = path;
     // drop file name from path
     path.pop();
 
-    Ok((path, file_name))
+    Ok((path, file_stem))
 }
 
 fn make_faas_config(
