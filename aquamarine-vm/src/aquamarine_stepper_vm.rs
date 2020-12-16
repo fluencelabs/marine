@@ -256,7 +256,7 @@ impl AquamarineVM {
             self.faas
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
-        let raw_outcome = Self::make_raw_outcome(result)?;
+        let raw_outcome = make_raw_outcome(result)?;
         raw_outcome.try_into()
     }
 }
