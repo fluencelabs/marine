@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use crate::stepper_outcome::StepperError;
 use fluence_faas::FaaSError;
 
 use std::io::Error as IOError;
@@ -28,9 +27,6 @@ pub enum AquamarineVMError {
 
     /// Aquamarine result deserialization errors.
     AquamarineResultError(String),
-
-    /// Errors related to stepper execution.
-    StepperError(StepperError),
 
     /// I/O errors while persisting resulted data.
     PersistDataError(IOError, PathBuf),
@@ -53,7 +49,6 @@ impl std::fmt::Display for AquamarineVMError {
         match self {
             AquamarineVMError::FaaSError(err) => write!(f, "{}", err),
             AquamarineVMError::AquamarineResultError(err_msg) => write!(f, "{}", err_msg),
-            AquamarineVMError::StepperError(err) => write!(f, "{}", err),
             AquamarineVMError::PersistDataError(err, path) => write!(
                 f,
                 "an error occurred while saving prev data {:?} by {:?} path",
@@ -69,13 +64,11 @@ impl std::fmt::Display for AquamarineVMError {
                 invalid_path,
                 io_error,
                 reason,
-            } => {
-                write!(
-                    f,
-                    "path to AIR interpreter .wasm ({:?}) is invalid: {}; IO Error: {:?}",
-                    invalid_path, reason, io_error
-                )
-            }
+            } => write!(
+                f,
+                "path to AIR interpreter .wasm ({:?}) is invalid: {}; IO Error: {:?}",
+                invalid_path, reason, io_error
+            ),
         }
     }
 }
@@ -83,12 +76,6 @@ impl std::fmt::Display for AquamarineVMError {
 impl From<FaaSError> for AquamarineVMError {
     fn from(err: FaaSError) -> Self {
         AquamarineVMError::FaaSError(err)
-    }
-}
-
-impl From<StepperError> for AquamarineVMError {
-    fn from(err: StepperError) -> Self {
-        AquamarineVMError::StepperError(err)
     }
 }
 

@@ -17,15 +17,13 @@
 use crate::Result;
 use crate::AquamarineVMError;
 use crate::config::AquamarineVMConfig;
-use crate::stepper_outcome::StepperOutcome;
-use crate::stepper_outcome::RawStepperOutcome;
 
 use fluence_faas::FaaSConfig;
 use fluence_faas::FluenceFaaS;
 use fluence_faas::HostImportDescriptor;
 use fluence_faas::IValue;
+use stepper_interface::StepperOutcome;
 
-use std::convert::TryInto;
 use std::path::PathBuf;
 use std::path::Path;
 use crate::errors::AquamarineVMError::InvalidAquamarinePath;
@@ -92,11 +90,11 @@ impl AquamarineVM {
             self.faas
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
-        let raw_outcome = make_raw_outcome(result)?;
-        std::fs::write(&prev_data_path, &raw_outcome.data)
+        let outcome = make_outcome(result)?;
+        std::fs::write(&prev_data_path, &outcome.data)
             .map_err(|e| PersistDataError(e, prev_data_path))?;
 
-        raw_outcome.try_into()
+        Ok(outcome)
     }
 }
 
@@ -170,13 +168,13 @@ fn make_faas_config(
     }
 }
 
-fn make_raw_outcome(mut result: Vec<IValue>) -> Result<RawStepperOutcome> {
+fn make_outcome(mut result: Vec<IValue>) -> Result<StepperOutcome> {
     use AquamarineVMError::AquamarineResultError as ResultError;
 
     match result.remove(0) {
         IValue::Record(record_values) => {
             let mut record_values = record_values.into_vec();
-            if record_values.len() != 3 {
+            if record_values.len() != 4 {
                 return Err(ResultError(format!(
                     "expected StepperOutcome struct with 3 fields, got {:?}",
                     record_values
@@ -193,11 +191,34 @@ fn make_raw_outcome(mut result: Vec<IValue>) -> Result<RawStepperOutcome> {
                 }
             };
 
-            let data = match record_values.remove(0) {
+            let error_message = match record_values.remove(0) {
                 IValue::String(str) => str,
                 v => {
                     return Err(ResultError(format!(
                         "expected string for data, got {:?}",
+                        v
+                    )))
+                }
+            };
+
+            let data = match record_values.remove(0) {
+                IValue::Array(array) => {
+                    let array: Result<Vec<_>> = array.into_iter().map(|v| {
+                        match v {
+                            IValue::U8(byte) => Ok(byte),
+                            v => {
+                                Err(ResultError(format!(
+                                    "expected a byte, got {:?}",
+                                    v
+                                )))
+                            }
+                        }
+                    }).collect();
+                    array?
+                },
+                v => {
+                    return Err(ResultError(format!(
+                        "expected Vec<u8> for data, got {:?}",
                         v
                     )))
                 }
@@ -224,8 +245,9 @@ fn make_raw_outcome(mut result: Vec<IValue>) -> Result<RawStepperOutcome> {
                 ))),
             }?;
 
-            Ok(RawStepperOutcome {
+            Ok(StepperOutcome {
                 ret_code,
+                error_message,
                 data,
                 next_peer_pks,
             })
@@ -260,7 +282,7 @@ impl AquamarineVM {
             self.faas
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
-        let raw_outcome = make_raw_outcome(result)?;
-        raw_outcome.try_into()
+        let raw_outcome = make_outcome(result)?;
+        Ok(raw_outcome)
     }
 }
