@@ -37,6 +37,13 @@ pub enum AquamarineVMError {
 
     /// Errors related to particle_data_store path from supplied config.
     InvalidDataStorePath(IOError, PathBuf),
+
+    /// Specified path to AIR interpreter .wasm file was invalid
+    InvalidAquamarinePath {
+        invalid_path: PathBuf,
+        io_error: Option<IOError>,
+        reason: &'static str,
+    },
 }
 
 impl Error for AquamarineVMError {}
@@ -57,6 +64,18 @@ impl std::fmt::Display for AquamarineVMError {
                 "an error occurred while creating data storage {:?} by {:?} path",
                 err, path
             ),
+
+            AquamarineVMError::InvalidAquamarinePath {
+                invalid_path,
+                io_error,
+                reason,
+            } => {
+                write!(
+                    f,
+                    "path to AIR interpreter .wasm ({:?}) is invalid: {}; IO Error: {:?}",
+                    invalid_path, reason, io_error
+                )
+            }
         }
     }
 }

@@ -28,8 +28,8 @@ use fluence_faas::IValue;
 use std::convert::TryInto;
 use std::path::PathBuf;
 use std::path::Path;
+use crate::errors::AquamarineVMError::InvalidAquamarinePath;
 
-const AQUAMARINE_WASM_FILE_NAME: &str = "aquamarine";
 const CALL_SERVICE_NAME: &str = "call_service";
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
 
@@ -38,6 +38,8 @@ unsafe impl Send for AquamarineVM {}
 pub struct AquamarineVM {
     faas: FluenceFaaS,
     particle_data_store: PathBuf,
+    /// file name of the AIR interpreter .wasm
+    wasm_filename: String,
 }
 
 impl AquamarineVM {
@@ -45,8 +47,11 @@ impl AquamarineVM {
     pub fn new(config: AquamarineVMConfig) -> Result<Self> {
         use AquamarineVMError::InvalidDataStorePath;
 
-        let faas_config = Self::make_faas_config(
-            config.aquamarine_wasm_path,
+        let (wasm_dir, wasm_filename) = split_basename(config.aquamarine_wasm_path)?;
+
+        let faas_config = make_faas_config(
+            wasm_dir,
+            &wasm_filename,
             config.call_service,
             config.current_peer_id,
             config.logging_mask,
@@ -60,6 +65,7 @@ impl AquamarineVM {
         Ok(Self {
             faas,
             particle_data_store,
+            wasm_filename,
         })
     }
 
@@ -82,131 +88,149 @@ impl AquamarineVM {
             IValue::String(data.into()),
         ];
 
-        let result = self.faas.call_with_ivalues(
-            AQUAMARINE_WASM_FILE_NAME,
-            "invoke",
-            &args,
-            <_>::default(),
-        )?;
+        let result =
+            self.faas
+                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
-        let raw_outcome = Self::make_raw_outcome(result)?;
+        let raw_outcome = make_raw_outcome(result)?;
         std::fs::write(&prev_data_path, &raw_outcome.data)
             .map_err(|e| PersistDataError(e, prev_data_path))?;
 
         raw_outcome.try_into()
     }
+}
 
-    fn make_faas_config(
-        aquamarine_wasm_path: PathBuf,
-        call_service: HostImportDescriptor,
-        current_peer_id: String,
-        logging_mask: i64,
-    ) -> FaaSConfig {
-        use maplit::hashmap;
+fn split_basename(path: PathBuf) -> Result<(PathBuf, String)> {
+    let metadata = path.metadata().map_err(|err| InvalidAquamarinePath {
+        invalid_path: path.clone(),
+        reason: "failed to get file's metadata (doesn't exist or invalid permissions)",
+        io_error: Some(err),
+    })?;
 
-        let make_faas_module_config = |call_service: HostImportDescriptor| {
-            use fluence_faas::FaaSModuleConfig;
-
-            let host_imports = hashmap! {
-                String::from(CALL_SERVICE_NAME) => call_service
-            };
-
-            FaaSModuleConfig {
-                mem_pages_count: None,
-                logger_enabled: true,
-                host_imports,
-                wasi: None,
-                logging_mask,
-            }
-        };
-
-        let mut aquamarine_module_config = make_faas_module_config(call_service);
-
-        let envs = hashmap! {
-            CURRENT_PEER_ID_ENV_NAME.as_bytes().to_vec() => current_peer_id.into_bytes(),
-        };
-        aquamarine_module_config.extend_wasi_envs(envs);
-
-        let mut aquamarine_wasm_dir = aquamarine_wasm_path;
-        // faas config requires a path to the directory with Wasm modules
-        aquamarine_wasm_dir.pop();
-
-        FaaSConfig {
-            modules_dir: Some(aquamarine_wasm_dir),
-            modules_config: vec![(
-                String::from(AQUAMARINE_WASM_FILE_NAME),
-                aquamarine_module_config,
-            )],
-            default_modules_config: None,
-        }
+    if !metadata.is_file() {
+        return Err(InvalidAquamarinePath {
+            invalid_path: path,
+            reason: "is not a file",
+            io_error: None,
+        });
     }
 
-    fn make_raw_outcome(mut result: Vec<IValue>) -> Result<RawStepperOutcome> {
-        use AquamarineVMError::AquamarineResultError as ResultError;
+    let file_name = path
+        .file_name()
+        .expect("checked to be a file, file name must be defined");
+    let file_name = file_name.to_string_lossy().into_owned();
 
-        match result.remove(0) {
-            IValue::Record(record_values) => {
-                let mut record_values = record_values.into_vec();
-                if record_values.len() != 3 {
-                    return Err(ResultError(format!(
-                        "expected StepperOutcome struct with 3 fields, got {:?}",
-                        record_values
-                    )));
-                }
+    let mut path = path;
+    // drop file name from path
+    path.pop();
 
-                let ret_code = match record_values.remove(0) {
-                    IValue::S32(ret_code) => ret_code,
-                    v => {
-                        return Err(ResultError(format!(
-                            "expected i32 for ret_code, got {:?}",
-                            v
-                        )))
-                    }
-                };
+    Ok((path, file_name))
+}
 
-                let data = match record_values.remove(0) {
-                    IValue::String(str) => str,
-                    v => {
-                        return Err(ResultError(format!(
-                            "expected string for data, got {:?}",
-                            v
-                        )))
-                    }
-                };
+fn make_faas_config(
+    aquamarine_wasm_dir: PathBuf,
+    aquamarine_wasm_file: &str,
+    call_service: HostImportDescriptor,
+    current_peer_id: String,
+    logging_mask: i64,
+) -> FaaSConfig {
+    use maplit::hashmap;
 
-                let next_peer_pks = match record_values.remove(0) {
-                    IValue::Array(ar_values) => {
-                        let array = ar_values
-                            .into_iter()
-                            .map(|v| match v {
-                                IValue::String(str) => Ok(str),
-                                v => Err(ResultError(format!(
-                                    "expected string for next_peer_pks, got {:?}",
-                                    v
-                                ))),
-                            })
-                            .collect::<Result<Vec<String>>>()?;
+    let make_faas_module_config = |call_service: HostImportDescriptor| {
+        use fluence_faas::FaaSModuleConfig;
 
-                        Ok(array)
-                    }
-                    v => Err(ResultError(format!(
-                        "expected array for next_peer_pks, got {:?}",
-                        v
-                    ))),
-                }?;
+        let host_imports = hashmap! {
+            String::from(CALL_SERVICE_NAME) => call_service
+        };
 
-                Ok(RawStepperOutcome {
-                    ret_code,
-                    data,
-                    next_peer_pks,
-                })
-            }
-            v => {
+        FaaSModuleConfig {
+            mem_pages_count: None,
+            logger_enabled: true,
+            host_imports,
+            wasi: None,
+            logging_mask,
+        }
+    };
+
+    let mut aquamarine_module_config = make_faas_module_config(call_service);
+
+    let envs = hashmap! {
+        CURRENT_PEER_ID_ENV_NAME.as_bytes().to_vec() => current_peer_id.into_bytes(),
+    };
+    aquamarine_module_config.extend_wasi_envs(envs);
+
+    FaaSConfig {
+        modules_dir: Some(aquamarine_wasm_dir),
+        modules_config: vec![(String::from(aquamarine_wasm_file), aquamarine_module_config)],
+        default_modules_config: None,
+    }
+}
+
+fn make_raw_outcome(mut result: Vec<IValue>) -> Result<RawStepperOutcome> {
+    use AquamarineVMError::AquamarineResultError as ResultError;
+
+    match result.remove(0) {
+        IValue::Record(record_values) => {
+            let mut record_values = record_values.into_vec();
+            if record_values.len() != 3 {
                 return Err(ResultError(format!(
-                    "expected record for StepperOutcome, got {:?}",
-                    v
-                )))
+                    "expected StepperOutcome struct with 3 fields, got {:?}",
+                    record_values
+                )));
             }
+
+            let ret_code = match record_values.remove(0) {
+                IValue::S32(ret_code) => ret_code,
+                v => {
+                    return Err(ResultError(format!(
+                        "expected i32 for ret_code, got {:?}",
+                        v
+                    )))
+                }
+            };
+
+            let data = match record_values.remove(0) {
+                IValue::String(str) => str,
+                v => {
+                    return Err(ResultError(format!(
+                        "expected string for data, got {:?}",
+                        v
+                    )))
+                }
+            };
+
+            let next_peer_pks = match record_values.remove(0) {
+                IValue::Array(ar_values) => {
+                    let array = ar_values
+                        .into_iter()
+                        .map(|v| match v {
+                            IValue::String(str) => Ok(str),
+                            v => Err(ResultError(format!(
+                                "expected string for next_peer_pks, got {:?}",
+                                v
+                            ))),
+                        })
+                        .collect::<Result<Vec<String>>>()?;
+
+                    Ok(array)
+                }
+                v => Err(ResultError(format!(
+                    "expected array for next_peer_pks, got {:?}",
+                    v
+                ))),
+            }?;
+
+            Ok(RawStepperOutcome {
+                ret_code,
+                data,
+                next_peer_pks,
+            })
+        }
+        v => {
+            return Err(ResultError(format!(
+                "expected record for StepperOutcome, got {:?}",
+                v
+            )))
         }
     }
 }
@@ -228,12 +252,9 @@ impl AquamarineVM {
             IValue::String(data.into()),
         ];
 
-        let result = self.faas.call_with_ivalues(
-            AQUAMARINE_WASM_FILE_NAME,
-            "invoke",
-            &args,
-            <_>::default(),
-        )?;
+        let result =
+            self.faas
+                .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
         let raw_outcome = Self::make_raw_outcome(result)?;
         raw_outcome.try_into()
