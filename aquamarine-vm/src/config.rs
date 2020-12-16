@@ -33,5 +33,5 @@ pub struct AquamarineVMConfig {
     pub particle_data_store: PathBuf,
 
     /// Mask used to filter logs, for details see `log_utf8_string` in fluence-faas.
-    pub logging_mask: i64,
+    pub logging_mask: i32,
 }
