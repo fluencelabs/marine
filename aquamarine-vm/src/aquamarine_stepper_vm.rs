@@ -26,7 +26,6 @@ use stepper_interface::StepperOutcome;
 
 use std::path::PathBuf;
 use std::path::Path;
-use crate::errors::AquamarineVMError::InvalidAquamarinePath;
 
 const CALL_SERVICE_NAME: &str = "call_service";
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
@@ -60,18 +59,20 @@ impl AquamarineVM {
         std::fs::create_dir_all(&particle_data_store)
             .map_err(|e| InvalidDataStorePath(e, particle_data_store.clone()))?;
 
-        Ok(Self {
+        let aqua_vm = Self {
             faas,
             particle_data_store,
             wasm_filename,
-        })
+        };
+
+        Ok(aqua_vm)
     }
 
     pub fn call(
         &mut self,
         init_user_id: impl Into<String>,
         aqua: impl Into<String>,
-        data: impl Into<String>,
+        data: impl Into<Vec<u8>>,
         particle_id: impl AsRef<Path>,
     ) -> Result<StepperOutcome> {
         use AquamarineVMError::PersistDataError;
@@ -79,11 +80,14 @@ impl AquamarineVM {
         let prev_data_path = self.particle_data_store.join(particle_id);
         // TODO: check for errors related to invalid file content (such as invalid UTF8 string)
         let prev_data = std::fs::read_to_string(&prev_data_path).unwrap_or_default();
+
+        let prev_data = into_ibytes_array(prev_data.into_bytes());
+        let data = into_ibytes_array(data.into());
         let args = vec![
             IValue::String(init_user_id.into()),
             IValue::String(aqua.into()),
-            IValue::String(prev_data.into()),
-            IValue::String(data.into()),
+            IValue::Array(prev_data),
+            IValue::Array(data),
         ];
 
         let result =
@@ -106,6 +110,8 @@ impl AquamarineVM {
 /// # Example
 /// For path `/path/to/aquamarine.wasm` result will be `Ok(PathBuf(/path/to), "aquamarine")`
 fn split_dirname(path: PathBuf) -> Result<(PathBuf, String)> {
+    use AquamarineVMError::InvalidAquamarinePath;
+
     let metadata = path.metadata().map_err(|err| InvalidAquamarinePath {
         invalid_path: path.clone(),
         reason: "failed to get file's metadata (doesn't exist or invalid permissions)",
@@ -164,6 +170,10 @@ fn make_faas_config(
         modules_config: vec![(String::from(aquamarine_wasm_file), aquamarine_module_config)],
         default_modules_config: None,
     }
+}
+
+fn into_ibytes_array(byte_array: Vec<u8>) -> Vec<IValue> {
+    byte_array.into_iter().map(IValue::U8).collect()
 }
 
 // This API is intended for testing purposes
