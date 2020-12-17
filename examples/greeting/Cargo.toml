@@ -9,4 +9,4 @@ name = "greeting"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["debug", "logger"] }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["debug"] }
