@@ -25,8 +25,8 @@ pub enum AquamarineVMError {
     /// FaaS errors.
     FaaSError(FaaSError),
 
-    /// Aquamarine result deserialization errors.
-    AquamarineResultError(String),
+    /// Aquamarine stepper result deserialization errors.
+    StepperResultDeError(String),
 
     /// I/O errors while persisting resulted data.
     PersistDataError(IOError, PathBuf),
@@ -48,7 +48,7 @@ impl std::fmt::Display for AquamarineVMError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
             AquamarineVMError::FaaSError(err) => write!(f, "{}", err),
-            AquamarineVMError::AquamarineResultError(err_msg) => write!(f, "{}", err_msg),
+            AquamarineVMError::StepperResultDeError(err_msg) => write!(f, "{}", err_msg),
             AquamarineVMError::PersistDataError(err, path) => write!(
                 f,
                 "an error occurred while saving prev data {:?} by {:?} path",

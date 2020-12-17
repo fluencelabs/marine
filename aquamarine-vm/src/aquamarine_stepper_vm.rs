@@ -78,7 +78,7 @@ impl AquamarineVM {
 
         let prev_data_path = self.particle_data_store.join(particle_id);
         // TODO: check for errors related to invalid file content (such as invalid UTF8 string)
-        let prev_data = std::fs::read_to_string(&prev_data_path).unwrap_or(String::from("[]"));
+        let prev_data = std::fs::read_to_string(&prev_data_path).unwrap_or_default();
         let args = vec![
             IValue::String(init_user_id.into()),
             IValue::String(aqua.into()),
@@ -90,7 +90,10 @@ impl AquamarineVM {
             self.faas
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
-        let outcome = make_outcome(result)?;
+        let outcome = StepperOutcome::from_ivalues(result)
+            .map_err(AquamarineVMError::StepperResultDeError)?;
+
+        // persist resulted data
         std::fs::write(&prev_data_path, &outcome.data)
             .map_err(|e| PersistDataError(e, prev_data_path))?;
 
@@ -160,95 +163,6 @@ fn make_faas_config(
         modules_dir: Some(aquamarine_wasm_dir),
         modules_config: vec![(String::from(aquamarine_wasm_file), aquamarine_module_config)],
         default_modules_config: None,
-    }
-}
-
-fn make_outcome(mut result: Vec<IValue>) -> Result<StepperOutcome> {
-    use AquamarineVMError::AquamarineResultError as ResultError;
-
-    match result.remove(0) {
-        IValue::Record(record_values) => {
-            let mut record_values = record_values.into_vec();
-            if record_values.len() != 4 {
-                return Err(ResultError(format!(
-                    "expected StepperOutcome struct with 3 fields, got {:?}",
-                    record_values
-                )));
-            }
-
-            let ret_code = match record_values.remove(0) {
-                IValue::S32(ret_code) => ret_code,
-                v => {
-                    return Err(ResultError(format!(
-                        "expected i32 for ret_code, got {:?}",
-                        v
-                    )))
-                }
-            };
-
-            let error_message = match record_values.remove(0) {
-                IValue::String(str) => str,
-                v => {
-                    return Err(ResultError(format!(
-                        "expected string for data, got {:?}",
-                        v
-                    )))
-                }
-            };
-
-            let data = match record_values.remove(0) {
-                IValue::Array(array) => {
-                    let array: Result<Vec<_>> = array
-                        .into_iter()
-                        .map(|v| match v {
-                            IValue::U8(byte) => Ok(byte),
-                            v => Err(ResultError(format!("expected a byte, got {:?}", v))),
-                        })
-                        .collect();
-                    array?
-                }
-                v => {
-                    return Err(ResultError(format!(
-                        "expected Vec<u8> for data, got {:?}",
-                        v
-                    )))
-                }
-            };
-
-            let next_peer_pks = match record_values.remove(0) {
-                IValue::Array(ar_values) => {
-                    let array = ar_values
-                        .into_iter()
-                        .map(|v| match v {
-                            IValue::String(str) => Ok(str),
-                            v => Err(ResultError(format!(
-                                "expected string for next_peer_pks, got {:?}",
-                                v
-                            ))),
-                        })
-                        .collect::<Result<Vec<String>>>()?;
-
-                    Ok(array)
-                }
-                v => Err(ResultError(format!(
-                    "expected array for next_peer_pks, got {:?}",
-                    v
-                ))),
-            }?;
-
-            Ok(StepperOutcome {
-                ret_code,
-                error_message,
-                data,
-                next_peer_pks,
-            })
-        }
-        v => {
-            return Err(ResultError(format!(
-                "expected record for StepperOutcome, got {:?}",
-                v
-            )))
-        }
     }
 }
 
