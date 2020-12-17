@@ -187,7 +187,9 @@ impl AquamarineVM {
             self.faas
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
-        let raw_outcome = make_outcome(result)?;
-        Ok(raw_outcome)
+        let outcome = StepperOutcome::from_ivalues(result)
+            .map_err(AquamarineVMError::StepperResultDeError)?;
+
+        Ok(outcome)
     }
 }
