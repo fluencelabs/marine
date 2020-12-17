@@ -191,8 +191,8 @@ impl AquamarineVM {
         let args = vec![
             IValue::String(init_user_id.into()),
             IValue::String(aqua.into()),
-            IValue::String(prev_data.into()),
-            IValue::String(data.into()),
+            IValue::Array(prev_data.into()),
+            IValue::Array(data.into()),
         ];
 
         let result =
