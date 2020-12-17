@@ -53,7 +53,7 @@ dependencies = [
 name = "arguments-passing-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "safe-transmute",
 ]
 
@@ -67,7 +67,7 @@ checksum = "a4c527152e37cf757a3f78aae5a06fbeefdb07ccc535c980a3208ee3060dd544"
 name = "arrays-passing-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "safe-transmute",
 ]
 
@@ -184,7 +184,7 @@ checksum = "0e4cec68f03f32e44924783795810fa50a7035d8c8ebe78580ad7e6c703fba38"
 name = "call_parameters"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
@@ -406,7 +406,7 @@ dependencies = [
 name = "curl_adapter"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
 ]
 
@@ -611,7 +611,7 @@ name = "facade"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
 ]
 
@@ -734,10 +734,10 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#581ce9063e2b7a3a5af03b647e87586dfce6bfad"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
- "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
- "fluence-sdk-main 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-main 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
@@ -790,9 +790,9 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#581ce9063e2b7a3a5af03b647e87586dfce6bfad"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
- "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
@@ -809,9 +809,9 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#581ce9063e2b7a3a5af03b647e87586dfce6bfad"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
- "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
  "serde",
 ]
@@ -833,7 +833,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32#581ce9063e2b7a3a5af03b647e87586dfce6bfad"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1197,7 +1197,7 @@ dependencies = [
 name = "inner-records-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "safe-transmute",
 ]
 
@@ -1236,7 +1236,7 @@ dependencies = [
 name = "ipfs-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
 ]
 
@@ -1244,7 +1244,7 @@ dependencies = [
 name = "ipfs-pure"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
 ]
 
@@ -1323,7 +1323,7 @@ checksum = "1482821306169ec4d07f6aca392a4681f66c75c9918aa49641a2595db64053cb"
 name = "local_storage"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
 ]
 
@@ -1859,7 +1859,7 @@ dependencies = [
 name = "record-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "test-record",
 ]
 
@@ -1867,7 +1867,7 @@ dependencies = [
 name = "record-pure"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "test-record",
 ]
 
@@ -2286,7 +2286,7 @@ dependencies = [
 name = "test-record"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
@@ -2742,7 +2742,7 @@ checksum = "7e7811dd7f9398f14cc76efd356f98f03aa30419dea46aa810d71e819fc97158"
 name = "wasm-greeting"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=logger-i32)",
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
