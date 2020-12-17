@@ -183,9 +183,11 @@ impl AquamarineVM {
         &mut self,
         init_user_id: impl Into<String>,
         aqua: impl Into<String>,
-        prev_data: impl Into<String>,
-        data: impl Into<String>,
+        prev_data: impl Into<Vec<u8>>,
+        data: impl Into<Vec<u8>>,
     ) -> Result<StepperOutcome> {
+        let prev_data = into_ibytes_array(prev_data.into_bytes());
+        let data = into_ibytes_array(data.into());
         let args = vec![
             IValue::String(init_user_id.into()),
             IValue::String(aqua.into()),
