@@ -22,25 +22,7 @@ jobs:
           cargo fmt --all -- --check --color always
           cargo +nightly check -v --all-features
 
-
-          cd ./examples/call_parameters/
-          ./build.sh
-
-          cd ../greeting/
-          ./build.sh
-
-          cd ../ipfs-node/
-          ./build.sh
-
-          cd ../records/
-          ./build.sh
-
-          cd ../url-downloader/
-          ./build.sh
-
-          cd ../../fluence-faas/tests/wasm_tests/
-
-          cd ../../
+          (cd ./examples; ./build.sh)
 
           cargo +nightly test --release -v --all-features
           cargo +nightly clippy -v
