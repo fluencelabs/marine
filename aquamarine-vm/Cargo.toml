@@ -12,6 +12,7 @@ path = "src/lib.rs"
 
 [dependencies]
 fluence-faas = { path = "../fluence-faas", version = "0.1.11" }
+stepper-interface = { git = "https://github.com/fluencelabs/aquamarine", branch = "new_stepper_outcome" }
 
 maplit = "1.0.2"
 serde_json = "1.0.57"
