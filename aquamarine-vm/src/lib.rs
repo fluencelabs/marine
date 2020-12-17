@@ -27,13 +27,10 @@
 mod aquamarine_stepper_vm;
 mod config;
 mod errors;
-mod stepper_outcome;
 
 pub use aquamarine_stepper_vm::AquamarineVM;
 pub use config::AquamarineVMConfig;
 pub use errors::AquamarineVMError;
-pub use stepper_outcome::StepperOutcome;
-pub use stepper_outcome::StepperError;
 
 // Re-exports
 pub use fluence_faas::HostExportedFunc;

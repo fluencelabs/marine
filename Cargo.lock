@@ -47,6 +47,7 @@ dependencies = [
  "maplit",
  "serde",
  "serde_json",
+ "stepper-interface",
 ]
 
 [[package]]
@@ -734,7 +735,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
+source = "git+https://github.com/fluencelabs/rust-sdk#8a2570bbc630b2a519aee146ac6c5a52d5afe6cd"
 dependencies = [
  "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "fluence-sdk-main 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
@@ -790,7 +791,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
+source = "git+https://github.com/fluencelabs/rust-sdk#8a2570bbc630b2a519aee146ac6c5a52d5afe6cd"
 dependencies = [
  "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
@@ -809,7 +810,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
+source = "git+https://github.com/fluencelabs/rust-sdk#8a2570bbc630b2a519aee146ac6c5a52d5afe6cd"
 dependencies = [
  "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
@@ -833,7 +834,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
+source = "git+https://github.com/fluencelabs/rust-sdk#8a2570bbc630b2a519aee146ac6c5a52d5afe6cd"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2200,6 +2201,16 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
+name = "stepper-interface"
+version = "0.1.0"
+source = "git+https://github.com/fluencelabs/aquamarine?branch=new_stepper_outcome#7b70f015be7297f1d53336d64d2119148b1d44cc"
+dependencies = [
+ "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+ "serde",
+ "wasmer-interface-types-fl",
+]
 
 [[package]]
 name = "strsim"
