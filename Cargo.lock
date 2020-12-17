@@ -735,7 +735,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#8a2570bbc630b2a519aee146ac6c5a52d5afe6cd"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
  "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "fluence-sdk-main 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
@@ -791,7 +791,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#8a2570bbc630b2a519aee146ac6c5a52d5afe6cd"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
  "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
@@ -810,7 +810,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#8a2570bbc630b2a519aee146ac6c5a52d5afe6cd"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
  "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
@@ -834,7 +834,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#8a2570bbc630b2a519aee146ac6c5a52d5afe6cd"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
  "proc-macro2",
  "quote",
