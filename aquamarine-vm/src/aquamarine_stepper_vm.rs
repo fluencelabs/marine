@@ -137,7 +137,7 @@ fn make_faas_config(
     aquamarine_wasm_file: &str,
     call_service: HostImportDescriptor,
     current_peer_id: String,
-    logging_mask: i64,
+    logging_mask: i32,
 ) -> FaaSConfig {
     use fluence_faas::FaaSModuleConfig;
     use maplit::hashmap;
