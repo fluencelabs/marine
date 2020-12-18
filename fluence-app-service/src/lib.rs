@@ -66,3 +66,4 @@ pub use fluence_faas::from_interface_values;
 pub use fluence_faas::vec1;
 
 pub use fluence_faas::CallParameters;
+pub use fluence_faas::SecurityTetraplet;

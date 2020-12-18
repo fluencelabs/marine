@@ -725,20 +725,20 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "573e8c4ab833d4a69ce87cf1638256465940ebd062c22b3e12a22beb4527c3bb"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
- "fluence-sdk-macro 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
- "fluence-sdk-main 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-main 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
 name = "fluence"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "573e8c4ab833d4a69ce87cf1638256465940ebd062c22b3e12a22beb4527c3bb"
 dependencies = [
- "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-main 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -763,7 +763,7 @@ dependencies = [
  "env_logger 0.7.1",
  "fce",
  "fce-utils",
- "fluence-sdk-main 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=tetraplets)",
  "itertools",
  "log",
  "once_cell",
@@ -782,6 +782,22 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.11"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
+dependencies = [
+ "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+]
+
+[[package]]
+name = "fluence-sdk-macro"
+version = "0.2.11"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=tetraplets#7bd2341ded949f161a13a05eecac5aa3b0284c71"
+dependencies = [
+ "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=tetraplets)",
+]
+
+[[package]]
+name = "fluence-sdk-macro"
+version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "348397aaa898e0bcd1554e71add917b400542684f0d416ef9cc8693da7daba48"
 dependencies = [
@@ -789,11 +805,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-macro"
+name = "fluence-sdk-main"
 version = "0.2.11"
 source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
- "fluence-sdk-wit 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
+ "log",
+ "serde",
+]
+
+[[package]]
+name = "fluence-sdk-main"
+version = "0.2.11"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=tetraplets#7bd2341ded949f161a13a05eecac5aa3b0284c71"
+dependencies = [
+ "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk?branch=tetraplets)",
+ "log",
+ "serde",
 ]
 
 [[package]]
@@ -808,20 +836,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-main"
-version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
-dependencies = [
- "fluence-sdk-macro 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
- "log",
- "serde",
-]
-
-[[package]]
 name = "fluence-sdk-wit"
 version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef3b20f7cd8ac6ee02a0ee7abd62f9339a236520430c0c702802149dc221555a"
+source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -834,7 +851,21 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.11"
-source = "git+https://github.com/fluencelabs/rust-sdk#31dc0a30dfd05144439c63d3fc3aae93636de06c"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=tetraplets#7bd2341ded949f161a13a05eecac5aa3b0284c71"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+ "uuid",
+]
+
+[[package]]
+name = "fluence-sdk-wit"
+version = "0.2.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef3b20f7cd8ac6ee02a0ee7abd62f9339a236520430c0c702802149dc221555a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2205,7 +2236,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stepper-interface"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/aquamarine#0f9ec42b1ab161761f2c609ddc2c95bad5b3e696"
+source = "git+https://github.com/fluencelabs/aquamarine#7371d84bff89e054c029845720e4bccd99404e6b"
 dependencies = [
  "fluence 0.2.11 (git+https://github.com/fluencelabs/rust-sdk)",
  "serde",
