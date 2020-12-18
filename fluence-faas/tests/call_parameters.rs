@@ -48,6 +48,7 @@ pub fn call_parameters() {
                 call_id: call_id.to_string(),
                 user_name: user_name.to_string(),
                 application_id: application_id.to_string(),
+                tetraplets: vec![],
             },
         )
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
