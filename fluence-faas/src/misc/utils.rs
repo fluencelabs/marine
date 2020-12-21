@@ -68,9 +68,7 @@ fn create_call_parameters_import(
     call_parameters: Rc<RefCell<fluence_sdk_main::CallParameters>>,
 ) -> HostImportDescriptor {
     let call_parameters_closure = move |_ctx: &mut Ctx, _args: Vec<IValue>| {
-        println!("call parameters: {:?}", call_parameters);
         let result = crate::to_interface_value(call_parameters.borrow().deref()).unwrap();
-        println!("result: {:?}", result);
         Some(result)
     };
 
