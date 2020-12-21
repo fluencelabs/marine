@@ -39,18 +39,17 @@ pub fn call_parameters() {
     let user_name = "root";
     let application_id = "0x31337";
 
+    let tetraplet = fluence_sdk_main::SecurityTetraplet::default();
+
+    let call_parameters = fluence_sdk_main::CallParameters {
+        call_id: call_id.to_string(),
+        user_name: user_name.to_string(),
+        application_id: application_id.to_string(),
+        tetraplets: vec![vec![tetraplet]],
+    };
+
     let result = faas
-        .call_with_ivalues(
-            "call_parameters",
-            "call_parameters",
-            &[],
-            fluence_sdk_main::CallParameters {
-                call_id: call_id.to_string(),
-                user_name: user_name.to_string(),
-                application_id: application_id.to_string(),
-                tetraplets: vec![],
-            },
-        )
+        .call_with_ivalues("call_parameters", "call_parameters", &[], call_parameters)
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
 
     assert_eq!(
