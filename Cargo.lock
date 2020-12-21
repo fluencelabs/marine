@@ -2205,7 +2205,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stepper-interface"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/aquamarine?branch=wit#839008fb8b42abe4cab18f85db49766341a52326"
+source = "git+https://github.com/fluencelabs/aquamarine#b967a63abca9742d6764e9b27926025d5e2b2efb"
 dependencies = [
  "fluence 0.2.11",
  "serde",
@@ -2297,7 +2297,7 @@ dependencies = [
 name = "test-record"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.11",
+ "fluence 0.2.12",
 ]
 
 [[package]]
