@@ -9,4 +9,4 @@ name = "greeting"
 path = "src/main.rs"
 
 [dependencies]
-fluence = "=0.2.12"
+fluence = "=0.2.13"

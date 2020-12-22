@@ -9,5 +9,5 @@ name = "ipfs_pure"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { version = "=0.2.12", features = ["logger"]}
+fluence = { version = "=0.2.13", features = ["logger"]}
 log = "0.4.11"
