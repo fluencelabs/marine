@@ -22,5 +22,13 @@ pub fn main() {}
 #[cfg(target_arch = "wasm32")]
 pub fn call_parameters() -> String {
     let cp = fluence::get_call_parameters();
-    format!("{}\n{}\n{}", cp.call_id, cp.user_name, cp.application_id)
+    format!(
+        "{}\n{}\n{}\n{}\n{}\n{:?}",
+        cp.init_peer_id,
+        cp.service_id,
+        cp.service_creator_peer_id,
+        cp.host_id,
+        cp.particle_id,
+        cp.tetraplets
+    )
 }

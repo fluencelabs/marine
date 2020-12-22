@@ -35,17 +35,22 @@ pub fn call_parameters() {
     let mut faas = FluenceFaaS::with_raw_config(call_parameters_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let call_id = "0x1337";
-    let user_name = "root";
-    let application_id = "0x31337";
+    let init_peer_id = "init_peer_id";
+    let service_id = "service_id";
+    let service_creator_peer_id = "service_creator_peer_id";
+    let host_id = "host_id";
+    let particle_id = "particle_id";
 
     let tetraplet = fluence_sdk_main::SecurityTetraplet::default();
+    let tetraplets = vec![vec![tetraplet]];
 
     let call_parameters = fluence_sdk_main::CallParameters {
-        call_id: call_id.to_string(),
-        user_name: user_name.to_string(),
-        application_id: application_id.to_string(),
-        tetraplets: vec![vec![tetraplet]],
+        init_peer_id: init_peer_id.to_string(),
+        service_id: service_id.to_string(),
+        service_creator_peer_id: service_creator_peer_id.to_string(),
+        host_id: host_id.to_string(),
+        particle_id: particle_id.to_string(),
+        tetraplets: tetraplets.clone(),
     };
 
     let result = faas
@@ -55,8 +60,8 @@ pub fn call_parameters() {
     assert_eq!(
         result,
         vec![IValue::String(format!(
-            "{}\n{}\n{}",
-            call_id, user_name, application_id
+            "{}\n{}\n{}\n{}\n{}\n{:?}",
+            init_peer_id, service_id, service_creator_peer_id, host_id, particle_id, tetraplets
         ))]
     );
 }
