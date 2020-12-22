@@ -111,7 +111,7 @@ fn json_value_to_ivalue<'a>(
     let arg_type = arg_types.next().unwrap().1;
     let ivalue = match json_value {
         // if there is an array with only one element try to implicitly flatten it,
-        // this is needed mostly because of jsonpath lib returns Vec<&JValue> and
+        // this is needed mostly because jsonpath lib returns Vec<&JValue> and
         // could be changed in future
         JValue::Array(mut json_array) if json_array.len() == 1 => {
             jvalue_to_ivalue(json_array.remove(0), arg_type, &HashMap::new())?
