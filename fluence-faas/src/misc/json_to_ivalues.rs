@@ -101,12 +101,24 @@ fn json_value_to_ivalue<'a>(
 ) -> Result<Vec<IValue>> {
     if arg_types.len() != 1 {
         return Err(ArgDeError(format!(
-            "the called function has the following signature: {:?}, but only one string argument is provided",
-            arg_types.collect::<Vec<_>>()
+            "the called function has the following signature: '{:?}', but this argument '{:?}' is provided",
+            arg_types.collect::<Vec<_>>(),
+            json_value,
         )));
     }
 
-    let ivalue = jvalue_to_ivalue(json_value, arg_types.next().unwrap().1, &HashMap::new())?;
+    // unwrap is safe here because iterator size's been checked
+    let arg_type = arg_types.next().unwrap().1;
+    let ivalue = match json_value {
+        // if there is an array with only one element try to implicitly flatten it,
+        // this is needed mostly because of jsonpath lib returns Vec<&JValue> and
+        // could be changed in future
+        JValue::Array(mut json_array) if json_array.len() == 1 => {
+            jvalue_to_ivalue(json_array.remove(0), arg_type, &HashMap::new())?
+        }
+        _ => jvalue_to_ivalue(json_value, arg_type, &HashMap::new())?,
+    };
+
     Ok(vec![ivalue])
 }
 

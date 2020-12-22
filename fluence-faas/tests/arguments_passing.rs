@@ -359,6 +359,9 @@ pub fn i32_type() {
 
     let result4 = call_faas!(faas, "arguments_passing_pure", "i32_type", json!(1));
     assert_eq!(result4, right_result);
+
+    let result5 = call_faas!(faas, "arguments_passing_pure", "i32_type", json!([1]));
+    assert_eq!(result5, right_result);
 }
 
 #[test]
@@ -393,6 +396,9 @@ pub fn i64_type() {
 
     let result4 = call_faas!(faas, "arguments_passing_pure", "i64_type", json!(1));
     assert_eq!(result4, right_result);
+
+    let result5 = call_faas!(faas, "arguments_passing_pure", "i64_type", json!([1]));
+    assert_eq!(result5, right_result);
 }
 
 #[test]
