@@ -360,7 +360,7 @@ pub fn i32_type() {
     let result4 = call_faas!(faas, "arguments_passing_pure", "i32_type", json!(1));
     assert_eq!(result4, right_result);
 
-    let result5 = call_faas!(faas, "arguments_passing_pure", "i32_type", json!([1]));
+    let result5 = call_faas!(faas, "arguments_passing_pure", "i32_type", json!([[1]]));
     assert_eq!(result5, right_result);
 }
 
@@ -613,6 +613,14 @@ pub fn bytearray_type() {
         json!([[0x13, 0x37]])
     );
     assert_eq!(result4, right_result);
+
+    let result5 = call_faas!(
+        faas,
+        "arguments_passing_pure",
+        "bytearray_type",
+        json!([[0x13]])
+    );
+    assert_eq!(result5, json!([0x13, 1, 1]));
 }
 
 #[test]
