@@ -9,6 +9,6 @@ name = "facade"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { version = "=0.2.12", features = ["logger"]}
+fluence = { version = "=0.2.13", features = ["logger"]}
 anyhow = "1.0.31"
 log = "0.4.8"
