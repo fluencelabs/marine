@@ -37,8 +37,8 @@ pub(crate) fn json_to_ivalues<'a, 'b>(
         JValue::Array(json_array) => {
             json_array_to_ivalues(json_array, arg_types.map(|arg| arg.1), &record_types)?
         }
-        JValue::Null => json_null_to_ivalue(arg_types)?,
-        json_value => json_value_to_ivalue(json_value, arg_types)?,
+        JValue::Null => json_null_to_ivalues(arg_types)?,
+        json_value => json_value_to_ivalues(json_value, arg_types)?,
     };
 
     Ok(ivalues)
@@ -95,23 +95,27 @@ fn json_array_to_ivalues<'a, 'b>(
 }
 
 /// Convert json value (Number, String or Bool) to an array of ivalues according to the supplied argument types.
-fn json_value_to_ivalue<'a>(
+fn json_value_to_ivalues<'a>(
     json_value: JValue,
     mut arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
 ) -> Result<Vec<IValue>> {
     if arg_types.len() != 1 {
         return Err(ArgDeError(format!(
-            "the called function has the following signature: {:?}, but only one string argument is provided",
-            arg_types.collect::<Vec<_>>()
+            "called function has the following signature: '{:?}', and it isn't suitable for an argument '{:?}' provided",
+            arg_types.collect::<Vec<_>>(),
+            json_value,
         )));
     }
 
-    let ivalue = jvalue_to_ivalue(json_value, arg_types.next().unwrap().1, &HashMap::new())?;
+    // unwrap is safe here because iterator size's been checked
+    let arg_type = arg_types.next().unwrap().1;
+    let ivalue = jvalue_to_ivalue(json_value, arg_type, &HashMap::new())?;
+
     Ok(vec![ivalue])
 }
 
 /// Convert json Null to an empty array of ivalues.
-fn json_null_to_ivalue<'a>(
+fn json_null_to_ivalues<'a>(
     arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
 ) -> Result<Vec<IValue>> {
     if arg_types.len() != 0 {
@@ -129,12 +133,17 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &RecordTypes) -> R
     macro_rules! to_ivalue(
         ($json_value:expr, $ty:ident) => {
             {
-                let value = serde_json::from_value($json_value).map_err(|e| {
-                    ArgDeError(format!(
-                        "error {:?} occurred while deserialize output result to a json value",
-                        e
-                    ))
-                })?;
+                let value = match $json_value {
+                    // if there is an array with only one element try to implicitly flatten it,
+                    // this is needed mostly because jsonpath lib returns Vec<&JValue> and
+                    // could be changed in future
+                    JValue::Array(mut json_array) if json_array.len() == 1 => {
+                        serde_json::from_value(json_array.remove(0))
+                    },
+                    jvalue => serde_json::from_value(jvalue),
+                }.map_err(|e|
+                    ArgDeError(format!("error {:?} occurred while deserialize output result to a json value",e))
+                )?;
 
                 Ok(IValue::$ty(value))
             }
