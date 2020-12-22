@@ -101,7 +101,7 @@ fn json_value_to_ivalue<'a>(
 ) -> Result<Vec<IValue>> {
     if arg_types.len() != 1 {
         return Err(ArgDeError(format!(
-            "the called function has the following signature: '{:?}', but this argument '{:?}' is provided",
+            "called function has the following signature: '{:?}', and it isn't suitable an argument '{:?}' provided",
             arg_types.collect::<Vec<_>>(),
             json_value,
         )));
