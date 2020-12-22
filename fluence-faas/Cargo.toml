@@ -1,13 +1,13 @@
 [package]
 name = "fluence-faas"
 description = "Fluence FaaS"
-version = "0.1.15"
+version = "0.1.16"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-fce = { path = "../engine", version = "0.1.13" }
+fce = { path = "../engine", version = "0.1.14" }
 fce-utils = { path = "../crates/utils", version = "0.1.0" }
 fluence-sdk-main = { version = "=0.2.12", features = ["logger"] }
 
