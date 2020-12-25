@@ -27,13 +27,27 @@ use stepper_interface::StepperOutcome;
 use std::path::PathBuf;
 use std::cell::{RefCell};
 use std::rc::Rc;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::borrow::Cow;
 
 const CALL_SERVICE_NAME: &str = "call_service";
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
 
-unsafe impl Send for AquamarineVM {}
+unsafe impl Send for SendSafeFaaS {}
+
+struct SendSafeFaaS(FluenceFaaS);
+impl Deref for SendSafeFaaS {
+    type Target = FluenceFaaS;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl DerefMut for SendSafeFaaS {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 #[derive(Debug, Default)]
 pub struct ParticleParams {
@@ -42,7 +56,7 @@ pub struct ParticleParams {
 }
 
 pub struct AquamarineVM {
-    faas: FluenceFaaS,
+    faas: SendSafeFaaS,
     particle_data_store: PathBuf,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
@@ -92,7 +106,7 @@ impl AquamarineVM {
             .map_err(|e| InvalidDataStorePath(e, particle_data_store.clone()))?;
 
         let aqua_vm = Self {
-            faas,
+            faas: SendSafeFaaS(faas),
             particle_data_store,
             wasm_filename,
             current_particle,
