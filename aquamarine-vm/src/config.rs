@@ -16,10 +16,11 @@
 
 use std::path::PathBuf;
 
-use crate::aquamarine_stepper_vm::ParticleParams;
+use crate::aquamarine_stepper_vm::ParticleParameters;
 use crate::IValue;
 
-pub type CallServiceClosure = Box<dyn Fn(ParticleParams, Vec<IValue>) -> Option<IValue> + 'static>;
+pub type CallServiceClosure =
+    Box<dyn Fn(ParticleParameters, Vec<IValue>) -> Option<IValue> + 'static>;
 
 /// Describes behaviour of the Aquamarine VM stepper.
 pub struct AquamarineVMConfig {

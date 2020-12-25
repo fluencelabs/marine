@@ -49,7 +49,7 @@ impl DerefMut for SendSafeFaaS {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct ParticleParams {
+pub struct ParticleParameters {
     pub init_user_id: String,
     pub particle_id: String,
 }
@@ -60,7 +60,7 @@ pub struct AquamarineVM {
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
     /// information about the particle that is being executed at the moment
-    current_particle: Arc<Mutex<ParticleParams>>,
+    current_particle: Arc<Mutex<ParticleParameters>>,
 }
 
 impl AquamarineVM {
@@ -68,7 +68,7 @@ impl AquamarineVM {
     pub fn new(config: AquamarineVMConfig) -> Result<Self> {
         use AquamarineVMError::InvalidDataStorePath;
 
-        let current_particle: Arc<Mutex<ParticleParams>> = <_>::default();
+        let current_particle: Arc<Mutex<ParticleParameters>> = <_>::default();
         let call_service = config.call_service;
         let params = current_particle.clone();
         let call_service_closure: HostExportedFunc = Box::new(move |_, ivalues: Vec<IValue>| {
