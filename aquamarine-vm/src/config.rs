@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-use fluence_faas::HostImportDescriptor;
 use std::path::PathBuf;
+
+use crate::aquamarine_stepper_vm::ParticleParams;
+use crate::IValue;
+
+type CallServiceClosure = Box<dyn Fn(&ParticleParams, Vec<IValue>) -> Option<IValue> + 'static>;
 
 /// Describes behaviour of the Aquamarine VM stepper.
 pub struct AquamarineVMConfig {
@@ -23,7 +27,7 @@ pub struct AquamarineVMConfig {
     pub aquamarine_wasm_path: PathBuf,
 
     /// Descriptor of a closure that will be invoked on call_service call from Aquamarine stepper.
-    pub call_service: HostImportDescriptor,
+    pub call_service: CallServiceClosure,
 
     /// Current peer id.
     pub current_peer_id: String,

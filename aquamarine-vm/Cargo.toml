@@ -15,8 +15,9 @@ fluence-faas = { path = "../fluence-faas", version = "0.1.18" }
 stepper-interface = { git = "https://github.com/fluencelabs/aquamarine", branch = "master" }
 
 maplit = "1.0.2"
-serde_json = "1.0.57"
-serde = "1.0.116"
+serde_json = "1.0.60"
+serde = "1.0.118"
+log = "0.4.11"
 
 [features]
 # enable raw AquamarineVM API intended for testing

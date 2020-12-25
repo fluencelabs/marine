@@ -14,29 +14,39 @@
  * limitations under the License.
  */
 
-use crate::Result;
+use crate::{Result, IType};
 use crate::AquamarineVMError;
 use crate::config::AquamarineVMConfig;
 
-use fluence_faas::FaaSConfig;
+use fluence_faas::{FaaSConfig, HostExportedFunc};
 use fluence_faas::FluenceFaaS;
 use fluence_faas::HostImportDescriptor;
 use fluence_faas::IValue;
 use stepper_interface::StepperOutcome;
 
 use std::path::PathBuf;
-use std::path::Path;
+use std::cell::{RefCell};
+use std::rc::Rc;
+use std::ops::Deref;
+use std::borrow::Cow;
 
 const CALL_SERVICE_NAME: &str = "call_service";
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
 
 unsafe impl Send for AquamarineVM {}
 
+#[derive(Debug, Default)]
+pub struct ParticleParams {
+    pub init_peer_id: String,
+    pub particle_id: String,
+}
+
 pub struct AquamarineVM {
     faas: FluenceFaaS,
     particle_data_store: PathBuf,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
+    current_particle: Rc<RefCell<ParticleParams>>,
 }
 
 impl AquamarineVM {
@@ -44,12 +54,34 @@ impl AquamarineVM {
     pub fn new(config: AquamarineVMConfig) -> Result<Self> {
         use AquamarineVMError::InvalidDataStorePath;
 
+        let current_particle: Rc<RefCell<ParticleParams>> = <_>::default();
+        let call_service = config.call_service;
+        let params = current_particle.clone();
+        let call_service_closure: HostExportedFunc = Box::new(move |_, ivalues: Vec<IValue>| {
+            let params = params.deref().try_borrow();
+            match params {
+                Ok(params) => call_service(params.deref(), ivalues),
+                Err(err) => {
+                    let err = AquamarineVMError::BorrowParticleParams(err);
+                    log::error!("UNEXPECTED: {}", err);
+                    // TODO: return error to the stepper?
+                    None
+                }
+            }
+        });
+        let import_descriptor = HostImportDescriptor {
+            host_exported_func: call_service_closure,
+            argument_types: vec![IType::String, IType::String, IType::String, IType::String],
+            output_type: Some(IType::Record(0)),
+            error_handler: None,
+        };
+
         let (wasm_dir, wasm_filename) = split_dirname(config.aquamarine_wasm_path)?;
 
         let faas_config = make_faas_config(
             wasm_dir,
             &wasm_filename,
-            config.call_service,
+            import_descriptor,
             config.current_peer_id,
             config.logging_mask,
         );
@@ -63,6 +95,7 @@ impl AquamarineVM {
             faas,
             particle_data_store,
             wasm_filename,
+            current_particle,
         };
 
         Ok(aqua_vm)
@@ -73,11 +106,20 @@ impl AquamarineVM {
         init_user_id: impl Into<String>,
         aqua: impl Into<String>,
         data: impl Into<Vec<u8>>,
-        particle_id: impl AsRef<Path>,
+        particle_id: Cow<'_, str>,
     ) -> Result<StepperOutcome> {
         use AquamarineVMError::PersistDataError;
 
-        let prev_data_path = self.particle_data_store.join(particle_id);
+        match self.current_particle.try_borrow_mut() {
+            Ok(mut params) => params.particle_id = particle_id.to_string(),
+            Err(err) => {
+                let err = AquamarineVMError::BorrowMutParticleParams(err);
+                log::error!("UNEXPECTED: {}", err);
+                return Err(err);
+            }
+        }
+
+        let prev_data_path = self.particle_data_store.join(particle_id.deref());
         // TODO: check for errors related to invalid file content (such as invalid UTF8 string)
         let prev_data = std::fs::read_to_string(&prev_data_path).unwrap_or_default();
 
