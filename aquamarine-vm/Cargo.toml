@@ -18,6 +18,7 @@ maplit = "1.0.2"
 serde_json = "1.0.60"
 serde = "1.0.118"
 log = "0.4.11"
+parking_lot = "0.11.1"
 
 [features]
 # enable raw AquamarineVM API intended for testing

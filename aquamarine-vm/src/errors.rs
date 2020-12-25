@@ -19,7 +19,6 @@ use fluence_faas::FaaSError;
 use std::io::Error as IOError;
 use std::error::Error;
 use std::path::PathBuf;
-use std::cell::{BorrowError, BorrowMutError};
 
 #[derive(Debug)]
 pub enum AquamarineVMError {
@@ -41,18 +40,6 @@ pub enum AquamarineVMError {
         io_error: Option<IOError>,
         reason: &'static str,
     },
-
-    /// [[BorrowError]] and [[BorrowMutError] are very serious errors, and shouldn't happen. If happened,
-    /// that means RefCell invariants are broken – we have borrowed [[AquamarineVm::current_particle]] twice.
-    /// Running in several threads? I don't know how else that could be possible.
-    /// But if that happened, chances are that we must avoid using RefCell,
-    /// and switch to [[parking_lot::Mutex]] or [[crossbeam_utils::AtomicCell]]
-
-    /// try_borrow failed on [[AquamarineVm::current_particle]]
-    BorrowParticleParams(BorrowError),
-
-    /// try_borrow_mut failed on [[AquamarineVm::current_particle]]
-    BorrowMutParticleParams(BorrowMutError),
 }
 
 impl Error for AquamarineVMError {}
@@ -82,22 +69,6 @@ impl std::fmt::Display for AquamarineVMError {
                 "path to AIR interpreter .wasm ({:?}) is invalid: {}; IO Error: {:?}",
                 invalid_path, reason, io_error
             ),
-
-            AquamarineVMError::BorrowMutParticleParams(err) => {
-                write!(
-                    f,
-                    "RefCell::try_borrow_mut failed for AquamarineVm::current_particle: {}",
-                    err
-                )
-            }
-
-            AquamarineVMError::BorrowParticleParams(err) => {
-                write!(
-                    f,
-                    "RefCell::try_borrow failed for AquamarineVm::current_particle: {}",
-                    err
-                )
-            }
         }
     }
 }

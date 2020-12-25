@@ -25,10 +25,9 @@ use fluence_faas::IValue;
 use stepper_interface::StepperOutcome;
 
 use std::path::PathBuf;
-use std::cell::{RefCell};
-use std::rc::Rc;
 use std::ops::{Deref, DerefMut};
-use std::borrow::Cow;
+use std::sync::Arc;
+use parking_lot::{Mutex};
 
 const CALL_SERVICE_NAME: &str = "call_service";
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
@@ -49,9 +48,9 @@ impl DerefMut for SendSafeFaaS {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct ParticleParams {
-    pub init_peer_id: String,
+    pub init_user_id: String,
     pub particle_id: String,
 }
 
@@ -60,7 +59,8 @@ pub struct AquamarineVM {
     particle_data_store: PathBuf,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
-    current_particle: Rc<RefCell<ParticleParams>>,
+    /// information about the particle that is being executed at the moment
+    current_particle: Arc<Mutex<ParticleParams>>,
 }
 
 impl AquamarineVM {
@@ -68,20 +68,15 @@ impl AquamarineVM {
     pub fn new(config: AquamarineVMConfig) -> Result<Self> {
         use AquamarineVMError::InvalidDataStorePath;
 
-        let current_particle: Rc<RefCell<ParticleParams>> = <_>::default();
+        let current_particle: Arc<Mutex<ParticleParams>> = <_>::default();
         let call_service = config.call_service;
         let params = current_particle.clone();
         let call_service_closure: HostExportedFunc = Box::new(move |_, ivalues: Vec<IValue>| {
-            let params = params.deref().try_borrow();
-            match params {
-                Ok(params) => call_service(params.deref(), ivalues),
-                Err(err) => {
-                    let err = AquamarineVMError::BorrowParticleParams(err);
-                    log::error!("UNEXPECTED: {}", err);
-                    // TODO: return error to the stepper?
-                    None
-                }
-            }
+            let params = {
+                let lock = params.lock();
+                lock.deref().clone()
+            };
+            call_service(params, ivalues)
         });
         let import_descriptor = HostImportDescriptor {
             host_exported_func: call_service_closure,
@@ -120,31 +115,27 @@ impl AquamarineVM {
         init_user_id: impl Into<String>,
         aqua: impl Into<String>,
         data: impl Into<Vec<u8>>,
-        particle_id: Cow<'_, str>,
+        particle_id: impl Into<String>,
     ) -> Result<StepperOutcome> {
         use AquamarineVMError::PersistDataError;
 
-        match self.current_particle.try_borrow_mut() {
-            Ok(mut params) => params.particle_id = particle_id.to_string(),
-            Err(err) => {
-                let err = AquamarineVMError::BorrowMutParticleParams(err);
-                log::error!("UNEXPECTED: {}", err);
-                return Err(err);
-            }
-        }
+        let particle_id = particle_id.into();
+        let init_user_id = init_user_id.into();
 
-        let prev_data_path = self.particle_data_store.join(particle_id.deref());
+        let prev_data_path = self.particle_data_store.join(&particle_id);
         // TODO: check for errors related to invalid file content (such as invalid UTF8 string)
         let prev_data = std::fs::read_to_string(&prev_data_path).unwrap_or_default();
 
         let prev_data = into_ibytes_array(prev_data.into_bytes());
         let data = into_ibytes_array(data.into());
         let args = vec![
-            IValue::String(init_user_id.into()),
+            IValue::String(init_user_id.clone()),
             IValue::String(aqua.into()),
             IValue::Array(prev_data),
             IValue::Array(data),
         ];
+
+        self.update_current_particle(particle_id, init_user_id);
 
         let result =
             self.faas
@@ -158,6 +149,12 @@ impl AquamarineVM {
             .map_err(|e| PersistDataError(e, prev_data_path))?;
 
         Ok(outcome)
+    }
+
+    pub fn update_current_particle(&self, particle_id: String, init_user_id: String) {
+        let mut params = self.current_particle.lock();
+        params.particle_id = particle_id;
+        params.init_user_id = init_user_id;
     }
 }
 
