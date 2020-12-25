@@ -261,14 +261,7 @@ impl AquamarineVM {
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
     ) -> Result<StepperOutcome> {
-        let prev_data = into_ibytes_array(prev_data.into());
-        let data = into_ibytes_array(data.into());
-        let args = vec![
-            IValue::String(init_user_id.into()),
-            IValue::String(aqua.into()),
-            IValue::Array(prev_data.into()),
-            IValue::Array(data.into()),
-        ];
+        let args = prepare_args(prev_data.into(), data, init_user_id.into(), aqua);
 
         let result =
             self.faas
