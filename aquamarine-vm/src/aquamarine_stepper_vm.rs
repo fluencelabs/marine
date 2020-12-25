@@ -14,29 +14,57 @@
  * limitations under the License.
  */
 
-use crate::Result;
+use crate::{Result, IType, CallServiceClosure};
 use crate::AquamarineVMError;
 use crate::config::AquamarineVMConfig;
 
-use fluence_faas::FaaSConfig;
+use fluence_faas::{FaaSConfig, HostExportedFunc};
 use fluence_faas::FluenceFaaS;
 use fluence_faas::HostImportDescriptor;
 use fluence_faas::IValue;
 use stepper_interface::StepperOutcome;
 
 use std::path::PathBuf;
-use std::path::Path;
+use std::ops::{Deref, DerefMut};
+use std::sync::Arc;
+use parking_lot::{Mutex};
 
 const CALL_SERVICE_NAME: &str = "call_service";
 const CURRENT_PEER_ID_ENV_NAME: &str = "CURRENT_PEER_ID";
 
-unsafe impl Send for AquamarineVM {}
+/// A newtype needed to mark it as `unsafe impl Send`
+struct SendSafeFaaS(FluenceFaaS);
+
+/// Mark runtime as Send, so libp2p on the node (use-site) is happy
+unsafe impl Send for SendSafeFaaS {}
+
+impl Deref for SendSafeFaaS {
+    type Target = FluenceFaaS;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl DerefMut for SendSafeFaaS {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+/// Information about the particle that is being executed by the stepper at the moment
+#[derive(Debug, Default, Clone)]
+pub struct ParticleParameters {
+    pub init_user_id: String,
+    pub particle_id: String,
+}
 
 pub struct AquamarineVM {
-    faas: FluenceFaaS,
+    faas: SendSafeFaaS,
     particle_data_store: PathBuf,
     /// file name of the AIR interpreter .wasm
     wasm_filename: String,
+    /// information about the particle that is being executed at the moment
+    current_particle: Arc<Mutex<ParticleParameters>>,
 }
 
 impl AquamarineVM {
@@ -44,12 +72,14 @@ impl AquamarineVM {
     pub fn new(config: AquamarineVMConfig) -> Result<Self> {
         use AquamarineVMError::InvalidDataStorePath;
 
+        let current_particle: Arc<Mutex<ParticleParameters>> = <_>::default();
+        let call_service = call_service_descriptor(current_particle.clone(), config.call_service);
         let (wasm_dir, wasm_filename) = split_dirname(config.aquamarine_wasm_path)?;
 
         let faas_config = make_faas_config(
             wasm_dir,
             &wasm_filename,
-            config.call_service,
+            call_service,
             config.current_peer_id,
             config.logging_mask,
         );
@@ -60,9 +90,10 @@ impl AquamarineVM {
             .map_err(|e| InvalidDataStorePath(e, particle_data_store.clone()))?;
 
         let aqua_vm = Self {
-            faas,
+            faas: SendSafeFaaS(faas),
             particle_data_store,
             wasm_filename,
+            current_particle,
         };
 
         Ok(aqua_vm)
@@ -73,22 +104,23 @@ impl AquamarineVM {
         init_user_id: impl Into<String>,
         aqua: impl Into<String>,
         data: impl Into<Vec<u8>>,
-        particle_id: impl AsRef<Path>,
+        particle_id: impl Into<String>,
     ) -> Result<StepperOutcome> {
         use AquamarineVMError::PersistDataError;
 
-        let prev_data_path = self.particle_data_store.join(particle_id);
-        // TODO: check for errors related to invalid file content (such as invalid UTF8 string)
-        let prev_data = std::fs::read_to_string(&prev_data_path).unwrap_or_default();
+        let particle_id = particle_id.into();
+        let init_user_id = init_user_id.into();
 
-        let prev_data = into_ibytes_array(prev_data.into_bytes());
-        let data = into_ibytes_array(data.into());
-        let args = vec![
-            IValue::String(init_user_id.into()),
-            IValue::String(aqua.into()),
-            IValue::Array(prev_data),
-            IValue::Array(data),
-        ];
+        let prev_data_path = self.particle_data_store.join(&particle_id);
+        // TODO: check for errors related to invalid file content (such as invalid UTF8 string)
+        let prev_data = std::fs::read_to_string(&prev_data_path)
+            .unwrap_or_default()
+            .into_bytes();
+
+        let args = prepare_args(prev_data, data, init_user_id.clone(), aqua);
+
+        // Update ParticleParams with the new values so subsequent calls to `call_service` can use them
+        self.update_current_particle(particle_id, init_user_id);
 
         let result =
             self.faas
@@ -102,6 +134,49 @@ impl AquamarineVM {
             .map_err(|e| PersistDataError(e, prev_data_path))?;
 
         Ok(outcome)
+    }
+
+    fn update_current_particle(&self, particle_id: String, init_user_id: String) {
+        let mut params = self.current_particle.lock();
+        params.particle_id = particle_id;
+        params.init_user_id = init_user_id;
+    }
+}
+
+fn prepare_args(
+    prev_data: Vec<u8>,
+    data: impl Into<Vec<u8>>,
+    init_user_id: String,
+    aqua: impl Into<String>,
+) -> Vec<IValue> {
+    let prev_data = into_ibytes_array(prev_data);
+    let data = into_ibytes_array(data.into());
+
+    vec![
+        IValue::String(init_user_id),
+        IValue::String(aqua.into()),
+        IValue::Array(prev_data),
+        IValue::Array(data),
+    ]
+}
+
+fn call_service_descriptor(
+    params: Arc<Mutex<ParticleParameters>>,
+    call_service: CallServiceClosure,
+) -> HostImportDescriptor {
+    let call_service_closure: HostExportedFunc = Box::new(move |_, ivalues: Vec<IValue>| {
+        let params = {
+            let lock = params.lock();
+            lock.deref().clone()
+        };
+        call_service(params, ivalues)
+    });
+
+    HostImportDescriptor {
+        host_exported_func: call_service_closure,
+        argument_types: vec![IType::String, IType::String, IType::String, IType::String],
+        output_type: Some(IType::Record(0)),
+        error_handler: None,
     }
 }
 
@@ -186,14 +261,7 @@ impl AquamarineVM {
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
     ) -> Result<StepperOutcome> {
-        let prev_data = into_ibytes_array(prev_data.into());
-        let data = into_ibytes_array(data.into());
-        let args = vec![
-            IValue::String(init_user_id.into()),
-            IValue::String(aqua.into()),
-            IValue::Array(prev_data.into()),
-            IValue::Array(data.into()),
-        ];
+        let args = prepare_args(prev_data.into(), data, init_user_id.into(), aqua);
 
         let result =
             self.faas
