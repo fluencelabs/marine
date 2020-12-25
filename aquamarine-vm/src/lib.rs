@@ -27,6 +27,8 @@
 mod aquamarine_stepper_vm;
 mod config;
 mod errors;
+mod args;
+mod args_error;
 
 pub use aquamarine_stepper_vm::AquamarineVM;
 pub use aquamarine_stepper_vm::ParticleParameters;
