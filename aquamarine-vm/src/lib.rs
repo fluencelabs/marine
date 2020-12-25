@@ -30,6 +30,7 @@ mod errors;
 
 pub use aquamarine_stepper_vm::AquamarineVM;
 pub use aquamarine_stepper_vm::ParticleParams;
+pub use config::CallServiceClosure;
 pub use config::AquamarineVMConfig;
 pub use errors::AquamarineVMError;
 
