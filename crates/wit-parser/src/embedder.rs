@@ -21,8 +21,8 @@ use walrus::ModuleConfig;
 use wasmer_wit::{
     ast::Interfaces,
     decoders::wat::{parse, Buffer},
-    encoders::binary::ToBytes,
 };
+use wasmer_wit::ToBytes;
 
 use std::path::PathBuf;
 

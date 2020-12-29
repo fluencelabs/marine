@@ -18,9 +18,9 @@ use crate::Result;
 use crate::WITParserError;
 use fce_wit_interfaces::FCEWITInterfaces;
 
-use wasmer_wit::types::RecordType as IRecordType;
+use wasmer_wit::IRecordType;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
-use wasmer_wit::types::InterfaceType as IType;
+use wasmer_wit::IType;
 use serde::Serialize;
 use serde::Deserialize;
 

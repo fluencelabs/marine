@@ -23,13 +23,13 @@ mod fce_module;
 
 pub use wit_instance::RecordTypes;
 
-pub use wasmer_wit::types::InterfaceType as IType;
-pub use wasmer_wit::types::RecordType as IRecordType;
+pub use wasmer_wit::IType;
+pub use wasmer_wit::IRecordType;
 pub use wasmer_wit::ast::FunctionArg as IFunctionArg;
-pub use wasmer_wit::values::InterfaceValue as IValue;
+pub use wasmer_wit::IValue;
 pub use fce_module::FCEFunctionSignature;
-pub use wasmer_wit::values::from_interface_values;
-pub use wasmer_wit::values::to_interface_value;
+pub use wasmer_wit::from_interface_values;
+pub use wasmer_wit::to_interface_value;
 
 pub(crate) use fce_module::FCEModule;
 pub(self) use wasmer_core::types::Type as WType;

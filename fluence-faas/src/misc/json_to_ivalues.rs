@@ -21,7 +21,7 @@ use crate::FaaSError::JsonArgumentsDeserializationError as ArgDeError;
 
 use fce::RecordTypes;
 use serde_json::Value as JValue;
-use wasmer_wit::vec1::Vec1;
+use wasmer_wit::NEVec;
 
 use std::collections::HashMap;
 use std::iter::ExactSizeIterator;
@@ -197,7 +197,7 @@ fn json_record_type_to_ivalue(
     json_value: JValue,
     record_type_id: &u64,
     record_types: &RecordTypes,
-) -> Result<Vec1<IValue>> {
+) -> Result<NEVec<IValue>> {
     let record_type = record_types.get(record_type_id).ok_or_else(|| {
         ArgDeError(format!(
             "record with type id `{}` wasn't found",
@@ -206,7 +206,7 @@ fn json_record_type_to_ivalue(
     })?;
 
     match json_value {
-        JValue::Object(json_map) => Ok(Vec1::new(json_map_to_ivalues(
+        JValue::Object(json_map) => Ok(NEVec::new(json_map_to_ivalues(
             json_map,
             record_type
                 .fields
@@ -215,7 +215,7 @@ fn json_record_type_to_ivalue(
             record_types,
         )?)
         .unwrap()),
-        JValue::Array(json_array) => Ok(Vec1::new(json_array_to_ivalues(
+        JValue::Array(json_array) => Ok(NEVec::new(json_array_to_ivalues(
             json_array,
             record_type.fields.iter().map(|field| (&field.ty)),
             record_types,

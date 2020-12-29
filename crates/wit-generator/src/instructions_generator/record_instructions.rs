@@ -20,9 +20,9 @@ use crate::Result;
 
 use fluence_sdk_wit::AstRecordItem;
 
-use wasmer_wit::types::RecordFieldType as IRecordFieldType;
-use wasmer_wit::types::RecordType;
-use wasmer_wit::vec1::Vec1;
+use wasmer_wit::IRecordFieldType;
+use wasmer_wit::IRecordType;
+use wasmer_wit::NEVec;
 
 impl WITGenerator for AstRecordItem {
     fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
@@ -35,14 +35,14 @@ impl WITGenerator for AstRecordItem {
             })
             .collect::<Vec<_>>();
 
-        let fields = Vec1::new(fields).map_err(|_| {
+        let fields = NEVec::new(fields).map_err(|_| {
             crate::errors::WITGeneratorError::CorruptedRecord(format!(
                 "serialized record with name '{}' contains no fields",
                 self.name
             ))
         })?;
 
-        let new_record_type = RecordType {
+        let new_record_type = IRecordType {
             name: self.name.clone(),
             fields,
         };

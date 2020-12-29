@@ -66,7 +66,7 @@ pub use fce::HostImportDescriptor;
 pub use fce::HostImportError;
 pub use fce::to_interface_value;
 pub use fce::from_interface_values;
-pub use fce::vec1;
+pub use fce::ne_vec;
 
 pub use fluence_sdk_main::CallParameters;
 pub use fluence_sdk_main::SecurityTetraplet;

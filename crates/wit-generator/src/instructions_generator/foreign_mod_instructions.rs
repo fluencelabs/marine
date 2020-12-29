@@ -279,7 +279,7 @@ impl ForeignModInstructionGenerator for ParsedType {
 }
 
 use fluence_sdk_wit::RustType;
-use wasmer_wit::types::InterfaceType as IType;
+use wasmer_wit::IType;
 
 pub fn to_raw_input_types(arg: &(String, ParsedType)) -> Vec<IFunctionArg> {
     match arg.1 {
