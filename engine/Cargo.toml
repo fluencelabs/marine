@@ -1,7 +1,7 @@
 [package]
 name = "fce"
 description = "Fluence Compute Engine"
-version = "0.1.14"
+version = "0.1.15"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -11,14 +11,14 @@ name = "fce"
 path = "src/lib.rs"
 
 [dependencies]
-fce-wit-interfaces = { path = "../crates/wit-interfaces", version = "0.1.9" }
-fce-wit-parser = { path = "../crates/wit-parser", version = "0.1.11" }
+fce-wit-interfaces = { path = "../crates/wit-interfaces", version = "0.1.10" }
+fce-wit-parser = { path = "../crates/wit-parser", version = "0.1.12" }
 fce-utils = { path = "../crates/utils", version = "0.1.0" }
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
-wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.20" }
+wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.24" }
 wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 
 multimap = "0.8.1"

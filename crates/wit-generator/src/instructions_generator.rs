@@ -21,9 +21,9 @@ mod utils;
 
 use crate::Result;
 
-use wasmer_wit::types::InterfaceType as IType;
+use wasmer_wit::IType;
 use wasmer_wit::ast::Interfaces;
-use wasmer_wit::types::RecordType;
+use wasmer_wit::IRecordType;
 
 use std::rc::Rc;
 
@@ -56,7 +56,7 @@ impl<'a> WITResolver<'a> {
                     .insert(record_name.to_string(), self.interfaces.types.len());
                 self.interfaces
                     .types
-                    .push(Type::Record(Rc::new(RecordType::default())));
+                    .push(Type::Record(Rc::new(IRecordType::default())));
 
                 self.not_resolved_types_count += 1;
                 self.interfaces.types.len()
@@ -64,10 +64,7 @@ impl<'a> WITResolver<'a> {
         }
     }
 
-    pub(crate) fn get_record_type(
-        &self,
-        record_type_id: u64,
-    ) -> Result<&wasmer_wit::types::RecordType> {
+    pub(crate) fn get_record_type(&self, record_type_id: u64) -> Result<&IRecordType> {
         if record_type_id >= self.interfaces.types.len() as u64 {
             return Err(crate::errors::WITGeneratorError::CorruptedRecord(format!(
                 "Can't find record with id {}, don't you forget to wrap it with #[fce]",
@@ -83,7 +80,7 @@ impl<'a> WITResolver<'a> {
         }
     }
 
-    pub(crate) fn insert_record_type(&mut self, record: RecordType) {
+    pub(crate) fn insert_record_type(&mut self, record: IRecordType) {
         use wasmer_wit::ast::Type;
 
         match self.types.get(&record.name) {

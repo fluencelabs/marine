@@ -25,8 +25,8 @@ use super::Result;
 
 use wasmer_core::memory::ptr::{Array, WasmPtr};
 use wasmer_core::vm::Ctx;
-use wasmer_wit::types::RecordType;
-use wasmer_wit::vec1::Vec1;
+use wasmer_wit::IRecordType;
+use wasmer_wit::NEVec;
 
 use std::rc::Rc;
 
@@ -209,12 +209,12 @@ fn lift_array(
 
 fn lift_record(
     ctx: &Ctx,
-    record_type: &RecordType,
+    record_type: &IRecordType,
     offset: usize,
     record_types: &Rc<RecordTypes>,
 ) -> Result<IValue> {
     // TODO: make it export from wasmer-interface-types crate
-    fn record_size(record_type: &RecordType) -> usize {
+    fn record_size(record_type: &IRecordType) -> usize {
         let mut record_size = 0;
 
         for field_type in record_type.fields.iter() {
@@ -316,7 +316,7 @@ fn lift_record(
     }
 
     Ok(IValue::Record(
-        Vec1::new(values.into_iter().collect())
+        NEVec::new(values.into_iter().collect())
             .expect("Record must have at least one field, zero given"),
     ))
 }

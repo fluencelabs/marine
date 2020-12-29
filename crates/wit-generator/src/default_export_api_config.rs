@@ -15,7 +15,7 @@
  */
 
 use wasmer_wit::ast::Interfaces;
-use wasmer_wit::types::InterfaceType as IType;
+use wasmer_wit::IType;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
 use once_cell::sync::Lazy;
 

@@ -50,9 +50,9 @@ pub use module::FCEFunctionSignature;
 pub use module::from_interface_values;
 pub use module::to_interface_value;
 
-pub use wasmer_wit::types::RecordFieldType as IRecordFieldType;
-pub mod vec1 {
-    pub use wasmer_wit::vec1::Vec1;
+pub use wasmer_wit::IRecordFieldType;
+pub mod ne_vec {
+    pub use wasmer_wit::NEVec;
 }
 
 pub(crate) type Result<T> = std::result::Result<T, FCEError>;

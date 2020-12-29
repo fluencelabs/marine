@@ -40,7 +40,7 @@ pub use fluence_faas::HostImportDescriptor;
 pub use fluence_faas::HostImportError;
 pub use fluence_faas::IValue;
 pub use fluence_faas::IType;
-pub use fluence_faas::vec1;
+pub use fluence_faas::ne_vec;
 pub use fluence_faas::Ctx;
 
 pub use stepper_interface::StepperOutcome;

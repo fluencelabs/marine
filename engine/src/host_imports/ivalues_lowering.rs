@@ -23,7 +23,7 @@ use crate::call_wasm_func;
 use crate::IValue;
 
 use wasmer_core::vm::Ctx;
-use wasmer_wit::vec1::Vec1;
+use wasmer_wit::NEVec;
 
 pub(super) fn ivalue_to_wvalues(
     ctx: &mut Ctx,
@@ -115,7 +115,7 @@ fn lower_array(
     (result_pointer as _, result.len() as _)
 }
 
-fn lower_record(ctx: &mut Ctx, values: Vec1<IValue>, allocate_func: &AllocateFunc) -> i32 {
+fn lower_record(ctx: &mut Ctx, values: NEVec<IValue>, allocate_func: &AllocateFunc) -> i32 {
     let mut result: Vec<u64> = Vec::with_capacity(values.len());
 
     for value in values.into_vec() {

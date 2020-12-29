@@ -27,8 +27,8 @@ use wasmer_core::import::ImportObject;
 use wasmer_core::import::Namespace;
 use wasmer_core::vm::Ctx;
 use wasmer_runtime::func;
-use wasmer_wit::values::InterfaceValue as IValue;
-use wasmer_wit::types::InterfaceType as IType;
+use wasmer_wit::IValue;
+use wasmer_wit::IType;
 
 use std::collections::HashMap;
 use std::cell::RefCell;
