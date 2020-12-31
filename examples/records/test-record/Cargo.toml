@@ -3,6 +3,7 @@ name = "test-record"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
+publish = false
 
 [lib]
 name = "test_record"

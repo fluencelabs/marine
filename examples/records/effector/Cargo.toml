@@ -3,6 +3,7 @@ name = "record-effector"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
+publish = false
 
 [[bin]]
 name = "records_effector"

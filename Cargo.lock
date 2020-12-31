@@ -2,9 +2,9 @@
 # It is not intended for manual editing.
 [[package]]
 name = "addr2line"
-version = "0.14.0"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c0929d69e78dd9bf5408269919fcbcaeb2e35e5d43e5815517cdc6a8e11a423"
+checksum = "a55f82cfe485775d02112886f4169bde0c5894d75e79ead7eafe7e40a25e45f7"
 dependencies = [
  "gimli 0.23.0",
 ]
@@ -737,7 +737,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.13"
-source = "git+https://github.com/fluencelabs/rust-sdk#71591f412cb65879d74e8c38838e827ab74d8802"
+source = "git+https://github.com/fluencelabs/rust-sdk#4979c1e1dbdcdeb7ebe1a14b41794d4a971f7bcf"
 dependencies = [
  "fluence-sdk-macro 0.2.13 (git+https://github.com/fluencelabs/rust-sdk)",
  "fluence-sdk-main 0.2.13 (git+https://github.com/fluencelabs/rust-sdk)",
@@ -805,7 +805,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.13"
-source = "git+https://github.com/fluencelabs/rust-sdk#71591f412cb65879d74e8c38838e827ab74d8802"
+source = "git+https://github.com/fluencelabs/rust-sdk#4979c1e1dbdcdeb7ebe1a14b41794d4a971f7bcf"
 dependencies = [
  "fluence-sdk-wit 0.2.13 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
@@ -824,7 +824,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.13"
-source = "git+https://github.com/fluencelabs/rust-sdk#71591f412cb65879d74e8c38838e827ab74d8802"
+source = "git+https://github.com/fluencelabs/rust-sdk#4979c1e1dbdcdeb7ebe1a14b41794d4a971f7bcf"
 dependencies = [
  "fluence-sdk-macro 0.2.13 (git+https://github.com/fluencelabs/rust-sdk)",
  "log",
@@ -848,7 +848,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.13"
-source = "git+https://github.com/fluencelabs/rust-sdk#71591f412cb65879d74e8c38838e827ab74d8802"
+source = "git+https://github.com/fluencelabs/rust-sdk#4979c1e1dbdcdeb7ebe1a14b41794d4a971f7bcf"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1495,9 +1495,9 @@ dependencies = [
 
 [[package]]
 name = "native-tls"
-version = "0.2.6"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6fcc7939b5edc4e4f86b1b4a04bb1498afaaf871b1a6691838ed06fcb48d3a3f"
+checksum = "b8d96b2e1c8da3957d58100b09f102c6d9cfdfced01b7ec5a8974044bb09dbd4"
 dependencies = [
  "lazy_static",
  "libc",
