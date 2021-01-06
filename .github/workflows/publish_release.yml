@@ -99,7 +99,7 @@ jobs:
             ITEM="<li><a href=\"$LINK\">$TEXT</a></li>"
             RELEASE_DESCRIPTION="${RELEASE_DESCRIPTION}${ITEM}"
           done
-          RELEASE_DESCRIPTION=<ul>$RELEASE_DESCRIPTION</ul>
+          RELEASE_DESCRIPTION="<ul>$RELEASE_DESCRIPTION</ul>"
           echo "RELEASE_DESCRIPTION=$RELEASE_DESCRIPTION" | tee -a $GITHUB_ENV
 
       - name: Create Release
