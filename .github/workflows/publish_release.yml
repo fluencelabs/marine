@@ -84,10 +84,18 @@ jobs:
         run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
 
       # Set the same version to all crates in the workspace and publish
-      - name: Publish to crates.io
-        run: cargo ws publish --no-git-commit --allow-dirty --yes custom "${{ env.FINAL_VERSION }}"
+#      - name: Publish to crates.io
+#        run: cargo ws publish --no-git-commit --allow-dirty --yes custom "${{ env.FINAL_VERSION }}"
 
       ### Create a pre-release
+      - name: Generate prerelease description
+        run: |
+          RELEASE_DESCRIPTION=""
+          for CRATE_NAME in $(cargo ws list)
+          do
+            RELEASE_DESCRIPTION=$RELEASE_DESCRIPTION"\n[${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/$CRATE_NAME/${{ env.FINAL_VERSION }})"
+          done
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -98,5 +106,5 @@ jobs:
           release_name: Fluence Compute Engine ${{ env.FINAL_VERSION }}
           body: |
             - [${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.FINAL_VERSION }})
-          draft: false
-          prerelease: true
+          draft: true
+          prerelease: false
