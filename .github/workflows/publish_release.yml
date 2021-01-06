@@ -66,7 +66,7 @@ jobs:
           # For all crates in the workspace accumulate its max_version
           for CRATE_NAME in $(cargo ws list)
           do
-            CRATE_VERSION="$((cargo show --json "$PKG_NAME" | jq -r .crate.max_version) 2>/dev/null || true)"
+            CRATE_VERSION="$((cargo show --json "$CRATE_NAME" | jq -r .crate.max_version) 2>/dev/null || true)"
             ALL_CRATES_VERSIONS+=($CRATE_VERSION)
           done
           # Take the highest version of all
@@ -83,20 +83,20 @@ jobs:
       - name: Login to crates.io
         run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
 
-#      # Set the same version to all crates in the workspace and publish
-#      - name: Publish to crates.io
-#        run: cargo ws publish --no-git-commit --allow-dirty --yes custom "${{ env.FINAL_VERSION }}"
+      # Set the same version to all crates in the workspace and publish
+      - name: Publish to crates.io
+        run: cargo ws publish --no-git-commit --allow-dirty --yes custom "${{ env.FINAL_VERSION }}"
 
-#      ### Create a pre-release
-#      - name: Create Release
-#        id: create_release
-#        uses: actions/create-release@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: ${{ env.FINAL_VERSION }}
-#          release_name: Fluence Compute Engine ${{ env.FINAL_VERSION }}
-#          body: |
-#            - [${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.FINAL_VERSION }})
-#          draft: false
-#          prerelease: true
+      ### Create a pre-release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.FINAL_VERSION }}
+          release_name: Fluence Compute Engine ${{ env.FINAL_VERSION }}
+          body: |
+            - [${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.FINAL_VERSION }})
+          draft: false
+          prerelease: true
