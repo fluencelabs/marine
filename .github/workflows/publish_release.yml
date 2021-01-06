@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "master"
+      - "release"
 
 jobs:
   npm-publish:
@@ -87,7 +88,6 @@ jobs:
       ### Create a pre-release
       - name: Generate prerelease description
         run: |
-          set -x
           RELEASE_DESCRIPTION=""
           for CRATE_NAME in $(cargo ws list)
           do
