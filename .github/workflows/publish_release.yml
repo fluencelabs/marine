@@ -90,11 +90,13 @@ jobs:
       ### Create a pre-release
       - name: Generate prerelease description
         run: |
+          set -x
           RELEASE_DESCRIPTION=""
           for CRATE_NAME in $(cargo ws list)
           do
             RELEASE_DESCRIPTION=$RELEASE_DESCRIPTION"\n[${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/$CRATE_NAME/${{ env.FINAL_VERSION }})"
           done
+          echo "RELEASE_DESCRIPTION=$RELEASE_DESCRIPTION" | tee -a $GITHUB_ENV
 
       - name: Create Release
         id: create_release
@@ -105,6 +107,6 @@ jobs:
           tag_name: ${{ env.FINAL_VERSION }}
           release_name: Fluence Compute Engine ${{ env.FINAL_VERSION }}
           body: |
-            - [${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.FINAL_VERSION }})
+            ${{ env.RELEASE_DESCRIPTION }}
           draft: true
           prerelease: false
