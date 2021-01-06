@@ -95,11 +95,11 @@ jobs:
           for CRATE_NAME in $(cargo ws list)
           do
             LINK="https://crates.io/crates/$CRATE_NAME/${{ env.FINAL_VERSION }}"
-            TEXT="$CRATE_NAME ${{ env.FINAL_VERSION }}@crates.io"
+            TEXT="$CRATE_NAME"
             ITEM="<li><a href=\"$LINK\">$TEXT</a></li>"
             RELEASE_DESCRIPTION="${RELEASE_DESCRIPTION}${ITEM}"
           done
-          RELEASE_DESCRIPTION="<ul>$RELEASE_DESCRIPTION</ul>"
+          RELEASE_DESCRIPTION="<h2>${{ env.FINAL_VERSION }} @ crates.io:</h2><ul>$RELEASE_DESCRIPTION</ul>"
           echo "RELEASE_DESCRIPTION=$RELEASE_DESCRIPTION" | tee -a $GITHUB_ENV
 
       - name: Create Release
@@ -112,5 +112,5 @@ jobs:
           release_name: Fluence Compute Engine ${{ env.FINAL_VERSION }}
           body: |
             ${{ env.RELEASE_DESCRIPTION }}
-          draft: true
-          prerelease: false
+          draft: false
+          prerelease: true
