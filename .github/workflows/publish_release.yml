@@ -94,8 +94,12 @@ jobs:
           RELEASE_DESCRIPTION=""
           for CRATE_NAME in $(cargo ws list)
           do
-            RELEASE_DESCRIPTION=$RELEASE_DESCRIPTION"%0A[${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/$CRATE_NAME/${{ env.FINAL_VERSION }})"
+            LINK="https://crates.io/crates/$CRATE_NAME/${{ env.FINAL_VERSION }}"
+            TEXT="$CRATE_NAME ${{ env.FINAL_VERSION }}@crates.io"
+            ITEM="<li><a href=\"$LINK\">$TEXT</a></li>"
+            RELEASE_DESCRIPTION="$RELEASE_DESCRIPTION" "$ITEM"
           done
+          RELEASE_DESCRIPTION=<ul>$RELEASE_DESCRIPTION</ul>
           echo "RELEASE_DESCRIPTION=$RELEASE_DESCRIPTION" | tee -a $GITHUB_ENV
 
       - name: Create Release
