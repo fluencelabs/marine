@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - "master"
-      - "release"
 
 jobs:
   npm-publish:
@@ -84,8 +83,8 @@ jobs:
         run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
 
       # Set the same version to all crates in the workspace and publish
-#      - name: Publish to crates.io
-#        run: cargo ws publish --no-git-commit --allow-dirty --yes custom "${{ env.FINAL_VERSION }}"
+      - name: Publish to crates.io
+        run: cargo ws publish --no-git-commit --allow-dirty --yes custom "${{ env.FINAL_VERSION }}"
 
       ### Create a pre-release
       - name: Generate prerelease description
