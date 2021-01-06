@@ -47,8 +47,6 @@ jobs:
 
       - name: Calculate the version
         run: |
-          set -x
-
           # install semver and add it to PATH
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
