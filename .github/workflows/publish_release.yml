@@ -85,16 +85,16 @@ jobs:
       - name: Publish to crates.io
         run: cargo ws publish --no-git-commit --allow-dirty --yes custom "${{ env.FINAL_VERSION }}"
 
-      ### Create a pre-release
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.FINAL_VERSION }}
-          release_name: Fluence Compute Engine ${{ env.FINAL_VERSION }}
-          body: |
-            - [${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.FINAL_VERSION }})
-          draft: false
-          prerelease: true
+#      ### Create a pre-release
+#      - name: Create Release
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ env.FINAL_VERSION }}
+#          release_name: Fluence Compute Engine ${{ env.FINAL_VERSION }}
+#          body: |
+#            - [${{ env.FINAL_VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.FINAL_VERSION }})
+#          draft: false
+#          prerelease: true
