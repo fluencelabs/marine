@@ -10,5 +10,5 @@ name = "sqlite_test"
 path = "src/main.rs"
 
 [dependencies]
-fluence = "=0.2.13"
+fluence = "=0.2.18"
 fce-sqlite-connector = "=0.1.3"
