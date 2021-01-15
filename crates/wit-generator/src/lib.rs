@@ -33,4 +33,6 @@ mod interface_generator;
 pub use interface_generator::embed_wit;
 pub use errors::WITGeneratorError;
 
+pub const TYPE_RESOLVE_RECURSION_LIMIT: u32 = 1024;
+
 pub(crate) type Result<T> = std::result::Result<T, WITGeneratorError>;
