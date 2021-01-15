@@ -687,7 +687,7 @@ version = "0.1.29"
 
 [[package]]
 name = "fce-wit-generator"
-version = "0.1.29"
+version = "0.1.30"
 dependencies = [
  "fce-wit-parser",
  "fluence-sdk-wit 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -720,7 +720,7 @@ dependencies = [
 
 [[package]]
 name = "fcli"
-version = "0.1.29"
+version = "0.1.30"
 dependencies = [
  "anyhow",
  "clap",
@@ -734,20 +734,20 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "27d9a5e4292d7bbd809a0e968e3c3aacac91cbc5acab3e26ee1e1d726f0aab24"
+source = "git+https://github.com/fluencelabs/rust-sdk#8d427c0e72e978922abbd1da0157b58c6a16a42f"
 dependencies = [
- "fluence-sdk-macro 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
- "fluence-sdk-main 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-macro 0.2.18 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-main 0.2.18 (git+https://github.com/fluencelabs/rust-sdk)",
 ]
 
 [[package]]
 name = "fluence"
 version = "0.2.18"
-source = "git+https://github.com/fluencelabs/rust-sdk#8d427c0e72e978922abbd1da0157b58c6a16a42f"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27d9a5e4292d7bbd809a0e968e3c3aacac91cbc5acab3e26ee1e1d726f0aab24"
 dependencies = [
- "fluence-sdk-macro 0.2.18 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-main 0.2.18 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -803,6 +803,14 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.18"
+source = "git+https://github.com/fluencelabs/rust-sdk#8d427c0e72e978922abbd1da0157b58c6a16a42f"
+dependencies = [
+ "fluence-sdk-wit 0.2.18 (git+https://github.com/fluencelabs/rust-sdk)",
+]
+
+[[package]]
+name = "fluence-sdk-macro"
+version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea1a7c75a617f827d1ba9a17b4d84e1565ab239915c63f5a85c41f89a9f1d4ba"
 dependencies = [
@@ -810,11 +818,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-macro"
+name = "fluence-sdk-main"
 version = "0.2.18"
 source = "git+https://github.com/fluencelabs/rust-sdk#8d427c0e72e978922abbd1da0157b58c6a16a42f"
 dependencies = [
- "fluence-sdk-wit 0.2.18 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.2.18 (git+https://github.com/fluencelabs/rust-sdk)",
+ "log",
+ "serde",
 ]
 
 [[package]]
@@ -829,20 +839,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "fluence-sdk-main"
-version = "0.2.18"
-source = "git+https://github.com/fluencelabs/rust-sdk#8d427c0e72e978922abbd1da0157b58c6a16a42f"
-dependencies = [
- "fluence-sdk-macro 0.2.18 (git+https://github.com/fluencelabs/rust-sdk)",
- "log",
- "serde",
-]
-
-[[package]]
 name = "fluence-sdk-wit"
 version = "0.2.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b75dbdd0275160f3818db3218563d791e6c612b616cd3c5d6e66283f207f648d"
+source = "git+https://github.com/fluencelabs/rust-sdk#8d427c0e72e978922abbd1da0157b58c6a16a42f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -855,7 +854,8 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.18"
-source = "git+https://github.com/fluencelabs/rust-sdk#8d427c0e72e978922abbd1da0157b58c6a16a42f"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b75dbdd0275160f3818db3218563d791e6c612b616cd3c5d6e66283f207f648d"
 dependencies = [
  "proc-macro2",
  "quote",
