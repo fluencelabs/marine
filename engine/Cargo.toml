@@ -13,6 +13,7 @@ path = "src/lib.rs"
 [dependencies]
 fce-wit-interfaces = { path = "../crates/wit-interfaces", version = "0.1.29" }
 fce-wit-parser = { path = "../crates/wit-parser", version = "0.1.29" }
+fce-wit-generator = { path = "../crates/wit-generator", version = "0.1.29" }
 fce-utils = { path = "../crates/utils", version = "0.1.29" }
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }

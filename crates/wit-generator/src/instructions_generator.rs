@@ -52,14 +52,15 @@ impl<'a> WITResolver<'a> {
         match self.types.get(record_name) {
             Some(type_index) => *type_index,
             None => {
+                let new_type_id = self.interfaces.types.len();
                 self.types
-                    .insert(record_name.to_string(), self.interfaces.types.len());
+                    .insert(record_name.to_string(), new_type_id);
                 self.interfaces
                     .types
                     .push(Type::Record(Rc::new(IRecordType::default())));
 
                 self.not_resolved_types_count += 1;
-                self.interfaces.types.len()
+                new_type_id
             }
         }
     }

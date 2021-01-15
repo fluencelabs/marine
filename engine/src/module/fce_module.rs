@@ -439,27 +439,37 @@ impl FCEModule {
         Ok(import_object)
     }
 
+    // TODO : move it to a separate crate
     fn extract_export_record_types(
         export_funcs: &ExportFunctions,
         wit_instance: &Arc<WITInstance>,
     ) -> Result<RecordTypes> {
+        use fce_wit_generator::TYPE_RESOLVE_RECURSION_LIMIT;
+        use FCEError::WasmerResolveError;
+
         fn handle_itype(
             itype: &IType,
             wit_instance: &Arc<WITInstance>,
             export_record_types: &mut RecordTypes,
+            recursion_level: u32,
         ) -> Result<()> {
             use wasmer_wit::interpreter::wasm::structures::Instance;
+
+            if recursion_level > TYPE_RESOLVE_RECURSION_LIMIT {
+                return Err(WasmerResolveError(String::from("mailformed module: a record contains more recursion level then allowed")));
+            }
 
             fn handle_record_type(
                 record_type_id: u64,
                 wit_instance: &Arc<WITInstance>,
                 export_record_types: &mut RecordTypes,
+                recursion_level: u32,
             ) -> Result<()> {
                 let record_type =
                     wit_instance
                         .wit_record_by_id(record_type_id)
                         .ok_or_else(|| {
-                            FCEError::WasmerResolveError(format!(
+                            WasmerResolveError(format!(
                                 "record type with type id {} not found",
                                 record_type_id
                             ))
@@ -467,7 +477,7 @@ impl FCEModule {
                 export_record_types.insert(record_type_id, record_type.clone());
 
                 for field in record_type.fields.iter() {
-                    handle_itype(&field.ty, wit_instance, export_record_types)?;
+                    handle_itype(&field.ty, wit_instance, export_record_types, recursion_level + 1)?;
                 }
 
                 Ok(())
@@ -475,10 +485,10 @@ impl FCEModule {
 
             match itype {
                 IType::Record(record_type_id) => {
-                    handle_record_type(*record_type_id, wit_instance, export_record_types)?
+                    handle_record_type(*record_type_id, wit_instance, export_record_types, recursion_level + 1)?
                 }
                 IType::Array(array_ty) => {
-                    handle_itype(array_ty, wit_instance, export_record_types)?
+                    handle_itype(array_ty, wit_instance, export_record_types, recursion_level + 1)?
                 }
                 _ => {}
             }
@@ -498,7 +508,7 @@ impl FCEModule {
         });
 
         for itype in itypes {
-            handle_itype(itype, wit_instance, &mut export_record_types)?;
+            handle_itype(itype, wit_instance, &mut export_record_types, 0)?;
         }
 
         Ok(export_record_types)
