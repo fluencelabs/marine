@@ -456,7 +456,9 @@ impl FCEModule {
             use wasmer_wit::interpreter::wasm::structures::Instance;
 
             if recursion_level > TYPE_RESOLVE_RECURSION_LIMIT {
-                return Err(WasmerResolveError(String::from("mailformed module: a record contains more recursion level then allowed")));
+                return Err(WasmerResolveError(String::from(
+                    "mailformed module: a record contains more recursion level then allowed",
+                )));
             }
 
             fn handle_record_type(
@@ -477,19 +479,30 @@ impl FCEModule {
                 export_record_types.insert(record_type_id, record_type.clone());
 
                 for field in record_type.fields.iter() {
-                    handle_itype(&field.ty, wit_instance, export_record_types, recursion_level + 1)?;
+                    handle_itype(
+                        &field.ty,
+                        wit_instance,
+                        export_record_types,
+                        recursion_level + 1,
+                    )?;
                 }
 
                 Ok(())
             }
 
             match itype {
-                IType::Record(record_type_id) => {
-                    handle_record_type(*record_type_id, wit_instance, export_record_types, recursion_level + 1)?
-                }
-                IType::Array(array_ty) => {
-                    handle_itype(array_ty, wit_instance, export_record_types, recursion_level + 1)?
-                }
+                IType::Record(record_type_id) => handle_record_type(
+                    *record_type_id,
+                    wit_instance,
+                    export_record_types,
+                    recursion_level + 1,
+                )?,
+                IType::Array(array_ty) => handle_itype(
+                    array_ty,
+                    wit_instance,
+                    export_record_types,
+                    recursion_level + 1,
+                )?,
                 _ => {}
             }
 

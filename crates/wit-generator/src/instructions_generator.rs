@@ -53,8 +53,7 @@ impl<'a> WITResolver<'a> {
             Some(type_index) => *type_index,
             None => {
                 let new_type_id = self.interfaces.types.len();
-                self.types
-                    .insert(record_name.to_string(), new_type_id);
+                self.types.insert(record_name.to_string(), new_type_id);
                 self.interfaces
                     .types
                     .push(Type::Record(Rc::new(IRecordType::default())));
