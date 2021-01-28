@@ -70,15 +70,15 @@ pub fn test2(age: i64) {
     cursor.bind(&[Value::Integer(age)]).unwrap();
 
     while let Some(row) = cursor.next().unwrap() {
-        println!("name = {}", row[0].as_string().unwrap());
-        println!("age = {}", row[1].as_integer().unwrap());
+        println!("name = {}", row[0].as_string().expect("error on row[0] parsing"));
+        println!("age = {}", row[1].as_integer().expect("error on row[1] parsing"));
     }
 }
 
 #[fce]
 pub fn test3() {
-    let db_path = "/var/folders/ww/v__xg0cj17x7h7sf3bgwpx8h0000gn/T/4589ab6f-5440-4933-ace5-a62714784142/tmp/users.sqlite";
-    let connection = fce_sqlite_connector::open(db_path).unwrap();
+    let db_path = "/var/users.sqlite";
+    let connection = fce_sqlite_connector::open(db_path).expect("error on connection establishing");
 
     let execute_result = connection.execute(
         "
@@ -90,7 +90,7 @@ pub fn test3() {
 
     println!("execute result: {:?}", execute_result);
 
-    let file_size = std::fs::metadata(db_path).unwrap().len();
-
-    println!("{} file size is {}", db_path, file_size);
+    //TODO fix it
+    // let file_size = std::fs::metadata(db_path).expect("error on file_size check").len();
+    // println!("{} file size is {}", db_path, file_size);
 }
