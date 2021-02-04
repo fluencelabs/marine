@@ -19,6 +19,7 @@ mod print_state;
 use crate::ReplResult;
 
 use fluence_app_service::AppService;
+use fluence_app_service::FaaSModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
 use print_state::print_envs;
 use print_state::print_fs_state;
@@ -34,7 +35,7 @@ macro_rules! next_argument {
             $arg_name
         } else {
             println!($error_msg);
-            return true;
+            return;
         };
     };
 }
@@ -50,108 +51,15 @@ impl REPL {
     }
 
     /// Returns true, it should be the last executed command.
-    pub fn execute<'a>(&mut self, mut args: impl Iterator<Item = &'a str>) -> bool {
+    pub fn execute<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) -> bool {
         match args.next() {
-            Some("new") => {
-                match Self::create_app_service(args.next()) {
-                    Ok(service) => self.app_service = service,
-                    Err(e) => println!("failed to create a new application service: {}", e),
-                };
-            }
-            Some("load") => {
-                next_argument!(module_name, args, "Module name should be specified");
-                next_argument!(module_path, args, "Module path should be specified");
-
-                let wasm_bytes = fs::read(module_path);
-                if let Err(e) = wasm_bytes {
-                    println!("failed to read wasm module: {}", e);
-                    return true;
-                }
-
-                let start = Instant::now();
-                let result_msg = match self
-                    .app_service
-                    .load_module::<String, fluence_app_service::FaaSModuleConfig>(
-                        module_name.into(),
-                        &wasm_bytes.unwrap(),
-                        None,
-                    ) {
-                    Ok(_) => {
-                        let elapsed_time = start.elapsed();
-                        format!(
-                            "module successfully loaded into App service\nelapsed time: {:?}",
-                            elapsed_time
-                        )
-                    }
-                    Err(e) => format!("module loaded failed with: {:?}", e),
-                };
-                println!("{}", result_msg);
-            }
-            Some("unload") => {
-                next_argument!(module_name, args, "Module name should be specified");
-
-                let start = Instant::now();
-                let result_msg = match self.app_service.unload_module(module_name) {
-                    Ok(_) => {
-                        let elapsed_time = start.elapsed();
-                        format!(
-                            "module successfully unloaded from App service\nelapsed time: {:?}",
-                            elapsed_time
-                        )
-                    }
-                    Err(e) => format!("module unloaded failed with: {:?}", e),
-                };
-                println!("{}", result_msg);
-            }
-            Some("call") => {
-                use itertools::Itertools;
-
-                next_argument!(module_name, args, "Module name should be specified");
-                next_argument!(func_name, args, "Function name should be specified");
-
-                let module_arg: String = args.join(" ");
-                let module_arg: serde_json::Value = match serde_json::from_str(&module_arg) {
-                    Ok(module_arg) => module_arg,
-                    Err(e) => {
-                        println!("incorrect arguments {}", e);
-                        return true;
-                    }
-                };
-
-                let start = Instant::now();
-                // TODO: add support of call parameters
-                let result = match self.app_service.call_with_module_name(
-                    module_name,
-                    func_name,
-                    module_arg,
-                    <_>::default(),
-                ) {
-                    Ok(result) => {
-                        let elapsed_time = start.elapsed();
-                        format!("result: {:?}\n elapsed time: {:?}", result, elapsed_time)
-                    }
-                    Err(e) => format!("execution failed with {:?}", e),
-                };
-                println!("{}", result);
-            }
-            Some("envs") => {
-                next_argument!(module_name, args, "Module name should be specified");
-                match self.app_service.get_wasi_state(module_name) {
-                    Ok(wasi_state) => print_envs(module_name, wasi_state),
-                    Err(e) => println!("{}", e),
-                };
-            }
-            Some("fs") => {
-                next_argument!(module_name, args, "Module name should be specified");
-                match self.app_service.get_wasi_state(module_name) {
-                    Ok(wasi_state) => print_fs_state(wasi_state),
-                    Err(e) => println!("{}", e),
-                };
-            }
-            Some("interface") => {
-                let interface = self.app_service.get_full_interface();
-                print!("Application service interface:\n{}", interface);
-            }
+            Some("new") => self.new_service(args),
+            Some("load") => self.load_module(args),
+            Some("unload") => self.unload_module(args),
+            Some("call") => self.call_module(args),
+            Some("envs") => self.show_envs(args),
+            Some("fs") => self.show_fs(args),
+            Some("interface") => self.show_interface(),
             Some("q") | Some("quit") => {
                 return false;
             }
@@ -160,6 +68,119 @@ impl REPL {
         }
 
         true
+    }
+
+    fn new_service<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
+        match Self::create_app_service(args.next()) {
+            Ok(service) => self.app_service = service,
+            Err(e) => println!("failed to create a new application service: {}", e),
+        };
+    }
+
+    fn load_module<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
+        next_argument!(module_name, args, "Module name should be specified");
+        next_argument!(module_path, args, "Module path should be specified");
+
+        let wasm_bytes = fs::read(module_path);
+        if let Err(e) = wasm_bytes {
+            println!("failed to read wasm module: {}", e);
+            return;
+        }
+
+        let start = Instant::now();
+        let config = FaaSModuleConfig {
+            logger_enabled: true,
+            ..<_>::default()
+        };
+        let result_msg = match self
+            .app_service
+            .load_module::<String, fluence_app_service::FaaSModuleConfig>(
+                module_name.into(),
+                &wasm_bytes.unwrap(),
+                Some(config),
+            ) {
+            Ok(_) => {
+                let elapsed_time = start.elapsed();
+                format!(
+                    "module successfully loaded into App service\nelapsed time: {:?}",
+                    elapsed_time
+                )
+            }
+            Err(e) => format!("module loaded failed with: {:?}", e),
+        };
+        println!("{}", result_msg);
+    }
+
+    fn unload_module<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
+        next_argument!(module_name, args, "Module name should be specified");
+
+        let start = Instant::now();
+        let result_msg = match self.app_service.unload_module(module_name) {
+            Ok(_) => {
+                let elapsed_time = start.elapsed();
+                format!(
+                    "module successfully unloaded from App service\nelapsed time: {:?}",
+                    elapsed_time
+                )
+            }
+            Err(e) => format!("module unloaded failed with: {:?}", e),
+        };
+        println!("{}", result_msg);
+    }
+
+    fn call_module<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
+        use itertools::Itertools;
+
+        next_argument!(module_name, args, "Module name should be specified");
+        next_argument!(func_name, args, "Function name should be specified");
+
+        let module_arg: String = args.join(" ");
+        let module_arg: serde_json::Value = match serde_json::from_str(&module_arg) {
+            Ok(module_arg) => module_arg,
+            Err(e) => {
+                println!("incorrect arguments {}", e);
+                return;
+            }
+        };
+
+        let start = Instant::now();
+        // TODO: add support of call parameters
+        let result = match self.app_service.call_with_module_name(
+            module_name,
+            func_name,
+            module_arg,
+            <_>::default(),
+        ) {
+            Ok(result) => {
+                let elapsed_time = start.elapsed();
+                format!("result: {:?}\n elapsed time: {:?}", result, elapsed_time)
+            }
+            Err(e) => format!("execution failed with {:?}", e),
+        };
+
+        println!("{}", result);
+    }
+
+    fn show_envs<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
+        next_argument!(module_name, args, "Module name should be specified");
+        match self.app_service.get_wasi_state(module_name) {
+            Ok(wasi_state) => print_envs(module_name, wasi_state),
+            Err(e) => println!("{}", e),
+        };
+    }
+
+    fn show_fs<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
+        next_argument!(module_name, args, "Module name should be specified");
+        match self.app_service.get_wasi_state(module_name) {
+            Ok(wasi_state) => print_fs_state(wasi_state),
+            Err(e) => println!("{}", e),
+        };
+    }
+
+    fn show_interface(&mut self) {
+        let interface = self.app_service.get_full_interface();
+
+        print!("Loaded modules interface:\n{}", interface);
     }
 
     fn create_app_service<S: Into<PathBuf>>(config_file_path: Option<S>) -> ReplResult<AppService> {

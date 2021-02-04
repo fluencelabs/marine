@@ -720,7 +720,7 @@ dependencies = [
 
 [[package]]
 name = "fcli"
-version = "0.1.30"
+version = "0.1.31"
 dependencies = [
  "anyhow",
  "clap",
@@ -898,7 +898,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.1.30"
+version = "0.1.32"
 dependencies = [
  "anyhow",
  "clap",
