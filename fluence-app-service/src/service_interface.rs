@@ -87,7 +87,7 @@ fn serialize_function_signature(
     }
 }
 
-fn serialize_record_type<'a, 'b>(
+fn serialize_record_type(
     id: u64,
     record: Rc<IRecordType>,
     record_types: &RecordTypes,
