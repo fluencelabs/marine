@@ -179,7 +179,7 @@ impl REPL {
         let duration = start.elapsed();
 
         println!(
-            "app service's created with service id = {}\nelapsed time {:?}",
+            "app service was created with service id = {}\nelapsed time {:?}",
             service_id, duration
         );
 
@@ -189,12 +189,12 @@ impl REPL {
 
 fn print_help() {
     println!(
-        "Commands:\n\
-            new [config_path]                       create new service (current will be removed)\n\
-            load <module_name> <module_path>        load new Wasm module\n\
-            unload <module_name>                    unload Wasm module\n\
+        "Commands:\n\n\
+            new [config_path]                       create a new service (current will be removed)\n\
+            load <module_name> <module_path>        load a new Wasm module\n\
+            unload <module_name>                    unload a Wasm module\n\
             call <module_name> <func_name> [args]   call function with given name from given module\n\
-            interface                               print public interfaces of all loaded modules\n\
+            interface                               print public interface of all loaded modules\n\
             envs <module_name>                      print environment variables of a module\n\
             fs <module_name>                        print filesystem state of a module\n\
             h/help                                  print this message\n\

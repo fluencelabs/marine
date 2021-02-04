@@ -24,7 +24,7 @@
 )]
 #![warn(rust_2018_idioms)]
 
-/// Command-line tool intended to test Fluence FaaS.
+/// Command-line tool intended to test Fluence App services.
 
 mod editor;
 mod logger;
@@ -54,7 +54,10 @@ fn main() -> ReplResult<()> {
     let mut rl = init_editor();
     let _ = rl.load_history(HISTORY_FILE_PATH);
 
-    println!("Welcome to the Fluence FaaS REPL");
+    println!(
+        "Welcome to the FCE REPL (version {})",
+        env!("CARGO_PKG_VERSION")
+    );
 
     let mut repl = REPL::new(args.config_file_path)?;
 
