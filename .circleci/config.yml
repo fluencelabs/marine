@@ -16,8 +16,8 @@ jobs:
           rustup default nightly-2020-04-20
           rustup override set nightly-2020-04-20
 
-          rustup component add rustfmt
-          rustup component add clippy --toolchain nightly
+          rustup component add rustfmt --toolchain nightly-2020-04-20
+          rustup component add clippy --toolchain nightly-2020-04-20
           rustup target add wasm32-wasi
 
           cargo install fcli
