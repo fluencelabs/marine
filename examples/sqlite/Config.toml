@@ -9,3 +9,5 @@ modules_dir = "artifacts/"
 name = "sqlite_test"
     mem_pages_count = 1
     logger_enabled = false
+    preopened_files = ["/var"]
+    mapped_dirs = { "var" = "./var" }
