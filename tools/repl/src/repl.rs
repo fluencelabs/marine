@@ -53,13 +53,13 @@ impl REPL {
     /// Returns true, it should be the last executed command.
     pub fn execute<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) -> bool {
         match args.next() {
-            Some("new") => self.new_service(args),
-            Some("load") => self.load_module(args),
-            Some("unload") => self.unload_module(args),
-            Some("call") => self.call_module(args),
-            Some("envs") => self.show_envs(args),
-            Some("fs") => self.show_fs(args),
-            Some("interface") => self.show_interface(),
+            Some("n") | Some("new") => self.new_service(args),
+            Some("l") | Some("load") => self.load_module(args),
+            Some("u") | Some("unload") => self.unload_module(args),
+            Some("c") | Some("call") => self.call_module(args),
+            Some("e") | Some("envs") => self.show_envs(args),
+            Some("f") | Some("fs") => self.show_fs(args),
+            Some("i") | Some("interface") => self.show_interface(),
             Some("q") | Some("quit") => {
                 return false;
             }
@@ -106,7 +106,7 @@ impl REPL {
                     elapsed_time
                 )
             }
-            Err(e) => format!("module loaded failed with: {:?}", e),
+            Err(e) => format!("loading failed with: {}", e),
         };
         println!("{}", result_msg);
     }
@@ -123,7 +123,7 @@ impl REPL {
                     elapsed_time
                 )
             }
-            Err(e) => format!("module unloaded failed with: {:?}", e),
+            Err(e) => format!("unloading failed with: {}", e),
         };
         println!("{}", result_msg);
     }
@@ -155,7 +155,7 @@ impl REPL {
                 let elapsed_time = start.elapsed();
                 format!("result: {:?}\n elapsed time: {:?}", result, elapsed_time)
             }
-            Err(e) => format!("execution failed with {:?}", e),
+            Err(e) => format!("call failed with: {}", e),
         };
 
         println!("{}", result);
@@ -211,14 +211,14 @@ impl REPL {
 fn print_help() {
     println!(
         "Commands:\n\n\
-            new [config_path]                       create a new service (current will be removed)\n\
-            load <module_name> <module_path>        load a new Wasm module\n\
-            unload <module_name>                    unload a Wasm module\n\
-            call <module_name> <func_name> [args]   call function with given name from given module\n\
-            interface                               print public interface of all loaded modules\n\
-            envs <module_name>                      print environment variables of a module\n\
-            fs <module_name>                        print filesystem state of a module\n\
-            h/help                                  print this message\n\
-            q/quit/Ctrl-C                           exit"
+            n/new [config_path]                       create a new service (current will be removed)\n\
+            l/load <module_name> <module_path>        load a new Wasm module\n\
+            u/unload <module_name>                    unload a Wasm module\n\
+            c/call <module_name> <func_name> [args]   call function with given name from given module\n\
+            i/interface                               print public interface of all loaded modules\n\
+            e/envs <module_name>                      print environment variables of a module\n\
+            f/fs <module_name>                        print filesystem state of a module\n\
+            h/help                                    print this message\n\
+            q/quit/Ctrl-C                             exit"
     );
 }
