@@ -10,7 +10,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - fce03-{{ checksum "Cargo.lock" }}
+            - fce04-{{ checksum "Cargo.lock" }}
       - run: |
           rustup toolchain install nightly-2020-04-20
           rustup default nightly-2020-04-20
@@ -34,7 +34,7 @@ jobs:
           paths:
             - ~/.cargo
             - ~/.rustup
-          key: fce03-{{ checksum "Cargo.lock" }}
+          key: fce04-{{ checksum "Cargo.lock" }}
 
 workflows:
   version: 2.1
