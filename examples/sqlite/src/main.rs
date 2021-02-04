@@ -70,8 +70,14 @@ pub fn test2(age: i64) {
     cursor.bind(&[Value::Integer(age)]).unwrap();
 
     while let Some(row) = cursor.next().unwrap() {
-        println!("name = {}", row[0].as_string().expect("error on row[0] parsing"));
-        println!("age = {}", row[1].as_integer().expect("error on row[1] parsing"));
+        println!(
+            "name = {}",
+            row[0].as_string().expect("error on row[0] parsing")
+        );
+        println!(
+            "age = {}",
+            row[1].as_integer().expect("error on row[1] parsing")
+        );
     }
 }
 
