@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-use crate::Result;
+mod print_state;
+
+use crate::ReplResult;
 
 use fluence_app_service::AppService;
 use fluence_app_service::TomlAppServiceConfig;
+use print_state::print_envs;
+use print_state::print_fs_state;
 
 use std::collections::HashMap;
 use std::fs;
@@ -30,7 +34,7 @@ macro_rules! next_argument {
             $arg_name
         } else {
             println!($error_msg);
-            return;
+            return true;
         };
     };
 }
@@ -40,12 +44,13 @@ pub(super) struct REPL {
 }
 
 impl REPL {
-    pub fn new<S: Into<PathBuf>>(config_file_path: Option<S>) -> Result<Self> {
+    pub fn new<S: Into<PathBuf>>(config_file_path: Option<S>) -> ReplResult<Self> {
         let app_service = Self::create_app_service(config_file_path)?;
         Ok(Self { app_service })
     }
 
-    pub fn execute<'a>(&mut self, mut args: impl Iterator<Item = &'a str>) {
+    /// Returns true, it should be the last executed command.
+    pub fn execute<'a>(&mut self, mut args: impl Iterator<Item = &'a str>) -> bool {
         match args.next() {
             Some("new") => {
                 match Self::create_app_service(args.next()) {
@@ -60,7 +65,7 @@ impl REPL {
                 let wasm_bytes = fs::read(module_path);
                 if let Err(e) = wasm_bytes {
                     println!("failed to read wasm module: {}", e);
-                    return;
+                    return true;
                 }
 
                 let start = Instant::now();
@@ -109,7 +114,7 @@ impl REPL {
                     Ok(module_arg) => module_arg,
                     Err(e) => {
                         println!("incorrect arguments {}", e);
-                        return;
+                        return true;
                     }
                 };
 
@@ -132,14 +137,14 @@ impl REPL {
             Some("envs") => {
                 next_argument!(module_name, args, "Module name should be specified");
                 match self.app_service.get_wasi_state(module_name) {
-                    Ok(wasi_state) => Self::print_envs(wasi_state),
+                    Ok(wasi_state) => print_envs(module_name, wasi_state),
                     Err(e) => println!("{}", e),
                 };
             }
             Some("fs") => {
                 next_argument!(module_name, args, "Module name should be specified");
                 match self.app_service.get_wasi_state(module_name) {
-                    Ok(wasi_state) => Self::print_fs_state(wasi_state),
+                    Ok(wasi_state) => print_fs_state(wasi_state),
                     Err(e) => println!("{}", e),
                 };
             }
@@ -147,27 +152,17 @@ impl REPL {
                 let interface = self.app_service.get_full_interface();
                 print!("Application service interface:\n{}", interface);
             }
-            Some("h") | Some("help") | None => {
-                println!(
-                    "Enter:\n\
-                                new [config_path]                       - to create a new AppService (current will be removed)\n\
-                                load <module_name> <module_path>        - to load a new Wasm module into App service\n\
-                                unload <module_name>                    - to unload Wasm module from AppService\n\
-                                call <module_name> <func_name> [args]   - to call function with func_name of module with module_name\n\
-                                interface                               - to print public interface of current AppService\n\
-                                envs <module_name>                      - to print environment variables of module with module_name\n\
-                                fs <module_name>                        - to print filesystem state of module with module_name\n\
-                                h/help                                  - to print this message\n\
-                                Ctrl-C                                  - to exit"
-                );
+            Some("q") | Some("quit") => {
+                return false;
             }
-            _ => {
-                println!("unsupported command");
-            }
+
+            _ => print_help(),
         }
+
+        true
     }
 
-    fn create_app_service<S: Into<PathBuf>>(config_file_path: Option<S>) -> Result<AppService> {
+    fn create_app_service<S: Into<PathBuf>>(config_file_path: Option<S>) -> ReplResult<AppService> {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
 
@@ -190,42 +185,19 @@ impl REPL {
 
         Ok(app_service)
     }
+}
 
-    fn print_envs(wasi_state: &wasmer_wasi::state::WasiState) {
-        let envs = &wasi_state.envs;
-
-        println!("Environment variables:");
-        for env in envs.iter() {
-            match String::from_utf8(env.clone()) {
-                Ok(string) => println!("{}", string),
-                Err(_) => println!("{:?}", env),
-            }
-        }
-    }
-
-    fn print_fs_state(wasi_state: &wasmer_wasi::state::WasiState) {
-        let wasi_fs = &wasi_state.fs;
-
-        println!("preopened file descriptors:\n{:?}\n", wasi_fs.preopen_fds);
-
-        println!("name map:");
-        for (name, inode) in &wasi_fs.name_map {
-            println!("{} - {:?}", name, inode);
-        }
-
-        println!("\nfile descriptors map:");
-        for (id, fd) in &wasi_fs.fd_map {
-            println!("{} - {:?}", id, fd);
-        }
-
-        println!("\norphan file descriptors:");
-        for (fd, inode) in &wasi_fs.orphan_fds {
-            println!("{:?} - {:?}", fd, inode);
-        }
-
-        println!("\ninodes:");
-        for (id, inode) in wasi_fs.inodes.iter().enumerate() {
-            println!("{}: {:?}", id, inode);
-        }
-    }
+fn print_help() {
+    println!(
+        "Commands:\n\
+            new [config_path]                       create new service (current will be removed)\n\
+            load <module_name> <module_path>        load new Wasm module\n\
+            unload <module_name>                    unload Wasm module\n\
+            call <module_name> <func_name> [args]   call function with given name from given module\n\
+            interface                               print public interfaces of all loaded modules\n\
+            envs <module_name>                      print environment variables of a module\n\
+            fs <module_name>                        print filesystem state of a module\n\
+            h/help                                  print this message\n\
+            q/quit/Ctrl-C                           exit"
+    );
 }
