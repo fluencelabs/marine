@@ -37,6 +37,8 @@ static ARG_CONFIG: Lazy<fluence_faas::TomlFaaSConfig> = Lazy::new(|| {
     arguments_passing_config
 });
 
+const MODULE_NAME: &str = "arguments_passing_pure";
+
 #[test]
 pub fn get_interfaces() {
     use std::collections::HashSet;
@@ -266,26 +268,18 @@ pub fn get_interfaces() {
 
 #[test]
 pub fn all_types() {
+    const FUNC_NAME: &'static str = "all_types";
+
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let result1 = faas.call_with_json(
-        "arguments_passing_pure",
-        "all_types",
-        json!({}),
-        <_>::default(),
-    );
+    let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
-        "arguments_passing_pure",
-        "all_types",
-        json!([]),
-        <_>::default(),
-    );
+    let result2 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!([
+    let expected_result = json!([
         0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 6, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,
         65, 1, 153, 154, 64, 34, 51, 51, 51, 51, 51, 51, 102, 108, 117, 101, 110, 99, 101, 19, 55,
         0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 6, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,
@@ -306,8 +300,8 @@ pub fn all_types() {
       "arg_10": "fluence",
       "arg_11": vec! [0x13, 0x37],
     });
-    let result3 = call_faas!(faas, "arguments_passing_pure", "all_types", faas_arg);
-    assert_eq!(result3, right_result);
+    let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, faas_arg);
+    assert_eq!(result3, expected_result);
 
     let faas_arg = json!([
         0,
@@ -323,360 +317,257 @@ pub fn all_types() {
         "fluence",
         vec![0x13, 0x37]
     ]);
-    let result4 = call_faas!(faas, "arguments_passing_pure", "all_types", faas_arg);
-    assert_eq!(result4, right_result);
+    let result4 = call_faas!(faas, MODULE_NAME, FUNC_NAME, faas_arg);
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
 pub fn i32_type() {
+    const FUNC_NAME: &'static str = "i32_type";
+
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let result1 = faas.call_with_json(
-        "arguments_passing_pure",
-        "i32_type",
-        json!({}),
-        <_>::default(),
-    );
+    let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
-        "arguments_passing_pure",
-        "i32_type",
-        json!([]),
-        <_>::default(),
-    );
+    let result2 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!(3);
-    let result3 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "i32_type",
-        json!({ "arg": 1 })
-    );
-    assert_eq!(result3, right_result);
+    let expected_result = json!(3);
+    let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!({ "arg": 1 }));
+    assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arguments_passing_pure", "i32_type", json!(1));
-    assert_eq!(result4, right_result);
+    let result4 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(1));
+    assert_eq!(result4, expected_result);
 
-    let result5 = call_faas!(faas, "arguments_passing_pure", "i32_type", json!([[1]]));
-    assert_eq!(result5, right_result);
+    let result5 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!([[1]]));
+    assert_eq!(result5, expected_result);
+
+    let value = std::i32::MAX - 2;
+    let result6 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(value));
+    assert_eq!(result6, value + 2);
+
+    let value = std::i32::MIN;
+    let result7 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(value));
+    assert_eq!(result7, value + 2);
 }
 
 #[test]
 pub fn i64_type() {
+    const FUNC_NAME: &'static str = "i64_type";
+
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let result1 = faas.call_with_json(
-        "arguments_passing_pure",
-        "i64_type",
-        json!({}),
-        <_>::default(),
-    );
+    let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
-        "arguments_passing_pure",
-        "i64_type",
-        json!([]),
-        <_>::default(),
-    );
+    let result2 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!(3);
-    let result3 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "i64_type",
-        json!({ "arg": 1 })
-    );
-    assert_eq!(result3, right_result);
+    let expected_result = json!(3);
+    let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!({ "arg": 1 }));
+    assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arguments_passing_pure", "i64_type", json!(1));
-    assert_eq!(result4, right_result);
+    let result4 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(1));
+    assert_eq!(result4, expected_result);
 
-    let result5 = call_faas!(faas, "arguments_passing_pure", "i64_type", json!([1]));
-    assert_eq!(result5, right_result);
+    let result5 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!([1]));
+    assert_eq!(result5, expected_result);
+
+    let value = std::i64::MAX - 2;
+    let result6 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(value));
+    assert_eq!(result6, value + 2);
+
+    let value = std::i64::MIN;
+    let result7 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(value));
+    assert_eq!(result7, value + 2);
 }
 
 #[test]
 pub fn u32_type() {
+    const FUNC_NAME: &'static str = "u32_type";
+
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let result1 = faas.call_with_json(
-        "arguments_passing_pure",
-        "u32_type",
-        json!({}),
-        <_>::default(),
-    );
+    let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
-        "arguments_passing_pure",
-        "u32_type",
-        json!([]),
-        <_>::default(),
-    );
+    let result2 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!(3);
-    let result3 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "u32_type",
-        json!({ "arg": 1 })
-    );
-    assert_eq!(result3, right_result);
+    let expected_result = json!(3);
+    let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!({ "arg": 1 }));
+    assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arguments_passing_pure", "u32_type", json!(1));
-    assert_eq!(result4, right_result);
+    let result4 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(1));
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
 pub fn u64_type() {
+    const FUNC_NAME: &'static str = "u64_type";
+
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let result1 = faas.call_with_json(
-        "arguments_passing_pure",
-        "u64_type",
-        json!({}),
-        <_>::default(),
-    );
+    let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
-        "arguments_passing_pure",
-        "u64_type",
-        json!([]),
-        <_>::default(),
-    );
+    let result2 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!(3);
-    let result3 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "u64_type",
-        json!({ "arg": 1 })
-    );
-    assert_eq!(result3, right_result);
+    let expected_result = json!(3);
+    let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!({ "arg": 1 }));
+    assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arguments_passing_pure", "u64_type", json!(1));
-    assert_eq!(result4, right_result);
+    let result4 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(1));
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
 pub fn f32_type() {
+    const FUNC_NAME: &'static str = "f32_type";
+
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let result1 = faas.call_with_json(
-        "arguments_passing_pure",
-        "f32_type",
-        json!({}),
-        <_>::default(),
-    );
+    let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
-        "arguments_passing_pure",
-        "f32_type",
-        json!([]),
-        <_>::default(),
-    );
+    let result2 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!(3.0);
-    let result3 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "f32_type",
-        json!({ "arg": 1.0 })
-    );
-    assert_eq!(result3, right_result);
+    let expected_result = json!(3.0);
+    let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!({ "arg": 1.0 }));
+    assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arguments_passing_pure", "f32_type", json!(1.0));
-    assert_eq!(result4, right_result);
+    let result4 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(1.0));
+    assert_eq!(result4, expected_result);
+
+    let value = std::f32::MAX - 2.0;
+    let result5 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(value));
+    assert_eq!(result5, value + 2.0);
+
+    let value = std::f32::MIN;
+    let result6 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(value));
+    assert_eq!(result6, value + 2.0);
 }
 
 #[test]
 pub fn f64_type() {
+    const FUNC_NAME: &'static str = "f64_type";
+
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let result1 = faas.call_with_json(
-        "arguments_passing_pure",
-        "f64_type",
-        json!({}),
-        <_>::default(),
-    );
+    let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
-        "arguments_passing_pure",
-        "f64_type",
-        json!([]),
-        <_>::default(),
-    );
+    let result2 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!(3.0);
-    let result3 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "f64_type",
-        json!({ "arg": 1.0 })
-    );
-    assert_eq!(result3, right_result);
+    let expected_result = json!(3.0);
+    let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!({ "arg": 1.0 }));
+    assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arguments_passing_pure", "f64_type", json!(1.0));
-    assert_eq!(result4, right_result);
+    let result4 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(1.0));
+    assert_eq!(result4, expected_result);
+
+    let value = std::f64::MAX - 2.0;
+    let result5 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(value));
+    assert_eq!(result5, value + 2.0);
+
+    let value = std::f64::MIN;
+    let result6 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(value));
+    assert_eq!(result6, value + 2.0);
 }
 
 #[test]
 pub fn string_type() {
+    const FUNC_NAME: &'static str = "string_type";
+
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let result1 = faas.call_with_json(
-        "arguments_passing_pure",
-        "string_type",
-        json!({}),
-        <_>::default(),
-    );
+    let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
-        "arguments_passing_pure",
-        "string_type",
-        json!([]),
-        <_>::default(),
-    );
+    let result2 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!("Fluence_Fluence_Fluence_Fluence");
-    let result3 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "string_type",
-        json!({ "arg": "Fluence" })
-    );
-    assert_eq!(result3, right_result);
+    let expected_result = json!("Fluence_Fluence_Fluence_Fluence");
+    let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!({ "arg": "Fluence" }));
+    assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "string_type",
-        json!("Fluence")
-    );
-    assert_eq!(result4, right_result);
+    let result4 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!("Fluence"));
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
 pub fn bytearray_type() {
+    const FUNC_NAME: &'static str = "bytearray_type";
+
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let result1 = faas.call_with_json(
-        "arguments_passing_pure",
-        "bytearray_type",
-        json!({}),
-        <_>::default(),
-    );
+    let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
-        "arguments_passing_pure",
-        "bytearray_type",
-        json!([]),
-        <_>::default(),
-    );
+    let result2 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!([0x13, 0x37, 1, 1]);
-    let result3 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "bytearray_type",
-        json!({ "arg": [0x13, 0x37] })
-    );
-    assert_eq!(result3, right_result);
+    let expected_result = json!([0x13, 0x37, 1, 1]);
+    let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!({ "arg": [0x13, 0x37] }));
+    assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "bytearray_type",
-        json!([[0x13, 0x37]])
-    );
-    assert_eq!(result4, right_result);
+    let result4 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!([[0x13, 0x37]]));
+    assert_eq!(result4, expected_result);
 
-    let result5 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "bytearray_type",
-        json!([[0x13]])
-    );
+    let result5 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!([[0x13]]));
     assert_eq!(result5, json!([0x13, 1, 1]));
 }
 
 #[test]
 pub fn bool_type() {
+    const FUNC_NAME: &'static str = "bool_type";
+
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let result1 = faas.call_with_json(
-        "arguments_passing_pure",
-        "bool_type",
-        json!({}),
-        <_>::default(),
-    );
+    let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
-        "arguments_passing_pure",
-        "bool_type",
-        json!([]),
-        <_>::default(),
-    );
+    let result2 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!(1);
-    let result3 = call_faas!(
-        faas,
-        "arguments_passing_pure",
-        "bool_type",
-        json!({ "arg": 0 })
-    );
-    assert_eq!(result3, right_result);
+    let expected_result = json!(1);
+    let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!({ "arg": 0 }));
+    assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arguments_passing_pure", "bool_type", json!(0));
-    assert_eq!(result4, right_result);
+    let result4 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!(0));
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
 pub fn empty_type() {
+    const FUNC_NAME: &'static str = "empty_type";
+
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
 
-    let right_result = json!("success");
-    let result1 = call_faas!(faas, "arguments_passing_pure", "empty_type", json!({}));
-    assert_eq!(result1, right_result);
+    let expected_result = json!("success");
+    let result1 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!({}));
+    assert_eq!(result1, expected_result);
 
-    let result2 = call_faas!(faas, "arguments_passing_pure", "empty_type", json!([]));
-    assert_eq!(result2, right_result);
+    let result2 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!([]));
+    assert_eq!(result2, expected_result);
 
-    let result3 = call_faas!(faas, "arguments_passing_pure", "empty_type", json!([]));
-    assert_eq!(result3, right_result);
+    let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!([]));
+    assert_eq!(result3, expected_result);
 
-    let result4 = faas.call_with_json(
-        "arguments_passing_pure",
-        "empty_type",
-        json!([1]),
-        <_>::default(),
-    );
+    let result4 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([1]), <_>::default());
     assert!(result4.is_err());
 }
