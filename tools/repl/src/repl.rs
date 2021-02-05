@@ -16,13 +16,13 @@
 
 mod print_state;
 
+use print_state::print_envs;
+use print_state::print_fs_state;
 use crate::ReplResult;
 
 use fluence_app_service::AppService;
 use fluence_app_service::FaaSModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
-use print_state::print_envs;
-use print_state::print_fs_state;
 
 use std::collections::HashMap;
 use std::fs;

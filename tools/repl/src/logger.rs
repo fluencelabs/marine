@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+use fluence_sdk_main::WASM_LOG_ENV_NAME;
+
+use std::io::Write;
+use std::env::var;
+
 const WIT_MODULE_PATH: &str = "wasmer_interface_types_fl";
 const RUST_LOG_ENV_NAME: &str = "RUST_LOG";
 
 pub(super) fn init_logger() {
-    use std::io::Write;
-    use std::env::var;
     use log::LevelFilter::Info;
-    use fluence_sdk_main::WASM_LOG_ENV_NAME;
 
     match (var(RUST_LOG_ENV_NAME), var(WASM_LOG_ENV_NAME)) {
         (Ok(_), _) => {}
@@ -37,7 +39,8 @@ pub(super) fn init_logger() {
                 Some(module_path) if module_path.starts_with(WIT_MODULE_PATH) => {
                     writeln!(buf, "[host] {}", record.args())
                 }
-                // because of the log_utf8_string implementation, log from a wasm module always has module path
+                // due to the log_utf8_string implementation,
+                // a log message from a Wasm module always has module path
                 None => writeln!(buf, "[host] {}", record.args()),
                 Some(module_path) => writeln!(buf, "[{}] {}", module_path, record.args()),
             }
