@@ -90,6 +90,7 @@ impl TryInto<FaaSConfig> for TomlFaaSConfig {
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlFaaSNamedModuleConfig {
     pub name: String,
+    #[serde(default)]
     pub file_name: Option<String>,
     #[serde(flatten)]
     pub config: TomlFaaSModuleConfig,
