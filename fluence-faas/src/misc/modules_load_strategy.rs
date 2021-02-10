@@ -25,6 +25,7 @@ pub enum ModulesLoadStrategy<'a> {
     /// Try to load only files contained in the set
     Named(&'a HashSet<String>),
     /// In a given directory, try to load all files ending with .wasm
+    #[allow(dead_code)]
     WasmOnly,
 }
 

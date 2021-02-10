@@ -50,7 +50,6 @@ pub use fluence_faas::TomlFaaSNamedModuleConfig;
 pub use fluence_faas::TomlWASIConfig;
 pub use fluence_faas::from_toml_faas_config;
 pub use fluence_faas::from_toml_module_config;
-pub use fluence_faas::from_toml_named_module_config;
 pub use fluence_faas::from_toml_wasi_config;
 
 pub use fluence_faas::FaaSError;

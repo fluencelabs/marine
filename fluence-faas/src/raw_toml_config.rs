@@ -25,6 +25,7 @@ use std::convert::TryInto;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::PathBuf;
+use serde::export::TryFrom;
 
 /*
 An example of the config:
@@ -89,23 +90,20 @@ impl TryInto<FaaSConfig> for TomlFaaSConfig {
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlFaaSNamedModuleConfig {
     pub name: String,
+    pub file_name: Option<String>,
     #[serde(flatten)]
     pub config: TomlFaaSModuleConfig,
 }
 
-impl TryInto<(String, FaaSModuleConfig)> for TomlFaaSNamedModuleConfig {
+impl TryFrom<TomlFaaSNamedModuleConfig> for ModuleDescriptor {
     type Error = FaaSError;
 
-    fn try_into(self) -> Result<(String, FaaSModuleConfig)> {
-        from_toml_named_module_config(self)
-    }
-}
-
-impl TryInto<FaaSModuleConfig> for TomlFaaSNamedModuleConfig {
-    type Error = FaaSError;
-
-    fn try_into(self) -> Result<FaaSModuleConfig> {
-        from_toml_named_module_config(self).map(|(_, module_config)| module_config)
+    fn try_from(config: TomlFaaSNamedModuleConfig) -> Result<Self> {
+        Ok(ModuleDescriptor {
+            file_name: config.file_name.unwrap_or(config.name.clone()),
+            import_name: config.name,
+            config: from_toml_module_config(config.config)?,
+        })
     }
 }
 
@@ -116,18 +114,6 @@ pub struct TomlFaaSModuleConfig {
     pub wasi: Option<TomlWASIConfig>,
     pub mounted_binaries: Option<toml::value::Table>,
     pub logging_mask: Option<i32>,
-}
-
-impl TomlFaaSNamedModuleConfig {
-    pub fn new<S>(name: S) -> Self
-    where
-        S: Into<String>,
-    {
-        Self {
-            name: name.into(),
-            config: <_>::default(),
-        }
-    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
@@ -142,7 +128,7 @@ pub fn from_toml_faas_config(config: TomlFaaSConfig) -> Result<FaaSConfig> {
     let modules_config = config
         .module
         .into_iter()
-        .map(from_toml_named_module_config)
+        .map(ModuleDescriptor::try_from)
         .collect::<Result<Vec<_>>>()?;
 
     let default_modules_config = config.default.map(from_toml_module_config).transpose()?;
@@ -152,13 +138,6 @@ pub fn from_toml_faas_config(config: TomlFaaSConfig) -> Result<FaaSConfig> {
         modules_config,
         default_modules_config,
     })
-}
-
-pub fn from_toml_named_module_config(
-    config: TomlFaaSNamedModuleConfig,
-) -> Result<(String, FaaSModuleConfig)> {
-    let module_config = from_toml_module_config(config.config)?;
-    Ok((config.name, module_config))
 }
 
 pub fn from_toml_module_config(config: TomlFaaSModuleConfig) -> Result<FaaSModuleConfig> {
@@ -236,6 +215,7 @@ mod tests {
     fn serialize_named() {
         let config = TomlFaaSNamedModuleConfig {
             name: "name".to_string(),
+            file_name: Some("file_name".to_string()),
             config: TomlFaaSModuleConfig {
                 mem_pages_count: Some(100),
                 logger_enabled: Some(false),

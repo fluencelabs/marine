@@ -18,7 +18,15 @@ use fce::HostImportDescriptor;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::path::PathBuf;
+use std::path::{PathBuf};
+
+/// Info to load a module from filesystem into runtime.
+#[derive(Default)]
+pub struct ModuleDescriptor {
+    pub file_name: String,
+    pub import_name: String,
+    pub config: FaaSModuleConfig,
+}
 
 /// Describes the behaviour of FluenceFaaS.
 #[derive(Default)]
@@ -27,7 +35,7 @@ pub struct FaaSConfig {
     pub modules_dir: Option<PathBuf>,
 
     /// Settings for a module with particular name (not HashMap because the order is matter).
-    pub modules_config: Vec<(String, FaaSModuleConfig)>,
+    pub modules_config: Vec<ModuleDescriptor>,
 
     /// Settings for a module that name's not been found in modules_config.
     pub default_modules_config: Option<FaaSModuleConfig>,

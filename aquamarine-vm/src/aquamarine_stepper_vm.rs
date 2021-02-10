@@ -18,7 +18,7 @@ use crate::{Result, IType, CallServiceClosure};
 use crate::AquamarineVMError;
 use crate::config::AquamarineVMConfig;
 
-use fluence_faas::{FaaSConfig, HostExportedFunc};
+use fluence_faas::{FaaSConfig, HostExportedFunc, ModuleDescriptor};
 use fluence_faas::FluenceFaaS;
 use fluence_faas::HostImportDescriptor;
 use fluence_faas::IValue;
@@ -242,7 +242,11 @@ fn make_faas_config(
 
     FaaSConfig {
         modules_dir: Some(aquamarine_wasm_dir),
-        modules_config: vec![(String::from(aquamarine_wasm_file), aquamarine_module_config)],
+        modules_config: vec![ModuleDescriptor {
+            file_name: String::from(aquamarine_wasm_file),
+            import_name: String::from(aquamarine_wasm_file),
+            config: aquamarine_module_config,
+        }],
         default_modules_config: None,
     }
 }
