@@ -34,7 +34,6 @@ use fluence_sdk_main::CallParameters;
 use serde_json::Value as JValue;
 use std::cell::RefCell;
 use std::convert::TryInto;
-use std::collections::HashSet;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -68,7 +67,7 @@ impl FluenceFaaS {
         let modules = config
             .modules_config
             .iter()
-            .map(|m| m.file_name.clone())
+            .map(|m| (m.file_name.clone(), m.import_name.clone()))
             .collect();
         Self::with_module_names::<FaaSConfig>(&modules, config)
     }
@@ -115,7 +114,7 @@ impl FluenceFaaS {
     }
 
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
-    pub fn with_module_names<C>(names: &HashSet<String>, config: C) -> Result<Self>
+    pub fn with_module_names<C>(names: &HashMap<String, String>, config: C) -> Result<Self>
     where
         C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,

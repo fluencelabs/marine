@@ -15,15 +15,22 @@
  */
 
 use std::path::Path;
-use std::collections::HashSet;
+use std::collections::{HashMap};
+use crate::FaaSError;
+use std::ffi::OsStr;
+use std::borrow::Cow;
+
+type ImportName = String;
+type FileName = String;
 
 /// Strategies for module loading.
 pub enum ModulesLoadStrategy<'a> {
-    /// Try to load all files in a given directory
+    /// Load all files in a given directory
     #[allow(dead_code)]
     All,
-    /// Try to load only files contained in the set
-    Named(&'a HashSet<String>),
+    /// Load only files contained in the set
+    /// Correspondence between module file name and import name is crucial for `extract_module_name`
+    Named(&'a HashMap<FileName, ImportName>),
     /// In a given directory, try to load all files ending with .wasm
     #[allow(dead_code)]
     WasmOnly,
@@ -35,7 +42,7 @@ impl<'a> ModulesLoadStrategy<'a> {
     pub fn should_load(&self, module: &Path) -> bool {
         match self {
             ModulesLoadStrategy::All => true,
-            ModulesLoadStrategy::Named(set) => set.contains(module.to_string_lossy().as_ref()),
+            ModulesLoadStrategy::Named(map) => map.contains_key(module.to_string_lossy().as_ref()),
             ModulesLoadStrategy::WasmOnly => module.extension().map_or(false, |e| e == "wasm"),
         }
     }
@@ -53,8 +60,8 @@ impl<'a> ModulesLoadStrategy<'a> {
     /// Returns difference between required and loaded modules.
     pub fn missing_modules<'s>(&self, loaded: impl Iterator<Item = &'s String>) -> Vec<&'s String> {
         match self {
-            ModulesLoadStrategy::Named(set) => loaded.fold(vec![], |mut vec, module| {
-                if !set.contains(module) {
+            ModulesLoadStrategy::Named(map) => loaded.fold(vec![], |mut vec, module| {
+                if !map.contains_key(module) {
                     vec.push(module)
                 }
                 vec
@@ -64,15 +71,29 @@ impl<'a> ModulesLoadStrategy<'a> {
     }
 
     #[inline]
-    pub fn extract_module_name(&self, module: String) -> String {
+    pub fn extract_module_name(&self, module_path: &Path) -> Result<String, FaaSError> {
+        use FaaSError::*;
+
+        fn as_str<'a>(
+            os_str: Option<&'a OsStr>,
+            path: &'a Path,
+        ) -> Result<Cow<'a, str>, FaaSError> {
+            os_str
+                .map(|s| s.to_string_lossy())
+                .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))
+        }
+
         match self {
-            ModulesLoadStrategy::WasmOnly => {
-                let path: &Path = module.as_ref();
-                path.file_stem()
-                    .map(|s| s.to_string_lossy().to_string())
-                    .unwrap_or(module)
+            Self::Named(map) => {
+                let file_name = as_str(module_path.file_name(), module_path)?;
+                // Take import_name from the mapping and return it
+                let import_name = map.get(file_name.as_ref());
+                let import_name = import_name.ok_or_else(|| NoSuchModule(file_name.to_string()))?;
+
+                Ok(import_name.clone())
             }
-            _ => module,
+            // for other strategies, simply use file name without extension
+            _ => Ok(as_str(module_path.file_stem(), module_path)?.to_string()),
         }
     }
 }
