@@ -185,7 +185,7 @@ pub(crate) fn load_modules_from_fs(
             let module_bytes = std::fs::read(&path)?;
             let module_name = modules.extract_module_name(&path)?;
             if hash_map.insert(module_name, module_bytes).is_some() {
-                return Err(FaaSError::ConfigParseError(String::from(
+                return Err(FaaSError::InvalidConfig(String::from(
                     "module {} is duplicated in config",
                 )));
             }
@@ -197,7 +197,7 @@ pub(crate) fn load_modules_from_fs(
     if modules.required_modules_len() > loaded.len() {
         let loaded = loaded.iter().map(|(n, _)| n);
         let not_found = modules.missing_modules(loaded);
-        return Err(FaaSError::ConfigParseError(format!(
+        return Err(FaaSError::InvalidConfig(format!(
             "the following modules were not found: {:?}",
             not_found
         )));

@@ -89,13 +89,13 @@ impl FluenceFaaS {
         let logger_filter = LoggerFilter::from_env_string(&wasm_log_env);
 
         for module in config.modules_config {
-            let module_bytes =
-                modules.remove(&module.import_name).ok_or_else(|| {
-                    FaaSError::InstantiationError(format!(
-                    "module with name {} is specified in config (dir: {:?}), but not found in provided modules: {:?}",
-                    module.import_name, modules_dir, modules.keys().collect::<Vec<_>>()
-                ))
-                })?;
+            let module_bytes = modules.remove(&module.import_name).ok_or_else(|| {
+                FaaSError::InstantiationError {
+                    module_import_name: module.import_name.clone(),
+                    modules_dir: modules_dir.clone(),
+                    provided_modules: modules.keys().cloned().collect::<Vec<_>>(),
+                }
+            })?;
 
             let fce_module_config = crate::misc::make_fce_config(
                 module.import_name.clone(),

@@ -73,9 +73,7 @@ impl TomlFaaSConfig {
     pub fn load<P: Into<PathBuf>>(path: P) -> Result<Self> {
         let path = path.into();
         let file_content = std::fs::read(&path)?;
-        toml::from_slice(&file_content).map_err(|e| {
-            FaaSError::ConfigParseError(format!("Error parsing config {:?}: {:?}", path, e))
-        })
+        Ok(toml::from_slice(&file_content)?)
     }
 }
 
@@ -101,7 +99,7 @@ impl TryFrom<TomlFaaSNamedModuleConfig> for ModuleDescriptor {
 
     fn try_from(config: TomlFaaSNamedModuleConfig) -> Result<Self> {
         Ok(ModuleDescriptor {
-            file_name: config.file_name.unwrap_or(config.name.clone()),
+            file_name: config.file_name.unwrap_or(format!("{}.wasm", config.name)),
             import_name: config.name,
             config: from_toml_module_config(config.config)?,
         })

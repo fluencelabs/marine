@@ -15,7 +15,7 @@
  */
 
 use std::path::Path;
-use std::collections::{HashMap};
+use std::collections::{HashMap, HashSet};
 use crate::FaaSError;
 use std::ffi::OsStr;
 use std::borrow::Cow;
@@ -24,6 +24,7 @@ type ImportName = String;
 type FileName = String;
 
 /// Strategies for module loading.
+#[derive(Debug, Clone)]
 pub enum ModulesLoadStrategy<'a> {
     /// Load all files in a given directory
     #[allow(dead_code)]
@@ -58,14 +59,18 @@ impl<'a> ModulesLoadStrategy<'a> {
 
     #[inline]
     /// Returns difference between required and loaded modules.
-    pub fn missing_modules<'s>(&self, loaded: impl Iterator<Item = &'s String>) -> Vec<&'s String> {
+    pub fn missing_modules<'i>(
+        &self,
+        loaded: impl Iterator<Item = &'i String>,
+    ) -> HashSet<&String> {
         match self {
-            ModulesLoadStrategy::Named(map) => loaded.fold(vec![], |mut vec, module| {
-                if !map.contains_key(module) {
-                    vec.push(module)
-                }
-                vec
-            }),
+            ModulesLoadStrategy::Named(map) => {
+                let set: HashSet<_> = map.keys().collect();
+                loaded.fold(set, |mut set, module| {
+                    set.remove(module);
+                    set
+                })
+            }
             _ => <_>::default(),
         }
     }
