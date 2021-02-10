@@ -21,11 +21,11 @@ use walrus::{IdsToIndices, ModuleConfig};
 use wasmer_wit::ast::Interfaces;
 use wasmer_core::Module as WasmerModule;
 
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 
 /// Extracts WIT section of provided Wasm binary and converts it to a string.
 pub fn extract_text_wit(wasm_file_path: PathBuf) -> Result<String, WITParserError> {
-    let wit_section_bytes = extract_wit_section_bytes(wasm_file_path)?;
+    let wit_section_bytes = extract_wit_section_bytes(&wasm_file_path)?;
     let wit = extract_wit_with_fn(&wit_section_bytes)?;
     Ok((&wit).to_string())
 }
@@ -53,9 +53,7 @@ pub(crate) fn extract_wit_with_fn(
     }
 }
 
-pub(crate) fn extract_wit_section_bytes(
-    wasm_file_path: PathBuf,
-) -> Result<Vec<u8>, WITParserError> {
+pub(crate) fn extract_wit_section_bytes(wasm_file_path: &Path) -> Result<Vec<u8>, WITParserError> {
     let module = ModuleConfig::new()
         .parse_file(wasm_file_path)
         .map_err(WITParserError::CorruptedWasmFile)?;
