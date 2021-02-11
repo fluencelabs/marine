@@ -21,7 +21,7 @@ pub use functions::*;
 pub use wit::*;
 
 use crate::Result;
-use std::path::{Path};
+use std::path::Path;
 
 pub fn module_interface(module_path: &Path) -> Result<ServiceInterface> {
     use fce_wit_interfaces::FCEWITInterfaces;
