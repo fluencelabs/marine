@@ -38,7 +38,7 @@ pub struct TestRecord2 {
 fn main() {}
 
 #[fce]
-fn test_record(mut test_record: TestRecord2) -> TestRecord2 {
+pub fn test_record(mut test_record: TestRecord2) -> TestRecord2 {
     test_record.test_record_0 = TestRecord0 { field_0: 1 };
 
     test_record

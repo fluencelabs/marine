@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#![allow(improper_ctypes)]
+
 mod path;
 
 use crate::path::to_full_path;

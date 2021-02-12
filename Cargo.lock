@@ -41,7 +41,7 @@ checksum = "afddf7f520a80dbf76e6f50a35bca42a2331ef227a28b3b6dc5c2e2338d114b1"
 
 [[package]]
 name = "aquamarine-vm"
-version = "0.1.30"
+version = "0.2.0"
 dependencies = [
  "fluence-faas",
  "log",
@@ -648,7 +648,7 @@ dependencies = [
 
 [[package]]
 name = "fce"
-version = "0.1.30"
+version = "0.2.0"
 dependencies = [
  "boolinator",
  "bytes 0.5.6",
@@ -687,7 +687,7 @@ version = "0.1.29"
 
 [[package]]
 name = "fce-wit-generator"
-version = "0.1.30"
+version = "0.2.0"
 dependencies = [
  "fce-wit-parser",
  "fluence-sdk-wit 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -708,7 +708,7 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-parser"
-version = "0.1.29"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
@@ -720,7 +720,7 @@ dependencies = [
 
 [[package]]
 name = "fcli"
-version = "0.1.31"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -752,7 +752,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.1.30"
+version = "0.2.0"
 dependencies = [
  "fluence-faas",
  "log",
@@ -766,7 +766,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.1.30"
+version = "0.2.0"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -899,7 +899,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.1.33"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",

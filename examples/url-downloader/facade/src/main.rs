@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![allow(improper_ctypes)]
 
 use fluence::fce;
 use fluence::WasmLoggerBuilder;
@@ -24,7 +25,7 @@ pub fn main() {
 /// Combining of modules: `curl` and `local_storage`.
 /// Calls `curl` and stores returned result into a file.
 #[fce]
-fn get_n_save(url: String, file_name: String) -> String {
+pub fn get_n_save(url: String, file_name: String) -> String {
     let result = unsafe { download(url) };
     unsafe { file_put(file_name, result.into_bytes()) };
 
