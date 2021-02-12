@@ -70,9 +70,9 @@ pub fn main() -> std::result::Result<(), anyhow::Error> {
         }
         ("show", Some(arg)) => {
             let wasm_path = arg.value_of(args::IN_WASM_PATH).unwrap();
-            let wasm_path = std::path::PathBuf::from(wasm_path);
+            let wasm_path = std::path::Path::new(wasm_path);
 
-            let result = fce_wit_parser::extract_text_wit(wasm_path)?;
+            let result = fce_wit_parser::extract_text_wit(&wasm_path)?;
             println!("{}", result);
 
             Ok(())

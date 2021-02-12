@@ -55,7 +55,7 @@ impl AppService {
                     "config should contain at least one module",
                 ))
             })?
-            .0
+            .import_name
             .clone();
 
         let service_id = service_id.into();
@@ -150,9 +150,11 @@ impl AppService {
             service_id.into_bytes(),
         );
 
-        for (_, module_config) in &mut config.faas_config.modules_config {
-            module_config.extend_wasi_envs(envs.clone());
-            module_config.extend_wasi_files(preopened_files.clone(), mapped_dirs.clone());
+        for module in &mut config.faas_config.modules_config {
+            module.config.extend_wasi_envs(envs.clone());
+            module
+                .config
+                .extend_wasi_files(preopened_files.clone(), mapped_dirs.clone());
         }
 
         Ok(())

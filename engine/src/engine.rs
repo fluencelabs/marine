@@ -65,16 +65,16 @@ impl FCE {
     /// Load a new module inside FCE.
     pub fn load_module<S: Into<String>>(
         &mut self,
-        name: S,
+        import_name: S,
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
     ) -> Result<()> {
-        self.load_module_(name.into(), wasm_bytes, config)
+        self.load_module_(import_name.into(), wasm_bytes, config)
     }
 
     fn load_module_(
         &mut self,
-        name: String,
+        import_name: String,
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
     ) -> Result<()> {
@@ -82,7 +82,7 @@ impl FCE {
 
         let module = FCEModule::new(&wasm_bytes, config, &self.modules)?;
 
-        match self.modules.entry(name) {
+        match self.modules.entry(import_name) {
             Entry::Vacant(entry) => {
                 entry.insert(module);
                 Ok(())

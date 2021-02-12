@@ -41,6 +41,7 @@ pub use faas_interface::itype_text_view;
 pub use config::FaaSConfig;
 pub use config::FaaSModuleConfig;
 pub use config::FaaSWASIConfig;
+pub use config::ModuleDescriptor;
 
 pub use raw_toml_config::TomlFaaSConfig;
 pub use raw_toml_config::TomlFaaSModuleConfig;
@@ -48,7 +49,6 @@ pub use raw_toml_config::TomlFaaSNamedModuleConfig;
 pub use raw_toml_config::TomlWASIConfig;
 pub use raw_toml_config::from_toml_faas_config;
 pub use raw_toml_config::from_toml_module_config;
-pub use raw_toml_config::from_toml_named_module_config;
 pub use raw_toml_config::from_toml_wasi_config;
 
 pub use errors::FaaSError;

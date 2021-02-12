@@ -34,10 +34,8 @@ use fluence_sdk_main::CallParameters;
 use serde_json::Value as JValue;
 use std::cell::RefCell;
 use std::convert::TryInto;
-use std::collections::HashSet;
 use std::collections::HashMap;
 use std::rc::Rc;
-use std::path::PathBuf;
 
 struct ModuleInterface {
     function_signatures: HashMap<SharedString, (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>)>,
@@ -59,12 +57,6 @@ pub struct FluenceFaaS {
 }
 
 impl FluenceFaaS {
-    /// Creates FaaS from config on filesystem.
-    pub fn with_config_path<P: Into<PathBuf>>(config_file_path: P) -> Result<Self> {
-        let config = crate::raw_toml_config::TomlFaaSConfig::load(config_file_path.into())?;
-        Self::with_raw_config(config)
-    }
-
     /// Creates FaaS from config deserialized from TOML.
     pub fn with_raw_config<C>(config: C) -> Result<Self>
     where
@@ -73,13 +65,11 @@ impl FluenceFaaS {
     {
         let config = config.try_into()?;
         let modules = config
-            .modules_dir
-            .as_ref()
-            .map_or(Ok(HashMap::new()), |dir| {
-                load_modules_from_fs(dir, ModulesLoadStrategy::WasmOnly)
-            })?;
-
-        Self::with_modules::<FaaSConfig>(modules, config)
+            .modules_config
+            .iter()
+            .map(|m| (m.file_name.clone(), m.import_name.clone()))
+            .collect();
+        Self::with_module_names::<FaaSConfig>(&modules, config)
     }
 
     /// Creates FaaS with given modules.
@@ -98,22 +88,22 @@ impl FluenceFaaS {
         let wasm_log_env = std::env::var(WASM_LOG_ENV_NAME).unwrap_or_default();
         let logger_filter = LoggerFilter::from_env_string(&wasm_log_env);
 
-        for (module_name, module_config) in config.modules_config {
-            let module_bytes =
-                modules.remove(&module_name).ok_or_else(|| {
-                    FaaSError::InstantiationError(format!(
-                    "module with name {} is specified in config (dir: {:?}), but not found in provided modules: {:?}",
-                    module_name, modules_dir, modules.keys().collect::<Vec<_>>()
-                ))
-                })?;
+        for module in config.modules_config {
+            let module_bytes = modules.remove(&module.import_name).ok_or_else(|| {
+                FaaSError::InstantiationError {
+                    module_import_name: module.import_name.clone(),
+                    modules_dir: modules_dir.clone(),
+                    provided_modules: modules.keys().cloned().collect::<Vec<_>>(),
+                }
+            })?;
 
             let fce_module_config = crate::misc::make_fce_config(
-                module_name.clone(),
-                Some(module_config),
+                module.import_name.clone(),
+                Some(module.config),
                 call_parameters.clone(),
                 &logger_filter,
             )?;
-            fce.load_module(module_name, &module_bytes, fce_module_config)?;
+            fce.load_module(module.import_name, &module_bytes, fce_module_config)?;
         }
 
         Ok(Self {
@@ -124,7 +114,7 @@ impl FluenceFaaS {
     }
 
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
-    pub fn with_module_names<C>(names: &HashSet<String>, config: C) -> Result<Self>
+    pub fn with_module_names<C>(names: &HashMap<String, String>, config: C) -> Result<Self>
     where
         C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,

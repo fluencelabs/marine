@@ -32,7 +32,7 @@ use wasmer_wit::IType;
 
 use std::collections::HashMap;
 use std::cell::RefCell;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use std::rc::Rc;
 use std::ops::Deref;
 
@@ -176,18 +176,16 @@ pub(crate) fn load_modules_from_fs(
             return Ok(hash_map);
         }
 
-        let module_name = path
-            .file_name()
-            .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?
-            .to_os_string()
-            .into_string()
-            .map_err(|name| IOError(format!("invalid file name: {:?}", name)))?;
+        let file_name = Path::new(
+            path.file_name()
+                .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?,
+        );
 
-        if modules.should_load(&module_name.as_ref()) {
-            let module_bytes = std::fs::read(path)?;
-            let module_name = modules.extract_module_name(module_name);
+        if modules.should_load(&file_name) {
+            let module_bytes = std::fs::read(&path)?;
+            let module_name = modules.extract_module_name(&path)?;
             if hash_map.insert(module_name, module_bytes).is_some() {
-                return Err(FaaSError::ConfigParseError(String::from(
+                return Err(FaaSError::InvalidConfig(String::from(
                     "module {} is duplicated in config",
                 )));
             }
@@ -199,7 +197,7 @@ pub(crate) fn load_modules_from_fs(
     if modules.required_modules_len() > loaded.len() {
         let loaded = loaded.iter().map(|(n, _)| n);
         let not_found = modules.missing_modules(loaded);
-        return Err(FaaSError::ConfigParseError(format!(
+        return Err(FaaSError::InvalidConfig(format!(
             "the following modules were not found: {:?}",
             not_found
         )));

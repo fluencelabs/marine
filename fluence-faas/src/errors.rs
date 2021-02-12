@@ -17,64 +17,57 @@
 use fce::FCEError;
 
 use std::io::Error as IOError;
-use std::error::Error;
+use thiserror::Error;
+use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum FaaSError {
-    /// An error related to config parsing.
-    ConfigParseError(String),
+    /// Errors that happened due to invalid config content
+    #[error("InvalidConfig: {0}")]
+    InvalidConfig(String),
 
     /// An error occurred at the instantiation step.
-    InstantiationError(String),
+    #[error(
+        "module with name {module_import_name} is specified in config (dir: {modules_dir:?}), \
+         but not found in provided modules: {provided_modules:?}"
+    )]
+    InstantiationError {
+        module_import_name: String,
+        modules_dir: Option<PathBuf>,
+        provided_modules: Vec<String>,
+    },
 
     /// Various errors related to file i/o.
+    #[error("IOError: {0}")]
     IOError(String),
 
     /// A function with specified name is missing.
+    #[error("function with name `{0}` is missing")]
     MissingFunctionError(String),
 
     /// An argument with specified name is missing.
+    #[error(r#"argument with name "{0}" is missing"#)]
     MissingArgumentError(String),
 
     /// Returns when there is no module with such name.
+    #[error(r#"module with name "{0}" is missing"#)]
     NoSuchModule(String),
 
     /// Provided arguments aren't compatible with a called function signature.
+    #[error("JsonArgumentsDeserializationError: {0}")]
     JsonArgumentsDeserializationError(String),
 
     /// Returned outputs aren't compatible with a called function signature.
+    #[error("JsonOutputSerializationError: {0}")]
     JsonOutputSerializationError(String),
 
     /// Errors related to invalid config.
+    #[error("ParseConfigError: {0}")]
     ParseConfigError(toml::de::Error),
 
     /// FCE errors.
+    #[error("EngineError: {0}")]
     EngineError(FCEError),
-}
-
-impl Error for FaaSError {}
-
-impl std::fmt::Display for FaaSError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        match self {
-            FaaSError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
-            FaaSError::InstantiationError(err_msg) => write!(f, "{}", err_msg),
-            FaaSError::MissingFunctionError(func_name) => {
-                write!(f, "function with name `{}` is missing", func_name)
-            }
-            FaaSError::MissingArgumentError(arg_name) => {
-                write!(f, r#"argument with name "{}" is missing"#, arg_name)
-            }
-            FaaSError::NoSuchModule(module_name) => {
-                write!(f, r#"module with name "{}" is missing"#, module_name)
-            }
-            FaaSError::JsonArgumentsDeserializationError(args) => write!(f, "{}", args),
-            FaaSError::JsonOutputSerializationError(args) => write!(f, "{}", args),
-            FaaSError::IOError(err_msg) => write!(f, "{}", err_msg),
-            FaaSError::EngineError(err) => write!(f, "{}", err),
-            FaaSError::ParseConfigError(err) => write!(f, "{}", err),
-        }
-    }
 }
 
 impl From<IOError> for FaaSError {
@@ -91,7 +84,7 @@ impl From<FCEError> for FaaSError {
 
 impl From<toml::de::Error> for FaaSError {
     fn from(err: toml::de::Error) -> Self {
-        FaaSError::ConfigParseError(format!("{}", err))
+        FaaSError::ParseConfigError(err)
     }
 }
 

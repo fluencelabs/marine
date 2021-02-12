@@ -21,9 +21,9 @@ pub use functions::*;
 pub use wit::*;
 
 use crate::Result;
-use std::path::PathBuf;
+use std::path::Path;
 
-pub fn module_interface(module_path: PathBuf) -> Result<ServiceInterface> {
+pub fn module_interface(module_path: &Path) -> Result<ServiceInterface> {
     use fce_wit_interfaces::FCEWITInterfaces;
 
     let wit_section_bytes = extract_wit_section_bytes(module_path)?;

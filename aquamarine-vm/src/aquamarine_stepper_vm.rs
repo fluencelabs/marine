@@ -18,7 +18,7 @@ use crate::{Result, IType, CallServiceClosure};
 use crate::AquamarineVMError;
 use crate::config::AquamarineVMConfig;
 
-use fluence_faas::{FaaSConfig, HostExportedFunc};
+use fluence_faas::{FaaSConfig, HostExportedFunc, ModuleDescriptor};
 use fluence_faas::FluenceFaaS;
 use fluence_faas::HostImportDescriptor;
 use fluence_faas::IValue;
@@ -180,10 +180,10 @@ fn call_service_descriptor(
     }
 }
 
-/// Splits given path into its directory and file stem
+/// Splits given path into its directory and file name
 ///
 /// # Example
-/// For path `/path/to/aquamarine.wasm` result will be `Ok(PathBuf(/path/to), "aquamarine")`
+/// For path `/path/to/aquamarine.wasm` result will be `Ok(PathBuf(/path/to), "aquamarine.wasm")`
 fn split_dirname(path: PathBuf) -> Result<(PathBuf, String)> {
     use AquamarineVMError::InvalidAquamarinePath;
 
@@ -201,16 +201,16 @@ fn split_dirname(path: PathBuf) -> Result<(PathBuf, String)> {
         });
     }
 
-    let file_stem = path
-        .file_stem()
+    let file_name = path
+        .file_name()
         .expect("checked to be a file, file name must be defined");
-    let file_stem = file_stem.to_string_lossy().into_owned();
+    let file_name = file_name.to_string_lossy().into_owned();
 
     let mut path = path;
     // drop file name from path
     path.pop();
 
-    Ok((path, file_stem))
+    Ok((path, file_name))
 }
 
 fn make_faas_config(
@@ -242,7 +242,11 @@ fn make_faas_config(
 
     FaaSConfig {
         modules_dir: Some(aquamarine_wasm_dir),
-        modules_config: vec![(String::from(aquamarine_wasm_file), aquamarine_module_config)],
+        modules_config: vec![ModuleDescriptor {
+            file_name: String::from(aquamarine_wasm_file),
+            import_name: String::from(aquamarine_wasm_file),
+            config: aquamarine_module_config,
+        }],
         default_modules_config: None,
     }
 }
