@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#![allow(improper_ctypes)]
+
 use fluence::fce;
 
 pub fn main() {}

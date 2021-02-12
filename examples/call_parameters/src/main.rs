@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#[cfg(target_arch = "wasm32")]
 use fluence::fce;
 
 pub fn main() {}
