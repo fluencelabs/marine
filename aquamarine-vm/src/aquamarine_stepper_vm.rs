@@ -22,7 +22,7 @@ use fluence_faas::{FaaSConfig, HostExportedFunc, ModuleDescriptor};
 use fluence_faas::FluenceFaaS;
 use fluence_faas::HostImportDescriptor;
 use fluence_faas::IValue;
-use stepper_interface::StepperOutcome;
+use crate::InterpreterOutcome;
 
 use std::path::PathBuf;
 use std::ops::{Deref, DerefMut};
@@ -105,7 +105,7 @@ impl AquamarineVM {
         aqua: impl Into<String>,
         data: impl Into<Vec<u8>>,
         particle_id: impl Into<String>,
-    ) -> Result<StepperOutcome> {
+    ) -> Result<InterpreterOutcome> {
         use AquamarineVMError::PersistDataError;
 
         let particle_id = particle_id.into();
@@ -126,7 +126,7 @@ impl AquamarineVM {
             self.faas
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
-        let outcome = StepperOutcome::from_ivalues(result)
+        let outcome = InterpreterOutcome::from_ivalues(result)
             .map_err(AquamarineVMError::StepperResultDeError)?;
 
         // persist resulted data

@@ -43,7 +43,7 @@ pub use fluence_faas::IType;
 pub use fluence_faas::ne_vec;
 pub use fluence_faas::Ctx;
 
-pub use stepper_interface::StepperOutcome;
-pub use stepper_interface::STEPPER_SUCCESS;
+pub use aqua_interpreter_interface::InterpreterOutcome;
+pub use aqua_interpreter_interface::INTERPRETER_SUCCESS;
 
 pub(crate) type Result<T> = std::result::Result<T, AquamarineVMError>;
