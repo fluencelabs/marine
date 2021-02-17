@@ -264,14 +264,14 @@ impl AquamarineVM {
         aqua: impl Into<String>,
         prev_data: impl Into<Vec<u8>>,
         data: impl Into<Vec<u8>>,
-    ) -> Result<StepperOutcome> {
+    ) -> Result<InterpreterOutcome> {
         let args = prepare_args(prev_data.into(), data, init_user_id.into(), aqua);
 
         let result =
             self.faas
                 .call_with_ivalues(&self.wasm_filename, "invoke", &args, <_>::default())?;
 
-        let outcome = StepperOutcome::from_ivalues(result)
+        let outcome = InterpreterOutcome::from_ivalues(result)
             .map_err(AquamarineVMError::StepperResultDeError)?;
 
         Ok(outcome)
