@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-mod modules_load_strategy;
-mod utils;
+mod raw_toml_config;
+mod toml_config;
 
-pub(crate) use modules_load_strategy::ModulesLoadStrategy;
-pub(crate) use utils::create_host_import;
-pub(crate) use utils::make_fce_config;
-pub(crate) use utils::load_modules_from_fs;
+pub use toml_config::FaaSModuleConfig;
+pub use toml_config::FaaSConfig;
+pub use toml_config::FaaSWASIConfig;
+pub use toml_config::ModuleDescriptor;
+
+pub use raw_toml_config::TomlFaaSNamedModuleConfig;
+pub use raw_toml_config::TomlWASIConfig;
+pub use raw_toml_config::TomlFaaSConfig;
+pub use raw_toml_config::TomlFaaSModuleConfig;
+
+pub use raw_toml_config::from_toml_faas_config;
+pub use raw_toml_config::from_toml_module_config;
+pub use raw_toml_config::from_toml_wasi_config;

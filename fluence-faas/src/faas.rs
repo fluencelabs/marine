@@ -153,8 +153,8 @@ impl FluenceFaaS {
         json_args: JValue,
         call_parameters: fluence_sdk_main::CallParameters,
     ) -> Result<JValue> {
-        use crate::misc::json_to_ivalues;
-        use crate::misc::ivalues_to_json;
+        use crate::json::json_to_ivalues;
+        use crate::json::ivalues_to_json;
 
         let module_name = module_name.as_ref();
         let func_name = func_name.as_ref();

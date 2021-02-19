@@ -16,16 +16,19 @@
 
 use crate::FaaSError;
 use crate::Result;
-use crate::config::*;
+use super::FaaSConfig;
+use super::FaaSModuleConfig;
+use super::FaaSWASIConfig;
+use super::ModuleDescriptor;
 
 use serde_derive::Serialize;
 use serde_derive::Deserialize;
+use serde::export::TryFrom;
 
 use std::convert::TryInto;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::PathBuf;
-use serde::export::TryFrom;
 
 /*
 An example of the config:
@@ -208,7 +211,7 @@ pub fn from_toml_wasi_config(wasi: TomlWASIConfig) -> Result<FaaSWASIConfig> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{TomlFaaSNamedModuleConfig, TomlFaaSModuleConfig, TomlWASIConfig};
+    use super::{TomlFaaSNamedModuleConfig, TomlFaaSModuleConfig, TomlWASIConfig};
 
     #[test]
     fn serialize_named() {

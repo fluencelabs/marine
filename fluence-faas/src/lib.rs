@@ -25,12 +25,12 @@
 )]
 
 mod config;
+mod json;
 mod errors;
 mod logger;
 mod faas;
 mod faas_interface;
 mod misc;
-mod raw_toml_config;
 
 pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
 
@@ -43,13 +43,13 @@ pub use config::FaaSModuleConfig;
 pub use config::FaaSWASIConfig;
 pub use config::ModuleDescriptor;
 
-pub use raw_toml_config::TomlFaaSConfig;
-pub use raw_toml_config::TomlFaaSModuleConfig;
-pub use raw_toml_config::TomlFaaSNamedModuleConfig;
-pub use raw_toml_config::TomlWASIConfig;
-pub use raw_toml_config::from_toml_faas_config;
-pub use raw_toml_config::from_toml_module_config;
-pub use raw_toml_config::from_toml_wasi_config;
+pub use config::TomlFaaSConfig;
+pub use config::TomlFaaSModuleConfig;
+pub use config::TomlFaaSNamedModuleConfig;
+pub use config::TomlWASIConfig;
+pub use config::from_toml_faas_config;
+pub use config::from_toml_module_config;
+pub use config::from_toml_wasi_config;
 
 pub use errors::FaaSError;
 
