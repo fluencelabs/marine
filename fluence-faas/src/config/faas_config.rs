@@ -171,7 +171,7 @@ impl TryFrom<TomlFaaSModuleConfig> for FaaSModuleConfig {
         for (import_name, host_cmd) in mounted_binaries {
             host_cli_imports.insert(
                 import_name,
-                crate::host_imports::create_host_import(host_cmd),
+                crate::host_imports::create_mounted_binary_import(host_cmd),
             );
         }
 

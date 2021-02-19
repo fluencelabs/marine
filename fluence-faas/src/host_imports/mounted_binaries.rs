@@ -15,34 +15,109 @@
  */
 
 use fce::HostImportDescriptor;
+use fluence_sdk_main::MountedBinaryResult;
+
 use wasmer_core::vm::Ctx;
 use wasmer_wit::IValue;
 use wasmer_wit::IType;
 
-pub(crate) fn create_host_import(host_cmd: String) -> HostImportDescriptor {
-    let host_cmd_closure = move |_ctx: &mut Ctx, args: Vec<IValue>| {
-        let arg = match &args[0] {
-            IValue::String(str) => str,
-            // this closure will be linked to import function with signature from supplied
-            // HostImportDescriptor. So it should be invoked only with string as an arg.
-            _ => unreachable!(),
-        };
+pub(crate) fn create_mounted_binary_import(mounted_binary_path: String) -> HostImportDescriptor {
+    let host_cmd_closure = move |_ctx: &mut Ctx, raw_args: Vec<IValue>| {
+        let result =
+            mounted_binary_import_impl(&mounted_binary_path, raw_args).unwrap_or_else(Into::into);
+        let raw_result = crate::to_interface_value(&result).unwrap();
 
-        let result = match cmd_lib::run_fun!("{} {}", host_cmd, arg) {
-            Ok(result) => result,
-            Err(e) => {
-                log::error!("error occurred `{} {}`: {:?} ", host_cmd, arg, e);
-                String::new()
-            }
-        };
-
-        Some(IValue::String(result))
+        Some(raw_result)
     };
 
     HostImportDescriptor {
         host_exported_func: Box::new(host_cmd_closure),
-        argument_types: vec![IType::String],
-        output_type: Some(IType::String),
+        argument_types: vec![IType::Array(Box::new(IType::String))],
+        output_type: Some(IType::Record(0)),
         error_handler: None,
+    }
+}
+
+pub(self) fn mounted_binary_import_impl(
+    mounted_binary_path: &String,
+    raw_args: Vec<IValue>,
+) -> Result<MountedBinaryResult, MountedBinaryResult> {
+    let args = parse_args(raw_args)?;
+
+    let result = std::process::Command::new(mounted_binary_path)
+        .args(&args)
+        .output();
+
+    let result = match result {
+        Ok(output) => {
+            const TERMINATED_BY_SIGNAL_CODE: i32 = 100000;
+            let ret_code = output.status.code().unwrap_or(TERMINATED_BY_SIGNAL_CODE);
+            let error = format!("{}", output.status);
+
+            MountedBinaryResult {
+                ret_code,
+                error,
+                stdout: output.stdout,
+                stderr: output.stderr,
+            }
+        }
+        Err(e) => {
+            const COMMAND_ERROR_CODE: i32 = 100001;
+            let error = format!("{}", e);
+
+            log::error!(
+                "error occurred on `{} {:?}`: {} ",
+                mounted_binary_path,
+                args,
+                e
+            );
+
+            MountedBinaryResult {
+                ret_code: COMMAND_ERROR_CODE,
+                error,
+                stdout: Vec::new(),
+                stderr: Vec::new(),
+            }
+        }
+    };
+
+    Ok(result)
+}
+
+fn parse_args(mut raw_args: Vec<IValue>) -> Result<Vec<String>, MountedBinaryResult> {
+    if raw_args.len() != 1 {
+        return Err(MountedBinaryResult::from_error(100002, "internal error is encountered while passing arguments to a mounted binary closure, probably you use a not suitable version of rust-sdk"));
+    }
+
+    let args = match raw_args.remove(0) {
+        IValue::Array(array) => {
+            let mut args = Vec::with_capacity(array.len());
+            for value in array {
+                match value {
+                    IValue::String(str) => args.push(str),
+                    _ => return Err(MountedBinaryResult::from_error(100004, "internal error is encountered while passing arguments to a mounted binary closure, probably you use a not suitable version of rust-sdk")),
+                }
+            }
+
+            args
+        }
+        _ => {
+            return Err(MountedBinaryResult::from_error(100003, "internal error is encountered while passing arguments to a mounted binary closure, probably you use a not suitable version of rust-sdk"));
+        }
+    };
+
+    Ok(args)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::mounted_binary_import_impl;
+
+    #[test]
+    fn call_non_existent_binary() {
+        let path = String::from("____non_existent_path____");
+        let actual = mounted_binary_import_impl(&path, vec![]).unwrap_err();
+
+        assert_eq!(actual.ret_code, 100002);
     }
 }

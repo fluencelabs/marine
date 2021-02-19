@@ -10,5 +10,6 @@ name = "ipfs_effector"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { version = "=0.2.18", features = ["logger"]}
+#fluence = { version = "=0.2.18", features = ["logger"]}
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "mounted_binary_result", features = ["logger"] }
 log = "0.4.11"

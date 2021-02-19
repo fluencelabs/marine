@@ -209,9 +209,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.66"
+version = "1.0.67"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c0496836a84f8d0495758516b8621a622beb77c0fed418570e50764093ced48"
+checksum = "e3c69b077ad434294d3ce9f1f6143a2a4b89a8a2d54ef813d85003a4fd1137fd"
 
 [[package]]
 name = "cfg-if"
@@ -762,6 +762,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "fluence"
+version = "0.2.18"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#feb7517126edafcdf7c86f7e753c9d731e6a2205"
+dependencies = [
+ "fluence-sdk-macro 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
+ "fluence-sdk-main 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
+]
+
+[[package]]
 name = "fluence-app-service"
 version = "0.3.0"
 dependencies = [
@@ -783,7 +792,7 @@ dependencies = [
  "env_logger 0.7.1",
  "fce",
  "fce-utils",
- "fluence-sdk-main 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
  "itertools",
  "log",
  "once_cell",
@@ -830,6 +839,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "fluence-sdk-macro"
+version = "0.2.18"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#feb7517126edafcdf7c86f7e753c9d731e6a2205"
+dependencies = [
+ "fluence-sdk-wit 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
+]
+
+[[package]]
 name = "fluence-sdk-main"
 version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -846,6 +863,16 @@ version = "0.2.18"
 source = "git+https://github.com/fluencelabs/rust-sdk#8d427c0e72e978922abbd1da0157b58c6a16a42f"
 dependencies = [
  "fluence-sdk-macro 0.2.18 (git+https://github.com/fluencelabs/rust-sdk)",
+ "log",
+ "serde",
+]
+
+[[package]]
+name = "fluence-sdk-main"
+version = "0.2.18"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#feb7517126edafcdf7c86f7e753c9d731e6a2205"
+dependencies = [
+ "fluence-sdk-macro 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
  "log",
  "serde",
 ]
@@ -868,6 +895,19 @@ dependencies = [
 name = "fluence-sdk-wit"
 version = "0.2.18"
 source = "git+https://github.com/fluencelabs/rust-sdk#8d427c0e72e978922abbd1da0157b58c6a16a42f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+ "uuid",
+]
+
+[[package]]
+name = "fluence-sdk-wit"
+version = "0.2.18"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#feb7517126edafcdf7c86f7e753c9d731e6a2205"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1290,7 +1330,7 @@ dependencies = [
 name = "ipfs-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
  "log",
 ]
 
@@ -1298,7 +1338,7 @@ dependencies = [
 name = "ipfs-pure"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
  "log",
 ]
 

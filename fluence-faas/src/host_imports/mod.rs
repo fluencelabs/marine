@@ -19,4 +19,4 @@ mod call_parameters;
 mod mounted_binaries;
 
 pub(crate) use call_parameters::create_call_parameters_import;
-pub(crate) use mounted_binaries::create_host_import;
+pub(crate) use mounted_binaries::create_mounted_binary_import;
