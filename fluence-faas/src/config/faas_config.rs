@@ -126,10 +126,7 @@ impl TryFrom<TomlFaaSConfig> for FaaSConfig {
     fn try_from(toml_config: TomlFaaSConfig) -> Result<Self, Self::Error> {
         let modules_dir = toml_config.modules_dir.map(PathBuf::from);
 
-        let default_modules_config = toml_config
-            .default
-            .map(|m| m.try_into())
-            .transpose()?;
+        let default_modules_config = toml_config.default.map(|m| m.try_into()).transpose()?;
 
         let modules_config = toml_config
             .module
