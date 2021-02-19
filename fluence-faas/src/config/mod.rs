@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-mod raw_toml_config;
-mod toml_config;
+mod raw_faas_config;
+mod to_fce_config;
+mod faas_config;
 
-pub use toml_config::FaaSModuleConfig;
-pub use toml_config::FaaSConfig;
-pub use toml_config::FaaSWASIConfig;
-pub use toml_config::ModuleDescriptor;
+pub use faas_config::FaaSModuleConfig;
+pub use faas_config::FaaSConfig;
+pub use faas_config::FaaSWASIConfig;
+pub use faas_config::ModuleDescriptor;
 
-pub use raw_toml_config::TomlFaaSNamedModuleConfig;
-pub use raw_toml_config::TomlWASIConfig;
-pub use raw_toml_config::TomlFaaSConfig;
-pub use raw_toml_config::TomlFaaSModuleConfig;
+pub use raw_faas_config::TomlFaaSNamedModuleConfig;
+pub use raw_faas_config::TomlWASIConfig;
+pub use raw_faas_config::TomlFaaSConfig;
+pub use raw_faas_config::TomlFaaSModuleConfig;
 
-pub use raw_toml_config::from_toml_faas_config;
-pub use raw_toml_config::from_toml_module_config;
-pub use raw_toml_config::from_toml_wasi_config;
+pub(crate) use to_fce_config::make_fce_config;

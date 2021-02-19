@@ -52,7 +52,7 @@ dependencies = [
 
 [[package]]
 name = "aquamarine-vm"
-version = "0.3.1"
+version = "0.4.1"
 dependencies = [
  "aqua-interpreter-interface",
  "fluence-faas",
@@ -763,7 +763,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "fluence-faas",
  "log",
@@ -777,7 +777,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -910,7 +910,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "clap",

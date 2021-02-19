@@ -20,10 +20,10 @@ use crate::FaaSError;
 use crate::Result;
 use crate::IValue;
 use crate::IType;
-use crate::misc::load_modules_from_fs;
-use crate::misc::ModulesLoadStrategy;
-use crate::logger::LoggerFilter;
-use crate::logger::WASM_LOG_ENV_NAME;
+use crate::module_loading::load_modules_from_fs;
+use crate::module_loading::ModulesLoadStrategy;
+use crate::host_imports::logger::LoggerFilter;
+use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 
 use fce::FCE;
 use fce::IFunctionArg;
@@ -97,7 +97,7 @@ impl FluenceFaaS {
                 }
             })?;
 
-            let fce_module_config = crate::misc::make_fce_config(
+            let fce_module_config = crate::config::make_fce_config(
                 module.import_name.clone(),
                 Some(module.config),
                 call_parameters.clone(),
@@ -250,7 +250,7 @@ impl FluenceFaaS {
         let wasm_log_env = std::env::var(WASM_LOG_ENV_NAME).unwrap_or_default();
         let logger_filter = LoggerFilter::from_env_string(&wasm_log_env);
 
-        let fce_module_config = crate::misc::make_fce_config(
+        let fce_module_config = crate::config::make_fce_config(
             name.clone(),
             config,
             self.call_parameters.clone(),

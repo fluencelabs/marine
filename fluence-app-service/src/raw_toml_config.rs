@@ -19,7 +19,6 @@ use crate::AppServiceError;
 use crate::config::AppServiceConfig;
 
 use fluence_faas::TomlFaaSConfig;
-use fluence_faas::from_toml_faas_config;
 use serde_derive::Serialize;
 use serde_derive::Deserialize;
 
@@ -49,7 +48,7 @@ impl TryInto<AppServiceConfig> for TomlAppServiceConfig {
     type Error = AppServiceError;
 
     fn try_into(self) -> Result<AppServiceConfig> {
-        let faas_config = from_toml_faas_config(self.toml_faas_config)?;
+        let faas_config = self.toml_faas_config.try_into()?;
         let service_base_dir = match self.service_base_dir {
             Some(service_base_dir) => PathBuf::from(service_base_dir),
             // use tmp dir for service base dir if it isn't defined
