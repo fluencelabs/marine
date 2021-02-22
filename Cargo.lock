@@ -421,7 +421,7 @@ dependencies = [
 name = "curl_adapter"
 version = "0.1.0"
 dependencies = [
- "fluence 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
  "log",
 ]
 
@@ -761,7 +761,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.18"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#3492f400575f194c305eee22d782d1d0b673e3fd"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#210fd72b892ca30078354d27ef06505ef468f0e8"
 dependencies = [
  "fluence-sdk-macro 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
  "fluence-sdk-main 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
@@ -838,7 +838,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.18"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#3492f400575f194c305eee22d782d1d0b673e3fd"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#210fd72b892ca30078354d27ef06505ef468f0e8"
 dependencies = [
  "fluence-sdk-wit 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
 ]
@@ -867,7 +867,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.18"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#3492f400575f194c305eee22d782d1d0b673e3fd"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#210fd72b892ca30078354d27ef06505ef468f0e8"
 dependencies = [
  "fluence-sdk-macro 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
  "log",
@@ -904,7 +904,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.18"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#3492f400575f194c305eee22d782d1d0b673e3fd"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#210fd72b892ca30078354d27ef06505ef468f0e8"
 dependencies = [
  "proc-macro2",
  "quote",

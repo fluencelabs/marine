@@ -26,9 +26,7 @@ pub(crate) fn create_mounted_binary_import(mounted_binary_path: String) -> HostI
         let result =
             mounted_binary_import_impl(&mounted_binary_path, raw_args).unwrap_or_else(Into::into);
 
-        println!("before serialization: {:?}", result);
         let raw_result = crate::to_interface_value(&result).unwrap();
-        println!("after serialization: {:?}", raw_result);
 
         Some(raw_result)
     };
