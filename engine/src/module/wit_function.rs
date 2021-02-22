@@ -17,7 +17,7 @@
 use super::fce_module::FCEModule;
 use super::{IType, IFunctionArg, IValue, WValue};
 use super::fce_module::Callable;
-use crate::Result;
+use crate::FCEResult;
 
 use wasmer_wit::interpreter::wasm;
 use wasmer_core::instance::DynFunc;
@@ -47,7 +47,7 @@ pub(super) struct WITFunction {
 
 impl WITFunction {
     /// Creates functions from a "usual" (not WIT) module export.
-    pub(super) fn from_export(dyn_func: DynFunc<'static>, name: String) -> Result<Self> {
+    pub(super) fn from_export(dyn_func: DynFunc<'static>, name: String) -> FCEResult<Self> {
         use super::type_converters::wtype_to_itype;
 
         let signature = dyn_func.signature();
@@ -87,7 +87,7 @@ impl WITFunction {
         function_name: &str,
         arguments: Rc<Vec<IFunctionArg>>,
         outputs: Rc<Vec<IType>>,
-    ) -> Result<Self> {
+    ) -> FCEResult<Self> {
         let callable = wit_module.get_callable(function_name)?;
 
         let inner = WITFunctionInner::Import { callable };

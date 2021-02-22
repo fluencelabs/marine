@@ -661,6 +661,7 @@ dependencies = [
 name = "fce"
 version = "0.2.0"
 dependencies = [
+ "anyhow",
  "boolinator",
  "bytes 0.5.6",
  "fce-utils",
@@ -676,6 +677,7 @@ dependencies = [
  "reqwest",
  "safe-transmute",
  "serde",
+ "thiserror",
  "tokio",
  "wasmer-interface-types-fl",
  "wasmer-runtime-core-fl",

@@ -88,8 +88,13 @@ pub fn get_address() -> String {
 }
 
 #[fce]
+fn ipfs_export(arg: Vec<u16>) {
+
+}
+
+#[fce]
 #[link(wasm_import_module = "host")]
 extern "C" {
     /// Execute provided cmd as a parameters of ipfs cli, return result.
-    pub fn ipfs(cmd: Vec<String>) -> MountedBinaryResult;
+    pub fn ipfs(cmd: Vec<u16>) -> MountedBinaryResult;
 }

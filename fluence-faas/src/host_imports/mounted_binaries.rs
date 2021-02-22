@@ -44,6 +44,8 @@ pub(self) fn mounted_binary_import_impl(
 ) -> Result<MountedBinaryResult, MountedBinaryResult> {
     let args = parse_args(raw_args)?;
 
+    println!("mounted_binary_import_impl called with {:?}", args);
+
     let result = std::process::Command::new(mounted_binary_path)
         .args(&args)
         .output();

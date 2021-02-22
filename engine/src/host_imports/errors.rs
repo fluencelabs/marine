@@ -18,52 +18,36 @@ use crate::IType;
 use super::WType;
 use super::WValue;
 
-use std::error::Error;
+// use safe_transmute::Error as TransmuteError;
+use thiserror::Error as ThisError;
 
-#[derive(Debug)]
+#[derive(Debug, ThisError)]
 pub enum HostImportError {
     /// An error occurred when host functions tries to lift IValues from WValues
     /// and the latter has different type.
+    #[error(
+        "Expected {0} type, but found {1:?} value during interface values lifting from Wasm memory"
+    )]
     MismatchWValues(WType, WValue),
 
-    /// An error occurred when host functions tries to lift IValues from WValues
+    /// An error occurred when a host functions tries to lift IValues from WValues
     /// and the latter is not enough for that.
+    #[error("Not enough WValue arguments are provided from the Wasm side")]
     MismatchWValuesCount,
 
     /// An error related to invalid memory access during lifting IValue.
+    #[error("Invalid memory access while lifting IValues, offset {0}, size {1}")]
     InvalidMemoryAccess(i32, i32),
 
     /// An error related to lifting memory from arrays of pointers with odd elements count.
+    #[error("Arrays of pointers for value type {0:?} contains odd count")]
     OddPointersCount(IType),
 
     /// An error related to not found record in module record types.
+    #[error("Record with type id {0} not found")]
     RecordTypeNotFound(u64),
-}
 
-impl Error for HostImportError {}
-
-impl std::fmt::Display for HostImportError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        match self {
-            HostImportError::MismatchWValues(expected_type, found_value) => write!(
-                f,
-                "Expected {} type, but found {:?} value during interface values lifting from Wasm memory",
-                expected_type, found_value
-            ),
-            HostImportError::MismatchWValuesCount => {
-                write!(f, "Not enough WValue arguments are provided from the Wasm side")
-            }
-            HostImportError::InvalidMemoryAccess(offset, size) => write!(
-                f,
-                "Invalid memory access while lifting IValues, offset {}, size {}",
-                offset, size
-            ),
-            HostImportError::OddPointersCount(itype) => {
-                write!(f, "Arrays of pointers for value type {:?} contains odd count", itype)
-            }
-            HostImportError::RecordTypeNotFound(record_type_id) => {
-                write!(f, "Record with type id {} not found", record_type_id)
-            }
-        }
-    }
+    /// An error encountered while transmiting arrays.
+    #[error("array of bytes with len {0} can't be transmuted to {1} type")]
+    TransmuteArrayError(usize, &'static str),
 }

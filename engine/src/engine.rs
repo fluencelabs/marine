@@ -50,7 +50,7 @@ impl FCE {
         module_name: MN,
         func_name: FN,
         arguments: &[IValue],
-    ) -> Result<Vec<IValue>> {
+    ) -> FCEResult<Vec<IValue>> {
         self.modules.get_mut(module_name.as_ref()).map_or_else(
             || {
                 Err(FCEError::NoSuchModule(format!(
@@ -68,7 +68,7 @@ impl FCE {
         import_name: S,
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
-    ) -> Result<()> {
+    ) -> FCEResult<()> {
         self.load_module_(import_name.into(), wasm_bytes, config)
     }
 
@@ -77,7 +77,7 @@ impl FCE {
         import_name: String,
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
-    ) -> Result<()> {
+    ) -> FCEResult<()> {
         let _prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
         let module = FCEModule::new(&wasm_bytes, config, &self.modules)?;
@@ -92,7 +92,7 @@ impl FCE {
     }
 
     /// Unload previously loaded module.
-    pub fn unload_module<S: AsRef<str>>(&mut self, name: S) -> Result<()> {
+    pub fn unload_module<S: AsRef<str>>(&mut self, name: S) -> FCEResult<()> {
         // TODO: clean up all reference from adaptors after adding support of lazy linking
         self.modules
             .remove(name.as_ref())
