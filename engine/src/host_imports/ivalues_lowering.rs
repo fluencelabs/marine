@@ -54,7 +54,9 @@ pub(super) fn ivalue_to_wvalues(
             vec![WValue::I32(offset as _), WValue::I32(size as _)]
         }
         Some(IValue::Record(values)) => {
+            println!("lowering values: {:?}", values);
             let offset = lower_record(ctx, values, allocate_func);
+            println!("resulted offset: {}", offset);
             vec![WValue::I32(offset)]
         }
         None => vec![],

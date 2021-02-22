@@ -269,12 +269,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "475bd7aa7680b4ed8f6bb59745e882bcbaeb39326532bb79ffb1716480d9a274"
 
 [[package]]
-name = "const_fn"
-version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28b9d6de7f49e22cf97ad17fc4036ece69300032f45f78f30b4a4482cdc3f4a6"
-
-[[package]]
 name = "constant_time_eq"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -379,27 +373,28 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-epoch"
-version = "0.9.1"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1aaa739f95311c2c7887a76863f500026092fb1dce0161dab577e559ef3569d"
+checksum = "d60ab4a8dba064f2fbb5aa270c28da5cf4bbd0e72dae1140a6b0353a779dbe00"
 dependencies = [
  "cfg-if 1.0.0",
- "const_fn",
  "crossbeam-utils",
  "lazy_static",
+ "loom",
  "memoffset",
  "scopeguard",
 ]
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.1"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02d96d1e189ef58269ebe5b97953da3274d83a93af647c2ddd6f9dab28cedb8d"
+checksum = "bae8f328835f8f5a6ceb6a7842a7f2d0c03692adb5c889347235d59194731fe3"
 dependencies = [
  "autocfg",
  "cfg-if 1.0.0",
  "lazy_static",
+ "loom",
 ]
 
 [[package]]
@@ -766,7 +761,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.2.18"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#feb7517126edafcdf7c86f7e753c9d731e6a2205"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#3492f400575f194c305eee22d782d1d0b673e3fd"
 dependencies = [
  "fluence-sdk-macro 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
  "fluence-sdk-main 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
@@ -843,7 +838,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.2.18"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#feb7517126edafcdf7c86f7e753c9d731e6a2205"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#3492f400575f194c305eee22d782d1d0b673e3fd"
 dependencies = [
  "fluence-sdk-wit 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
 ]
@@ -872,7 +867,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.2.18"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#feb7517126edafcdf7c86f7e753c9d731e6a2205"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#3492f400575f194c305eee22d782d1d0b673e3fd"
 dependencies = [
  "fluence-sdk-macro 0.2.18 (git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result)",
  "log",
@@ -909,7 +904,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.2.18"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#feb7517126edafcdf7c86f7e753c9d731e6a2205"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=mounted_binary_result#3492f400575f194c305eee22d782d1d0b673e3fd"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1047,6 +1042,19 @@ checksum = "8e1d3b771574f62d0548cee0ad9057857e9fc25d7a3335f140c84f6acd0bf601"
 dependencies = [
  "cfg-if 0.1.10",
  "serde",
+]
+
+[[package]]
+name = "generator"
+version = "0.6.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a9fed24fd1e18827652b4d55652899a1e9da8e54d91624dc3437a5bc3a9f9a9c"
+dependencies = [
+ "cc",
+ "libc",
+ "log",
+ "rustversion",
+ "winapi 0.3.9",
 ]
 
 [[package]]
@@ -1457,6 +1465,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "loom"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d44c73b4636e497b4917eb21c33539efa3816741a2d3ff26c6316f1b529481a4"
+dependencies = [
+ "cfg-if 1.0.0",
+ "generator",
+ "scoped-tls",
+]
+
+[[package]]
 name = "maplit"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1680,9 +1699,9 @@ checksum = "a9a7ab5d64814df0fe4a4b5ead45ed6c5f181ee3ff04ba344313a6c80446c5d4"
 
 [[package]]
 name = "once_cell"
-version = "1.5.2"
+version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13bd41f508810a131401606d54ac32a467c97172d74ba7662562ebba5ad07fa0"
+checksum = "4ad167a2f54e832b82dbe003a046280dceffe5227b5f79e08e363a29638cfddd"
 
 [[package]]
 name = "openssl"
@@ -2118,6 +2137,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "59a6f317aba7842554266d387a51504f084fc460cab6eb59e19d98dc3d18b9ec"
 
 [[package]]
+name = "rustversion"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb5d2a036dc6d2d8fd16fde3498b04306e29bd193bf306a57427019b823d5acd"
+
+[[package]]
 name = "rustyline"
 version = "6.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2168,6 +2193,12 @@ dependencies = [
  "lazy_static",
  "winapi 0.3.9",
 ]
+
+[[package]]
+name = "scoped-tls"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ea6a9290e3c9cf0f18145ef7ffa62d68ee0bf5fcd651017e586dc7fd5da448c2"
 
 [[package]]
 name = "scopeguard"

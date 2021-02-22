@@ -22,7 +22,7 @@ use crate::path::to_full_path;
 
 use fluence::fce;
 use fluence::WasmLoggerBuilder;
-use fluence::MountedBinaryResult;
+use fluence::mounted_binary;
 
 const RESULT_FILE_PATH: &str = "/tmp/ipfs_rpc_file";
 const IPFS_ADDR_ENV_NAME: &str = "IPFS_ADDR";
@@ -49,10 +49,13 @@ pub fn put(file_path: String) -> String {
         format!("-Q {}", file_path),
     ];
 
-    let exec_result = unsafe { ipfs(cmd) };
-    println!("exec_result: {:?}", exec_result);
+    let ipfs_result = unsafe { ipfs(cmd) };
 
-    String::from_utf8(exec_result.stdout).unwrap()
+    if ipfs_result.ret_code != fluence::mounted_binary::SUCCESS_CODE {
+        String::from_utf8(ipfs_result.stderr).unwrap()
+    } else {
+        String::from_utf8(ipfs_result.stdout).unwrap()
+    }
 }
 
 /// Get file by provided hash from IPFS, saves it to a temporary file and returns a path to it.
@@ -70,9 +73,7 @@ pub fn get(hash: String) -> String {
         hash,
     ];
 
-    let exec_result = unsafe { ipfs(cmd) };
-    println!("exec_result: {:?}", exec_result);
-
+    unsafe { ipfs(cmd) };
     RESULT_FILE_PATH.to_string()
 }
 
@@ -88,13 +89,8 @@ pub fn get_address() -> String {
 }
 
 #[fce]
-fn ipfs_export(arg: Vec<u16>) {
-
-}
-
-#[fce]
 #[link(wasm_import_module = "host")]
 extern "C" {
     /// Execute provided cmd as a parameters of ipfs cli, return result.
-    pub fn ipfs(cmd: Vec<u16>) -> MountedBinaryResult;
+    pub fn ipfs(cmd: Vec<String>) -> mounted_binary::Result;
 }

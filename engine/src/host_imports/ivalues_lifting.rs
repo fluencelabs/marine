@@ -125,7 +125,6 @@ fn lift_array(
     }
 
     let data = read_mem(ctx, offset, size)?;
-    println!("data: {:?}", data);
 
     macro_rules! simple_type_array_convert(
         ($data:ident, $itype:ident, $rtype:ident) => {

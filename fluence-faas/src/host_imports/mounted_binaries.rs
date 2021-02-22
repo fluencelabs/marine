@@ -15,7 +15,7 @@
  */
 
 use fce::HostImportDescriptor;
-use fluence_sdk_main::MountedBinaryResult;
+use fluence_sdk_main::mounted_binary::Result as MountedBinaryResult;
 
 use wasmer_core::vm::Ctx;
 use wasmer_wit::IValue;
@@ -25,7 +25,10 @@ pub(crate) fn create_mounted_binary_import(mounted_binary_path: String) -> HostI
     let host_cmd_closure = move |_ctx: &mut Ctx, raw_args: Vec<IValue>| {
         let result =
             mounted_binary_import_impl(&mounted_binary_path, raw_args).unwrap_or_else(Into::into);
+
+        println!("before serialization: {:?}", result);
         let raw_result = crate::to_interface_value(&result).unwrap();
+        println!("after serialization: {:?}", raw_result);
 
         Some(raw_result)
     };
@@ -43,8 +46,6 @@ pub(self) fn mounted_binary_import_impl(
     raw_args: Vec<IValue>,
 ) -> Result<MountedBinaryResult, MountedBinaryResult> {
     let args = parse_args(raw_args)?;
-
-    println!("mounted_binary_import_impl called with {:?}", args);
 
     let result = std::process::Command::new(mounted_binary_path)
         .args(&args)

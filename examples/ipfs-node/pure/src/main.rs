@@ -47,7 +47,10 @@ pub fn put(file_content: Vec<u8>) -> String {
         return format!("file can't be written: {}", e);
     }
 
-    unsafe { ipfs_put(rpc_tmp_filepath) }
+    let t = unsafe { ipfs_put(rpc_tmp_filepath) };
+    println!("pure: {}", t);
+
+    t
 }
 
 #[fce]
