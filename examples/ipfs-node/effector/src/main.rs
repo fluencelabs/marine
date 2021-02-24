@@ -52,7 +52,10 @@ pub fn put(file_path: String) -> String {
     ];
 
     let ipfs_result = unsafe { ipfs(cmd) };
-    ipfs_result.into_std().unwrap().unwrap_or_else(std::convert::identity)
+    ipfs_result
+        .into_std()
+        .unwrap()
+        .unwrap_or_else(std::convert::identity)
 }
 
 /// Get file by provided hash from IPFS, saves it to a temporary file and returns a path to it.

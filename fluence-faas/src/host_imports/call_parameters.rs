@@ -23,6 +23,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::ops::Deref;
 
+/// Create the import intended for handling get_call_parameters SDK api.
 pub(crate) fn create_call_parameters_import(
     call_parameters: Rc<RefCell<fluence_sdk_main::CallParameters>>,
 ) -> HostImportDescriptor {

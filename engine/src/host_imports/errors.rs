@@ -40,7 +40,7 @@ pub enum HostImportError {
     InvalidMemoryAccess(i32, i32),
 
     /// An error related to lifting memory from arrays of pointers with odd elements count.
-    #[error("Arrays of pointers for value type {0:?} contains odd count")]
+    #[error("Arrays of pointers for value type {0:?} contains non-even count of elements")]
     OddPointersCount(IType),
 
     /// An error related to not found record in module record types.

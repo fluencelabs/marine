@@ -138,14 +138,14 @@ fn lift_array(
 
     let result_array = match value_type {
         IType::S8 => {
-            // unwrap is safe here because it
+            // unwrap is safe here because it could fail if data types has different size
             let data = transmute_vec::<u8, i8>(data).unwrap();
             data.iter().map(|v| IValue::S8(*v)).collect::<Vec<_>>()
         }
         IType::S16 => simple_type_array_convert!(data, S16, i16),
         IType::S32 => simple_type_array_convert!(data, S32, i32),
         IType::S64 => simple_type_array_convert!(data, S64, i64),
-        IType::U8 => simple_type_array_convert!(data, U8, u8),
+        IType::U8 => data.iter().map(|v| IValue::U8(*v)).collect::<Vec<_>>(),
         IType::U16 => simple_type_array_convert!(data, U16, u16),
         IType::U32 => simple_type_array_convert!(data, U32, u32),
         IType::U64 => simple_type_array_convert!(data, U64, u64),
