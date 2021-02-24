@@ -22,6 +22,7 @@ use crate::path::to_full_path;
 
 use fluence::fce;
 use fluence::WasmLoggerBuilder;
+use fluence::MountedBinaryResult;
 
 const RESULT_FILE_PATH: &str = "/tmp/ipfs_rpc_file";
 const IPFS_ADDR_ENV_NAME: &str = "IPFS_ADDR";
@@ -42,9 +43,19 @@ pub fn put(file_path: String) -> String {
     let file_path = to_full_path(file_path);
 
     let timeout = std::env::var(TIMEOUT_ENV_NAME).unwrap_or_else(|_| "1s".to_string());
-    let cmd = format!("add --timeout {} -Q {}", timeout, file_path);
+    let cmd = vec![
+        String::from("add"),
+        String::from("--timeout"),
+        timeout,
+        String::from("-Q"),
+        file_path,
+    ];
 
-    unsafe { ipfs(cmd) }
+    let ipfs_result = unsafe { ipfs(cmd) };
+    ipfs_result
+        .into_std()
+        .unwrap()
+        .unwrap_or_else(std::convert::identity)
 }
 
 /// Get file by provided hash from IPFS, saves it to a temporary file and returns a path to it.
@@ -55,13 +66,16 @@ pub fn get(hash: String) -> String {
     let result_file_path = to_full_path(RESULT_FILE_PATH);
 
     let timeout = std::env::var(TIMEOUT_ENV_NAME).unwrap_or_else(|_| "1s".to_string());
-    let cmd = format!(
-        "get --timeout {} -o {}  {}",
-        timeout, result_file_path, hash
-    );
+    let cmd = vec![
+        String::from("get"),
+        String::from("--timeout"),
+        timeout,
+        String::from("-o"),
+        result_file_path,
+        hash,
+    ];
 
     unsafe { ipfs(cmd) };
-
     RESULT_FILE_PATH.to_string()
 }
 
@@ -80,5 +94,5 @@ pub fn get_address() -> String {
 #[link(wasm_import_module = "host")]
 extern "C" {
     /// Execute provided cmd as a parameters of ipfs cli, return result.
-    pub fn ipfs(cmd: String) -> String;
+    pub fn ipfs(cmd: Vec<String>) -> MountedBinaryResult;
 }

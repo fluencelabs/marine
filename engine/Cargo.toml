@@ -31,6 +31,9 @@ serde = "=1.0.118"
 safe-transmute = "0.11.0"
 log = "0.4.8"
 
+anyhow = "1.0.31"
+thiserror = "1.0.24"
+
 [dev-dependencies]
 reqwest = "0.10.4"
 bytes = "0.5.4"

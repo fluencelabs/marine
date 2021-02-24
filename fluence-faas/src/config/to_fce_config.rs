@@ -16,69 +16,19 @@
 
 use crate::Result;
 use crate::config::FaaSModuleConfig;
-use crate::errors::FaaSError;
-use crate::logger::log_utf8_string_closure;
-use crate::logger::LoggerFilter;
-use crate::logger::WASM_LOG_ENV_NAME;
+use crate::host_imports::logger::log_utf8_string_closure;
+use crate::host_imports::logger::LoggerFilter;
+use crate::host_imports::logger::WASM_LOG_ENV_NAME;
+use crate::host_imports::create_call_parameters_import;
 
 use fce::FCEModuleConfig;
-use fce::HostImportDescriptor;
 use wasmer_core::import::ImportObject;
 use wasmer_core::import::Namespace;
-use wasmer_core::vm::Ctx;
 use wasmer_runtime::func;
-use wasmer_wit::IValue;
-use wasmer_wit::IType;
 
 use std::collections::HashMap;
 use std::cell::RefCell;
-use std::path::{PathBuf, Path};
 use std::rc::Rc;
-use std::ops::Deref;
-
-pub(crate) fn create_host_import(host_cmd: String) -> HostImportDescriptor {
-    let host_cmd_closure = move |_ctx: &mut Ctx, args: Vec<IValue>| {
-        let arg = match &args[0] {
-            IValue::String(str) => str,
-            // this closure will be linked to import function with signature from supplied
-            // HostImportDescriptor. So it should be invoked only with string as an arg.
-            _ => unreachable!(),
-        };
-
-        let result = match cmd_lib::run_fun!("{} {}", host_cmd, arg) {
-            Ok(result) => result,
-            Err(e) => {
-                log::error!("error occurred `{} {}`: {:?} ", host_cmd, arg, e);
-                String::new()
-            }
-        };
-
-        Some(IValue::String(result))
-    };
-
-    HostImportDescriptor {
-        host_exported_func: Box::new(host_cmd_closure),
-        argument_types: vec![IType::String],
-        output_type: Some(IType::String),
-        error_handler: None,
-    }
-}
-
-fn create_call_parameters_import(
-    call_parameters: Rc<RefCell<fluence_sdk_main::CallParameters>>,
-) -> HostImportDescriptor {
-    let call_parameters_closure = move |_ctx: &mut Ctx, _args: Vec<IValue>| {
-        let result = crate::to_interface_value(call_parameters.borrow().deref()).unwrap();
-        Some(result)
-    };
-
-    HostImportDescriptor {
-        host_exported_func: Box::new(call_parameters_closure),
-        argument_types: vec![],
-        output_type: Some(IType::Record(0)),
-        error_handler: None,
-    }
-}
 
 /// Make FCE config from provided FaaS config.
 pub(crate) fn make_fce_config(
@@ -154,54 +104,4 @@ pub(crate) fn make_fce_config(
     fce_module_config.wasi_version = wasmer_wasi::WasiVersion::Latest;
 
     Ok(fce_module_config)
-}
-
-use crate::misc::ModulesLoadStrategy;
-
-/// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
-pub(crate) fn load_modules_from_fs(
-    modules_dir: &PathBuf,
-    modules: ModulesLoadStrategy<'_>,
-) -> Result<HashMap<String, Vec<u8>>> {
-    use FaaSError::IOError;
-
-    let mut dir_entries =
-        std::fs::read_dir(modules_dir).map_err(|e| IOError(format!("{:?}: {}", modules_dir, e)))?;
-
-    let loaded = dir_entries.try_fold(HashMap::new(), |mut hash_map, entry| {
-        let entry = entry?;
-        let path = entry.path();
-        // Skip directories
-        if path.is_dir() {
-            return Ok(hash_map);
-        }
-
-        let file_name = Path::new(
-            path.file_name()
-                .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?,
-        );
-
-        if modules.should_load(&file_name) {
-            let module_bytes = std::fs::read(&path)?;
-            let module_name = modules.extract_module_name(&path)?;
-            if hash_map.insert(module_name, module_bytes).is_some() {
-                return Err(FaaSError::InvalidConfig(String::from(
-                    "module {} is duplicated in config",
-                )));
-            }
-        }
-
-        Ok(hash_map)
-    })?;
-
-    if modules.required_modules_len() > loaded.len() {
-        let loaded = loaded.iter().map(|(n, _)| n);
-        let not_found = modules.missing_modules(loaded);
-        return Err(FaaSError::InvalidConfig(format!(
-            "the following modules were not found: {:?}",
-            not_found
-        )));
-    }
-
-    Ok(loaded)
 }

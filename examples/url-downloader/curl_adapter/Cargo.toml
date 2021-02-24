@@ -10,5 +10,5 @@ path = "src/main.rs"
 name = "curl_adapter"
 
 [dependencies]
-fluence = { version = "=0.2.18", features = ["logger"]}
+fluence = { version = "=0.3.1", features = ["logger"] }
 log = "0.4.8"

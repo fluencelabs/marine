@@ -55,4 +55,4 @@ pub mod ne_vec {
     pub use wasmer_wit::NEVec;
 }
 
-pub(crate) type Result<T> = std::result::Result<T, FCEError>;
+pub(crate) type FCEResult<T> = std::result::Result<T, FCEError>;

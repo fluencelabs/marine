@@ -17,7 +17,7 @@
 use super::wit_prelude::*;
 use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
 use super::RecordTypes;
-use crate::Result;
+use crate::FCEResult;
 use crate::FCEModuleConfig;
 
 use fce_wit_interfaces::FCEWITInterfaces;
@@ -63,7 +63,7 @@ pub(super) struct Callable {
 }
 
 impl Callable {
-    pub fn call(&mut self, args: &[IValue]) -> Result<Vec<IValue>> {
+    pub fn call(&mut self, args: &[IValue]) -> FCEResult<Vec<IValue>> {
         use wasmer_wit::interpreter::stack::Stackable;
 
         let result = self
@@ -113,7 +113,7 @@ impl FCEModule {
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
         modules: &HashMap<String, FCEModule>,
-    ) -> Result<Self> {
+    ) -> FCEResult<Self> {
         let wasmer_module = compile(&wasm_bytes)?;
         let wit = extract_wit(&wasmer_module)?;
         let fce_wit = FCEWITInterfaces::new(wit);
@@ -152,7 +152,7 @@ impl FCEModule {
         })
     }
 
-    pub(crate) fn call(&mut self, function_name: &str, args: &[IValue]) -> Result<Vec<IValue>> {
+    pub(crate) fn call(&mut self, function_name: &str, args: &[IValue]) -> FCEResult<Vec<IValue>> {
         self.export_funcs.get_mut(function_name).map_or_else(
             || {
                 Err(FCEError::NoSuchFunction(format!(
@@ -187,7 +187,7 @@ impl FCEModule {
     }
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
-    pub(super) fn get_callable(&self, function_name: &str) -> Result<Rc<Callable>> {
+    pub(super) fn get_callable(&self, function_name: &str) -> FCEResult<Rc<Callable>> {
         match self.export_funcs.get(function_name) {
             Some(func) => Ok(func.clone()),
             None => Err(FCEError::NoSuchFunction(format!(
@@ -201,7 +201,7 @@ impl FCEModule {
         config: FCEModuleConfig,
         fce_wit: &FCEWITInterfaces<'_>,
         wit_import_object: ImportObject,
-    ) -> Result<(ImportObject, ImportObject)> {
+    ) -> FCEResult<(ImportObject, ImportObject)> {
         use crate::host_imports::create_host_import_func;
 
         let wasi_envs = config
@@ -249,7 +249,7 @@ impl FCEModule {
     fn instantiate_wit_exports(
         wit_instance: &Arc<WITInstance>,
         wit: &FCEWITInterfaces<'_>,
-    ) -> Result<ExportFunctions> {
+    ) -> FCEResult<ExportFunctions> {
         use fce_wit_interfaces::WITAstType;
 
         wit.implementations()
@@ -299,14 +299,14 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<ExportFunctions>>()
+            .collect::<FCEResult<ExportFunctions>>()
     }
 
     // this function deals only with import functions that have an adaptor implementation
     fn adjust_wit_imports(
         wit: &FCEWITInterfaces<'_>,
         wit_instance: Arc<MaybeUninit<WITInstance>>,
-    ) -> Result<ImportObject> {
+    ) -> FCEResult<ImportObject> {
         use fce_wit_interfaces::WITAstType;
         use wasmer_core::typed_func::DynamicFunc;
         use wasmer_core::vm::Ctx;
@@ -423,7 +423,7 @@ impl FCEModule {
                     ))),
                 }
             })
-            .collect::<Result<multimap::MultiMap<_, _>>>()?;
+            .collect::<FCEResult<multimap::MultiMap<_, _>>>()?;
 
         let mut import_object = ImportObject::new();
 
@@ -443,7 +443,7 @@ impl FCEModule {
     fn extract_export_record_types(
         export_funcs: &ExportFunctions,
         wit_instance: &Arc<WITInstance>,
-    ) -> Result<RecordTypes> {
+    ) -> FCEResult<RecordTypes> {
         use fce_wit_generator::TYPE_RESOLVE_RECURSION_LIMIT;
         use FCEError::WasmerResolveError;
 
@@ -452,7 +452,7 @@ impl FCEModule {
             wit_instance: &Arc<WITInstance>,
             export_record_types: &mut RecordTypes,
             recursion_level: u32,
-        ) -> Result<()> {
+        ) -> FCEResult<()> {
             use wasmer_wit::interpreter::wasm::structures::Instance;
 
             if recursion_level > TYPE_RESOLVE_RECURSION_LIMIT {
@@ -466,7 +466,7 @@ impl FCEModule {
                 wit_instance: &Arc<WITInstance>,
                 export_record_types: &mut RecordTypes,
                 recursion_level: u32,
-            ) -> Result<()> {
+            ) -> FCEResult<()> {
                 let record_type =
                     wit_instance
                         .wit_record_by_id(record_type_id)
