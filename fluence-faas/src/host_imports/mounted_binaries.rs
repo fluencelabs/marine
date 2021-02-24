@@ -53,11 +53,10 @@ pub(self) fn mounted_binary_import_impl(
         Ok(output) => {
             const TERMINATED_BY_SIGNAL_CODE: i32 = 100000;
             let ret_code = output.status.code().unwrap_or(TERMINATED_BY_SIGNAL_CODE);
-            let error = format!("{}", output.status);
 
             MountedBinaryResult {
                 ret_code,
-                error,
+                error: String::new(),
                 stdout: output.stdout,
                 stderr: output.stderr,
             }

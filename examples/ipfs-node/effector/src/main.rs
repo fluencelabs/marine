@@ -52,12 +52,7 @@ pub fn put(file_path: String) -> String {
     ];
 
     let ipfs_result = unsafe { ipfs(cmd) };
-
-    if ipfs_result.ret_code != fluence::BINARY_SUCCESS_CODE {
-        String::from_utf8(ipfs_result.stderr).unwrap()
-    } else {
-        String::from_utf8(ipfs_result.stdout).unwrap()
-    }
+    ipfs_result.into_std().unwrap().unwrap_or_else(std::convert::identity)
 }
 
 /// Get file by provided hash from IPFS, saves it to a temporary file and returns a path to it.
