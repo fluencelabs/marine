@@ -11,9 +11,9 @@ dependencies = [
 
 [[package]]
 name = "adler"
-version = "0.2.3"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee2a4ec343196209d6594e19543ae87a39f96d5534d7174822a3ad825dd6ed7e"
+checksum = "bedc89c5c7b5550ffb9372eb5c5ffc7f9f705cc3f4a128bd4669b9745f555093"
 
 [[package]]
 name = "aho-corasick"
@@ -52,7 +52,7 @@ dependencies = [
 
 [[package]]
 name = "aquamarine-vm"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "aqua-interpreter-interface",
  "fluence-faas",
@@ -67,7 +67,7 @@ dependencies = [
 name = "arguments-passing-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
  "safe-transmute",
 ]
 
@@ -81,7 +81,7 @@ checksum = "a4c527152e37cf757a3f78aae5a06fbeefdb07ccc535c980a3208ee3060dd544"
 name = "arrays-passing-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
  "safe-transmute",
 ]
 
@@ -204,7 +204,7 @@ checksum = "b700ce4376041dcd0a327fd0097c41095743c4c8af8887265942faf1100bd040"
 name = "call_parameters"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
 ]
 
 [[package]]
@@ -373,28 +373,26 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-epoch"
-version = "0.9.2"
+version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d60ab4a8dba064f2fbb5aa270c28da5cf4bbd0e72dae1140a6b0353a779dbe00"
+checksum = "2584f639eb95fea8c798496315b297cf81b9b58b6d30ab066a75455333cf4b12"
 dependencies = [
  "cfg-if 1.0.0",
  "crossbeam-utils",
  "lazy_static",
- "loom",
  "memoffset",
  "scopeguard",
 ]
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.2"
+version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bae8f328835f8f5a6ceb6a7842a7f2d0c03692adb5c889347235d59194731fe3"
+checksum = "e7e9d99fa91428effe99c5c6d4634cdeba32b8cf784fc428a2a687f61a952c49"
 dependencies = [
  "autocfg",
  "cfg-if 1.0.0",
  "lazy_static",
- "loom",
 ]
 
 [[package]]
@@ -421,7 +419,7 @@ dependencies = [
 name = "curl_adapter"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
  "log",
 ]
 
@@ -626,7 +624,7 @@ name = "facade"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "fluence 0.3.1",
+ "fluence 0.3.2",
  "log",
 ]
 
@@ -654,7 +652,7 @@ dependencies = [
 
 [[package]]
 name = "fce"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "boolinator",
@@ -698,7 +696,7 @@ name = "fce-wit-generator"
 version = "0.2.0"
 dependencies = [
  "fce-wit-parser",
- "fluence-sdk-wit 0.3.1",
+ "fluence-sdk-wit 0.3.2",
  "once_cell",
  "serde",
  "serde_json",
@@ -751,17 +749,17 @@ dependencies = [
 
 [[package]]
 name = "fluence"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9771ec8c65ee6439924b64a24557c905b97a88cca636811a43145a7aa715de5d"
+checksum = "334da7101df795de8f5233ca8a1f697650670f20b61972a87395bff7871e432b"
 dependencies = [
- "fluence-sdk-macro 0.3.1",
- "fluence-sdk-main 0.3.1",
+ "fluence-sdk-macro 0.3.2",
+ "fluence-sdk-main 0.3.2",
 ]
 
 [[package]]
 name = "fluence-app-service"
-version = "0.3.0"
+version = "0.3.2"
 dependencies = [
  "fluence-faas",
  "log",
@@ -775,13 +773,13 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.3.0"
+version = "0.3.2"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
  "fce",
  "fce-utils",
- "fluence-sdk-main 0.3.1",
+ "fluence-sdk-main 0.3.2",
  "itertools",
  "log",
  "once_cell",
@@ -821,11 +819,11 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-macro"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "933556910b1ae7cfcf4d379c00c9ca4f87882c581aac04768828c960bbb09e7e"
+checksum = "18658790f81a032507ab4e914c8db0c166c91e77c2d11e35cb60e3ba93fef9d8"
 dependencies = [
- "fluence-sdk-wit 0.3.1",
+ "fluence-sdk-wit 0.3.2",
 ]
 
 [[package]]
@@ -841,11 +839,11 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3809793aec9683809c10b12732f81f91a151c8799d84e10d1c565f59290166c"
+checksum = "e9cf213e3a5bda967d39c05ba295fd20e00c0a9909951cf524f5a5063afc33b3"
 dependencies = [
- "fluence-sdk-macro 0.3.1",
+ "fluence-sdk-macro 0.3.2",
  "log",
  "serde",
 ]
@@ -866,9 +864,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-wit"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2ed7e3a782daee620e1ef37d1c85e71fdb33280fd3f08f93cd0e3f5149bd83a"
+checksum = "beceb227b42626d9b523966a2bb36e8958144e35c7c552a276d97bc387587701"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -911,13 +909,13 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.3.0"
+version = "0.3.2"
 dependencies = [
  "anyhow",
  "clap",
  "env_logger 0.7.1",
  "fluence-app-service",
- "fluence-sdk-main 0.3.1",
+ "fluence-sdk-main 0.3.2",
  "itertools",
  "log",
  "rustop",
@@ -1006,19 +1004,6 @@ checksum = "8e1d3b771574f62d0548cee0ad9057857e9fc25d7a3335f140c84f6acd0bf601"
 dependencies = [
  "cfg-if 0.1.10",
  "serde",
-]
-
-[[package]]
-name = "generator"
-version = "0.6.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9fed24fd1e18827652b4d55652899a1e9da8e54d91624dc3437a5bc3a9f9a9c"
-dependencies = [
- "cc",
- "libc",
- "log",
- "rustversion",
- "winapi 0.3.9",
 ]
 
 [[package]]
@@ -1256,7 +1241,7 @@ dependencies = [
 name = "inner-records-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
  "safe-transmute",
 ]
 
@@ -1304,7 +1289,7 @@ dependencies = [
 name = "ipfs-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
  "log",
 ]
 
@@ -1312,7 +1297,7 @@ dependencies = [
 name = "ipfs-pure"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
  "log",
 ]
 
@@ -1397,7 +1382,7 @@ checksum = "b7282d924be3275cec7f6756ff4121987bc6481325397dde6ba3e7802b1a8b1c"
 name = "local_storage"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
  "log",
 ]
 
@@ -1426,17 +1411,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51b9bbe6c47d51fc3e1a9b945965946b4c44142ab8792c50835a980d362c2710"
 dependencies = [
  "cfg-if 1.0.0",
-]
-
-[[package]]
-name = "loom"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d44c73b4636e497b4917eb21c33539efa3816741a2d3ff26c6316f1b529481a4"
-dependencies = [
- "cfg-if 1.0.0",
- "generator",
- "scoped-tls",
 ]
 
 [[package]]
@@ -1494,9 +1468,9 @@ dependencies = [
 
 [[package]]
 name = "miniz_oxide"
-version = "0.4.3"
+version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f2d26ec3309788e423cfbf68ad1800f061638098d76a83681af979dc4eda19d"
+checksum = "a92518e98c078586bc6c934028adcca4c92a53d6a958196de835170a01d84e4b"
 dependencies = [
  "adler",
  "autocfg",
@@ -1663,9 +1637,9 @@ checksum = "a9a7ab5d64814df0fe4a4b5ead45ed6c5f181ee3ff04ba344313a6c80446c5d4"
 
 [[package]]
 name = "once_cell"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ad167a2f54e832b82dbe003a046280dceffe5227b5f79e08e363a29638cfddd"
+checksum = "10acf907b94fc1b1a152d08ef97e7759650268cf986bf127f387e602b02c7e5a"
 
 [[package]]
 name = "openssl"
@@ -1957,7 +1931,7 @@ dependencies = [
 name = "record-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
  "test-record",
 ]
 
@@ -1965,7 +1939,7 @@ dependencies = [
 name = "record-pure"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
  "test-record",
 ]
 
@@ -2101,12 +2075,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "59a6f317aba7842554266d387a51504f084fc460cab6eb59e19d98dc3d18b9ec"
 
 [[package]]
-name = "rustversion"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb5d2a036dc6d2d8fd16fde3498b04306e29bd193bf306a57427019b823d5acd"
-
-[[package]]
 name = "rustyline"
 version = "6.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2159,12 +2127,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "scoped-tls"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea6a9290e3c9cf0f18145ef7ffa62d68ee0bf5fcd651017e586dc7fd5da448c2"
-
-[[package]]
 name = "scopeguard"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2172,9 +2134,9 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
 name = "security-framework"
-version = "2.0.0"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1759c2e3c8580017a484a7ac56d3abc5a6c1feadf88db2f3633f12ae4268c69"
+checksum = "c6af1b6204f89cf0069736daf8b852573e3bc34898eee600e95d3dd855c12e81"
 dependencies = [
  "bitflags",
  "core-foundation",
@@ -2185,9 +2147,9 @@ dependencies = [
 
 [[package]]
 name = "security-framework-sys"
-version = "2.0.0"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f99b9d5e26d2a71633cc4f2ebae7cc9f874044e0c351a27e17892d76dce5678b"
+checksum = "31531d257baab426203cf81c5ce1b0b55159dda7ed602ac81b582ccd62265741"
 dependencies = [
  "core-foundation-sys",
  "libc",
@@ -2249,9 +2211,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.62"
+version = "1.0.63"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea1c6153794552ea7cf7cf63b1231a25de00ec90db326ba6264440fa08e31486"
+checksum = "43535db9747a4ba938c0ce0a98cc631a46ebf943c9e1d604e091df6007620bf6"
 dependencies = [
  "itoa",
  "ryu",
@@ -2415,7 +2377,7 @@ dependencies = [
 name = "test-record"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
 ]
 
 [[package]]
@@ -2870,7 +2832,7 @@ checksum = "dd4945e4943ae02d15c13962b38a5b1e81eadd4b71214eee75af64a4d6a4fd64"
 name = "wasm-greeting"
 version = "0.1.0"
 dependencies = [
- "fluence 0.3.1",
+ "fluence 0.3.2",
 ]
 
 [[package]]
@@ -2878,7 +2840,7 @@ name = "wasm-sqlite-test"
 version = "0.1.0"
 dependencies = [
  "fce-sqlite-connector",
- "fluence 0.3.1",
+ "fluence 0.3.2",
 ]
 
 [[package]]
