@@ -1,7 +1,7 @@
 [package]
 name = "aquamarine-vm"
 description = "Fluence Aquamarine VM"
-version = "0.4.2"
+version = "0.5.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 license = "Apache-2.0"
@@ -11,7 +11,7 @@ name = "aquamarine_vm"
 path = "src/lib.rs"
 
 [dependencies]
-fluence-faas = { path = "../fluence-faas", version = "0.3.2" }
+fluence-faas = { path = "../fluence-faas", version = "0.5.0" }
 aqua-interpreter-interface = "0.3.1"
 
 maplit = "1.0.2"
