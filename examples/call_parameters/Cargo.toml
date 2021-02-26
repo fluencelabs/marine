@@ -10,4 +10,4 @@ name = "call_parameters"
 path = "src/main.rs"
 
 [dependencies]
-fluence = "=0.3.2"
+fluence = "=0.4.1"

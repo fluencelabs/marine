@@ -26,7 +26,7 @@ const RPC_TMP_FILEPATH: &str = "/tmp/ipfs_rpc_file";
 
 pub fn main() {
     WasmLoggerBuilder::new()
-        .with_log_level(log::Level::Info)
+        .with_log_level(log::LevelFilter::Info)
         .build()
         .unwrap();
 }

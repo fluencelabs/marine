@@ -10,5 +10,5 @@ name = "records_effector"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { version = "=0.3.2", features = ["logger"]}
+fluence = { version = "=0.4.1", features = ["logger"]}
 test-record = { path = "../test-record" }

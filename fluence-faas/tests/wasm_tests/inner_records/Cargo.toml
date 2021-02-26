@@ -10,5 +10,5 @@ name = "inner_records_pure"
 path = "src/pure.rs"
 
 [dependencies]
-fluence = "=0.3.2"
+fluence = "=0.4.1"
 safe-transmute = "0.11.0"
