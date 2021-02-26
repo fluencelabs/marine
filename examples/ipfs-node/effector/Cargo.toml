@@ -10,5 +10,5 @@ name = "ipfs_effector"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { version = "=0.4.0", features = ["logger"] }
+fluence = { version = "=0.4.1", features = ["logger"] }
 log = "0.4.11"
