@@ -52,7 +52,7 @@ dependencies = [
 
 [[package]]
 name = "aquamarine-vm"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "aqua-interpreter-interface",
  "fluence-faas",
@@ -535,7 +535,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ebda144c4fe02d1f7ea1a7d9641b6fc6b580adcfa024ae48797ecdeb6825b4d"
 dependencies = [
  "libc",
- "redox_users 0.4.1",
+ "redox_users 0.4.0",
  "winapi 0.3.9",
 ]
 
@@ -751,7 +751,7 @@ dependencies = [
 name = "fluence"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60707e75096e166154558b3c5abe576f80f7a9829cc2213a42ee8c5de759348c"
+checksum = "5a506b5ac52db98d9c9e054a62412d61c906de6db83ae14c6155c588af6f0368"
 dependencies = [
  "fluence-sdk-macro 0.4.1",
  "fluence-sdk-main 0.4.1",
@@ -759,7 +759,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "fluence-faas",
  "log",
@@ -773,7 +773,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -821,7 +821,7 @@ dependencies = [
 name = "fluence-sdk-macro"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9264becdf6cd56eb73334aa170bd456bf69f50281980d7f27bb76993913f5570"
+checksum = "c4641a1f147cd6da67751659d138b16270cfe26f6d00fd54c8a85f1457858bbf"
 dependencies = [
  "fluence-sdk-wit 0.4.1",
 ]
@@ -841,7 +841,7 @@ dependencies = [
 name = "fluence-sdk-main"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b439181f12715a0275af25cdcc4cad17943faa480673901f81b9af83d070ea8b"
+checksum = "46de4e8034687aa9921bd229d24a9261ff5c039ca4b9299a73ba14be85697419"
 dependencies = [
  "fluence-sdk-macro 0.4.1",
  "log",
@@ -866,7 +866,7 @@ dependencies = [
 name = "fluence-sdk-wit"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2883f125ecae0f61553fbb62376798eeab976729b88a3086af8e3fba5510f3f4"
+checksum = "7328e54bb603aaec05f0c4b25abca6969d898d112afb415ff66d493baabcbdcd"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -909,7 +909,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -1971,7 +1971,7 @@ dependencies = [
 
 [[package]]
 name = "redox_users"
-version = "0.4.1"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "528532f3d801c87aec9def2add9ca802fe569e44a544afe633765267840abe64"
 dependencies = [
@@ -3070,7 +3070,7 @@ checksum = "2d315eee3b34aca4797b2da6b13ed88266e6d612562a0c46390af8299fc699bc"
 
 [[package]]
 name = "winapi-i686-pc-windows-gnu"
-version = "0.4.1"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6"
 
@@ -3085,7 +3085,7 @@ dependencies = [
 
 [[package]]
 name = "winapi-x86_64-pc-windows-gnu"
-version = "0.4.1"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
