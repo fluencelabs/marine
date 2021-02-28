@@ -14,5 +14,5 @@ name = "arrays_passing_effector"
 path = "src/effector.rs"
 
 [dependencies]
-fluence = "=0.4.1"
+fluence = "=0.4.2"
 safe-transmute = "0.11.0"
