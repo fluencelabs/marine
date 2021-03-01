@@ -1,7 +1,7 @@
 [package]
 name = "fce"
 description = "Fluence Compute Engine"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -13,7 +13,7 @@ path = "src/lib.rs"
 [dependencies]
 fce-wit-interfaces = { path = "../crates/wit-interfaces", version = "0.1.29" }
 fce-wit-parser = { path = "../crates/wit-parser", version = "0.2.0" }
-fce-wit-generator = { path = "../crates/wit-generator", version = "0.2.0" }
+fce-wit-generator = { path = "../crates/wit-generator", version = "0.3.0" }
 fce-utils = { path = "../crates/utils", version = "0.1.29" }
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
