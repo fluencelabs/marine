@@ -49,7 +49,7 @@ pub fn main() -> Result<(), anyhow::Error> {
         ("it", Some(args)) => it(args),
         ("info", Some(args)) => info(args),
         ("repl", Some(args)) => repl(args),
-        c => Err(crate::errors::CLIError::NoSuchCommand(c.0.to_string()).into()),
+        (c, _) => Err(crate::errors::CLIError::NoSuchCommand(c.to_string()).into()),
     }
 }
 

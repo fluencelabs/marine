@@ -15,9 +15,9 @@
  */
 
 use crate::Result;
-use crate::ManifestParserError;
+use crate::ModuleInfoError;
 use crate::extract_custom_sections_by_name;
-use crate::as_one_section;
+use crate::try_as_one_section;
 
 use fluence_sdk_main::VERSION_SECTION_NAME;
 use walrus::ModuleConfig;
@@ -30,7 +30,7 @@ use std::path::Path;
 pub fn extract_sdk_version_by_path(wasm_module_path: &Path) -> Result<Option<semver::Version>> {
     let module = ModuleConfig::new()
         .parse_file(wasm_module_path)
-        .map_err(ManifestParserError::CorruptedWasmFile)?;
+        .map_err(ModuleInfoError::CorruptedWasmFile)?;
 
     extract_sdk_version_by_module(&module)
 }
@@ -41,7 +41,7 @@ pub fn extract_sdk_version_by_module(wasm_module: &Module) -> Result<Option<semv
     if sections.is_empty() {
         return Ok(None);
     }
-    let section = as_one_section(sections, VERSION_SECTION_NAME)?;
+    let section = try_as_one_section(sections, VERSION_SECTION_NAME)?;
 
     let version = match section {
         Cow::Borrowed(bytes) => as_semver(bytes),
@@ -54,6 +54,6 @@ pub fn extract_sdk_version_by_module(wasm_module: &Module) -> Result<Option<semv
 fn as_semver(version_as_bytes: &[u8]) -> Result<semver::Version> {
     match std::str::from_utf8(version_as_bytes) {
         Ok(str) => Ok(semver::Version::from_str(str)?),
-        Err(e) => Err(ManifestParserError::VersionNotValidUtf8(e)),
+        Err(e) => Err(ModuleInfoError::VersionNotValidUtf8(e)),
     }
 }

@@ -20,7 +20,7 @@ use std::str::Utf8Error;
 use std::io::Error as IOError;
 
 #[derive(Debug, ThisError)]
-pub enum ManifestParserError {
+pub enum ModuleInfoError {
     /// Version section is absent.
     #[error("the module doesn't contain section with '{0}', probably it's compiled with older sdk version")]
     NoCustomSection(&'static str),
@@ -43,6 +43,10 @@ pub enum ManifestParserError {
     )]
     ManifestCorrupted(&'static str),
 
+    /// Manifest contains some trailing characters.
+    #[error("embedded manifest is corrupted: there are some trailing characters")]
+    ManifestRemainderNotEmpty,
+
     /// An error occurred while parsing Wasm file.
     #[error("provided Wasm file is corrupted: {0}")]
     CorruptedWasmFile(anyhow::Error),
@@ -52,13 +56,13 @@ pub enum ManifestParserError {
     AstToBytesError(IOError),
 }
 
-impl From<SemVerError> for ManifestParserError {
+impl From<SemVerError> for ModuleInfoError {
     fn from(err: SemVerError) -> Self {
         Self::VersionCorrupted(err)
     }
 }
 
-impl From<IOError> for ManifestParserError {
+impl From<IOError> for ModuleInfoError {
     fn from(err: IOError) -> Self {
         Self::AstToBytesError(err)
     }

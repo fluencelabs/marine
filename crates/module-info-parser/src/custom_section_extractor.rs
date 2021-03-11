@@ -15,7 +15,7 @@
  */
 
 use crate::Result;
-use crate::ManifestParserError;
+use crate::ModuleInfoError;
 
 use walrus::IdsToIndices;
 use walrus::Module;
@@ -38,21 +38,21 @@ pub(super) fn extract_custom_sections_by_name<'w>(
     Ok(sections)
 }
 
-pub(super) fn as_one_section<'s>(
+pub(super) fn try_as_one_section<'s>(
     mut sections: Vec<Cow<'s, [u8]>>,
     section_name: &'static str,
 ) -> Result<Cow<'s, [u8]>> {
     let sections_count = sections.len();
 
     if sections_count > 1 {
-        return Err(ManifestParserError::MultipleCustomSections(
+        return Err(ModuleInfoError::MultipleCustomSections(
             section_name,
             sections_count,
         ));
     }
 
     if sections_count == 0 {
-        return Err(ManifestParserError::NoCustomSection(section_name));
+        return Err(ModuleInfoError::NoCustomSection(section_name));
     }
 
     Ok(sections.remove(0))

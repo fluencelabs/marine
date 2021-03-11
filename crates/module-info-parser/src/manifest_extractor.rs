@@ -15,9 +15,9 @@
  */
 
 use crate::Result;
-use crate::ManifestParserError;
+use crate::ModuleInfoError;
 use crate::extract_custom_sections_by_name;
-use crate::as_one_section;
+use crate::try_as_one_section;
 use crate::ModuleManifest;
 
 use fluence_sdk_main::MANIFEST_SECTION_NAME;
@@ -31,7 +31,7 @@ use std::convert::TryInto;
 pub fn extract_manifest_by_path(wasm_module_path: &Path) -> Result<Option<ModuleManifest>> {
     let module = ModuleConfig::new()
         .parse_file(wasm_module_path)
-        .map_err(ManifestParserError::CorruptedWasmFile)?;
+        .map_err(ModuleInfoError::CorruptedWasmFile)?;
 
     extract_version_by_module(&module)
 }
@@ -42,7 +42,7 @@ pub fn extract_version_by_module(wasm_module: &Module) -> Result<Option<ModuleMa
         return Ok(None);
     }
 
-    let section = as_one_section(sections, MANIFEST_SECTION_NAME)?;
+    let section = try_as_one_section(sections, MANIFEST_SECTION_NAME)?;
 
     let manifest = match section {
         Cow::Borrowed(bytes) => bytes.try_into(),
