@@ -38,6 +38,7 @@ pub fn main() -> std::result::Result<(), anyhow::Error> {
         .setting(clap::AppSettings::ArgRequiredElseHelp)
         .subcommand(args::build())
         .subcommand(args::embed_wit())
+        .subcommand(args::show_manifest())
         .subcommand(args::show_wit())
         .subcommand(args::repl());
     let arg_matches = app.get_matches();
@@ -68,12 +69,24 @@ pub fn main() -> std::result::Result<(), anyhow::Error> {
 
             Ok(())
         }
-        ("show", Some(arg)) => {
+        ("it", Some(arg)) => {
             let wasm_path = arg.value_of(args::IN_WASM_PATH).unwrap();
             let wasm_path = std::path::Path::new(wasm_path);
 
-            let result = fce_wit_parser::extract_text_wit(&wasm_path)?;
-            println!("{}", result);
+            let it = fce_wit_parser::extract_text_wit(&wasm_path)?;
+            println!("{}", it);
+
+            Ok(())
+        }
+        ("info", Some(arg)) => {
+            let wasm_path = arg.value_of(args::IN_WASM_PATH).unwrap();
+            let wasm_path = std::path::Path::new(wasm_path);
+
+            let sdk_version = fce_module_manifest_parser::extract_sdk_version_by_path(&wasm_path)?;
+            let module_manifest = fce_module_manifest_parser::extract_manifest_by_path(&wasm_path)?;
+
+            println!("sdk version: {}", sdk_version);
+            println!("module manifest: {:?}", module_manifest);
 
             Ok(())
         }

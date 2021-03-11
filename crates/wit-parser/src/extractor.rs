@@ -27,7 +27,7 @@ pub fn module_interface(module_path: &Path) -> Result<ServiceInterface> {
     use fce_wit_interfaces::FCEWITInterfaces;
 
     let wit_section_bytes = extract_custom_section(module_path)?;
-    let wit = extract_wit(&wit_section_bytes)?;
+    let wit = extract_wit_from_bytes(&wit_section_bytes)?;
     let fce_interface = FCEWITInterfaces::new(wit);
 
     get_interface(&fce_interface)

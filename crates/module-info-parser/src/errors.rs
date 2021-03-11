@@ -37,6 +37,12 @@ pub enum ManifestParserError {
     #[error("embedded to the Wasm file version is corrupted: '{0}'")]
     VersionCorrupted(SemVerError),
 
+    /// Manifest of a Wasm file doesn't have enough bytes to read field.
+    #[error(
+        "{0} can't be read: embedded manifest doesn't contain enough bytes to read field prefix"
+    )]
+    ManifestCorrupted(&'static str),
+
     /// An error occurred while parsing Wasm file.
     #[error("provided Wasm file is corrupted: {0}")]
     CorruptedWasmFile(anyhow::Error),

@@ -19,13 +19,13 @@ use crate::ManifestParserError;
 use crate::extract_custom_sections_by_name;
 use crate::ModuleManifest;
 
-use fluence_sdk_main::VERSION_SECTION_NAME;
+use fluence_sdk_main::MANIFEST_SECTION_NAME;
 use walrus::ModuleConfig;
 use walrus::Module;
 
 use std::borrow::Cow;
-use std::str::FromStr;
 use std::path::Path;
+use std::convert::TryInto;
 
 pub fn extract_manifest_by_path(wasm_module_path: &Path) -> Result<ModuleManifest> {
     let module = ModuleConfig::new()
@@ -36,12 +36,12 @@ pub fn extract_manifest_by_path(wasm_module_path: &Path) -> Result<ModuleManifes
 }
 
 pub fn extract_version_by_module(wasm_module: &Module) -> Result<ModuleManifest> {
-    let sections = extract_custom_sections_by_name(&wasm_module, VERSION_SECTION_NAME)?;
+    let sections = extract_custom_sections_by_name(&wasm_module, MANIFEST_SECTION_NAME)?;
     let section = as_one_section(sections)?;
 
     match section {
-        Cow::Borrowed(bytes) => as_manifest(bytes),
-        Cow::Owned(vec) => as_manifest(&vec),
+        Cow::Borrowed(bytes) => bytes.try_into(),
+        Cow::Owned(vec) => vec.as_slice().try_into(),
     }
 }
 

@@ -27,7 +27,7 @@ use std::path::Path;
 /// Extracts WIT section of provided Wasm binary and converts it to a string.
 pub fn extract_text_wit(wasm_file_path: &Path) -> Result<String> {
     let wit_section_bytes = extract_custom_section(&wasm_file_path)?;
-    let wit = extract_wit(&wit_section_bytes)?;
+    let wit = extract_wit_from_bytes(&wit_section_bytes)?;
     Ok((&wit).to_string())
 }
 
@@ -41,10 +41,10 @@ pub fn extract_wit(wasmer_module: &WasmerModule) -> Result<Interfaces<'_>> {
         return Err(WITParserError::MultipleITSections);
     }
 
-    extract_wit(&wit_sections[0])
+    extract_wit_from_bytes(&wit_sections[0])
 }
 
-pub(crate) fn extract_wit(
+pub(crate) fn extract_wit_from_bytes(
     wit_section_bytes: &[u8],
 ) -> Result<Interfaces<'_>> {
     match wasmer_wit::decoders::binary::parse::<()>(wit_section_bytes) {
