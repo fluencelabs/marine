@@ -42,11 +42,13 @@ impl TryFrom<&[u8]> for ModuleManifest {
         let version = semver::Version::from_str(version_as_str)?;
 
         let offset = offset + read_len;
-        let (description_as_bytes, read_len) = extract_prefixed_field(&value[offset..], "description")?;
+        let (description_as_bytes, read_len) =
+            extract_prefixed_field(&value[offset..], "description")?;
         let description = try_to_string(description_as_bytes)?;
 
         let offset = offset + read_len;
-        let (repository_as_bytes, read_len) = extract_prefixed_field(&value[offset..], "repository")?;
+        let (repository_as_bytes, read_len) =
+            extract_prefixed_field(&value[offset..], "repository")?;
         let repository = try_to_string(repository_as_bytes)?;
 
         if offset + read_len != value.len() {
@@ -64,9 +66,11 @@ impl TryFrom<&[u8]> for ModuleManifest {
     }
 }
 
-fn extract_prefixed_field<'a>(array: &'a [u8], field_name: &'static str) -> Result<(&'a [u8], usize)> {
+fn extract_prefixed_field<'a>(
+    array: &'a [u8],
+    field_name: &'static str,
+) -> Result<(&'a [u8], usize)> {
     const PREFIX_SIZE: usize = std::mem::size_of::<u64>();
-    println!("array: {}, {:x?}", array.len(), array);
 
     if array.len() < PREFIX_SIZE {
         return Err(ManifestParserError::ManifestCorrupted(field_name));
@@ -74,7 +78,6 @@ fn extract_prefixed_field<'a>(array: &'a [u8], field_name: &'static str) -> Resu
 
     let mut field_len = [0u8; PREFIX_SIZE];
     field_len.copy_from_slice(&array[0..PREFIX_SIZE]);
-    println!("field_len bytes: {:?}", field_len);
 
     let field_len = u64::from_le_bytes(field_len);
     if field_len.checked_add(PREFIX_SIZE as u64).is_none() || usize::try_from(field_len).is_err() {
@@ -83,8 +86,6 @@ fn extract_prefixed_field<'a>(array: &'a [u8], field_name: &'static str) -> Resu
 
     // it's safe because it's been checked
     let field_len = field_len as usize;
-
-    println!("field_len: {}", field_len);
 
     if array.len() < PREFIX_SIZE + field_len {
         return Err(ManifestParserError::ManifestCorrupted(field_name));
@@ -106,5 +107,16 @@ fn try_to_str(value: &[u8]) -> Result<&str> {
     match std::str::from_utf8(value) {
         Ok(s) => Ok(s),
         Err(e) => Err(ManifestParserError::VersionNotValidUtf8(e)),
+    }
+}
+
+use std::fmt;
+
+impl fmt::Display for ModuleManifest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "authors: {}", self.authors)?;
+        writeln!(f, "version: {}", self.version)?;
+        writeln!(f, "description: {}", self.description)?;
+        write!(f, "repository: {}", self.repository)
     }
 }

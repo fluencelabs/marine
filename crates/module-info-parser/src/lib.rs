@@ -39,5 +39,6 @@ pub use manifest_extractor::extract_manifest_by_path;
 pub use manifest_extractor::extract_version_by_module;
 
 pub(crate) use custom_section_extractor::extract_custom_sections_by_name;
+pub(crate) use custom_section_extractor::as_one_section;
 
 pub(crate) type Result<T> = std::result::Result<T, ManifestParserError>;

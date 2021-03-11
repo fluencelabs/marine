@@ -44,9 +44,7 @@ pub fn extract_wit(wasmer_module: &WasmerModule) -> Result<Interfaces<'_>> {
     extract_wit_from_bytes(&wit_sections[0])
 }
 
-pub(crate) fn extract_wit_from_bytes(
-    wit_section_bytes: &[u8],
-) -> Result<Interfaces<'_>> {
+pub(crate) fn extract_wit_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>> {
     match wasmer_wit::decoders::binary::parse::<()>(wit_section_bytes) {
         Ok((remainder, wit)) if remainder.is_empty() => Ok(wit),
         Ok(_) => Err(WITParserError::ITRemainderNotEmpty),

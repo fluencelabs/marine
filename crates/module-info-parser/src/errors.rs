@@ -22,12 +22,12 @@ use std::io::Error as IOError;
 #[derive(Debug, ThisError)]
 pub enum ManifestParserError {
     /// Version section is absent.
-    #[error("the module doesn't contain section with version, probably it's compiled with older sdk version")]
-    NoVersionSection,
+    #[error("the module doesn't contain section with '{0}', probably it's compiled with older sdk version")]
+    NoCustomSection(&'static str),
 
-    /// Multiple Version sections.
-    #[error("the module contains {0} version sections - it's corrupted")]
-    MultipleVersionSections(usize),
+    /// Multiple sections with the same name.
+    #[error("the module contains {1} sections with name '{0}' - it's corrupted")]
+    MultipleCustomSections(&'static str, usize),
 
     /// Version can't be parsed to Utf8 string.
     #[error("embedded to the Wasm file version isn't valid UTF8 string: '{0}'")]

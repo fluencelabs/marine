@@ -15,13 +15,14 @@
  */
 
 use crate::Result;
+use crate::ManifestParserError;
 
 use walrus::IdsToIndices;
 use walrus::Module;
 
 use std::borrow::Cow;
 
-pub(crate) fn extract_custom_sections_by_name<'w>(
+pub(super) fn extract_custom_sections_by_name<'w>(
     wasm_module: &'w Module,
     section_name: &str,
 ) -> Result<Vec<Cow<'w, [u8]>>> {
@@ -35,4 +36,24 @@ pub(crate) fn extract_custom_sections_by_name<'w>(
         .collect::<Vec<_>>();
 
     Ok(sections)
+}
+
+pub(super) fn as_one_section<'s>(
+    mut sections: Vec<Cow<'s, [u8]>>,
+    section_name: &'static str,
+) -> Result<Cow<'s, [u8]>> {
+    let sections_count = sections.len();
+
+    if sections_count > 1 {
+        return Err(ManifestParserError::MultipleCustomSections(
+            section_name,
+            sections_count,
+        ));
+    }
+
+    if sections_count == 0 {
+        return Err(ManifestParserError::NoCustomSection(section_name));
+    }
+
+    Ok(sections.remove(0))
 }

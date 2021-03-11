@@ -17,6 +17,7 @@
 use crate::Result;
 use crate::ManifestParserError;
 use crate::extract_custom_sections_by_name;
+use crate::as_one_section;
 
 use fluence_sdk_main::VERSION_SECTION_NAME;
 use walrus::ModuleConfig;
@@ -26,7 +27,7 @@ use std::borrow::Cow;
 use std::str::FromStr;
 use std::path::Path;
 
-pub fn extract_sdk_version_by_path(wasm_module_path: &Path) -> Result<semver::Version> {
+pub fn extract_sdk_version_by_path(wasm_module_path: &Path) -> Result<Option<semver::Version>> {
     let module = ModuleConfig::new()
         .parse_file(wasm_module_path)
         .map_err(ManifestParserError::CorruptedWasmFile)?;
@@ -34,28 +35,20 @@ pub fn extract_sdk_version_by_path(wasm_module_path: &Path) -> Result<semver::Ve
     extract_sdk_version_by_module(&module)
 }
 
-pub fn extract_sdk_version_by_module(wasm_module: &Module) -> Result<semver::Version> {
+pub fn extract_sdk_version_by_module(wasm_module: &Module) -> Result<Option<semver::Version>> {
     let sections = extract_custom_sections_by_name(&wasm_module, VERSION_SECTION_NAME)?;
-    let section = as_one_section(sections)?;
 
-    match section {
+    if sections.is_empty() {
+        return Ok(None);
+    }
+    let section = as_one_section(sections, VERSION_SECTION_NAME)?;
+
+    let version = match section {
         Cow::Borrowed(bytes) => as_semver(bytes),
         Cow::Owned(vec) => as_semver(&vec),
-    }
-}
+    };
 
-fn as_one_section(mut sections: Vec<Cow<'_, [u8]>>) -> Result<Cow<'_, [u8]>> {
-    let sections_count = sections.len();
-
-    if sections_count > 1 {
-        return Err(ManifestParserError::MultipleVersionSections(sections_count));
-    }
-
-    if sections_count == 0 {
-        return Err(ManifestParserError::NoVersionSection);
-    }
-
-    Ok(sections.remove(0))
+    version.map(Some)
 }
 
 fn as_semver(version_as_bytes: &[u8]) -> Result<semver::Version> {
