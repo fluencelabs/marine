@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-mod functions;
-mod wit;
-
-pub use functions::*;
-pub use wit::*;
-
 use crate::Result;
-use std::path::Path;
 
-pub fn module_interface(module_path: &Path) -> Result<ServiceInterface> {
-    use fce_wit_interfaces::FCEWITInterfaces;
+use walrus::IdsToIndices;
+use walrus::Module;
 
-    let wit_section_bytes = extract_custom_section(module_path)?;
-    let wit = extract_wit(&wit_section_bytes)?;
-    let fce_interface = FCEWITInterfaces::new(wit);
+use std::borrow::Cow;
 
-    get_interface(&fce_interface)
+pub(crate) fn extract_custom_sections_by_name<'w>(
+    wasm_module: &'w Module,
+    section_name: &str,
+) -> Result<Vec<Cow<'w, [u8]>>> {
+    let default_ids = IdsToIndices::default();
+
+    let sections = wasm_module
+        .customs
+        .iter()
+        .filter(|(_, section)| section.name() == section_name)
+        .map(|s| s.1.data(&default_ids))
+        .collect::<Vec<_>>();
+
+    Ok(sections)
 }

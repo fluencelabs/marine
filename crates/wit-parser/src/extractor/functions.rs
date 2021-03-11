@@ -88,7 +88,7 @@ fn get_exports(wit: &FCEWITInterfaces<'_>) -> Result<Vec<FCEFunctionSignature>> 
                     };
                     Ok(signature)
                 }
-                _ => Err(WITParserError::IncorrectWIT(format!(
+                _ => Err(WITParserError::IncorrectITFormat(format!(
                     "type with idx = {} isn't a function type",
                     adapter_function_type
                 ))),

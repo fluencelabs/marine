@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-mod functions;
-mod wit;
-
-pub use functions::*;
-pub use wit::*;
-
-use crate::Result;
-use std::path::Path;
-
-pub fn module_interface(module_path: &Path) -> Result<ServiceInterface> {
-    use fce_wit_interfaces::FCEWITInterfaces;
-
-    let wit_section_bytes = extract_custom_section(module_path)?;
-    let wit = extract_wit(&wit_section_bytes)?;
-    let fce_interface = FCEWITInterfaces::new(wit);
-
-    get_interface(&fce_interface)
+/// Describes manifest of a Wasm module in the Fluence network.
+pub struct ModuleManifest {
+    pub authors: String,
+    pub version: semver::Version,
+    pub description: String,
+    pub repository: String,
 }
+
+use crate::ManifestParserError;
+use std::convert::TryFrom;
+use std::borrow::Cow;
+
+impl TryFrom<&[u8]> for ModuleManifest {
+    type Error = ManifestParserError;
+
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {}
+}
+
+fn extract_prefixed_field(array: &[u8]) -> &[u8] {}
