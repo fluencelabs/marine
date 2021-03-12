@@ -28,7 +28,9 @@ use std::borrow::Cow;
 use std::path::Path;
 use std::convert::TryInto;
 
-pub fn extract_manifest_by_path(wasm_module_path: &Path) -> ModuleInfoResult<Option<ModuleManifest>> {
+pub fn extract_manifest_by_path(
+    wasm_module_path: &Path,
+) -> ModuleInfoResult<Option<ModuleManifest>> {
     let module = ModuleConfig::new()
         .parse_file(wasm_module_path)
         .map_err(ModuleInfoError::CorruptedWasmFile)?;

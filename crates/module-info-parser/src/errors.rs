@@ -52,7 +52,7 @@ pub enum SDKVersionError {
     VersionCorrupted(#[from] SemVerError),
 }
 
-#[derive(Debug, ThisError)]
+#[derive(Debug, ThisError, PartialEq)]
 pub enum ManifestError {
     /// Manifest of a Wasm file doesn't have enough bytes to read size of a field from its prefix.
     #[error(

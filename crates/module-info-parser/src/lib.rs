@@ -29,6 +29,8 @@ mod errors;
 mod manifest;
 mod manifest_extractor;
 mod version_extractor;
+#[cfg(test)]
+mod tests;
 
 pub use errors::ModuleInfoError;
 pub use errors::ManifestError;
