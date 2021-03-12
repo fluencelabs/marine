@@ -21,7 +21,7 @@ use std::str::Utf8Error;
 #[derive(Debug, ThisError)]
 pub enum ModuleInfoError {
     /// Version section is absent.
-    #[error("the module doesn't contain section with '{0}', probably it's compiled with older sdk version")]
+    #[error("the module doesn't contain section with '{0}', probably it's compiled with an old sdk version")]
     NoCustomSection(&'static str),
 
     /// Multiple sections with the same name.
