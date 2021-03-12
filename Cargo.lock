@@ -685,7 +685,7 @@ name = "fce-module-manifest-parser"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "fluence-sdk-main 0.5.0 (git+https://github.com/fluencelabs/rust-sdk?branch=versioning)",
+ "fluence-sdk-main 0.5.0",
  "semver 0.11.0",
  "serde",
  "thiserror",
@@ -710,7 +710,7 @@ name = "fce-wit-generator"
 version = "0.2.0"
 dependencies = [
  "fce-wit-parser",
- "fluence-sdk-wit 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-wit 0.5.0",
  "once_cell",
  "serde",
  "serde_json",
@@ -779,8 +779,8 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "342831732a977f13220ecd6f25c7e6b6127af8d3794d42e3c880b05e457a0484"
 dependencies = [
- "fluence-sdk-macro 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "fluence-sdk-main 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-macro 0.5.0",
+ "fluence-sdk-main 0.5.0",
 ]
 
 [[package]]
@@ -805,7 +805,7 @@ dependencies = [
  "env_logger 0.7.1",
  "fce",
  "fce-utils",
- "fluence-sdk-main 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.5.0",
  "itertools",
  "log",
  "once_cell",
@@ -855,18 +855,10 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.5.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=versioning#6c477059abc1730f36d838e370610ad621786285"
-dependencies = [
- "fluence-sdk-wit 0.5.0 (git+https://github.com/fluencelabs/rust-sdk?branch=versioning)",
-]
-
-[[package]]
-name = "fluence-sdk-macro"
-version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "00c840552e5e58b62d4a272e3e4aabd548e1a4519df629a51d42157c7ecbe653"
 dependencies = [
- "fluence-sdk-wit 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-wit 0.5.0",
 ]
 
 [[package]]
@@ -894,20 +886,10 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.5.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=versioning#6c477059abc1730f36d838e370610ad621786285"
-dependencies = [
- "fluence-sdk-macro 0.5.0 (git+https://github.com/fluencelabs/rust-sdk?branch=versioning)",
- "log",
- "serde",
-]
-
-[[package]]
-name = "fluence-sdk-main"
-version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f1d126f05a798c8f812fbe47a42145478ce8029e00411b04d1c5194ab368313"
 dependencies = [
- "fluence-sdk-macro 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-macro 0.5.0",
  "log",
  "serde",
 ]
@@ -931,19 +913,6 @@ name = "fluence-sdk-wit"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56d835812bab8fb6f261b9e37355b9bf0a28a16123580145ce0fe44ef4363144"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn",
- "uuid",
-]
-
-[[package]]
-name = "fluence-sdk-wit"
-version = "0.5.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=versioning#6c477059abc1730f36d838e370610ad621786285"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1006,7 +975,7 @@ dependencies = [
  "clap",
  "env_logger 0.7.1",
  "fluence-app-service",
- "fluence-sdk-main 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.5.0",
  "itertools",
  "log",
  "rustop",
