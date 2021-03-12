@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-use std::borrow::Cow;
-use walrus::{CustomSection, IdsToIndices};
+use walrus::CustomSection;
+use walrus::IdsToIndices;
 
-pub const WIT_SECTION_NAME: &str = "interface-types";
+use std::borrow::Cow;
+
+pub const IT_SECTION_NAME: &str = "interface-types";
 
 #[derive(Debug, Clone)]
-pub(super) struct WITCustom(pub Vec<u8>);
+pub(super) struct ITCustomSection(pub Vec<u8>);
 
-impl CustomSection for WITCustom {
+impl CustomSection for ITCustomSection {
     fn name(&self) -> &str {
-        WIT_SECTION_NAME
+        IT_SECTION_NAME
     }
 
     fn data(&self, _ids_to_indices: &IdsToIndices) -> Cow<'_, [u8]> {

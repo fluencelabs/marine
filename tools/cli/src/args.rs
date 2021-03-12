@@ -34,7 +34,7 @@ pub fn build<'a, 'b>() -> App<'a, 'b> {
 
 pub fn embed_wit<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("embed")
-        .about("Embed IT to a provided Wasm file")
+        .about("Embed IT to the provided Wasm file")
         .args(&[
             Arg::with_name(IN_WASM_PATH)
                 .required(true)
@@ -54,8 +54,19 @@ pub fn embed_wit<'a, 'b>() -> App<'a, 'b> {
 }
 
 pub fn show_wit<'a, 'b>() -> App<'a, 'b> {
-    SubCommand::with_name("show")
-        .about("Show IT of provided Wasm file")
+    SubCommand::with_name("it")
+        .about("Show IT of the provided Wasm file")
+        .setting(clap::AppSettings::ArgRequiredElseHelp)
+        .args(&[Arg::with_name(IN_WASM_PATH)
+            .required(true)
+            .takes_value(true)
+            .short("i")
+            .help("path to the Wasm file")])
+}
+
+pub fn show_manifest<'a, 'b>() -> App<'a, 'b> {
+    SubCommand::with_name("info")
+        .about("Show manifest and sdk version of the provided Wasm file")
         .setting(clap::AppSettings::ArgRequiredElseHelp)
         .args(&[Arg::with_name(IN_WASM_PATH)
             .required(true)

@@ -15,7 +15,7 @@
  */
 
 use super::errors::WITParserError;
-use super::custom::WIT_SECTION_NAME;
+use super::custom::IT_SECTION_NAME;
 
 use walrus::ModuleConfig;
 
@@ -45,7 +45,7 @@ pub fn delete_wit_section(mut wasm_module: walrus::Module) -> walrus::Module {
         .customs
         .iter()
         .filter_map(|(id, section)| {
-            if section.name() == WIT_SECTION_NAME {
+            if section.name() == IT_SECTION_NAME {
                 Some(id)
             } else {
                 None

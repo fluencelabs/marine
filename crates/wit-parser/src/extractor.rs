@@ -26,8 +26,8 @@ use std::path::Path;
 pub fn module_interface(module_path: &Path) -> Result<ServiceInterface> {
     use fce_wit_interfaces::FCEWITInterfaces;
 
-    let wit_section_bytes = extract_wit_section_bytes(module_path)?;
-    let wit = extract_wit_with_fn(&wit_section_bytes)?;
+    let wit_section_bytes = extract_custom_section(module_path)?;
+    let wit = extract_wit_from_bytes(&wit_section_bytes)?;
     let fce_interface = FCEWITInterfaces::new(wit);
 
     get_interface(&fce_interface)
