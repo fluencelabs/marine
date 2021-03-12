@@ -54,7 +54,7 @@ dependencies = [
 
 [[package]]
 name = "aquamarine-vm"
-version = "0.5.2"
+version = "0.6.0"
 dependencies = [
  "aqua-interpreter-interface",
  "fluence-faas",
@@ -654,11 +654,12 @@ dependencies = [
 
 [[package]]
 name = "fce"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "boolinator",
  "bytes 0.5.6",
+ "fce-module-info-parser",
  "fce-utils",
  "fce-wit-generator",
  "fce-wit-interfaces",
@@ -671,6 +672,7 @@ dependencies = [
  "pwasm-utils",
  "reqwest",
  "safe-transmute",
+ "semver 0.11.0",
  "serde",
  "thiserror",
  "tokio",
@@ -681,7 +683,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "fce-module-manifest-parser"
+name = "fce-module-info-parser"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -690,6 +692,7 @@ dependencies = [
  "serde",
  "thiserror",
  "walrus",
+ "wasmer-runtime-core-fl",
 ]
 
 [[package]]
@@ -746,7 +749,7 @@ dependencies = [
  "anyhow",
  "clap",
  "exitfailure",
- "fce-module-manifest-parser",
+ "fce-module-info-parser",
  "fce-wit-generator",
  "fce-wit-parser",
  "serde",
@@ -785,7 +788,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.5.2"
+version = "0.6.0"
 dependencies = [
  "fluence-faas",
  "log",
@@ -799,7 +802,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.5.2"
+version = "0.6.0"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -969,7 +972,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.5.2"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "clap",

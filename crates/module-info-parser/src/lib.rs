@@ -38,10 +38,12 @@ pub use errors::SDKVersionError;
 
 pub use version_extractor::extract_sdk_version_by_path;
 pub use version_extractor::extract_sdk_version_by_module;
+pub use version_extractor::extract_sdk_version_by_wasmer_module;
 
 pub use manifest::ModuleManifest;
 pub use manifest_extractor::extract_manifest_by_path;
-pub use manifest_extractor::extract_version_by_module;
+pub use manifest_extractor::extract_manifest_by_module;
+pub use manifest_extractor::extract_manifest_by_wasmer_module;
 
 pub(crate) use custom_section_extractor::extract_custom_sections_by_name;
 pub(crate) use custom_section_extractor::try_as_one_section;

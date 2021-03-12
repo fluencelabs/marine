@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+use crate::HostImportError;
 use fce_wit_interfaces::FCEWITInterfacesError;
 use fce_wit_parser::WITParserError;
-use crate::HostImportError;
+use fce_module_info_parser::ModuleInfoError;
 
 use wasmer_wit::errors::InstructionError;
 use wasmer_runtime::error::{
@@ -24,6 +25,8 @@ use wasmer_runtime::error::{
 };
 
 use std::error::Error;
+
+// TODO: refactor errors
 
 #[derive(Debug)]
 pub enum FCEError {
@@ -59,6 +62,18 @@ pub enum FCEError {
 
     /// Incorrect WIT section.
     IncorrectWIT(String),
+
+    /// Error is encountered while parsing module version.
+    ModuleVersionParseError(ModuleInfoError),
+
+    /// Provided module doesn't contain a sdk version that is necessary.
+    ModuleWithoutVersion,
+
+    /// Module versions are incompatible.
+    IncompatibleVersions {
+        required: semver::Version,
+        provided: semver::Version,
+    },
 }
 
 impl Error for FCEError {}
@@ -85,6 +100,9 @@ impl std::fmt::Display for FCEError {
             FCEError::HostImportError(host_import_error) => write!(f, "{}", host_import_error),
             FCEError::WITParseError(err) => write!(f, "{}", err),
             FCEError::IncorrectWIT(err_msg) => write!(f, "{}", err_msg),
+            FCEError::ModuleVersionParseError(err) => write!(f, "{}", err),
+            FCEError::ModuleWithoutVersion => write!(f, "provided modules doesn't contain a version of sdk, probably it's compiled with an old version of sdk"),
+            FCEError::IncompatibleVersions {required, provided} => write!(f, "module compiled with {} version, but at least {} required", provided, required),
         }
     }
 }
@@ -155,6 +173,12 @@ impl From<WITParserError> for FCEError {
 impl From<FCEWITInterfacesError> for FCEError {
     fn from(err: FCEWITInterfacesError) -> Self {
         FCEError::IncorrectWIT(format!("{}", err))
+    }
+}
+
+impl From<ModuleInfoError> for FCEError {
+    fn from(err: ModuleInfoError) -> Self {
+        Self::ModuleVersionParseError(err)
     }
 }
 

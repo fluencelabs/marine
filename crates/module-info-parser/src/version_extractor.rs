@@ -20,6 +20,7 @@ use crate::SDKVersionError;
 use crate::extract_custom_sections_by_name;
 use crate::try_as_one_section;
 
+use wasmer_core::Module as WasmerModule;
 use fluence_sdk_main::VERSION_SECTION_NAME;
 use walrus::ModuleConfig;
 use walrus::Module;
@@ -46,12 +47,28 @@ pub fn extract_sdk_version_by_module(
     if sections.is_empty() {
         return Ok(None);
     }
-    let section = try_as_one_section(sections, VERSION_SECTION_NAME)?;
+    let section = try_as_one_section(&sections, VERSION_SECTION_NAME)?;
 
     let version = match section {
         Cow::Borrowed(bytes) => as_semver(bytes),
         Cow::Owned(vec) => as_semver(&vec),
     }?;
+
+    Ok(Some(version))
+}
+
+pub fn extract_sdk_version_by_wasmer_module(
+    wasmer_module: &WasmerModule,
+) -> ModuleInfoResult<Option<semver::Version>> {
+    let sections = wasmer_module.custom_sections(VERSION_SECTION_NAME);
+
+    let sections = match sections {
+        Some(sections) => sections,
+        None => return Ok(None),
+    };
+
+    let section = try_as_one_section(sections, VERSION_SECTION_NAME)?;
+    let version = as_semver(section)?;
 
     Ok(Some(version))
 }

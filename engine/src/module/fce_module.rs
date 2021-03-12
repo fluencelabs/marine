@@ -115,6 +115,8 @@ impl FCEModule {
         modules: &HashMap<String, FCEModule>,
     ) -> FCEResult<Self> {
         let wasmer_module = compile(&wasm_bytes)?;
+        crate::misc::check_version(&wasmer_module)?;
+
         let wit = extract_wit(&wasmer_module)?;
         let fce_wit = FCEWITInterfaces::new(wit);
 

@@ -94,8 +94,8 @@ fn info(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
     let wasm_path = std::path::Path::new(wasm_path);
 
-    let sdk_version = fce_module_manifest_parser::extract_sdk_version_by_path(&wasm_path)?;
-    let module_manifest = fce_module_manifest_parser::extract_manifest_by_path(&wasm_path)?;
+    let sdk_version = fce_module_info_parser::extract_sdk_version_by_path(&wasm_path)?;
+    let module_manifest = fce_module_info_parser::extract_manifest_by_path(&wasm_path)?;
 
     match sdk_version {
         Some(sdk_version) => println!("sdk version: {}", sdk_version),

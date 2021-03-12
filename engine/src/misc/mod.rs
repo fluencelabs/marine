@@ -15,5 +15,7 @@
  */
 
 mod prepare;
+mod version_checker;
 
 pub(crate) use prepare::prepare_module;
+pub(crate) use version_checker::check_version;

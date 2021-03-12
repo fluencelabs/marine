@@ -56,3 +56,6 @@ pub mod ne_vec {
 }
 
 pub(crate) type FCEResult<T> = std::result::Result<T, FCEError>;
+
+use std::str::FromStr;
+thread_local!(static MINIMAL_SUPPORT_SDK_VERSION: semver::Version = semver::Version::from_str("0.5.0").unwrap());

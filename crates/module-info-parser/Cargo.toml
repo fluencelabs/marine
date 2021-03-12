@@ -1,17 +1,19 @@
 [package]
-name = "fce-module-manifest-parser"
-description = "Fluence FCE Wasm module manifest parser"
+name = "fce-module-info-parser"
+description = "Fluence FCE Wasm module info (manifest and version) parser"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [lib]
-name = "fce_module_manifest_parser"
+name = "fce_module_info_parser"
 path = "src/lib.rs"
 
 [dependencies]
 fluence-sdk-main = "0.5.0"
+
+wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0" }
 
 anyhow = "1.0.31"
 walrus = "0.18.0"
