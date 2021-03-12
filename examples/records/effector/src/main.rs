@@ -15,7 +15,11 @@
  */
 
 use fluence::fce;
+use fluence::module_manifest;
+
 use test_record::TestRecord;
+
+module_manifest!();
 
 pub fn main() {}
 

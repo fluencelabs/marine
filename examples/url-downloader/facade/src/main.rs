@@ -16,7 +16,10 @@
 #![allow(improper_ctypes)]
 
 use fluence::fce;
+use fluence::module_manifest;
 use fluence::WasmLoggerBuilder;
+
+module_manifest!();
 
 pub fn main() {
     WasmLoggerBuilder::new().build().unwrap();

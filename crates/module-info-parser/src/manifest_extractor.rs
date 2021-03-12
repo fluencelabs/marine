@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::Result;
+use crate::ModuleInfoResult;
 use crate::ModuleInfoError;
 use crate::extract_custom_sections_by_name;
 use crate::try_as_one_section;
@@ -28,7 +28,7 @@ use std::borrow::Cow;
 use std::path::Path;
 use std::convert::TryInto;
 
-pub fn extract_manifest_by_path(wasm_module_path: &Path) -> Result<Option<ModuleManifest>> {
+pub fn extract_manifest_by_path(wasm_module_path: &Path) -> ModuleInfoResult<Option<ModuleManifest>> {
     let module = ModuleConfig::new()
         .parse_file(wasm_module_path)
         .map_err(ModuleInfoError::CorruptedWasmFile)?;
@@ -36,7 +36,7 @@ pub fn extract_manifest_by_path(wasm_module_path: &Path) -> Result<Option<Module
     extract_version_by_module(&module)
 }
 
-pub fn extract_version_by_module(wasm_module: &Module) -> Result<Option<ModuleManifest>> {
+pub fn extract_version_by_module(wasm_module: &Module) -> ModuleInfoResult<Option<ModuleManifest>> {
     let sections = extract_custom_sections_by_name(&wasm_module, MANIFEST_SECTION_NAME)?;
     if sections.is_empty() {
         return Ok(None);
@@ -47,7 +47,7 @@ pub fn extract_version_by_module(wasm_module: &Module) -> Result<Option<ModuleMa
     let manifest = match section {
         Cow::Borrowed(bytes) => bytes.try_into(),
         Cow::Owned(vec) => vec.as_slice().try_into(),
-    };
+    }?;
 
-    manifest.map(Some)
+    Ok(Some(manifest))
 }

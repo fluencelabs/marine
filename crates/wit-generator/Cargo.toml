@@ -12,7 +12,7 @@ path = "src/lib.rs"
 
 [dependencies]
 fce-wit-parser = { path = "../wit-parser", version = "0.2.0"}
-fluence-sdk-wit = "=0.4.2"
+fluence-sdk-wit = "=0.5.0"
 
 walrus = "0.18.0"
 wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.17.24" }

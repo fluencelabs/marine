@@ -17,7 +17,6 @@
 use semver::SemVerError;
 use thiserror::Error as ThisError;
 use std::str::Utf8Error;
-use std::io::Error as IOError;
 
 #[derive(Debug, ThisError)]
 pub enum ModuleInfoError {
@@ -29,41 +28,57 @@ pub enum ModuleInfoError {
     #[error("the module contains {1} sections with name '{0}' - it's corrupted")]
     MultipleCustomSections(&'static str, usize),
 
+    /// Errors related to corrupted version.
+    #[error("{0}")]
+    VersionError(#[from] SDKVersionError),
+
+    /// Errors related to corrupted manifest.
+    #[error("{0}")]
+    ManifestError(#[from] ManifestError),
+
+    /// An error occurred while parsing Wasm file.
+    #[error("provided Wasm file is corrupted: {0}")]
+    CorruptedWasmFile(anyhow::Error),
+}
+
+#[derive(Debug, ThisError)]
+pub enum SDKVersionError {
     /// Version can't be parsed to Utf8 string.
     #[error("embedded to the Wasm file version isn't valid UTF8 string: '{0}'")]
     VersionNotValidUtf8(Utf8Error),
 
     /// Version can't be parsed with semver.
     #[error("embedded to the Wasm file version is corrupted: '{0}'")]
-    VersionCorrupted(SemVerError),
+    VersionCorrupted(#[from] SemVerError),
+}
+
+#[derive(Debug, ThisError)]
+pub enum ManifestError {
+    /// Manifest of a Wasm file doesn't have enough bytes to read size of a field from its prefix.
+    #[error(
+        "{0} can't be read: embedded manifest doesn't contain enough bytes to read field size from prefix"
+    )]
+    NotEnoughBytesForPrefix(&'static str),
+
+    /// Manifest of a Wasm file doesn't have enough bytes to read a field.
+    #[error(
+        "{0} can't be read: embedded manifest doesn't contain enough bytes to read field of size {1}"
+    )]
+    NotEnoughBytesForField(&'static str, usize),
 
     /// Manifest of a Wasm file doesn't have enough bytes to read field.
-    #[error(
-        "{0} can't be read: embedded manifest doesn't contain enough bytes to read field prefix"
-    )]
-    ManifestCorrupted(&'static str),
+    #[error("{0} is an invalid Utf8 string: {1}")]
+    FieldNotValidUtf8(&'static str, Utf8Error),
+
+    /// Size inside prefix of a field is too big (it exceeds usize or overflows with prefix size).
+    #[error("{0} has too big size: {1}")]
+    TooBigFieldSize(&'static str, u64),
+
+    /// Version can't be parsed with semver.
+    #[error("embedded to the Wasm file version is corrupted: '{0}'")]
+    ModuleVersionCorrupted(#[from] SemVerError),
 
     /// Manifest contains some trailing characters.
     #[error("embedded manifest is corrupted: there are some trailing characters")]
     ManifestRemainderNotEmpty,
-
-    /// An error occurred while parsing Wasm file.
-    #[error("provided Wasm file is corrupted: {0}")]
-    CorruptedWasmFile(anyhow::Error),
-
-    /// An error occurred while manipulating with converting ast to bytes.
-    #[error("Convertation Wast to AST failed with: {0}")]
-    AstToBytesError(IOError),
-}
-
-impl From<SemVerError> for ModuleInfoError {
-    fn from(err: SemVerError) -> Self {
-        Self::VersionCorrupted(err)
-    }
-}
-
-impl From<IOError> for ModuleInfoError {
-    fn from(err: IOError) -> Self {
-        Self::AstToBytesError(err)
-    }
 }

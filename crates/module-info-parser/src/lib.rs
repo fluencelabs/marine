@@ -31,6 +31,9 @@ mod manifest_extractor;
 mod version_extractor;
 
 pub use errors::ModuleInfoError;
+pub use errors::ManifestError;
+pub use errors::SDKVersionError;
+
 pub use version_extractor::extract_sdk_version_by_path;
 pub use version_extractor::extract_sdk_version_by_module;
 
@@ -41,4 +44,4 @@ pub use manifest_extractor::extract_version_by_module;
 pub(crate) use custom_section_extractor::extract_custom_sections_by_name;
 pub(crate) use custom_section_extractor::try_as_one_section;
 
-pub(crate) type Result<T> = std::result::Result<T, ModuleInfoError>;
+pub(crate) type ModuleInfoResult<T> = std::result::Result<T, ModuleInfoError>;

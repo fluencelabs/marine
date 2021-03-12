@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::Result;
+use crate::ModuleInfoResult;
 use crate::ModuleInfoError;
 
 use walrus::IdsToIndices;
@@ -25,7 +25,7 @@ use std::borrow::Cow;
 pub(super) fn extract_custom_sections_by_name<'w>(
     wasm_module: &'w Module,
     section_name: &str,
-) -> Result<Vec<Cow<'w, [u8]>>> {
+) -> ModuleInfoResult<Vec<Cow<'w, [u8]>>> {
     let default_ids = IdsToIndices::default();
 
     let sections = wasm_module
@@ -41,7 +41,7 @@ pub(super) fn extract_custom_sections_by_name<'w>(
 pub(super) fn try_as_one_section<'s>(
     mut sections: Vec<Cow<'s, [u8]>>,
     section_name: &'static str,
-) -> Result<Cow<'s, [u8]>> {
+) -> ModuleInfoResult<Cow<'s, [u8]>> {
     let sections_count = sections.len();
 
     if sections_count > 1 {

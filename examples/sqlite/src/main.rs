@@ -15,8 +15,12 @@
  */
 
 use fluence::fce;
+use fluence::module_manifest;
+
 use fce_sqlite_connector;
 use fce_sqlite_connector::State;
+
+module_manifest!();
 
 pub fn main() {}
 

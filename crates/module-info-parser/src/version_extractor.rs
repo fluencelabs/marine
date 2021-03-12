@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-use crate::Result;
+use crate::ModuleInfoResult;
 use crate::ModuleInfoError;
+use crate::SDKVersionError;
 use crate::extract_custom_sections_by_name;
 use crate::try_as_one_section;
 
@@ -27,7 +28,7 @@ use std::borrow::Cow;
 use std::str::FromStr;
 use std::path::Path;
 
-pub fn extract_sdk_version_by_path(wasm_module_path: &Path) -> Result<Option<semver::Version>> {
+pub fn extract_sdk_version_by_path(wasm_module_path: &Path) -> ModuleInfoResult<Option<semver::Version>> {
     let module = ModuleConfig::new()
         .parse_file(wasm_module_path)
         .map_err(ModuleInfoError::CorruptedWasmFile)?;
@@ -35,7 +36,7 @@ pub fn extract_sdk_version_by_path(wasm_module_path: &Path) -> Result<Option<sem
     extract_sdk_version_by_module(&module)
 }
 
-pub fn extract_sdk_version_by_module(wasm_module: &Module) -> Result<Option<semver::Version>> {
+pub fn extract_sdk_version_by_module(wasm_module: &Module) -> ModuleInfoResult<Option<semver::Version>> {
     let sections = extract_custom_sections_by_name(&wasm_module, VERSION_SECTION_NAME)?;
 
     if sections.is_empty() {
@@ -46,14 +47,14 @@ pub fn extract_sdk_version_by_module(wasm_module: &Module) -> Result<Option<semv
     let version = match section {
         Cow::Borrowed(bytes) => as_semver(bytes),
         Cow::Owned(vec) => as_semver(&vec),
-    };
+    }?;
 
-    version.map(Some)
+    Ok(Some(version))
 }
 
-fn as_semver(version_as_bytes: &[u8]) -> Result<semver::Version> {
+fn as_semver(version_as_bytes: &[u8]) -> Result<semver::Version, crate::SDKVersionError> {
     match std::str::from_utf8(version_as_bytes) {
         Ok(str) => Ok(semver::Version::from_str(str)?),
-        Err(e) => Err(ModuleInfoError::VersionNotValidUtf8(e)),
+        Err(e) => Err(SDKVersionError::VersionNotValidUtf8(e).into()),
     }
 }

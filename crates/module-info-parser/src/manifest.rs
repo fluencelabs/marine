@@ -23,14 +23,15 @@ pub struct ModuleManifest {
     pub repository: String,
 }
 
-use crate::ModuleInfoError;
-use crate::Result;
+use crate::ManifestError;
 
 use std::convert::TryFrom;
 use std::str::FromStr;
 
+type Result<T> = std::result::Result<T, ManifestError>;
+
 impl TryFrom<&[u8]> for ModuleManifest {
-    type Error = ModuleInfoError;
+    type Error = ManifestError;
 
     #[rustfmt::skip]
     fn try_from(value: &[u8]) -> Result<Self> {
@@ -40,7 +41,7 @@ impl TryFrom<&[u8]> for ModuleManifest {
         let (repository, next_offset) = try_extract_field_as_string(value, next_offset, "repository")?;
 
         if next_offset != value.len() {
-            return Err(ModuleInfoError::ManifestRemainderNotEmpty)
+            return Err(ManifestError::ManifestRemainderNotEmpty)
         }
 
         let manifest = ModuleManifest {
@@ -59,9 +60,9 @@ fn try_extract_field_as_string(
     offset: usize,
     field_name: &'static str,
 ) -> Result<(String, usize)> {
-    let (field_as_bytes, read_len) =
-        try_extract_prefixed_field(&raw_manifest[offset..], field_name)?;
-    let field_as_string = try_to_string(field_as_bytes)?;
+    let raw_manifest = &raw_manifest[offset..];
+    let (field_as_bytes, read_len) = try_extract_prefixed_field(raw_manifest, field_name)?;
+    let field_as_string = try_to_str(field_as_bytes, field_name)?.to_string();
 
     Ok((field_as_string, offset + read_len))
 }
@@ -71,9 +72,9 @@ fn try_extract_field_as_version(
     offset: usize,
     field_name: &'static str,
 ) -> Result<(semver::Version, usize)> {
-    let (field_as_bytes, read_len) =
-        try_extract_prefixed_field(&raw_manifest[offset..], field_name)?;
-    let field_as_str = try_to_str(field_as_bytes)?;
+    let raw_manifest = &raw_manifest[offset..];
+    let (field_as_bytes, read_len) = try_extract_prefixed_field(raw_manifest, field_name)?;
+    let field_as_str = try_to_str(field_as_bytes, field_name)?;
     let version = semver::Version::from_str(field_as_str)?;
 
     Ok((version, offset + read_len))
@@ -94,7 +95,7 @@ fn try_extract_prefixed_field<'a>(
 
 fn try_extract_field_len(array: &[u8], field_name: &'static str) -> Result<usize> {
     if array.len() < PREFIX_SIZE {
-        return Err(ModuleInfoError::ManifestCorrupted(field_name));
+        return Err(ManifestError::NotEnoughBytesForPrefix(field_name));
     }
 
     let mut field_len = [0u8; PREFIX_SIZE];
@@ -105,7 +106,7 @@ fn try_extract_field_len(array: &[u8], field_name: &'static str) -> Result<usize
     if field_len.checked_add(PREFIX_SIZE as u64).is_none()
         || usize::try_from(field_len + PREFIX_SIZE as u64).is_err()
     {
-        return Err(ModuleInfoError::ManifestCorrupted(field_name));
+        return Err(ManifestError::TooBigFieldSize(field_name, field_len));
     }
 
     // it's safe to convert it to usize because it's been checked
@@ -118,24 +119,17 @@ fn try_extract_field<'a>(
     field_name: &'static str,
 ) -> Result<&'a [u8]> {
     if array.len() < PREFIX_SIZE + field_len {
-        return Err(ModuleInfoError::ManifestCorrupted(field_name));
+        return Err(ManifestError::NotEnoughBytesForField(field_name, field_len));
     }
 
     let field = &array[PREFIX_SIZE..PREFIX_SIZE + field_len];
     Ok(field)
 }
 
-fn try_to_string(value: &[u8]) -> Result<String> {
-    match std::str::from_utf8(value) {
-        Ok(str) => Ok(str.to_string()),
-        Err(e) => Err(ModuleInfoError::VersionNotValidUtf8(e)),
-    }
-}
-
-fn try_to_str(value: &[u8]) -> Result<&str> {
+fn try_to_str<'v>(value: &'v [u8], field_name: &'static str) -> Result<&'v str> {
     match std::str::from_utf8(value) {
         Ok(s) => Ok(s),
-        Err(e) => Err(ModuleInfoError::VersionNotValidUtf8(e)),
+        Err(e) => Err(ManifestError::FieldNotValidUtf8(field_name, e)),
     }
 }
 
@@ -143,9 +137,9 @@ use std::fmt;
 
 impl fmt::Display for ModuleManifest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "authors: {}", self.authors)?;
-        writeln!(f, "version: {}", self.version)?;
+        writeln!(f, "authors:     {}", self.authors)?;
+        writeln!(f, "version:     {}", self.version)?;
         writeln!(f, "description: {}", self.description)?;
-        write!(f, "repository: {}", self.repository)
+        write!(f, "repository:  {}", self.repository)
     }
 }

@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-use std::fs;
 use fluence::fce;
+use fluence::module_manifest;
 use fluence::WasmLoggerBuilder;
+
+use std::fs;
 use std::path::PathBuf;
+
+module_manifest!();
 
 const SITES_DIR: &str = "/sites/";
 
