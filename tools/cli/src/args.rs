@@ -24,6 +24,8 @@ pub const IN_WASM_PATH: &str = "in-wasm-path";
 pub const WIT_PATH: &str = "wit-path";
 pub const OUT_WASM_PATH: &str = "out-wasm-path";
 
+pub const SDK_VERSION: &str = "sdk-version";
+
 pub fn build<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("build")
         .about("Build provided Rust project to Wasm")
@@ -33,7 +35,7 @@ pub fn build<'a, 'b>() -> App<'a, 'b> {
 }
 
 pub fn embed_wit<'a, 'b>() -> App<'a, 'b> {
-    SubCommand::with_name("embed")
+    SubCommand::with_name("embed_it")
         .about("Embed IT to the provided Wasm file")
         .args(&[
             Arg::with_name(IN_WASM_PATH)
@@ -50,6 +52,27 @@ pub fn embed_wit<'a, 'b>() -> App<'a, 'b> {
                 .takes_value(true)
                 .short("o")
                 .help("path to result file with embedded WIT"),
+        ])
+}
+
+pub fn embed_version<'a, 'b>() -> App<'a, 'b> {
+    SubCommand::with_name("embed_ver")
+        .about("Embed sdk version to the provided Wasm file")
+        .args(&[
+            Arg::with_name(IN_WASM_PATH)
+                .required(true)
+                .takes_value(true)
+                .short("i")
+                .help("path to the wasm file"),
+            Arg::with_name(SDK_VERSION)
+                .required(true)
+                .takes_value(true)
+                .short("v")
+                .help("version of a used sdk"),
+            Arg::with_name(OUT_WASM_PATH)
+                .takes_value(true)
+                .short("o")
+                .help("path to result file with embedded version"),
         ])
 }
 

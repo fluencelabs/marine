@@ -29,6 +29,8 @@ mod args;
 mod build;
 mod errors;
 
+use std::path::Path;
+
 pub(crate) type CLIResult<T> = std::result::Result<T, crate::errors::CLIError>;
 
 pub fn main() -> Result<(), anyhow::Error> {
@@ -38,6 +40,7 @@ pub fn main() -> Result<(), anyhow::Error> {
         .setting(clap::AppSettings::ArgRequiredElseHelp)
         .subcommand(args::build())
         .subcommand(args::embed_wit())
+        .subcommand(args::embed_version())
         .subcommand(args::show_manifest())
         .subcommand(args::show_wit())
         .subcommand(args::repl());
@@ -45,7 +48,8 @@ pub fn main() -> Result<(), anyhow::Error> {
 
     match arg_matches.subcommand() {
         ("build", Some(args)) => build(args),
-        ("embed", Some(args)) => embed(args),
+        ("embed_wit", Some(args)) => embed_wit(args),
+        ("embed_ver", Some(args)) => embed_version(args),
         ("it", Some(args)) => it(args),
         ("info", Some(args)) => info(args),
         ("repl", Some(args)) => repl(args),
@@ -61,7 +65,7 @@ fn build(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-fn embed(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+fn embed_wit(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let in_wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
     let wit_path = args.value_of(args::WIT_PATH).unwrap();
     let out_wasm_path = match args.value_of(args::OUT_WASM_PATH) {
@@ -76,6 +80,27 @@ fn embed(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
         std::path::PathBuf::from(out_wasm_path),
         &wit,
     )?;
+
+    println!("interface types were successfully embedded");
+
+    Ok(())
+}
+
+fn embed_version(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+    let in_wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
+    let version = args.value_of(args::SDK_VERSION).unwrap();
+    let out_wasm_path = match args.value_of(args::OUT_WASM_PATH) {
+        Some(path) => path,
+        None => in_wasm_path,
+    };
+
+    fce_module_info_parser::embed_sdk_version_by_path(
+        Path::new(in_wasm_path),
+        Path::new(out_wasm_path),
+        version.to_string(),
+    )?;
+
+    println!("version was successfully embedded");
 
     Ok(())
 }

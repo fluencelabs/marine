@@ -28,6 +28,7 @@ mod custom_section_extractor;
 mod errors;
 mod manifest;
 mod manifest_extractor;
+mod version_embedder;
 mod version_extractor;
 #[cfg(test)]
 mod tests;
@@ -39,6 +40,8 @@ pub use errors::SDKVersionError;
 pub use version_extractor::extract_sdk_version_by_path;
 pub use version_extractor::extract_sdk_version_by_module;
 pub use version_extractor::extract_sdk_version_by_wasmer_module;
+pub use version_embedder::embed_sdk_version_by_path;
+pub use version_embedder::embed_sdk_version_by_module;
 
 pub use manifest::ModuleManifest;
 pub use manifest_extractor::extract_manifest_by_path;

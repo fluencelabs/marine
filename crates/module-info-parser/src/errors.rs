@@ -39,6 +39,10 @@ pub enum ModuleInfoError {
     /// An error occurred while parsing Wasm file.
     #[error("provided Wasm file is corrupted: {0}")]
     CorruptedWasmFile(anyhow::Error),
+
+    /// Wasm emitting file error.
+    #[error("emitting resulted Wasm file failed with: {0}")]
+    WasmEmitError(anyhow::Error),
 }
 
 #[derive(Debug, ThisError)]
