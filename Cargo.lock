@@ -3007,9 +3007,9 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.18.1"
+version = "0.18.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b1b45165b0e1697db61d07eda5b0ef7ae7f13a5e0d71c1c9e9c23c9436e510e"
+checksum = "9a0f9430f67621da4ace505a3e7b56c19e2ceff93db5507d2ca2f8e0b53feca6"
 dependencies = [
  "fluence-it-types",
  "it-to-bytes",

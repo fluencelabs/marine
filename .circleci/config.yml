@@ -21,7 +21,7 @@ jobs:
           rustup component add clippy --toolchain nightly-2021-02-27
           rustup target add wasm32-wasi
 
-          cargo install fcli
+          cargo install --path tools/cli
 
           cargo fmt --all -- --check --color always
           cargo check -v --all-features
