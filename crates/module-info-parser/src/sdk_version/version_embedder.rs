@@ -26,7 +26,7 @@ use std::path::Path;
 use std::borrow::Cow;
 
 #[derive(Debug, Clone)]
-pub(super) struct VersionCustomSection(Vec<u8>);
+pub(super) struct VersionCustomSection(String);
 
 impl CustomSection for VersionCustomSection {
     fn name(&self) -> &str {
@@ -34,7 +34,7 @@ impl CustomSection for VersionCustomSection {
     }
 
     fn data(&self, _ids_to_indices: &IdsToIndices) -> Cow<'_, [u8]> {
-        Cow::Borrowed(&self.0)
+        Cow::Borrowed(self.0.as_bytes())
     }
 }
 
@@ -45,7 +45,7 @@ pub fn embed_by_module(
 ) -> walrus::Module {
     delete_version_sections(&mut wasm_module);
 
-    let custom = VersionCustomSection(version.to_string().into_bytes());
+    let custom = VersionCustomSection(version.to_string());
     wasm_module.customs.add(custom);
 
     wasm_module
