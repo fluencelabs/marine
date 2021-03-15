@@ -29,8 +29,6 @@ mod args;
 mod build;
 mod errors;
 
-use std::path::Path;
-
 pub(crate) type CLIResult<T> = std::result::Result<T, crate::errors::CLIError>;
 
 pub fn main() -> Result<(), anyhow::Error> {
@@ -75,11 +73,7 @@ fn embed_wit(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
 
     let wit = String::from_utf8(std::fs::read(wit_path)?).unwrap();
 
-    fce_wit_parser::embed_text_wit(
-        std::path::PathBuf::from(in_wasm_path),
-        std::path::PathBuf::from(out_wasm_path),
-        &wit,
-    )?;
+    fce_wit_parser::embed_text_wit(in_wasm_path, out_wasm_path, &wit)?;
 
     println!("interface types were successfully embedded");
 
@@ -95,12 +89,12 @@ fn embed_version(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     };
 
     fce_module_info_parser::embed_sdk_version_by_path(
-        Path::new(in_wasm_path),
-        Path::new(out_wasm_path),
+        in_wasm_path,
+        out_wasm_path,
         version.to_string(),
     )?;
 
-    println!("version was successfully embedded");
+    println!("the version was successfully embedded");
 
     Ok(())
 }

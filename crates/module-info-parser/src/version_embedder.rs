@@ -49,11 +49,15 @@ pub fn embed_sdk_version_by_module(
     wasm_module
 }
 
-pub fn embed_sdk_version_by_path(
-    in_wasm_module_path: &Path,
-    out_wasm_module_path: &Path,
+pub fn embed_sdk_version_by_path<I, O>(
+    in_wasm_module_path: I,
+    out_wasm_module_path: O,
     version: String,
-) -> ModuleInfoResult<()> {
+) -> ModuleInfoResult<()>
+where
+    I: AsRef<Path>,
+    O: AsRef<Path>,
+{
     let wasm_module = ModuleConfig::new()
         .parse_file(in_wasm_module_path)
         .map_err(ModuleInfoError::CorruptedWasmFile)?;
