@@ -16,7 +16,7 @@ fce-wit-interfaces = { path = "../wit-interfaces", version = "0.1.29" }
 anyhow = "1.0.31"
 walrus = "0.18.0"
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0"}
-wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.18.1" }
+wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.18.3" }
 
 semver = "0.11.0"
 serde = "=1.0.118"
