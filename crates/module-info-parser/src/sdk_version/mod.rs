@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-mod prepare;
-mod version_checker;
+mod errors;
+mod version_embedder;
+mod version_extractor;
 
-pub(crate) use prepare::prepare_module;
-pub(crate) use version_checker::check_sdk_version;
+pub use errors::SDKVersionError;
+pub use version_extractor::extract_by_path;
+pub use version_extractor::extract_by_module;
+pub use version_extractor::extract_by_wasmer_module;
+pub use version_embedder::embed_by_path;
+pub use version_embedder::embed_by_module;

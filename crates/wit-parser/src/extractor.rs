@@ -21,13 +21,22 @@ pub use functions::*;
 pub use wit::*;
 
 use crate::Result;
+use crate::WITParserError;
 use std::path::Path;
 
-pub fn module_interface(module_path: &Path) -> Result<ServiceInterface> {
+pub fn module_interface<P>(module_path: P) -> Result<ServiceInterface>
+where
+    P: AsRef<Path>,
+{
     use fce_wit_interfaces::FCEWITInterfaces;
 
-    let wit_section_bytes = extract_custom_section(module_path)?;
-    let wit = extract_wit_from_bytes(&wit_section_bytes)?;
+    let module = walrus::ModuleConfig::new()
+        .parse_file(module_path)
+        .map_err(WITParserError::CorruptedWasmFile)?;
+
+    let raw_custom_section = extract_custom_section(&module)?;
+    let custom_section_bytes = raw_custom_section.as_ref();
+    let wit = extract_wit_from_bytes(custom_section_bytes)?;
     let fce_interface = FCEWITInterfaces::new(wit);
 
     get_interface(&fce_interface)

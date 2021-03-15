@@ -21,7 +21,7 @@ use crate::FCEResult;
 use crate::FCEModuleConfig;
 
 use fce_wit_interfaces::FCEWITInterfaces;
-use fce_wit_parser::extract_wit;
+use fce_wit_parser::extract_wit_from_module;
 use fce_utils::SharedString;
 use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
@@ -115,9 +115,9 @@ impl FCEModule {
         modules: &HashMap<String, FCEModule>,
     ) -> FCEResult<Self> {
         let wasmer_module = compile(&wasm_bytes)?;
-        crate::misc::check_version(&wasmer_module)?;
+        crate::misc::check_sdk_version(&wasmer_module)?;
 
-        let wit = extract_wit(&wasmer_module)?;
+        let wit = extract_wit_from_module(&wasmer_module)?;
         let fce_wit = FCEWITInterfaces::new(wit);
 
         let mut wit_instance = Arc::new_uninit();

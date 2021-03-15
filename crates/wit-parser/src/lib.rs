@@ -36,7 +36,8 @@ pub use deleter::delete_wit_section;
 pub use deleter::delete_wit_section_from_file;
 pub use embedder::embed_wit;
 pub use embedder::embed_text_wit;
-pub use extractor::extract_wit;
+pub use extractor::extract_wit_from_module;
+pub use extractor::extract_version_from_module;
 pub use extractor::extract_text_wit;
 pub use extractor::module_interface;
 

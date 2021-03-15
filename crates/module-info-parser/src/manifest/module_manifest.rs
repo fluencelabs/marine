@@ -23,7 +23,7 @@ pub struct ModuleManifest {
     pub repository: String,
 }
 
-use crate::ManifestError;
+use super::ManifestError;
 
 use std::convert::TryFrom;
 use std::str::FromStr;

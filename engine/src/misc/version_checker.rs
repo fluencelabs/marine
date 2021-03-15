@@ -18,12 +18,12 @@ use crate::FCEResult;
 use crate::FCEError;
 use crate::MINIMAL_SUPPORT_SDK_VERSION;
 
-use fce_module_info_parser::extract_sdk_version_by_wasmer_module;
+use fce_module_info_parser::sdk_version;
 
 use wasmer_core::Module;
 
-pub(crate) fn check_version(wasmer_module: &Module) -> FCEResult<()> {
-    let module_version = extract_sdk_version_by_wasmer_module(wasmer_module)?;
+pub(crate) fn check_sdk_version(wasmer_module: &Module) -> FCEResult<()> {
+    let module_version = sdk_version::extract_by_wasmer_module(wasmer_module)?;
     let module_version = match module_version {
         Some(module_version) => module_version,
         None => return Err(FCEError::ModuleWithoutVersion),

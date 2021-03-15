@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-mod prepare;
-mod version_checker;
+mod errors;
+mod manifest_extractor;
+mod module_manifest;
+#[cfg(test)]
+mod tests;
 
-pub(crate) use prepare::prepare_module;
-pub(crate) use version_checker::check_sdk_version;
+pub use errors::ManifestError;
+pub use manifest_extractor::extract_by_path;
+pub use manifest_extractor::extract_by_module;
+pub use manifest_extractor::extract_by_wasmer_module;
+pub use module_manifest::ModuleManifest;
