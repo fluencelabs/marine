@@ -91,6 +91,7 @@ async fn redis() {
 }
 
 #[tokio::test]
+#[ignore]
 async fn sqlite() {
     let wasm_bytes = download(SQLITE_DOWNLOAD_URL).await;
 
