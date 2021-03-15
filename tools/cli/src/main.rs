@@ -49,7 +49,7 @@ pub fn main() -> Result<(), anyhow::Error> {
 
     match arg_matches.subcommand() {
         ("build", Some(args)) => build(args),
-        ("embed_wit", Some(args)) => embed_wit(args),
+        ("embed_it", Some(args)) => embed_wit(args),
         ("embed_ver", Some(args)) => embed_version(args),
         ("it", Some(args)) => it(args),
         ("info", Some(args)) => info(args),
