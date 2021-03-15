@@ -95,7 +95,7 @@ fn embed_version(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     };
 
     let version = semver::Version::from_str(version)?;
-    sdk_version::embed_by_path(in_wasm_path, out_wasm_path, version)?;
+    sdk_version::embed_from_path(in_wasm_path, out_wasm_path, version)?;
 
     println!("the version was successfully embedded");
 
@@ -115,8 +115,8 @@ fn info(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
 
     let wasm_module = walrus::ModuleConfig::new().parse_file(wasm_path)?;
-    let sdk_version = sdk_version::extract_by_module(&wasm_module)?;
-    let module_manifest = manifest::extract_by_module(&wasm_module)?;
+    let sdk_version = sdk_version::extract_from_module(&wasm_module)?;
+    let module_manifest = manifest::extract_from_module(&wasm_module)?;
     let it_version = fce_wit_parser::extract_version_from_module(&wasm_module)?;
 
     println!("it version:  {}", it_version);

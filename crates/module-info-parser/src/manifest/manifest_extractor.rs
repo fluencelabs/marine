@@ -29,7 +29,7 @@ use std::borrow::Cow;
 use std::path::Path;
 use std::convert::TryInto;
 
-pub fn extract_by_path<P>(wasm_module_path: P) -> ModuleInfoResult<Option<ModuleManifest>>
+pub fn extract_from_path<P>(wasm_module_path: P) -> ModuleInfoResult<Option<ModuleManifest>>
 where
     P: AsRef<Path>,
 {
@@ -37,10 +37,10 @@ where
         .parse_file(wasm_module_path)
         .map_err(ModuleInfoError::CorruptedWasmFile)?;
 
-    extract_by_module(&module)
+    extract_from_module(&module)
 }
 
-pub fn extract_by_module(wasm_module: &Module) -> ModuleInfoResult<Option<ModuleManifest>> {
+pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<ModuleManifest>> {
     let sections = extract_custom_sections_by_name(&wasm_module, MANIFEST_SECTION_NAME)?;
     if sections.is_empty() {
         return Ok(None);
@@ -56,7 +56,7 @@ pub fn extract_by_module(wasm_module: &Module) -> ModuleInfoResult<Option<Module
     Ok(Some(manifest))
 }
 
-pub fn extract_by_wasmer_module(
+pub fn extract_from_wasmer_module(
     wasmer_module: &WasmerModule,
 ) -> ModuleInfoResult<Option<ModuleManifest>> {
     let sections = wasmer_module.custom_sections(MANIFEST_SECTION_NAME);

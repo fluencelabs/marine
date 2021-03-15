@@ -131,7 +131,7 @@ async fn sqlite() {
                 IValue::U32(db_handle),
                 IValue::String(String::from("CREATE VIRTUAL TABLE users USING FTS5(body)")),
                 IValue::S32(0),
-                IValue::S32(0)
+                IValue::S32(0),
             ],
         )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
@@ -142,9 +142,11 @@ async fn sqlite() {
             "sqlite3_exec",
             &[
                 IValue::U32(db_handle),
-                IValue::String(String::from("INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')")),
+                IValue::String(String::from(
+                    "INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')",
+                )),
                 IValue::S32(0),
-                IValue::S32(0)
+                IValue::S32(0),
             ],
         )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
@@ -155,9 +157,11 @@ async fn sqlite() {
             "sqlite3_exec",
             &[
                 IValue::U32(db_handle),
-                IValue::String(String::from("SELECT * FROM users WHERE users MATCH 'A* OR B*'")),
+                IValue::String(String::from(
+                    "SELECT * FROM users WHERE users MATCH 'A* OR B*'",
+                )),
                 IValue::S32(0),
-                IValue::S32(0)
+                IValue::S32(0),
             ],
         )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));

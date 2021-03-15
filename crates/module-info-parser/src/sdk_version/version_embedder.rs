@@ -39,7 +39,7 @@ impl CustomSection for VersionCustomSection {
 }
 
 /// Embed provided WIT to a Wasm module.
-pub fn embed_by_module(
+pub fn embed_from_module(
     mut wasm_module: walrus::Module,
     version: semver::Version,
 ) -> walrus::Module {
@@ -51,7 +51,7 @@ pub fn embed_by_module(
     wasm_module
 }
 
-pub fn embed_by_path<I, O>(
+pub fn embed_from_path<I, O>(
     in_wasm_module_path: I,
     out_wasm_module_path: O,
     version: semver::Version,
@@ -64,7 +64,7 @@ where
         .parse_file(in_wasm_module_path)
         .map_err(ModuleInfoError::CorruptedWasmFile)?;
 
-    let mut wasm_module = embed_by_module(wasm_module, version);
+    let mut wasm_module = embed_from_module(wasm_module, version);
     wasm_module
         .emit_wasm_file(out_wasm_module_path)
         .map_err(ModuleInfoError::WasmEmitError)

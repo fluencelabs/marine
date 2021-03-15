@@ -21,7 +21,7 @@ mod module_manifest;
 mod tests;
 
 pub use errors::ManifestError;
-pub use manifest_extractor::extract_by_path;
-pub use manifest_extractor::extract_by_module;
-pub use manifest_extractor::extract_by_wasmer_module;
+pub use manifest_extractor::extract_from_path;
+pub use manifest_extractor::extract_from_module;
+pub use manifest_extractor::extract_from_wasmer_module;
 pub use module_manifest::ModuleManifest;
