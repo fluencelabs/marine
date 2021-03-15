@@ -118,6 +118,8 @@ impl FCEModule {
         crate::misc::check_sdk_version(&wasmer_module)?;
 
         let wit = extract_wit_from_module(&wasmer_module)?;
+        crate::misc::check_it_version(&wit.version)?;
+
         let fce_wit = FCEWITInterfaces::new(wit);
 
         let mut wit_instance = Arc::new_uninit();

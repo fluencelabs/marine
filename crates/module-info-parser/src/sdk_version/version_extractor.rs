@@ -29,9 +29,7 @@ use std::borrow::Cow;
 use std::str::FromStr;
 use std::path::Path;
 
-pub fn extract_by_path<P>(
-    wasm_module_path: P,
-) -> ModuleInfoResult<Option<semver::Version>>
+pub fn extract_by_path<P>(wasm_module_path: P) -> ModuleInfoResult<Option<semver::Version>>
 where
     P: AsRef<Path>,
 {
@@ -42,9 +40,7 @@ where
     extract_by_module(&module)
 }
 
-pub fn extract_by_module(
-    wasm_module: &Module,
-) -> ModuleInfoResult<Option<semver::Version>> {
+pub fn extract_by_module(wasm_module: &Module) -> ModuleInfoResult<Option<semver::Version>> {
     let sections = extract_custom_sections_by_name(&wasm_module, VERSION_SECTION_NAME)?;
 
     if sections.is_empty() {

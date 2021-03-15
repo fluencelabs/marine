@@ -41,9 +41,11 @@ impl CustomSection for VersionCustomSection {
 /// Embed provided WIT to a Wasm module.
 pub fn embed_by_module(
     mut wasm_module: walrus::Module,
-    version: String,
+    version: semver::Version,
 ) -> walrus::Module {
-    let custom = VersionCustomSection(version.into_bytes());
+    delete_version_sections(&mut wasm_module);
+
+    let custom = VersionCustomSection(version.to_string().into_bytes());
     wasm_module.customs.add(custom);
 
     wasm_module
@@ -52,7 +54,7 @@ pub fn embed_by_module(
 pub fn embed_by_path<I, O>(
     in_wasm_module_path: I,
     out_wasm_module_path: O,
-    version: String,
+    version: semver::Version,
 ) -> ModuleInfoResult<()>
 where
     I: AsRef<Path>,
@@ -66,4 +68,23 @@ where
     wasm_module
         .emit_wasm_file(out_wasm_module_path)
         .map_err(ModuleInfoError::WasmEmitError)
+}
+
+// TODO: deduplicate it with wit_parser::delete_wit_section_from_file
+fn delete_version_sections(wasm_module: &mut walrus::Module) {
+    let version_section_ids = wasm_module
+        .customs
+        .iter()
+        .filter_map(|(id, section)| {
+            if section.name() == VERSION_SECTION_NAME {
+                Some(id)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+
+    for id in version_section_ids {
+        wasm_module.customs.delete(id);
+    }
 }

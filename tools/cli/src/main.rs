@@ -85,6 +85,8 @@ fn embed_wit(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
 }
 
 fn embed_version(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+    use std::str::FromStr;
+
     let in_wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
     let version = args.value_of(args::SDK_VERSION).unwrap();
     let out_wasm_path = match args.value_of(args::OUT_WASM_PATH) {
@@ -92,11 +94,8 @@ fn embed_version(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
         None => in_wasm_path,
     };
 
-    sdk_version::embed_by_path(
-        in_wasm_path,
-        out_wasm_path,
-        version.to_string(),
-    )?;
+    let version = semver::Version::from_str(version)?;
+    sdk_version::embed_by_path(in_wasm_path, out_wasm_path, version)?;
 
     println!("the version was successfully embedded");
 
@@ -120,7 +119,7 @@ fn info(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let module_manifest = manifest::extract_by_module(&wasm_module)?;
     let it_version = fce_wit_parser::extract_version_from_module(&wasm_module)?;
 
-    println!("it version: {}", it_version);
+    println!("it version:  {}", it_version);
     match sdk_version {
         Some(sdk_version) => println!("sdk version: {}", sdk_version),
         None => println!("module doesn't contain sdk version"),

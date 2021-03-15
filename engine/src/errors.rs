@@ -69,8 +69,14 @@ pub enum FCEError {
     /// Provided module doesn't contain a sdk version that is necessary.
     ModuleWithoutVersion,
 
-    /// Module versions are incompatible.
-    IncompatibleVersions {
+    /// Module sdk versions are incompatible.
+    IncompatibleSDKVersions {
+        required: semver::Version,
+        provided: semver::Version,
+    },
+
+    /// Module IT versions are incompatible.
+    IncompatibleITVersions {
         required: semver::Version,
         provided: semver::Version,
     },
@@ -102,7 +108,8 @@ impl std::fmt::Display for FCEError {
             FCEError::IncorrectWIT(err_msg) => write!(f, "{}", err_msg),
             FCEError::ModuleVersionParseError(err) => write!(f, "{}", err),
             FCEError::ModuleWithoutVersion => write!(f, "provided modules doesn't contain a version of sdk, probably it's compiled with an old version of sdk"),
-            FCEError::IncompatibleVersions {required, provided} => write!(f, "module compiled with {} version, but at least {} required", provided, required),
+            FCEError::IncompatibleSDKVersions {required, provided} => write!(f, "module compiled with {} sdk version, but at least {} required", provided, required),
+            FCEError::IncompatibleITVersions {required, provided} => write!(f, "module compiled with {} IT version, but at least {} required", provided, required),
         }
     }
 }

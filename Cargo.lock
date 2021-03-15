@@ -765,6 +765,7 @@ dependencies = [
  "fce-module-info-parser",
  "fce-wit-generator",
  "fce-wit-parser",
+ "semver 0.11.0",
  "serde",
  "serde_json",
  "walrus",
