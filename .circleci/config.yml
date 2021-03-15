@@ -27,6 +27,7 @@ jobs:
           cargo check -v --all-features
 
           (cd ./examples; ./build.sh)
+          (cd ./fluence-faas/tests/wasm_tests; ./build.sh)
 
           cargo test --release -v --all-features
           cargo clippy -v
