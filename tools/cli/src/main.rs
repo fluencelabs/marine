@@ -40,8 +40,7 @@ pub fn main() -> Result<(), anyhow::Error> {
         .author(args::AUTHORS)
         .setting(clap::AppSettings::ArgRequiredElseHelp)
         .subcommand(args::build())
-        .subcommand(args::embed_wit())
-        .subcommand(args::embed_version())
+        .subcommand(args::set())
         .subcommand(args::show_manifest())
         .subcommand(args::show_wit())
         .subcommand(args::repl());
@@ -49,8 +48,7 @@ pub fn main() -> Result<(), anyhow::Error> {
 
     match arg_matches.subcommand() {
         ("build", Some(args)) => build(args),
-        ("embed_it", Some(args)) => embed_wit(args),
-        ("embed_ver", Some(args)) => embed_version(args),
+        ("set", Some(args)) => set(args),
         ("it", Some(args)) => it(args),
         ("info", Some(args)) => info(args),
         ("repl", Some(args)) => repl(args),
@@ -66,7 +64,15 @@ fn build(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-fn embed_wit(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+fn set(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+    match args.subcommand() {
+        ("it", Some(args)) => set_it(args),
+        ("version", Some(args)) => set_version(args),
+        (c, _) => Err(crate::errors::CLIError::NoSuchCommand(c.to_string()).into()),
+    }
+}
+
+fn set_it(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let in_wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
     let it_path = args.value_of(args::WIT_PATH).unwrap();
     let out_wasm_path = match args.value_of(args::OUT_WASM_PATH) {
@@ -84,7 +90,7 @@ fn embed_wit(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-fn embed_version(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+fn set_version(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     use std::str::FromStr;
 
     let in_wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();

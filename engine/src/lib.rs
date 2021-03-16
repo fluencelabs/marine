@@ -73,10 +73,10 @@ thread_local!(static MINIMAL_SUPPORTED_IT_VERSION_CHECK: &'static semver::Versio
 
 /// Return minimal support version of interface types.
 pub fn min_it_version() -> &'static semver::Version {
-    Lazy::force(&MINIMAL_SUPPORTED_SDK_VERSION)
+    Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION)
 }
 
 /// Return minimal support version of SDK.
 pub fn min_sdk_version() -> &'static semver::Version {
-    Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION)
+    Lazy::force(&MINIMAL_SUPPORTED_SDK_VERSION)
 }

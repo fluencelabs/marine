@@ -28,57 +28,64 @@ pub const SDK_VERSION: &str = "sdk-version";
 
 pub fn build<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("build")
-        .about("Build provided Rust project to Wasm")
+        .about("Builds provided Rust project to Wasm")
         .setting(clap::AppSettings::TrailingVarArg)
         .setting(clap::AppSettings::AllowLeadingHyphen)
         .arg(Arg::from_usage("[optional]... 'cargo build arguments'").multiple(true))
 }
 
-pub fn embed_wit<'a, 'b>() -> App<'a, 'b> {
-    SubCommand::with_name("embed_it")
-        .about("Embed IT to the provided Wasm file")
+pub fn set<'a, 'b>() -> App<'a, 'b> {
+    SubCommand::with_name("set")
+        .about("Sets interface types and version to the provided Wasm file")
+        .subcommand(set_it())
+        .subcommand(set_version())
+}
+
+fn set_it<'a, 'b>() -> App<'a, 'b> {
+    SubCommand::with_name("it")
+        .about("Sets given interface types to the provided Wasm file")
         .args(&[
             Arg::with_name(IN_WASM_PATH)
                 .required(true)
                 .takes_value(true)
                 .short("i")
-                .help("path to the wasm file"),
+                .help("a path to a Wasm file"),
             Arg::with_name(WIT_PATH)
                 .required(true)
                 .takes_value(true)
                 .short("w")
-                .help("path to file with WIT"),
+                .help("a path to a file with interface types"),
             Arg::with_name(OUT_WASM_PATH)
                 .takes_value(true)
                 .short("o")
-                .help("path to result file with embedded WIT"),
+                .help("a path to the result Wasm file with set interface types"),
         ])
 }
 
-pub fn embed_version<'a, 'b>() -> App<'a, 'b> {
-    SubCommand::with_name("embed_ver")
-        .about("Embed sdk version to the provided Wasm file")
+fn set_version<'a, 'b>() -> App<'a, 'b> {
+    SubCommand::with_name("version")
+        .about("Sets given sdk version to the provided Wasm file")
         .args(&[
             Arg::with_name(IN_WASM_PATH)
                 .required(true)
                 .takes_value(true)
                 .short("i")
-                .help("path to the wasm file"),
+                .help("a path to a Wasm file"),
             Arg::with_name(SDK_VERSION)
                 .required(true)
                 .takes_value(true)
                 .short("v")
-                .help("version of a used sdk"),
+                .help("a version of the sdk"),
             Arg::with_name(OUT_WASM_PATH)
                 .takes_value(true)
                 .short("o")
-                .help("path to result file with embedded version"),
+                .help("a path to the result file with set version"),
         ])
 }
 
 pub fn show_wit<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("it")
-        .about("Show IT of the provided Wasm file")
+        .about("Shows IT of the provided Wasm file")
         .setting(clap::AppSettings::ArgRequiredElseHelp)
         .args(&[Arg::with_name(IN_WASM_PATH)
             .required(true)
@@ -89,7 +96,7 @@ pub fn show_wit<'a, 'b>() -> App<'a, 'b> {
 
 pub fn show_manifest<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("info")
-        .about("Show manifest and sdk version of the provided Wasm file")
+        .about("Shows manifest and sdk version of the provided Wasm file")
         .setting(clap::AppSettings::ArgRequiredElseHelp)
         .args(&[Arg::with_name(IN_WASM_PATH)
             .required(true)
@@ -100,7 +107,7 @@ pub fn show_manifest<'a, 'b>() -> App<'a, 'b> {
 
 pub fn repl<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("repl")
-        .about("Start Fluence application service REPL")
+        .about("Starts Fluence application service REPL")
         .setting(clap::AppSettings::TrailingVarArg)
         .setting(clap::AppSettings::AllowLeadingHyphen)
         .arg(Arg::from_usage("[optional]... 'fluence repl arguments'").multiple(true))
