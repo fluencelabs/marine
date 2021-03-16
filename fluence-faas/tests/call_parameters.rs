@@ -33,7 +33,7 @@ pub fn call_parameters() {
         Some(String::from("../examples/call_parameters/artifacts"));
 
     let mut faas = FluenceFaaS::with_raw_config(call_parameters_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let init_peer_id = "init_peer_id";
     let service_id = "service_id";

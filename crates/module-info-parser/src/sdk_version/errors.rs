@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-mod prepare;
-mod version_checker;
+use semver::SemVerError;
+use thiserror::Error as ThisError;
+use std::str::Utf8Error;
 
-pub(crate) use prepare::prepare_module;
-pub(crate) use version_checker::check_sdk_version;
-pub(crate) use version_checker::check_it_version;
+#[derive(Debug, ThisError)]
+pub enum SDKVersionError {
+    /// Version can't be parsed to Utf8 string.
+    #[error("embedded to the Wasm file version isn't valid UTF8 string: '{0}'")]
+    VersionNotValidUtf8(Utf8Error),
+
+    /// Version can't be parsed with semver.
+    #[error("embedded to the Wasm file version is corrupted: '{0}'")]
+    VersionCorrupted(#[from] SemVerError),
+}

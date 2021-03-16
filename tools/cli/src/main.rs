@@ -29,6 +29,9 @@ mod args;
 mod build;
 mod errors;
 
+use fce_module_info_parser::manifest;
+use fce_module_info_parser::sdk_version;
+
 pub(crate) type CLIResult<T> = std::result::Result<T, crate::errors::CLIError>;
 
 pub fn main() -> Result<(), anyhow::Error> {
@@ -37,7 +40,7 @@ pub fn main() -> Result<(), anyhow::Error> {
         .author(args::AUTHORS)
         .setting(clap::AppSettings::ArgRequiredElseHelp)
         .subcommand(args::build())
-        .subcommand(args::embed_wit())
+        .subcommand(args::set())
         .subcommand(args::show_manifest())
         .subcommand(args::show_wit())
         .subcommand(args::repl());
@@ -45,7 +48,7 @@ pub fn main() -> Result<(), anyhow::Error> {
 
     match arg_matches.subcommand() {
         ("build", Some(args)) => build(args),
-        ("embed", Some(args)) => embed(args),
+        ("set", Some(args)) => set(args),
         ("it", Some(args)) => it(args),
         ("info", Some(args)) => info(args),
         ("repl", Some(args)) => repl(args),
@@ -61,30 +64,54 @@ fn build(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-fn embed(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+fn set(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+    match args.subcommand() {
+        ("it", Some(args)) => set_it(args),
+        ("version", Some(args)) => set_version(args),
+        (c, _) => Err(crate::errors::CLIError::NoSuchCommand(c.to_string()).into()),
+    }
+}
+
+fn set_it(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let in_wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
-    let wit_path = args.value_of(args::WIT_PATH).unwrap();
+    let it_path = args.value_of(args::WIT_PATH).unwrap();
     let out_wasm_path = match args.value_of(args::OUT_WASM_PATH) {
         Some(path) => path,
         None => in_wasm_path,
     };
 
-    let wit = String::from_utf8(std::fs::read(wit_path)?).unwrap();
+    let it = std::fs::read(it_path)?;
+    let it = String::from_utf8(it)?;
 
-    fce_wit_parser::embed_text_wit(
-        std::path::PathBuf::from(in_wasm_path),
-        std::path::PathBuf::from(out_wasm_path),
-        &wit,
-    )?;
+    fce_wit_parser::embed_text_wit(in_wasm_path, out_wasm_path, &it)?;
+
+    println!("interface types were successfully embedded");
+
+    Ok(())
+}
+
+fn set_version(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+    use std::str::FromStr;
+
+    let in_wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
+    let version = args.value_of(args::SDK_VERSION).unwrap();
+    let out_wasm_path = match args.value_of(args::OUT_WASM_PATH) {
+        Some(path) => path,
+        None => in_wasm_path,
+    };
+
+    let version = semver::Version::from_str(version)?;
+    sdk_version::embed_from_path(in_wasm_path, out_wasm_path, version)?;
+
+    println!("the version was successfully embedded");
 
     Ok(())
 }
 
 fn it(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
-    let wasm_path = std::path::Path::new(wasm_path);
 
-    let it = fce_wit_parser::extract_text_wit(&wasm_path)?;
+    let it = fce_wit_parser::extract_text_wit(wasm_path)?;
     println!("{}", it);
 
     Ok(())
@@ -92,11 +119,13 @@ fn it(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
 
 fn info(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
-    let wasm_path = std::path::Path::new(wasm_path);
 
-    let sdk_version = fce_module_manifest_parser::extract_sdk_version_by_path(&wasm_path)?;
-    let module_manifest = fce_module_manifest_parser::extract_manifest_by_path(&wasm_path)?;
+    let wasm_module = walrus::ModuleConfig::new().parse_file(wasm_path)?;
+    let sdk_version = sdk_version::extract_from_module(&wasm_module)?;
+    let module_manifest = manifest::extract_from_module(&wasm_module)?;
+    let it_version = fce_wit_parser::extract_version_from_module(&wasm_module)?;
 
+    println!("it version:  {}", it_version);
     match sdk_version {
         Some(sdk_version) => println!("sdk version: {}", sdk_version),
         None => println!("module doesn't contain sdk version"),

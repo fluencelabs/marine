@@ -38,10 +38,10 @@ pub(super) fn extract_custom_sections_by_name<'w>(
     Ok(sections)
 }
 
-pub(super) fn try_as_one_section<'s>(
-    mut sections: Vec<Cow<'s, [u8]>>,
+pub(super) fn try_as_one_section<'s, T: Sized>(
+    sections: &'s [T],
     section_name: &'static str,
-) -> ModuleInfoResult<Cow<'s, [u8]>> {
+) -> ModuleInfoResult<&'s T> {
     let sections_count = sections.len();
 
     if sections_count > 1 {
@@ -55,5 +55,5 @@ pub(super) fn try_as_one_section<'s>(
         return Err(ModuleInfoError::NoCustomSection(section_name));
     }
 
-    Ok(sections.remove(0))
+    Ok(&sections[0])
 }

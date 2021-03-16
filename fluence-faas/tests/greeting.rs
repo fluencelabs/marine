@@ -34,7 +34,7 @@ pub fn greeting() {
     greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
 
     let mut faas = FluenceFaaS::with_raw_config(greeting_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas
         .call_with_ivalues(
@@ -70,7 +70,7 @@ pub fn get_interfaces() {
     greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
 
     let faas = FluenceFaaS::with_raw_config(greeting_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let interface = faas.get_interface();
 

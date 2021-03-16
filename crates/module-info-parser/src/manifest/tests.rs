@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use crate::ManifestError;
-use crate::ModuleManifest;
+use super::ManifestError;
+use super::ModuleManifest;
 
 use std::convert::TryInto;
 use std::str::FromStr;

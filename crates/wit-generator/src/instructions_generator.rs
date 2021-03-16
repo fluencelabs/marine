@@ -31,7 +31,7 @@ use std::rc::Rc;
 pub(crate) struct WITResolver<'a> {
     types: std::collections::HashMap<String, usize>,
     pub(crate) interfaces: Interfaces<'a>,
-    not_resolved_types_count: usize,
+    unresolved_types_count: usize,
 }
 
 impl<'a> WITResolver<'a> {
@@ -58,7 +58,7 @@ impl<'a> WITResolver<'a> {
                     .types
                     .push(Type::Record(Rc::new(IRecordType::default())));
 
-                self.not_resolved_types_count += 1;
+                self.unresolved_types_count += 1;
                 new_type_id
             }
         }
@@ -86,7 +86,7 @@ impl<'a> WITResolver<'a> {
         match self.types.get(&record.name) {
             Some(pos) => {
                 self.interfaces.types[*pos] = Type::Record(Rc::new(record));
-                self.not_resolved_types_count -= 1;
+                self.unresolved_types_count -= 1;
             }
             None => {
                 self.types
@@ -98,7 +98,7 @@ impl<'a> WITResolver<'a> {
     }
 
     pub(crate) fn unresolved_types_count(&self) -> usize {
-        self.not_resolved_types_count
+        self.unresolved_types_count
     }
 }
 

@@ -24,24 +24,12 @@
     unreachable_patterns
 )]
 
+pub mod manifest;
+pub mod sdk_version;
 mod custom_section_extractor;
 mod errors;
-mod manifest;
-mod manifest_extractor;
-mod version_extractor;
-#[cfg(test)]
-mod tests;
 
 pub use errors::ModuleInfoError;
-pub use errors::ManifestError;
-pub use errors::SDKVersionError;
-
-pub use version_extractor::extract_sdk_version_by_path;
-pub use version_extractor::extract_sdk_version_by_module;
-
-pub use manifest::ModuleManifest;
-pub use manifest_extractor::extract_manifest_by_path;
-pub use manifest_extractor::extract_version_by_module;
 
 pub(crate) use custom_section_extractor::extract_custom_sections_by_name;
 pub(crate) use custom_section_extractor::try_as_one_section;

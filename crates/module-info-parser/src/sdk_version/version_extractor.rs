@@ -16,10 +16,11 @@
 
 use crate::ModuleInfoResult;
 use crate::ModuleInfoError;
-use crate::SDKVersionError;
+use super::SDKVersionError;
 use crate::extract_custom_sections_by_name;
 use crate::try_as_one_section;
 
+use wasmer_core::Module as WasmerModule;
 use fluence_sdk_main::VERSION_SECTION_NAME;
 use walrus::ModuleConfig;
 use walrus::Module;
@@ -28,25 +29,24 @@ use std::borrow::Cow;
 use std::str::FromStr;
 use std::path::Path;
 
-pub fn extract_sdk_version_by_path(
-    wasm_module_path: &Path,
-) -> ModuleInfoResult<Option<semver::Version>> {
+pub fn extract_from_path<P>(wasm_module_path: P) -> ModuleInfoResult<Option<semver::Version>>
+where
+    P: AsRef<Path>,
+{
     let module = ModuleConfig::new()
         .parse_file(wasm_module_path)
         .map_err(ModuleInfoError::CorruptedWasmFile)?;
 
-    extract_sdk_version_by_module(&module)
+    extract_from_module(&module)
 }
 
-pub fn extract_sdk_version_by_module(
-    wasm_module: &Module,
-) -> ModuleInfoResult<Option<semver::Version>> {
+pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<semver::Version>> {
     let sections = extract_custom_sections_by_name(&wasm_module, VERSION_SECTION_NAME)?;
 
     if sections.is_empty() {
         return Ok(None);
     }
-    let section = try_as_one_section(sections, VERSION_SECTION_NAME)?;
+    let section = try_as_one_section(&sections, VERSION_SECTION_NAME)?;
 
     let version = match section {
         Cow::Borrowed(bytes) => as_semver(bytes),
@@ -56,7 +56,23 @@ pub fn extract_sdk_version_by_module(
     Ok(Some(version))
 }
 
-fn as_semver(version_as_bytes: &[u8]) -> Result<semver::Version, crate::SDKVersionError> {
+pub fn extract_from_wasmer_module(
+    wasmer_module: &WasmerModule,
+) -> ModuleInfoResult<Option<semver::Version>> {
+    let sections = wasmer_module.custom_sections(VERSION_SECTION_NAME);
+
+    let sections = match sections {
+        Some(sections) => sections,
+        None => return Ok(None),
+    };
+
+    let section = try_as_one_section(sections, VERSION_SECTION_NAME)?;
+    let version = as_semver(section)?;
+
+    Ok(Some(version))
+}
+
+fn as_semver(version_as_bytes: &[u8]) -> Result<semver::Version, super::SDKVersionError> {
     match std::str::from_utf8(version_as_bytes) {
         Ok(str) => Ok(semver::Version::from_str(str)?),
         Err(e) => Err(SDKVersionError::VersionNotValidUtf8(e)),
