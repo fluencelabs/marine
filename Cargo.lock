@@ -676,7 +676,6 @@ dependencies = [
  "fce-wit-interfaces",
  "fce-wit-parser",
  "log",
- "multi-map",
  "multimap",
  "once_cell",
  "parity-wasm",
@@ -1584,12 +1583,6 @@ dependencies = [
  "winapi 0.2.8",
  "ws2_32-sys",
 ]
-
-[[package]]
-name = "multi-map"
-version = "1.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bba551d6d795f74a01767577ea8339560bf0a65354e0417b7e915ed608443d46"
 
 [[package]]
 name = "multimap"

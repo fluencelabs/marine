@@ -16,8 +16,6 @@
 
 use crate::FCEResult;
 use crate::FCEError;
-use crate::MINIMAL_SUPPORTED_SDK_VERSION;
-use crate::MINIMAL_SUPPORTED_IT_VERSION;
 
 use fce_module_info_parser::sdk_version;
 
@@ -30,27 +28,25 @@ pub(crate) fn check_sdk_version(wasmer_module: &Module) -> FCEResult<()> {
         None => return Err(FCEError::ModuleWithoutVersion),
     };
 
-    MINIMAL_SUPPORTED_SDK_VERSION.with(|required_version| {
-        if module_version < *required_version {
-            return Err(FCEError::IncompatibleSDKVersions {
-                required: required_version.clone(),
-                provided: module_version,
-            });
-        }
+    let required_version = crate::min_sdk_version();
+    if module_version < *required_version {
+        return Err(FCEError::IncompatibleSDKVersions {
+            required: required_version.clone(),
+            provided: module_version,
+        });
+    }
 
-        Ok(())
-    })
+    Ok(())
 }
 
 pub(crate) fn check_it_version(it_version: &semver::Version) -> FCEResult<()> {
-    MINIMAL_SUPPORTED_IT_VERSION.with(|required_version| {
-        if it_version < required_version {
-            return Err(FCEError::IncompatibleITVersions {
-                required: required_version.clone(),
-                provided: it_version.clone(),
-            });
-        }
+    let required_version = crate::min_it_version();
+    if it_version < required_version {
+        return Err(FCEError::IncompatibleITVersions {
+            required: required_version.clone(),
+            provided: it_version.clone(),
+        });
+    }
 
-        Ok(())
-    })
+    Ok(())
 }
