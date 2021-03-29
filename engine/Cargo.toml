@@ -12,8 +12,8 @@ path = "src/lib.rs"
 
 [dependencies]
 fce-module-info-parser = { path = "../crates/module-info-parser", version = "0.1.0" }
-fce-wit-interfaces = { path = "../crates/wit-interfaces", version = "0.1.29" }
-fce-wit-parser = { path = "../crates/wit-parser", version = "0.2.0" }
+fce-wit-interfaces = { path = "../crates/wit-interfaces", version = "0.2.0" }
+fce-wit-parser = { path = "../crates/wit-parser", version = "0.4.0" }
 fce-wit-generator = { path = "../crates/wit-generator", version = "0.2.0" }
 fce-utils = { path = "../crates/utils", version = "0.1.29" }
 

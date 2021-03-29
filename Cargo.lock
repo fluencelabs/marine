@@ -734,7 +734,7 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-interfaces"
-version = "0.1.29"
+version = "0.2.0"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -742,7 +742,7 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-parser"
-version = "0.2.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
