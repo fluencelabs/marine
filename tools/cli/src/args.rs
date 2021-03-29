@@ -28,7 +28,7 @@ pub const SDK_VERSION: &str = "sdk-version";
 
 pub fn build<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("build")
-        .about("Builds provided Rust project to Wasm")
+        .about("Builds provided Rust project to Wasm (similar to cargo build)")
         .setting(clap::AppSettings::TrailingVarArg)
         .setting(clap::AppSettings::AllowLeadingHyphen)
         .arg(Arg::from_usage("[optional]... 'cargo build arguments'").multiple(true))
@@ -111,4 +111,12 @@ pub fn repl<'a, 'b>() -> App<'a, 'b> {
         .setting(clap::AppSettings::TrailingVarArg)
         .setting(clap::AppSettings::AllowLeadingHyphen)
         .arg(Arg::from_usage("[optional]... 'fluence repl arguments'").multiple(true))
+}
+
+pub fn test<'a, 'b>() -> App<'a, 'b> {
+    SubCommand::with_name("test")
+        .about("Runs tests inside provided project (similar to cargo test)")
+        .setting(clap::AppSettings::TrailingVarArg)
+        .setting(clap::AppSettings::AllowLeadingHyphen)
+        .arg(Arg::from_usage("[optional]... 'cargo test arguments'").multiple(true))
 }

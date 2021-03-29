@@ -43,11 +43,13 @@ pub fn main() -> Result<(), anyhow::Error> {
         .subcommand(args::set())
         .subcommand(args::show_manifest())
         .subcommand(args::show_wit())
-        .subcommand(args::repl());
+        .subcommand(args::repl())
+        .subcommand(args::test());
     let arg_matches = app.get_matches();
 
     match arg_matches.subcommand() {
         ("build", Some(args)) => build(args),
+        ("test", Some(args)) => test(args),
         ("set", Some(args)) => set(args),
         ("it", Some(args)) => it(args),
         ("info", Some(args)) => info(args),
@@ -155,6 +157,22 @@ fn repl(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
         // this branch should be executed if exec was successful, so just else if fine here
         println!("error occurred: {:?}", error);
     }
+
+    Ok(())
+}
+
+fn test(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+    use std::process::Command;
+    // use UNIX-specific API for replacing process image
+    use std::os::unix::process::CommandExt;
+
+    let trailing_args: Vec<&str> = args.values_of("optional").unwrap_or_default().collect();
+
+    let mut cargo_test = Command::new("cargo");
+
+    cargo_test.arg("test").args(trailing_args);
+    let error = cargo_test.exec();
+    println!("error occurred: {:?}", error);
 
     Ok(())
 }
