@@ -145,7 +145,7 @@ impl REPL {
 
         let start = Instant::now();
         // TODO: add support of call parameters
-        let result = match self.app_service.call_with_module_name(
+        let result = match self.app_service.call_module(
             module_name,
             func_name,
             module_arg,
