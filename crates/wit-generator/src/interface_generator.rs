@@ -44,7 +44,7 @@ pub fn embed_wit(path: std::path::PathBuf) -> Result<()> {
 
 pub(crate) struct ModuleAST {
     pub(crate) records: Vec<fluence_sdk_wit::AstRecordItem>,
-    pub(crate) functions: Vec<fluence_sdk_wit::AstFunctionItem>,
+    pub(crate) functions: Vec<fluence_sdk_wit::AstFnItem>,
     pub(crate) extern_mods: Vec<fluence_sdk_wit::AstExternModItem>,
 }
 
@@ -53,7 +53,7 @@ fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<ModuleAST> {
     use fluence_sdk_wit::*;
 
     let mut records: Vec<AstRecordItem> = Vec::new();
-    let mut functions: Vec<AstFunctionItem> = Vec::new();
+    let mut functions: Vec<AstFnItem> = Vec::new();
     let mut extern_mods: Vec<AstExternModItem> = Vec::new();
 
     // consider only sections name of that starts with GENERATED_SECTION_PREFIX
@@ -101,7 +101,7 @@ fn generate_interfaces(module_ast: &ModuleAST) -> Result<Interfaces<'_>> {
 fn generate_default_export_api(interfaces: &mut Interfaces<'_>) {
     // TODO: the order is matter
     ALLOCATE_FUNC.update_interfaces(interfaces);
-    DEALLOCATE_FUNC.update_interfaces(interfaces);
+    RELEASE_OBJECTS.update_interfaces(interfaces);
     GET_RESULT_SIZE_FUNC.update_interfaces(interfaces);
     GET_RESULT_PTR_FUNC.update_interfaces(interfaces);
     SET_RESULT_SIZE_FUNC.update_interfaces(interfaces);

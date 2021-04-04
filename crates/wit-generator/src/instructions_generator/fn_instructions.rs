@@ -20,14 +20,14 @@ use super::utils::ptype_to_itype_checked;
 use crate::default_export_api_config::*;
 use crate::Result;
 
-use fluence_sdk_wit::AstFunctionItem;
+use fluence_sdk_wit::AstFnItem;
 use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
 
 use std::rc::Rc;
 
-impl WITGenerator for AstFunctionItem {
+impl WITGenerator for AstFnItem {
     fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
         use wasmer_wit::ast::Type;
         use wasmer_wit::ast::Adapter;
@@ -36,10 +36,10 @@ impl WITGenerator for AstFunctionItem {
             .signature
             .arguments
             .iter()
-            .map(|(arg_name, arg_type)| -> Result<IFunctionArg> {
+            .map(|arg| -> Result<IFunctionArg> {
                 Ok(IFunctionArg {
-                    name: arg_name.clone(),
-                    ty: ptype_to_itype_checked(arg_type, wit_resolver)?,
+                    name: arg.name.clone(),
+                    ty: ptype_to_itype_checked(&arg.ty, wit_resolver)?,
                 })
             })
             .collect::<Result<Vec<_>>>()?;
@@ -77,16 +77,14 @@ impl WITGenerator for AstFunctionItem {
             .arguments
             .iter()
             .enumerate()
-            .try_fold::<_, _, Result<_>>(
-                Vec::new(),
-                |mut instructions, (arg_id, (_, input_type))| {
-                    let mut new_instructions = input_type
-                        .generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
+            .try_fold::<_, _, Result<_>>(Vec::new(), |mut instructions, (arg_id, arg)| {
+                let mut new_instructions = arg
+                    .ty
+                    .generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
 
-                    instructions.append(&mut new_instructions);
-                    Ok(instructions)
-                },
-            )?;
+                instructions.append(&mut new_instructions);
+                Ok(instructions)
+            })?;
 
         let export_function_index = (wit_resolver.interfaces.exports.len() - 1) as u32;
         instructions.push(Instruction::CallCore {
@@ -191,9 +189,7 @@ impl FnInstructionGenerator for ParsedType {
                 Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
                 Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
                 Instruction::StringLiftMemory,
-                Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
-                Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
-                Instruction::CallCore { function_index: DEALLOCATE_FUNC.id },
+                Instruction::CallCore { function_index: RELEASE_OBJECTS.id },
             ],
             ParsedType::Vector(value_type, _) => {
                 let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
@@ -202,6 +198,7 @@ impl FnInstructionGenerator for ParsedType {
                     Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
                     Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
                     Instruction::ArrayLiftMemory { value_type },
+                    Instruction::CallCore { function_index: RELEASE_OBJECTS.id },
                 ]
             },
             ParsedType::Record(record_name, _) => {
@@ -210,6 +207,7 @@ impl FnInstructionGenerator for ParsedType {
                 vec! [
                     Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
                     Instruction::RecordLiftMemory { record_type_id },
+                    Instruction::CallCore { function_index: RELEASE_OBJECTS.id },
                 ]
             },
         };

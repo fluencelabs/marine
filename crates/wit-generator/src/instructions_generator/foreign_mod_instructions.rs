@@ -23,6 +23,7 @@ use crate::Result;
 use fluence_sdk_wit::AstExternModItem;
 use fluence_sdk_wit::AstExternFnItem;
 use fluence_sdk_wit::ParsedType;
+use fluence_sdk_wit::AstFnArgument;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
 use wasmer_wit::interpreter::Instruction;
 use crate::instructions_generator::utils::wtype_to_itype;
@@ -58,10 +59,10 @@ fn generate_wit_for_import<'a>(
         .signature
         .arguments
         .iter()
-        .map(|(arg_name, arg_type)| -> Result<IFunctionArg> {
+        .map(|arg| -> Result<IFunctionArg> {
             Ok(IFunctionArg {
-                name: arg_name.clone(),
-                ty: ptype_to_itype_checked(arg_type, wit_resolver)?,
+                name: arg.name.clone(),
+                ty: ptype_to_itype_checked(&arg.ty, wit_resolver)?,
             })
         })
         .collect::<Result<Vec<_>>>()?;
@@ -132,16 +133,14 @@ fn generate_wit_for_import<'a>(
         .signature
         .arguments
         .iter()
-        .try_fold::<_, _, Result<_>>(
-            (0, Vec::new()),
-            |(arg_id, mut instructions), (_, input_type)| {
-                let (mut new_instructions, shift) =
-                    input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
+        .try_fold::<_, _, Result<_>>((0, Vec::new()), |(arg_id, mut instructions), arg| {
+            let (mut new_instructions, shift) = arg
+                .ty
+                .generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
 
-                instructions.append(&mut new_instructions);
-                Ok((arg_id + shift, instructions))
-            },
-        )?
+            instructions.append(&mut new_instructions);
+            Ok((arg_id + shift, instructions))
+        })?
         .1;
 
     // TODO: refactor
@@ -281,8 +280,8 @@ impl ForeignModInstructionGenerator for ParsedType {
 use fluence_sdk_wit::RustType;
 use wasmer_wit::IType;
 
-pub fn to_raw_input_types(arg: &(String, ParsedType)) -> Vec<IFunctionArg> {
-    match arg.1 {
+pub fn to_raw_input_types(arg: &AstFnArgument) -> Vec<IFunctionArg> {
+    match arg.ty {
         ParsedType::Boolean(_)
         | ParsedType::I8(_)
         | ParsedType::I16(_)
@@ -291,28 +290,28 @@ pub fn to_raw_input_types(arg: &(String, ParsedType)) -> Vec<IFunctionArg> {
         | ParsedType::U16(_)
         | ParsedType::U32(_)
         | ParsedType::Record(..) => vec![IFunctionArg {
-            name: arg.0.clone(),
+            name: arg.name.clone(),
             ty: IType::I32,
         }],
         ParsedType::I64(_) | ParsedType::U64(_) => vec![IFunctionArg {
-            name: arg.0.clone(),
+            name: arg.name.clone(),
             ty: IType::I64,
         }],
         ParsedType::F32(_) => vec![IFunctionArg {
-            name: arg.0.clone(),
+            name: arg.name.clone(),
             ty: IType::F32,
         }],
         ParsedType::F64(_) => vec![IFunctionArg {
-            name: arg.0.clone(),
+            name: arg.name.clone(),
             ty: IType::F64,
         }],
         ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) | ParsedType::Vector(..) => vec![
             IFunctionArg {
-                name: format!("{}_ptr", arg.0),
+                name: format!("{}_ptr", arg.name),
                 ty: IType::I32,
             },
             IFunctionArg {
-                name: format!("{}_ptr", arg.0),
+                name: format!("{}_ptr", arg.name),
                 ty: IType::I32,
             },
         ],
