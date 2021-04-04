@@ -15,77 +15,57 @@
  */
 
 use wasmer_wit::decoders::wat::Error as WATError;
-use std::io::Error as StdIOError;
-use std::error::Error;
+use thiserror::Error as ThisError;
 
-#[derive(Debug)]
+use std::io::Error as IOError;
+
+#[derive(Debug, ThisError)]
 pub enum WITParserError {
     /// WIT section is absent.
-    NoWITSection,
+    #[error("the module doesn't contain IT section")]
+    NoITSection,
 
     /// Multiple WIT sections.
-    MultipleWITSections,
+    #[error("the module contains multiple IT sections that is unsupported")]
+    MultipleITSections,
 
     /// WIT section remainder isn't empty.
-    WITRemainderNotEmpty,
+    #[error("IT section is corrupted: IT section remainder isn't empty")]
+    ITRemainderNotEmpty,
 
     /// An error occurred while parsing WIT section.
-    CorruptedWITSection,
+    #[error("IT section is corrupted")]
+    CorruptedITSection,
 
-    // An error related to incorrect wit section.
-    IncorrectWIT(String),
+    /// An error related to incorrect data of wit section.
+    #[error("{0}")]
+    IncorrectITFormat(String),
 
     /// An error occurred while parsing file in Wat format.
-    CorruptedWATFile(WATError),
+    #[error("provided file with IT definitions is corrupted: {0}")]
+    CorruptedITFile(WATError),
 
-    /// An error occurred while parsing Wasm file
+    /// An error occurred while parsing Wasm file.
+    #[error("provided Wasm file is corrupted: {0}")]
     CorruptedWasmFile(anyhow::Error),
 
     /// An error occurred while manipulating with converting ast to bytes.
-    AstToBytesError(StdIOError),
+    #[error("Convertation Wast to AST failed with: {0}")]
+    AstToBytesError(IOError),
 
-    // Wasm emittig file error.
+    /// Wasm emitting file error.
+    #[error("Emitting resulted Wasm file failed with: {0}")]
     WasmEmitError(anyhow::Error),
-}
-
-impl Error for WITParserError {}
-
-impl std::fmt::Display for WITParserError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        match self {
-            WITParserError::NoWITSection => write!(f, "Loaded module doesn't contain WIT section"),
-            WITParserError::MultipleWITSections => write!(
-                f,
-                "Loaded module contains multiple WIT sections that is unsupported now"
-            ),
-            WITParserError::WITRemainderNotEmpty => write!(
-                f,
-                "WIT section remainder isn't empty - WIT section possibly corrupted"
-            ),
-            WITParserError::IncorrectWIT(err_msg) => write!(f, "{}", err_msg),
-            WITParserError::CorruptedWITSection => write!(f, "WIT section is corrupted"),
-            WITParserError::CorruptedWATFile(err) => {
-                write!(f, "an error occurred while parsing wat file: {}", err)
-            }
-            WITParserError::CorruptedWasmFile(err) => {
-                write!(f, "Failed to parse the Wasm module: {}", err)
-            }
-            WITParserError::AstToBytesError(err) => {
-                write!(f, "Wasm AST converting to bytes failed with: {}", err)
-            }
-            WITParserError::WasmEmitError(err) => write!(f, "Failed to emit Wasm file: {}", err),
-        }
-    }
 }
 
 impl From<WATError> for WITParserError {
     fn from(err: WATError) -> Self {
-        WITParserError::CorruptedWATFile(err)
+        WITParserError::CorruptedITFile(err)
     }
 }
 
-impl From<StdIOError> for WITParserError {
-    fn from(err: StdIOError) -> Self {
+impl From<IOError> for WITParserError {
+    fn from(err: IOError) -> Self {
         WITParserError::AstToBytesError(err)
     }
 }

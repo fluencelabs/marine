@@ -34,10 +34,30 @@ pub use errors::WITParserError;
 
 pub use deleter::delete_wit_section;
 pub use deleter::delete_wit_section_from_file;
+
 pub use embedder::embed_wit;
 pub use embedder::embed_text_wit;
-pub use extractor::extract_wit;
+
+pub use extractor::extract_wit_from_module;
+pub use extractor::extract_version_from_module;
 pub use extractor::extract_text_wit;
 pub use extractor::module_interface;
+pub use extractor::module_raw_interface;
+
+pub mod interface {
+    pub use crate::extractor::ServiceInterface;
+    pub use crate::extractor::RecordType;
+    pub use crate::extractor::FunctionSignature;
+
+    pub use crate::extractor::FCEModuleInterface;
+    pub use crate::extractor::FCERecordTypes;
+    pub use crate::extractor::FCEFunctionSignature;
+    pub mod it {
+        pub use wasmer_wit::IType;
+        pub use wasmer_wit::ast::FunctionArg as IFunctionArg;
+        pub use wasmer_wit::IRecordType;
+        pub use wasmer_wit::IRecordFieldType;
+    }
+}
 
 pub(crate) type Result<T> = std::result::Result<T, WITParserError>;

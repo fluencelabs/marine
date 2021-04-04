@@ -19,7 +19,7 @@ use crate::Result;
 use serde_derive::Serialize;
 use serde_derive::Deserialize;
 
-use std::path::PathBuf;
+use std::path::Path;
 
 /*
 An example of the config:
@@ -64,9 +64,8 @@ pub struct TomlFaaSConfig {
 
 impl TomlFaaSConfig {
     /// Load config from filesystem.
-    pub fn load<P: Into<PathBuf>>(path: P) -> Result<Self> {
-        let path = path.into();
-        let file_content = std::fs::read(&path)?;
+    pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let file_content = std::fs::read(path)?;
         Ok(toml::from_slice(&file_content)?)
     }
 }

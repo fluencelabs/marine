@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::Result;
+use crate::CLIResult;
 use crate::errors::CLIError;
 
 use std::process::Command;
@@ -28,7 +28,7 @@ enum DiagnosticMessage {
     RunWithArgs,
 }
 
-pub(crate) fn build(trailing_args: Vec<&str>) -> Result<()> {
+pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
     use std::io::Read;
 
     let mut cargo = Command::new("cargo");

@@ -2,6 +2,8 @@
 name = "wasm-greeting"
 version = "0.1.0"
 authors = ["Fluence Labs"]
+description = "The greeting module for the Fluence network"
+repository = "https://github.com/fluencelabs/fce/tree/master/examples/greeting"
 edition = "2018"
 publish = false
 
@@ -10,5 +12,4 @@ name = "greeting"
 path = "src/main.rs"
 
 [dependencies]
-#fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "support_references" }
-fluence = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk/fluence" }
+fluence = "0.5.0"

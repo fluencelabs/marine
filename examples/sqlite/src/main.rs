@@ -15,8 +15,12 @@
  */
 
 use fluence::fce;
+use fluence::module_manifest;
+
 use fce_sqlite_connector;
 use fce_sqlite_connector::State;
+
+module_manifest!();
 
 pub fn main() {}
 
@@ -83,20 +87,21 @@ pub fn test2(age: i64) {
 
 #[fce]
 pub fn test3() {
-    let db_path = "/var/users.sqlite";
-    let connection = fce_sqlite_connector::open(db_path).expect("error on connection establishing");
+    let db_path = "/tmp/users.sqlite";
+    let connection = fce_sqlite_connector::open(db_path).expect("db should be opened");
 
-    let execute_result = connection.execute(
-        "
-            CREATE TABLE users (name TEXT, age INTEGER);
+    connection
+        .execute(
+            "
+            CREATE TABLE IF NOT EXISTS users (name TEXT, age INTEGER);
             INSERT INTO users VALUES ('Alice', 42);
             INSERT INTO users VALUES ('Bob', 69);
         ",
-    );
+        )
+        .expect("table should be created successfully");
 
-    println!("execute result: {:?}", execute_result);
+    let connection = fce_sqlite_connector::open(db_path).expect("db should be opened");
+    let cursor = connection.prepare("SELECT * FROM users").unwrap().cursor();
 
-    //TODO fix it
-    // let file_size = std::fs::metadata(db_path).expect("error on file_size check").len();
-    // println!("{} file size is {}", db_path, file_size);
+    println!("table size is: {:?}", cursor.count());
 }

@@ -69,7 +69,7 @@ dependencies = [
 name = "arguments-passing-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.5.0",
  "safe-transmute",
 ]
 
@@ -83,7 +83,7 @@ checksum = "a4c527152e37cf757a3f78aae5a06fbeefdb07ccc535c980a3208ee3060dd544"
 name = "arrays-passing-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.5.0",
  "safe-transmute",
 ]
 
@@ -206,7 +206,18 @@ checksum = "b700ce4376041dcd0a327fd0097c41095743c4c8af8887265942faf1100bd040"
 name = "call_parameters"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.5.0",
+]
+
+[[package]]
+name = "cargo_toml"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "513d17226888c7b8283ac02a1c1b0d8a9d4cbf6db65dfadb79f598f5d7966fe9"
+dependencies = [
+ "serde",
+ "serde_derive",
+ "toml",
 ]
 
 [[package]]
@@ -421,7 +432,7 @@ dependencies = [
 name = "curl_adapter"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.5.0",
  "log",
 ]
 
@@ -626,7 +637,7 @@ name = "facade"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "fluence 0.4.2",
+ "fluence 0.5.0",
  "log",
 ]
 
@@ -659,18 +670,19 @@ dependencies = [
  "anyhow",
  "boolinator",
  "bytes 0.5.6",
+ "fce-module-info-parser",
  "fce-utils",
  "fce-wit-generator",
  "fce-wit-interfaces",
  "fce-wit-parser",
  "log",
- "multi-map",
  "multimap",
  "once_cell",
  "parity-wasm",
  "pwasm-utils",
  "reqwest",
  "safe-transmute",
+ "semver 0.11.0",
  "serde",
  "thiserror",
  "tokio",
@@ -681,12 +693,25 @@ dependencies = [
 ]
 
 [[package]]
-name = "fce-sqlite-connector"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8165090ee52453a5c14bd42212bfc6516860c4aaa2315fd568c0198b46b52901"
+name = "fce-module-info-parser"
+version = "0.1.0"
 dependencies = [
- "fluence 0.2.18",
+ "anyhow",
+ "fluence-sdk-main 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "semver 0.11.0",
+ "serde",
+ "thiserror",
+ "walrus",
+ "wasmer-runtime-core-fl",
+]
+
+[[package]]
+name = "fce-sqlite-connector"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c02ba19dff7f195418416b249423384761a964447dc40e7427f448687ac60b56"
+dependencies = [
+ "fluence 0.4.2",
 ]
 
 [[package]]
@@ -697,6 +722,7 @@ version = "0.1.29"
 name = "fce-wit-generator"
 version = "0.3.0"
 dependencies = [
+ "cargo_toml",
  "fce-wit-parser",
  "fluence-sdk-wit 0.5.0 (git+https://github.com/fluencelabs/rust-sdk?branch=support_references)",
  "once_cell",
@@ -708,7 +734,7 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-interfaces"
-version = "0.1.29"
+version = "0.2.0"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -716,11 +742,13 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-parser"
-version = "0.2.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
+ "semver 0.11.0",
  "serde",
+ "thiserror",
  "walrus",
  "wasmer-interface-types-fl",
  "wasmer-runtime-core-fl",
@@ -733,10 +761,13 @@ dependencies = [
  "anyhow",
  "clap",
  "exitfailure",
+ "fce-module-info-parser",
  "fce-wit-generator",
  "fce-wit-parser",
+ "semver 0.11.0",
  "serde",
  "serde_json",
+ "walrus",
 ]
 
 [[package]]
@@ -762,10 +793,11 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "342831732a977f13220ecd6f25c7e6b6127af8d3794d42e3c880b05e457a0484"
 dependencies = [
- "fluence-sdk-macro 0.5.0",
- "fluence-sdk-main 0.5.0",
- "serde",
+ "fluence-sdk-macro 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-sdk-main 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -848,8 +880,10 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "00c840552e5e58b62d4a272e3e4aabd548e1a4519df629a51d42157c7ecbe653"
 dependencies = [
- "fluence-sdk-wit 0.5.0",
+ "fluence-sdk-wit 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -887,8 +921,10 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f1d126f05a798c8f812fbe47a42145478ce8029e00411b04d1c5194ab368313"
 dependencies = [
- "fluence-sdk-macro 0.5.0",
+ "fluence-sdk-macro 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log",
  "serde",
 ]
@@ -937,6 +973,8 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ac71e8d48a8e2bdaccf59572dc7a8e8a1ad0de512fc452107756e37ac0bf752"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1311,7 +1349,7 @@ dependencies = [
 name = "inner-records-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.5.0",
  "safe-transmute",
 ]
 
@@ -1359,7 +1397,7 @@ dependencies = [
 name = "ipfs-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.5.0",
  "log",
 ]
 
@@ -1367,7 +1405,7 @@ dependencies = [
 name = "ipfs-pure"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.5.0",
  "log",
 ]
 
@@ -1452,7 +1490,7 @@ checksum = "56d855069fafbb9b344c0f962150cd2c1187975cb1c22c1522c240d8c4986714"
 name = "local_storage"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.5.0",
  "log",
 ]
 
@@ -1576,12 +1614,6 @@ dependencies = [
  "winapi 0.2.8",
  "ws2_32-sys",
 ]
-
-[[package]]
-name = "multi-map"
-version = "1.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bba551d6d795f74a01767577ea8339560bf0a65354e0417b7e915ed608443d46"
 
 [[package]]
 name = "multimap"
@@ -1825,6 +1857,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
+name = "pest"
+version = "2.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10f4872ae94d7b90ae48754df22fd42ad52ce740b8f370b03da4835417403e53"
+dependencies = [
+ "ucd-trie",
+]
+
+[[package]]
 name = "pin-project"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2001,7 +2042,7 @@ dependencies = [
 name = "record-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.5.0",
  "test-record",
 ]
 
@@ -2009,7 +2050,7 @@ dependencies = [
 name = "record-pure"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.5.0",
  "test-record",
 ]
 
@@ -2134,7 +2175,7 @@ version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "138e3e0acb6c9fb258b19b67cb8abd63c00679d2851805ea151465464fe9030a"
 dependencies = [
- "semver",
+ "semver 0.9.0",
 ]
 
 [[package]]
@@ -2230,7 +2271,16 @@ version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d7eb9ef2c18661902cc47e535f9bc51b78acd254da71d375c2f6720d9a40403"
 dependencies = [
- "semver-parser",
+ "semver-parser 0.7.0",
+]
+
+[[package]]
+name = "semver"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f301af10236f6df4160f7c3f04eec6dbc70ace82d23326abad5edee88801c6b6"
+dependencies = [
+ "semver-parser 0.10.2",
 ]
 
 [[package]]
@@ -2238,6 +2288,15 @@ name = "semver-parser"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
+
+[[package]]
+name = "semver-parser"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "00b0bef5b7f9e0df16536d3961cfb6e84331c065b4066afb39768d0e319411f7"
+dependencies = [
+ "pest",
+]
 
 [[package]]
 name = "serde"
@@ -2446,7 +2505,7 @@ dependencies = [
 name = "test-record"
 version = "0.1.0"
 dependencies = [
- "fluence 0.4.2",
+ "fluence 0.5.0",
 ]
 
 [[package]]
@@ -2671,6 +2730,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ucd-trie"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "56dee185309b50d1f11bfedef0fe6d036842e3fb77413abef29f8f8d1c5d4c1c"
+
+[[package]]
 name = "unicase"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2783,23 +2848,23 @@ dependencies = [
 
 [[package]]
 name = "walrus"
-version = "0.17.0"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f970863270179a4e0ca2bfb470931f883f7535ae8b9dac4271761fa1b77e253d"
+checksum = "4d470d0583e65f4cab21a1ff3c1ba3dd23ae49e68f516f0afceaeb001b32af39"
 dependencies = [
  "anyhow",
  "id-arena",
  "leb128",
  "log",
  "walrus-macro",
- "wasmparser 0.55.0",
+ "wasmparser 0.59.0",
 ]
 
 [[package]]
 name = "walrus-macro"
-version = "0.17.0"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80927fca8665132b48c7714bcec983d6e761c60b3a9877c6cd7df86417b13573"
+checksum = "d7c2bb690b44cb1b0fdcc54d4998d21f8bdaf706b93775425e440b174f39ad16"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -2909,7 +2974,7 @@ name = "wasm-sqlite-test"
 version = "0.1.0"
 dependencies = [
  "fce-sqlite-connector",
- "fluence 0.4.2",
+ "fluence 0.5.0",
 ]
 
 [[package]]
@@ -2966,15 +3031,16 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.17.24"
+version = "0.18.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e29cd6c3670db55e8aa3dfe6fb02c8ec9e7a17789e0204cef0a7cb50e0b8c5cb"
+checksum = "9a0f9430f67621da4ace505a3e7b56c19e2ceff93db5507d2ca2f8e0b53feca6"
 dependencies = [
  "fluence-it-types",
  "it-to-bytes",
  "log",
  "nom",
  "safe-transmute",
+ "semver 0.11.0",
  "serde",
  "serde_json",
  "wast",
@@ -3092,9 +3158,9 @@ checksum = "aeb1956b19469d1c5e63e459d29e7b5aa0f558d9f16fcef09736f8a265e6c10a"
 
 [[package]]
 name = "wasmparser"
-version = "0.55.0"
+version = "0.59.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af931e2e1960c53f4a28b063fec4cacd036f35acbec8ff3a4739125b17382a87"
+checksum = "a950e6a618f62147fd514ff445b2a0b53120d382751960797f85f058c7eda9b9"
 
 [[package]]
 name = "wast"

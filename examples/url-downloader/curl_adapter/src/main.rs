@@ -17,9 +17,12 @@
 #![allow(improper_ctypes)]
 
 use fluence::fce;
+use fluence::module_manifest;
 
 use fluence::WasmLoggerBuilder;
 use fluence::MountedBinaryResult;
+
+module_manifest!();
 
 /// Log level can be changed by `RUST_LOG` env as well.
 pub fn main() {

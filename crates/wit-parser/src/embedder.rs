@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-use super::custom::WITCustom;
+use super::custom::ITCustomSection;
 use super::errors::WITParserError;
+use crate::Result;
 
 use walrus::ModuleConfig;
 use wasmer_wit::{
@@ -24,16 +25,16 @@ use wasmer_wit::{
 };
 use wasmer_wit::ToBytes;
 
-use std::path::PathBuf;
+use std::path::Path;
 
 /// Embed provided WIT to a Wasm file by path.
-pub fn embed_text_wit(
-    in_wasm_path: PathBuf,
-    out_wasm_path: PathBuf,
-    wit: &str,
-) -> Result<(), WITParserError> {
+pub fn embed_text_wit<I, O>(in_wasm_path: I, out_wasm_path: O, wit: &str) -> Result<()>
+where
+    I: AsRef<Path>,
+    O: AsRef<Path>,
+{
     let module = ModuleConfig::new()
-        .parse_file(&in_wasm_path)
+        .parse_file(in_wasm_path)
         .map_err(WITParserError::CorruptedWasmFile)?;
 
     let buffer = Buffer::new(wit)?;
@@ -41,7 +42,7 @@ pub fn embed_text_wit(
 
     let mut module = embed_wit(module, &ast);
     module
-        .emit_wasm_file(&out_wasm_path)
+        .emit_wasm_file(out_wasm_path)
         .map_err(WITParserError::WasmEmitError)?;
 
     Ok(())
@@ -53,7 +54,7 @@ pub fn embed_wit(mut wasm_module: walrus::Module, interfaces: &Interfaces<'_>) -
     // TODO: think about possible errors here
     interfaces.to_bytes(&mut bytes).unwrap();
 
-    let custom = WITCustom(bytes);
+    let custom = ITCustomSection(bytes);
     wasm_module.customs.add(custom);
 
     wasm_module

@@ -186,7 +186,7 @@ impl AppService {
         })
     }
 
-    pub fn call_with_module_name<MN: AsRef<str>, FN: AsRef<str>>(
+    pub fn call_module<MN: AsRef<str>, FN: AsRef<str>>(
         &mut self,
         module_name: MN,
         func_name: FN,

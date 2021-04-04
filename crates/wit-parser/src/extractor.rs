@@ -21,14 +21,40 @@ pub use functions::*;
 pub use wit::*;
 
 use crate::Result;
+use crate::WITParserError;
+
+use fce_wit_interfaces::FCEWITInterfaces;
 use std::path::Path;
 
-pub fn module_interface(module_path: &Path) -> Result<ServiceInterface> {
-    use fce_wit_interfaces::FCEWITInterfaces;
+pub fn module_interface<P>(module_path: P) -> Result<ServiceInterface>
+where
+    P: AsRef<Path>,
+{
+    create_fce_it_with(module_path, |it| get_interface(&it))
+}
 
-    let wit_section_bytes = extract_wit_section_bytes(module_path)?;
-    let wit = extract_wit_with_fn(&wit_section_bytes)?;
+pub fn module_raw_interface<P>(module_path: P) -> Result<FCEModuleInterface>
+where
+    P: AsRef<Path>,
+{
+    create_fce_it_with(module_path, |it| get_raw_interface(&it))
+}
+
+fn create_fce_it_with<P, T>(
+    module_path: P,
+    transformer: impl FnOnce(FCEWITInterfaces<'_>) -> Result<T>,
+) -> Result<T>
+where
+    P: AsRef<Path>,
+{
+    let module = walrus::ModuleConfig::new()
+        .parse_file(module_path)
+        .map_err(WITParserError::CorruptedWasmFile)?;
+    let raw_custom_section = extract_custom_section(&module)?;
+    let custom_section_bytes = raw_custom_section.as_ref();
+    let wit = extract_wit_from_bytes(custom_section_bytes)?;
+
     let fce_interface = FCEWITInterfaces::new(wit);
 
-    get_interface(&fce_interface)
+    transformer(fce_interface)
 }

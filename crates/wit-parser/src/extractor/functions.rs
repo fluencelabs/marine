@@ -27,7 +27,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-pub type RecordTypes = HashMap<u64, Rc<IRecordType>>;
+pub type FCERecordTypes = HashMap<u64, Rc<IRecordType>>;
 
 #[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
 pub struct FCEFunctionSignature {
@@ -38,22 +38,27 @@ pub struct FCEFunctionSignature {
 
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
 pub struct FCEModuleInterface {
-    pub record_types: RecordTypes,
+    pub record_types: FCERecordTypes,
     pub function_signatures: Vec<FCEFunctionSignature>,
 }
 
-pub fn get_interface(wit: &FCEWITInterfaces<'_>) -> Result<ServiceInterface> {
-    let function_signatures = get_exports(wit)?;
-    let record_types = extract_record_types(wit);
+pub fn get_interface(fce_it_interface: &FCEWITInterfaces<'_>) -> Result<ServiceInterface> {
+    let fce_interface = get_raw_interface(fce_it_interface)?;
+    let service_interface = into_service_interface(fce_interface);
+
+    Ok(service_interface)
+}
+
+pub fn get_raw_interface(fce_it_interface: &FCEWITInterfaces<'_>) -> Result<FCEModuleInterface> {
+    let function_signatures = get_exports(fce_it_interface)?;
+    let record_types = extract_record_types(fce_it_interface);
 
     let fce_interface = FCEModuleInterface {
         record_types,
         function_signatures,
     };
 
-    let service_interface = into_service_interface(fce_interface);
-
-    Ok(service_interface)
+    Ok(fce_interface)
 }
 
 fn get_exports(wit: &FCEWITInterfaces<'_>) -> Result<Vec<FCEFunctionSignature>> {
@@ -88,7 +93,7 @@ fn get_exports(wit: &FCEWITInterfaces<'_>) -> Result<Vec<FCEFunctionSignature>> 
                     };
                     Ok(signature)
                 }
-                _ => Err(WITParserError::IncorrectWIT(format!(
+                _ => Err(WITParserError::IncorrectITFormat(format!(
                     "type with idx = {} isn't a function type",
                     adapter_function_type
                 ))),
@@ -97,7 +102,7 @@ fn get_exports(wit: &FCEWITInterfaces<'_>) -> Result<Vec<FCEFunctionSignature>> 
         .collect::<Result<Vec<FCEFunctionSignature>>>()
 }
 
-fn extract_record_types(wit: &FCEWITInterfaces<'_>) -> RecordTypes {
+fn extract_record_types(wit: &FCEWITInterfaces<'_>) -> FCERecordTypes {
     use fce_wit_interfaces::WITAstType;
 
     let (record_types_by_id, _) = wit.types().fold(
@@ -158,7 +163,7 @@ pub(crate) fn into_service_interface(fce_interface: FCEModuleInterface) -> Servi
 
 fn serialize_function_signature(
     signature: FCEFunctionSignature,
-    record_types: &RecordTypes,
+    record_types: &FCERecordTypes,
 ) -> FunctionSignature {
     let arguments = signature
         .arguments
@@ -182,7 +187,7 @@ fn serialize_function_signature(
 fn serialize_record_type<'a, 'b>(
     id: u64,
     record: Rc<IRecordType>,
-    record_types: &RecordTypes,
+    record_types: &FCERecordTypes,
 ) -> RecordType {
     let fields = record
         .fields
@@ -197,7 +202,7 @@ fn serialize_record_type<'a, 'b>(
     }
 }
 
-fn itype_text_view(arg_ty: &IType, record_types: &RecordTypes) -> String {
+fn itype_text_view(arg_ty: &IType, record_types: &FCERecordTypes) -> String {
     match arg_ty {
         IType::Record(record_type_id) => {
             // unwrap is safe because FaaSInterface here is well-formed

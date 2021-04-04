@@ -5,9 +5,15 @@ modules_dir = "artifacts/"
     mem_pages_count = 100
     logger_enabled = false
 
+    [module.wasi]
+    preopened_files = ["/tmp"]
+    mapped_dirs = { "tmp" = "/tmp" }
+
 [[module]]
-name = "sqlite_test"
+    name = "sqlite_test"
     mem_pages_count = 1
     logger_enabled = false
-    preopened_files = ["/var"]
-    mapped_dirs = { "var" = "./var" }
+
+    [module.wasi]
+    preopened_files = ["/tmp"]
+    mapped_dirs = { "tmp" = "/tmp" }

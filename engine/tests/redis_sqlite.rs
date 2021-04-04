@@ -18,9 +18,9 @@ use fce::FCE;
 use fce::IValue;
 
 const REDIS_DOWNLOAD_URL: &str =
-    "https://github.com/fluencelabs/redis/releases/download/v0.10.0_w/redis.wasm";
+    "https://github.com/fluencelabs/redis/releases/download/v0.11.0_w/redis.wasm";
 const SQLITE_DOWNLOAD_URL: &str =
-    "https://github.com/fluencelabs/sqlite/releases/download/v0.6.0_w/sqlite3.wasm";
+    "https://github.com/fluencelabs/sqlite/releases/download/v0.11.0_w/sqlite3.wasm";
 
 pub async fn download(url: &str) -> bytes::Bytes {
     reqwest::get(url)
@@ -101,35 +101,86 @@ async fn sqlite() {
     fce.load_module(module_name, wasm_bytes.as_ref(), config)
         .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
 
-    let result1 = fce
+    let mut result1 = fce
         .call(
             module_name,
-            "invoke",
-            &[IValue::String(String::from(
-                "CREATE VIRTUAL TABLE users USING FTS5(body)",
-            ))],
-        )
-        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result2 = fce
-        .call(
-            module_name,
-            "invoke",
-            &[IValue::String(String::from(
-                "INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')",
-            ))],
-        )
-        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result3 = fce
-        .call(
-            module_name,
-            "invoke",
-            &[IValue::String(String::from(
-                "SELECT * FROM users WHERE users MATCH 'A* OR B*'",
-            ))],
+            "sqlite3_open_v2",
+            &[
+                IValue::String(String::from(":memory:")),
+                IValue::S32(6),
+                IValue::String(String::new()),
+            ],
         )
         .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
 
-    assert_eq!(result1, vec![IValue::String(String::from("OK"))]);
-    assert_eq!(result2, vec![IValue::String(String::from("OK"))]);
-    assert_eq!(result3, vec![IValue::String(String::from("AB|BC"))]);
+    let mut record_values = match result1.remove(0) {
+        IValue::Record(value) => value.into_vec(),
+        _ => panic!("return result should have record type"),
+    };
+
+    let db_handle = match record_values.remove(1) {
+        IValue::U32(value) => value,
+        _ => panic!("db handle should have u32 type"),
+    };
+
+    let mut result1 = fce
+        .call(
+            module_name,
+            "sqlite3_exec",
+            &[
+                IValue::U32(db_handle),
+                IValue::String(String::from("CREATE VIRTUAL TABLE users USING FTS5(body)")),
+                IValue::S32(0),
+                IValue::S32(0),
+            ],
+        )
+        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
+
+    let mut result2 = fce
+        .call(
+            module_name,
+            "sqlite3_exec",
+            &[
+                IValue::U32(db_handle),
+                IValue::String(String::from(
+                    "INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')",
+                )),
+                IValue::S32(0),
+                IValue::S32(0),
+            ],
+        )
+        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
+
+    let mut result3 = fce
+        .call(
+            module_name,
+            "sqlite3_exec",
+            &[
+                IValue::U32(db_handle),
+                IValue::String(String::from(
+                    "SELECT * FROM users WHERE users MATCH 'A* OR B*'",
+                )),
+                IValue::S32(0),
+                IValue::S32(0),
+            ],
+        )
+        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
+
+    let result1 = match result1.remove(0) {
+        IValue::Record(value) => value.into_vec(),
+        _ => panic!("result should have record type"),
+    };
+    assert_eq!(result1, vec![IValue::S32(0), IValue::String(String::new())]);
+
+    let result2 = match result2.remove(0) {
+        IValue::Record(value) => value.into_vec(),
+        _ => panic!("result should have record type"),
+    };
+    assert_eq!(result2, vec![IValue::S32(0), IValue::String(String::new())]);
+
+    let result3 = match result3.remove(0) {
+        IValue::Record(value) => value.into_vec(),
+        _ => panic!("result should have record type"),
+    };
+    assert_eq!(result3, vec![IValue::S32(0), IValue::String(String::new())]);
 }

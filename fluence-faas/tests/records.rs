@@ -32,7 +32,7 @@ pub fn records() {
     records_config.modules_dir = Some(String::from("../examples/records/artifacts/"));
 
     let mut faas = FluenceFaaS::with_raw_config(records_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas
         .call_with_ivalues("records_pure", "invoke", &[], <_>::default())
@@ -169,7 +169,7 @@ fn inner_records() {
         Some(String::from("./tests/wasm_tests/inner_records/artifacts"));
 
     let mut faas = FluenceFaaS::with_raw_config(inner_records_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result = faas
         .call_with_json(

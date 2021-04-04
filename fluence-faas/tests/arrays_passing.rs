@@ -40,7 +40,7 @@ pub fn get_interfaces() {
     use std::collections::HashSet;
 
     let faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let interface = faas.get_interface();
 
@@ -247,7 +247,7 @@ pub fn get_interfaces() {
 #[test]
 pub fn i32_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let right_result = json!([0, 1, 2, 3, 4, 0, 2]);
 
@@ -286,7 +286,7 @@ pub fn i32_type() {
 #[test]
 pub fn i64_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json("arrays_passing_pure", "i64_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -320,7 +320,7 @@ pub fn i64_type() {
 #[test]
 pub fn u32_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json("arrays_passing_pure", "u32_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -345,7 +345,7 @@ pub fn u32_type() {
 #[test]
 pub fn u64_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json("arrays_passing_pure", "u64_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -370,7 +370,7 @@ pub fn u64_type() {
 #[test]
 pub fn f64_type_() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json("arrays_passing_pure", "f32_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -396,7 +396,7 @@ pub fn f64_type_() {
 #[ignore]
 pub fn f64_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json("arrays_passing_pure", "f64_type", json!({}), <_>::default());
     assert!(result1.is_err());
@@ -421,7 +421,7 @@ pub fn f64_type() {
 #[test]
 pub fn string_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json(
         "arrays_passing_pure",
@@ -461,7 +461,7 @@ pub fn string_type() {
 #[test]
 pub fn byte_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json(
         "arrays_passing_pure",
@@ -500,7 +500,7 @@ pub fn byte_type() {
 #[test]
 pub fn inner_arrays_1_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json(
         "arrays_passing_pure",
@@ -547,7 +547,7 @@ pub fn inner_arrays_1_type() {
 #[test]
 pub fn inner_arrays_2_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json(
         "arrays_passing_pure",
@@ -620,7 +620,7 @@ pub fn inner_arrays_2_type() {
 #[ignore]
 pub fn bool_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json(
         "arrays_passing_pure",
@@ -655,7 +655,7 @@ pub fn bool_type() {
 #[test]
 pub fn empty_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {:?}", e));
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let right_result = json!(["from effector"]);
     let result1 = call_faas!(faas, "arrays_passing_pure", "empty_type", json!({}));
