@@ -29,7 +29,7 @@ use fce::FCE;
 use fce::IFunctionArg;
 use fce_utils::SharedString;
 use fce::RecordTypes;
-use fluence_sdk_main::CallParameters;
+use fluence::CallParameters;
 
 use serde_json::Value as JValue;
 use std::cell::RefCell;
@@ -136,7 +136,7 @@ impl FluenceFaaS {
         module_name: MN,
         func_name: FN,
         args: &[IValue],
-        call_parameters: fluence_sdk_main::CallParameters,
+        call_parameters: fluence::CallParameters,
     ) -> Result<Vec<IValue>> {
         self.call_parameters.replace(call_parameters);
 
@@ -151,7 +151,7 @@ impl FluenceFaaS {
         module_name: MN,
         func_name: FN,
         json_args: JValue,
-        call_parameters: fluence_sdk_main::CallParameters,
+        call_parameters: fluence::CallParameters,
     ) -> Result<JValue> {
         use crate::json::json_to_ivalues;
         use crate::json::ivalues_to_json;

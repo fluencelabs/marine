@@ -25,7 +25,7 @@ use std::ops::Deref;
 
 /// Create the import intended for handling get_call_parameters SDK api.
 pub(crate) fn create_call_parameters_import(
-    call_parameters: Rc<RefCell<fluence_sdk_main::CallParameters>>,
+    call_parameters: Rc<RefCell<fluence::CallParameters>>,
 ) -> HostImportDescriptor {
     let call_parameters_closure = move |_ctx: &mut Ctx, _args: Vec<IValue>| {
         let result = crate::to_interface_value(call_parameters.borrow().deref()).unwrap();

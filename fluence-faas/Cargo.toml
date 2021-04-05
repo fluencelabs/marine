@@ -10,6 +10,7 @@ edition = "2018"
 fce = { path = "../engine", version = "0.4.0" }
 fce-utils = { path = "../crates/utils", version = "0.1.29" }
 fluence-sdk-main = { git = "https://github.com/fluencelabs/rust-sdk", branch = "support_references", features = ["logger"] }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "support_references", features = ["logger"] }
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
