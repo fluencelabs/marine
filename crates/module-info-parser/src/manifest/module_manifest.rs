@@ -146,6 +146,6 @@ impl fmt::Display for ModuleManifest {
         writeln!(f, "version:     {}", self.version)?;
         writeln!(f, "description: {}", self.description)?;
         writeln!(f, "repository:  {}", self.repository)?;
-        write!(f, "build time:  {}", self.build_time)
+        write!(f, "build time:  {} UTC", self.build_time)
     }
 }
