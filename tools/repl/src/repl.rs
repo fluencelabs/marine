@@ -133,6 +133,14 @@ impl REPL {
 
         next_argument!(module_name, args, "Module name should be specified");
         next_argument!(func_name, args, "Function name should be specified");
+        let show_result_arg = match args.next() {
+            Some(option) if option == "-nr" => false,
+            Some(option) => {
+                println!("incorrect option specified: {}", option);
+                return;
+            }
+            None => true,
+        };
 
         let module_arg: String = args.join(" ");
         let module_arg: serde_json::Value = match serde_json::from_str(&module_arg) {
@@ -150,9 +158,13 @@ impl REPL {
                 .app_service
                 .call_module(module_name, func_name, module_arg, <_>::default())
             {
-                Ok(result) => {
+                Ok(result) if show_result_arg => {
                     let elapsed_time = start.elapsed();
                     format!("result: {:?}\n elapsed time: {:?}", result, elapsed_time)
+                }
+                Ok(_) => {
+                    let elapsed_time = start.elapsed();
+                    format!("call succeeded, elapsed time: {:?}", elapsed_time)
                 }
                 Err(e) => format!("call failed with: {}", e),
             };
