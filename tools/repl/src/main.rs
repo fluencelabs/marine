@@ -54,10 +54,7 @@ fn main() -> ReplResult<()> {
     let mut rl = init_editor();
     let _ = rl.load_history(HISTORY_FILE_PATH);
 
-    println!(
-        "Welcome to the FCE REPL (version {})",
-        env!("CARGO_PKG_VERSION")
-    );
+    print_welcome_message();
 
     let mut repl = REPL::new(args.config_file_path)?;
 
@@ -96,4 +93,38 @@ fn main() -> ReplResult<()> {
     }
 
     Ok(())
+}
+
+fn print_welcome_message() {
+    use termion::color;
+
+    println!(
+        "Welcome to the FCE REPL (version {})",
+        env!("CARGO_PKG_VERSION")
+    );
+
+    println!(
+        "Minimal supported versions of\n  sdk: {}{}\n  {}interface-types: {}{}{}\n",
+        color::Fg(color::LightBlue),
+        fluence_app_service::min_sdk_version(),
+        color::Fg(color::Reset),
+        color::Fg(color::LightBlue),
+        fluence_app_service::min_it_version(),
+        color::Fg(color::Reset),
+    );
+
+    if let Ok(Some(new_version)) = check_latest::check_max!() {
+        println!(
+            "New version is available! {}{} -> {}{}",
+            color::Fg(color::Red),
+            check_latest::crate_version!(),
+            color::Fg(color::Blue),
+            new_version
+        );
+        println!(
+            "{}To update run: {}cargo +nightly update frepl --force\n",
+            color::Fg(color::Black),
+            color::Fg(color::LightBlack)
+        );
+    }
 }
