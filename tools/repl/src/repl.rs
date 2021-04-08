@@ -128,17 +128,18 @@ impl REPL {
         println!("{}", result_msg);
     }
 
-    fn call_module<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
+    fn call_module<'args>(&mut self, args: impl Iterator<Item = &'args str>) {
         use itertools::Itertools;
 
+        let mut args = args.peekable();
         next_argument!(module_name, args, "Module name should be specified");
         next_argument!(func_name, args, "Function name should be specified");
-        let show_result_arg = match args.next() {
-            Some(option) if option == "-nr" => false,
-            Some(option) => {
-                println!("incorrect option specified: {}", option);
-                return;
+        let show_result_arg = match args.peek() {
+            Some(option) if *option == "-nr" => {
+                args.next();
+                false
             }
+            Some(_) => true,
             None => true,
         };
 
