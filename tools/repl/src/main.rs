@@ -104,7 +104,7 @@ fn print_welcome_message() {
     );
 
     println!(
-        "Minimal supported versions of\n  sdk: {}{}\n  {}interface-types: {}{}{}\n",
+        "Minimal supported versions\n  sdk: {}{}\n  {}interface-types: {}{}{}\n",
         color::Fg(color::LightBlue),
         fluence_app_service::min_sdk_version(),
         color::Fg(color::Reset),
