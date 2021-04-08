@@ -50,5 +50,5 @@ pub enum ManifestError {
 
     /// Error occurred while parsing embedded build time.
     #[error("build time can't be parsed: {0}")]
-    DateTimeError(#[from] chrono::ParseError),
+    DateTimeParseError(#[from] chrono::ParseError),
 }
