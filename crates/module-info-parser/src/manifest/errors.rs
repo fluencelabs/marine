@@ -47,4 +47,8 @@ pub enum ManifestError {
     /// Manifest contains some trailing characters.
     #[error("embedded manifest is corrupted: there are some trailing characters")]
     ManifestRemainderNotEmpty,
+
+    /// Error occurred while parsing embedded build time.
+    #[error("build time can't be parsed: {0}")]
+    DateTimeParseError(#[from] chrono::ParseError),
 }
