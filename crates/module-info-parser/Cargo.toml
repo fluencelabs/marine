@@ -16,6 +16,7 @@ fluence-sdk-main = { git = "https://github.com/fluencelabs/rust-sdk" }
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0" }
 
 anyhow = "1.0.31"
+chrono = "0.4.19"
 walrus = "0.18.0"
 semver = "0.11.0"
 

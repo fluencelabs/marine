@@ -21,9 +21,11 @@ serde_json = "1.0.57"
 wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1"}
 
 env_logger = "0.7.1"
+check-latest = "1.0.0"
 log = "0.4.14"
 rustyline = { version = "6.1.2", features = ["with-fuzzy"] }
 rustyline-derive = "0.3.1"
 rustop = "1.1.1"
 itertools = "0.9.0"
 uuid = { version = "0.8.1", features = ["v4"] }
+termion = "1.5.6"

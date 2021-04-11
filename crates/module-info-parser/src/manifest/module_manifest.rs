@@ -21,6 +21,7 @@ pub struct ModuleManifest {
     pub version: semver::Version,
     pub description: String,
     pub repository: String,
+    pub build_time: chrono::DateTime<chrono::FixedOffset>,
 }
 
 use super::ManifestError;
@@ -39,16 +40,20 @@ impl TryFrom<&[u8]> for ModuleManifest {
         let (version, next_offset) = try_extract_field_as_version(value, next_offset, "version")?;
         let (description, next_offset) = try_extract_field_as_string(value, next_offset, "description")?;
         let (repository, next_offset) = try_extract_field_as_string(value, next_offset, "repository")?;
+        let (build_time, next_offset) = try_extract_field_as_string(value, next_offset, "build time")?;
 
         if next_offset != value.len() {
             return Err(ManifestError::ManifestRemainderNotEmpty)
         }
+
+        let build_time = chrono::DateTime::parse_from_rfc3339(&build_time)?;
 
         let manifest = ModuleManifest {
             authors,
             version,
             description,
             repository,
+            build_time
         };
 
         Ok(manifest)
@@ -140,6 +145,7 @@ impl fmt::Display for ModuleManifest {
         writeln!(f, "authors:     {}", self.authors)?;
         writeln!(f, "version:     {}", self.version)?;
         writeln!(f, "description: {}", self.description)?;
-        write!(f, "repository:  {}", self.repository)
+        writeln!(f, "repository:  {}", self.repository)?;
+        write!(f, "build time:  {} UTC", self.build_time)
     }
 }

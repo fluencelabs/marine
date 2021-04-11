@@ -71,6 +71,7 @@ fn test_reading_simple_config() {
     let version = semver::Version::from_str("0.1.0").unwrap();
     let description = "description".to_string();
     let repository = "repository".to_string();
+    let build_time = chrono::Utc::now();
 
     let mut array = ByteEncoder::new();
 
@@ -78,6 +79,7 @@ fn test_reading_simple_config() {
     array.add_utf8_field(&version.to_string());
     array.add_utf8_field(&description);
     array.add_utf8_field(&repository);
+    array.add_utf8_field(&build_time.to_rfc3339());
 
     let actual: ModuleManifest = array
         .as_bytes()
@@ -89,6 +91,7 @@ fn test_reading_simple_config() {
         version,
         description,
         repository,
+        build_time: build_time.into(),
     };
 
     assert_eq!(actual, expected);

@@ -53,7 +53,27 @@ pub fn main() -> Result<(), anyhow::Error> {
         ("info", Some(args)) => info(args),
         ("repl", Some(args)) => repl(args),
         (c, _) => Err(crate::errors::CLIError::NoSuchCommand(c.to_string()).into()),
+    }?;
+
+    if let Ok(Some(new_version)) = check_latest::check_max!() {
+        use termion::color;
+
+        println!(
+            "\nNew version is available! {}{} -> {}{}",
+            color::Fg(color::Red),
+            check_latest::crate_version!(),
+            color::Fg(color::Blue),
+            new_version
+        );
+        println!(
+            "{}To update run: {}cargo +nightly update fcli --force{}",
+            color::Fg(color::Reset),
+            color::Fg(color::LightBlack),
+            color::Fg(color::Reset)
+        );
     }
+
+    Ok(())
 }
 
 fn build(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
