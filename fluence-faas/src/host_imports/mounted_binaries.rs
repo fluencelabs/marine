@@ -15,7 +15,7 @@
  */
 
 use fce::HostImportDescriptor;
-use fluence_sdk_main::mounted_binary::Result as MountedBinaryResult;
+use fluence::MountedBinaryResult;
 
 use wasmer_core::vm::Ctx;
 use wasmer_wit::IValue;

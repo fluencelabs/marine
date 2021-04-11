@@ -70,16 +70,18 @@ pub fn non_exist_module_func() {
     fce.load_module("greeting", &*GREETING_WASM_BYTES, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
 
+    let module_name = "greeting";
+    let function_name = "greeting";
     let non_exist_name = String::from("_");
 
     let call_result1 = fce.call(
         non_exist_name.as_str(),
-        "greeting",
+        function_name,
         &[IValue::String(String::from("Fluence"))],
     );
 
     let call_result2 = fce.call(
-        "greeting",
+        module_name,
         non_exist_name.as_str(),
         &[IValue::String(String::from("Fluence"))],
     );
@@ -99,7 +101,7 @@ pub fn non_exist_module_func() {
     assert!(call_result2.is_err());
     assert!(matches!(
         call_result2.err().unwrap(),
-        fce::FCEError::NoSuchFunction(non_exist_name)
+        fce::FCEError::NoSuchFunction(module_name, non_exist_name)
     ));
 
     assert!(call_result3.is_err());

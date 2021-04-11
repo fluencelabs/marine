@@ -46,11 +46,12 @@ pub(super) struct WITInstance {
 impl WITInstance {
     pub(super) fn new(
         wasmer_instance: &WasmerInstance,
+        module_name: &str,
         wit: &FCEWITInterfaces<'_>,
         modules: &HashMap<String, FCEModule>,
     ) -> FCEResult<Self> {
         let mut exports = Self::extract_raw_exports(&wasmer_instance, wit)?;
-        let imports = Self::extract_imports(modules, wit, exports.len())?;
+        let imports = Self::extract_imports(module_name, modules, wit, exports.len())?;
         let memories = Self::extract_memories(&wasmer_instance);
 
         exports.extend(imports);
@@ -93,6 +94,7 @@ impl WITInstance {
 
     /// Extracts only those imports that don't have implementations.
     fn extract_imports(
+        module_name: &str,
         modules: &HashMap<String, FCEModule>,
         wit: &FCEWITInterfaces<'_>,
         start_index: usize,
@@ -119,8 +121,13 @@ impl WITInstance {
                             }
                         };
 
-                    let func =
-                        WITFunction::from_import(module, import.name, arguments, output_types)?;
+                    let func = WITFunction::from_import(
+                        module,
+                        module_name,
+                        import.name,
+                        arguments,
+                        output_types,
+                    )?;
 
                     Ok((start_index + idx as usize, func))
                 }

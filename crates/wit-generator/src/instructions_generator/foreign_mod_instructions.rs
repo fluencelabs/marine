@@ -23,6 +23,7 @@ use crate::Result;
 use fluence_sdk_wit::AstExternModItem;
 use fluence_sdk_wit::AstExternFnItem;
 use fluence_sdk_wit::ParsedType;
+use fluence_sdk_wit::AstFnArgument;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
 use wasmer_wit::interpreter::Instruction;
 use crate::instructions_generator::utils::wtype_to_itype;
@@ -58,10 +59,10 @@ fn generate_wit_for_import<'a>(
         .signature
         .arguments
         .iter()
-        .map(|(arg_name, arg_type)| -> Result<IFunctionArg> {
+        .map(|arg| -> Result<IFunctionArg> {
             Ok(IFunctionArg {
-                name: arg_name.clone(),
-                ty: ptype_to_itype_checked(arg_type, wit_resolver)?,
+                name: arg.name.clone(),
+                ty: ptype_to_itype_checked(&arg.ty, wit_resolver)?,
             })
         })
         .collect::<Result<Vec<_>>>()?;
@@ -132,16 +133,14 @@ fn generate_wit_for_import<'a>(
         .signature
         .arguments
         .iter()
-        .try_fold::<_, _, Result<_>>(
-            (0, Vec::new()),
-            |(arg_id, mut instructions), (_, input_type)| {
-                let (mut new_instructions, shift) =
-                    input_type.generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
+        .try_fold::<_, _, Result<_>>((0, Vec::new()), |(arg_id, mut instructions), arg| {
+            let (mut new_instructions, shift) = arg
+                .ty
+                .generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
 
-                instructions.append(&mut new_instructions);
-                Ok((arg_id + shift, instructions))
-            },
-        )?
+            instructions.append(&mut new_instructions);
+            Ok((arg_id + shift, instructions))
+        })?
         .1;
 
     // TODO: refactor
@@ -194,23 +193,23 @@ impl ForeignModInstructionGenerator for ParsedType {
         wit_resolver: &mut WITResolver<'a>,
     ) -> Result<(Vec<Instruction>, u32)> {
         let instructions = match self {
-            ParsedType::Boolean => (vec![Instruction::ArgumentGet { index }], 1),
-            ParsedType::I8 => (vec![Instruction::ArgumentGet { index }, Instruction::S8FromI32], 1),
-            ParsedType::I16 => (vec![Instruction::ArgumentGet { index }, Instruction::S16FromI32], 1),
-            ParsedType::I32 => (vec![Instruction::ArgumentGet { index }, Instruction::S32FromI32], 1),
-            ParsedType::I64 => (vec![Instruction::ArgumentGet { index }, Instruction::S64FromI64], 1),
-            ParsedType::U8 => (vec![Instruction::ArgumentGet { index }, Instruction::U8FromI32], 1),
-            ParsedType::U16 => (vec![Instruction::ArgumentGet { index }, Instruction::U16FromI32], 1),
-            ParsedType::U32 => (vec![Instruction::ArgumentGet { index }, Instruction::U32FromI32], 1),
-            ParsedType::U64 => (vec![Instruction::ArgumentGet { index }, Instruction::U64FromI64], 1),
-            ParsedType::F32 => (vec![Instruction::ArgumentGet { index }], 1),
-            ParsedType::F64 => (vec![Instruction::ArgumentGet { index }], 1),
-            ParsedType::Utf8String => (vec![
+            ParsedType::Boolean(_) => (vec![Instruction::ArgumentGet { index }], 1),
+            ParsedType::I8(_) => (vec![Instruction::ArgumentGet { index }, Instruction::S8FromI32], 1),
+            ParsedType::I16(_) => (vec![Instruction::ArgumentGet { index }, Instruction::S16FromI32], 1),
+            ParsedType::I32(_) => (vec![Instruction::ArgumentGet { index }, Instruction::S32FromI32], 1),
+            ParsedType::I64(_) => (vec![Instruction::ArgumentGet { index }, Instruction::S64FromI64], 1),
+            ParsedType::U8(_) => (vec![Instruction::ArgumentGet { index }, Instruction::U8FromI32], 1),
+            ParsedType::U16(_) => (vec![Instruction::ArgumentGet { index }, Instruction::U16FromI32], 1),
+            ParsedType::U32(_) => (vec![Instruction::ArgumentGet { index }, Instruction::U32FromI32], 1),
+            ParsedType::U64(_) => (vec![Instruction::ArgumentGet { index }, Instruction::U64FromI64], 1),
+            ParsedType::F32(_) => (vec![Instruction::ArgumentGet { index }], 1),
+            ParsedType::F64(_) => (vec![Instruction::ArgumentGet { index }], 1),
+            ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) => (vec![
                 Instruction::ArgumentGet { index },
                 Instruction::ArgumentGet { index: index + 1 },
                 Instruction::StringLiftMemory,
             ], 2),
-            ParsedType::Vector(value_type) => {
+            ParsedType::Vector(value_type, _) => {
                 let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
 
                 (vec![
@@ -219,7 +218,7 @@ impl ForeignModInstructionGenerator for ParsedType {
                     Instruction::ArrayLiftMemory { value_type },
                 ], 2)
             },
-            ParsedType::Record(record_name) => {
+            ParsedType::Record(record_name, _) => {
                 let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 
                 (vec![
@@ -235,18 +234,18 @@ impl ForeignModInstructionGenerator for ParsedType {
     #[rustfmt::skip]
     fn generate_instructions_for_output_type<'a>(&self, wit_resolver: &mut WITResolver<'a>) -> Result<Vec<Instruction>> {
         let instructions = match self {
-            ParsedType::Boolean => vec![],
-            ParsedType::I8 => vec![Instruction::I32FromS8],
-            ParsedType::I16 => vec![Instruction::I32FromS16],
-            ParsedType::I32 => vec![Instruction::I32FromS32],
-            ParsedType::I64 => vec![Instruction::I64FromS64],
-            ParsedType::U8 => vec![Instruction::I32FromU8],
-            ParsedType::U16 => vec![Instruction::I32FromU16],
-            ParsedType::U32 => vec![Instruction::I32FromU32],
-            ParsedType::U64 => vec![Instruction::I64FromU64],
-            ParsedType::F32 => vec![],
-            ParsedType::F64 => vec![],
-            ParsedType::Utf8String => vec![
+            ParsedType::Boolean(_) => vec![],
+            ParsedType::I8(_) => vec![Instruction::I32FromS8],
+            ParsedType::I16(_) => vec![Instruction::I32FromS16],
+            ParsedType::I32(_) => vec![Instruction::I32FromS32],
+            ParsedType::I64(_) => vec![Instruction::I64FromS64],
+            ParsedType::U8(_) => vec![Instruction::I32FromU8],
+            ParsedType::U16(_) => vec![Instruction::I32FromU16],
+            ParsedType::U32(_) => vec![Instruction::I32FromU32],
+            ParsedType::U64(_) => vec![Instruction::I64FromU64],
+            ParsedType::F32(_) => vec![],
+            ParsedType::F64(_) => vec![],
+            ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) => vec![
                 Instruction::Dup,
                 Instruction::StringSize,
                 Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
@@ -255,7 +254,7 @@ impl ForeignModInstructionGenerator for ParsedType {
                 Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
                 Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
             ],
-            ParsedType::Vector(value_type) => {
+            ParsedType::Vector(value_type, _) => {
                 let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
 
                 vec![
@@ -264,7 +263,7 @@ impl ForeignModInstructionGenerator for ParsedType {
                     Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
                 ]
             },
-            ParsedType::Record(record_name) => {
+            ParsedType::Record(record_name, _) => {
                 let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;
 
                 vec![
@@ -281,38 +280,38 @@ impl ForeignModInstructionGenerator for ParsedType {
 use fluence_sdk_wit::RustType;
 use wasmer_wit::IType;
 
-pub fn to_raw_input_types(arg: &(String, ParsedType)) -> Vec<IFunctionArg> {
-    match arg.1 {
-        ParsedType::Boolean
-        | ParsedType::I8
-        | ParsedType::I16
-        | ParsedType::I32
-        | ParsedType::U8
-        | ParsedType::U16
-        | ParsedType::U32
-        | ParsedType::Record(_) => vec![IFunctionArg {
-            name: arg.0.clone(),
+pub fn to_raw_input_types(arg: &AstFnArgument) -> Vec<IFunctionArg> {
+    match arg.ty {
+        ParsedType::Boolean(_)
+        | ParsedType::I8(_)
+        | ParsedType::I16(_)
+        | ParsedType::I32(_)
+        | ParsedType::U8(_)
+        | ParsedType::U16(_)
+        | ParsedType::U32(_)
+        | ParsedType::Record(..) => vec![IFunctionArg {
+            name: arg.name.clone(),
             ty: IType::I32,
         }],
-        ParsedType::I64 | ParsedType::U64 => vec![IFunctionArg {
-            name: arg.0.clone(),
+        ParsedType::I64(_) | ParsedType::U64(_) => vec![IFunctionArg {
+            name: arg.name.clone(),
             ty: IType::I64,
         }],
-        ParsedType::F32 => vec![IFunctionArg {
-            name: arg.0.clone(),
+        ParsedType::F32(_) => vec![IFunctionArg {
+            name: arg.name.clone(),
             ty: IType::F32,
         }],
-        ParsedType::F64 => vec![IFunctionArg {
-            name: arg.0.clone(),
+        ParsedType::F64(_) => vec![IFunctionArg {
+            name: arg.name.clone(),
             ty: IType::F64,
         }],
-        ParsedType::Utf8String | ParsedType::Vector(_) => vec![
+        ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) | ParsedType::Vector(..) => vec![
             IFunctionArg {
-                name: format!("{}_ptr", arg.0),
+                name: format!("{}_ptr", arg.name),
                 ty: IType::I32,
             },
             IFunctionArg {
-                name: format!("{}_ptr", arg.0),
+                name: format!("{}_ptr", arg.name),
                 ty: IType::I32,
             },
         ],
@@ -321,16 +320,19 @@ pub fn to_raw_input_types(arg: &(String, ParsedType)) -> Vec<IFunctionArg> {
 
 pub fn to_raw_output_type(ty: &ParsedType) -> Vec<RustType> {
     match ty {
-        ParsedType::Boolean
-        | ParsedType::I8
-        | ParsedType::I16
-        | ParsedType::I32
-        | ParsedType::U8
-        | ParsedType::U16
-        | ParsedType::U32 => vec![RustType::I32],
-        ParsedType::I64 | ParsedType::U64 => vec![RustType::I64],
-        ParsedType::F32 => vec![RustType::F32],
-        ParsedType::F64 => vec![RustType::F64],
-        ParsedType::Utf8String | ParsedType::Vector(_) | ParsedType::Record(_) => vec![],
+        ParsedType::Boolean(_)
+        | ParsedType::I8(_)
+        | ParsedType::I16(_)
+        | ParsedType::I32(_)
+        | ParsedType::U8(_)
+        | ParsedType::U16(_)
+        | ParsedType::U32(_) => vec![RustType::I32],
+        ParsedType::I64(_) | ParsedType::U64(_) => vec![RustType::I64],
+        ParsedType::F32(_) => vec![RustType::F32],
+        ParsedType::F64(_) => vec![RustType::F64],
+        ParsedType::Utf8Str(_)
+        | ParsedType::Utf8String(_)
+        | ParsedType::Vector(..)
+        | ParsedType::Record(..) => vec![],
     }
 }

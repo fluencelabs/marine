@@ -10,5 +10,5 @@ name = "records_effector"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { version = "=0.5.0", features = ["logger"]}
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
 test-record = { path = "../test-record" }

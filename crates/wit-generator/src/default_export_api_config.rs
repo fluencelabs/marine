@@ -55,20 +55,11 @@ pub(crate) static ALLOCATE_FUNC: Lazy<ApiExportFuncDescriptor> =
         output_types: vec![IType::I32],
     });
 
-pub(crate) static DEALLOCATE_FUNC: Lazy<ApiExportFuncDescriptor> =
+pub(crate) static RELEASE_OBJECTS: Lazy<ApiExportFuncDescriptor> =
     Lazy::new(|| ApiExportFuncDescriptor {
-        name: "deallocate",
+        name: "release_objects",
         id: 1,
-        arguments: vec![
-            IFunctionArg {
-                name: String::from("pointer"),
-                ty: IType::I32,
-            },
-            IFunctionArg {
-                name: String::from("size"),
-                ty: IType::I32,
-            },
-        ],
+        arguments: vec![],
         output_types: vec![],
     });
 

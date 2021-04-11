@@ -10,4 +10,4 @@ name = "call_parameters"
 path = "src/main.rs"
 
 [dependencies]
-fluence = "=0.5.0"
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }

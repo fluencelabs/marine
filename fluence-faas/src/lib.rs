@@ -67,7 +67,7 @@ pub use fce::ne_vec;
 pub use fce::min_sdk_version;
 pub use fce::min_it_version;
 
-pub use fluence_sdk_main::CallParameters;
-pub use fluence_sdk_main::SecurityTetraplet;
+pub use fluence::CallParameters;
+pub use fluence::SecurityTetraplet;
 
 pub use wasmer_core::vm::Ctx;

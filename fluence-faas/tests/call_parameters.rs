@@ -41,10 +41,10 @@ pub fn call_parameters() {
     let host_id = "host_id";
     let particle_id = "particle_id";
 
-    let tetraplet = fluence_sdk_main::SecurityTetraplet::default();
+    let tetraplet = fluence::SecurityTetraplet::default();
     let tetraplets = vec![vec![tetraplet]];
 
-    let call_parameters = fluence_sdk_main::CallParameters {
+    let call_parameters = fluence::CallParameters {
         init_peer_id: init_peer_id.to_string(),
         service_id: service_id.to_string(),
         service_creator_peer_id: service_creator_peer_id.to_string(),

@@ -34,7 +34,7 @@ use std::rc::Rc;
 pub(crate) fn make_fce_config(
     module_name: String,
     faas_module_config: Option<FaaSModuleConfig>,
-    call_parameters: Rc<RefCell<fluence_sdk_main::CallParameters>>,
+    call_parameters: Rc<RefCell<fluence::CallParameters>>,
     logger_filter: &LoggerFilter<'_>,
 ) -> Result<FCEModuleConfig> {
     let mut fce_module_config = FCEModuleConfig::default();
