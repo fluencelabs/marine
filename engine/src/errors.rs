@@ -19,6 +19,8 @@ use fce_wit_interfaces::FCEWITInterfacesError;
 use fce_wit_parser::WITParserError;
 use fce_module_info_parser::ModuleInfoError;
 
+use wasmer_runtime::error as wasmer_error;
+
 use thiserror::Error as ThisError;
 
 // TODO: refactor errors
@@ -31,7 +33,7 @@ pub enum FCEError {
 
     /// Error related to calling a main Wasm module.
     #[error("WasmerInvokeError: {0}")]
-    WasmerInvokeError(#[from] wasmer_error::InvokeError),
+    WasmerInvokeError(String),
 
     /// Error that raises during compilation Wasm code by Wasmer.
     #[error("WasmerCreationError: {0}")]
@@ -43,15 +45,15 @@ pub enum FCEError {
 
     /// Errors arisen during execution of a Wasm module.
     #[error("WasmerCompileError: {0}")]
-    WasmerRuntimeError(#[from] wasmer_error::RuntimeError),
+    WasmerRuntimeError(String),
 
     /// Errors arisen during linking Wasm modules with already loaded into FCE modules.
-    #[error("WasmerCompileError: {0}")]
+    #[error("WasmerLinkError: {0}")]
     WasmerLinkError(#[from] wasmer_error::LinkError),
 
     /// Errors from the temporary class of amalgamation errors from the Wasmer side.
-    #[error("WasmerCompileError: {0}")]
-    WasmerError(#[from] wasmer_error::Error),
+    #[error("WasmerError: {0}")]
+    WasmerError(String),
 
     /// Errors related to failed resolving of records.
     #[error("{0}")]
@@ -98,7 +100,7 @@ pub enum FCEError {
     ModuleVersionParseError(#[from] ModuleInfoError),
 
     /// Provided module doesn't contain a sdk version that is necessary.
-    #[error("module with name {0} doesn't contain a version of sdk, probably it's compiled with an old version one")]
+    #[error("module with name {0} doesn't contain a version of sdk, probably it's compiled with an old one")]
     ModuleWithoutVersion(String),
 
     /// Module sdk versions are incompatible.
@@ -118,11 +120,27 @@ pub enum FCEError {
     },
 }
 
-use wasmer_runtime::error as wasmer_error;
-
 impl From<FCEWITInterfacesError> for FCEError {
     fn from(err: FCEWITInterfacesError) -> Self {
         FCEError::IncorrectWIT(format!("{}", err))
+    }
+}
+
+impl From<wasmer_error::RuntimeError> for FCEError {
+    fn from(err: wasmer_error::RuntimeError) -> Self {
+        Self::WasmerRuntimeError(err.to_string())
+    }
+}
+
+impl From<wasmer_error::Error> for FCEError {
+    fn from(err: wasmer_error::Error) -> Self {
+        Self::WasmerError(err.to_string())
+    }
+}
+
+impl From<wasmer_error::InvokeError> for FCEError {
+    fn from(err: wasmer_error::InvokeError) -> Self {
+        Self::WasmerInvokeError(err.to_string())
     }
 }
 
