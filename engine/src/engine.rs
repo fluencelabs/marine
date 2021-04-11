@@ -58,31 +58,31 @@ impl FCE {
                     module_name.as_ref()
                 )))
             },
-            |module| module.call(func_name.as_ref(), arguments),
+            |module| module.call(module_name.as_ref(), func_name.as_ref(), arguments),
         )
     }
 
     /// Load a new module inside FCE.
     pub fn load_module<S: Into<String>>(
         &mut self,
-        import_name: S,
+        name: S,
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
     ) -> FCEResult<()> {
-        self.load_module_(import_name.into(), wasm_bytes, config)
+        self.load_module_(name.into(), wasm_bytes, config)
     }
 
     fn load_module_(
         &mut self,
-        import_name: String,
+        name: String,
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
     ) -> FCEResult<()> {
         let _prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
-        let module = FCEModule::new(&wasm_bytes, config, &self.modules)?;
+        let module = FCEModule::new(&name, &wasm_bytes, config, &self.modules)?;
 
-        match self.modules.entry(import_name) {
+        match self.modules.entry(name) {
             Entry::Vacant(entry) => {
                 entry.insert(module);
                 Ok(())

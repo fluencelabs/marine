@@ -21,16 +21,17 @@ use fce_module_info_parser::sdk_version;
 
 use wasmer_core::Module;
 
-pub(crate) fn check_sdk_version(wasmer_module: &Module) -> FCEResult<()> {
+pub(crate) fn check_sdk_version(name: impl Into<String>, wasmer_module: &Module) -> FCEResult<()> {
     let module_version = sdk_version::extract_from_wasmer_module(wasmer_module)?;
     let module_version = match module_version {
         Some(module_version) => module_version,
-        None => return Err(FCEError::ModuleWithoutVersion),
+        None => return Err(FCEError::ModuleWithoutVersion(name.into())),
     };
 
     let required_version = crate::min_sdk_version();
     if module_version < *required_version {
         return Err(FCEError::IncompatibleSDKVersions {
+            module_name: name.into(),
             required: required_version.clone(),
             provided: module_version,
         });
@@ -39,10 +40,14 @@ pub(crate) fn check_sdk_version(wasmer_module: &Module) -> FCEResult<()> {
     Ok(())
 }
 
-pub(crate) fn check_it_version(it_version: &semver::Version) -> FCEResult<()> {
+pub(crate) fn check_it_version(
+    name: impl Into<String>,
+    it_version: &semver::Version,
+) -> FCEResult<()> {
     let required_version = crate::min_it_version();
     if it_version < required_version {
         return Err(FCEError::IncompatibleITVersions {
+            module_name: name.into(),
             required: required_version.clone(),
             provided: it_version.clone(),
         });

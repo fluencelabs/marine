@@ -110,15 +110,16 @@ pub(crate) struct FCEModule {
 
 impl FCEModule {
     pub(crate) fn new(
+        name: &str,
         wasm_bytes: &[u8],
         config: FCEModuleConfig,
         modules: &HashMap<String, FCEModule>,
     ) -> FCEResult<Self> {
         let wasmer_module = compile(&wasm_bytes)?;
-        crate::misc::check_sdk_version(&wasmer_module)?;
+        crate::misc::check_sdk_version(name, &wasmer_module)?;
 
         let wit = extract_wit_from_module(&wasmer_module)?;
-        crate::misc::check_it_version(&wit.version)?;
+        crate::misc::check_it_version(name, &wit.version)?;
 
         let fce_wit = FCEWITInterfaces::new(wit);
 
@@ -133,7 +134,7 @@ impl FCEModule {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
-                MaybeUninit::new(WITInstance::new(&wasmer_instance, &fce_wit, modules)?);
+                MaybeUninit::new(WITInstance::new(&wasmer_instance, name, &fce_wit, modules)?);
             std::mem::transmute::<_, Arc<WITInstance>>(wit_instance)
         };
 
@@ -156,13 +157,18 @@ impl FCEModule {
         })
     }
 
-    pub(crate) fn call(&mut self, function_name: &str, args: &[IValue]) -> FCEResult<Vec<IValue>> {
+    pub(crate) fn call(
+        &mut self,
+        module_name: &str,
+        function_name: &str,
+        args: &[IValue],
+    ) -> FCEResult<Vec<IValue>> {
         self.export_funcs.get_mut(function_name).map_or_else(
             || {
-                Err(FCEError::NoSuchFunction(format!(
-                    "{} hasn't been found while calling",
-                    function_name
-                )))
+                Err(FCEError::NoSuchFunction(
+                    module_name.to_string(),
+                    function_name.to_string(),
+                ))
             },
             |func| Rc::make_mut(func).call(args),
         )
@@ -191,13 +197,17 @@ impl FCEModule {
     }
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
-    pub(super) fn get_callable(&self, function_name: &str) -> FCEResult<Rc<Callable>> {
+    pub(super) fn get_callable(
+        &self,
+        module_name: &str,
+        function_name: &str,
+    ) -> FCEResult<Rc<Callable>> {
         match self.export_funcs.get(function_name) {
             Some(func) => Ok(func.clone()),
-            None => Err(FCEError::NoSuchFunction(format!(
-                "{} hasn't been found while calling",
-                function_name
-            ))),
+            None => Err(FCEError::NoSuchFunction(
+                module_name.to_string(),
+                function_name.to_string(),
+            )),
         }
     }
 
@@ -227,7 +237,7 @@ impl FCEModule {
             wasi_preopened_files,
             wasi_mapped_dirs,
         )
-        .map_err(|e| FCEError::PrepareError(e))?;
+        .map_err(FCEError::WASIPrepareError)?;
 
         let mut host_closures_namespace = Namespace::new();
         let record_types = fce_wit
@@ -449,7 +459,7 @@ impl FCEModule {
         wit_instance: &Arc<WITInstance>,
     ) -> FCEResult<RecordTypes> {
         use fce_wit_generator::TYPE_RESOLVE_RECURSION_LIMIT;
-        use FCEError::WasmerResolveError;
+        use FCEError::RecordResolveError;
 
         fn handle_itype(
             itype: &IType,
@@ -460,7 +470,7 @@ impl FCEModule {
             use wasmer_wit::interpreter::wasm::structures::Instance;
 
             if recursion_level > TYPE_RESOLVE_RECURSION_LIMIT {
-                return Err(WasmerResolveError(String::from(
+                return Err(RecordResolveError(String::from(
                     "mailformed module: a record contains more recursion level then allowed",
                 )));
             }
@@ -475,7 +485,7 @@ impl FCEModule {
                     wit_instance
                         .wit_record_by_id(record_type_id)
                         .ok_or_else(|| {
-                            WasmerResolveError(format!(
+                            RecordResolveError(format!(
                                 "record type with type id {} not found",
                                 record_type_id
                             ))

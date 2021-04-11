@@ -696,7 +696,7 @@ name = "fce-module-info-parser"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "fluence-sdk-main 0.5.0",
+ "fluence-sdk-main 0.6.0",
  "semver 0.11.0",
  "serde",
  "thiserror",
@@ -861,15 +861,6 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-macro"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00c840552e5e58b62d4a272e3e4aabd548e1a4519df629a51d42157c7ecbe653"
-dependencies = [
- "fluence-sdk-wit 0.5.0",
-]
-
-[[package]]
-name = "fluence-sdk-macro"
 version = "0.6.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#e2a1e66e170abd992ee5b1a1bd21347494fcf91c"
 dependencies = [
@@ -889,17 +880,6 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f1d126f05a798c8f812fbe47a42145478ce8029e00411b04d1c5194ab368313"
-dependencies = [
- "fluence-sdk-macro 0.5.0",
- "log",
- "serde",
-]
-
-[[package]]
-name = "fluence-sdk-main"
 version = "0.6.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#e2a1e66e170abd992ee5b1a1bd21347494fcf91c"
 dependencies = [
@@ -913,20 +893,6 @@ name = "fluence-sdk-wit"
 version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b75dbdd0275160f3818db3218563d791e6c612b616cd3c5d6e66283f207f648d"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn",
- "uuid",
-]
-
-[[package]]
-name = "fluence-sdk-wit"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ac71e8d48a8e2bdaccf59572dc7a8e8a1ad0de512fc452107756e37ac0bf752"
 dependencies = [
  "proc-macro2",
  "quote",

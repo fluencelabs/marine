@@ -84,11 +84,12 @@ impl WITFunction {
     /// Creates function from a module import.
     pub(super) fn from_import(
         wit_module: &FCEModule,
+        module_name: &str,
         function_name: &str,
         arguments: Rc<Vec<IFunctionArg>>,
         outputs: Rc<Vec<IType>>,
     ) -> FCEResult<Self> {
-        let callable = wit_module.get_callable(function_name)?;
+        let callable = wit_module.get_callable(module_name, function_name)?;
 
         let inner = WITFunctionInner::Import { callable };
 

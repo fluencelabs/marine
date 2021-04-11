@@ -11,7 +11,7 @@ name = "fce_module_info_parser"
 path = "src/lib.rs"
 
 [dependencies]
-fluence-sdk-main = "0.5.0"
+fluence-sdk-main = { git = "https://github.com/fluencelabs/rust-sdk" }
 
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0" }
 

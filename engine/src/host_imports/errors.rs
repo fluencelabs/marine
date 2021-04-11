@@ -18,7 +18,6 @@ use crate::IType;
 use super::WType;
 use super::WValue;
 
-// use safe_transmute::Error as TransmuteError;
 use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
