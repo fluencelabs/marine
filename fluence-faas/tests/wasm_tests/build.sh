@@ -4,21 +4,21 @@
 (
   cd arguments_passing || exit;
   cargo update;
-  ../../../../target/debug/fce build --release;
+  fce build --release;
   rm artifacts/*;
 )
 
 (
   cd arrays_passing || exit;
   cargo update;
-  ../../../../target/debug/fce build --release;
+  fce build --release;
   rm artifacts/*;
 )
 
 (
   cd inner_records || exit;
   cargo update;
-  ../../../../target/debug/fce build --release;
+  fce build --release;
   rm artifacts/*;
 )
 

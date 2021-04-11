@@ -10,6 +10,6 @@ name = "inner_records_pure"
 path = "src/pure.rs"
 
 [dependencies]
-# fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "support_references" }
+# fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
 fluence = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk/fluence" }
 safe-transmute = "0.11.0"
