@@ -15,5 +15,5 @@ path = "src/effector.rs"
 
 [dependencies]
 # fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
-fluence = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk/fluence" }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
 safe-transmute = "0.11.0"
