@@ -75,8 +75,8 @@ mod effector {
     #[fce]
     #[link(wasm_import_module = "records_passing_effector")]
     extern "C" {
-        pub fn test_record(mut test_record: TestRecord2) -> TestRecord2;
+        pub fn test_record(test_record: TestRecord2) -> TestRecord2;
 
-        pub fn test_record_ref(mut test_record: &TestRecord2) -> TestRecord2;
+        pub fn test_record_ref(test_record: &TestRecord2) -> TestRecord2;
     }
 }

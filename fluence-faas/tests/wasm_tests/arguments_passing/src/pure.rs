@@ -207,8 +207,8 @@ pub fn i32_type(arg: i32) -> i32 {
 }
 
 #[fce]
-pub fn i32_ref_type(arg: i32) -> i32 {
-    let arg = unsafe { effector::i32_type(arg) };
+pub fn i32_ref_type(arg: &i32) -> i32 {
+    let arg = unsafe { effector::i32_ref_type(arg) };
     arg + 1
 }
 
