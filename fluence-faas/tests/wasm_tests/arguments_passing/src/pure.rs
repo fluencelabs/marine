@@ -85,18 +85,7 @@ pub fn all_ref_types(
 ) -> Vec<u8> {
     let mut result = unsafe {
         effector::all_ref_types(
-            arg_0,
-            arg_1,
-            arg_2,
-            arg_3,
-            arg_4,
-            arg_5,
-            arg_6,
-            arg_7,
-            arg_8,
-            arg_9,
-            arg_10,
-            arg_11,
+            arg_0, arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9, arg_10, arg_11,
         )
     };
 
