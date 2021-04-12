@@ -1372,14 +1372,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "inner-records-test"
-version = "0.1.0"
-dependencies = [
- "fluence 0.6.0",
- "safe-transmute",
-]
-
-[[package]]
 name = "instant"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2115,6 +2107,14 @@ version = "0.1.0"
 dependencies = [
  "fluence 0.6.0",
  "test-record",
+]
+
+[[package]]
+name = "records-passing-test"
+version = "0.1.0"
+dependencies = [
+ "fluence 0.6.0",
+ "safe-transmute",
 ]
 
 [[package]]

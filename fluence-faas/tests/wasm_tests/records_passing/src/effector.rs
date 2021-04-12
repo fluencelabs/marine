@@ -17,11 +17,13 @@
 use fluence::fce;
 
 #[fce]
+#[derive(Clone, Debug, Default)]
 pub struct TestRecord0 {
     pub field_0: i32,
 }
 
 #[fce]
+#[derive(Clone, Debug, Default)]
 pub struct TestRecord1 {
     pub field_0: i32,
     pub field_1: String,
@@ -30,6 +32,7 @@ pub struct TestRecord1 {
 }
 
 #[fce]
+#[derive(Clone, Debug, Default)]
 pub struct TestRecord2 {
     pub test_record_0: TestRecord0,
     pub test_record_1: TestRecord1,
@@ -42,4 +45,11 @@ pub fn test_record(mut test_record: TestRecord2) -> TestRecord2 {
     test_record.test_record_0 = TestRecord0 { field_0: 1 };
 
     test_record
+}
+
+#[fce]
+pub fn test_record_ref(test_record: &mut TestRecord2) -> TestRecord2 {
+    test_record.test_record_0 = TestRecord0 { field_0: 1 };
+
+    test_record.clone()
 }
