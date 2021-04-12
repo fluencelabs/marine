@@ -18,9 +18,9 @@ use fce::FCE;
 use fce::IValue;
 
 const REDIS_DOWNLOAD_URL: &str =
-    "https://github.com/fluencelabs/redis/releases/download/v0.11.0_w/redis.wasm";
+    "https://github.com/fluencelabs/redis/releases/download/v0.12.0_w/redis.wasm";
 const SQLITE_DOWNLOAD_URL: &str =
-    "https://github.com/fluencelabs/sqlite/releases/download/v0.11.0_w/sqlite3.wasm";
+    "https://github.com/fluencelabs/sqlite/releases/download/v0.12.0_w/sqlite3.wasm";
 
 pub async fn download(url: &str) -> bytes::Bytes {
     reqwest::get(url)
