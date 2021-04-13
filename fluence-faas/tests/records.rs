@@ -157,56 +157,61 @@ pub fn records() {
 }
 
 #[test]
-fn inner_records() {
-    let inner_records_config_raw = std::fs::read("./tests/wasm_tests/inner_records/Config.toml")
-        .expect("../examples/greeting/artifacts/greeting.wasm should presence");
+fn records_passing() {
+    let inner_records_config_raw = std::fs::read("./tests/wasm_tests/records_passing/Config.toml")
+        .expect("./tests/wasm_tests/records_passing/Config.toml should presence");
 
-    let mut inner_records_config: fluence_faas::TomlFaaSConfig =
+    let mut records_passing_config: fluence_faas::TomlFaaSConfig =
         toml::from_slice(&inner_records_config_raw)
             .expect("argument passing test config should be well-formed");
 
-    inner_records_config.modules_dir =
-        Some(String::from("./tests/wasm_tests/inner_records/artifacts"));
+    records_passing_config.modules_dir =
+        Some(String::from("./tests/wasm_tests/records_passing/artifacts"));
 
-    let mut faas = FluenceFaaS::with_raw_config(inner_records_config)
+    let mut faas = FluenceFaaS::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let result = faas
-        .call_with_json(
-            "inner_records_pure",
-            "test_record",
-            json!({
-                "test_record": {
-                    "test_record_0": {
-                        "field_0": 0
-                    },
-                    "test_record_1": {
-                        "field_0": 1,
-                        "field_1": "",
-                        "field_2": vec![1],
+    let mut test = |func_name: &str| {
+        let result = faas
+            .call_with_json(
+                "records_passing_pure",
+                func_name,
+                json!({
+                    "test_record": {
                         "test_record_0": {
-                            "field_0": 1
+                            "field_0": 0
+                        },
+                        "test_record_1": {
+                            "field_0": 1,
+                            "field_1": "",
+                            "field_2": vec![1],
+                            "test_record_0": {
+                                "field_0": 1
+                            }
                         }
                     }
-                }
-            }),
-            <_>::default(),
-        )
-        .unwrap_or_else(|e| panic!("can't invoke inner_records_pure: {:?}", e));
+                }),
+                <_>::default(),
+            )
+            .unwrap_or_else(|e| panic!("can't invoke inner_records_pure: {:?}", e));
 
-    let right_result = json!({
+        let right_result = json!({
             "test_record_0": {
                 "field_0": 1
             },
             "test_record_1": {
                 "field_0": 1,
-                "field_1": "",
-                "field_2": vec![1],
+                "field_1": "fluence",
+                "field_2": vec![0x13, 0x37],
                 "test_record_0": {
-                    "field_0": 1
+                    "field_0": 5
                 }
             }
-    });
+        });
 
-    assert_eq!(result, right_result);
+        assert_eq!(result, right_result);
+    };
+
+    test("test_record");
+    test("test_record_ref");
 }

@@ -22,7 +22,7 @@ members = [
     "fluence-faas",
     "fluence-faas/tests/wasm_tests/arguments_passing",
     "fluence-faas/tests/wasm_tests/arrays_passing",
-    "fluence-faas/tests/wasm_tests/inner_records",
+    "fluence-faas/tests/wasm_tests/records_passing",
     "tools/cli",
     "tools/repl",
 ]

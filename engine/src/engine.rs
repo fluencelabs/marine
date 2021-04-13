@@ -52,12 +52,7 @@ impl FCE {
         arguments: &[IValue],
     ) -> FCEResult<Vec<IValue>> {
         self.modules.get_mut(module_name.as_ref()).map_or_else(
-            || {
-                Err(FCEError::NoSuchModule(format!(
-                    "trying to call module with name {} that is not loaded",
-                    module_name.as_ref()
-                )))
-            },
+            || Err(FCEError::NoSuchModule(module_name.as_ref().to_string())),
             |module| module.call(module_name.as_ref(), func_name.as_ref(), arguments),
         )
     }
@@ -97,12 +92,7 @@ impl FCE {
         self.modules
             .remove(name.as_ref())
             .map(|_| ())
-            .ok_or_else(|| {
-                FCEError::NoSuchModule(format!(
-                    "trying to unload module with name {} that is not loaded",
-                    name.as_ref()
-                ))
-            })
+            .ok_or_else(|| FCEError::NoSuchModule(name.as_ref().to_string()))
     }
 
     pub fn module_wasi_state<S: AsRef<str>>(

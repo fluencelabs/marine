@@ -245,7 +245,7 @@ checksum = "52785868311163c46203e5be682d01623fc550949e24b7943eb8e4b80c9ca937"
 dependencies = [
  "anyhow",
  "chrono",
- "reqwest 0.11.2",
+ "reqwest 0.11.3",
  "semver 0.11.0",
  "serde",
 ]
@@ -730,7 +730,7 @@ dependencies = [
 [[package]]
 name = "fce-timestamp-macro"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#e2a1e66e170abd992ee5b1a1bd21347494fcf91c"
+source = "git+https://github.com/fluencelabs/rust-sdk#339dd4d58a9e7481ad4cc9e73e19a8ebe96b46fe"
 dependencies = [
  "chrono",
  "quote",
@@ -807,7 +807,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#e2a1e66e170abd992ee5b1a1bd21347494fcf91c"
+source = "git+https://github.com/fluencelabs/rust-sdk#339dd4d58a9e7481ad4cc9e73e19a8ebe96b46fe"
 dependencies = [
  "fce-timestamp-macro",
  "fluence-sdk-macro 0.6.0",
@@ -879,7 +879,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#e2a1e66e170abd992ee5b1a1bd21347494fcf91c"
+source = "git+https://github.com/fluencelabs/rust-sdk#339dd4d58a9e7481ad4cc9e73e19a8ebe96b46fe"
 dependencies = [
  "fluence-sdk-wit 0.6.0",
 ]
@@ -898,7 +898,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#e2a1e66e170abd992ee5b1a1bd21347494fcf91c"
+source = "git+https://github.com/fluencelabs/rust-sdk#339dd4d58a9e7481ad4cc9e73e19a8ebe96b46fe"
 dependencies = [
  "fluence-sdk-macro 0.6.0",
  "log",
@@ -922,7 +922,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#e2a1e66e170abd992ee5b1a1bd21347494fcf91c"
+source = "git+https://github.com/fluencelabs/rust-sdk#339dd4d58a9e7481ad4cc9e73e19a8ebe96b46fe"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1175,8 +1175,8 @@ dependencies = [
  "http",
  "indexmap",
  "slab",
- "tokio 1.4.0",
- "tokio-util 0.6.5",
+ "tokio 1.5.0",
+ "tokio-util 0.6.6",
  "tracing",
 ]
 
@@ -1305,7 +1305,7 @@ dependencies = [
  "itoa",
  "pin-project",
  "socket2 0.4.0",
- "tokio 1.4.0",
+ "tokio 1.5.0",
  "tower-service",
  "tracing",
  "want",
@@ -1333,7 +1333,7 @@ dependencies = [
  "bytes 1.0.1",
  "hyper 0.14.5",
  "native-tls",
- "tokio 1.4.0",
+ "tokio 1.5.0",
  "tokio-native-tls",
 ]
 
@@ -1369,14 +1369,6 @@ dependencies = [
  "autocfg",
  "hashbrown",
  "serde",
-]
-
-[[package]]
-name = "inner-records-test"
-version = "0.1.0"
-dependencies = [
- "fluence 0.6.0",
- "safe-transmute",
 ]
 
 [[package]]
@@ -2118,6 +2110,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "records-passing-test"
+version = "0.1.0"
+dependencies = [
+ "fluence 0.6.0",
+ "safe-transmute",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.1.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2225,9 +2225,9 @@ dependencies = [
 
 [[package]]
 name = "reqwest"
-version = "0.11.2"
+version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf12057f289428dbf5c591c74bf10392e4a8003f993405a902f20117019022d4"
+checksum = "2296f2fac53979e8ccbc4a1136b25dcefd37be9ed7e4a1f6b05a6029c84ff124"
 dependencies = [
  "base64",
  "bytes 1.0.1",
@@ -2249,7 +2249,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_urlencoded",
- "tokio 1.4.0",
+ "tokio 1.5.0",
  "tokio-native-tls",
  "url",
  "wasm-bindgen",
@@ -2731,9 +2731,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.4.0"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "134af885d758d645f0f0505c9a8b3f9bf8a348fd822e112ab5248138348f1722"
+checksum = "83f0c8e7c0addab50b663055baf787d0af7f413a46e6e7fb9559a4e4db7137a5"
 dependencies = [
  "autocfg",
  "bytes 1.0.1",
@@ -2762,7 +2762,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7d995660bd2b7f8c1568414c1126076c13fbb725c40112dc0120b78eb9b717b"
 dependencies = [
  "native-tls",
- "tokio 1.4.0",
+ "tokio 1.5.0",
 ]
 
 [[package]]
@@ -2791,16 +2791,16 @@ dependencies = [
 
 [[package]]
 name = "tokio-util"
-version = "0.6.5"
+version = "0.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5143d049e85af7fbc36f5454d990e62c2df705b3589f123b71f441b6b59f443f"
+checksum = "940a12c99365c31ea8dd9ba04ec1be183ffe4920102bb7122c2f515437601e8e"
 dependencies = [
  "bytes 1.0.1",
  "futures-core",
  "futures-sink",
  "log",
  "pin-project-lite 0.2.6",
- "tokio 1.4.0",
+ "tokio 1.5.0",
 ]
 
 [[package]]
