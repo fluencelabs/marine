@@ -43,7 +43,7 @@ pub fn invoke() -> TestRecord {
         field_12: Vec::new(),
     };
 
-    unsafe { mutate_struct(test_record) }
+    mutate_struct(test_record)
 }
 
 #[fce]

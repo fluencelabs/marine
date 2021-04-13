@@ -44,7 +44,7 @@ fn main() {}
 
 #[fce]
 pub fn test_record(test_record: TestRecord2) -> TestRecord2 {
-    let mut test_record = unsafe { effector::test_record(test_record) };
+    let mut test_record = effector::test_record(test_record);
 
     test_record.test_record_1 = TestRecord1 {
         field_0: 1,
@@ -58,7 +58,7 @@ pub fn test_record(test_record: TestRecord2) -> TestRecord2 {
 
 #[fce]
 fn test_record_ref(test_record: &TestRecord2) -> TestRecord2 {
-    let mut test_record = unsafe { effector::test_record_ref(test_record) };
+    let mut test_record = effector::test_record_ref(test_record);
 
     test_record.test_record_1 = TestRecord1 {
         field_0: 1,

@@ -29,8 +29,8 @@ pub fn main() {
 /// Calls `curl` and stores returned result into a file.
 #[fce]
 pub fn get_n_save(url: String, file_name: String) -> String {
-    let result = unsafe { download(url) };
-    unsafe { file_put(file_name, result.into_bytes()) };
+    let result = download(url);
+    file_put(file_name, result.into_bytes());
 
     String::from("Ok")
 }

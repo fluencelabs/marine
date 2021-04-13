@@ -24,7 +24,7 @@ pub fn main() {}
 pub fn byte_type(mut arg: Vec<u8>) -> Vec<u8> {
     arg.push(0);
 
-    let mut arg = unsafe { effector::byte_type(arg) };
+    let mut arg =  effector::byte_type(arg);
 
     arg.push(2);
     arg
@@ -34,7 +34,7 @@ pub fn byte_type(mut arg: Vec<u8>) -> Vec<u8> {
 pub fn inner_arrays_1(mut arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<Vec<Vec<Vec<u8>>>> {
     arg.push(vec![vec![vec![0]]]);
 
-    let mut arg = unsafe { effector::inner_arrays_1(arg) };
+    let mut arg =  effector::inner_arrays_1(arg);
 
     arg.push(vec![vec![vec![2]]]);
     arg
@@ -57,7 +57,7 @@ pub fn inner_arrays_2(mut arg: Vec<Vec<Vec<Vec<TestRecord>>>>) -> Vec<Vec<Vec<Ve
         TestRecord::default(),
     ]]]);
 
-    let mut arg = unsafe { effector::inner_arrays_2(arg) };
+    let mut arg =  effector::inner_arrays_2(arg);
 
     arg.push(vec![vec![vec![
         TestRecord {
@@ -74,7 +74,7 @@ pub fn inner_arrays_2(mut arg: Vec<Vec<Vec<Vec<TestRecord>>>>) -> Vec<Vec<Vec<Ve
 pub fn string_type(mut arg: Vec<String>) -> Vec<String> {
     arg.push(String::from("fce"));
 
-    let mut arg = unsafe { effector::string_type(arg) };
+    let mut arg =  effector::string_type(arg);
 
     arg.push(String::from("test"));
     arg
@@ -83,7 +83,7 @@ pub fn string_type(mut arg: Vec<String>) -> Vec<String> {
 /*
 #[fce]
 pub fn bool_type(arg: Vec<bool>) -> Vec<bool> {
-    let mut arg = unsafe { effector::bool_type(arg) };
+    let mut arg =  effector::bool_type(arg);
 
     arg.push(false);
     arg
@@ -94,7 +94,7 @@ pub fn bool_type(arg: Vec<bool>) -> Vec<bool> {
 pub fn f32_type(mut arg: Vec<f32>) -> Vec<f32> {
     arg.push(0.0);
 
-    let mut arg = unsafe { effector::f32_type(arg) };
+    let mut arg =  effector::f32_type(arg);
 
     arg.push(1.0);
     arg
@@ -104,7 +104,7 @@ pub fn f32_type(mut arg: Vec<f32>) -> Vec<f32> {
 pub fn f64_type(mut arg: Vec<f64>) -> Vec<f64> {
     arg.push(0.0);
 
-    let mut arg = unsafe { effector::f64_type(arg) };
+    let mut arg =  effector::f64_type(arg);
 
     arg.push(1.0);
     arg
@@ -114,7 +114,7 @@ pub fn f64_type(mut arg: Vec<f64>) -> Vec<f64> {
 pub fn u32_type(mut arg: Vec<u32>) -> Vec<u32> {
     arg.push(0);
 
-    let mut arg = unsafe { effector::u32_type(arg) };
+    let mut arg =  effector::u32_type(arg);
 
     arg.push(2);
     arg
@@ -124,7 +124,7 @@ pub fn u32_type(mut arg: Vec<u32>) -> Vec<u32> {
 pub fn u64_type(mut arg: Vec<u64>) -> Vec<u64> {
     arg.push(0);
 
-    let mut arg = unsafe { effector::u64_type(arg) };
+    let mut arg =  effector::u64_type(arg);
 
     arg.push(2);
     arg
@@ -134,7 +134,7 @@ pub fn u64_type(mut arg: Vec<u64>) -> Vec<u64> {
 pub fn i32_type(mut arg: Vec<i32>) -> Vec<i32> {
     arg.push(0);
 
-    let mut arg = unsafe { effector::i32_type(arg) };
+    let mut arg =  effector::i32_type(arg);
 
     arg.push(2);
     arg
@@ -144,7 +144,7 @@ pub fn i32_type(mut arg: Vec<i32>) -> Vec<i32> {
 pub fn i64_type(mut arg: Vec<i64>) -> Vec<i64> {
     arg.push(0);
 
-    let mut arg = unsafe { effector::i64_type(arg) };
+    let mut arg =  effector::i64_type(arg);
 
     arg.push(1);
     arg
@@ -152,7 +152,7 @@ pub fn i64_type(mut arg: Vec<i64>) -> Vec<i64> {
 
 #[fce]
 pub fn empty_type() -> Vec<String> {
-    unsafe { effector::empty_type() }
+     effector::empty_type()
 }
 
 mod effector {
