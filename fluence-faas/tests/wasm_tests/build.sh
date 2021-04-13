@@ -5,21 +5,21 @@
   cd arguments_passing || exit;
   cargo update;
   fce build --release;
-  rm artifacts/*;
+  rm artifacts/* || true;
 )
 
 (
   cd arrays_passing || exit;
   cargo update;
   fce build --release;
-  rm artifacts/*;
+  rm artifacts/* || true;
 )
 
 (
   cd records_passing || exit;
   cargo update;
   fce build --release;
-  rm artifacts/*;
+  rm artifacts/* || true;
 )
 
 cp ../../../target/wasm32-wasi/release/arguments_passing_effector.wasm arguments_passing/artifacts/
