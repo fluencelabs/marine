@@ -14,6 +14,5 @@ name = "arrays_passing_effector"
 path = "src/effector.rs"
 
 [dependencies]
-# fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "safe_imports" }
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "safe_imports" }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
 safe-transmute = "0.11.0"

@@ -69,7 +69,7 @@ dependencies = [
 name = "arguments-passing-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
  "safe-transmute",
 ]
 
@@ -83,7 +83,7 @@ checksum = "a4c527152e37cf757a3f78aae5a06fbeefdb07ccc535c980a3208ee3060dd544"
 name = "arrays-passing-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
  "safe-transmute",
 ]
 
@@ -205,7 +205,7 @@ checksum = "b700ce4376041dcd0a327fd0097c41095743c4c8af8887265942faf1100bd040"
 name = "call_parameters"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
 ]
 
 [[package]]
@@ -445,7 +445,7 @@ dependencies = [
 name = "curl_adapter"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
  "log",
 ]
 
@@ -650,7 +650,7 @@ name = "facade"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
  "log",
 ]
 
@@ -711,7 +711,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
- "fluence-sdk-main 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence-sdk-main 0.6.0",
  "semver 0.11.0",
  "serde",
  "thiserror",
@@ -724,22 +724,13 @@ name = "fce-sqlite-connector"
 version = "0.3.0"
 source = "git+https://github.com/fluencelabs/sqlite-wasm-connector?branch=fluence_0_6_0#6cf624a62b27d35351aa390cfa20b3358655fe1f"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.6.0",
 ]
 
 [[package]]
 name = "fce-timestamp-macro"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports#d23267e415d833430598397acda7f6f61d07728a"
-dependencies = [
- "chrono",
- "quote",
-]
-
-[[package]]
-name = "fce-timestamp-macro"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#339dd4d58a9e7481ad4cc9e73e19a8ebe96b46fe"
+source = "git+https://github.com/fluencelabs/rust-sdk#1755202195c1e2a86c962219ac1420664afe3d49"
 dependencies = [
  "chrono",
  "quote",
@@ -755,7 +746,7 @@ version = "0.3.0"
 dependencies = [
  "cargo_toml",
  "fce-wit-parser",
- "fluence-sdk-wit 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence-sdk-wit 0.6.0",
  "once_cell",
  "serde",
  "serde_json",
@@ -816,22 +807,11 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports#d23267e415d833430598397acda7f6f61d07728a"
+source = "git+https://github.com/fluencelabs/rust-sdk#1755202195c1e2a86c962219ac1420664afe3d49"
 dependencies = [
- "fce-timestamp-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
- "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
- "fluence-sdk-main 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
- "serde",
-]
-
-[[package]]
-name = "fluence"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#339dd4d58a9e7481ad4cc9e73e19a8ebe96b46fe"
-dependencies = [
- "fce-timestamp-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
- "fluence-sdk-main 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fce-timestamp-macro",
+ "fluence-sdk-macro 0.6.0",
+ "fluence-sdk-main 0.6.0",
  "serde",
 ]
 
@@ -857,8 +837,8 @@ dependencies = [
  "env_logger 0.7.1",
  "fce",
  "fce-utils",
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
- "fluence-sdk-main 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
+ "fluence-sdk-main 0.6.0",
  "itertools",
  "log",
  "once_cell",
@@ -899,17 +879,9 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports#d23267e415d833430598397acda7f6f61d07728a"
+source = "git+https://github.com/fluencelabs/rust-sdk#1755202195c1e2a86c962219ac1420664afe3d49"
 dependencies = [
- "fluence-sdk-wit 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
-]
-
-[[package]]
-name = "fluence-sdk-macro"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#339dd4d58a9e7481ad4cc9e73e19a8ebe96b46fe"
-dependencies = [
- "fluence-sdk-wit 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-wit 0.6.0",
 ]
 
 [[package]]
@@ -926,19 +898,9 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports#d23267e415d833430598397acda7f6f61d07728a"
+source = "git+https://github.com/fluencelabs/rust-sdk#1755202195c1e2a86c962219ac1420664afe3d49"
 dependencies = [
- "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
- "log",
- "serde",
-]
-
-[[package]]
-name = "fluence-sdk-main"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#339dd4d58a9e7481ad4cc9e73e19a8ebe96b46fe"
-dependencies = [
- "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence-sdk-macro 0.6.0",
  "log",
  "serde",
 ]
@@ -960,20 +922,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports#d23267e415d833430598397acda7f6f61d07728a"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn",
- "uuid",
-]
-
-[[package]]
-name = "fluence-sdk-wit"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#339dd4d58a9e7481ad4cc9e73e19a8ebe96b46fe"
+source = "git+https://github.com/fluencelabs/rust-sdk#1755202195c1e2a86c962219ac1420664afe3d49"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1023,7 +972,7 @@ dependencies = [
  "clap",
  "env_logger 0.7.1",
  "fluence-app-service",
- "fluence-sdk-main 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence-sdk-main 0.6.0",
  "itertools",
  "log",
  "rustop",
@@ -1466,7 +1415,7 @@ dependencies = [
 name = "ipfs-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
  "log",
 ]
 
@@ -1474,7 +1423,7 @@ dependencies = [
 name = "ipfs-pure"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
  "log",
 ]
 
@@ -1559,7 +1508,7 @@ checksum = "9385f66bf6105b241aa65a61cb923ef20efc665cb9f9bb50ac2f0c4b7f378d41"
 name = "local_storage"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
  "log",
 ]
 
@@ -2148,7 +2097,7 @@ dependencies = [
 name = "record-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
  "test-record",
 ]
 
@@ -2156,7 +2105,7 @@ dependencies = [
 name = "record-pure"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
  "test-record",
 ]
 
@@ -2164,7 +2113,7 @@ dependencies = [
 name = "records-passing-test"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
  "safe-transmute",
 ]
 
@@ -2686,7 +2635,7 @@ dependencies = [
 name = "test-record"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
 ]
 
 [[package]]
@@ -3187,7 +3136,7 @@ checksum = "d9a543ae66aa233d14bb765ed9af4a33e81b8b58d1584cf1b47ff8cd0b9e4489"
 name = "wasm-greeting"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
 ]
 
 [[package]]
@@ -3195,7 +3144,7 @@ name = "wasm-sqlite-test"
 version = "0.1.0"
 dependencies = [
  "fce-sqlite-connector",
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=safe_imports)",
+ "fluence 0.6.0",
 ]
 
 [[package]]
