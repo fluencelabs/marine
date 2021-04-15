@@ -54,7 +54,7 @@ pub fn put(file_path: String) -> String {
         file_path,
     ];
 
-    let ipfs_result = unsafe { ipfs(cmd) };
+    let ipfs_result = ipfs(cmd);
     ipfs_result
         .into_std()
         .unwrap()
