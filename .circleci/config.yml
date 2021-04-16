@@ -9,9 +9,9 @@ jobs:
       #RUST_TEST_THREADS: 1
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - fce06-{{ checksum "Cargo.lock" }}
+#      - restore_cache:
+#          keys:
+#            - fce06-{{ checksum "Cargo.lock" }}
       - run: |
           rustup toolchain install nightly-2021-03-24
           rustup default nightly-2021-03-24
@@ -32,11 +32,11 @@ jobs:
           cargo test --release -v --all-features
           cargo clippy -v
 
-      - save_cache:
-          paths:
-            - ~/.cargo
-            - ~/.rustup
-          key: fce06-{{ checksum "Cargo.lock" }}
+#      - save_cache:
+#          paths:
+#            - ~/.cargo
+#            - ~/.rustup
+#          key: fce06-{{ checksum "Cargo.lock" }}
 
 workflows:
   version: 2.1
