@@ -78,7 +78,7 @@ pub fn get(hash: String) -> String {
         hash,
     ];
 
-    unsafe { ipfs(cmd) };
+    ipfs(cmd);
     RESULT_FILE_PATH.to_string()
 }
 
