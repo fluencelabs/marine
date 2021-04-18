@@ -20,7 +20,7 @@ use crate::instructions_generator::WITGenerator;
 use crate::instructions_generator::WITResolver;
 use crate::Result;
 
-pub use fluence_sdk_wit::FCEAst;
+pub use fluence_sdk_wit::SDKAst;
 use wasmer_wit::ast::Interfaces;
 use wasmer_wit::IRecordType;
 use wasmer_wit::IType;
@@ -43,18 +43,18 @@ pub fn embed_wit(path: std::path::PathBuf) -> Result<()> {
 }
 
 pub(crate) struct ModuleAST {
-    pub(crate) records: Vec<fluence_sdk_wit::AstRecordItem>,
-    pub(crate) functions: Vec<fluence_sdk_wit::AstFnItem>,
-    pub(crate) extern_mods: Vec<fluence_sdk_wit::AstExternModItem>,
+    pub(crate) records: Vec<fluence_sdk_wit::RecordItem>,
+    pub(crate) functions: Vec<fluence_sdk_wit::FnItem>,
+    pub(crate) extern_mods: Vec<fluence_sdk_wit::ExternModItem>,
 }
 
 /// Extract all custom AST types previously embedded by rust-sdk from compiled binary.
 fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<ModuleAST> {
     use fluence_sdk_wit::*;
 
-    let mut records: Vec<AstRecordItem> = Vec::new();
-    let mut functions: Vec<AstFnItem> = Vec::new();
-    let mut extern_mods: Vec<AstExternModItem> = Vec::new();
+    let mut records: Vec<RecordItem> = Vec::new();
+    let mut functions: Vec<FnItem> = Vec::new();
+    let mut extern_mods: Vec<ExternModItem> = Vec::new();
 
     // consider only sections name of that starts with GENERATED_SECTION_PREFIX
     for custom_module in wasm_module.customs.iter().filter(|(_, section)| {
@@ -64,11 +64,11 @@ fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<ModuleAST> {
     }) {
         let default_ids = walrus::IdsToIndices::default();
         let raw_data = custom_module.1.data(&default_ids);
-        let decoded_json: FCEAst = serde_json::from_slice(&raw_data)?;
+        let decoded_json: SDKAst = serde_json::from_slice(&raw_data)?;
         match decoded_json {
-            FCEAst::Record(record) => records.push(record),
-            FCEAst::Function(function) => functions.push(function),
-            FCEAst::ExternMod(extern_mod) => extern_mods.push(extern_mod),
+            SDKAst::Record(record) => records.push(record),
+            SDKAst::Function(function) => functions.push(function),
+            SDKAst::ExternMod(extern_mod) => extern_mods.push(extern_mod),
         }
     }
 

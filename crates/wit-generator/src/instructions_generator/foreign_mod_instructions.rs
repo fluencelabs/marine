@@ -20,10 +20,10 @@ use super::utils::ptype_to_itype_checked;
 use crate::default_export_api_config::*;
 use crate::Result;
 
-use fluence_sdk_wit::AstExternModItem;
-use fluence_sdk_wit::AstExternFnItem;
+use fluence_sdk_wit::ExternModItem;
+use fluence_sdk_wit::ExternFnItem;
 use fluence_sdk_wit::ParsedType;
-use fluence_sdk_wit::AstFnArgument;
+use fluence_sdk_wit::FnArgument;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
 use wasmer_wit::interpreter::Instruction;
 use crate::instructions_generator::utils::wtype_to_itype;
@@ -32,7 +32,7 @@ use std::rc::Rc;
 
 const HOST_NAMESPACE_NAME: &str = "host";
 
-impl WITGenerator for AstExternModItem {
+impl WITGenerator for ExternModItem {
     fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
         // host imports should be left as is
         if self.namespace == HOST_NAMESPACE_NAME {
@@ -48,7 +48,7 @@ impl WITGenerator for AstExternModItem {
 }
 
 fn generate_wit_for_import<'a>(
-    import: &'a AstExternFnItem,
+    import: &'a ExternFnItem,
     namespace: &'a str,
     wit_resolver: &mut WITResolver<'a>,
 ) -> Result<()> {
@@ -280,7 +280,7 @@ impl ForeignModInstructionGenerator for ParsedType {
 use fluence_sdk_wit::RustType;
 use wasmer_wit::IType;
 
-pub fn to_raw_input_types(arg: &AstFnArgument) -> Vec<IFunctionArg> {
+pub fn to_raw_input_types(arg: &FnArgument) -> Vec<IFunctionArg> {
     match arg.ty {
         ParsedType::Boolean(_)
         | ParsedType::I8(_)

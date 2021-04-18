@@ -20,14 +20,14 @@ use super::utils::ptype_to_itype_checked;
 use crate::default_export_api_config::*;
 use crate::Result;
 
-use fluence_sdk_wit::AstFnItem;
+use fluence_sdk_wit::FnItem;
 use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
 
 use std::rc::Rc;
 
-impl WITGenerator for AstFnItem {
+impl WITGenerator for FnItem {
     fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
         use wasmer_wit::ast::Type;
         use wasmer_wit::ast::Adapter;

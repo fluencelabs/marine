@@ -18,16 +18,22 @@ use super::WITGenerator;
 use super::WITResolver;
 use crate::Result;
 
-use fluence_sdk_wit::AstRecordItem;
+use fluence_sdk_wit::RecordItem;
+use fluence_sdk_wit::RecordFields;
 
 use wasmer_wit::IRecordFieldType;
 use wasmer_wit::IRecordType;
 use wasmer_wit::NEVec;
 
-impl WITGenerator for AstRecordItem {
+impl WITGenerator for RecordItem {
     fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
-        let fields = self
-            .fields
+        let fields = match &self.fields {
+            RecordFields::Named(fields) => fields,
+            RecordFields::Unnamed(fields) => fields,
+            RecordFields::Unit => return Ok(()),
+        };
+
+        let fields = fields
             .iter()
             .map(|field| IRecordFieldType {
                 name: field.name.clone().unwrap_or_default(),
