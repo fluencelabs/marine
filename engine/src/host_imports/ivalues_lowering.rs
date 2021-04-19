@@ -18,18 +18,20 @@
 /// and pass it to a Wasm module as raw WValues (Wasm types).
 use super::WValue;
 use super::AllocateFunc;
-use super::utils::write_to_wasm_mem;
-use crate::call_wasm_func;
+//use super::utils::write_to_wasm_mem;
+//use crate::call_wasm_func;
 use crate::IValue;
 
 use wasmer_core::vm::Ctx;
 use wasmer_wit::NEVec;
 
 pub(super) fn ivalue_to_wvalues(
-    ctx: &mut Ctx,
-    ivalue: Option<IValue>,
-    allocate_func: &AllocateFunc,
+    _ctx: &mut Ctx,
+    _ivalue: Option<IValue>,
+    _allocate_func: &AllocateFunc,
 ) -> Vec<WValue> {
+    unimplemented!()
+    /*
     match ivalue {
         Some(IValue::S8(v)) => vec![WValue::I32(v as _)],
         Some(IValue::S16(v)) => vec![WValue::I32(v as _)],
@@ -59,13 +61,16 @@ pub(super) fn ivalue_to_wvalues(
         }
         None => vec![],
     }
+     */
 }
 
 fn lower_array(
-    ctx: &mut Ctx,
-    array_values: Vec<IValue>,
-    allocate_func: &AllocateFunc,
+    _ctx: &mut Ctx,
+    _array_values: Vec<IValue>,
+    _allocate_func: &AllocateFunc,
 ) -> (usize, usize) {
+    unimplemented!()
+    /*
     let mut result: Vec<u64> = Vec::with_capacity(array_values.len());
 
     for value in array_values {
@@ -113,9 +118,13 @@ fn lower_array(
     write_to_wasm_mem(ctx, result_pointer as _, result);
 
     (result_pointer as _, result.len() as _)
+
+     */
 }
 
-fn lower_record(ctx: &mut Ctx, values: NEVec<IValue>, allocate_func: &AllocateFunc) -> i32 {
+fn lower_record(_ctx: &mut Ctx, _values: NEVec<IValue>, _allocate_func: &AllocateFunc) -> i32 {
+    unimplemented!()
+    /*
     let mut result: Vec<u64> = Vec::with_capacity(values.len());
 
     for value in values.into_vec() {
@@ -169,4 +178,5 @@ fn lower_record(ctx: &mut Ctx, values: NEVec<IValue>, allocate_func: &AllocateFu
     write_to_wasm_mem(ctx, offset as _, result);
 
     offset as _
+     */
 }

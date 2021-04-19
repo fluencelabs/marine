@@ -48,7 +48,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4c49b8a5fe1336a9c6981be09cb13706c7d9083e48588d692120b5080a13278"
 dependencies = [
  "fluence 0.2.18",
- "fluence-it-types",
+ "fluence-it-types 0.1.1",
  "serde",
 ]
 
@@ -839,7 +839,7 @@ dependencies = [
  "fce-utils",
  "fluence 0.6.0",
  "fluence-sdk-main 0.6.0",
- "itertools",
+ "itertools 0.9.0",
  "log",
  "once_cell",
  "pretty_assertions",
@@ -861,7 +861,15 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b81c770e52b35e2406f8251f6c01b3b882c3eaed3029731d8c19c74dc1b423c"
 dependencies = [
- "it-to-bytes",
+ "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde",
+]
+
+[[package]]
+name = "fluence-it-types"
+version = "0.2.0"
+dependencies = [
+ "it-to-bytes 0.1.0",
  "nom",
  "serde",
  "wast",
@@ -985,7 +993,7 @@ dependencies = [
  "env_logger 0.7.1",
  "fluence-app-service",
  "fluence-sdk-main 0.6.0",
- "itertools",
+ "itertools 0.9.0",
  "log",
  "rustop",
  "rustyline",
@@ -1448,6 +1456,10 @@ checksum = "47be2f14c678be2fdcab04ab1171db51b2762ce6f0a8ee87c8dd4a04ed216135"
 [[package]]
 name = "it-to-bytes"
 version = "0.1.0"
+
+[[package]]
+name = "it-to-bytes"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "729c74bb4236418898a219c6d96f14cba77456dd7c04a2e99e65e9c643709b56"
 
@@ -1456,6 +1468,15 @@ name = "itertools"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "284f18f85651fe11e8a991b2adb42cb078325c996ed026d994719efcfca1d54b"
+dependencies = [
+ "either",
+]
+
+[[package]]
+name = "itertools"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37d572918e350e82412fe766d24b15e6682fb2ed2bbe018280caa810397cb319"
 dependencies = [
  "either",
 ]
@@ -3213,12 +3234,11 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.19.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be2004c1e24c8d51bd7732b8cbd968c6015b2d766fb31d19794c3ea3474cc297"
+version = "0.20.0"
 dependencies = [
- "fluence-it-types",
- "it-to-bytes",
+ "fluence-it-types 0.2.0",
+ "it-to-bytes 0.1.0",
+ "itertools 0.10.0",
  "log",
  "nom",
  "safe-transmute",

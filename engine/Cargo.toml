@@ -20,7 +20,7 @@ fce-utils = { path = "../crates/utils", version = "0.1.29" }
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
-wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.19.0" }
+wasmer-wit = { package = "wasmer-interface-types-fl", path = "/Users/mike/dev/work/fluence/wasm/interface-types/wasmer-it" }
 wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 
 multimap = "0.8.1"

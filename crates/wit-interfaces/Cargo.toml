@@ -11,5 +11,5 @@ name = "fce_wit_interfaces"
 path = "src/lib.rs"
 
 [dependencies]
-wasmer-wit = { package = "wasmer-interface-types-fl", version = "=0.19.0" }
+wasmer-wit = { package = "wasmer-interface-types-fl", path = "/Users/mike/dev/work/fluence/wasm/interface-types/wasmer-it" }
 multimap = "0.8.1"
