@@ -29,8 +29,8 @@ jobs:
           (cd ./examples; ./build.sh)
           (cd ./fluence-faas/tests/wasm_tests; ./build.sh)
 
-          cargo test --release -v --all-features
-          cargo clippy -v
+          cargo test --release -v --all-features -p fce -p fluence-faas -p fluence-app-service -p aquamarine-vm -p fcli -p frepl
+          cargo clippy -v -p fce -p fluence-faas -p fluence-app-service -p aquamarine-vm -p fcli -p frepl
 
       - save_cache:
           paths:
