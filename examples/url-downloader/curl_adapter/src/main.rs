@@ -33,7 +33,7 @@ pub fn main() {
 pub fn download(url: String) -> String {
     log::info!("get called with url {}", url);
 
-    let result = unsafe { curl(vec![url]) };
+    let result = curl(vec![url]);
     String::from_utf8(result.stdout).unwrap()
 }
 

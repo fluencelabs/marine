@@ -11,32 +11,32 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - fce05-{{ checksum "Cargo.lock" }}
+            - fce04-{{ checksum "Cargo.lock" }}
       - run: |
-          rustup toolchain install nightly-2021-02-27
-          rustup default nightly-2021-02-27
-          rustup override set nightly-2021-02-27
+          rustup toolchain install nightly-2021-03-24
+          rustup default nightly-2021-03-24
+          rustup override set nightly-2021-03-24
 
-          rustup component add rustfmt --toolchain nightly-2021-02-27
-          rustup component add clippy --toolchain nightly-2021-02-27
+          rustup component add rustfmt --toolchain nightly-2021-03-24
+          rustup component add clippy --toolchain nightly-2021-03-24
           rustup target add wasm32-wasi
 
           cargo install --path tools/cli
 
           cargo fmt --all -- --check --color always
-          cargo check -v --all-features
+          cargo check -v --all-features -p fce -p fluence-faas -p fluence-app-service -p aquamarine-vm -p fcli -p frepl
 
           (cd ./examples; ./build.sh)
           (cd ./fluence-faas/tests/wasm_tests; ./build.sh)
 
-          cargo test --release -v --all-features
-          cargo clippy -v
+          cargo test --release -v --all-features -p fce -p fluence-faas -p fluence-app-service -p aquamarine-vm -p fcli -p frepl
+          cargo clippy -v -p fce -p fluence-faas -p fluence-app-service -p aquamarine-vm -p fcli -p frepl
 
       - save_cache:
           paths:
             - ~/.cargo
             - ~/.rustup
-          key: fce05-{{ checksum "Cargo.lock" }}
+          key: fce04-{{ checksum "Cargo.lock" }}
 
 workflows:
   version: 2.1

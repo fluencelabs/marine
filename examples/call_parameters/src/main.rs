@@ -16,6 +16,11 @@
 
 #[cfg(target_arch = "wasm32")]
 use fluence::fce;
+#[cfg(target_arch = "wasm32")]
+use fluence::module_manifest;
+
+#[cfg(target_arch = "wasm32")]
+module_manifest!();
 
 pub fn main() {}
 
