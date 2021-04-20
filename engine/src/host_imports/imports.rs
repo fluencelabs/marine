@@ -33,6 +33,7 @@ use wasmer_core::types::FuncSig;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::ops::Deref;
 
 pub(crate) fn create_host_import_func(
     descriptor: HostImportDescriptor,
@@ -69,7 +70,11 @@ pub(crate) fn create_host_import_func(
                     .map_or_else(|| default_error_handler(&e), |h| h(&e))
             }
         };
-        let wvalues = ivalue_to_wvalues(ctx, result, &allocate_func);
+        let memory_index = 0;
+        let view = ctx.memory(memory_index).view::<u8>();
+        let memory = view.deref();
+        let memory = WasmMemory::new(memory);
+        let wvalues = ivalue_to_wvalues(&memory, result, &allocate_func);
 
         // TODO: refactor this when multi-value is supported
         match wvalues.len() {
