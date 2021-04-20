@@ -205,7 +205,7 @@ checksum = "b700ce4376041dcd0a327fd0097c41095743c4c8af8887265942faf1100bd040"
 name = "call_parameters"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.6.0",
 ]
 
 [[package]]
@@ -445,7 +445,7 @@ dependencies = [
 name = "curl_adapter"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.6.0",
  "log",
 ]
 
@@ -650,7 +650,7 @@ name = "facade"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.6.0",
  "log",
 ]
 
@@ -1470,7 +1470,7 @@ dependencies = [
 name = "ipfs-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.6.0",
  "log",
 ]
 
@@ -1478,7 +1478,7 @@ dependencies = [
 name = "ipfs-pure"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.6.0",
  "log",
 ]
 
@@ -1576,7 +1576,7 @@ checksum = "9385f66bf6105b241aa65a61cb923ef20efc665cb9f9bb50ac2f0c4b7f378d41"
 name = "local_storage"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.6.0",
  "log",
 ]
 
@@ -2165,7 +2165,7 @@ dependencies = [
 name = "record-effector"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.6.0",
  "test-record",
 ]
 
@@ -2173,7 +2173,7 @@ dependencies = [
 name = "record-pure"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.6.0",
  "test-record",
 ]
 
@@ -2703,7 +2703,7 @@ dependencies = [
 name = "test-record"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.6.0",
 ]
 
 [[package]]
@@ -3204,7 +3204,7 @@ checksum = "d9a543ae66aa233d14bb765ed9af4a33e81b8b58d1584cf1b47ff8cd0b9e4489"
 name = "wasm-greeting"
 version = "0.1.0"
 dependencies = [
- "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk)",
+ "fluence 0.6.0",
 ]
 
 [[package]]
