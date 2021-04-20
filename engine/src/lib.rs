@@ -18,7 +18,7 @@
 #![feature(new_uninit)]
 #![feature(stmt_expr_attributes)]
 #![deny(
-    //dead_code,
+    dead_code,
     nonstandard_style,
     unused_imports,
     unused_mut,

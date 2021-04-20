@@ -83,35 +83,37 @@ fn lower_array(
     let ser_array_size = wasmer_wit::ser_value_size(&values[0]) * elements_count;
     let offset = call_wasm_func!(allocate_func, ser_array_size as _) as usize;
 
+    let writer = memory.sequential_writer(offset);
+
     for value in values {
         match value {
-            IValue::Boolean(value) => memory.write_u8(offset, value as _),
-            IValue::S8(value) => memory.write_array(offset, value.to_le_bytes()),
-            IValue::S16(value) => memory.write_array(offset, value.to_le_bytes()),
-            IValue::S32(value) => memory.write_array(offset, value.to_le_bytes()),
-            IValue::S64(value) => memory.write_array(offset, value.to_le_bytes()),
-            IValue::U8(value) => memory.write_u8(offset, value),
-            IValue::U16(value) => memory.write_array(offset, value.to_le_bytes()),
-            IValue::U32(value) => memory.write_u32(offset, value),
-            IValue::U64(value) => memory.write_array(offset, value.to_le_bytes()),
-            IValue::I32(value) => memory.write_array(offset, value.to_le_bytes()),
-            IValue::I64(value) => memory.write_array(offset, value.to_le_bytes()),
-            IValue::F32(value) => memory.write_array(offset, value.to_le_bytes()),
-            IValue::F64(value) => memory.write_array(offset, value.to_le_bytes()),
+            IValue::Boolean(value) => writer.write_u8(value as _),
+            IValue::S8(value) => writer.write_array(value.to_le_bytes()),
+            IValue::S16(value) => writer.write_array(value.to_le_bytes()),
+            IValue::S32(value) => writer.write_array(value.to_le_bytes()),
+            IValue::S64(value) => writer.write_array(value.to_le_bytes()),
+            IValue::U8(value) => writer.write_u8(value),
+            IValue::U16(value) => writer.write_array(value.to_le_bytes()),
+            IValue::U32(value) => writer.write_u32(value),
+            IValue::U64(value) => writer.write_array(value.to_le_bytes()),
+            IValue::I32(value) => writer.write_array(value.to_le_bytes()),
+            IValue::I64(value) => writer.write_array(value.to_le_bytes()),
+            IValue::F32(value) => writer.write_array(value.to_le_bytes()),
+            IValue::F64(value) => writer.write_array(value.to_le_bytes()),
             IValue::String(value) => {
                 let str_offset = call_wasm_func!(allocate_func, value.len() as _) as u32;
                 memory.write_bytes(str_offset as _, value.as_bytes());
 
-                memory.write_u32(offset, str_offset);
-                memory.write_u32(offset + 4, value.len() as u32);
+                writer.write_u32(str_offset);
+                writer.write_u32(value.len() as u32);
             }
 
             IValue::ByteArray(value) => {
                 let array_offset = call_wasm_func!(allocate_func, value.len() as _) as u32;
                 memory.write_bytes(array_offset as _, &value);
 
-                memory.write_u32(offset, array_offset);
-                memory.write_u32(offset + 4, value.len() as u32);
+                writer.write_u32(array_offset);
+                writer.write_u32(value.len() as u32);
             }
 
             IValue::Array(values) => {
@@ -121,14 +123,14 @@ fn lower_array(
                     (0, 0)
                 };
 
-                memory.write_u32(offset, array_offset as u32);
-                memory.write_u32(offset + 4, array_size as u32);
+                writer.write_u32(array_offset as u32);
+                writer.write_u32(array_size as u32);
             }
 
             IValue::Record(values) => {
                 let record_offset = lower_record(memory, values, allocate_func);
 
-                memory.write_u32(offset, record_offset as u32);
+                writer.write_u32(record_offset as u32);
             }
         }
     }

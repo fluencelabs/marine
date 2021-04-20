@@ -20,6 +20,11 @@ pub(crate) struct MemoryWriter<'m> {
     memory: &'m [Cell<u8>],
 }
 
+pub(crate) struct SequentialWriter<'w, 'm> {
+    writer: &'w MemoryWriter<'m>,
+    offset: Cell<usize>,
+}
+
 impl<'m> MemoryWriter<'m> {
     pub(crate) fn new(memory: &'m [Cell<u8>]) -> Self {
         Self { memory }
@@ -51,5 +56,52 @@ impl<'m> MemoryWriter<'m> {
             .iter()
             .zip(bytes)
             .for_each(|(cell, &byte)| cell.set(byte));
+    }
+
+    pub(super) fn sequential_writer(&self, offset: usize) -> SequentialWriter<'_, '_> {
+        SequentialWriter::new(&self, offset)
+    }
+}
+
+impl<'w, 'm> SequentialWriter<'w, 'm> {
+    pub(super) fn new(writer: &'w MemoryWriter<'m>, offset: usize) -> Self {
+        let offset = Cell::new(offset);
+
+        Self { writer, offset }
+    }
+
+    pub(crate) fn write_array<const N: usize>(&self, values: [u8; N]) {
+        let offset = self.offset.get();
+
+        self.writer.write_array(offset, values);
+
+        self.offset.set(offset + N);
+    }
+
+    // specialization of write_array for u8
+    pub(super) fn write_u8(&self, value: u8) {
+        let offset = self.offset.get();
+
+        self.writer.write_u8(offset, value);
+
+        self.offset.set(offset + 1);
+    }
+
+    // specialization of write_array for u32
+    pub(super) fn write_u32(&self, value: u32) {
+        let offset = self.offset.get();
+
+        self.writer.write_u32(offset, value);
+
+        self.offset.set(offset + 4);
+    }
+
+    #[allow(dead_code)]
+    pub(super) fn write_bytes(&self, bytes: &[u8]) {
+        let offset = self.offset.get();
+
+        self.writer.write_bytes(offset, bytes);
+
+        self.offset.set(offset + bytes.len());
     }
 }
