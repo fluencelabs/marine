@@ -19,7 +19,6 @@ mod imports;
 mod ivalues_lifting;
 mod ivalues_lowering;
 mod utils;
-mod wasm_memory;
 
 use std::cell::RefCell;
 use wasmer_core::Func;
@@ -29,7 +28,7 @@ pub(crate) use imports::create_host_import_func;
 
 pub(self) use wasmer_core::types::Value as WValue;
 pub(self) use wasmer_core::types::Type as WType;
-pub(self) use wasm_memory::WasmMemory;
+pub(self) use ivalues_lowering::MemoryWriter;
 
 pub(self) type HostImportResult<T> = std::result::Result<T, HostImportError>;
 pub(self) type WasmModuleFunc<Args, Rets> = Box<RefCell<Option<Func<'static, Args, Rets>>>>;

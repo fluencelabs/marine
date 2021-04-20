@@ -185,24 +185,23 @@ pub fn get_interfaces() {
         outputs: Rc::new(empty_type_outputs),
     };
 
-    /*
     let bool_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
-        ty: IType::I32,
+        ty: IType::Array(Box::new(IType::Boolean)),
     }];
-    let bool_type_outputs = vec![IType::I32];
+    let bool_type_outputs = vec![IType::Array(Box::new(IType::Boolean))];
 
     let bool_type_sign = fluence_faas::FaaSFunctionSignature {
-        name: "bool_type",
-        arguments: &bool_type_arguments,
-        outputs: &bool_type_outputs,
+        name: Rc::new(String::from("bool_type")),
+        arguments: Rc::new(bool_type_arguments),
+        outputs: Rc::new(bool_type_outputs),
     };
-     */
 
     let functions = vec![
         byte_type_sign,
         inner_arrays_1_sign,
         string_type_sign,
+        bool_type_sign,
         f32_type_sign,
         f64_type_sign,
         u32_type_sign,
@@ -368,7 +367,7 @@ pub fn u64_type() {
 }
 
 #[test]
-pub fn f64_type_() {
+pub fn f64_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -389,32 +388,6 @@ pub fn f64_type_() {
     assert_eq!(result3, right_result);
 
     let result4 = call_faas!(faas, "arrays_passing_pure", "f64_type", json!([[1.0]]));
-    assert_eq!(result4, right_result);
-}
-
-#[test]
-#[ignore]
-pub fn f64_type() {
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
-
-    let result1 = faas.call_with_json("arrays_passing_pure", "f64_type", json!({}), <_>::default());
-    assert!(result1.is_err());
-
-    let result2 = faas.call_with_json("arrays_passing_pure", "f64_type", json!([]), <_>::default());
-    assert!(result2.is_err());
-
-    let right_result = json!([3.0]);
-
-    let result3 = call_faas!(
-        faas,
-        "arrays_passing_pure",
-        "f64_type",
-        json!({ "arg": 1.0 })
-    );
-    assert_eq!(result3, right_result);
-
-    let result4 = call_faas!(faas, "arrays_passing_pure", "f64_type", json!(1.0));
     assert_eq!(result4, right_result);
 }
 
@@ -617,7 +590,6 @@ pub fn inner_arrays_2_type() {
 }
 
 #[test]
-#[ignore]
 pub fn bool_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
@@ -638,18 +610,18 @@ pub fn bool_type() {
     );
     assert!(result2.is_err());
 
-    let right_result = json!(1);
+    let expected_result = json!([true, true, false, true, false, true]);
 
     let result3 = call_faas!(
         faas,
         "arrays_passing_pure",
         "bool_type",
-        json!({ "arg": 0 })
+        json!({ "arg": [false] })
     );
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arrays_passing_pure", "bool_type", json!(0));
-    assert_eq!(result4, right_result);
+    let result4 = call_faas!(faas, "arrays_passing_pure", "bool_type", json!([[false]]));
+    assert_eq!(result4, expected_result);
 }
 
 #[test]

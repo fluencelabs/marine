@@ -16,16 +16,19 @@
 
 /// Contain functions intended to put (lower) IValues to Wasm memory
 /// and pass it to a Wasm module as raw WValues (Wasm types).
+mod memory_writer;
+
+pub(crate) use memory_writer::MemoryWriter;
+
 use super::WValue;
 use super::AllocateFunc;
-use super::WasmMemory;
 use crate::call_wasm_func;
 use crate::IValue;
 
 use wasmer_wit::NEVec;
 
 pub(super) fn ivalue_to_wvalues(
-    memory: &WasmMemory<'_>,
+    memory: &MemoryWriter<'_>,
     ivalue: Option<IValue>,
     allocate_func: &AllocateFunc,
 ) -> Vec<WValue> {
@@ -68,7 +71,7 @@ pub(super) fn ivalue_to_wvalues(
 }
 
 fn lower_array(
-    memory: &WasmMemory<'_>,
+    memory: &MemoryWriter<'_>,
     values: Vec<IValue>,
     allocate_func: &AllocateFunc,
 ) -> (usize, usize) {
@@ -132,7 +135,7 @@ fn lower_array(
 }
 
 fn lower_record(
-    memory: &WasmMemory<'_>,
+    memory: &MemoryWriter<'_>,
     values: NEVec<IValue>,
     allocate_func: &AllocateFunc,
 ) -> i32 {

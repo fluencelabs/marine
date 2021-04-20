@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-// mod lift_array;
-
 /// Contain functions intended to create (lift) IValues from raw WValues (Wasm types).
-// use super::WType;
+mod memory_reader;
+
+use super::WType;
 use super::WValue;
 use super::HostImportError;
 use crate::IValue;
@@ -25,21 +25,19 @@ use crate::RecordTypes;
 use crate::IType;
 use super::HostImportResult;
 
-// use wasmer_core::memory::ptr::{Array, WasmPtr};
+use wasmer_core::memory::ptr::{Array, WasmPtr};
 use wasmer_core::vm::Ctx;
 use wasmer_wit::IRecordType;
-// use wasmer_wit::NEVec;
+use wasmer_wit::NEVec;
 
 use std::rc::Rc;
 
 pub(super) fn wvalues_to_ivalues(
-    _ctx: &Ctx,
-    _wvalues: &[WValue],
-    _itypes: &[IType],
-    _record_types: &Rc<RecordTypes>,
+    ctx: &Ctx,
+    wvalues: &[WValue],
+    itypes: &[IType],
+    record_types: &Rc<RecordTypes>,
 ) -> HostImportResult<Vec<IValue>> {
-    unimplemented!()
-    /*
     let mut result = Vec::new();
     let mut wvalue = wvalues.iter();
 
@@ -69,7 +67,7 @@ pub(super) fn wvalues_to_ivalues(
             IType::Boolean => {
                 let w = next_wvalue!(I32);
                 result.push(IValue::Boolean(w == 1))
-            },
+            }
             IType::S8 => simple_wvalue_to_ivalue!(I32, S8),
             IType::S16 => simple_wvalue_to_ivalue!(I32, S16),
             IType::S32 => simple_wvalue_to_ivalue!(I32, S32),
@@ -120,19 +118,15 @@ pub(super) fn wvalues_to_ivalues(
     }
 
     Ok(result)
-
-     */
 }
 
 fn lift_array(
-    _ctx: &Ctx,
-    _value_type: &IType,
-    _offset: usize,
-    _size: usize,
-    _record_types: &Rc<RecordTypes>,
+    ctx: &Ctx,
+    value_type: &IType,
+    offset: usize,
+    size: usize,
+    record_types: &Rc<RecordTypes>,
 ) -> HostImportResult<Vec<IValue>> {
-    unimplemented!()
-    /*
     use safe_transmute::guard::AllOrNothingGuard;
     use safe_transmute::transmute_many;
     use safe_transmute::transmute_vec;
@@ -156,7 +150,9 @@ fn lift_array(
     let result_array = match value_type {
         IType::Boolean => {
             // unwrap is safe here because it could fail only if data types has different size
-            data.iter().map(|v| IValue::Boolean(v == 1)).collect::<Vec<_>>()
+            data.iter()
+                .map(|v| IValue::Boolean(v == 1))
+                .collect::<Vec<_>>()
         }
         IType::S8 => {
             // unwrap is safe here because it could fail only if data types has different size
@@ -265,18 +261,14 @@ fn lift_array(
     };
 
     Ok(result_array)
-
-     */
 }
 
 fn lift_record(
-    _ctx: &Ctx,
-    _record_type: &IRecordType,
-    _offset: usize,
-    _record_types: &Rc<RecordTypes>,
+    ctx: &Ctx,
+    record_type: &IRecordType,
+    offset: usize,
+    record_types: &Rc<RecordTypes>,
 ) -> HostImportResult<IValue> {
-    unimplemented!()
-    /*
     let fields_count = record_type.fields.len();
     let mut values = Vec::with_capacity(fields_count);
 
@@ -364,8 +356,6 @@ fn lift_record(
         NEVec::new(values.into_iter().collect())
             .expect("Record must have at least one field, zero given"),
     ))
-
-     */
 }
 
 // TODO: refactor it later to avoid the copying

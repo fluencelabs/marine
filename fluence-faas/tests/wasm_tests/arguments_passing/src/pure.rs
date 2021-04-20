@@ -140,7 +140,10 @@ pub fn bytearray_ref_type(arg: &Vec<u8>) -> Vec<u8> {
 
 #[fce]
 pub fn bool_type(arg: bool) -> bool {
-    effector::bool_type(arg)
+    println!("pure bool types called: {}", arg);
+    let ret = effector::bool_type(arg);
+    println!("pure bool types ret: {}", ret);
+    ret
 }
 
 #[fce]

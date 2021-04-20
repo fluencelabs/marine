@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 use std::cell::Cell;
 
-pub(crate) struct WasmMemory<'m> {
+pub(crate) struct MemoryWriter<'m> {
     memory: &'m [Cell<u8>],
     writes_count: Cell<u32>,
 }
 
-impl<'m> WasmMemory<'m> {
+impl<'m> MemoryWriter<'m> {
     pub(crate) fn new(memory: &'m [Cell<u8>]) -> Self {
         let writes_count = Cell::new(0);
         Self {

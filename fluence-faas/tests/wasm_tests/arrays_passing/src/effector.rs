@@ -60,15 +60,13 @@ pub fn string_type(mut arg: Vec<String>) -> Vec<String> {
     arg
 }
 
-/*
 #[fce]
-pub fn bool_type(arg: Vec<bool>) -> Vec<bool> {
-    let mut arg = unsafe { effector::bool_type(arg) };
-
+pub fn bool_type(mut arg: Vec<bool>) -> Vec<bool> {
+    arg.push(true);
     arg.push(false);
+    arg.push(true);
     arg
 }
- */
 
 #[fce]
 pub fn f32_type(mut arg: Vec<f32>) -> Vec<f32> {
