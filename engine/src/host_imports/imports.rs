@@ -61,7 +61,13 @@ pub(crate) fn create_host_import_func(
     let func = move |ctx: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
         init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 2);
 
-        let result = match wvalues_to_ivalues(ctx, inputs, &argument_types, &record_types) {
+        let memory_index = 0;
+        let view = ctx.memory(memory_index).view::<u8>();
+        let memory = view.deref();
+
+        let reader = MemoryReader::new(memory);
+
+        let result = match wvalues_to_ivalues(&reader, inputs, &argument_types, &record_types) {
             Ok(ivalues) => host_exported_func(ctx, ivalues),
             Err(e) => {
                 log::error!("error occurred while lifting values in host import: {}", e);
@@ -70,11 +76,12 @@ pub(crate) fn create_host_import_func(
                     .map_or_else(|| default_error_handler(&e), |h| h(&e))
             }
         };
+
         let memory_index = 0;
         let view = ctx.memory(memory_index).view::<u8>();
         let memory = view.deref();
-        let memory = MemoryWriter::new(memory);
-        let wvalues = ivalue_to_wvalues(&memory, result, &allocate_func);
+        let writer = MemoryWriter::new(memory);
+        let wvalues = ivalue_to_wvalues(&writer, result, &allocate_func);
 
         // TODO: refactor this when multi-value is supported
         match wvalues.len() {

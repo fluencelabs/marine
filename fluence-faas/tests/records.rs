@@ -38,8 +38,8 @@ pub fn records() {
         .call_with_ivalues("records_pure", "invoke", &[], <_>::default())
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    let right_result = json!({
-        "field_0": 1,
+    let expected_result = json!({
+        "field_0": true,
         "field_1": 1,
         "field_2": 2,
         "field_3": 3,
@@ -58,7 +58,7 @@ pub fn records() {
         result1,
         vec![IValue::Record(
             wasmer_wit::NEVec::new(vec![
-                IValue::I32(1),
+                IValue::Boolean(true),
                 IValue::S8(1),
                 IValue::S16(2),
                 IValue::S32(3),
@@ -82,7 +82,7 @@ pub fn records() {
             "mutate_struct",
             json!({
                 "test_record": {
-                    "field_0": 0,
+                    "field_0": false,
                     "field_1": 0,
                     "field_2": 0,
                     "field_3": 0,
@@ -102,28 +102,28 @@ pub fn records() {
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    assert_eq!(result2, right_result);
+    assert_eq!(result2, expected_result);
 
     let result3 = faas
         .call_with_json(
             "records_effector",
             "mutate_struct",
             json!({
-                "test_record": [0,0,0,0,0,0,0,0,0,0,0,"",[1]]
+                "test_record": [false,0,0,0,0,0,0,0,0,0,0,"",[1]]
 
             }),
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 
     let result4 = faas
         .call_with_json(
             "records_effector",
             "mutate_struct",
             json!([{
-                    "field_0": 0,
+                    "field_0": false,
                     "field_1": 0,
                     "field_2": 0,
                     "field_3": 0,
@@ -142,18 +142,18 @@ pub fn records() {
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    assert_eq!(result4, right_result);
+    assert_eq!(result4, expected_result);
 
     let result5 = faas
         .call_with_json(
             "records_effector",
             "mutate_struct",
-            json!([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", [1]]]),
+            json!([[false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", [1]]]),
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    assert_eq!(result5, right_result);
+    assert_eq!(result5, expected_result);
 }
 
 #[test]
@@ -195,7 +195,7 @@ fn records_passing() {
             )
             .unwrap_or_else(|e| panic!("can't invoke inner_records_pure: {:?}", e));
 
-        let right_result = json!({
+        let expected_result = json!({
             "test_record_0": {
                 "field_0": 1
             },
@@ -209,7 +209,7 @@ fn records_passing() {
             }
         });
 
-        assert_eq!(result, right_result);
+        assert_eq!(result, expected_result);
     };
 
     test("test_record");

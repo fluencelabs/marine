@@ -18,16 +18,11 @@ use std::cell::Cell;
 
 pub(crate) struct MemoryWriter<'m> {
     memory: &'m [Cell<u8>],
-    writes_count: Cell<u32>,
 }
 
 impl<'m> MemoryWriter<'m> {
     pub(crate) fn new(memory: &'m [Cell<u8>]) -> Self {
-        let writes_count = Cell::new(0);
-        Self {
-            memory,
-            writes_count,
-        }
+        Self { memory }
     }
 
     pub(crate) fn write_array<const N: usize>(&self, offset: usize, values: [u8; N]) {
@@ -35,14 +30,11 @@ impl<'m> MemoryWriter<'m> {
             .iter()
             .zip(values.iter())
             .for_each(|(cell, &byte)| cell.set(byte));
-
-        self.count_write();
     }
 
     // specialization of write_array for u8
     pub(super) fn write_u8(&self, offset: usize, value: u8) {
         self.memory[offset].set(value);
-        self.count_write();
     }
 
     // specialization of write_array for u32
@@ -52,8 +44,6 @@ impl<'m> MemoryWriter<'m> {
         self.memory[offset + 1].set(value[1]);
         self.memory[offset + 2].set(value[2]);
         self.memory[offset + 3].set(value[3]);
-
-        self.count_write();
     }
 
     pub(super) fn write_bytes(&self, offset: usize, bytes: &[u8]) {
@@ -61,16 +51,5 @@ impl<'m> MemoryWriter<'m> {
             .iter()
             .zip(bytes)
             .for_each(|(cell, &byte)| cell.set(byte));
-
-        self.count_write();
-    }
-
-    fn count_write(&self) {
-        let current_writes_count = self.writes_count.get();
-        self.writes_count.set(current_writes_count + 1);
-    }
-
-    pub(super) fn writes_count(&self) -> u32 {
-        self.writes_count.get()
     }
 }

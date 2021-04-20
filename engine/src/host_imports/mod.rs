@@ -28,6 +28,7 @@ pub(crate) use imports::create_host_import_func;
 
 pub(self) use wasmer_core::types::Value as WValue;
 pub(self) use wasmer_core::types::Type as WType;
+pub(self) use ivalues_lifting::MemoryReader;
 pub(self) use ivalues_lowering::MemoryWriter;
 
 pub(self) type HostImportResult<T> = std::result::Result<T, HostImportError>;

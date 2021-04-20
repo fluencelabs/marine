@@ -41,7 +41,9 @@ pub fn call_parameters() {
     let host_id = "host_id";
     let particle_id = "particle_id";
 
-    let tetraplet = fluence::SecurityTetraplet::default();
+    let mut tetraplet = fluence::SecurityTetraplet::default();
+    tetraplet.function_name = "some_func_name".to_string();
+    tetraplet.json_path = "some_json_path".to_string();
     let tetraplets = vec![vec![tetraplet]];
 
     let call_parameters = fluence::CallParameters {

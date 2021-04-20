@@ -96,15 +96,6 @@ where
     Ok(typed_func)
 }
 
-pub(super) fn write_to_wasm_mem(context: &mut Ctx, address: usize, value: &[u8]) {
-    let memory = context.memory(0);
-
-    memory.view::<u8>()[address..(address + value.len())]
-        .iter()
-        .zip(value.iter())
-        .for_each(|(cell, byte)| cell.set(*byte));
-}
-
 pub(super) fn itypes_args_to_wtypes(itypes: &[IType]) -> Vec<WType> {
     itypes
         .iter()

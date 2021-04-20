@@ -79,7 +79,8 @@ fn lower_array(
         return (0, 0);
     }
 
-    let ser_array_size = wasmer_wit::ser_value_size(&values[0]) * values.len();
+    let elements_count = values.len();
+    let ser_array_size = wasmer_wit::ser_value_size(&values[0]) * elements_count;
     let offset = call_wasm_func!(allocate_func, ser_array_size as _) as usize;
 
     for value in values {
@@ -102,7 +103,7 @@ fn lower_array(
                 memory.write_bytes(str_offset as _, value.as_bytes());
 
                 memory.write_u32(offset, str_offset);
-                memory.write_u32(offset, value.len() as u32);
+                memory.write_u32(offset + 4, value.len() as u32);
             }
 
             IValue::ByteArray(value) => {
@@ -110,7 +111,7 @@ fn lower_array(
                 memory.write_bytes(array_offset as _, &value);
 
                 memory.write_u32(offset, array_offset);
-                memory.write_u32(offset, value.len() as u32);
+                memory.write_u32(offset + 4, value.len() as u32);
             }
 
             IValue::Array(values) => {
@@ -121,17 +122,18 @@ fn lower_array(
                 };
 
                 memory.write_u32(offset, array_offset as u32);
-                memory.write_u32(offset, array_size as u32);
+                memory.write_u32(offset + 4, array_size as u32);
             }
 
             IValue::Record(values) => {
                 let record_offset = lower_record(memory, values, allocate_func);
+
                 memory.write_u32(offset, record_offset as u32);
             }
         }
     }
 
-    (offset as _, memory.writes_count() as _)
+    (offset as _, elements_count as _)
 }
 
 fn lower_record(
@@ -158,7 +160,7 @@ fn lower_record(
             IValue::F32(value) => result.extend(&value.to_le_bytes()),
             IValue::F64(value) => result.extend(&value.to_le_bytes()),
             IValue::String(value) => {
-                let string_pointer = if !value.is_empty() {
+                let offset = if !value.is_empty() {
                     let offset = call_wasm_func!(allocate_func, value.len() as _);
                     memory.write_bytes(offset as _, value.as_bytes());
                     offset
@@ -166,7 +168,7 @@ fn lower_record(
                     0
                 } as u32;
 
-                result.extend(&string_pointer.to_le_bytes());
+                result.extend(&offset.to_le_bytes());
                 result.extend(&(value.len() as u32).to_le_bytes());
             }
 
@@ -185,7 +187,7 @@ fn lower_record(
 
             IValue::Array(values) => {
                 let (offset, size) = if !values.is_empty() {
-                    lower_array(memory, values, allocate_func)
+                    lower_array(memory, values.clone(), allocate_func)
                 } else {
                     (0, 0)
                 };

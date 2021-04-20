@@ -17,6 +17,8 @@
 /// Contain functions intended to create (lift) IValues from raw WValues (Wasm types).
 mod memory_reader;
 
+pub(crate) use memory_reader::MemoryReader;
+
 use super::WType;
 use super::WValue;
 use super::HostImportError;
@@ -25,93 +27,87 @@ use crate::RecordTypes;
 use crate::IType;
 use super::HostImportResult;
 
-use wasmer_core::memory::ptr::{Array, WasmPtr};
-use wasmer_core::vm::Ctx;
 use wasmer_wit::IRecordType;
 use wasmer_wit::NEVec;
 
 use std::rc::Rc;
 
+macro_rules! next_wvalue {
+    ($wvalue_iter:ident, $wtype:ident) => {
+        match $wvalue_iter
+            .next()
+            .ok_or_else(|| HostImportError::MismatchWValuesCount)?
+        {
+            WValue::$wtype(v) => *v,
+            v => return Err(HostImportError::MismatchWValues(WType::$wtype, v.clone())),
+        };
+    };
+}
+
+macro_rules! simple_wvalue_to_ivalue {
+    ($result:ident, $wvalue_iter:ident, $wtype:ident, $ivalue:ident) => {{
+        let w = next_wvalue!($wvalue_iter, $wtype);
+        $result.push(IValue::$ivalue(w as _))
+    }};
+}
+
 pub(super) fn wvalues_to_ivalues(
-    ctx: &Ctx,
+    reader: &MemoryReader<'_>,
     wvalues: &[WValue],
     itypes: &[IType],
     record_types: &Rc<RecordTypes>,
 ) -> HostImportResult<Vec<IValue>> {
-    let mut result = Vec::new();
+    let mut result = Vec::with_capacity(wvalues.len());
     let mut wvalue = wvalues.iter();
-
-    macro_rules! next_wvalue(
-        ($wtype:ident) => {
-            match wvalue
-                .next()
-                .ok_or_else(|| HostImportError::MismatchWValuesCount)?
-                {
-                    WValue::$wtype(v) => *v,
-                    v => return Err(HostImportError::MismatchWValues(WType::$wtype, v.clone())),
-                };
-        }
-    );
-
-    macro_rules! simple_wvalue_to_ivalue(
-        ($wtype:ident, $ivalue:ident) => {
-            {
-                let w = next_wvalue!($wtype);
-                result.push(IValue::$ivalue(w as _))
-            }
-        }
-    );
 
     for itype in itypes.iter() {
         match itype {
             IType::Boolean => {
-                let w = next_wvalue!(I32);
-                result.push(IValue::Boolean(w == 1))
+                let w = next_wvalue!(wvalue, I32);
+                result.push(IValue::Boolean(w != 0))
             }
-            IType::S8 => simple_wvalue_to_ivalue!(I32, S8),
-            IType::S16 => simple_wvalue_to_ivalue!(I32, S16),
-            IType::S32 => simple_wvalue_to_ivalue!(I32, S32),
-            IType::S64 => simple_wvalue_to_ivalue!(I64, S64),
-            IType::U8 => simple_wvalue_to_ivalue!(I32, U8),
-            IType::U16 => simple_wvalue_to_ivalue!(I32, U16),
-            IType::U32 => simple_wvalue_to_ivalue!(I32, U32),
-            IType::U64 => simple_wvalue_to_ivalue!(I64, U64),
-            IType::I32 => simple_wvalue_to_ivalue!(I32, I32),
-            IType::I64 => simple_wvalue_to_ivalue!(I64, I64),
-            IType::F32 => simple_wvalue_to_ivalue!(F32, F32),
-            IType::F64 => simple_wvalue_to_ivalue!(F64, F64),
+            IType::S8 => simple_wvalue_to_ivalue!(result, wvalue, I32, S8),
+            IType::S16 => simple_wvalue_to_ivalue!(result, wvalue, I32, S16),
+            IType::S32 => simple_wvalue_to_ivalue!(result, wvalue, I32, S32),
+            IType::S64 => simple_wvalue_to_ivalue!(result, wvalue, I64, S64),
+            IType::U8 => simple_wvalue_to_ivalue!(result, wvalue, I32, U8),
+            IType::U16 => simple_wvalue_to_ivalue!(result, wvalue, I32, U16),
+            IType::U32 => simple_wvalue_to_ivalue!(result, wvalue, I32, U32),
+            IType::U64 => simple_wvalue_to_ivalue!(result, wvalue, I64, U64),
+            IType::I32 => simple_wvalue_to_ivalue!(result, wvalue, I32, I32),
+            IType::I64 => simple_wvalue_to_ivalue!(result, wvalue, I64, I64),
+            IType::F32 => simple_wvalue_to_ivalue!(result, wvalue, F32, F32),
+            IType::F64 => simple_wvalue_to_ivalue!(result, wvalue, F64, F64),
             IType::String => {
-                let offset = next_wvalue!(I32);
-                let size = next_wvalue!(I32);
+                let offset = next_wvalue!(wvalue, I32);
+                let elements_count = next_wvalue!(wvalue, I32);
 
-                let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
-                let str = wasm_ptr
-                    .get_utf8_string(ctx.memory(0), size as _)
-                    .ok_or(HostImportError::InvalidMemoryAccess(offset, size))?;
-
-                result.push(IValue::String(str.to_string()));
+                let raw_str = reader.read_raw_u8_array(offset as _, elements_count as _);
+                // TODO: check for errors
+                let str = String::from_utf8(raw_str).unwrap();
+                result.push(IValue::String(str));
             }
             IType::ByteArray => {
-                let offset = next_wvalue!(I32);
-                let size = next_wvalue!(I32);
+                let offset = next_wvalue!(wvalue, I32);
+                let elements_count = next_wvalue!(wvalue, I32);
 
-                let data = read_mem(ctx, offset as _, size as _)?;
-                result.push(IValue::ByteArray(data));
+                let array = reader.read_raw_u8_array(offset as _, elements_count as _);
+                result.push(IValue::ByteArray(array));
             }
             IType::Array(ty) => {
-                let offset = next_wvalue!(I32);
-                let size = next_wvalue!(I32);
+                let offset = next_wvalue!(wvalue, I32);
+                let size = next_wvalue!(wvalue, I32);
 
-                let array = lift_array(ctx, ty, offset as _, size as _, record_types)?;
+                let array = lift_array(reader, ty, offset as _, size as _, record_types)?;
                 result.push(IValue::Array(array));
             }
             IType::Record(record_type_id) => {
                 let record_type = record_types
                     .get(record_type_id)
                     .ok_or_else(|| HostImportError::RecordTypeNotFound(*record_type_id))?;
-                let offset = next_wvalue!(I32);
+                let offset = next_wvalue!(wvalue, I32);
 
-                let record = lift_record(ctx, record_type, offset as _, record_types)?;
+                let record = lift_record(reader, record_type, offset as _, record_types)?;
                 result.push(record);
             }
         }
@@ -121,123 +117,68 @@ pub(super) fn wvalues_to_ivalues(
 }
 
 fn lift_array(
-    ctx: &Ctx,
+    reader: &MemoryReader<'_>,
     value_type: &IType,
     offset: usize,
-    size: usize,
+    elements_count: usize,
     record_types: &Rc<RecordTypes>,
 ) -> HostImportResult<Vec<IValue>> {
-    use safe_transmute::guard::AllOrNothingGuard;
-    use safe_transmute::transmute_many;
-    use safe_transmute::transmute_vec;
-
-    if size == 0 {
+    if elements_count == 0 {
         return Ok(vec![]);
     }
 
-    let data = read_mem(ctx, offset, size)?;
-
-    macro_rules! simple_type_array_convert(
-        ($data:ident, $itype:ident, $rtype:ident) => {
-            {
-                let data = transmute_many::<$rtype, AllOrNothingGuard>(&data)
-                    .map_err(|_| HostImportError::TransmuteArrayError($data.len(), stringify!($rtype)))?;
-                data.iter().map(|v| IValue::$itype(*v)).collect::<Vec<_>>()
-            }
-        }
-    );
-
     let result_array = match value_type {
-        IType::Boolean => {
-            // unwrap is safe here because it could fail only if data types has different size
-            data.iter()
-                .map(|v| IValue::Boolean(v == 1))
-                .collect::<Vec<_>>()
-        }
-        IType::S8 => {
-            // unwrap is safe here because it could fail only if data types has different size
-            let data = transmute_vec::<u8, i8>(data).unwrap();
-            data.iter().map(|v| IValue::S8(*v)).collect::<Vec<_>>()
-        }
-        IType::S16 => simple_type_array_convert!(data, S16, i16),
-        IType::S32 => simple_type_array_convert!(data, S32, i32),
-        IType::S64 => simple_type_array_convert!(data, S64, i64),
-        IType::U8 => data.iter().map(|v| IValue::U8(*v)).collect::<Vec<_>>(),
-        IType::U16 => simple_type_array_convert!(data, U16, u16),
-        IType::U32 => simple_type_array_convert!(data, U32, u32),
-        IType::U64 => simple_type_array_convert!(data, U64, u64),
-        IType::F32 => {
-            let data = transmute_many::<u32, AllOrNothingGuard>(&data)
-                .map_err(|_| HostImportError::TransmuteArrayError(data.len(), stringify!(f32)))?;
-            data.iter()
-                .map(|v| IValue::F32(f32::from_bits(*v)))
-                .collect::<Vec<_>>()
-        }
-        IType::F64 => {
-            let data = transmute_many::<u64, AllOrNothingGuard>(&data)
-                .map_err(|_| HostImportError::TransmuteArrayError(data.len(), stringify!(f64)))?;
-            data.iter()
-                .map(|v| IValue::F64(f64::from_bits(*v)))
-                .collect::<Vec<_>>()
-        }
-        IType::I32 => simple_type_array_convert!(data, I32, i32),
-        IType::I64 => simple_type_array_convert!(data, I64, i64),
+        IType::Boolean => reader.read_bool_array(offset, elements_count),
+        IType::S8 => reader.read_s8_array(offset, elements_count),
+        IType::S16 => reader.read_s16_array(offset, elements_count),
+        IType::S32 => reader.read_s32_array(offset, elements_count),
+        IType::S64 => reader.read_s64_array(offset, elements_count),
+        IType::U8 => reader.read_u8_array(offset, elements_count),
+        IType::U16 => reader.read_u16_array(offset, elements_count),
+        IType::U32 => reader.read_u32_array(offset, elements_count),
+        IType::U64 => reader.read_u64_array(offset, elements_count),
+        IType::F32 => reader.read_f32_array(offset, elements_count),
+        IType::F64 => reader.read_f64_array(offset, elements_count),
+        IType::I32 => reader.read_i32_array(offset, elements_count),
+        IType::I64 => reader.read_i64_array(offset, elements_count),
         IType::String => {
-            let data = transmute_many::<u32, AllOrNothingGuard>(&data)
-                .map_err(|_| HostImportError::TransmuteArrayError(data.len(), stringify!(u32)))?;
+            let mut result = Vec::with_capacity(elements_count);
+            let seq_reader = reader.sequential_reader(offset);
 
-            let mut data = data.into_iter();
-            let mut result = Vec::with_capacity(data.len() / 2);
+            for _ in 0..elements_count {
+                let str_offset = seq_reader.read_u32();
+                let str_size = seq_reader.read_u32();
 
-            while let Some(&string_offset) = data.next() {
-                let string_size = *data
-                    .next()
-                    .ok_or(HostImportError::OddPointersCount(IType::String))?;
-
-                let string = WasmPtr::<u8, Array>::new(string_offset as _)
-                    .get_utf8_string(ctx.memory(0), string_size as _)
-                    .ok_or_else(|| {
-                        HostImportError::InvalidMemoryAccess(string_offset as _, string_size as _)
-                    })?;
-
-                result.push(IValue::String(string.to_string()));
+                let raw_str = reader.read_raw_u8_array(str_offset as _, str_size as _);
+                let str = String::from_utf8(raw_str).unwrap();
+                result.push(IValue::String(str));
             }
 
             result
         }
         IType::ByteArray => {
-            let data = transmute_many::<u32, AllOrNothingGuard>(&data)
-                .map_err(|_| HostImportError::TransmuteArrayError(data.len(), stringify!(u32)))?;
+            let mut result = Vec::with_capacity(elements_count);
+            let seq_reader = reader.sequential_reader(offset);
 
-            let mut data = data.into_iter();
-            let mut result = Vec::with_capacity(data.len() / 2);
+            for _ in 0..elements_count {
+                let array_offset = seq_reader.read_u32();
+                let array_size = seq_reader.read_u32();
 
-            while let Some(&array_offset) = data.next() {
-                let array_size = *data
-                    .next()
-                    .ok_or_else(|| HostImportError::OddPointersCount(IType::Array(ty.clone())))?;
-
-                let array = read_mem(ctx, array_offset as _, array_size as _)?;
-
+                let array = reader.read_raw_u8_array(array_offset as _, array_size as _);
                 result.push(IValue::ByteArray(array));
             }
 
             result
         }
         IType::Array(ty) => {
-            let data = transmute_many::<u32, AllOrNothingGuard>(&data)
-                .map_err(|_| HostImportError::TransmuteArrayError(data.len(), stringify!(u32)))?;
+            let mut result = Vec::with_capacity(elements_count);
+            let seq_reader = reader.sequential_reader(offset);
 
-            let mut data = data.into_iter();
-            let mut result = Vec::with_capacity(data.len() / 2);
+            for _ in 0..elements_count {
+                let array_offset = seq_reader.read_u32() as usize;
+                let elements_count = seq_reader.read_u32() as usize;
 
-            while let Some(&array_offset) = data.next() {
-                let array_size = *data
-                    .next()
-                    .ok_or_else(|| HostImportError::OddPointersCount(IType::Array(ty.clone())))?;
-
-                let array = lift_array(ctx, ty, array_offset as _, array_size as _, record_types)?;
-
+                let array = lift_array(reader, ty, array_offset, elements_count, record_types)?;
                 result.push(IValue::Array(array));
             }
 
@@ -248,10 +189,12 @@ fn lift_array(
                 .get(record_type_id)
                 .ok_or_else(|| HostImportError::RecordTypeNotFound(*record_type_id))?;
 
-            let mut result = Vec::with_capacity(data.len() / 2);
+            let mut result = Vec::with_capacity(elements_count);
+            let seq_reader = reader.sequential_reader(offset);
 
-            for record_offset in data {
-                let record = lift_record(ctx, &record_type, record_offset as _, record_types)?;
+            for _ in 0..elements_count {
+                let record_offset = seq_reader.read_u32();
+                let record = lift_record(reader, &record_type, record_offset as _, record_types)?;
 
                 result.push(record);
             }
@@ -264,7 +207,7 @@ fn lift_array(
 }
 
 fn lift_record(
-    ctx: &Ctx,
+    reader: &MemoryReader<'_>,
     record_type: &IRecordType,
     offset: usize,
     record_types: &Rc<RecordTypes>,
@@ -272,107 +215,73 @@ fn lift_record(
     let fields_count = record_type.fields.len();
     let mut values = Vec::with_capacity(fields_count);
 
-    let size = wasmer_wit::record_size(record_type);
-    let data = read_mem(ctx, offset, size)?;
+    // let size = wasmer_wit::record_size(record_type);
+    let seq_reader = reader.sequential_reader(offset);
 
-    let mut field_id = 0;
     for field in (*record_type.fields).iter() {
-        let value = 1;
         match &field.ty {
-            IType::S8 => {
-                values.push(IValue::S8(value as _));
-            }
-            IType::S16 => {
-                values.push(IValue::S16(value as _));
-            }
-            IType::S32 => {
-                values.push(IValue::S32(value as _));
-            }
-            IType::S64 => {
-                values.push(IValue::S64(value as _));
-            }
-            IType::I32 => {
-                values.push(IValue::I32(value as _));
-            }
-            IType::I64 => {
-                values.push(IValue::I64(value as _));
-            }
-            IType::U8 => {
-                values.push(IValue::U8(value as _));
-            }
-            IType::U16 => {
-                values.push(IValue::U16(value as _));
-            }
-            IType::U32 => {
-                values.push(IValue::U32(value as _));
-            }
-            IType::U64 => {
-                values.push(IValue::U64(value as _));
-            }
-            IType::F32 => {
-                values.push(IValue::F32(value as _));
-            }
-            IType::F64 => values.push(IValue::F64(f64::from_bits(value))),
+            IType::Boolean => values.push(IValue::Boolean(seq_reader.read_bool())),
+            IType::S8 => values.push(IValue::S8(seq_reader.read_i8())),
+            IType::S16 => values.push(IValue::S16(seq_reader.read_i16())),
+            IType::S32 => values.push(IValue::S32(seq_reader.read_i32())),
+            IType::S64 => values.push(IValue::S64(seq_reader.read_i64())),
+            IType::I32 => values.push(IValue::I32(seq_reader.read_i32())),
+            IType::I64 => values.push(IValue::I64(seq_reader.read_i64())),
+            IType::U8 => values.push(IValue::U8(seq_reader.read_u8())),
+            IType::U16 => values.push(IValue::U16(seq_reader.read_u16())),
+            IType::U32 => values.push(IValue::U32(seq_reader.read_u32())),
+            IType::U64 => values.push(IValue::U64(seq_reader.read_u64())),
+            IType::F32 => values.push(IValue::F32(seq_reader.read_f32())),
+            IType::F64 => values.push(IValue::F64(seq_reader.read_f64())),
             IType::String => {
-                let string_offset = value;
-                field_id += 1;
-                let string_size = data[field_id];
+                let string_offset = seq_reader.read_u32();
+                let string_size = seq_reader.read_u32();
 
                 if string_size != 0 {
-                    let string = WasmPtr::<u8, Array>::new(string_offset as _)
-                        .get_utf8_string(ctx.memory(0), size as _)
-                        .ok_or(HostImportError::OddPointersCount(IType::String))?;
-                    values.push(IValue::String(string.to_string()));
+                    let raw_str = reader.read_raw_u8_array(string_offset as _, string_size as _);
+                    let str = String::from_utf8(raw_str).unwrap();
+                    values.push(IValue::String(str));
                 } else {
                     values.push(IValue::String(String::new()));
                 }
             }
+            IType::ByteArray => {
+                let array_offset = seq_reader.read_u32();
+                let array_size = seq_reader.read_u32();
+
+                if array_size != 0 {
+                    let array = reader.read_raw_u8_array(array_offset as _, array_size as _);
+                    values.push(IValue::ByteArray(array));
+                } else {
+                    values.push(IValue::ByteArray(vec![]));
+                }
+            }
             IType::Array(ty) => {
-                let array_offset = value;
-                field_id += 1;
-                let array_size = data[field_id];
+                let array_offset = seq_reader.read_u32();
+                let array_size = seq_reader.read_u32();
 
                 if array_size != 0 {
                     let array =
-                        lift_array(ctx, &ty, array_offset as _, array_size as _, record_types)?;
+                        lift_array(reader, ty, array_offset as _, array_size as _, record_types)?;
                     values.push(IValue::Array(array));
                 } else {
                     values.push(IValue::Array(vec![]));
                 }
             }
             IType::Record(record_type_id) => {
-                let offset = value;
+                let record_offset = seq_reader.read_u32();
 
                 let record_type = record_types
                     .get(record_type_id)
                     .ok_or_else(|| HostImportError::RecordTypeNotFound(*record_type_id))?;
-                values.push(lift_record(ctx, record_type, offset as _, record_types)?);
+                let record = lift_record(reader, record_type, record_offset as _, record_types)?;
+                values.push(record);
             }
         }
-        field_id += 1;
     }
 
     Ok(IValue::Record(
         NEVec::new(values.into_iter().collect())
             .expect("Record must have at least one field, zero given"),
     ))
-}
-
-// TODO: refactor it later to avoid the copying
-fn read_mem(ctx: &Ctx, offset: usize, size: usize) -> HostImportResult<Vec<u8>> {
-    let memory_index: u32 = 0;
-
-    let memory_view = ctx.memory(memory_index).view();
-
-    let right_margin = offset + size;
-    if right_margin < offset || right_margin >= memory_view.len() {
-        return Err(HostImportError::InvalidMemoryAccess(offset as _, size as _));
-    }
-
-    let memory_view = memory_view[offset..right_margin]
-        .iter()
-        .map(std::cell::Cell::get)
-        .collect::<Vec<_>>();
-
-    Ok(memory_view)
 }

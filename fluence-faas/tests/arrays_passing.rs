@@ -248,7 +248,7 @@ pub fn i32_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let right_result = json!([0, 1, 2, 3, 4, 0, 2]);
+    let expected_result = json!([0, 1, 2, 3, 4, 0, 2]);
 
     let result1 = faas
         .call_with_json(
@@ -258,7 +258,7 @@ pub fn i32_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
-    assert_eq!(result1, right_result);
+    assert_eq!(result1, expected_result);
 
     let result2 = faas
         .call_with_json(
@@ -268,9 +268,9 @@ pub fn i32_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
-    assert_eq!(result2, right_result);
+    assert_eq!(result2, expected_result);
 
-    let right_result = json!([1, 0, 1, 2, 3, 4, 0, 2]);
+    let expected_result = json!([1, 0, 1, 2, 3, 4, 0, 2]);
     let result3 = faas
         .call_with_json(
             "arrays_passing_pure",
@@ -279,7 +279,7 @@ pub fn i32_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 }
 
 #[test]
@@ -293,7 +293,7 @@ pub fn i64_type() {
     let result2 = faas.call_with_json("arrays_passing_pure", "i64_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!([1, 0, 1, 2, 3, 4, 1, 1]);
+    let expected_result = json!([1, 0, 1, 2, 3, 4, 1, 1]);
 
     let result3 = faas
         .call_with_json(
@@ -303,7 +303,7 @@ pub fn i64_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke i64_type: {:?}", e));
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 
     let result4 = faas
         .call_with_json(
@@ -313,7 +313,7 @@ pub fn i64_type() {
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke i64_type: {:?}", e));
-    assert_eq!(result4, right_result);
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
@@ -327,7 +327,7 @@ pub fn u32_type() {
     let result2 = faas.call_with_json("arrays_passing_pure", "u32_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!([1, 0, 13, 37, 2]);
+    let expected_result = json!([1, 0, 13, 37, 2]);
 
     let result3 = call_faas!(
         faas,
@@ -335,10 +335,10 @@ pub fn u32_type() {
         "u32_type",
         json!({ "arg": [1] })
     );
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 
     let result4 = call_faas!(faas, "arrays_passing_pure", "u32_type", json!([[1]]));
-    assert_eq!(result4, right_result);
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
@@ -352,7 +352,7 @@ pub fn u64_type() {
     let result2 = faas.call_with_json("arrays_passing_pure", "u64_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!([1, 0, 1, 2, 3, 4, 2]);
+    let expected_result = json!([1, 0, 1, 2, 3, 4, 2]);
 
     let result3 = call_faas!(
         faas,
@@ -360,10 +360,10 @@ pub fn u64_type() {
         "u64_type",
         json!({ "arg": [1] })
     );
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 
     let result4 = call_faas!(faas, "arrays_passing_pure", "u64_type", json!([[1]]));
-    assert_eq!(result4, right_result);
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
@@ -377,7 +377,7 @@ pub fn f64_type() {
     let result2 = faas.call_with_json("arrays_passing_pure", "f32_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
-    let right_result = json!([1.0, 0.0, 13.37, 1.0]);
+    let expected_result = json!([1.0, 0.0, 13.37, 1.0]);
 
     let result3 = call_faas!(
         faas,
@@ -385,10 +385,10 @@ pub fn f64_type() {
         "f64_type",
         json!({ "arg": [1.0] })
     );
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 
     let result4 = call_faas!(faas, "arrays_passing_pure", "f64_type", json!([[1.0]]));
-    assert_eq!(result4, right_result);
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
@@ -412,7 +412,7 @@ pub fn string_type() {
     );
     assert!(result2.is_err());
 
-    let right_result = json!(["Fluence", "fce", "from effector", "test"]);
+    let expected_result = json!(["Fluence", "fce", "from effector", "test"]);
 
     let result3 = call_faas!(
         faas,
@@ -420,7 +420,7 @@ pub fn string_type() {
         "string_type",
         json!({ "arg": ["Fluence"] })
     );
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 
     let result4 = call_faas!(
         faas,
@@ -428,7 +428,7 @@ pub fn string_type() {
         "string_type",
         json!([["Fluence"]])
     );
-    assert_eq!(result4, right_result);
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
@@ -452,14 +452,14 @@ pub fn byte_type() {
     );
     assert!(result2.is_err());
 
-    let right_result = json!([0x13, 0x37, 0, 1, 2]);
+    let expected_result = json!([0x13, 0x37, 0, 1, 2]);
     let result3 = call_faas!(
         faas,
         "arrays_passing_pure",
         "byte_type",
         json!({ "arg": [0x13, 0x37] })
     );
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 
     let result4 = call_faas!(
         faas,
@@ -467,7 +467,7 @@ pub fn byte_type() {
         "byte_type",
         json!([[0x13, 0x37]])
     );
-    assert_eq!(result4, right_result);
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
@@ -491,7 +491,7 @@ pub fn inner_arrays_1_type() {
     );
     assert!(result2.is_err());
 
-    let right_result = json!([
+    let expected_result = json!([
         [[[0x13, 0x37]]],
         [[[0]]],
         [],
@@ -506,7 +506,7 @@ pub fn inner_arrays_1_type() {
         "inner_arrays_1",
         json!({ "arg": [[[[0x13, 0x37]]]] })
     );
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 
     let result4 = call_faas!(
         faas,
@@ -514,7 +514,7 @@ pub fn inner_arrays_1_type() {
         "inner_arrays_1",
         json!([[[[[0x13, 0x37]]]]])
     );
-    assert_eq!(result4, right_result);
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
@@ -538,7 +538,7 @@ pub fn inner_arrays_2_type() {
     );
     assert!(result2.is_err());
 
-    let right_result = json!([
+    let expected_result = json!([
     [[[{
         "field_0": 0,
         "field_1": [[1]]
@@ -578,7 +578,7 @@ pub fn inner_arrays_2_type() {
         "inner_arrays_2",
         json!({ "arg": [[[[[0, [[1]]]]]]] })
     );
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 
     let result4 = call_faas!(
         faas,
@@ -586,7 +586,7 @@ pub fn inner_arrays_2_type() {
         "inner_arrays_2",
         json!([[[[[{"field_0": 0, "field_1": [[1]]}]]]]])
     );
-    assert_eq!(result4, right_result);
+    assert_eq!(result4, expected_result);
 }
 
 #[test]
@@ -629,15 +629,15 @@ pub fn empty_type() {
     let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let right_result = json!(["from effector"]);
+    let expected_result = json!(["from effector"]);
     let result1 = call_faas!(faas, "arrays_passing_pure", "empty_type", json!({}));
-    assert_eq!(result1, right_result);
+    assert_eq!(result1, expected_result);
 
     let result2 = call_faas!(faas, "arrays_passing_pure", "empty_type", json!([]));
-    assert_eq!(result2, right_result);
+    assert_eq!(result2, expected_result);
 
     let result3 = call_faas!(faas, "arrays_passing_pure", "empty_type", json!([]));
-    assert_eq!(result3, right_result);
+    assert_eq!(result3, expected_result);
 
     let result4 = faas.call_with_json(
         "arrays_passing_pure",

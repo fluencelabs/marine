@@ -83,7 +83,7 @@ pub fn string_type(mut arg: Vec<String>) -> Vec<String> {
 #[fce]
 pub fn bool_type(mut arg: Vec<bool>) -> Vec<bool> {
     arg[0] = !arg[0];
-    let mut arg =  effector::bool_type(arg);
+    let mut arg = effector::bool_type(arg);
 
     arg.push(false);
     arg.push(true);
