@@ -37,7 +37,7 @@ pub(crate) fn ptype_to_itype_checked(
         ParsedType::U64(_) => Ok(IType::U64),
         ParsedType::F32(_) => Ok(IType::F32),
         ParsedType::F64(_) => Ok(IType::F64),
-        ParsedType::Boolean(_) => Ok(IType::I32),
+        ParsedType::Boolean(_) => Ok(IType::Boolean),
         ParsedType::Utf8Str(_) => Ok(IType::String),
         ParsedType::Utf8String(_) => Ok(IType::String),
         ParsedType::Vector(ty, _) => {
@@ -66,7 +66,7 @@ pub(crate) fn ptype_to_itype_unchecked(
         ParsedType::U64(_) => IType::U64,
         ParsedType::F32(_) => IType::F32,
         ParsedType::F64(_) => IType::F64,
-        ParsedType::Boolean(_) => IType::I32,
+        ParsedType::Boolean(_) => IType::Boolean,
         ParsedType::Utf8Str(_) => IType::String,
         ParsedType::Utf8String(_) => IType::String,
         ParsedType::Vector(ty, _) => {

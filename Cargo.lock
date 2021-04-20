@@ -776,6 +776,7 @@ version = "0.4.0"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
+ "nom",
  "semver 0.11.0",
  "serde",
  "thiserror",

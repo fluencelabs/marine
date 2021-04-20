@@ -63,10 +63,10 @@ pub fn extract_version_from_module(module: &walrus::Module) -> Result<semver::Ve
 }
 
 pub(crate) fn extract_wit_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>> {
-    match wasmer_wit::decoders::binary::parse::<()>(wit_section_bytes) {
+    match wasmer_wit::decoders::binary::parse::<(&[u8], nom::error::ErrorKind)>(wit_section_bytes) {
         Ok((remainder, wit)) if remainder.is_empty() => Ok(wit),
         Ok(_) => Err(WITParserError::ITRemainderNotEmpty),
-        Err(_) => Err(WITParserError::CorruptedITSection),
+        Err(e) => Err(WITParserError::CorruptedITSection(e.to_owned())),
     }
 }
 

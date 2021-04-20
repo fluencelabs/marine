@@ -42,11 +42,12 @@ pub(crate) fn ivalues_to_json(
     }
 }
 
-fn ivalue_to_json(ivalue: IValue, output: &IType, record_types: &RecordTypes) -> Result<JValue> {
+fn ivalue_to_json(ivalue: IValue, output: IType, record_types: &RecordTypes) -> Result<JValue> {
     use serde_json::json;
 
     // clone here needed because binding by-value and by-ref in the same pattern in unstable
-    match (ivalue, output.clone()) {
+    match (ivalue, output) {
+        (IValue::Boolean(value), IType::Boolean) => Ok(json!(value)),
         (IValue::S8(value), IType::S8) => Ok(json!(value)),
         (IValue::S16(value), IType::S16) => Ok(json!(value)),
         (IValue::S32(value), IType::S32) => Ok(json!(value)),

@@ -173,10 +173,7 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &RecordTypes) -> R
 
                     Ok(iargs)
                 }
-                _ => Err(ArgDeError(format!(
-                    "expected bytearray, got {:?}",
-                    jvalue
-                ))),
+                _ => Err(ArgDeError(format!("expected bytearray, got {:?}", jvalue))),
             }?;
 
             Ok(IValue::Array(value))

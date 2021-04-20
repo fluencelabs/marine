@@ -41,7 +41,7 @@ pub fn inner_arrays_1(mut arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<Vec<Vec<Vec<u8>>>>
 }
 
 #[fce]
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct TestRecord {
     pub field_0: i32,
     pub field_1: Vec<Vec<u8>>,

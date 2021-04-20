@@ -34,8 +34,12 @@ pub enum WITParserError {
     ITRemainderNotEmpty,
 
     /// An error occurred while parsing WIT section.
-    #[error("IT section is corrupted")]
-    CorruptedITSection,
+    #[error(
+        "IT section is corrupted: {0}.\
+    \nProbably the module was compiled with an old of fce cli, please try to update and recompile.\
+    \nTo update fce run: cargo install fcli --force"
+    )]
+    CorruptedITSection(nom::Err<(Vec<u8>, nom::error::ErrorKind)>),
 
     /// An error related to incorrect data of wit section.
     #[error("{0}")]

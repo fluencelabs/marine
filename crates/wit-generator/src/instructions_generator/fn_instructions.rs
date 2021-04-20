@@ -131,7 +131,7 @@ impl FnInstructionGenerator for ParsedType {
     #[rustfmt::skip]
     fn generate_instructions_for_input_type<'a>(&self, index: u32, wit_resolver: &mut WITResolver<'a>) -> Result<Vec<Instruction>> {
         let instructions = match self {
-            ParsedType::Boolean(_) => vec![Instruction::ArgumentGet { index }],
+            ParsedType::Boolean(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromBool],
             ParsedType::I8(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS8],
             ParsedType::I16(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS16],
             ParsedType::I32(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS32],
@@ -174,7 +174,7 @@ impl FnInstructionGenerator for ParsedType {
     #[rustfmt::skip]
     fn generate_instructions_for_output_type<'a>(&self, wit_resolver: &mut WITResolver<'a>) -> Result<Vec<Instruction>> {
         let instructions = match self {
-            ParsedType::Boolean(_) => vec![],
+            ParsedType::Boolean(_) => vec![Instruction::BoolFromI32],
             ParsedType::I8(_) => vec![Instruction::S8FromI32],
             ParsedType::I16(_) => vec![Instruction::S16FromI32],
             ParsedType::I32(_) => vec![Instruction::S32FromI32],

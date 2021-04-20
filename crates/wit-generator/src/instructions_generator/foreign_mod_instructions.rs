@@ -193,7 +193,7 @@ impl ForeignModInstructionGenerator for ParsedType {
         wit_resolver: &mut WITResolver<'a>,
     ) -> Result<(Vec<Instruction>, u32)> {
         let instructions = match self {
-            ParsedType::Boolean(_) => (vec![Instruction::ArgumentGet { index }], 1),
+            ParsedType::Boolean(_) => (vec![Instruction::ArgumentGet { index }, Instruction::BoolFromI32], 1),
             ParsedType::I8(_) => (vec![Instruction::ArgumentGet { index }, Instruction::S8FromI32], 1),
             ParsedType::I16(_) => (vec![Instruction::ArgumentGet { index }, Instruction::S16FromI32], 1),
             ParsedType::I32(_) => (vec![Instruction::ArgumentGet { index }, Instruction::S32FromI32], 1),
@@ -234,7 +234,7 @@ impl ForeignModInstructionGenerator for ParsedType {
     #[rustfmt::skip]
     fn generate_instructions_for_output_type<'a>(&self, wit_resolver: &mut WITResolver<'a>) -> Result<Vec<Instruction>> {
         let instructions = match self {
-            ParsedType::Boolean(_) => vec![],
+            ParsedType::Boolean(_) => vec![Instruction::I32FromBool],
             ParsedType::I8(_) => vec![Instruction::I32FromS8],
             ParsedType::I16(_) => vec![Instruction::I32FromS16],
             ParsedType::I32(_) => vec![Instruction::I32FromS32],
