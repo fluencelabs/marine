@@ -113,9 +113,7 @@ pub fn bytearray_ref_type(arg: &mut Vec<u8>) -> Vec<u8> {
 
 #[fce]
 pub fn bool_type(arg: bool) -> bool {
-    let res = !arg;
-    println!("effector: {} {}", arg, res);
-    res
+    !arg
 }
 
 #[fce]

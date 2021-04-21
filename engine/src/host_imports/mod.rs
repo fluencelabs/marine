@@ -28,12 +28,10 @@ pub(crate) use imports::create_host_import_func;
 
 pub(self) use wasmer_core::types::Value as WValue;
 pub(self) use wasmer_core::types::Type as WType;
-pub(self) use ivalues_lifting::MemoryReader;
-pub(self) use ivalues_lowering::MemoryWriter;
 
 pub(self) type HostImportResult<T> = std::result::Result<T, HostImportError>;
 pub(self) type WasmModuleFunc<Args, Rets> = Box<RefCell<Option<Func<'static, Args, Rets>>>>;
-pub(self) type AllocateFunc = WasmModuleFunc<i32, i32>;
+pub(self) type AllocateFunc = WasmModuleFunc<(i32, i32), i32>;
 pub(self) type SetResultPtrFunc = WasmModuleFunc<i32, ()>;
 pub(self) type SetResultSizeFunc = WasmModuleFunc<i32, ()>;
 

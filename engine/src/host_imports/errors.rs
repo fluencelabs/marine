@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use crate::IType;
 use super::WType;
 use super::WValue;
 
+use it_lilo_utils::error::MemoryAccessError;
 use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
@@ -34,19 +34,19 @@ pub enum HostImportError {
     #[error("Not enough WValue arguments are provided from the Wasm side")]
     MismatchWValuesCount,
 
-    /// An error related to invalid memory access during lifting IValue.
-    #[error("Invalid memory access while lifting IValues, offset {0}, size {1}")]
-    InvalidMemoryAccess(i32, i32),
-
-    /// An error related to lifting memory from arrays of pointers with odd elements count.
-    #[error("Arrays of pointers for value type {0:?} contains non-even count of elements")]
-    OddPointersCount(IType),
+    /// Out-of-bound memory access.
+    #[error("{0}")]
+    MemoryAccessError(#[from] MemoryAccessError),
 
     /// An error related to not found record in module record types.
     #[error("Record with type id {0} not found")]
     RecordTypeNotFound(u64),
 
-    /// An error encountered while transmiting arrays.
-    #[error("array of bytes with len {0} can't be transmuted to {1} type")]
-    TransmuteArrayError(usize, &'static str),
+    /// Errors related to lifting incorrect UTF8 string from a Wasm module.
+    #[error("corrupted UTF8 string {0}")]
+    CorruptedUTF8String(#[from] std::string::FromUtf8Error),
+
+    /// This error occurred when a record is created from empty values array.
+    #[error("Record with name '{0}' can't be empty")]
+    EmptyRecord(String),
 }

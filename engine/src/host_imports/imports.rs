@@ -19,8 +19,8 @@ use super::ivalues_lifting::wvalues_to_ivalues;
 use super::ivalues_lowering::ivalue_to_wvalues;
 use super::utils::itypes_args_to_wtypes;
 use super::utils::itypes_output_to_wtypes;
-use crate::RecordTypes;
 
+use crate::RecordTypes;
 use crate::init_wasm_func_once;
 use crate::call_wasm_func;
 use crate::HostImportDescriptor;
@@ -30,6 +30,8 @@ use wasmer_core::vm::Ctx;
 use wasmer_core::typed_func::DynamicFunc;
 use wasmer_core::types::Value as WValue;
 use wasmer_core::types::FuncSig;
+use it_lilo_utils::memory_reader::MemoryReader;
+use it_lilo_utils::memory_writer::MemoryWriter;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -59,7 +61,7 @@ pub(crate) fn create_host_import_func(
     let raw_output = itypes_output_to_wtypes(&output_type_to_types(output_type));
 
     let func = move |ctx: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
-        init_wasm_func_once!(allocate_func, ctx, i32, i32, ALLOCATE_FUNC_NAME, 2);
+        init_wasm_func_once!(allocate_func, ctx, (i32, i32), i32, ALLOCATE_FUNC_NAME, 2);
 
         let memory_index = 0;
         let view = ctx.memory(memory_index).view::<u8>();
@@ -81,7 +83,8 @@ pub(crate) fn create_host_import_func(
         let view = ctx.memory(memory_index).view::<u8>();
         let memory = view.deref();
         let writer = MemoryWriter::new(memory);
-        let wvalues = ivalue_to_wvalues(&writer, result, &allocate_func);
+        let wvalues = ivalue_to_wvalues(&writer, result, &allocate_func)
+            .expect("host closure shouldn't fail");
 
         // TODO: refactor this when multi-value is supported
         match wvalues.len() {

@@ -688,6 +688,7 @@ dependencies = [
  "fce-wit-generator",
  "fce-wit-interfaces",
  "fce-wit-parser",
+ "it-lilo-utils",
  "log",
  "multimap",
  "once_cell",
@@ -1487,6 +1488,15 @@ name = "ipnet"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47be2f14c678be2fdcab04ab1171db51b2762ce6f0a8ee87c8dd4a04ed216135"
+
+[[package]]
+name = "it-lilo-utils"
+version = "0.1.0"
+dependencies = [
+ "fluence-it-types 0.2.0",
+ "paste",
+ "thiserror",
+]
 
 [[package]]
 name = "it-to-bytes"
@@ -3278,6 +3288,7 @@ name = "wasmer-interface-types-fl"
 version = "0.20.0"
 dependencies = [
  "fluence-it-types 0.2.0",
+ "it-lilo-utils",
  "it-to-bytes 0.1.0",
  "itertools 0.10.0",
  "log",
@@ -3286,6 +3297,7 @@ dependencies = [
  "semver 0.11.0",
  "serde",
  "serde_json",
+ "thiserror",
  "wast",
 ]
 

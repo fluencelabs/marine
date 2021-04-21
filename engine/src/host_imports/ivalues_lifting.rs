@@ -15,17 +15,16 @@
  */
 
 /// Contain functions intended to create (lift) IValues from raw WValues (Wasm types).
-mod memory_reader;
-
-pub(crate) use memory_reader::MemoryReader;
-
 use super::WType;
 use super::WValue;
 use super::HostImportError;
+use super::HostImportResult;
 use crate::IValue;
 use crate::RecordTypes;
 use crate::IType;
-use super::HostImportResult;
+
+use it_lilo_utils::memory_reader::MemoryReader;
+use it_lilo_utils::ser_type_size;
 
 use wasmer_wit::IRecordType;
 use wasmer_wit::NEVec;
@@ -80,18 +79,17 @@ pub(super) fn wvalues_to_ivalues(
             IType::F64 => simple_wvalue_to_ivalue!(result, wvalue, F64, F64),
             IType::String => {
                 let offset = next_wvalue!(wvalue, I32);
-                let elements_count = next_wvalue!(wvalue, I32);
+                let size = next_wvalue!(wvalue, I32);
 
-                let raw_str = reader.read_raw_u8_array(offset as _, elements_count as _);
-                // TODO: check for errors
-                let str = String::from_utf8(raw_str).unwrap();
+                let raw_str = reader.read_raw_u8_array(offset as _, size as _)?;
+                let str = String::from_utf8(raw_str)?;
                 result.push(IValue::String(str));
             }
             IType::ByteArray => {
                 let offset = next_wvalue!(wvalue, I32);
-                let elements_count = next_wvalue!(wvalue, I32);
+                let size = next_wvalue!(wvalue, I32);
 
-                let array = reader.read_raw_u8_array(offset as _, elements_count as _);
+                let array = reader.read_raw_u8_array(offset as _, size as _)?;
                 result.push(IValue::ByteArray(array));
             }
             IType::Array(ty) => {
@@ -128,29 +126,30 @@ fn lift_array(
     }
 
     let result_array = match value_type {
-        IType::Boolean => reader.read_bool_array(offset, elements_count),
-        IType::S8 => reader.read_s8_array(offset, elements_count),
-        IType::S16 => reader.read_s16_array(offset, elements_count),
-        IType::S32 => reader.read_s32_array(offset, elements_count),
-        IType::S64 => reader.read_s64_array(offset, elements_count),
-        IType::U8 => reader.read_u8_array(offset, elements_count),
-        IType::U16 => reader.read_u16_array(offset, elements_count),
-        IType::U32 => reader.read_u32_array(offset, elements_count),
-        IType::U64 => reader.read_u64_array(offset, elements_count),
-        IType::F32 => reader.read_f32_array(offset, elements_count),
-        IType::F64 => reader.read_f64_array(offset, elements_count),
-        IType::I32 => reader.read_i32_array(offset, elements_count),
-        IType::I64 => reader.read_i64_array(offset, elements_count),
+        IType::Boolean => reader.read_bool_array(offset, elements_count)?,
+        IType::S8 => reader.read_s8_array(offset, elements_count)?,
+        IType::S16 => reader.read_s16_array(offset, elements_count)?,
+        IType::S32 => reader.read_s32_array(offset, elements_count)?,
+        IType::S64 => reader.read_s64_array(offset, elements_count)?,
+        IType::U8 => reader.read_u8_array(offset, elements_count)?,
+        IType::U16 => reader.read_u16_array(offset, elements_count)?,
+        IType::U32 => reader.read_u32_array(offset, elements_count)?,
+        IType::U64 => reader.read_u64_array(offset, elements_count)?,
+        IType::F32 => reader.read_f32_array(offset, elements_count)?,
+        IType::F64 => reader.read_f64_array(offset, elements_count)?,
+        IType::I32 => reader.read_i32_array(offset, elements_count)?,
+        IType::I64 => reader.read_i64_array(offset, elements_count)?,
         IType::String => {
             let mut result = Vec::with_capacity(elements_count);
-            let seq_reader = reader.sequential_reader(offset);
+            let size = ser_type_size(&IType::String) * elements_count;
+            let seq_reader = reader.sequential_reader(offset, size)?;
 
             for _ in 0..elements_count {
                 let str_offset = seq_reader.read_u32();
                 let str_size = seq_reader.read_u32();
 
-                let raw_str = reader.read_raw_u8_array(str_offset as _, str_size as _);
-                let str = String::from_utf8(raw_str).unwrap();
+                let raw_str = reader.read_raw_u8_array(str_offset as _, str_size as _)?;
+                let str = String::from_utf8(raw_str)?;
                 result.push(IValue::String(str));
             }
 
@@ -158,13 +157,14 @@ fn lift_array(
         }
         IType::ByteArray => {
             let mut result = Vec::with_capacity(elements_count);
-            let seq_reader = reader.sequential_reader(offset);
+            let size = ser_type_size(&IType::ByteArray) * elements_count;
+            let seq_reader = reader.sequential_reader(offset, size)?;
 
             for _ in 0..elements_count {
                 let array_offset = seq_reader.read_u32();
                 let array_size = seq_reader.read_u32();
 
-                let array = reader.read_raw_u8_array(array_offset as _, array_size as _);
+                let array = reader.read_raw_u8_array(array_offset as _, array_size as _)?;
                 result.push(IValue::ByteArray(array));
             }
 
@@ -172,7 +172,8 @@ fn lift_array(
         }
         IType::Array(ty) => {
             let mut result = Vec::with_capacity(elements_count);
-            let seq_reader = reader.sequential_reader(offset);
+            let size = ser_type_size(&IType::Array(ty.clone())) * elements_count;
+            let seq_reader = reader.sequential_reader(offset, size)?;
 
             for _ in 0..elements_count {
                 let array_offset = seq_reader.read_u32() as usize;
@@ -190,7 +191,8 @@ fn lift_array(
                 .ok_or_else(|| HostImportError::RecordTypeNotFound(*record_type_id))?;
 
             let mut result = Vec::with_capacity(elements_count);
-            let seq_reader = reader.sequential_reader(offset);
+            let size = it_lilo_utils::record_size(record_type);
+            let seq_reader = reader.sequential_reader(offset, size)?;
 
             for _ in 0..elements_count {
                 let record_offset = seq_reader.read_u32();
@@ -215,8 +217,8 @@ fn lift_record(
     let fields_count = record_type.fields.len();
     let mut values = Vec::with_capacity(fields_count);
 
-    // let size = wasmer_wit::record_size(record_type);
-    let seq_reader = reader.sequential_reader(offset);
+    let size = it_lilo_utils::record_size(record_type);
+    let seq_reader = reader.sequential_reader(offset, size)?;
 
     for field in (*record_type.fields).iter() {
         match &field.ty {
@@ -238,8 +240,8 @@ fn lift_record(
                 let string_size = seq_reader.read_u32();
 
                 if string_size != 0 {
-                    let raw_str = reader.read_raw_u8_array(string_offset as _, string_size as _);
-                    let str = String::from_utf8(raw_str).unwrap();
+                    let raw_str = reader.read_raw_u8_array(string_offset as _, string_size as _)?;
+                    let str = String::from_utf8(raw_str)?;
                     values.push(IValue::String(str));
                 } else {
                     values.push(IValue::String(String::new()));
@@ -250,7 +252,7 @@ fn lift_record(
                 let array_size = seq_reader.read_u32();
 
                 if array_size != 0 {
-                    let array = reader.read_raw_u8_array(array_offset as _, array_size as _);
+                    let array = reader.read_raw_u8_array(array_offset as _, array_size as _)?;
                     values.push(IValue::ByteArray(array));
                 } else {
                     values.push(IValue::ByteArray(vec![]));
@@ -280,8 +282,7 @@ fn lift_record(
         }
     }
 
-    Ok(IValue::Record(
-        NEVec::new(values.into_iter().collect())
-            .expect("Record must have at least one field, zero given"),
-    ))
+    let record = NEVec::new(values.into_iter().collect())
+        .map_err(|_| HostImportError::EmptyRecord(record_type.name.clone()))?;
+    Ok(IValue::Record(record))
 }

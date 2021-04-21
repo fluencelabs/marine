@@ -152,7 +152,7 @@ macro_rules! init_wasm_func_once {
 #[macro_export]
 /// Call Wasm function that have Box<RefCell<Option<Func<'static, args, rets>>>> type.
 macro_rules! call_wasm_func {
-    ($func:ident, $arg:expr) => {
-        $func.borrow().as_ref().unwrap().call($arg).unwrap()
+    ($func:ident, $($arg:expr),*) => {
+        $func.borrow().as_ref().unwrap().call($($arg),*).unwrap()
     };
 }
