@@ -13,4 +13,4 @@ path = "src/main.rs"
 
 [dependencies]
 #fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
-fluence = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk/fluence" }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "optimizations" }

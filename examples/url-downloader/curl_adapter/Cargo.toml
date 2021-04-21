@@ -11,5 +11,5 @@ name = "curl_adapter"
 
 [dependencies]
 #fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
-fluence = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk/fluence", features = ["logger"] }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "optimizations", features = ["logger"] }
 log = "0.4.8"

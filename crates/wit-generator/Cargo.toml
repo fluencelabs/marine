@@ -15,8 +15,8 @@ fce-wit-parser = { path = "../wit-parser", version = "0.4.0"}
 #fluence-sdk-wit = { git = "https://github.com/fluencelabs/rust-sdk" }
 fluence-sdk-wit = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk/crates/wit" }
 
-wasmer-wit = { package = "wasmer-interface-types-fl", path = "/Users/mike/dev/work/fluence/wasm/interface-types/wasmer-it" }
-it-lilo-utils = { path = "/Users/mike/dev/work/fluence/wasm/interface-types/crates/it-lilo-utils" }
+wasmer-wit = { package = "wasmer-interface-types-fl", git = "https://github.com/fluencelabs/interface-types", branch = "optimizations" }
+it-lilo-utils = { git = "https://github.com/fluencelabs/interface-types", branch = "optimizations" }
 
 walrus = "0.18.0"
 once_cell = "1.4.0"
