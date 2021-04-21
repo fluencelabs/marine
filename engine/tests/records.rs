@@ -43,7 +43,7 @@ pub fn records() {
         result,
         vec![IValue::Record(
             wasmer_wit::NEVec::new(vec![
-                IValue::I32(1),
+                IValue::Boolean(true),
                 IValue::S8(1),
                 IValue::S16(2),
                 IValue::S32(3),

@@ -15,8 +15,8 @@
  */
 
 use super::*;
-use super::ivalues_lifting::wvalues_to_ivalues;
-use super::ivalues_lowering::ivalue_to_wvalues;
+use super::lifting::wvalues_to_ivalues;
+use super::lowering::ivalue_to_wvalues;
 use super::utils::itypes_args_to_wtypes;
 use super::utils::itypes_output_to_wtypes;
 
@@ -83,8 +83,21 @@ pub(crate) fn create_host_import_func(
         let view = ctx.memory(memory_index).view::<u8>();
         let memory = view.deref();
         let writer = MemoryWriter::new(memory);
-        let wvalues = ivalue_to_wvalues(&writer, result, &allocate_func)
-            .expect("host closure shouldn't fail");
+
+        let wvalues = match ivalue_to_wvalues(&writer, result, &allocate_func) {
+            Ok(wvalues) => wvalues,
+            Err(e) => {
+                log::error!("host closure failed: {}", e);
+
+                // returns 0 to a Wasm module in case of errors
+                init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 4);
+                init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
+
+                call_wasm_func!(set_result_ptr_func, 0 as _);
+                call_wasm_func!(set_result_size_func, 0 as _);
+                return vec![WValue::I32(0)];
+            }
+        };
 
         // TODO: refactor this when multi-value is supported
         match wvalues.len() {

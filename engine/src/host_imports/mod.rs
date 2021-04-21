@@ -15,9 +15,9 @@
  */
 
 mod errors;
+mod lifting;
+mod lowering;
 mod imports;
-mod ivalues_lifting;
-mod ivalues_lowering;
 mod utils;
 
 use std::cell::RefCell;
