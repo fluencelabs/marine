@@ -12,8 +12,7 @@ path = "src/lib.rs"
 
 [dependencies]
 fce-wit-parser = { path = "../wit-parser", version = "0.4.0"}
-#fluence-sdk-wit = { git = "https://github.com/fluencelabs/rust-sdk" }
-fluence-sdk-wit = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk/crates/wit" }
+fluence-sdk-wit = { git = "https://github.com/fluencelabs/rust-sdk", branch = "optimizations" }
 
 wasmer-wit = { package = "wasmer-interface-types-fl", git = "https://github.com/fluencelabs/interface-types", branch = "optimizations" }
 it-lilo-utils = { git = "https://github.com/fluencelabs/interface-types", branch = "optimizations" }

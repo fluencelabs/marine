@@ -756,7 +756,7 @@ version = "0.3.0"
 dependencies = [
  "cargo_toml",
  "fce-wit-parser",
- "fluence-sdk-wit 0.6.0",
+ "fluence-sdk-wit 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
  "it-lilo-utils",
  "once_cell",
  "serde",
@@ -986,18 +986,6 @@ dependencies = [
 name = "fluence-sdk-wit"
 version = "0.6.0"
 source = "git+https://github.com/fluencelabs/rust-sdk#1755202195c1e2a86c962219ac1420664afe3d49"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn",
- "uuid",
-]
-
-[[package]]
-name = "fluence-sdk-wit"
-version = "0.6.0"
 dependencies = [
  "proc-macro2",
  "quote",
