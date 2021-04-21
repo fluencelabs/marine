@@ -756,6 +756,7 @@ dependencies = [
  "cargo_toml",
  "fce-wit-parser",
  "fluence-sdk-wit 0.6.0",
+ "it-lilo-utils",
  "once_cell",
  "serde",
  "serde_json",

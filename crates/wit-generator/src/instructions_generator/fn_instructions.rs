@@ -24,6 +24,7 @@ use fluence_sdk_wit::FnItem;
 use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
+use wasmer_wit::IType;
 
 use std::rc::Rc;
 
@@ -142,13 +143,17 @@ impl FnInstructionGenerator for ParsedType {
             ParsedType::U64(_) => vec![Instruction::ArgumentGet { index }, Instruction::I64FromU64],
             ParsedType::F32(_) => vec![Instruction::ArgumentGet { index }],
             ParsedType::F64(_) => vec![Instruction::ArgumentGet { index }],
-            ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) => vec![
-                Instruction::ArgumentGet { index },
-                Instruction::StringSize,
-                Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
-                Instruction::ArgumentGet { index },
-                Instruction::StringLowerMemory,
-            ],
+            ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) => {
+                let type_tag = it_lilo_utils::ser_type_size(&IType::U8) as i32;
+                vec![
+                    Instruction::ArgumentGet { index },
+                    Instruction::StringSize,
+                    Instruction::PushI32 { value: type_tag },
+                    Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
+                    Instruction::ArgumentGet { index },
+                    Instruction::StringLowerMemory,
+                ]
+            },
             ParsedType::Vector(value_type, _) => {
                 let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
                 vec![

@@ -17,8 +17,9 @@
 use super::WITGenerator;
 use super::WITResolver;
 use super::utils::ptype_to_itype_checked;
-use crate::default_export_api_config::*;
 use crate::Result;
+use crate::default_export_api_config::*;
+use crate::instructions_generator::utils::wtype_to_itype;
 
 use fluence_sdk_wit::ExternModItem;
 use fluence_sdk_wit::ExternFnItem;
@@ -26,7 +27,7 @@ use fluence_sdk_wit::ParsedType;
 use fluence_sdk_wit::FnArgument;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
 use wasmer_wit::interpreter::Instruction;
-use crate::instructions_generator::utils::wtype_to_itype;
+use wasmer_wit::IType;
 
 use std::rc::Rc;
 
@@ -245,15 +246,20 @@ impl ForeignModInstructionGenerator for ParsedType {
             ParsedType::U64(_) => vec![Instruction::I64FromU64],
             ParsedType::F32(_) => vec![],
             ParsedType::F64(_) => vec![],
-            ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) => vec![
-                Instruction::Dup,
-                Instruction::StringSize,
-                Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
-                Instruction::Swap2,
-                Instruction::StringLowerMemory,
-                Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
-                Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
-            ],
+            ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) => {
+                let type_tag = it_lilo_utils::ser_type_size(&IType::U8) as i32;
+
+                vec![
+                    Instruction::Dup,
+                    Instruction::StringSize,
+                    Instruction::PushI32 { value: type_tag },
+                    Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
+                    Instruction::Swap2,
+                    Instruction::StringLowerMemory,
+                    Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
+                    Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
+                ]
+            },
             ParsedType::Vector(value_type, _) => {
                 let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
 
@@ -278,7 +284,6 @@ impl ForeignModInstructionGenerator for ParsedType {
 }
 
 use fluence_sdk_wit::RustType;
-use wasmer_wit::IType;
 
 pub fn to_raw_input_types(arg: &FnArgument) -> Vec<IFunctionArg> {
     match arg.ty {
