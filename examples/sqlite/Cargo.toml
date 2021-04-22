@@ -10,5 +10,5 @@ name = "sqlite_test"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "optimizations" }
 fce-sqlite-connector = { git = "https://github.com/fluencelabs/sqlite-wasm-connector", branch = "fluence_0_6_0" }
