@@ -22,11 +22,11 @@ use crate::FaaSError;
 use crate::Result;
 
 use std::collections::HashMap;
-use std::path::{PathBuf, Path};
+use std::path::Path;
 
 /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
 pub(crate) fn load_modules_from_fs(
-    modules_dir: &PathBuf,
+    modules_dir: &Path,
     modules: ModulesLoadStrategy<'_>,
 ) -> Result<HashMap<String, Vec<u8>>> {
     use FaaSError::IOError;

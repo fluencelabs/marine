@@ -93,8 +93,8 @@ pub(crate) fn create_host_import_func(
                 init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 4);
                 init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
 
-                call_wasm_func!(set_result_ptr_func, 0 as _);
-                call_wasm_func!(set_result_size_func, 0 as _);
+                call_wasm_func!(set_result_ptr_func, 0);
+                call_wasm_func!(set_result_size_func, 0);
                 return vec![WValue::I32(0)];
             }
         };
