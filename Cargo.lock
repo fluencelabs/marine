@@ -731,7 +731,7 @@ dependencies = [
 [[package]]
 name = "fce-timestamp-macro"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#4b6f6d9111e22f5d575282b1e1dc6de9ace5cb32"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
 dependencies = [
  "chrono",
  "quote",
@@ -761,6 +761,7 @@ dependencies = [
  "once_cell",
  "serde",
  "serde_json",
+ "thiserror",
  "walrus",
  "wasmer-interface-types-fl",
 ]
@@ -819,7 +820,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#4b6f6d9111e22f5d575282b1e1dc6de9ace5cb32"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
 dependencies = [
  "fce-timestamp-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
  "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
@@ -911,7 +912,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#4b6f6d9111e22f5d575282b1e1dc6de9ace5cb32"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
 dependencies = [
  "fluence-sdk-wit 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
 ]
@@ -938,7 +939,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#4b6f6d9111e22f5d575282b1e1dc6de9ace5cb32"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
 dependencies = [
  "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
  "log",
@@ -972,7 +973,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#4b6f6d9111e22f5d575282b1e1dc6de9ace5cb32"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1318,6 +1319,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "494b4d60369511e7dea41cf646832512a94e542f68bb9c49e54518e0f468eb47"
 
 [[package]]
+name = "httpdate"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05842d0d43232b23ccb7060ecb0f0626922c21f30012e97b767b30afd4a5d4b9"
+
+[[package]]
 name = "humantime"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1340,7 +1347,7 @@ dependencies = [
  "http",
  "http-body 0.3.1",
  "httparse",
- "httpdate",
+ "httpdate 0.3.2",
  "itoa",
  "pin-project",
  "socket2 0.3.19",
@@ -1352,9 +1359,9 @@ dependencies = [
 
 [[package]]
 name = "hyper"
-version = "0.14.5"
+version = "0.14.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bf09f61b52cfcf4c00de50df88ae423d6c02354e385a86341133b5338630ad1"
+checksum = "5f006b8784cfb01fe7aa9c46f5f5cd4cf5c85a8c612a0653ec97642979062665"
 dependencies = [
  "bytes 1.0.1",
  "futures-channel",
@@ -1364,7 +1371,7 @@ dependencies = [
  "http",
  "http-body 0.4.1",
  "httparse",
- "httpdate",
+ "httpdate 1.0.0",
  "itoa",
  "pin-project",
  "socket2 0.4.0",
@@ -1394,7 +1401,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6183ddfa99b85da61a140bea0efc93fdf56ceaa041b37d553518030827f9905"
 dependencies = [
  "bytes 1.0.1",
- "hyper 0.14.5",
+ "hyper 0.14.6",
  "native-tls",
  "tokio 1.5.0",
  "tokio-native-tls",
@@ -2329,7 +2336,7 @@ dependencies = [
  "futures-util",
  "http",
  "http-body 0.4.1",
- "hyper 0.14.5",
+ "hyper 0.14.6",
  "hyper-tls 0.5.0",
  "ipnet",
  "js-sys",
@@ -2651,9 +2658,9 @@ checksum = "1e81da0851ada1f3e9d4312c704aa4f8806f0f9d69faaf8df2f3464b4a9437c2"
 
 [[package]]
 name = "syn"
-version = "1.0.69"
+version = "1.0.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48fe99c6bd8b1cc636890bcc071842de909d902c81ac7dab53ba33c421ab8ffb"
+checksum = "b9505f307c872bab8eb46f77ae357c8eba1fdacead58ee5a850116b1d7f82883"
 dependencies = [
  "proc-macro2",
  "quote",

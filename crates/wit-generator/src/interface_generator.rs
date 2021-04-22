@@ -43,18 +43,18 @@ pub fn embed_wit(path: std::path::PathBuf) -> Result<()> {
 }
 
 pub(crate) struct ModuleAST {
-    pub(crate) records: Vec<fluence_sdk_wit::RecordItem>,
-    pub(crate) functions: Vec<fluence_sdk_wit::FnItem>,
-    pub(crate) extern_mods: Vec<fluence_sdk_wit::ExternModItem>,
+    pub(crate) records: Vec<fluence_sdk_wit::RecordType>,
+    pub(crate) functions: Vec<fluence_sdk_wit::FnType>,
+    pub(crate) extern_mods: Vec<fluence_sdk_wit::ExternModType>,
 }
 
 /// Extract all custom AST types previously embedded by rust-sdk from compiled binary.
 fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<ModuleAST> {
     use fluence_sdk_wit::*;
 
-    let mut records: Vec<RecordItem> = Vec::new();
-    let mut functions: Vec<FnItem> = Vec::new();
-    let mut extern_mods: Vec<ExternModItem> = Vec::new();
+    let mut records: Vec<RecordType> = Vec::new();
+    let mut functions: Vec<FnType> = Vec::new();
+    let mut extern_mods: Vec<ExternModType> = Vec::new();
 
     // consider only sections name of that starts with GENERATED_SECTION_PREFIX
     for custom_module in wasm_module.customs.iter().filter(|(_, section)| {

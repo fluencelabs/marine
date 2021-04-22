@@ -20,7 +20,7 @@ use super::utils::ptype_to_itype_checked;
 use crate::default_export_api_config::*;
 use crate::Result;
 
-use fluence_sdk_wit::FnItem;
+use fluence_sdk_wit::FnType;
 use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
@@ -28,7 +28,7 @@ use wasmer_wit::IType;
 
 use std::rc::Rc;
 
-impl WITGenerator for FnItem {
+impl WITGenerator for FnType {
     fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
         use wasmer_wit::ast::Type;
         use wasmer_wit::ast::Adapter;
@@ -47,10 +47,12 @@ impl WITGenerator for FnItem {
 
         let arguments = Rc::new(arguments);
 
-        let output_types = match self.signature.output_type {
-            Some(ref output_type) => vec![ptype_to_itype_checked(output_type, wit_resolver)?],
-            None => vec![],
-        };
+        let output_types = self
+            .signature
+            .output_types
+            .iter()
+            .map(|ty| ptype_to_itype_checked(ty, wit_resolver))
+            .collect::<Result<Vec<_>>>()?;
         let output_types = Rc::new(output_types);
 
         let interfaces = &mut wit_resolver.interfaces;
@@ -79,11 +81,11 @@ impl WITGenerator for FnItem {
             .iter()
             .enumerate()
             .try_fold::<_, _, Result<_>>(Vec::new(), |mut instructions, (arg_id, arg)| {
-                let mut new_instructions = arg
+                let new_instructions = arg
                     .ty
                     .generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
 
-                instructions.append(&mut new_instructions);
+                instructions.extend(new_instructions);
                 Ok(instructions)
             })?;
 
@@ -92,10 +94,16 @@ impl WITGenerator for FnItem {
             function_index: export_function_index,
         });
 
-        instructions.extend(match &self.signature.output_type {
-            Some(output_type) => output_type.generate_instructions_for_output_type(wit_resolver)?,
-            None => vec![],
-        });
+        let instructions = self
+            .signature
+            .output_types
+            .iter()
+            .try_fold::<_, _, Result<_>>(instructions, |mut instructions, ty| {
+                let new_instructions = ty.generate_instructions_for_output_type(wit_resolver)?;
+
+                instructions.extend(new_instructions);
+                Ok(instructions)
+            })?;
 
         let adapter = Adapter {
             function_type: adapter_idx,

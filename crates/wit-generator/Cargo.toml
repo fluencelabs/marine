@@ -17,6 +17,7 @@ fluence-sdk-wit = { git = "https://github.com/fluencelabs/rust-sdk", branch = "o
 wasmer-wit = { package = "wasmer-interface-types-fl", git = "https://github.com/fluencelabs/interface-types", branch = "optimizations" }
 it-lilo-utils = { git = "https://github.com/fluencelabs/interface-types", branch = "optimizations" }
 
+thiserror = "1.0.24"
 walrus = "0.18.0"
 once_cell = "1.4.0"
 serde = { version = "=1.0.118", features = ["derive"] }

@@ -14,39 +14,20 @@
  * limitations under the License.
  */
 
-use std::error::Error;
+use thiserror::Error as ThisError;
 use serde_json::Error as SerdeDeserializationError;
 
-#[derive(Debug)]
+#[derive(Debug, ThisError)]
 pub enum WITGeneratorError {
     /// An error related to serde deserialization.
-    DeserializationError(SerdeDeserializationError),
+    #[error("Embedded by rust-sdk metadata couldn't be parsed by serde: {0:?}")]
+    DeserializationError(#[from] SerdeDeserializationError),
 
     /// Various errors related to records
+    #[error("{0}")]
     CorruptedRecord(String),
 
     /// Various errors occurred during the parsing/emitting a Wasm file.
+    #[error("I/O error occurred: {0}")]
     IOError(String),
-}
-
-impl Error for WITGeneratorError {}
-
-impl std::fmt::Display for WITGeneratorError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        match self {
-            WITGeneratorError::DeserializationError(err) => write!(
-                f,
-                "Embedded by rust-sdk metadata could't be parsed by serde: {:?}",
-                err
-            ),
-            WITGeneratorError::CorruptedRecord(err) => write!(f, "{:?}", err),
-            WITGeneratorError::IOError(err) => write!(f, "I/O error occurred: {:?}", err),
-        }
-    }
-}
-
-impl From<SerdeDeserializationError> for WITGeneratorError {
-    fn from(err: SerdeDeserializationError) -> Self {
-        WITGeneratorError::DeserializationError(err)
-    }
 }

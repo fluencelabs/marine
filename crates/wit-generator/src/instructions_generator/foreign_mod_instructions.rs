@@ -21,8 +21,8 @@ use crate::Result;
 use crate::default_export_api_config::*;
 use crate::instructions_generator::utils::wtype_to_itype;
 
-use fluence_sdk_wit::ExternModItem;
-use fluence_sdk_wit::ExternFnItem;
+use fluence_sdk_wit::ExternModType;
+use fluence_sdk_wit::ExternFnType;
 use fluence_sdk_wit::ParsedType;
 use fluence_sdk_wit::FnArgument;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
@@ -33,7 +33,7 @@ use std::rc::Rc;
 
 const HOST_NAMESPACE_NAME: &str = "host";
 
-impl WITGenerator for ExternModItem {
+impl WITGenerator for ExternModType {
     fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
         // host imports should be left as is
         if self.namespace == HOST_NAMESPACE_NAME {
@@ -49,7 +49,7 @@ impl WITGenerator for ExternModItem {
 }
 
 fn generate_wit_for_import<'a>(
-    import: &'a ExternFnItem,
+    import: &'a ExternFnType,
     namespace: &'a str,
     wit_resolver: &mut WITResolver<'a>,
 ) -> Result<()> {
@@ -69,10 +69,12 @@ fn generate_wit_for_import<'a>(
         .collect::<Result<Vec<_>>>()?;
     let arguments = Rc::new(arguments);
 
-    let output_types = match import.signature.output_type {
-        Some(ref output_type) => vec![ptype_to_itype_checked(output_type, wit_resolver)?],
-        None => vec![],
-    };
+    let output_types = import
+        .signature
+        .output_types
+        .iter()
+        .map(|ty| ptype_to_itype_checked(ty, wit_resolver))
+        .collect::<Result<Vec<_>>>()?;
     let output_types = Rc::new(output_types);
 
     let interfaces = &mut wit_resolver.interfaces;
@@ -90,13 +92,18 @@ fn generate_wit_for_import<'a>(
         .collect::<Vec<_>>();
     let raw_inputs = Rc::new(raw_inputs);
 
-    let raw_outputs = match import.signature.output_type {
-        Some(ref output_type) => to_raw_output_type(output_type)
-            .iter()
-            .map(wtype_to_itype)
-            .collect(),
-        None => vec![],
-    };
+    let raw_outputs = import
+        .signature
+        .output_types
+        .iter()
+        .map(|ty| {
+            to_raw_output_type(ty)
+                .iter()
+                .map(wtype_to_itype)
+                .collect::<Vec<_>>()
+        })
+        .flatten()
+        .collect::<Vec<_>>();
     let raw_outputs = Rc::new(raw_outputs);
 
     interfaces.types.push(Type::Function {
@@ -135,11 +142,11 @@ fn generate_wit_for_import<'a>(
         .arguments
         .iter()
         .try_fold::<_, _, Result<_>>((0, Vec::new()), |(arg_id, mut instructions), arg| {
-            let (mut new_instructions, shift) = arg
+            let (new_instructions, shift) = arg
                 .ty
                 .generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
 
-            instructions.append(&mut new_instructions);
+            instructions.extend(new_instructions);
             Ok((arg_id + shift, instructions))
         })?
         .1;
@@ -152,10 +159,16 @@ fn generate_wit_for_import<'a>(
         function_index: import_function_index,
     });
 
-    instructions.extend(match &import.signature.output_type {
-        Some(output_type) => output_type.generate_instructions_for_output_type(wit_resolver)?,
-        None => vec![],
-    });
+    let instructions = import
+        .signature
+        .output_types
+        .iter()
+        .try_fold::<_, _, Result<_>>(instructions, |mut instructions, ty| {
+            let new_instructions = ty.generate_instructions_for_output_type(wit_resolver)?;
+
+            instructions.extend(new_instructions);
+            Ok(instructions)
+        })?;
 
     let adapter = Adapter {
         function_type: adapter_idx,
