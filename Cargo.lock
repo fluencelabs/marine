@@ -44,11 +44,10 @@ checksum = "28b2cd92db5cbd74e8e5028f7e27dd7aa3090e89e4f2a197cc7c8dfb69c7063b"
 [[package]]
 name = "aqua-interpreter-interface"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cf8c8116a5a3ba83aa9319895281b8ed602d473adaca9d58f84557a6c8942b5"
+source = "git+https://github.com/fluencelabs/air?branch=bwu#c11435f3bdc78083247111576182042a0af0fe42"
 dependencies = [
  "fluence 0.4.2",
- "fluence-it-types 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-it-types",
  "serde",
 ]
 
@@ -882,22 +881,12 @@ dependencies = [
 [[package]]
 name = "fluence-it-types"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#8de882c159eef7b53d8a7fc290a0c6aa011722a7"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#5df263876fb5645674228cbbdd6288b33d361d8e"
 dependencies = [
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=optimizations)",
+ "it-to-bytes",
  "nom",
  "serde",
  "wast",
-]
-
-[[package]]
-name = "fluence-it-types"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59c3c0b0dea71548d1781f2bb974ded7490ebc7de5837f7f5e2f3a9debc4ce4f"
-dependencies = [
- "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde",
 ]
 
 [[package]]
@@ -1359,9 +1348,9 @@ dependencies = [
 
 [[package]]
 name = "hyper"
-version = "0.14.6"
+version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f006b8784cfb01fe7aa9c46f5f5cd4cf5c85a8c612a0653ec97642979062665"
+checksum = "1e5f105c494081baa3bf9e200b279e27ec1623895cd504c7dbef8d0b080fcf54"
 dependencies = [
  "bytes 1.0.1",
  "futures-channel",
@@ -1401,7 +1390,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6183ddfa99b85da61a140bea0efc93fdf56ceaa041b37d553518030827f9905"
 dependencies = [
  "bytes 1.0.1",
- "hyper 0.14.6",
+ "hyper 0.14.7",
  "native-tls",
  "tokio 1.5.0",
  "tokio-native-tls",
@@ -1506,9 +1495,10 @@ checksum = "47be2f14c678be2fdcab04ab1171db51b2762ce6f0a8ee87c8dd4a04ed216135"
 [[package]]
 name = "it-lilo-utils"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#8de882c159eef7b53d8a7fc290a0c6aa011722a7"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#5df263876fb5645674228cbbdd6288b33d361d8e"
 dependencies = [
- "fluence-it-types 0.2.0 (git+https://github.com/fluencelabs/interface-types?branch=optimizations)",
+ "fluence-it-types",
+ "log",
  "paste",
  "thiserror",
 ]
@@ -1516,13 +1506,7 @@ dependencies = [
 [[package]]
 name = "it-to-bytes"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#8de882c159eef7b53d8a7fc290a0c6aa011722a7"
-
-[[package]]
-name = "it-to-bytes"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "729c74bb4236418898a219c6d96f14cba77456dd7c04a2e99e65e9c643709b56"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#5df263876fb5645674228cbbdd6288b33d361d8e"
 
 [[package]]
 name = "itertools"
@@ -2264,9 +2248,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.4.5"
+version = "1.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "957056ecddbeba1b26965114e191d2e8589ce74db242b6ea25fc4062427a5c19"
+checksum = "2a26af418b574bd56588335b3a3659a65725d4e636eb1016c2f9e3b38c7cc759"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2336,7 +2320,7 @@ dependencies = [
  "futures-util",
  "http",
  "http-body 0.4.1",
- "hyper 0.14.6",
+ "hyper 0.14.7",
  "hyper-tls 0.5.0",
  "ipnet",
  "js-sys",
@@ -3302,11 +3286,11 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types-fl"
 version = "0.20.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#8de882c159eef7b53d8a7fc290a0c6aa011722a7"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#5df263876fb5645674228cbbdd6288b33d361d8e"
 dependencies = [
- "fluence-it-types 0.2.0 (git+https://github.com/fluencelabs/interface-types?branch=optimizations)",
+ "fluence-it-types",
  "it-lilo-utils",
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=optimizations)",
+ "it-to-bytes",
  "itertools 0.10.0",
  "log",
  "nom",
