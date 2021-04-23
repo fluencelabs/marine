@@ -34,3 +34,13 @@ lto = true
 debug-assertions = false
 overflow-checks = false
 panic = "abort"
+
+[patch.crates-io]
+fluence-it-types = { git = "https://github.com/fluencelabs/interface-types", rev = "9095389a5af6e5e334be898437cee5b13f5b4909" }
+wasmer-wit = { package = "wasmer-interface-types-fl", git = "https://github.com/fluencelabs/interface-types", rev = "9095389a5af6e5e334be898437cee5b13f5b4909" }
+it-lilo-utils = { git = "https://github.com/fluencelabs/interface-types", rev = "9095389a5af6e5e334be898437cee5b13f5b4909" }
+aqua-interpreter-interface = { git = "https://github.com/fluencelabs/air", branch = "bwu" }
+
+#[patch."https://github.com/fluencelabs/interface-types"]
+#it-lilo-utils = { rev = "9095389a5af6e5e334be898437cee5b13f5b4909" }
+#wasmer-interface-types-fl = { git = "https://github.com/fluencelabs/interface-types", rev = "9095389a5af6e5e334be898437cee5b13f5b4909" }
