@@ -38,6 +38,6 @@ pub enum CLIError {
     WasmCompilationError(String),
 
     /// Various errors related to I/O operations.
-    #[error("{:?}")]
+    #[error("{0:?}")]
     IOError(#[from] std::io::Error),
 }
