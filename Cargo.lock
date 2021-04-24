@@ -730,7 +730,7 @@ dependencies = [
 [[package]]
 name = "fce-timestamp-macro"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#43c3908409b20cd875f2a42ae5563672453129a0"
 dependencies = [
  "chrono",
  "quote",
@@ -810,7 +810,7 @@ dependencies = [
 [[package]]
 name = "fluence"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#43c3908409b20cd875f2a42ae5563672453129a0"
 dependencies = [
  "fce-timestamp-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
  "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
@@ -872,7 +872,7 @@ dependencies = [
 [[package]]
 name = "fluence-it-types"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#39dca73210fcae8cdc90aedd2da4edc104006e7b"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#27c13e9547ac55ddbc5e7a4e1ab6f1a1368075ed"
 dependencies = [
  "it-to-bytes",
  "nom",
@@ -883,7 +883,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-macro"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#43c3908409b20cd875f2a42ae5563672453129a0"
 dependencies = [
  "fluence-sdk-wit 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
 ]
@@ -899,7 +899,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-main"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#43c3908409b20cd875f2a42ae5563672453129a0"
 dependencies = [
  "fluence-sdk-macro 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
  "log",
@@ -919,7 +919,7 @@ dependencies = [
 [[package]]
 name = "fluence-sdk-wit"
 version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#ba7af66ca834fbaa9e708029d950caf4b0729ba8"
+source = "git+https://github.com/fluencelabs/rust-sdk?branch=optimizations#43c3908409b20cd875f2a42ae5563672453129a0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1452,7 +1452,7 @@ checksum = "47be2f14c678be2fdcab04ab1171db51b2762ce6f0a8ee87c8dd4a04ed216135"
 [[package]]
 name = "it-lilo"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#39dca73210fcae8cdc90aedd2da4edc104006e7b"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#27c13e9547ac55ddbc5e7a4e1ab6f1a1368075ed"
 dependencies = [
  "fluence-it-types",
  "log",
@@ -1463,7 +1463,7 @@ dependencies = [
 [[package]]
 name = "it-to-bytes"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#39dca73210fcae8cdc90aedd2da4edc104006e7b"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#27c13e9547ac55ddbc5e7a4e1ab6f1a1368075ed"
 
 [[package]]
 name = "itertools"
@@ -3253,7 +3253,7 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types-fl"
 version = "0.20.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#39dca73210fcae8cdc90aedd2da4edc104006e7b"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#27c13e9547ac55ddbc5e7a4e1ab6f1a1368075ed"
 dependencies = [
  "fluence-it-types",
  "it-lilo",

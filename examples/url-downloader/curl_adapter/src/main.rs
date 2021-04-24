@@ -65,8 +65,8 @@ static GLOBAL_ALLOCATOR: WasmTracingAllocator<System> = WasmTracingAllocator(Sys
 
 #[derive(Debug)]
 pub struct WasmTracingAllocator<A>(pub A)
-    where
-        A: GlobalAlloc;
+where
+    A: GlobalAlloc;
 
 use std::sync::atomic::AtomicUsize;
 
@@ -76,8 +76,8 @@ static mut REALLOCSA: AtomicUsize = AtomicUsize::new(0);
 static mut REALLOCSD: AtomicUsize = AtomicUsize::new(0);
 
 unsafe impl<A> GlobalAlloc for WasmTracingAllocator<A>
-    where
-        A: GlobalAlloc,
+where
+    A: GlobalAlloc,
 {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         let size = layout.size();
