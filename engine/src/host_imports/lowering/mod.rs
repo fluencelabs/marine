@@ -16,15 +16,11 @@
 
 /// Contain functions intended to put (lower) IValues to Wasm memory
 /// and pass it to a Wasm module as raw WValues (Wasm types).
-///
-mod lower_array;
+mod lo_helper;
 mod lower_ivalues;
-mod lower_record;
 
+pub(crate) use lo_helper::LoHelper;
 pub(crate) use lower_ivalues::ivalue_to_wvalues;
-
-use lower_array::lower_array;
-use lower_record::lower_record;
 
 use super::WValue;
 use super::AllocateFunc;

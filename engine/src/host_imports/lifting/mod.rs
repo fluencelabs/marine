@@ -16,16 +16,13 @@
 
 /// Contain functions intended to create (lift) IValues from raw WValues (Wasm types).
 
-mod lift_array;
+mod li_helper;
 mod lift_ivalues;
-mod lift_record;
 
+pub(crate) use li_helper::LiHelper;
 pub(crate) use lift_ivalues::wvalues_to_ivalues;
 
 use super::WValue;
 use super::WType;
 use super::HostImportError;
 use super::HostImportResult;
-
-use lift_array::lift_array;
-use lift_record::lift_record;

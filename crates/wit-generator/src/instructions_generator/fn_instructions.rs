@@ -152,7 +152,7 @@ impl FnInstructionGenerator for ParsedType {
             ParsedType::F32(_) => vec![Instruction::ArgumentGet { index }],
             ParsedType::F64(_) => vec![Instruction::ArgumentGet { index }],
             ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) => {
-                let type_tag = it_lilo_utils::ser_type_size(&IType::U8) as i32;
+                let type_tag = it_lilo::utils::ser_type_size(&IType::U8) as i32;
                 vec![
                     Instruction::ArgumentGet { index },
                     Instruction::StringSize,

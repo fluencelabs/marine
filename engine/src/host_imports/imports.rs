@@ -16,7 +16,9 @@
 
 use super::*;
 use super::lifting::wvalues_to_ivalues;
+use super::lifting::LiHelper;
 use super::lowering::ivalue_to_wvalues;
+use super::lowering::LoHelper;
 use super::utils::itypes_args_to_wtypes;
 use super::utils::itypes_output_to_wtypes;
 
@@ -30,8 +32,8 @@ use wasmer_core::vm::Ctx;
 use wasmer_core::typed_func::DynamicFunc;
 use wasmer_core::types::Value as WValue;
 use wasmer_core::types::FuncSig;
-use it_lilo_utils::memory_reader::MemoryReader;
-use it_lilo_utils::memory_writer::MemoryWriter;
+use it_lilo::lifter::ILifter;
+use it_lilo::lowerer::ILowerer;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -61,15 +63,14 @@ pub(crate) fn create_host_import_func(
     let raw_output = itypes_output_to_wtypes(&output_type_to_types(output_type));
 
     let func = move |ctx: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
-        init_wasm_func_once!(allocate_func, ctx, (i32, i32), i32, ALLOCATE_FUNC_NAME, 2);
-
         let memory_index = 0;
         let view = ctx.memory(memory_index).view::<u8>();
         let memory = view.deref();
 
-        let reader = MemoryReader::new(memory);
+        let li_helper = LiHelper::new(record_types.clone());
+        let lifter = ILifter::new(memory, &li_helper);
 
-        let result = match wvalues_to_ivalues(&reader, inputs, &argument_types, &record_types) {
+        let result = match wvalues_to_ivalues(&lifter, inputs, &argument_types) {
             Ok(ivalues) => host_exported_func(ctx, ivalues),
             Err(e) => {
                 log::error!("error occurred while lifting values in host import: {}", e);
@@ -79,12 +80,14 @@ pub(crate) fn create_host_import_func(
             }
         };
 
-        let memory_index = 0;
-        let view = ctx.memory(memory_index).view::<u8>();
-        let memory = view.deref();
-        let writer = MemoryWriter::new(memory);
+        init_wasm_func_once!(allocate_func, ctx, (i32, i32), i32, ALLOCATE_FUNC_NAME, 2);
 
-        let wvalues = match ivalue_to_wvalues(&writer, result, &allocate_func) {
+        let lo_helper = LoHelper::new(&ctx, &allocate_func);
+        let t = ILowerer::new(&lo_helper)
+            .map_err(|e| HostImportError::LowererError(e))
+            .and_then(|lowerer| ivalue_to_wvalues(&lowerer, result));
+
+        let wvalues = match t {
             Ok(wvalues) => wvalues,
             Err(e) => {
                 log::error!("host closure failed: {}", e);

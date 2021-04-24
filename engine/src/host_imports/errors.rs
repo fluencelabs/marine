@@ -17,7 +17,9 @@
 use super::WType;
 use super::WValue;
 
-use it_lilo_utils::error::MemoryAccessError;
+use it_lilo::lifter::LiError;
+use it_lilo::lowerer::LoError;
+use it_lilo::traits::RecordResolvableError;
 use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
@@ -34,19 +36,15 @@ pub enum HostImportError {
     #[error("Not enough WValue arguments are provided from the Wasm side")]
     MismatchWValuesCount,
 
-    /// Out-of-bound memory access.
     #[error("{0}")]
-    MemoryAccessError(#[from] MemoryAccessError),
+    LifterError(#[from] LiError),
 
-    /// An error related to not found record in module record types.
-    #[error("Record with type id {0} not found")]
-    RecordTypeNotFound(u64),
+    #[error("{0}")]
+    LowererError(#[from] LoError),
 
-    /// Errors related to lifting incorrect UTF8 string from a Wasm module.
-    #[error("corrupted UTF8 string {0}")]
-    CorruptedUTF8String(#[from] std::string::FromUtf8Error),
+    #[error("{0}")]
+    RecordNotFound(#[from] RecordResolvableError),
 
-    /// This error occurred when a record is created from empty values array.
-    #[error("Record with name '{0}' can't be empty")]
-    EmptyRecord(String),
+    #[error("{0}")]
+    InvalidUTF8String(#[from] std::string::FromUtf8Error),
 }

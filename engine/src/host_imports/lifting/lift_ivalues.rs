@@ -19,12 +19,10 @@ use super::WValue;
 use super::HostImportError;
 use super::HostImportResult;
 use crate::IValue;
-use crate::RecordTypes;
 use crate::IType;
 
-use it_lilo_utils::memory_reader::MemoryReader;
-
-use std::rc::Rc;
+use it_lilo::lifter::*;
+use it_lilo::traits::RecordResolvable;
 
 macro_rules! next_wvalue {
     ($wvalue_iter:ident, $wtype:ident) => {
@@ -45,11 +43,10 @@ macro_rules! simple_wvalue_to_ivalue {
     }};
 }
 
-pub(crate) fn wvalues_to_ivalues(
-    reader: &MemoryReader<'_>,
+pub(crate) fn wvalues_to_ivalues<R: RecordResolvable>(
+    lifter: &ILifter<'_, '_, R>,
     wvalues: &[WValue],
     itypes: &[IType],
-    record_types: &Rc<RecordTypes>,
 ) -> HostImportResult<Vec<IValue>> {
     let mut result = Vec::with_capacity(wvalues.len());
     let mut wvalue = wvalues.iter();
@@ -76,7 +73,7 @@ pub(crate) fn wvalues_to_ivalues(
                 let offset = next_wvalue!(wvalue, I32);
                 let size = next_wvalue!(wvalue, I32);
 
-                let raw_str = reader.read_raw_u8_array(offset as _, size as _)?;
+                let raw_str = lifter.reader.read_raw_u8_array(offset as _, size as _)?;
                 let str = String::from_utf8(raw_str)?;
                 result.push(IValue::String(str));
             }
@@ -84,23 +81,21 @@ pub(crate) fn wvalues_to_ivalues(
                 let offset = next_wvalue!(wvalue, I32);
                 let size = next_wvalue!(wvalue, I32);
 
-                let array = reader.read_raw_u8_array(offset as _, size as _)?;
+                let array = lifter.reader.read_raw_u8_array(offset as _, size as _)?;
                 result.push(IValue::ByteArray(array));
             }
             IType::Array(ty) => {
                 let offset = next_wvalue!(wvalue, I32);
                 let size = next_wvalue!(wvalue, I32);
 
-                let array = super::lift_array(reader, ty, offset as _, size as _, record_types)?;
-                result.push(IValue::Array(array));
+                let array = array_lift_memory(lifter, ty, offset as _, size as _)?;
+                result.push(array);
             }
             IType::Record(record_type_id) => {
-                let record_type = record_types
-                    .get(record_type_id)
-                    .ok_or_else(|| HostImportError::RecordTypeNotFound(*record_type_id))?;
+                let record_type = lifter.resolver.resolve_record(*record_type_id)?;
                 let offset = next_wvalue!(wvalue, I32);
 
-                let record = super::lift_record(reader, record_type, offset as _, record_types)?;
+                let record = record_lift_memory(lifter, record_type, offset as _)?;
                 result.push(record);
             }
         }
