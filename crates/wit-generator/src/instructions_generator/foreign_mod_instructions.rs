@@ -225,12 +225,19 @@ impl ForeignModInstructionGenerator for ParsedType {
             ], 2),
             ParsedType::Vector(value_type, _) => {
                 let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
-
-                (vec![
-                    Instruction::ArgumentGet { index },
-                    Instruction::ArgumentGet { index: index + 1 },
-                    Instruction::ArrayLiftMemory { value_type },
-                ], 2)
+                if let IType::U8 = value_type {
+                    (vec![
+                        Instruction::ArgumentGet { index },
+                        Instruction::ArgumentGet { index: index + 1 },
+                        Instruction::ByteArrayLiftMemory,
+                    ], 2)
+                } else {
+                    (vec![
+                        Instruction::ArgumentGet { index },
+                        Instruction::ArgumentGet { index: index + 1 },
+                        Instruction::ArrayLiftMemory { value_type },
+                    ], 2)
+                }
             },
             ParsedType::Record(record_name, _) => {
                 let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;

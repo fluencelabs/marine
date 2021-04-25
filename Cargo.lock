@@ -44,7 +44,7 @@ checksum = "28b2cd92db5cbd74e8e5028f7e27dd7aa3090e89e4f2a197cc7c8dfb69c7063b"
 [[package]]
 name = "aqua-interpreter-interface"
 version = "0.4.0"
-source = "git+https://github.com/fluencelabs/air?branch=bwu#3feea33ab5ae766d13ca43270aeac39f38b566de"
+source = "git+https://github.com/fluencelabs/air?branch=bwu#0b1ccf35c9d599d72b7efaba972e8463467ddd72"
 dependencies = [
  "fluence 0.6.0 (git+https://github.com/fluencelabs/rust-sdk?branch=optimizations)",
  "fluence-it-types",
@@ -872,7 +872,7 @@ dependencies = [
 [[package]]
 name = "fluence-it-types"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#27c13e9547ac55ddbc5e7a4e1ab6f1a1368075ed"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#7f049c0551fce18dc9e106d0f2b1ff3bdd909280"
 dependencies = [
  "it-to-bytes",
  "nom",
@@ -1452,7 +1452,7 @@ checksum = "47be2f14c678be2fdcab04ab1171db51b2762ce6f0a8ee87c8dd4a04ed216135"
 [[package]]
 name = "it-lilo"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#27c13e9547ac55ddbc5e7a4e1ab6f1a1368075ed"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#7f049c0551fce18dc9e106d0f2b1ff3bdd909280"
 dependencies = [
  "fluence-it-types",
  "log",
@@ -1463,7 +1463,7 @@ dependencies = [
 [[package]]
 name = "it-to-bytes"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#27c13e9547ac55ddbc5e7a4e1ab6f1a1368075ed"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#7f049c0551fce18dc9e106d0f2b1ff3bdd909280"
 
 [[package]]
 name = "itertools"
@@ -3253,7 +3253,7 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types-fl"
 version = "0.20.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#27c13e9547ac55ddbc5e7a4e1ab6f1a1368075ed"
+source = "git+https://github.com/fluencelabs/interface-types?branch=optimizations#7f049c0551fce18dc9e106d0f2b1ff3bdd909280"
 dependencies = [
  "fluence-it-types",
  "it-lilo",

@@ -16,8 +16,8 @@
 
 use fce::FCEError;
 
-use std::io::Error as IOError;
 use thiserror::Error;
+use std::io::Error as IOError;
 use std::path::PathBuf;
 
 #[derive(Debug, Error)]
@@ -54,37 +54,25 @@ pub enum FaaSError {
     NoSuchModule(String),
 
     /// Provided arguments aren't compatible with a called function signature.
-    #[error("JsonArgumentsDeserializationError: {0}")]
+    #[error("arguments from json deserialization error: {0}")]
     JsonArgumentsDeserializationError(String),
 
     /// Returned outputs aren't compatible with a called function signature.
-    #[error("JsonOutputSerializationError: {0}")]
+    #[error("output to json serialization error: {0}")]
     JsonOutputSerializationError(String),
 
     /// Errors related to invalid config.
-    #[error("ParseConfigError: {0}")]
-    ParseConfigError(toml::de::Error),
+    #[error("parsing config error: {0}")]
+    ParseConfigError(#[from] toml::de::Error),
 
     /// FCE errors.
-    #[error("EngineError: {0}")]
-    EngineError(FCEError),
+    #[error("engine error: {0}")]
+    EngineError(#[from] FCEError),
 }
 
 impl From<IOError> for FaaSError {
     fn from(err: IOError) -> Self {
         FaaSError::IOError(format!("{}", err))
-    }
-}
-
-impl From<FCEError> for FaaSError {
-    fn from(err: FCEError) -> Self {
-        FaaSError::EngineError(err)
-    }
-}
-
-impl From<toml::de::Error> for FaaSError {
-    fn from(err: toml::de::Error) -> Self {
-        FaaSError::ParseConfigError(err)
     }
 }
 

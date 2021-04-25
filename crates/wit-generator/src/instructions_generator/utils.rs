@@ -42,7 +42,11 @@ pub(crate) fn ptype_to_itype_checked(
         ParsedType::Utf8String(_) => Ok(IType::String),
         ParsedType::Vector(ty, _) => {
             let array_itype = ptype_to_itype_checked(ty, wit_resolver)?;
-            Ok(IType::Array(Box::new(array_itype)))
+            if let IType::U8 = array_itype {
+                Ok(IType::ByteArray)
+            } else {
+                Ok(IType::Array(Box::new(array_itype)))
+            }
         }
         ParsedType::Record(record_name, _) => {
             let record_type_id = wit_resolver.get_record_type_id(record_name)?;
@@ -71,7 +75,11 @@ pub(crate) fn ptype_to_itype_unchecked(
         ParsedType::Utf8String(_) => IType::String,
         ParsedType::Vector(ty, _) => {
             let array_itype = ptype_to_itype_unchecked(ty, wit_resolver);
-            IType::Array(Box::new(array_itype))
+            if let IType::U8 = array_itype {
+                IType::ByteArray
+            } else {
+                IType::Array(Box::new(array_itype))
+            }
         }
         ParsedType::Record(record_name, _) => {
             let record_type_id = wit_resolver.get_record_type_id_unchecked(record_name);

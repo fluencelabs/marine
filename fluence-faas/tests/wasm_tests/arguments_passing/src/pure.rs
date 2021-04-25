@@ -125,6 +125,7 @@ pub fn str_type(arg: &str) -> String {
 #[fce]
 pub fn bytearray_type(arg: Vec<u8>) -> Vec<u8> {
     let mut arg = effector::bytearray_type(arg);
+    println!("pure: {:?}", arg);
 
     arg.push(1);
     arg

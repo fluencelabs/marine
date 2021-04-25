@@ -149,14 +149,11 @@ fn prepare_args(
     init_user_id: String,
     aqua: impl Into<String>,
 ) -> Vec<IValue> {
-    let prev_data = into_ibytes_array(prev_data);
-    let data = into_ibytes_array(data.into());
-
     vec![
         IValue::String(init_user_id),
         IValue::String(aqua.into()),
-        IValue::Array(prev_data),
-        IValue::Array(data),
+        IValue::ByteArray(prev_data),
+        IValue::ByteArray(data.into()),
     ]
 }
 
@@ -249,10 +246,6 @@ fn make_faas_config(
         }],
         default_modules_config: None,
     }
-}
-
-fn into_ibytes_array(byte_array: Vec<u8>) -> Vec<IValue> {
-    byte_array.into_iter().map(IValue::U8).collect()
 }
 
 // This API is intended for testing purposes

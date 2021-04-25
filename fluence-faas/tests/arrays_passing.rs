@@ -46,9 +46,9 @@ pub fn get_interfaces() {
 
     let byte_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
-        ty: IType::Array(Box::new(IType::U8)),
+        ty: IType::ByteArray,
     }];
-    let byte_type_outputs = vec![IType::Array(Box::new(IType::U8))];
+    let byte_type_outputs = vec![IType::ByteArray];
 
     let byte_type_sign = fluence_faas::FaaSFunctionSignature {
         name: Rc::new(String::from("byte_type")),
@@ -59,11 +59,11 @@ pub fn get_interfaces() {
     let inner_arrays_1_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
         ty: IType::Array(Box::new(IType::Array(Box::new(IType::Array(Box::new(
-            IType::Array(Box::new(IType::U8)),
+            IType::ByteArray,
         )))))),
     }];
     let inner_arrays_1_outputs = vec![IType::Array(Box::new(IType::Array(Box::new(
-        IType::Array(Box::new(IType::Array(Box::new(IType::U8)))),
+        IType::Array(Box::new(IType::ByteArray)),
     ))))];
 
     let inner_arrays_1_sign = fluence_faas::FaaSFunctionSignature {

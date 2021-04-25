@@ -206,13 +206,21 @@ impl FnInstructionGenerator for ParsedType {
             ],
             ParsedType::Vector(value_type, _) => {
                 let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
-
-                vec![
-                    Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
-                    Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
-                    Instruction::ArrayLiftMemory { value_type },
-                    Instruction::CallCore { function_index: RELEASE_OBJECTS.id },
-                ]
+                if let IType::U8 = value_type {
+                   vec![
+                       Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
+                       Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
+                       Instruction::ByteArrayLiftMemory,
+                       Instruction::CallCore { function_index: RELEASE_OBJECTS.id },
+                   ]
+                } else {
+                    vec![
+                        Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
+                        Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
+                        Instruction::ArrayLiftMemory { value_type },
+                        Instruction::CallCore { function_index: RELEASE_OBJECTS.id },
+                    ]
+                }
             },
             ParsedType::Record(record_name, _) => {
                 let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;

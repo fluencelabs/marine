@@ -80,9 +80,9 @@ pub fn get_interfaces() {
 
     let bytearray_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
-        ty: IType::Array(Box::new(IType::U8)),
+        ty: IType::ByteArray,
     }];
-    let bytearray_type_outputs = vec![IType::Array(Box::new(IType::U8))];
+    let bytearray_type_outputs = vec![IType::ByteArray];
 
     let bytearray_type_sign = fluence_faas::FaaSFunctionSignature {
         name: Rc::new(String::from("bytearray_type")),
@@ -279,10 +279,10 @@ pub fn get_interfaces() {
         },
         fluence_faas::IFunctionArg {
             name: String::from("arg_11"),
-            ty: IType::Array(Box::new(IType::U8)),
+            ty: IType::ByteArray,
         },
     ];
-    let all_types_outputs = vec![IType::Array(Box::new(IType::U8))];
+    let all_types_outputs = vec![IType::ByteArray];
 
     let all_types_sign = fluence_faas::FaaSFunctionSignature {
         name: Rc::new(String::from("all_types")),

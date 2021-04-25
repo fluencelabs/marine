@@ -61,6 +61,26 @@ fn ivalue_to_json(ivalue: IValue, output: &IType, record_types: &RecordTypes) ->
         (IValue::F32(value), IType::F32) => Ok(json!(value)),
         (IValue::F64(value), IType::F64) => Ok(json!(value)),
         (IValue::String(value), IType::String) => Ok(json!(value)),
+        (IValue::ByteArray(value), IType::ByteArray) => {
+            let result = value.into_iter().map(|v| json!(v)).collect();
+            Ok(JValue::Array(result))
+        }
+        (IValue::Array(value), IType::ByteArray) => {
+            let result: Result<Vec<_>> = value
+                .into_iter()
+                .map(|v| ivalue_to_json(v, &IType::U8, record_types))
+                .collect();
+
+            Ok(JValue::Array(result?))
+        }
+        (IValue::ByteArray(value), IType::Array(array_ty)) => {
+            let result: Result<Vec<_>> = value
+                .into_iter()
+                .map(|v| ivalue_to_json(IValue::U8(v), &array_ty, record_types))
+                .collect();
+
+            Ok(JValue::Array(result?))
+        }
         (IValue::Array(value), IType::Array(array_ty)) => {
             let result: Result<Vec<_>> = value
                 .into_iter()
