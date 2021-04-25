@@ -12,10 +12,10 @@ path = "src/lib.rs"
 
 [dependencies]
 fce-wit-parser = { path = "../wit-parser", version = "0.4.0"}
-fluence-sdk-wit = { git = "https://github.com/fluencelabs/rust-sdk", branch = "optimizations" }
+fluence-sdk-wit = { git = "https://github.com/fluencelabs/rust-sdk" }
 
-wasmer-wit = { package = "wasmer-interface-types-fl", git = "https://github.com/fluencelabs/interface-types", branch = "optimizations" }
-it-lilo = { git = "https://github.com/fluencelabs/interface-types", branch = "optimizations" }
+wasmer-wit = { package = "wasmer-interface-types-fl", git = "https://github.com/fluencelabs/interface-types" }
+it-lilo = { git = "https://github.com/fluencelabs/interface-types" }
 
 thiserror = "1.0.24"
 walrus = "0.18.0"

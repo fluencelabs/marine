@@ -10,5 +10,4 @@ name = "call_parameters"
 path = "src/main.rs"
 
 [dependencies]
-#fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", branch = "optimizations" }
+fluence = { git = "https://github.com/fluencelabs/rust-sdk" }
