@@ -1,7 +1,9 @@
 #!/bin/sh
 
-cargo update
-fce build --release
+cargo update --aggressive;
+fce build --release;
 
-rm -f artifacts/*
-cp ../../target/wasm32-wasi/release/call_parameters.wasm artifacts/
+rm -f artifacts/* || true;
+mkdir -p artifacts;
+
+cp ../../target/wasm32-wasi/release/call_parameters.wasm artifacts/;
