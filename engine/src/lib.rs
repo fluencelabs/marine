@@ -61,10 +61,10 @@ use once_cell::sync::Lazy;
 
 use std::str::FromStr;
 static MINIMAL_SUPPORTED_SDK_VERSION: Lazy<semver::Version> = Lazy::new(|| {
-    semver::Version::from_str("0.5.0").expect("invalid minimal sdk version specified")
+    semver::Version::from_str("0.6.0").expect("invalid minimal sdk version specified")
 });
 static MINIMAL_SUPPORTED_IT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
-    semver::Version::from_str("0.17.0").expect("invalid minimal sdk version specified")
+    semver::Version::from_str("0.20.0").expect("invalid minimal sdk version specified")
 });
 
 // These locals intended for check that set versions are correct at the start of an application.
