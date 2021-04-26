@@ -26,6 +26,7 @@ use wasmer_wit::interpreter::wasm::structures::{LocalImportIndex, TypedIndex};
 use wasmer_core::Instance as WasmerInstance;
 
 use std::collections::HashMap;
+use std::cell::Cell;
 use std::rc::Rc;
 
 pub type RecordTypes = HashMap<u64, Rc<IRecordType>>;
@@ -193,6 +194,24 @@ impl wasm::structures::Instance<WITExport, WITFunction, WITMemory, WITMemoryView
         } else {
             Some(&self.memories[index])
         }
+    }
+
+    fn memory_slice(&self, index: usize) -> Option<&[Cell<u8>]> {
+        use wasmer_core::vm::LocalMemory;
+
+        if index >= self.memories.len() {
+            return None;
+        }
+
+        let memory = &self.memories[index];
+        let LocalMemory { base, .. } = unsafe { *memory.0.vm_local_memory() };
+        let length = memory.0.size().bytes().0 / std::mem::size_of::<u8>();
+
+        let mut_slice: &mut [u8] = unsafe { std::slice::from_raw_parts_mut(base, length) };
+        let cell_slice: &Cell<[u8]> = Cell::from_mut(mut_slice);
+        let slice = cell_slice.as_slice_of_cells();
+
+        Some(slice)
     }
 
     fn wit_record_by_id(&self, index: u64) -> Option<&Rc<IRecordType>> {

@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-use thiserror::Error as ThisError;
-use serde_json::Error as SerdeDeserializationError;
+/// Contain functions intended to create (lift) IValues from raw WValues (Wasm types).
 
-#[derive(Debug, ThisError)]
-pub enum WITGeneratorError {
-    /// An error related to serde deserialization.
-    #[error("Embedded by rust-sdk metadata couldn't be parsed by serde: {0:?}")]
-    DeserializationError(#[from] SerdeDeserializationError),
+mod li_helper;
+mod lift_ivalues;
 
-    /// Various errors related to records
-    #[error("{0}")]
-    CorruptedRecord(String),
+pub(crate) use li_helper::LiHelper;
+pub(crate) use lift_ivalues::wvalues_to_ivalues;
 
-    /// Various errors occurred during the parsing/emitting a Wasm file.
-    #[error("I/O error occurred: {0}")]
-    IOError(String),
-}
+use super::WValue;
+use super::WType;
+use super::HostImportError;
+use super::HostImportResult;

@@ -17,55 +17,27 @@
 use fce_wit_generator::WITGeneratorError;
 use fce_wit_parser::WITParserError;
 
-use std::io::Error as StdIOError;
-use std::error::Error;
+use thiserror::Error as ThisError;
 
-#[derive(Debug)]
+#[derive(Debug, ThisError)]
 pub enum CLIError {
     /// Unknown command was entered by user.
+    #[error("{0} is unknown command")]
     NoSuchCommand(String),
 
     /// An error occurred while generating interface types.
-    WITGeneratorError(WITGeneratorError),
+    #[error("{0}")]
+    WITGeneratorError(#[from] WITGeneratorError),
 
     /// An error occurred while parsing interface types.
-    WITParserError(WITParserError),
+    #[error("{0}")]
+    WITParserError(#[from] WITParserError),
 
     /// An error occurred when no Wasm file was compiled.
+    #[error("{0}")]
     WasmCompilationError(String),
 
     /// Various errors related to I/O operations.
-    IOError(StdIOError),
-}
-
-impl Error for CLIError {}
-
-impl std::fmt::Display for CLIError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        match self {
-            CLIError::NoSuchCommand(cmd) => write!(f, "{} is unknown command", cmd),
-            CLIError::WITGeneratorError(err) => write!(f, "{}", err),
-            CLIError::WITParserError(err) => write!(f, "{}", err),
-            CLIError::WasmCompilationError(err) => write!(f, "{}", err),
-            CLIError::IOError(err) => write!(f, "{:?}", err),
-        }
-    }
-}
-
-impl From<WITGeneratorError> for CLIError {
-    fn from(err: WITGeneratorError) -> Self {
-        CLIError::WITGeneratorError(err)
-    }
-}
-
-impl From<WITParserError> for CLIError {
-    fn from(err: WITParserError) -> Self {
-        CLIError::WITParserError(err)
-    }
-}
-
-impl From<StdIOError> for CLIError {
-    fn from(err: StdIOError) -> Self {
-        CLIError::IOError(err)
-    }
+    #[error("{0:?}")]
+    IOError(#[from] std::io::Error),
 }

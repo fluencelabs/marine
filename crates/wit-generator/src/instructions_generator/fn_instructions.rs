@@ -20,14 +20,15 @@ use super::utils::ptype_to_itype_checked;
 use crate::default_export_api_config::*;
 use crate::Result;
 
-use fluence_sdk_wit::AstFnItem;
+use fluence_sdk_wit::FnType;
 use fluence_sdk_wit::ParsedType;
 use wasmer_wit::interpreter::Instruction;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
+use wasmer_wit::IType;
 
 use std::rc::Rc;
 
-impl WITGenerator for AstFnItem {
+impl WITGenerator for FnType {
     fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
         use wasmer_wit::ast::Type;
         use wasmer_wit::ast::Adapter;
@@ -46,10 +47,12 @@ impl WITGenerator for AstFnItem {
 
         let arguments = Rc::new(arguments);
 
-        let output_types = match self.signature.output_type {
-            Some(ref output_type) => vec![ptype_to_itype_checked(output_type, wit_resolver)?],
-            None => vec![],
-        };
+        let output_types = self
+            .signature
+            .output_types
+            .iter()
+            .map(|ty| ptype_to_itype_checked(ty, wit_resolver))
+            .collect::<Result<Vec<_>>>()?;
         let output_types = Rc::new(output_types);
 
         let interfaces = &mut wit_resolver.interfaces;
@@ -78,11 +81,11 @@ impl WITGenerator for AstFnItem {
             .iter()
             .enumerate()
             .try_fold::<_, _, Result<_>>(Vec::new(), |mut instructions, (arg_id, arg)| {
-                let mut new_instructions = arg
+                let new_instructions = arg
                     .ty
                     .generate_instructions_for_input_type(arg_id as _, wit_resolver)?;
 
-                instructions.append(&mut new_instructions);
+                instructions.extend(new_instructions);
                 Ok(instructions)
             })?;
 
@@ -91,10 +94,16 @@ impl WITGenerator for AstFnItem {
             function_index: export_function_index,
         });
 
-        instructions.extend(match &self.signature.output_type {
-            Some(output_type) => output_type.generate_instructions_for_output_type(wit_resolver)?,
-            None => vec![],
-        });
+        let instructions = self
+            .signature
+            .output_types
+            .iter()
+            .try_fold::<_, _, Result<_>>(instructions, |mut instructions, ty| {
+                let new_instructions = ty.generate_instructions_for_output_type(wit_resolver)?;
+
+                instructions.extend(new_instructions);
+                Ok(instructions)
+            })?;
 
         let adapter = Adapter {
             function_type: adapter_idx,
@@ -131,7 +140,7 @@ impl FnInstructionGenerator for ParsedType {
     #[rustfmt::skip]
     fn generate_instructions_for_input_type<'a>(&self, index: u32, wit_resolver: &mut WITResolver<'a>) -> Result<Vec<Instruction>> {
         let instructions = match self {
-            ParsedType::Boolean(_) => vec![Instruction::ArgumentGet { index }],
+            ParsedType::Boolean(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromBool],
             ParsedType::I8(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS8],
             ParsedType::I16(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS16],
             ParsedType::I32(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS32],
@@ -142,13 +151,17 @@ impl FnInstructionGenerator for ParsedType {
             ParsedType::U64(_) => vec![Instruction::ArgumentGet { index }, Instruction::I64FromU64],
             ParsedType::F32(_) => vec![Instruction::ArgumentGet { index }],
             ParsedType::F64(_) => vec![Instruction::ArgumentGet { index }],
-            ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) => vec![
-                Instruction::ArgumentGet { index },
-                Instruction::StringSize,
-                Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
-                Instruction::ArgumentGet { index },
-                Instruction::StringLowerMemory,
-            ],
+            ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) => {
+                let type_tag = it_lilo::utils::ser_type_size(&IType::U8) as i32;
+                vec![
+                    Instruction::ArgumentGet { index },
+                    Instruction::StringSize,
+                    Instruction::PushI32 { value: type_tag },
+                    Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
+                    Instruction::ArgumentGet { index },
+                    Instruction::StringLowerMemory,
+                ]
+            },
             ParsedType::Vector(value_type, _) => {
                 let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
                 vec![
@@ -174,7 +187,7 @@ impl FnInstructionGenerator for ParsedType {
     #[rustfmt::skip]
     fn generate_instructions_for_output_type<'a>(&self, wit_resolver: &mut WITResolver<'a>) -> Result<Vec<Instruction>> {
         let instructions = match self {
-            ParsedType::Boolean(_) => vec![],
+            ParsedType::Boolean(_) => vec![Instruction::BoolFromI32],
             ParsedType::I8(_) => vec![Instruction::S8FromI32],
             ParsedType::I16(_) => vec![Instruction::S16FromI32],
             ParsedType::I32(_) => vec![Instruction::S32FromI32],
@@ -193,13 +206,21 @@ impl FnInstructionGenerator for ParsedType {
             ],
             ParsedType::Vector(value_type, _) => {
                 let value_type = ptype_to_itype_checked(value_type, wit_resolver)?;
-
-                vec![
-                    Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
-                    Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
-                    Instruction::ArrayLiftMemory { value_type },
-                    Instruction::CallCore { function_index: RELEASE_OBJECTS.id },
-                ]
+                if let IType::U8 = value_type {
+                   vec![
+                       Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
+                       Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
+                       Instruction::ByteArrayLiftMemory,
+                       Instruction::CallCore { function_index: RELEASE_OBJECTS.id },
+                   ]
+                } else {
+                    vec![
+                        Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
+                        Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
+                        Instruction::ArrayLiftMemory { value_type },
+                        Instruction::CallCore { function_index: RELEASE_OBJECTS.id },
+                    ]
+                }
             },
             ParsedType::Record(record_name, _) => {
                 let record_type_id = wit_resolver.get_record_type_id(record_name)? as u32;

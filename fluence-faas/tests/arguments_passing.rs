@@ -80,9 +80,9 @@ pub fn get_interfaces() {
 
     let bytearray_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
-        ty: IType::Array(Box::new(IType::U8)),
+        ty: IType::ByteArray,
     }];
-    let bytearray_type_outputs = vec![IType::Array(Box::new(IType::U8))];
+    let bytearray_type_outputs = vec![IType::ByteArray];
 
     let bytearray_type_sign = fluence_faas::FaaSFunctionSignature {
         name: Rc::new(String::from("bytearray_type")),
@@ -216,9 +216,9 @@ pub fn get_interfaces() {
 
     let bool_type_arguments = vec![fluence_faas::IFunctionArg {
         name: String::from("arg"),
-        ty: IType::I32,
+        ty: IType::Boolean,
     }];
-    let bool_type_outputs = vec![IType::I32];
+    let bool_type_outputs = vec![IType::Boolean];
 
     let bool_type_sign = fluence_faas::FaaSFunctionSignature {
         name: Rc::new(String::from("bool_type")),
@@ -279,10 +279,10 @@ pub fn get_interfaces() {
         },
         fluence_faas::IFunctionArg {
             name: String::from("arg_11"),
-            ty: IType::Array(Box::new(IType::U8)),
+            ty: IType::ByteArray,
         },
     ];
-    let all_types_outputs = vec![IType::Array(Box::new(IType::U8))];
+    let all_types_outputs = vec![IType::ByteArray];
 
     let all_types_sign = fluence_faas::FaaSFunctionSignature {
         name: Rc::new(String::from("all_types")),
@@ -430,11 +430,11 @@ pub fn i32_type() {
         let result5 = call_faas!(faas, MODULE_NAME, func_name, json!([[1]]));
         assert_eq!(result5, expected_result);
 
-        let value = std::i32::MAX - 2;
+        let value = i32::MAX - 2;
         let result6 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result6, value + 2);
 
-        let value = std::i32::MIN;
+        let value = i32::MIN;
         let result7 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result7, value + 2);
     };
@@ -465,11 +465,11 @@ pub fn i64_type() {
         let result5 = call_faas!(faas, MODULE_NAME, func_name, json!([1]));
         assert_eq!(result5, expected_result);
 
-        let value = std::i64::MAX - 2;
+        let value = i64::MAX - 2;
         let result6 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result6, value + 2);
 
-        let value = std::i64::MIN;
+        let value = i64::MIN;
         let result7 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result7, value + 2);
     };
@@ -545,11 +545,11 @@ pub fn f32_type() {
         let result4 = call_faas!(faas, MODULE_NAME, func_name, json!(1.0));
         assert_eq!(result4, expected_result);
 
-        let value = std::f32::MAX - 2.0;
+        let value = f32::MAX - 2.0;
         let result5 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result5, value + 2.0);
 
-        let value = std::f32::MIN;
+        let value = f32::MIN;
         let result6 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result6, value + 2.0);
     };
@@ -577,11 +577,11 @@ pub fn f64_type() {
         let result4 = call_faas!(faas, MODULE_NAME, func_name, json!(1.0));
         assert_eq!(result4, expected_result);
 
-        let value = std::f64::MAX - 2.0;
+        let value = f64::MAX - 2.0;
         let result5 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result5, value + 2.0);
 
-        let value = std::f64::MIN;
+        let value = f64::MIN;
         let result6 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result6, value + 2.0);
     };
@@ -674,11 +674,11 @@ pub fn bool_type() {
         let result2 = faas.call_with_json(MODULE_NAME, func_name, json!([]), <_>::default());
         assert!(result2.is_err());
 
-        let expected_result = json!(1);
-        let result3 = call_faas!(faas, MODULE_NAME, func_name, json!({ "arg": 0 }));
+        let expected_result = json!(true);
+        let result3 = call_faas!(faas, MODULE_NAME, func_name, json!({ "arg": false }));
         assert_eq!(result3, expected_result);
 
-        let result4 = call_faas!(faas, MODULE_NAME, func_name, json!(0));
+        let result4 = call_faas!(faas, MODULE_NAME, func_name, json!(false));
         assert_eq!(result4, expected_result);
     };
 

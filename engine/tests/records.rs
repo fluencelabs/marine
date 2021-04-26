@@ -43,7 +43,7 @@ pub fn records() {
         result,
         vec![IValue::Record(
             wasmer_wit::NEVec::new(vec![
-                IValue::I32(1),
+                IValue::Boolean(true),
                 IValue::S8(1),
                 IValue::S16(2),
                 IValue::S32(3),
@@ -55,7 +55,7 @@ pub fn records() {
                 IValue::F32(9.0),
                 IValue::F64(10.0),
                 IValue::String(String::from("field_11")),
-                IValue::Array(vec![IValue::U8(0x13), IValue::U8(0x37)])
+                IValue::ByteArray(vec![0x13, 0x37])
             ])
             .unwrap()
         )]

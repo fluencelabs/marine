@@ -151,6 +151,7 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &RecordTypes) -> R
     );
 
     match ty {
+        IType::Boolean => to_ivalue!(jvalue, Boolean),
         IType::S8 => to_ivalue!(jvalue, S8),
         IType::S16 => to_ivalue!(jvalue, S16),
         IType::S32 => to_ivalue!(jvalue, S32),
@@ -162,6 +163,21 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &RecordTypes) -> R
         IType::F32 => to_ivalue!(jvalue, F32),
         IType::F64 => to_ivalue!(jvalue, F64),
         IType::String => to_ivalue!(jvalue, String),
+        IType::ByteArray => {
+            let value = match jvalue {
+                JValue::Array(json_array) => {
+                    let iargs = json_array
+                        .into_iter()
+                        .map(|json_value| jvalue_to_ivalue(json_value, &IType::U8, record_types))
+                        .collect::<Result<Vec<_>>>()?;
+
+                    Ok(iargs)
+                }
+                _ => Err(ArgDeError(format!("expected bytearray, got {:?}", jvalue))),
+            }?;
+
+            Ok(IValue::Array(value))
+        }
         IType::Array(value_type) => {
             let value = match jvalue {
                 JValue::Array(json_array) => {
@@ -186,7 +202,6 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &RecordTypes) -> R
             let value = json_record_type_to_ivalue(jvalue, record_type_id, &record_types)?;
             Ok(IValue::Record(value))
         }
-        IType::Anyref => Err(ArgDeError(String::from("anyrefs aren't supported now"))),
     }
 }
 

@@ -41,7 +41,7 @@ pub fn inner_arrays_1(mut arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<Vec<Vec<Vec<u8>>>>
 }
 
 #[fce]
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct TestRecord {
     pub field_0: i32,
     pub field_1: Vec<Vec<u8>>,
@@ -80,15 +80,15 @@ pub fn string_type(mut arg: Vec<String>) -> Vec<String> {
     arg
 }
 
-/*
 #[fce]
-pub fn bool_type(arg: Vec<bool>) -> Vec<bool> {
-    let mut arg =  effector::bool_type(arg);
+pub fn bool_type(mut arg: Vec<bool>) -> Vec<bool> {
+    arg[0] = !arg[0];
+    let mut arg = effector::bool_type(arg);
 
     arg.push(false);
+    arg.push(true);
     arg
 }
- */
 
 #[fce]
 pub fn f32_type(mut arg: Vec<f32>) -> Vec<f32> {
@@ -172,9 +172,7 @@ mod effector {
 
         pub fn byte_type(arg: Vec<u8>) -> Vec<u8>;
 
-        /*
         pub fn bool_type(arg: Vec<bool>) -> Vec<bool>;
-         */
 
         pub fn f32_type(arg: Vec<f32>) -> Vec<f32>;
 

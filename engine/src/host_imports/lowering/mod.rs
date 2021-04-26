@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-use thiserror::Error as ThisError;
-use serde_json::Error as SerdeDeserializationError;
+/// Contain functions intended to put (lower) IValues to Wasm memory
+/// and pass it to a Wasm module as raw WValues (Wasm types).
+mod lo_helper;
+mod lower_ivalues;
 
-#[derive(Debug, ThisError)]
-pub enum WITGeneratorError {
-    /// An error related to serde deserialization.
-    #[error("Embedded by rust-sdk metadata couldn't be parsed by serde: {0:?}")]
-    DeserializationError(#[from] SerdeDeserializationError),
+pub(crate) use lo_helper::LoHelper;
+pub(crate) use lower_ivalues::ivalue_to_wvalues;
 
-    /// Various errors related to records
-    #[error("{0}")]
-    CorruptedRecord(String),
-
-    /// Various errors occurred during the parsing/emitting a Wasm file.
-    #[error("I/O error occurred: {0}")]
-    IOError(String),
-}
+use super::WValue;
+use super::AllocateFunc;
+use super::HostImportResult;

@@ -96,15 +96,6 @@ where
     Ok(typed_func)
 }
 
-pub(super) fn write_to_wasm_mem(context: &mut Ctx, address: usize, value: &[u8]) {
-    let memory = context.memory(0);
-
-    memory.view::<u8>()[address..(address + value.len())]
-        .iter()
-        .zip(value.iter())
-        .for_each(|(cell, byte)| cell.set(*byte));
-}
-
 pub(super) fn itypes_args_to_wtypes(itypes: &[IType]) -> Vec<WType> {
     itypes
         .iter()
@@ -161,7 +152,7 @@ macro_rules! init_wasm_func_once {
 #[macro_export]
 /// Call Wasm function that have Box<RefCell<Option<Func<'static, args, rets>>>> type.
 macro_rules! call_wasm_func {
-    ($func:ident, $arg:expr) => {
-        $func.borrow().as_ref().unwrap().call($arg).unwrap()
+    ($func:expr, $($arg:expr),*) => {
+        $func.borrow().as_ref().unwrap().call($($arg),*).unwrap()
     };
 }

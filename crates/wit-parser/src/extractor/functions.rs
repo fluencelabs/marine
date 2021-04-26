@@ -66,11 +66,8 @@ fn get_exports(wit: &FCEWITInterfaces<'_>) -> Result<Vec<FCEFunctionSignature>> 
 
     wit.implementations()
         .filter_map(|(adapter_function_type, core_function_type)| {
-            match wit.exports_by_type(*core_function_type) {
-                Some(export_function_name) => Some((adapter_function_type, export_function_name)),
-                // pass functions that aren't export
-                None => None,
-            }
+            wit.exports_by_type(*core_function_type)
+                .map(|export_function_name| (adapter_function_type, export_function_name))
         })
         .map(|(adapter_function_type, export_function_names)| {
             export_function_names
@@ -156,8 +153,8 @@ pub(crate) fn into_service_interface(fce_interface: FCEModuleInterface) -> Servi
         .collect::<Vec<_>>();
 
     ServiceInterface {
-        record_types,
         function_signatures,
+        record_types,
     }
 }
 
@@ -184,7 +181,7 @@ fn serialize_function_signature(
     }
 }
 
-fn serialize_record_type<'a, 'b>(
+fn serialize_record_type(
     id: u64,
     record: Rc<IRecordType>,
     record_types: &FCERecordTypes,

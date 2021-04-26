@@ -40,7 +40,7 @@ pub(crate) fn create_mounted_binary_import(mounted_binary_path: String) -> HostI
 }
 
 pub(self) fn mounted_binary_import_impl(
-    mounted_binary_path: &String,
+    mounted_binary_path: &str,
     raw_args: Vec<IValue>,
 ) -> Result<MountedBinaryResult, MountedBinaryResult> {
     let args = parse_args(raw_args)?;

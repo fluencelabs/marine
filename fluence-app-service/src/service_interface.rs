@@ -59,8 +59,8 @@ pub(crate) fn into_service_interface(faas_interface: FaaSModuleInterface<'_>) ->
         .collect::<Vec<_>>();
 
     ServiceInterface {
-        record_types,
         function_signatures,
+        record_types,
     }
 }
 

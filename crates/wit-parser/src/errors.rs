@@ -34,8 +34,12 @@ pub enum WITParserError {
     ITRemainderNotEmpty,
 
     /// An error occurred while parsing WIT section.
-    #[error("IT section is corrupted")]
-    CorruptedITSection,
+    #[error(
+        "IT section is corrupted: {0}.\
+    \nProbably the module was compiled with an old version of fce cli, please try to update and recompile.\
+    \nTo update fce run: cargo install fcli --force"
+    )]
+    CorruptedITSection(nom::Err<(Vec<u8>, nom::error::ErrorKind)>),
 
     /// An error related to incorrect data of wit section.
     #[error("{0}")]
@@ -43,7 +47,7 @@ pub enum WITParserError {
 
     /// An error occurred while parsing file in Wat format.
     #[error("provided file with IT definitions is corrupted: {0}")]
-    CorruptedITFile(WATError),
+    CorruptedITFile(#[from] WATError),
 
     /// An error occurred while parsing Wasm file.
     #[error("provided Wasm file is corrupted: {0}")]
@@ -51,21 +55,9 @@ pub enum WITParserError {
 
     /// An error occurred while manipulating with converting ast to bytes.
     #[error("Convertation Wast to AST failed with: {0}")]
-    AstToBytesError(IOError),
+    AstToBytesError(#[from] IOError),
 
     /// Wasm emitting file error.
     #[error("Emitting resulted Wasm file failed with: {0}")]
     WasmEmitError(anyhow::Error),
-}
-
-impl From<WATError> for WITParserError {
-    fn from(err: WATError) -> Self {
-        WITParserError::CorruptedITFile(err)
-    }
-}
-
-impl From<IOError> for WITParserError {
-    fn from(err: IOError) -> Self {
-        WITParserError::AstToBytesError(err)
-    }
 }

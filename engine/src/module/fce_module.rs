@@ -268,13 +268,8 @@ impl FCEModule {
 
         wit.implementations()
             .filter_map(|(adapter_function_type, core_function_type)| {
-                match wit.exports_by_type(*core_function_type) {
-                    Some(export_function_name) => {
-                        Some((adapter_function_type, export_function_name))
-                    }
-                    // pass functions that aren't export
-                    None => None,
-                }
+                wit.exports_by_type(*core_function_type)
+                    .map(|export_function_name| (adapter_function_type, export_function_name))
             })
             .map(|(adapter_function_type, export_function_names)| {
                 export_function_names
@@ -392,11 +387,8 @@ impl FCEModule {
         let wit_import_funcs = wit
             .implementations()
             .filter_map(|(adapter_function_type, core_function_type)| {
-                match wit.imports_by_type(*core_function_type) {
-                    Some(import) => Some((adapter_function_type, import)),
-                    // skip functions that aren't import
-                    None => None,
-                }
+                wit.imports_by_type(*core_function_type)
+                    .map(|import| (adapter_function_type, import))
             })
             .map(|(adapter_function_type, import_function_names)| {
                 import_function_names

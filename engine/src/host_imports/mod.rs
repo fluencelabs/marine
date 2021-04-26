@@ -15,9 +15,9 @@
  */
 
 mod errors;
+mod lifting;
+mod lowering;
 mod imports;
-mod ivalues_lifting;
-mod ivalues_lowering;
 mod utils;
 
 use std::cell::RefCell;
@@ -31,7 +31,7 @@ pub(self) use wasmer_core::types::Type as WType;
 
 pub(self) type HostImportResult<T> = std::result::Result<T, HostImportError>;
 pub(self) type WasmModuleFunc<Args, Rets> = Box<RefCell<Option<Func<'static, Args, Rets>>>>;
-pub(self) type AllocateFunc = WasmModuleFunc<i32, i32>;
+pub(self) type AllocateFunc = WasmModuleFunc<(i32, i32), i32>;
 pub(self) type SetResultPtrFunc = WasmModuleFunc<i32, ()>;
 pub(self) type SetResultSizeFunc = WasmModuleFunc<i32, ()>;
 

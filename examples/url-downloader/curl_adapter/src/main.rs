@@ -31,10 +31,24 @@ pub fn main() {
 
 #[fce]
 pub fn download(url: String) -> String {
-    log::info!("get called with url {}", url);
+    log::info!("download called with url {}\n", url);
+    unsafe {
+        log::info!(
+            "download track: {} {} {} {} {}",
+            *ALLOCS.get_mut(),
+            *DEALLOCS.get_mut(),
+            *REALLOCSA.get_mut(),
+            *REALLOCSD.get_mut(),
+            *ALLOCS.get_mut() - *DEALLOCS.get_mut() - *REALLOCSD.get_mut() + *REALLOCSA.get_mut()
+        );
+    }
 
     let result = curl(vec![url]);
-    String::from_utf8(result.stdout).unwrap()
+
+    let res = String::from_utf8(result.stdout).unwrap();
+    log::info!("download ended with {}\n", res);
+
+    res
 }
 
 /// Permissions in `Config.toml` should exist to use host functions.
@@ -42,4 +56,66 @@ pub fn download(url: String) -> String {
 #[link(wasm_import_module = "host")]
 extern "C" {
     fn curl(cmd: Vec<String>) -> MountedBinaryResult;
+}
+
+use std::alloc::{GlobalAlloc, System, Layout};
+
+#[global_allocator]
+static GLOBAL_ALLOCATOR: WasmTracingAllocator<System> = WasmTracingAllocator(System);
+
+#[derive(Debug)]
+pub struct WasmTracingAllocator<A>(pub A)
+where
+    A: GlobalAlloc;
+
+use std::sync::atomic::AtomicUsize;
+
+static mut ALLOCS: AtomicUsize = AtomicUsize::new(0);
+static mut DEALLOCS: AtomicUsize = AtomicUsize::new(0);
+static mut REALLOCSA: AtomicUsize = AtomicUsize::new(0);
+static mut REALLOCSD: AtomicUsize = AtomicUsize::new(0);
+
+unsafe impl<A> GlobalAlloc for WasmTracingAllocator<A>
+where
+    A: GlobalAlloc,
+{
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        let size = layout.size();
+        let t = *ALLOCS.get_mut();
+        *ALLOCS.get_mut() = t + size;
+
+        let pointer = self.0.alloc(layout);
+        pointer
+    }
+
+    unsafe fn dealloc(&self, pointer: *mut u8, layout: Layout) {
+        let size = layout.size();
+        let t = *DEALLOCS.get_mut();
+        *DEALLOCS.get_mut() = t + size;
+
+        self.0.dealloc(pointer, layout);
+    }
+
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+        let size = layout.size();
+        let t = *ALLOCS.get_mut();
+        *ALLOCS.get_mut() = t + size;
+
+        let pointer = self.0.alloc_zeroed(layout);
+
+        pointer
+    }
+
+    unsafe fn realloc(&self, old_pointer: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
+        let old_size = layout.size();
+        let t = *REALLOCSD.get_mut();
+        *REALLOCSD.get_mut() = t + old_size;
+
+        let t = *REALLOCSA.get_mut();
+        *REALLOCSA.get_mut() = t + layout.size();
+
+        let new_pointer = self.0.realloc(old_pointer, layout, new_size);
+
+        new_pointer
+    }
 }
