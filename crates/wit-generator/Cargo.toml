@@ -14,8 +14,8 @@ path = "src/lib.rs"
 fce-wit-parser = { path = "../wit-parser", version = "0.4.0"}
 fluence-sdk-wit = { git = "https://github.com/fluencelabs/rust-sdk" }
 
-wasmer-wit = { package = "wasmer-interface-types-fl", git = "https://github.com/fluencelabs/interface-types" }
-it-lilo = { git = "https://github.com/fluencelabs/interface-types" }
+wasmer-wit = { package = "wasmer-interface-types-fl", version = "0.20.0" }
+it-lilo = "0.1.0"
 
 thiserror = "1.0.24"
 walrus = "0.18.0"
