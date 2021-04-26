@@ -44,7 +44,7 @@ checksum = "28b2cd92db5cbd74e8e5028f7e27dd7aa3090e89e4f2a197cc7c8dfb69c7063b"
 [[package]]
 name = "aqua-interpreter-interface"
 version = "0.4.0"
-source = "git+https://github.com/fluencelabs/air?branch=bwu#ba3809ae175217ab20cb2763d5bb7612da982906"
+source = "git+https://github.com/fluencelabs/air#7097b255334c518ce52faf733a5fa295c0a5768e"
 dependencies = [
  "fluence",
  "fluence-it-types",
