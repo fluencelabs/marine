@@ -11,4 +11,4 @@ path = "src/main.rs"
 
 [dependencies]
 fluence = "0.6.1"
-fce-sqlite-connector = { git = "https://github.com/fluencelabs/sqlite-wasm-connector", branch = "fluence_0_6_0" }
+fce-sqlite-connector = "0.4.0"
