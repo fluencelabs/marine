@@ -10,5 +10,5 @@ name = "ipfs_pure"
 path = "src/main.rs"
 
 [dependencies]
-fluence = { git = "https://github.com/fluencelabs/rust-sdk", features = ["logger"] }
+fluence = { version = "0.6.1", features = ["logger"] }
 log = "0.4.14"

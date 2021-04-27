@@ -43,8 +43,9 @@ checksum = "28b2cd92db5cbd74e8e5028f7e27dd7aa3090e89e4f2a197cc7c8dfb69c7063b"
 
 [[package]]
 name = "aqua-interpreter-interface"
-version = "0.4.0"
-source = "git+https://github.com/fluencelabs/air#7097b255334c518ce52faf733a5fa295c0a5768e"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ddaec44ed96baa11fbbefcad1a25c9bd3aca704398cb71d5b35eb879c9f2ac52"
 dependencies = [
  "fluence",
  "fluence-it-types",
@@ -53,7 +54,7 @@ dependencies = [
 
 [[package]]
 name = "aquamarine-vm"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "aqua-interpreter-interface",
  "fluence-faas",
@@ -111,11 +112,12 @@ checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
 name = "backtrace"
-version = "0.3.57"
+version = "0.3.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78ed203b9ba68b242c62b3fb7480f589dd49829be1edb3fe8fc8b4ffda2dcb8d"
+checksum = "88fb5a785d6b44fd9d6700935608639af1b8356de1e55d5f7c2740f4faa15d82"
 dependencies = [
  "addr2line",
+ "cc",
  "cfg-if 1.0.0",
  "libc",
  "miniz_oxide",
@@ -677,7 +679,7 @@ dependencies = [
 
 [[package]]
 name = "fce"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "boolinator",
@@ -721,16 +723,18 @@ dependencies = [
 
 [[package]]
 name = "fce-sqlite-connector"
-version = "0.3.0"
-source = "git+https://github.com/fluencelabs/sqlite-wasm-connector?branch=fluence_0_6_0#adf0dbbcc706520019380593f4db5d8c19c7a1c5"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd17f58854caa1ad712f3b69cb42fff17019f1d12fd92c752317527ea185b426"
 dependencies = [
  "fluence",
 ]
 
 [[package]]
 name = "fce-timestamp-macro"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#e8bc1db0dff8550b97675d4835cf17e0f27848ef"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c59a6302902583b2c84e87de9d72b949da4396a369baf0aaa49e97021600bb0"
 dependencies = [
  "chrono",
  "quote",
@@ -738,11 +742,11 @@ dependencies = [
 
 [[package]]
 name = "fce-utils"
-version = "0.1.29"
+version = "0.2.0"
 
 [[package]]
 name = "fce-wit-generator"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "cargo_toml",
  "fce-wit-parser",
@@ -758,7 +762,7 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-interfaces"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -766,7 +770,7 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-parser"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
@@ -781,7 +785,7 @@ dependencies = [
 
 [[package]]
 name = "fcli"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "check-latest",
@@ -800,8 +804,9 @@ dependencies = [
 
 [[package]]
 name = "fluence"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#e8bc1db0dff8550b97675d4835cf17e0f27848ef"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54b2f78a2432dcd10e7113f9f08aac004373dee610a3b4ca692d5b12a3e7c867"
 dependencies = [
  "fce-timestamp-macro",
  "fluence-sdk-macro",
@@ -811,7 +816,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "fluence-faas",
  "log",
@@ -825,7 +830,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -863,16 +868,18 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-macro"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#e8bc1db0dff8550b97675d4835cf17e0f27848ef"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb43d2f51f1becb70e2125ef8ca9759597900f95cc22ce7dca981a7d6ccd7dde"
 dependencies = [
  "fluence-sdk-wit",
 ]
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#e8bc1db0dff8550b97675d4835cf17e0f27848ef"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a78910d85e3cdcb9c2baf56144f20a99925c67ac445d4156220c005bfd2f9604"
 dependencies = [
  "fluence-sdk-macro",
  "log",
@@ -881,8 +888,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-wit"
-version = "0.6.0"
-source = "git+https://github.com/fluencelabs/rust-sdk#e8bc1db0dff8550b97675d4835cf17e0f27848ef"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eab3ed39703b72e0e52bce9e1760746c73f65a5694c8da4dec751d3bfdec15b8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -925,7 +933,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "anyhow",
  "check-latest",
