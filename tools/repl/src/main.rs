@@ -122,7 +122,7 @@ fn print_welcome_message() {
             new_version
         );
         println!(
-            "{}To update run: {}cargo +nightly update frepl --force\n",
+            "{}To update run: {}cargo +nightly install frepl --force\n",
             color::Fg(color::Black),
             color::Fg(color::LightBlack)
         );

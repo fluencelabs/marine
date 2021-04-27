@@ -66,7 +66,7 @@ pub fn main() -> Result<(), anyhow::Error> {
             new_version
         );
         println!(
-            "{}To update run: {}cargo +nightly update fcli --force{}",
+            "{}To update run: {}cargo +nightly install fcli --force{}",
             color::Fg(color::Reset),
             color::Fg(color::LightBlack),
             color::Fg(color::Reset)
