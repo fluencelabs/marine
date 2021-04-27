@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use fce_module_info_parser::ModuleInfoError;
 use fce_wit_generator::WITGeneratorError;
 use fce_wit_parser::WITParserError;
 
@@ -22,8 +23,12 @@ use thiserror::Error as ThisError;
 #[derive(Debug, ThisError)]
 pub enum CLIError {
     /// Unknown command was entered by user.
-    #[error("{0} is unknown command")]
+    #[error("{0} is an unknown command")]
     NoSuchCommand(String),
+
+    /// A error occurred while embedding rust sdk version.
+    #[error("{0}")]
+    VersionEmbeddingError(#[from] ModuleInfoError),
 
     /// An error occurred while generating interface types.
     #[error("{0}")]

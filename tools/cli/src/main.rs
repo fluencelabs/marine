@@ -121,7 +121,7 @@ fn set_version(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     };
 
     let version = semver::Version::from_str(version)?;
-    sdk_version::embed_from_path(in_wasm_path, out_wasm_path, version)?;
+    sdk_version::embed_from_path(in_wasm_path, out_wasm_path, &version)?;
 
     println!("the version was successfully embedded");
 

@@ -19,6 +19,8 @@ use crate::errors::CLIError;
 
 use std::process::Command;
 
+const RUST_SDK_VERSION: &str = "0.6.0";
+
 #[derive(serde::Deserialize)]
 #[serde(tag = "reason", rename_all = "kebab-case")]
 enum DiagnosticMessage {
@@ -30,6 +32,7 @@ enum DiagnosticMessage {
 
 pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
     use std::io::Read;
+    use std::str::FromStr;
 
     let mut cargo = Command::new("cargo");
     cargo.arg("build").arg("--target").arg("wasm32-wasi");
@@ -70,9 +73,11 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
         return Ok(());
     }
 
+    let version = semver::Version::from_str(RUST_SDK_VERSION).unwrap();
     for wasm in wasms {
         let wasm_path = std::path::PathBuf::from(wasm);
-        fce_wit_generator::embed_wit(wasm_path)?;
+        fce_wit_generator::embed_wit(&wasm_path)?;
+        fce_module_info_parser::sdk_version::embed_from_path(&wasm_path, &wasm_path, &version)?;
     }
 
     Ok(())

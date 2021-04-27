@@ -41,7 +41,7 @@ impl CustomSection for VersionCustomSection {
 /// Embed provided WIT to a Wasm module.
 pub fn embed_from_module(
     mut wasm_module: walrus::Module,
-    version: semver::Version,
+    version: &semver::Version,
 ) -> walrus::Module {
     delete_version_sections(&mut wasm_module);
 
@@ -54,7 +54,7 @@ pub fn embed_from_module(
 pub fn embed_from_path<I, O>(
     in_wasm_module_path: I,
     out_wasm_module_path: O,
-    version: semver::Version,
+    version: &semver::Version,
 ) -> ModuleInfoResult<()>
 where
     I: AsRef<Path>,
