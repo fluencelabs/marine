@@ -12,7 +12,7 @@ path = "src/lib.rs"
 
 [dependencies]
 fluence-faas = { path = "../fluence-faas", version = "0.7.0" }
-aqua-interpreter-interface = "0.4.0"
+aqua-interpreter-interface = "0.5.0"
 
 maplit = "1.0.2"
 serde_json = "1.0.60"
