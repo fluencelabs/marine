@@ -53,7 +53,7 @@ dependencies = [
 
 [[package]]
 name = "aquamarine-vm"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "aqua-interpreter-interface",
  "fluence-faas",
@@ -678,7 +678,7 @@ dependencies = [
 
 [[package]]
 name = "fce"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "boolinator",
@@ -749,11 +749,11 @@ dependencies = [
 
 [[package]]
 name = "fce-utils"
-version = "0.1.29"
+version = "0.2.0"
 
 [[package]]
 name = "fce-wit-generator"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "cargo_toml",
  "fce-wit-parser",
@@ -769,7 +769,7 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-interfaces"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -777,7 +777,7 @@ dependencies = [
 
 [[package]]
 name = "fce-wit-parser"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "fce-wit-interfaces",
@@ -792,7 +792,7 @@ dependencies = [
 
 [[package]]
 name = "fcli"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "check-latest",
@@ -834,7 +834,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "fluence-faas",
  "log",
@@ -848,7 +848,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -982,7 +982,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "anyhow",
  "check-latest",
