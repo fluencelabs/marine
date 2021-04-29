@@ -59,7 +59,9 @@
 
 4. **module_interface** is the new macro that provide capability to embed some information about compiled Wasm module into result binary. Then it could be obtained with help of `fce info`: 
 
-![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/147a4029-536e-404e-9534-8c278a4d8d9b/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/147a4029-536e-404e-9534-8c278a4d8d9b/Untitled.png)
+<p align="center" width="100%">
+    <img alt="fluence stack" align="center" src="images/fce_info.png" />
+</p>
 
 
 5.  IT was extended with **Boolean** type (in the previous version each bool produces `i32` IT type)
