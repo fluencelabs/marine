@@ -22,11 +22,19 @@
    ```
     
 
-2. Added **&str** type that follows the aforementioned rules for references:
+2. Added **&str** type:
      ```rust
     #[fce]
     fn foo(arg: &str) → &str
     ```
+    
+   ```rust
+    #[fce]
+    #[link(wasm_import_module = "module_name")]
+    extern "C" {
+      fn foo(arg: &Vec<&Vec<&str>>) → Vec<Vec<u8>>;
+    }
+   ```
    
 
 3. **fce_test** macro
