@@ -2,45 +2,31 @@
 
 **Quantitative changes:**
 
-1. **Support of references** with the following limitiations:
-    - refs couldn't be used with internal types of vectors in arguments and outputs of export functions and in outputs of import functions, f.e.
+1. **Support of references** in the following form:
      ```rust
     #[fce]
-    fn foo(arg: Vec<&Vec<u8>>) → Vec<u8>
+    fn foo(arg: &Vec<Vec<u8>>) → Vec<u8>
     ```
 
     ```rust
     #[fce]
-    fn foo(arg: Vec<u8>) → Vec<&Vec<u8>>
+    fn foo(arg: &String) → &String
    ```
 
     ```rust
     #[fce]
     #[link(wasm_import_module = "module_name")]
     extern "C" {
-      fn foo(arg: Vec<u8>) → Vec<&Vec<u8>>;
+      fn foo(arg: &Vec<&Vec<&String>>) → Vec<Vec<u8>>;
     }
    ```
-
-    aren't allowed, but these are nice:
-    ```rust
-    #[fce]
-    fn foo(arg: &Vec<Vec<u8>>) → Vec<u8>
-   ```
-
-    ```rust
-    #[fce]
-    #[link(wasm_import_module = "module_name")]
-    extern "C" {
-      fn foo(arg: &Vec<&Vec<&u8>>) → Vec<Vec<u8>>;
-    }
-   ```
-   
-    - refs can't be used with output types of import functions
-    - refs can't be used with fields of structs
     
 
-2. Added **&str** type that follows the aforementioned rules for references.
+2. Added **&str** type that follows the aforementioned rules for references:
+     ```rust
+    #[fce]
+    fn foo(arg: &str) → &str
+    ```
    
 
 3. **fce_test** macro
