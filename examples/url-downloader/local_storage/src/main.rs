@@ -34,17 +34,6 @@ pub fn main() {
 #[fce]
 pub fn put(name: String, file_content: Vec<u8>) -> String {
     log::info!("put called with file name {}\n", name);
-    unsafe {
-        log::info!(
-            "put track: {} {} {} {} {}",
-            *ALLOCS.get_mut(),
-            *DEALLOCS.get_mut(),
-            *REALLOCSA.get_mut(),
-            *REALLOCSD.get_mut(),
-            *ALLOCS.get_mut() - *DEALLOCS.get_mut() - *REALLOCSD.get_mut() + *REALLOCSA.get_mut()
-        );
-    }
-
     let rpc_tmp_filepath = format!("{}{}", SITES_DIR, name);
 
     let result = fs::write(PathBuf::from(rpc_tmp_filepath.clone()), file_content);
@@ -52,92 +41,14 @@ pub fn put(name: String, file_content: Vec<u8>) -> String {
         return format!("file can't be written: {}", e);
     }
 
-    log::info!("put ended with OK\n");
-
     String::from("Ok")
 }
 
 #[fce]
 pub fn get(file_name: String) -> Vec<u8> {
     log::info!("get called with file name: {}\n", file_name);
-    unsafe {
-        log::info!(
-            "get track: {} {} {} {} {}",
-            *ALLOCS.get_mut(),
-            *DEALLOCS.get_mut(),
-            *REALLOCSA.get_mut(),
-            *REALLOCSD.get_mut(),
-            *ALLOCS.get_mut() - *DEALLOCS.get_mut() - *REALLOCSD.get_mut() + *REALLOCSA.get_mut()
-        );
-    }
 
     let tmp_filepath = format!("{}{}", SITES_DIR, file_name);
 
-    let res = fs::read(tmp_filepath).unwrap_or_else(|_| b"error while reading file".to_vec());
-
-    log::info!("get ended with file name: {}\n", file_name);
-
-    res
-}
-
-use std::alloc::{GlobalAlloc, System, Layout};
-
-#[global_allocator]
-static GLOBAL_ALLOCATOR: WasmTracingAllocator<System> = WasmTracingAllocator(System);
-
-#[derive(Debug)]
-pub struct WasmTracingAllocator<A>(pub A)
-where
-    A: GlobalAlloc;
-
-use std::sync::atomic::AtomicUsize;
-
-static mut ALLOCS: AtomicUsize = AtomicUsize::new(0);
-static mut DEALLOCS: AtomicUsize = AtomicUsize::new(0);
-static mut REALLOCSA: AtomicUsize = AtomicUsize::new(0);
-static mut REALLOCSD: AtomicUsize = AtomicUsize::new(0);
-
-unsafe impl<A> GlobalAlloc for WasmTracingAllocator<A>
-where
-    A: GlobalAlloc,
-{
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        let size = layout.size();
-        let t = *ALLOCS.get_mut();
-        *ALLOCS.get_mut() = t + size;
-
-        let pointer = self.0.alloc(layout);
-        pointer
-    }
-
-    unsafe fn dealloc(&self, pointer: *mut u8, layout: Layout) {
-        let size = layout.size();
-        let t = *DEALLOCS.get_mut();
-        *DEALLOCS.get_mut() = t + size;
-
-        self.0.dealloc(pointer, layout);
-    }
-
-    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        let size = layout.size();
-        let t = *ALLOCS.get_mut();
-        *ALLOCS.get_mut() = t + size;
-
-        let pointer = self.0.alloc_zeroed(layout);
-
-        pointer
-    }
-
-    unsafe fn realloc(&self, old_pointer: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
-        let old_size = layout.size();
-        let t = *REALLOCSD.get_mut();
-        *REALLOCSD.get_mut() = t + old_size;
-
-        let t = *REALLOCSA.get_mut();
-        *REALLOCSA.get_mut() = t + layout.size();
-
-        let new_pointer = self.0.realloc(old_pointer, layout, new_size);
-
-        new_pointer
-    }
+    fs::read(tmp_filepath).unwrap_or_else(|_| b"error while reading file".to_vec())
 }

@@ -804,9 +804,9 @@ dependencies = [
 
 [[package]]
 name = "fluence"
-version = "0.6.1"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54b2f78a2432dcd10e7113f9f08aac004373dee610a3b4ca692d5b12a3e7c867"
+checksum = "5b731bd4a69a3945186f2ff96ff753908939c8a2debd60e1f0e8edb6a28757f8"
 dependencies = [
  "fce-timestamp-macro",
  "fluence-sdk-macro",
@@ -933,7 +933,7 @@ dependencies = [
 
 [[package]]
 name = "frepl"
-version = "0.7.1"
+version = "0.7.2"
 dependencies = [
  "anyhow",
  "check-latest",
@@ -1796,9 +1796,9 @@ checksum = "af8b08b04175473088b46763e51ee54da5f9a164bc162f615b91bc179dbf15a3"
 
 [[package]]
 name = "openssl"
-version = "0.10.33"
+version = "0.10.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a61075b62a23fef5a29815de7536d940aa35ce96d18ce0cc5076272db678a577"
+checksum = "6d7830286ad6a3973c0f1d9b73738f69c76b739301d0229c4b96501695cbe4c8"
 dependencies = [
  "bitflags",
  "cfg-if 1.0.0",
@@ -1816,9 +1816,9 @@ checksum = "77af24da69f9d9341038eba93a073b1fdaaa1b788221b00a69bce9e762cb32de"
 
 [[package]]
 name = "openssl-sys"
-version = "0.9.61"
+version = "0.9.62"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "313752393519e876837e09e1fa183ddef0be7735868dced3196f4472d536277f"
+checksum = "fa52160d45fa2e7608d504b7c3a3355afed615e6d8b627a74458634ba21b69bd"
 dependencies = [
  "autocfg",
  "cc",
@@ -1896,7 +1896,7 @@ dependencies = [
  "cfg-if 1.0.0",
  "instant",
  "libc",
- "redox_syscall 0.2.6",
+ "redox_syscall 0.2.7",
  "smallvec",
  "winapi 0.3.9",
 ]
@@ -2127,9 +2127,9 @@ checksum = "41cc0f7e4d5d4544e8861606a285bb08d3e70712ccc7d2b84d7c0ccfaf4b05ce"
 
 [[package]]
 name = "redox_syscall"
-version = "0.2.6"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8270314b5ccceb518e7e578952f0b72b88222d02e8f77f5ecf7abbb673539041"
+checksum = "85dd92e586f7355c633911e11f77f3d12f04b1b1bd76a198bd34ae3af8341ef2"
 dependencies = [
  "bitflags",
 ]
@@ -2140,7 +2140,7 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8440d8acb4fd3d277125b4bd01a6f38aee8d814b3b5fc09b3f2b825d37d3fe8f"
 dependencies = [
- "redox_syscall 0.2.6",
+ "redox_syscall 0.2.7",
 ]
 
 [[package]]
@@ -2161,7 +2161,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "528532f3d801c87aec9def2add9ca802fe569e44a544afe633765267840abe64"
 dependencies = [
  "getrandom 0.2.2",
- "redox_syscall 0.2.6",
+ "redox_syscall 0.2.7",
 ]
 
 [[package]]
@@ -2560,9 +2560,9 @@ checksum = "1e81da0851ada1f3e9d4312c704aa4f8806f0f9d69faaf8df2f3464b4a9437c2"
 
 [[package]]
 name = "syn"
-version = "1.0.70"
+version = "1.0.71"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9505f307c872bab8eb46f77ae357c8eba1fdacead58ee5a850116b1d7f82883"
+checksum = "ad184cc9470f9117b2ac6817bfe297307418819ba40552f9b3846f05c33d5373"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2596,7 +2596,7 @@ dependencies = [
  "cfg-if 1.0.0",
  "libc",
  "rand",
- "redox_syscall 0.2.6",
+ "redox_syscall 0.2.7",
  "remove_dir_all",
  "winapi 0.3.9",
 ]
@@ -2629,7 +2629,7 @@ checksum = "077185e2eac69c3f8379a4298e1e07cd36beb962290d4a51199acf0fdc10607e"
 dependencies = [
  "libc",
  "numtoa",
- "redox_syscall 0.2.6",
+ "redox_syscall 0.2.7",
  "redox_termios",
 ]
 
@@ -3212,9 +3212,9 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.20.0"
+version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b47648f6ed55acbd6ddf2a4efed8c2976ce19a55997eb159e511fbd11e366006"
+checksum = "df960871d756f87237e7630daa0e8453dd48f9e44e0f214e795362a6daa04967"
 dependencies = [
  "fluence-it-types",
  "it-lilo",
