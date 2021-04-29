@@ -25,14 +25,3 @@ pub fn main() {}
 pub fn greeting(name: String) -> String {
     format!("Hi, {}", name)
 }
-
-#[cfg(test)]
-mod tests {
-    use fluence_test::fce_test;
-
-    #[fce_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
-    fn test() {
-        let result = greeting.greeting("user".to_string());
-        assert_eq!(result, "Hi, user");
-    }
-}
