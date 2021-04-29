@@ -13,3 +13,6 @@ path = "src/main.rs"
 
 [dependencies]
 fluence = "0.6.1"
+
+[dev-dependencies]
+fluence-test = { path = "/Users/mike/dev/work/fluence/wasm/rust-sdk/fluence-test" }

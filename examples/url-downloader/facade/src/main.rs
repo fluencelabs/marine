@@ -32,12 +32,7 @@ pub fn get_n_save(url: String, file_name: String) -> String {
     log::info!("get_n_save called with {} {}\n", url, file_name);
 
     let result = download(url);
-
-    log::info!("get_n_save {} download\n", result);
-
     file_put(file_name, result.into_bytes());
-
-    log::info!("get_n_save ended with Ok\n");
 
     String::from("Ok")
 }
