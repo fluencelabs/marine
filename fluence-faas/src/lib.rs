@@ -50,22 +50,22 @@ pub use config::TomlWASIConfig;
 
 pub use errors::FaaSError;
 
-// Re-exports from FCE
-pub use fce::IValue;
-pub use fce::IRecordType;
-pub use fce::IFunctionArg;
-pub use fce::IType;
-pub use fce::FCEModuleInterface as FaaSModuleInterface;
-pub use fce::FCEFunctionSignature as FaaSFunctionSignature;
-pub use fce::RecordTypes;
-pub use fce::HostExportedFunc;
-pub use fce::HostImportDescriptor;
-pub use fce::HostImportError;
-pub use fce::to_interface_value;
-pub use fce::from_interface_values;
-pub use fce::ne_vec;
-pub use fce::min_sdk_version;
-pub use fce::min_it_version;
+// Re-exports from Marine
+pub use marine::IValue;
+pub use marine::IRecordType;
+pub use marine::IFunctionArg;
+pub use marine::IType;
+pub use marine::MModuleInterface as FaaSModuleInterface;
+pub use marine::MFunctionSignature as FaaSFunctionSignature;
+pub use marine::RecordTypes;
+pub use marine::HostExportedFunc;
+pub use marine::HostImportDescriptor;
+pub use marine::HostImportError;
+pub use marine::to_interface_value;
+pub use marine::from_interface_values;
+pub use marine::ne_vec;
+pub use marine::min_sdk_version;
+pub use marine::min_it_version;
 
 pub use fluence::CallParameters;
 pub use fluence::SecurityTetraplet;

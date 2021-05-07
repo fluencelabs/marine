@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::errors::FCEWITInterfacesError;
+use super::errors::MITInterfacesError;
 
 use wasmer_wit::interpreter::Instruction;
 use wasmer_wit::ast::*;
@@ -30,11 +30,11 @@ pub type AdapterFunctionType = u32;
 pub type ExportName<'a> = &'a str;
 pub type ImportName<'a> = &'a str;
 pub type ImportNamespace<'a> = &'a str;
-pub type WITAstType = Type;
+pub type ITAstType = Type;
 
-pub struct FCEWITInterfaces<'a> {
+pub struct MITInterfaces<'a> {
     /// All the types.
-    types: Vec<WITAstType>,
+    types: Vec<ITAstType>,
 
     /// All the imported functions.
     imports: Vec<Import<'a>>,
@@ -52,7 +52,7 @@ pub struct FCEWITInterfaces<'a> {
     core_type_to_adapter: MultiMap<CoreFunctionType, AdapterFunctionType>,
 }
 
-impl<'a> FCEWITInterfaces<'a> {
+impl<'a> MITInterfaces<'a> {
     pub fn new(interfaces: Interfaces<'a>) -> Self {
         let core_type_to_imports = interfaces
             .imports
@@ -112,7 +112,7 @@ impl<'a> FCEWITInterfaces<'a> {
 
     pub fn record_types(&self) -> impl Iterator<Item = (u64, &Rc<IRecordType>)> {
         self.types.iter().enumerate().filter_map(|(id, t)| match t {
-            WITAstType::Record(r) => Some((id as u64, r)),
+            ITAstType::Record(r) => Some((id as u64, r)),
             _ => None,
         })
     }
@@ -121,10 +121,10 @@ impl<'a> FCEWITInterfaces<'a> {
         self.types.get(idx as usize)
     }
 
-    pub fn type_by_idx_r(&self, idx: u32) -> Result<&Type, FCEWITInterfacesError> {
+    pub fn type_by_idx_r(&self, idx: u32) -> Result<&Type, MITInterfacesError> {
         self.types
             .get(idx as usize)
-            .ok_or(FCEWITInterfacesError::NoSuchType(idx))
+            .ok_or(MITInterfacesError::NoSuchType(idx))
     }
 
     pub fn imports(&self) -> impl Iterator<Item = &Import<'_>> {
@@ -141,10 +141,10 @@ impl<'a> FCEWITInterfaces<'a> {
     pub fn imports_by_type_r(
         &self,
         import_type: CoreFunctionType,
-    ) -> Result<&Vec<(ImportName<'a>, ImportNamespace<'a>)>, FCEWITInterfacesError> {
+    ) -> Result<&Vec<(ImportName<'a>, ImportNamespace<'a>)>, MITInterfacesError> {
         self.core_type_to_imports
             .get_vec(&import_type)
-            .ok_or(FCEWITInterfacesError::NoSuchImport(import_type))
+            .ok_or(MITInterfacesError::NoSuchImport(import_type))
     }
 
     pub fn adapters(&self) -> impl Iterator<Item = (&AdapterFunctionType, &Vec<Instruction>)> {
@@ -158,10 +158,10 @@ impl<'a> FCEWITInterfaces<'a> {
     pub fn adapter_by_type_r(
         &self,
         adapter_type: AdapterFunctionType,
-    ) -> Result<&Vec<Instruction>, FCEWITInterfacesError> {
+    ) -> Result<&Vec<Instruction>, MITInterfacesError> {
         self.adapters
             .get(&adapter_type)
-            .ok_or(FCEWITInterfacesError::NoSuchAdapter(adapter_type))
+            .ok_or(MITInterfacesError::NoSuchAdapter(adapter_type))
     }
 
     pub fn exports(&self) -> impl Iterator<Item = &Export<'_>> {
@@ -175,10 +175,10 @@ impl<'a> FCEWITInterfaces<'a> {
     pub fn exports_by_type_r(
         &self,
         export_type: CoreFunctionType,
-    ) -> Result<&Vec<ExportName<'a>>, FCEWITInterfacesError> {
+    ) -> Result<&Vec<ExportName<'a>>, MITInterfacesError> {
         self.core_type_to_exports
             .get_vec(&export_type)
-            .ok_or(FCEWITInterfacesError::NoSuchImport(export_type))
+            .ok_or(MITInterfacesError::NoSuchImport(export_type))
     }
 
     pub fn implementations(

@@ -23,7 +23,7 @@ pub use wit::*;
 use crate::Result;
 use crate::WITParserError;
 
-use fce_wit_interfaces::FCEWITInterfaces;
+use marine_wit_interfaces::MITInterfaces;
 use std::path::Path;
 
 pub fn module_interface<P>(module_path: P) -> Result<ServiceInterface>
@@ -33,7 +33,7 @@ where
     create_fce_it_with(module_path, |it| get_interface(&it))
 }
 
-pub fn module_raw_interface<P>(module_path: P) -> Result<FCEModuleInterface>
+pub fn module_raw_interface<P>(module_path: P) -> Result<MModuleInterface>
 where
     P: AsRef<Path>,
 {
@@ -42,7 +42,7 @@ where
 
 fn create_fce_it_with<P, T>(
     module_path: P,
-    transformer: impl FnOnce(FCEWITInterfaces<'_>) -> Result<T>,
+    transformer: impl FnOnce(MITInterfaces<'_>) -> Result<T>,
 ) -> Result<T>
 where
     P: AsRef<Path>,
@@ -54,7 +54,7 @@ where
     let custom_section_bytes = raw_custom_section.as_ref();
     let wit = extract_wit_from_bytes(custom_section_bytes)?;
 
-    let fce_interface = FCEWITInterfaces::new(wit);
+    let fce_interface = MITInterfaces::new(wit);
 
     transformer(fce_interface)
 }

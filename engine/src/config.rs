@@ -43,7 +43,7 @@ pub struct HostImportDescriptor {
     pub error_handler: Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + 'static>>,
 }
 
-pub struct FCEModuleConfig {
+pub struct MModuleConfig {
     /// Maximum number of Wasm memory pages that loaded module can use.
     /// Each Wasm pages is 65536 bytes long.
     pub mem_pages_count: u32,
@@ -67,7 +67,7 @@ pub struct FCEModuleConfig {
     pub wasi_mapped_dirs: HashMap<String, PathBuf>,
 }
 
-impl Default for FCEModuleConfig {
+impl Default for MModuleConfig {
     fn default() -> Self {
         // some reasonable defaults
         Self {
@@ -83,9 +83,9 @@ impl Default for FCEModuleConfig {
     }
 }
 
-// TODO: implement debug for FCEModuleConfig
+// TODO: implement debug for MModuleConfig
 
-impl FCEModuleConfig {
+impl MModuleConfig {
     #[allow(dead_code)]
     pub fn with_mem_pages_count(mut self, mem_pages_count: u32) -> Self {
         self.mem_pages_count = mem_pages_count;

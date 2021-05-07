@@ -1,17 +1,17 @@
 [package]
-name = "fce-wit-generator"
-description = "Fluence FCE interface type generator"
+name = "marine-wit-generator"
+description = "Fluence Marine interface types generator"
 version = "0.4.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [lib]
-name = "fce_wit_generator"
+name = "marine_wit_generator"
 path = "src/lib.rs"
 
 [dependencies]
-fce-wit-parser = { path = "../wit-parser", version = "0.5.0"}
+marine-wit-parser = { path = "../wit-parser", version = "0.5.0"}
 fluence-sdk-wit = "0.6.1"
 
 wasmer-wit = { package = "wasmer-interface-types-fl", version = "0.20.0" }

@@ -17,8 +17,8 @@
 use fluence::fce;
 use fluence::module_manifest;
 
-use fce_sqlite_connector;
-use fce_sqlite_connector::State;
+use marine_sqlite_connector;
+use marine_sqlite_connector::State;
 
 module_manifest!();
 
@@ -52,7 +52,7 @@ pub fn test1(age: i64) {
 
 #[fce]
 pub fn test2(age: i64) {
-    use fce_sqlite_connector::Value;
+    use marine_sqlite_connector::Value;
 
     let connection = fce_sqlite_connector::open(":memory:").unwrap();
 

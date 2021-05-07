@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use fce_module_info_parser::ModuleInfoError;
-use fce_wit_generator::WITGeneratorError;
-use fce_wit_parser::WITParserError;
+use marine_module_info_parser::ModuleInfoError;
+use marine_wit_generator::WITGeneratorError;
+use marine_wit_parser::WITParserError;
 
 use thiserror::Error as ThisError;
 

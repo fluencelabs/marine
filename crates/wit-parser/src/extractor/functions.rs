@@ -16,7 +16,7 @@
 
 use crate::Result;
 use crate::WITParserError;
-use fce_wit_interfaces::FCEWITInterfaces;
+use marine_wit_interfaces::MITInterfaces;
 
 use wasmer_wit::IRecordType;
 use wasmer_wit::ast::FunctionArg as IFunctionArg;
@@ -27,33 +27,33 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-pub type FCERecordTypes = HashMap<u64, Rc<IRecordType>>;
+pub type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
 
 #[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
-pub struct FCEFunctionSignature {
+pub struct MFunctionSignature {
     pub name: Rc<String>,
     pub arguments: Rc<Vec<IFunctionArg>>,
     pub outputs: Rc<Vec<IType>>,
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
-pub struct FCEModuleInterface {
-    pub record_types: FCERecordTypes,
-    pub function_signatures: Vec<FCEFunctionSignature>,
+pub struct MModuleInterface {
+    pub record_types: MRecordTypes,
+    pub function_signatures: Vec<MFunctionSignature>,
 }
 
-pub fn get_interface(fce_it_interface: &FCEWITInterfaces<'_>) -> Result<ServiceInterface> {
+pub fn get_interface(fce_it_interface: &MITInterfaces<'_>) -> Result<ServiceInterface> {
     let fce_interface = get_raw_interface(fce_it_interface)?;
     let service_interface = into_service_interface(fce_interface);
 
     Ok(service_interface)
 }
 
-pub fn get_raw_interface(fce_it_interface: &FCEWITInterfaces<'_>) -> Result<FCEModuleInterface> {
+pub fn get_raw_interface(fce_it_interface: &MITInterfaces<'_>) -> Result<MModuleInterface> {
     let function_signatures = get_exports(fce_it_interface)?;
     let record_types = extract_record_types(fce_it_interface);
 
-    let fce_interface = FCEModuleInterface {
+    let fce_interface = MModuleInterface {
         record_types,
         function_signatures,
     };
@@ -61,8 +61,8 @@ pub fn get_raw_interface(fce_it_interface: &FCEWITInterfaces<'_>) -> Result<FCEM
     Ok(fce_interface)
 }
 
-fn get_exports(wit: &FCEWITInterfaces<'_>) -> Result<Vec<FCEFunctionSignature>> {
-    use fce_wit_interfaces::WITAstType;
+fn get_exports(wit: &MITInterfaces<'_>) -> Result<Vec<MFunctionSignature>> {
+    use marine_wit_interfaces::ITAstType;
 
     wit.implementations()
         .filter_map(|(adapter_function_type, core_function_type)| {
@@ -79,11 +79,11 @@ fn get_exports(wit: &FCEWITInterfaces<'_>) -> Result<Vec<FCEFunctionSignature>> 
             let wit_type = wit.type_by_idx_r(adapter_function_type).unwrap();
 
             match wit_type {
-                WITAstType::Function {
+                ITAstType::Function {
                     arguments,
                     output_types,
                 } => {
-                    let signature = FCEFunctionSignature {
+                    let signature = MFunctionSignature {
                         name: Rc::new(export_function_name.to_string()),
                         arguments: arguments.clone(),
                         outputs: output_types.clone(),
@@ -96,20 +96,20 @@ fn get_exports(wit: &FCEWITInterfaces<'_>) -> Result<Vec<FCEFunctionSignature>> 
                 ))),
             }
         })
-        .collect::<Result<Vec<FCEFunctionSignature>>>()
+        .collect::<Result<Vec<MFunctionSignature>>>()
 }
 
-fn extract_record_types(wit: &FCEWITInterfaces<'_>) -> FCERecordTypes {
-    use fce_wit_interfaces::WITAstType;
+fn extract_record_types(wit: &MITInterfaces<'_>) -> MRecordTypes {
+    use marine_wit_interfaces::ITAstType;
 
     let (record_types_by_id, _) = wit.types().fold(
         (HashMap::new(), 0u64),
         |(mut record_types_by_id, id), ty| {
             match ty {
-                WITAstType::Record(record_type) => {
+                ITAstType::Record(record_type) => {
                     record_types_by_id.insert(id, record_type.clone());
                 }
-                WITAstType::Function { .. } => {}
+                ITAstType::Function { .. } => {}
             };
             (record_types_by_id, id + 1)
         },
@@ -138,7 +138,7 @@ pub struct ServiceInterface {
     pub record_types: Vec<RecordType>,
 }
 
-pub(crate) fn into_service_interface(fce_interface: FCEModuleInterface) -> ServiceInterface {
+pub(crate) fn into_service_interface(fce_interface: MModuleInterface) -> ServiceInterface {
     let record_types = fce_interface.record_types;
 
     let function_signatures = fce_interface
@@ -159,8 +159,8 @@ pub(crate) fn into_service_interface(fce_interface: FCEModuleInterface) -> Servi
 }
 
 fn serialize_function_signature(
-    signature: FCEFunctionSignature,
-    record_types: &FCERecordTypes,
+    signature: MFunctionSignature,
+    record_types: &MRecordTypes,
 ) -> FunctionSignature {
     let arguments = signature
         .arguments
@@ -184,7 +184,7 @@ fn serialize_function_signature(
 fn serialize_record_type(
     id: u64,
     record: Rc<IRecordType>,
-    record_types: &FCERecordTypes,
+    record_types: &MRecordTypes,
 ) -> RecordType {
     let fields = record
         .fields
@@ -199,7 +199,7 @@ fn serialize_record_type(
     }
 }
 
-fn itype_text_view(arg_ty: &IType, record_types: &FCERecordTypes) -> String {
+fn itype_text_view(arg_ty: &IType, record_types: &MRecordTypes) -> String {
     match arg_ty {
         IType::Record(record_type_id) => {
             // unwrap is safe because FaaSInterface here is well-formed

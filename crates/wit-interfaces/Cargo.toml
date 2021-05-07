@@ -1,13 +1,13 @@
 [package]
-name = "fce-wit-interfaces"
-description = "Fluence FCE interface type helper crate"
+name = "marine-wit-interfaces"
+description = "Fluence Marine interface types helper crate"
 version = "0.3.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [lib]
-name = "fce_wit_interfaces"
+name = "marine_wit_interfaces"
 path = "src/lib.rs"
 
 [dependencies]

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fce::HostImportDescriptor;
+use marine::HostImportDescriptor;
 use fluence::MountedBinaryResult;
 
 use wasmer_core::vm::Ctx;

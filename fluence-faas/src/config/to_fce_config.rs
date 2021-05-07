@@ -21,7 +21,7 @@ use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use crate::host_imports::create_call_parameters_import;
 
-use fce::FCEModuleConfig;
+use marine::MModuleConfig;
 use wasmer_core::import::ImportObject;
 use wasmer_core::import::Namespace;
 use wasmer_runtime::func;
@@ -30,31 +30,31 @@ use std::collections::HashMap;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// Make FCE config from provided FaaS config.
-pub(crate) fn make_fce_config(
+/// Make Marine config from provided FaaS config.
+pub(crate) fn make_marine_config(
     module_name: String,
     faas_module_config: Option<FaaSModuleConfig>,
     call_parameters: Rc<RefCell<fluence::CallParameters>>,
     logger_filter: &LoggerFilter<'_>,
-) -> Result<FCEModuleConfig> {
-    let mut fce_module_config = FCEModuleConfig::default();
+) -> Result<MModuleConfig> {
+    let mut marine_module_cfg = MModuleConfig::default();
 
     let faas_module_config = match faas_module_config {
         Some(faas_module_config) => faas_module_config,
-        None => return Ok(fce_module_config),
+        None => return Ok(marine_module_cfg),
     };
 
     if let Some(mem_pages_count) = faas_module_config.mem_pages_count {
-        fce_module_config.mem_pages_count = mem_pages_count;
+        marine_module_cfg.mem_pages_count = mem_pages_count;
     }
 
     if let Some(wasi) = faas_module_config.wasi {
-        fce_module_config.wasi_envs = wasi.envs;
-        fce_module_config.wasi_preopened_files = wasi.preopened_files;
-        fce_module_config.wasi_mapped_dirs = wasi.mapped_dirs;
+        marine_module_cfg.wasi_envs = wasi.envs;
+        marine_module_cfg.wasi_preopened_files = wasi.preopened_files;
+        marine_module_cfg.wasi_mapped_dirs = wasi.mapped_dirs;
 
         // create environment variables for all mapped directories
-        let mapped_dirs = fce_module_config
+        let mapped_dirs = marine_module_cfg
             .wasi_mapped_dirs
             .iter()
             .map(|(from, to)| {
@@ -65,11 +65,11 @@ pub(crate) fn make_fce_config(
             })
             .collect::<HashMap<_, _>>();
 
-        fce_module_config.wasi_envs.extend(mapped_dirs);
+        marine_module_cfg.wasi_envs.extend(mapped_dirs);
     };
 
-    fce_module_config.host_imports = faas_module_config.host_imports;
-    fce_module_config.host_imports.insert(
+    marine_module_cfg.host_imports = faas_module_config.host_imports;
+    marine_module_cfg.host_imports.insert(
         String::from("get_call_parameters"),
         create_call_parameters_import(call_parameters),
     );
@@ -84,7 +84,7 @@ pub(crate) fn make_fce_config(
             };
 
             // overwrite possibly installed log variable in config
-            fce_module_config.wasi_envs.insert(
+            marine_module_cfg.wasi_envs.insert(
                 WASM_LOG_ENV_NAME.as_bytes().to_owned(),
                 log_level_str.into_bytes(),
             );
@@ -99,9 +99,9 @@ pub(crate) fn make_fce_config(
 
     let mut raw_host_imports = ImportObject::new();
     raw_host_imports.register("host", namespace);
-    fce_module_config.raw_imports = raw_host_imports;
+    marine_module_cfg.raw_imports = raw_host_imports;
 
-    fce_module_config.wasi_version = wasmer_wasi::WasiVersion::Latest;
+    marine_module_cfg.wasi_version = wasmer_wasi::WasiVersion::Latest;
 
-    Ok(fce_module_config)
+    Ok(marine_module_cfg)
 }

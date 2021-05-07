@@ -19,7 +19,7 @@ use crate::IType;
 use crate::Result;
 use crate::errors::FaaSError::JsonOutputSerializationError as OutputDeError;
 
-use fce::RecordTypes;
+use marine::RecordTypes;
 use serde_json::Value as JValue;
 
 pub(crate) fn ivalues_to_json(

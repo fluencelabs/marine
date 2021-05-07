@@ -41,7 +41,7 @@ where
     Ok((&wit).to_string())
 }
 
-/// Extracts WIT section of provided Wasm binary and converts it to a FCEWITInterfaces.
+/// Extracts WIT section of provided Wasm binary and converts it to a MITInterfaces.
 pub fn extract_wit_from_module(wasmer_module: &WasmerModule) -> Result<Interfaces<'_>> {
     let wit_sections = wasmer_module
         .custom_sections(IT_SECTION_NAME)

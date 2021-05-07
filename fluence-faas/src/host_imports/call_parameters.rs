@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fce::HostImportDescriptor;
+use marine::HostImportDescriptor;
 use wasmer_core::vm::Ctx;
 use wasmer_wit::IValue;
 use wasmer_wit::IType;

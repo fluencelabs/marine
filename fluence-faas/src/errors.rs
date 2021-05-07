@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fce::FCEError;
+use marine::MError;
 
 use thiserror::Error;
 use std::io::Error as IOError;
@@ -65,9 +65,9 @@ pub enum FaaSError {
     #[error("parsing config error: {0}")]
     ParseConfigError(#[from] toml::de::Error),
 
-    /// FCE errors.
+    /// Marine errors.
     #[error("engine error: {0}")]
-    EngineError(#[from] FCEError),
+    EngineError(#[from] MError),
 }
 
 impl From<IOError> for FaaSError {

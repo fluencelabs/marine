@@ -7,8 +7,8 @@ license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-fce = { path = "../engine", version = "0.5.0" }
-fce-utils = { path = "../crates/utils", version = "0.2.0" }
+marine = { path = "../engine", version = "0.5.0" }
+marine-utils = { path = "../crates/utils", version = "0.2.0" }
 fluence-sdk-main = { version = "0.6.1", features = ["logger"] }
 fluence = { version = "0.6.1", features = ["logger"] }
 

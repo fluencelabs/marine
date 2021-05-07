@@ -36,7 +36,7 @@ pub enum WITParserError {
     /// An error occurred while parsing WIT section.
     #[error(
         "IT section is corrupted: {0}.\
-    \nProbably the module was compiled with an old version of fce cli, please try to update and recompile.\
+    \nProbably the module was compiled with an old version of marine cli, please try to update and recompile.\
     \nTo update fce run: cargo install fcli --force"
     )]
     CorruptedITSection(nom::Err<(Vec<u8>, nom::error::ErrorKind)>),

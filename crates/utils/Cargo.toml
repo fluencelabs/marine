@@ -1,11 +1,11 @@
 [package]
-name = "fce-utils"
-description = "Fluence FCE utils crate"
+name = "marine-utils"
+description = "Fluence Marine utils crate"
 version = "0.2.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [lib]
-name = "fce_utils"
+name = "marine_utils"
 path = "src/lib.rs"

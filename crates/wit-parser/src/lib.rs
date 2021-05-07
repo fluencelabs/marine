@@ -49,9 +49,9 @@ pub mod interface {
     pub use crate::extractor::RecordType;
     pub use crate::extractor::FunctionSignature;
 
-    pub use crate::extractor::FCEModuleInterface;
-    pub use crate::extractor::FCERecordTypes;
-    pub use crate::extractor::FCEFunctionSignature;
+    pub use crate::extractor::MModuleInterface;
+    pub use crate::extractor::MRecordTypes;
+    pub use crate::extractor::MFunctionSignature;
     pub mod it {
         pub use wasmer_wit::IType;
         pub use wasmer_wit::ast::FunctionArg as IFunctionArg;

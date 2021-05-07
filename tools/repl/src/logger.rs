@@ -51,6 +51,6 @@ pub(super) fn init_logger() {
         //.filter(Some(WIT_MODULE_PATH), Info)
         // the same for rustyline and fce
         .filter(Some("rustyline"), Info)
-        .filter(Some("fce"), Info)
+        .filter(Some("marine"), Info)
         .init();
 }

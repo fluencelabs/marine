@@ -17,12 +17,12 @@
 use super::wit_prelude::*;
 use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
 use super::RecordTypes;
-use crate::FCEResult;
-use crate::FCEModuleConfig;
+use crate::MResult;
+use crate::MModuleConfig;
 
-use fce_wit_interfaces::FCEWITInterfaces;
-use fce_wit_parser::extract_wit_from_module;
-use fce_utils::SharedString;
+use marine_wit_interfaces::MITInterfaces;
+use marine_wit_parser::extract_wit_from_module;
+use marine_utils::SharedString;
 use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
 use wasmer_runtime::compile;
@@ -39,18 +39,18 @@ use std::sync::Arc;
 use std::rc::Rc;
 
 type WITInterpreter =
-    Interpreter<WITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
+    Interpreter<ITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
 
 #[derive(Clone)]
-pub(super) struct WITModuleFunc {
+pub(super) struct ITModuleFunc {
     interpreter: Arc<WITInterpreter>,
     pub(super) arguments: Rc<Vec<IFunctionArg>>,
     pub(super) output_types: Rc<Vec<IType>>,
 }
 
-/// Represent a function type inside FCE module.
+/// Represent a function type inside Marine module.
 #[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
-pub struct FCEFunctionSignature {
+pub struct MFunctionSignature {
     pub name: Rc<String>,
     pub arguments: Rc<Vec<IFunctionArg>>,
     pub outputs: Rc<Vec<IType>>,
@@ -58,12 +58,12 @@ pub struct FCEFunctionSignature {
 
 #[derive(Clone)]
 pub(super) struct Callable {
-    pub(super) wit_instance: Arc<WITInstance>,
-    pub(super) wit_module_func: WITModuleFunc,
+    pub(super) wit_instance: Arc<ITInstance>,
+    pub(super) wit_module_func: ITModuleFunc,
 }
 
 impl Callable {
-    pub fn call(&mut self, args: &[IValue]) -> FCEResult<Vec<IValue>> {
+    pub fn call(&mut self, args: &[IValue]) -> MResult<Vec<IValue>> {
         use wasmer_wit::interpreter::stack::Stackable;
 
         let result = self
@@ -79,7 +79,7 @@ impl Callable {
 
 type ExportFunctions = HashMap<SharedString, Rc<Callable>>;
 
-pub(crate) struct FCEModule {
+pub(crate) struct MModule {
     // wasmer_instance is needed because WITInstance contains dynamic functions
     // that internally keep pointer to it.
     #[allow(unused)]
@@ -88,7 +88,7 @@ pub(crate) struct FCEModule {
     // import_object is needed because ImportObject::extend doesn't really deep copy
     // imports, so we need to store imports of this module to prevent their removing.
     #[allow(unused)]
-    wit_import_object: ImportObject,
+    it_import_object: ImportObject,
 
     // host_import_object is needed because ImportObject::extend doesn't really deep copy
     // imports, so we need to store imports of this module to prevent their removing.
@@ -108,20 +108,20 @@ pub(crate) struct FCEModule {
     export_record_types: RecordTypes,
 }
 
-impl FCEModule {
+impl MModule {
     pub(crate) fn new(
         name: &str,
         wasm_bytes: &[u8],
-        config: FCEModuleConfig,
-        modules: &HashMap<String, FCEModule>,
-    ) -> FCEResult<Self> {
+        config: MModuleConfig,
+        modules: &HashMap<String, MModule>,
+    ) -> MResult<Self> {
         let wasmer_module = compile(&wasm_bytes)?;
         crate::misc::check_sdk_version(name, &wasmer_module)?;
 
         let wit = extract_wit_from_module(&wasmer_module)?;
         crate::misc::check_it_version(name, &wit.version)?;
 
-        let fce_wit = FCEWITInterfaces::new(wit);
+        let fce_wit = MITInterfaces::new(wit);
 
         let mut wit_instance = Arc::new_uninit();
         let wit_import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
@@ -134,8 +134,8 @@ impl FCEModule {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
-                MaybeUninit::new(WITInstance::new(&wasmer_instance, name, &fce_wit, modules)?);
-            std::mem::transmute::<_, Arc<WITInstance>>(wit_instance)
+                MaybeUninit::new(ITInstance::new(&wasmer_instance, name, &fce_wit, modules)?);
+            std::mem::transmute::<_, Arc<ITInstance>>(wit_instance)
         };
 
         let export_funcs = Self::instantiate_wit_exports(&wit_instance, &fce_wit)?;
@@ -149,7 +149,7 @@ impl FCEModule {
 
         Ok(Self {
             wasmer_instance: Box::new(wasmer_instance),
-            wit_import_object,
+            it_import_object: wit_import_object,
             host_import_object: raw_imports,
             host_closures_import_object,
             export_funcs,
@@ -162,10 +162,10 @@ impl FCEModule {
         module_name: &str,
         function_name: &str,
         args: &[IValue],
-    ) -> FCEResult<Vec<IValue>> {
+    ) -> MResult<Vec<IValue>> {
         self.export_funcs.get_mut(function_name).map_or_else(
             || {
-                Err(FCEError::NoSuchFunction(
+                Err(MError::NoSuchFunction(
                     module_name.to_string(),
                     function_name.to_string(),
                 ))
@@ -174,10 +174,10 @@ impl FCEModule {
         )
     }
 
-    pub(crate) fn get_exports_signatures(&self) -> impl Iterator<Item = FCEFunctionSignature> + '_ {
+    pub(crate) fn get_exports_signatures(&self) -> impl Iterator<Item = MFunctionSignature> + '_ {
         self.export_funcs
             .iter()
-            .map(|(func_name, func)| FCEFunctionSignature {
+            .map(|(func_name, func)| MFunctionSignature {
                 name: func_name.0.clone(),
                 arguments: func.wit_module_func.arguments.clone(),
                 outputs: func.wit_module_func.output_types.clone(),
@@ -201,10 +201,10 @@ impl FCEModule {
         &self,
         module_name: &str,
         function_name: &str,
-    ) -> FCEResult<Rc<Callable>> {
+    ) -> MResult<Rc<Callable>> {
         match self.export_funcs.get(function_name) {
             Some(func) => Ok(func.clone()),
-            None => Err(FCEError::NoSuchFunction(
+            None => Err(MError::NoSuchFunction(
                 module_name.to_string(),
                 function_name.to_string(),
             )),
@@ -212,10 +212,10 @@ impl FCEModule {
     }
 
     fn create_import_objects(
-        config: FCEModuleConfig,
-        fce_wit: &FCEWITInterfaces<'_>,
+        config: MModuleConfig,
+        fce_wit: &MITInterfaces<'_>,
         wit_import_object: ImportObject,
-    ) -> FCEResult<(ImportObject, ImportObject)> {
+    ) -> MResult<(ImportObject, ImportObject)> {
         use crate::host_imports::create_host_import_func;
 
         let wasi_envs = config
@@ -237,7 +237,7 @@ impl FCEModule {
             wasi_preopened_files,
             wasi_mapped_dirs,
         )
-        .map_err(FCEError::WASIPrepareError)?;
+        .map_err(MError::WASIPrepareError)?;
 
         let mut host_closures_namespace = Namespace::new();
         let record_types = fce_wit
@@ -261,10 +261,10 @@ impl FCEModule {
     }
 
     fn instantiate_wit_exports(
-        wit_instance: &Arc<WITInstance>,
-        wit: &FCEWITInterfaces<'_>,
-    ) -> FCEResult<ExportFunctions> {
-        use fce_wit_interfaces::WITAstType;
+        wit_instance: &Arc<ITInstance>,
+        wit: &MITInterfaces<'_>,
+    ) -> MResult<ExportFunctions> {
+        use marine_wit_interfaces::ITAstType;
 
         wit.implementations()
             .filter_map(|(adapter_function_type, core_function_type)| {
@@ -282,13 +282,13 @@ impl FCEModule {
                 let wit_type = wit.type_by_idx_r(adapter_function_type)?;
 
                 match wit_type {
-                    WITAstType::Function {
+                    ITAstType::Function {
                         arguments,
                         output_types,
                     } => {
                         let interpreter: WITInterpreter =
                             adapter_instructions.clone().try_into()?;
-                        let wit_module_func = WITModuleFunc {
+                        let wit_module_func = ITModuleFunc {
                             interpreter: Arc::new(interpreter),
                             arguments: arguments.clone(),
                             output_types: output_types.clone(),
@@ -302,21 +302,21 @@ impl FCEModule {
 
                         Ok((shared_string, callable))
                     }
-                    _ => Err(FCEError::IncorrectWIT(format!(
+                    _ => Err(MError::IncorrectWIT(format!(
                         "type with idx = {} isn't a function type",
                         adapter_function_type
                     ))),
                 }
             })
-            .collect::<FCEResult<ExportFunctions>>()
+            .collect::<MResult<ExportFunctions>>()
     }
 
     // this function deals only with import functions that have an adaptor implementation
     fn adjust_wit_imports(
-        wit: &FCEWITInterfaces<'_>,
-        wit_instance: Arc<MaybeUninit<WITInstance>>,
-    ) -> FCEResult<ImportObject> {
-        use fce_wit_interfaces::WITAstType;
+        wit: &MITInterfaces<'_>,
+        wit_instance: Arc<MaybeUninit<ITInstance>>,
+    ) -> MResult<ImportObject> {
+        use marine_wit_interfaces::ITAstType;
         use wasmer_core::typed_func::DynamicFunc;
         use wasmer_core::vm::Ctx;
 
@@ -339,7 +339,7 @@ impl FCEModule {
 
         // creates a closure that is represent a WIT module import
         fn create_raw_import(
-            wit_instance: Arc<MaybeUninit<WITInstance>>,
+            wit_instance: Arc<MaybeUninit<ITInstance>>,
             interpreter: WITInterpreter,
             import_namespace: String,
             import_name: String,
@@ -401,7 +401,7 @@ impl FCEModule {
                 let wit_type = wit.type_by_idx_r(adapter_function_type)?;
 
                 match wit_type {
-                    WITAstType::Function {
+                    ITAstType::Function {
                         arguments,
                         output_types,
                     } => {
@@ -423,13 +423,13 @@ impl FCEModule {
 
                         Ok((import_namespace.to_string(), (*import_name, wit_import)))
                     }
-                    _ => Err(FCEError::IncorrectWIT(format!(
+                    _ => Err(MError::IncorrectWIT(format!(
                         "type with idx = {} isn't a function type",
                         adapter_function_type
                     ))),
                 }
             })
-            .collect::<FCEResult<multimap::MultiMap<_, _>>>()?;
+            .collect::<MResult<multimap::MultiMap<_, _>>>()?;
 
         let mut import_object = ImportObject::new();
 
@@ -448,17 +448,17 @@ impl FCEModule {
     // TODO : move it to a separate crate
     fn extract_export_record_types(
         export_funcs: &ExportFunctions,
-        wit_instance: &Arc<WITInstance>,
-    ) -> FCEResult<RecordTypes> {
-        use fce_wit_generator::TYPE_RESOLVE_RECURSION_LIMIT;
-        use FCEError::RecordResolveError;
+        wit_instance: &Arc<ITInstance>,
+    ) -> MResult<RecordTypes> {
+        use marine_wit_generator::TYPE_RESOLVE_RECURSION_LIMIT;
+        use MError::RecordResolveError;
 
         fn handle_itype(
             itype: &IType,
-            wit_instance: &Arc<WITInstance>,
+            wit_instance: &Arc<ITInstance>,
             export_record_types: &mut RecordTypes,
             recursion_level: u32,
-        ) -> FCEResult<()> {
+        ) -> MResult<()> {
             use wasmer_wit::interpreter::wasm::structures::Instance;
 
             if recursion_level > TYPE_RESOLVE_RECURSION_LIMIT {
@@ -469,10 +469,10 @@ impl FCEModule {
 
             fn handle_record_type(
                 record_type_id: u64,
-                wit_instance: &Arc<WITInstance>,
+                wit_instance: &Arc<ITInstance>,
                 export_record_types: &mut RecordTypes,
                 recursion_level: u32,
-            ) -> FCEResult<()> {
+            ) -> MResult<()> {
                 let record_type =
                     wit_instance
                         .wit_record_by_id(record_type_id)

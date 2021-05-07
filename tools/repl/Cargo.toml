@@ -1,14 +1,14 @@
 [package]
 name = "frepl"
-description = "Fluence FCE REPL intended for testing purposes"
+description = "Fluence Marine REPL intended for testing purposes"
 version = "0.7.2"
 authors = ["Fluence Labs"]
-repository = "https://github.com/fluencelabs/fce/tools/repl"
+repository = "https://github.com/fluencelabs/marine/tools/repl"
 license = "Apache-2.0"
 edition = "2018"
 
 [[bin]]
-name = "fce-repl"
+name = "marine-repl"
 path = "src/main.rs"
 
 [dependencies]

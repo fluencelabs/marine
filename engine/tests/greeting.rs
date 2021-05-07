@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use fce::FCE;
-use fce::IValue;
+use marine::Marine;
+use marine::IValue;
 
 use once_cell::sync::Lazy;
 
@@ -26,11 +26,12 @@ static GREETING_WASM_BYTES: Lazy<Vec<u8>> = Lazy::new(|| {
 
 #[test]
 pub fn greeting_basic() {
-    let mut fce = FCE::new();
-    fce.load_module("greeting", &*GREETING_WASM_BYTES, <_>::default())
-        .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
+    let mut marine = Marine::new();
+    marine
+        .load_module("greeting", &*GREETING_WASM_BYTES, <_>::default())
+        .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    let result1 = fce
+    let result1 = marine
         .call(
             "greeting",
             "greeting",
@@ -38,7 +39,7 @@ pub fn greeting_basic() {
         )
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
-    let result2 = fce
+    let result2 = marine
         .call("greeting", "greeting", &[IValue::String(String::from(""))])
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
@@ -49,44 +50,46 @@ pub fn greeting_basic() {
 #[test]
 // test loading module with the same name twice
 pub fn non_unique_module_name() {
-    let mut fce = FCE::new();
+    let mut marine = Marine::new();
     let module_name = String::from("greeting");
-    fce.load_module(&module_name, &*GREETING_WASM_BYTES, <_>::default())
-        .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
+    marine
+        .load_module(&module_name, &*GREETING_WASM_BYTES, <_>::default())
+        .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    let load_result = fce.load_module(&module_name, &*GREETING_WASM_BYTES, <_>::default());
+    let load_result = marine.load_module(&module_name, &*GREETING_WASM_BYTES, <_>::default());
     assert!(load_result.is_err());
     assert!(std::matches!(
         load_result.err().unwrap(),
-        fce::FCEError::NonUniqueModuleName(_)
+        marine::MError::NonUniqueModuleName(_)
     ));
 }
 
 #[test]
 #[allow(unused_variables)]
-// test calling FCE with non-exist module and function names
+// test calling Marine with non-exist module and function names
 pub fn non_exist_module_func() {
-    let mut fce = FCE::new();
-    fce.load_module("greeting", &*GREETING_WASM_BYTES, <_>::default())
-        .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
+    let mut marine = Marine::new();
+    marine
+        .load_module("greeting", &*GREETING_WASM_BYTES, <_>::default())
+        .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
     let module_name = "greeting";
     let function_name = "greeting";
     let non_exist_name = String::from("_");
 
-    let call_result1 = fce.call(
+    let call_result1 = marine.call(
         non_exist_name.as_str(),
         function_name,
         &[IValue::String(String::from("Fluence"))],
     );
 
-    let call_result2 = fce.call(
+    let call_result2 = marine.call(
         module_name,
         non_exist_name.as_str(),
         &[IValue::String(String::from("Fluence"))],
     );
 
-    let call_result3 = fce.call(
+    let call_result3 = marine.call(
         non_exist_name.as_str(),
         non_exist_name.as_str(),
         &[IValue::String(String::from("Fluence"))],
@@ -95,19 +98,19 @@ pub fn non_exist_module_func() {
     assert!(call_result1.is_err());
     assert!(matches!(
         call_result1.err().unwrap(),
-        fce::FCEError::NoSuchModule(non_exist_name)
+        marine::MError::NoSuchModule(non_exist_name)
     ));
 
     assert!(call_result2.is_err());
     assert!(matches!(
         call_result2.err().unwrap(),
-        fce::FCEError::NoSuchFunction(module_name, non_exist_name)
+        marine::MError::NoSuchFunction(module_name, non_exist_name)
     ));
 
     assert!(call_result3.is_err());
     // at first, the module name should be checked
     assert!(matches!(
         call_result3.err().unwrap(),
-        fce::FCEError::NoSuchModule(non_exist_name)
+        marine::MError::NoSuchModule(non_exist_name)
     ));
 }

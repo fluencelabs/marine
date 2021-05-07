@@ -17,7 +17,7 @@
 use std::error::Error;
 
 #[derive(Debug)]
-pub enum FCEWITInterfacesError {
+pub enum MITInterfacesError {
     /// WIT doesn't contain such type.
     NoSuchType(u32),
 
@@ -31,27 +31,27 @@ pub enum FCEWITInterfacesError {
     NoSuchAdapter(u32),
 }
 
-impl Error for FCEWITInterfacesError {}
+impl Error for MITInterfacesError {}
 
-impl std::fmt::Display for FCEWITInterfacesError {
+impl std::fmt::Display for MITInterfacesError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
-            FCEWITInterfacesError::NoSuchType(type_id) => write!(
+            MITInterfacesError::NoSuchType(type_id) => write!(
                 f,
                 "Loaded module doesn't contain type with idx = {}",
                 type_id
             ),
-            FCEWITInterfacesError::NoSuchExport(export_type_id) => write!(
+            MITInterfacesError::NoSuchExport(export_type_id) => write!(
                 f,
                 "Loaded module doesn't contain export with type idx = {}",
                 export_type_id
             ),
-            FCEWITInterfacesError::NoSuchImport(import_type_id) => write!(
+            MITInterfacesError::NoSuchImport(import_type_id) => write!(
                 f,
                 "Loaded module doesn't contain import with type idx = {}",
                 import_type_id
             ),
-            FCEWITInterfacesError::NoSuchAdapter(adapter_type_id) => write!(
+            MITInterfacesError::NoSuchAdapter(adapter_type_id) => write!(
                 f,
                 "Loaded module doesn't contain adapter with type idx = {}",
                 adapter_type_id
