@@ -1,26 +1,26 @@
 [package]
-name = "fce"
-description = "Fluence Compute Engine"
+name = "marine"
+description = "Marine is the Fluence Compute Runtime"
 version = "0.5.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [lib]
-name = "fce"
+name = "marine"
 path = "src/lib.rs"
 
 [dependencies]
-fce-module-info-parser = { path = "../crates/module-info-parser", version = "0.1.0" }
-fce-wit-interfaces = { path = "../crates/wit-interfaces", version = "0.3.0" }
-fce-wit-parser = { path = "../crates/wit-parser", version = "0.5.0" }
-fce-wit-generator = { path = "../crates/wit-generator", version = "0.4.0" }
-fce-utils = { path = "../crates/utils", version = "0.2.0" }
+marine-module-info-parser = { path = "../crates/module-info-parser", version = "0.1.0" }
+marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.3.0" }
+marine-it-parser = { path = "../crates/it-parser", version = "0.5.0" }
+marine-it-generator = { path = "../crates/it-generator", version = "0.4.0" }
+marine-utils = { path = "../crates/utils", version = "0.2.0" }
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
-wasmer-wit = { package = "wasmer-interface-types-fl", version = "0.20.0" }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.0" }
 it-lilo = "0.1.0"
 wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 

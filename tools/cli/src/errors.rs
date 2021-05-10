@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use fce_module_info_parser::ModuleInfoError;
-use fce_wit_generator::WITGeneratorError;
-use fce_wit_parser::WITParserError;
+use marine_module_info_parser::ModuleInfoError;
+use marine_it_generator::ITGeneratorError;
+use marine_it_parser::ITParserError;
 
 use thiserror::Error as ThisError;
 
@@ -32,11 +32,11 @@ pub enum CLIError {
 
     /// An error occurred while generating interface types.
     #[error("{0}")]
-    WITGeneratorError(#[from] WITGeneratorError),
+    ITGeneratorError(#[from] ITGeneratorError),
 
     /// An error occurred while parsing interface types.
     #[error("{0}")]
-    WITParserError(#[from] WITParserError),
+    ITParserError(#[from] ITParserError),
 
     /// An error occurred when no Wasm file was compiled.
     #[error("{0}")]

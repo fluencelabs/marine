@@ -1,20 +1,20 @@
 [package]
 name = "fcli"
-description = "Fluence FCE command line tool"
+description = "Fluence Marine command line tool"
 version = "0.4.1"
 authors = ["Fluence Labs"]
-repository = "https://github.com/fluencelabs/fce/tools/cli"
+repository = "https://github.com/fluencelabs/marine/tools/cli"
 license = "Apache-2.0"
 edition = "2018"
 
 [[bin]]
-name = "fce"
+name = "marine"
 path = "src/main.rs"
 
 [dependencies]
-fce-wit-generator = { path = "../../crates/wit-generator", version = "0.4.0" }
-fce-wit-parser = { path = "../../crates/wit-parser", version = "0.5.0" }
-fce-module-info-parser = { path = "../../crates/module-info-parser", version = "0.1.0" }
+marine-it-generator = { path = "../../crates/it-generator", version = "0.4.0" }
+marine-it-parser = { path = "../../crates/it-parser", version = "0.5.0" }
+marine-module-info-parser = { path = "../../crates/module-info-parser", version = "0.1.0" }
 
 semver = "0.11.0"
 walrus = "0.18.0"

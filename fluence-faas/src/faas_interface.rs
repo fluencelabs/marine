@@ -18,7 +18,7 @@ use super::IType;
 use super::IRecordType;
 use crate::FaaSModuleInterface;
 
-use fce::RecordTypes;
+use marine::RecordTypes;
 use itertools::Itertools;
 use serde::Serialize;
 

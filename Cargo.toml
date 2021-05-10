@@ -1,11 +1,10 @@
 [workspace]
 members = [
-    "aquamarine-vm",
+    "crates/it-generator",
+    "crates/it-interfaces",
+    "crates/it-parser",
     "crates/module-info-parser",
     "crates/utils",
-    "crates/wit-generator",
-    "crates/wit-interfaces",
-    "crates/wit-parser",
     "engine",
     "examples/call_parameters",
     "examples/greeting",

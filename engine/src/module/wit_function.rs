@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-use super::fce_module::FCEModule;
+use super::marine_module::MModule;
 use super::{IType, IFunctionArg, IValue, WValue};
-use super::fce_module::Callable;
-use crate::FCEResult;
+use super::marine_module::Callable;
+use crate::MResult;
 
-use wasmer_wit::interpreter::wasm;
+use wasmer_it::interpreter::wasm;
 use wasmer_core::instance::DynFunc;
 
 // use std::sync::Arc;
@@ -36,7 +36,7 @@ enum WITFunctionInner {
     },
 }
 
-/// Represents all import and export functions that could be called from WIT context by call-core.
+/// Represents all import and export functions that could be called from IT context by call-core.
 #[derive(Clone)]
 pub(super) struct WITFunction {
     name: String,
@@ -46,8 +46,8 @@ pub(super) struct WITFunction {
 }
 
 impl WITFunction {
-    /// Creates functions from a "usual" (not WIT) module export.
-    pub(super) fn from_export(dyn_func: DynFunc<'static>, name: String) -> FCEResult<Self> {
+    /// Creates functions from a "usual" (not IT) module export.
+    pub(super) fn from_export(dyn_func: DynFunc<'static>, name: String) -> MResult<Self> {
         use super::type_converters::wtype_to_itype;
 
         let signature = dyn_func.signature();
@@ -83,12 +83,12 @@ impl WITFunction {
 
     /// Creates function from a module import.
     pub(super) fn from_import(
-        wit_module: &FCEModule,
+        wit_module: &MModule,
         module_name: &str,
         function_name: &str,
         arguments: Rc<Vec<IFunctionArg>>,
         outputs: Rc<Vec<IType>>,
-    ) -> FCEResult<Self> {
+    ) -> MResult<Self> {
         let callable = wit_module.get_callable(module_name, function_name)?;
 
         let inner = WITFunctionInner::Import { callable };

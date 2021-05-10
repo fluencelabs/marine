@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  fce:
+  marine:
     docker:
       - image: circleci/rust:latest
     resource_class: xlarge
@@ -11,7 +11,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - fce04-{{ checksum "Cargo.lock" }}
+            - marine04-{{ checksum "Cargo.lock" }}
       - run: |
           rustup toolchain install nightly-2021-03-24
           rustup default nightly-2021-03-24
@@ -24,22 +24,22 @@ jobs:
           cargo install --path tools/cli
 
           cargo fmt --all -- --check --color always
-          cargo check -v --all-features -p fce -p fluence-faas -p fluence-app-service -p aquamarine-vm -p fcli -p frepl
+          cargo check -v --all-features -p marine -p fluence-faas -p fluence-app-service -p fcli -p frepl
 
           (cd ./examples; ./build.sh)
           (cd ./fluence-faas/tests/wasm_tests; ./build.sh)
 
-          cargo test --release -v --all-features -p fce -p fluence-faas -p fluence-app-service -p aquamarine-vm -p fcli -p frepl
-          cargo clippy -v -p fce -p fluence-faas -p fluence-app-service -p aquamarine-vm -p fcli -p frepl
+          cargo test --release -v --all-features -p marine -p fluence-faas -p fluence-app-service -p fcli -p frepl
+          cargo clippy -v -p marine -p fluence-faas -p fluence-app-service -p fcli -p frepl
 
       - save_cache:
           paths:
             - ~/.cargo
             - ~/.rustup
-          key: fce04-{{ checksum "Cargo.lock" }}
+          key: marine04-{{ checksum "Cargo.lock" }}
 
 workflows:
   version: 2.1
-  fce:
+  marine:
     jobs:
-      - fce
+      - marine

@@ -19,9 +19,9 @@ use crate::IType;
 use crate::Result;
 use crate::FaaSError::JsonArgumentsDeserializationError as ArgDeError;
 
-use fce::RecordTypes;
+use marine::RecordTypes;
 use serde_json::Value as JValue;
-use wasmer_wit::NEVec;
+use wasmer_it::NEVec;
 
 use std::collections::HashMap;
 use std::iter::ExactSizeIterator;

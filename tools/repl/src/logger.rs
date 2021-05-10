@@ -19,7 +19,7 @@ use fluence_sdk_main::WASM_LOG_ENV_NAME;
 use std::io::Write;
 use std::env::var;
 
-const WIT_MODULE_PATH: &str = "wasmer_interface_types_fl";
+const IT_MODULE_PATH: &str = "wasmer_interface_types_fl";
 const RUST_LOG_ENV_NAME: &str = "RUST_LOG";
 
 pub(super) fn init_logger() {
@@ -36,7 +36,7 @@ pub(super) fn init_logger() {
     env_logger::builder()
         .format(|buf, record| {
             match record.module_path() {
-                Some(module_path) if module_path.starts_with(WIT_MODULE_PATH) => {
+                Some(module_path) if module_path.starts_with(IT_MODULE_PATH) => {
                     writeln!(buf, "[host] {}", record.args())
                 }
                 // due to the log_utf8_string implementation,
@@ -51,6 +51,6 @@ pub(super) fn init_logger() {
         //.filter(Some(WIT_MODULE_PATH), Info)
         // the same for rustyline and fce
         .filter(Some("rustyline"), Info)
-        .filter(Some("fce"), Info)
+        .filter(Some("marine"), Info)
         .init();
 }

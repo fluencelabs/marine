@@ -25,10 +25,10 @@ use crate::module_loading::ModulesLoadStrategy;
 use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 
-use fce::FCE;
-use fce::IFunctionArg;
-use fce_utils::SharedString;
-use fce::RecordTypes;
+use marine::Marine;
+use marine::IFunctionArg;
+use marine_utils::SharedString;
+use marine::RecordTypes;
 use fluence::CallParameters;
 
 use serde_json::Value as JValue;
@@ -46,8 +46,8 @@ struct ModuleInterface {
 unsafe impl Send for FluenceFaaS {}
 
 pub struct FluenceFaaS {
-    /// The Fluence Compute Engine instance.
-    fce: FCE,
+    /// Marine instance.
+    marine: Marine,
 
     /// Parameters of call accessible by Wasm modules.
     call_parameters: Rc<RefCell<CallParameters>>,
@@ -78,7 +78,7 @@ impl FluenceFaaS {
         C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,
     {
-        let mut fce = FCE::new();
+        let mut marine = Marine::new();
         let config = config.try_into()?;
         let call_parameters = Rc::new(RefCell::new(<_>::default()));
 
@@ -97,17 +97,17 @@ impl FluenceFaaS {
                 }
             })?;
 
-            let fce_module_config = crate::config::make_fce_config(
+            let fce_module_config = crate::config::make_marine_config(
                 module.import_name.clone(),
                 Some(module.config),
                 call_parameters.clone(),
                 &logger_filter,
             )?;
-            fce.load_module(module.import_name, &module_bytes, fce_module_config)?;
+            marine.load_module(module.import_name, &module_bytes, fce_module_config)?;
         }
 
         Ok(Self {
-            fce,
+            marine: marine,
             call_parameters,
             module_interfaces_cache: HashMap::new(),
         })
@@ -140,7 +140,7 @@ impl FluenceFaaS {
     ) -> Result<Vec<IValue>> {
         self.call_parameters.replace(call_parameters);
 
-        self.fce
+        self.marine
             .call(module_name, func_name, args)
             .map_err(Into::into)
     }
@@ -168,14 +168,14 @@ impl FluenceFaaS {
         )?;
 
         self.call_parameters.replace(call_parameters);
-        let result = self.fce.call(module_name, func_name, &iargs)?;
+        let result = self.marine.call(module_name, func_name, &iargs)?;
 
         ivalues_to_json(result, &output_types, &record_types)
     }
 
     /// Return all export functions (name and signatures) of loaded modules.
     pub fn get_interface(&self) -> FaaSInterface<'_> {
-        let modules = self.fce.interface().collect();
+        let modules = self.marine.interface().collect();
 
         FaaSInterface { modules }
     }
@@ -203,7 +203,7 @@ impl FluenceFaaS {
         }
 
         let module_interface = self
-            .fce
+            .marine
             .module_interface(module_name)
             .ok_or_else(|| NoSuchModule(module_name.to_string()))?;
 
@@ -234,7 +234,7 @@ impl FluenceFaaS {
     }
 }
 
-// This API is intended for testing purposes (mostly in FCE REPL)
+// This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl FluenceFaaS {
     pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
@@ -250,19 +250,19 @@ impl FluenceFaaS {
         let wasm_log_env = std::env::var(WASM_LOG_ENV_NAME).unwrap_or_default();
         let logger_filter = LoggerFilter::from_env_string(&wasm_log_env);
 
-        let fce_module_config = crate::config::make_fce_config(
+        let fce_module_config = crate::config::make_marine_config(
             name.clone(),
             config,
             self.call_parameters.clone(),
             &logger_filter,
         )?;
-        self.fce
+        self.marine
             .load_module(name, &wasm_bytes, fce_module_config)
             .map_err(Into::into)
     }
 
     pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
-        self.fce.unload_module(module_name).map_err(Into::into)
+        self.marine.unload_module(module_name).map_err(Into::into)
     }
 
     pub fn module_wasi_state<S: AsRef<str>>(
@@ -271,7 +271,7 @@ impl FluenceFaaS {
     ) -> Result<&wasmer_wasi::state::WasiState> {
         let module_name = module_name.as_ref();
 
-        self.fce
+        self.marine
             .module_wasi_state(module_name)
             .ok_or_else(|| FaaSError::NoSuchModule(module_name.to_string()))
     }

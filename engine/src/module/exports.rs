@@ -17,20 +17,20 @@
 use super::IValue;
 use super::IType;
 use super::IFunctionArg;
-use wasmer_wit::interpreter::wasm;
+use wasmer_it::interpreter::wasm;
 
 // In current implementation export simply does nothing, because there is no more
 // explicit instruction call-export in this version of wasmer-interface-types,
 // but explicit Exports is still required by wasmer-interface-types::Interpreter.
 #[derive(Clone)]
-pub(crate) struct WITExport {
+pub(crate) struct ITExport {
     name: String,
     arguments: Vec<IFunctionArg>,
     outputs: Vec<IType>,
     function: fn(arguments: &[IValue]) -> Result<Vec<IValue>, ()>,
 }
 
-impl WITExport {
+impl ITExport {
     #[allow(unused)]
     pub(crate) fn new() -> Self {
         Self {
@@ -42,7 +42,7 @@ impl WITExport {
     }
 }
 
-impl wasm::structures::Export for WITExport {
+impl wasm::structures::Export for ITExport {
     fn name(&self) -> &str {
         self.name.as_str()
     }

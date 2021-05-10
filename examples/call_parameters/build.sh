@@ -1,7 +1,7 @@
 #!/bin/sh
 
 cargo update --aggressive;
-fce build --release;
+marine build --release;
 
 rm -f artifacts/* || true;
 mkdir -p artifacts;

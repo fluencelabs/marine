@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use fce::FCE;
-use fce::IValue;
+use marine::Marine;
+use marine::IValue;
 
 const REDIS_DOWNLOAD_URL: &str =
     "https://github.com/fluencelabs/redis/releases/download/v0.14.0_w/redis.wasm";
@@ -35,42 +35,43 @@ pub async fn download(url: &str) -> bytes::Bytes {
 async fn redis() {
     let wasm_bytes = download(REDIS_DOWNLOAD_URL).await;
 
-    let mut fce = FCE::new();
+    let mut marine = Marine::new();
     let module_name = "redis";
     let config = <_>::default();
 
-    fce.load_module(module_name, wasm_bytes.as_ref(), config)
-        .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
+    marine
+        .load_module(module_name, wasm_bytes.as_ref(), config)
+        .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    let result1 = fce
+    let result1 = marine
         .call(
             module_name,
             "invoke",
             &[IValue::String(String::from("SET A 10"))],
         )
-        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result2 = fce
+        .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
+    let result2 = marine
         .call(
             module_name,
             "invoke",
             &[IValue::String(String::from("SADD B 20"))],
         )
-        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result3 = fce
+        .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
+    let result3 = marine
         .call(
             module_name,
             "invoke",
             &[IValue::String(String::from("GET A"))],
         )
-        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result4 = fce
+        .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
+    let result4 = marine
         .call(
             module_name,
             "invoke",
             &[IValue::String(String::from("SMEMBERS B"))],
         )
-        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
-    let result5 = fce
+        .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
+    let result5 = marine
         .call(
             module_name,
             "invoke",
@@ -78,7 +79,7 @@ async fn redis() {
                 "eval \"redis.call('incr', 'A') return redis.call('get', 'A') * 8 + 5\"  0",
             ))],
         )
-        .expect("error while FCE invocation");
+        .expect("error while Marine invocation");
 
     assert_eq!(result1, vec![IValue::String(String::from("+OK\r\n"))]);
     assert_eq!(result2, vec![IValue::String(String::from(":1\r\n"))]);
@@ -94,14 +95,15 @@ async fn redis() {
 async fn sqlite() {
     let wasm_bytes = download(SQLITE_DOWNLOAD_URL).await;
 
-    let mut fce = FCE::new();
+    let mut marine = Marine::new();
     let module_name = "sqlite";
     let config = <_>::default();
 
-    fce.load_module(module_name, wasm_bytes.as_ref(), config)
-        .unwrap_or_else(|e| panic!("can't load a module into FCE: {:?}", e));
+    marine
+        .load_module(module_name, wasm_bytes.as_ref(), config)
+        .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    let mut result1 = fce
+    let mut result1 = marine
         .call(
             module_name,
             "sqlite3_open_v2",
@@ -111,7 +113,7 @@ async fn sqlite() {
                 IValue::String(String::new()),
             ],
         )
-        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
+        .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
 
     let mut record_values = match result1.remove(0) {
         IValue::Record(value) => value.into_vec(),
@@ -123,7 +125,7 @@ async fn sqlite() {
         _ => panic!("db handle should have u32 type"),
     };
 
-    let mut result1 = fce
+    let mut result1 = marine
         .call(
             module_name,
             "sqlite3_exec",
@@ -134,9 +136,9 @@ async fn sqlite() {
                 IValue::S32(0),
             ],
         )
-        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
+        .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
 
-    let mut result2 = fce
+    let mut result2 = marine
         .call(
             module_name,
             "sqlite3_exec",
@@ -149,9 +151,9 @@ async fn sqlite() {
                 IValue::S32(0),
             ],
         )
-        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
+        .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
 
-    let mut result3 = fce
+    let mut result3 = marine
         .call(
             module_name,
             "sqlite3_exec",
@@ -164,7 +166,7 @@ async fn sqlite() {
                 IValue::S32(0),
             ],
         )
-        .unwrap_or_else(|e| panic!("error while FCE invocation: {:?}", e));
+        .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
 
     let result1 = match result1.remove(0) {
         IValue::Record(value) => value.into_vec(),

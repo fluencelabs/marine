@@ -34,28 +34,28 @@ mod host_imports;
 mod misc;
 mod module;
 
-pub use config::FCEModuleConfig;
+pub use config::MModuleConfig;
 pub use config::HostExportedFunc;
 pub use config::HostImportDescriptor;
-pub use engine::FCE;
-pub use engine::FCEModuleInterface;
-pub use errors::FCEError;
+pub use engine::Marine;
+pub use engine::MModuleInterface;
+pub use errors::MError;
 pub use host_imports::HostImportError;
 pub use module::IValue;
 pub use module::IRecordType;
 pub use module::IFunctionArg;
 pub use module::IType;
 pub use module::RecordTypes;
-pub use module::FCEFunctionSignature;
+pub use module::MFunctionSignature;
 pub use module::from_interface_values;
 pub use module::to_interface_value;
 
-pub use wasmer_wit::IRecordFieldType;
+pub use wasmer_it::IRecordFieldType;
 pub mod ne_vec {
-    pub use wasmer_wit::NEVec;
+    pub use wasmer_it::NEVec;
 }
 
-pub(crate) type FCEResult<T> = std::result::Result<T, FCEError>;
+pub(crate) type MResult<T> = std::result::Result<T, MError>;
 
 use once_cell::sync::Lazy;
 

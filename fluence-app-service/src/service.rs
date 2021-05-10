@@ -161,7 +161,7 @@ impl AppService {
     }
 }
 
-// This API is intended for testing purposes (mostly in FCE REPL)
+// This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl AppService {
     pub fn new_with_empty_facade<C, S>(

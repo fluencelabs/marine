@@ -99,7 +99,7 @@ fn print_welcome_message() {
     use termion::color;
 
     println!(
-        "Welcome to the FCE REPL (version {})",
+        "Welcome to the Marine REPL (version {})",
         env!("CARGO_PKG_VERSION")
     );
 

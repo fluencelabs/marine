@@ -38,7 +38,7 @@ impl CustomSection for VersionCustomSection {
     }
 }
 
-/// Embed provided WIT to a Wasm module.
+/// Embed provided IT to a Wasm module.
 pub fn embed_from_module(
     mut wasm_module: walrus::Module,
     version: &semver::Version,

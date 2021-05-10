@@ -28,4 +28,4 @@ pub use raw_faas_config::TomlWASIConfig;
 pub use raw_faas_config::TomlFaaSConfig;
 pub use raw_faas_config::TomlFaaSModuleConfig;
 
-pub(crate) use to_fce_config::make_fce_config;
+pub(crate) use to_fce_config::make_marine_config;

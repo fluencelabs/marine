@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-use fce::HostImportDescriptor;
+use marine::HostImportDescriptor;
 use fluence::MountedBinaryResult;
 
 use wasmer_core::vm::Ctx;
-use wasmer_wit::IValue;
-use wasmer_wit::IType;
+use wasmer_it::IValue;
+use wasmer_it::IType;
 
 pub(crate) fn create_mounted_binary_import(mounted_binary_path: String) -> HostImportDescriptor {
     let host_cmd_closure = move |_ctx: &mut Ctx, raw_args: Vec<IValue>| {

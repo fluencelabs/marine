@@ -57,7 +57,7 @@ pub fn records() {
     assert_eq!(
         result1,
         vec![IValue::Record(
-            wasmer_wit::NEVec::new(vec![
+            wasmer_it::NEVec::new(vec![
                 IValue::Boolean(true),
                 IValue::S8(1),
                 IValue::S16(2),

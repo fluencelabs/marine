@@ -15,9 +15,9 @@
  */
 
 use crate::HostImportError;
-use fce_wit_interfaces::FCEWITInterfacesError;
-use fce_wit_parser::WITParserError;
-use fce_module_info_parser::ModuleInfoError;
+use marine_it_interfaces::MITInterfacesError;
+use marine_it_parser::ITParserError;
+use marine_module_info_parser::ModuleInfoError;
 
 use wasmer_runtime::error as wasmer_error;
 
@@ -26,7 +26,7 @@ use thiserror::Error as ThisError;
 // TODO: refactor errors
 
 #[derive(Debug, ThisError)]
-pub enum FCEError {
+pub enum MError {
     /// This error type is produced by Wasmer during resolving a Wasm function.
     #[error("WasmerResolveError: {0}")]
     ResolveError(#[from] wasmer_error::ResolveError),
@@ -47,7 +47,7 @@ pub enum FCEError {
     #[error("WasmerCompileError: {0}")]
     WasmerRuntimeError(String),
 
-    /// Errors arisen during linking Wasm modules with already loaded into FCE modules.
+    /// Errors arisen during linking Wasm modules with already loaded into Marine modules.
     #[error("WasmerLinkError: {0}")]
     WasmerLinkError(#[from] wasmer_error::LinkError),
 
@@ -65,33 +65,33 @@ pub enum FCEError {
 
     /// Error arisen during execution of Wasm modules (especially, interface types).
     #[error("Execution error: {0}")]
-    ITInstructionError(#[from] wasmer_wit::errors::InstructionError),
+    ITInstructionError(#[from] wasmer_it::errors::InstructionError),
 
     /// Error that raises on the preparation step.
     #[error("PrepareError: {0}, probably module is malformed")]
     PrepareError(#[from] parity_wasm::elements::Error),
 
     /// Indicates that there is already a module with such name.
-    #[error("Module with name {0} already loaded in FCE, please specify another name")]
+    #[error("module with name {0} already loaded in Marine, please specify another name")]
     NonUniqueModuleName(String),
 
     /// Returns when there is no module with such name.
-    #[error("Module with name {0} doesn't have function with name {1}")]
+    #[error("module with name {0} doesn't have function with name {1}")]
     NoSuchFunction(String, String),
 
     /// Returns when there is no module with such name.
-    #[error("Module with name {0} doesn't loaded in FCE")]
+    #[error("module with name {0} doesn't loaded in Marine")]
     NoSuchModule(String),
 
     /// An error occurred when host functions tries to lift IValues from WValues and lowering back.
     #[error("{0}")]
     HostImportError(#[from] HostImportError),
 
-    /// WIT section parse error.
+    /// IT section parse error.
     #[error("{0}")]
-    WITParseError(#[from] WITParserError),
+    WITParseError(#[from] ITParserError),
 
-    /// Incorrect WIT section.
+    /// Incorrect IT section.
     #[error("{0}")]
     IncorrectWIT(String),
 
@@ -120,32 +120,32 @@ pub enum FCEError {
     },
 }
 
-impl From<FCEWITInterfacesError> for FCEError {
-    fn from(err: FCEWITInterfacesError) -> Self {
-        FCEError::IncorrectWIT(format!("{}", err))
+impl From<MITInterfacesError> for MError {
+    fn from(err: MITInterfacesError) -> Self {
+        MError::IncorrectWIT(format!("{}", err))
     }
 }
 
-impl From<wasmer_error::RuntimeError> for FCEError {
+impl From<wasmer_error::RuntimeError> for MError {
     fn from(err: wasmer_error::RuntimeError) -> Self {
         Self::WasmerRuntimeError(err.to_string())
     }
 }
 
-impl From<wasmer_error::Error> for FCEError {
+impl From<wasmer_error::Error> for MError {
     fn from(err: wasmer_error::Error) -> Self {
         Self::WasmerError(err.to_string())
     }
 }
 
-impl From<wasmer_error::InvokeError> for FCEError {
+impl From<wasmer_error::InvokeError> for MError {
     fn from(err: wasmer_error::InvokeError) -> Self {
         Self::WasmerInvokeError(err.to_string())
     }
 }
 
-impl From<()> for FCEError {
+impl From<()> for MError {
     fn from(_err: ()) -> Self {
-        FCEError::IncorrectWIT("failed to parse instructions for adapter type".to_string())
+        MError::IncorrectWIT("failed to parse instructions for adapter type".to_string())
     }
 }

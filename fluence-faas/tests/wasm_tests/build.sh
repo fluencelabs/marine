@@ -4,21 +4,21 @@
 (
   cd arguments_passing || exit;
   cargo update --aggressive;
-  fce build --release;
+  marine build --release;
   rm artifacts/* || true;
 )
 
 (
   cd arrays_passing || exit;
   cargo update --aggressive;
-  fce build --release;
+  marine build --release;
   rm artifacts/* || true;
 )
 
 (
   cd records_passing || exit;
   cargo update --aggressive;
-  fce build --release;
+  marine build --release;
   rm artifacts/* || true;
 )
 

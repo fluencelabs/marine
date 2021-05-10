@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fce::HostImportDescriptor;
+use marine::HostImportDescriptor;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -41,7 +41,7 @@ pub struct FaaSConfig {
     pub default_modules_config: Option<FaaSModuleConfig>,
 }
 
-/// Various settings that could be used to guide FCE how to load a module in a proper way.
+/// Various settings that could be used to guide Marine how to load a module in a proper way.
 #[derive(Default)]
 pub struct FaaSModuleConfig {
     /// Maximum memory size accessible by a module in Wasm pages (64 Kb).

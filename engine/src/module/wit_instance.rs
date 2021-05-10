@@ -15,14 +15,14 @@
  */
 
 use super::wit_prelude::*;
-use super::fce_module::FCEModule;
+use super::marine_module::MModule;
 use super::IRecordType;
-use crate::FCEResult;
+use crate::MResult;
 
-use fce_wit_interfaces::FCEWITInterfaces;
-use fce_wit_interfaces::WITAstType;
-use wasmer_wit::interpreter::wasm;
-use wasmer_wit::interpreter::wasm::structures::{LocalImportIndex, TypedIndex};
+use marine_it_interfaces::MITInterfaces;
+use marine_it_interfaces::ITAstType;
+use wasmer_it::interpreter::wasm;
+use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, TypedIndex};
 use wasmer_core::Instance as WasmerInstance;
 
 use std::collections::HashMap;
@@ -31,26 +31,26 @@ use std::rc::Rc;
 
 pub type RecordTypes = HashMap<u64, Rc<IRecordType>>;
 
-/// Contains all import and export functions that could be called from WIT context by call-core.
+/// Contains all import and export functions that could be called from IT context by call-core.
 #[derive(Clone)]
-pub(super) struct WITInstance {
-    /// WIT functions indexed by id.
+pub(super) struct ITInstance {
+    /// IT functions indexed by id.
     funcs: HashMap<usize, WITFunction>,
 
-    /// WIT memories.
+    /// IT memories.
     memories: Vec<WITMemory>,
 
     /// All record types that instance contains.
     record_types_by_id: RecordTypes,
 }
 
-impl WITInstance {
+impl ITInstance {
     pub(super) fn new(
         wasmer_instance: &WasmerInstance,
         module_name: &str,
-        wit: &FCEWITInterfaces<'_>,
-        modules: &HashMap<String, FCEModule>,
-    ) -> FCEResult<Self> {
+        wit: &MITInterfaces<'_>,
+        modules: &HashMap<String, MModule>,
+    ) -> MResult<Self> {
         let mut exports = Self::extract_raw_exports(&wasmer_instance, wit)?;
         let imports = Self::extract_imports(module_name, modules, wit, exports.len())?;
         let memories = Self::extract_memories(&wasmer_instance);
@@ -69,13 +69,13 @@ impl WITInstance {
 
     fn extract_raw_exports(
         wasmer_instance: &WasmerInstance,
-        wit: &FCEWITInterfaces<'_>,
-    ) -> FCEResult<HashMap<usize, WITFunction>> {
+        it: &MITInterfaces<'_>,
+    ) -> MResult<HashMap<usize, WITFunction>> {
         use wasmer_core::DynFunc;
 
         let module_exports = &wasmer_instance.exports;
 
-        wit.exports()
+        it.exports()
             .enumerate()
             .map(|(export_id, export)| {
                 let export_func = module_exports.get(export.name)?;
@@ -96,10 +96,10 @@ impl WITInstance {
     /// Extracts only those imports that don't have implementations.
     fn extract_imports(
         module_name: &str,
-        modules: &HashMap<String, FCEModule>,
-        wit: &FCEWITInterfaces<'_>,
+        modules: &HashMap<String, MModule>,
+        wit: &MITInterfaces<'_>,
         start_index: usize,
-    ) -> FCEResult<HashMap<usize, WITFunction>> {
+    ) -> MResult<HashMap<usize, WITFunction>> {
         wit.imports()
             .filter(|import|
                 // filter out imports that have implementations
@@ -107,7 +107,7 @@ impl WITInstance {
             .enumerate()
             .map(|(idx, import)| match modules.get(import.namespace) {
                 Some(module) => {
-                    use wasmer_wit::ast::Type;
+                    use wasmer_it::ast::Type;
                     let (arguments, output_types) =
                         match wit.type_by_idx_r(import.function_type - 2)? {
                             Type::Function {
@@ -115,8 +115,8 @@ impl WITInstance {
                                 output_types,
                             } => (arguments.clone(), output_types.clone()),
                             ty => {
-                                return Err(FCEError::IncorrectWIT(format!(
-                                    "WIT should has Type::Function, but {:?} met",
+                                return Err(MError::IncorrectWIT(format!(
+                                    "IT should has Type::Function, but {:?} met",
                                     ty
                                 )))
                             }
@@ -132,9 +132,9 @@ impl WITInstance {
 
                     Ok((start_index + idx as usize, func))
                 }
-                None => Err(FCEError::NoSuchModule(import.namespace.to_string())),
+                None => Err(MError::NoSuchModule(import.namespace.to_string())),
             })
-            .collect::<FCEResult<HashMap<_, _>>>()
+            .collect::<MResult<HashMap<_, _>>>()
     }
 
     fn extract_memories(wasmer_instance: &WasmerInstance) -> Vec<WITMemory> {
@@ -158,15 +158,15 @@ impl WITInstance {
         memories
     }
 
-    fn extract_record_types(wit: &FCEWITInterfaces<'_>) -> RecordTypes {
+    fn extract_record_types(wit: &MITInterfaces<'_>) -> RecordTypes {
         let (record_types_by_id, _) = wit.types().fold(
             (HashMap::new(), 0u64),
             |(mut record_types_by_id, id), ty| {
                 match ty {
-                    WITAstType::Record(record_type) => {
+                    ITAstType::Record(record_type) => {
                         record_types_by_id.insert(id, record_type.clone());
                     }
-                    WITAstType::Function { .. } => {}
+                    ITAstType::Function { .. } => {}
                 };
                 (record_types_by_id, id + 1)
             },
@@ -176,11 +176,11 @@ impl WITInstance {
     }
 }
 
-impl wasm::structures::Instance<WITExport, WITFunction, WITMemory, WITMemoryView<'_>>
-    for WITInstance
+impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<'_>>
+    for ITInstance
 {
-    fn export(&self, _export_name: &str) -> Option<&WITExport> {
-        // exports aren't used in this version of WIT
+    fn export(&self, _export_name: &str) -> Option<&ITExport> {
+        // exports aren't used in this version of IT
         None
     }
 
