@@ -66,7 +66,7 @@ pub fn main() -> Result<(), anyhow::Error> {
             new_version
         );
         println!(
-            "{}To update run: {}cargo +nightly install fcli --force{}",
+            "{}To update run: {}cargo +nightly install mcli --force{}",
             color::Fg(color::Reset),
             color::Fg(color::LightBlack),
             color::Fg(color::Reset)
@@ -166,11 +166,11 @@ fn repl(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
 
     let trailing_args: Vec<&str> = args.values_of("optional").unwrap_or_default().collect();
 
-    let mut repl = Command::new("fce-repl");
+    let mut repl = Command::new("mrepl");
     repl.args(trailing_args);
     let error = repl.exec();
     if error.kind() == std::io::ErrorKind::NotFound {
-        println!("fce-repl not found, run `cargo +nightly install frepl` to install it");
+        println!("mrepl not found, run `cargo +nightly install mrepl` to install it");
     } else {
         // this branch should be executed if exec was successful, so just else if fine here
         println!("error occurred: {:?}", error);

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use fluence::marine;
 
 pub fn main() {}
 
-#[fce]
+#[marine]
 pub fn all_types(
     arg_0: i8,
     arg_1: i16,
@@ -51,7 +51,7 @@ pub fn all_types(
     result
 }
 
-#[fce]
+#[marine]
 pub fn all_ref_types(
     arg_0: &i8,
     arg_1: &i16,
@@ -84,105 +84,105 @@ pub fn all_ref_types(
     result
 }
 
-#[fce]
+#[marine]
 pub fn string_type(arg: String) -> String {
     format!("{}_{}", arg, arg)
 }
 
-#[fce]
+#[marine]
 pub fn string_ref_type(arg: &String) -> String {
     format!("{}_{}", arg, arg)
 }
 
-#[fce]
+#[marine]
 pub fn str_type(arg: &str) -> String {
     format!("{}_{}", arg, arg)
 }
 
-#[fce]
+#[marine]
 pub fn bytearray_type(mut arg: Vec<u8>) -> Vec<u8> {
     println!("effector: {:?}", arg);
     arg.push(1);
     arg
 }
 
-#[fce]
+#[marine]
 pub fn bytearray_ref_type(arg: &mut Vec<u8>) -> Vec<u8> {
     arg.push(1);
     arg.clone()
 }
 
-#[fce]
+#[marine]
 pub fn bool_type(arg: bool) -> bool {
     !arg
 }
 
-#[fce]
+#[marine]
 pub fn bool_ref_type(arg: &bool) -> bool {
     !*arg
 }
 
-#[fce]
+#[marine]
 pub fn f32_type(arg: f32) -> f32 {
     arg + 1.0
 }
 
-#[fce]
+#[marine]
 pub fn f32_ref_type(arg: &f32) -> f32 {
     *arg + 1.0
 }
 
-#[fce]
+#[marine]
 pub fn f64_type(arg: f64) -> f64 {
     arg + 1.0
 }
 
-#[fce]
+#[marine]
 pub fn f64_ref_type(arg: &f64) -> f64 {
     *arg + 1.0
 }
 
-#[fce]
+#[marine]
 pub fn u32_type(arg: u32) -> u32 {
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn u32_ref_type(arg: &u32) -> u32 {
     *arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn u64_type(arg: u64) -> u64 {
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn u64_ref_type(arg: &u64) -> u64 {
     *arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn i32_type(arg: i32) -> i32 {
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn i32_ref_type(arg: &i32) -> i32 {
     *arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn i64_type(arg: i64) -> i64 {
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn i64_ref_type(arg: &i64) -> i64 {
     *arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn empty_type() -> String {
     String::from("success")
 }

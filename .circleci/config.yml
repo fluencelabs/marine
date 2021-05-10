@@ -24,13 +24,13 @@ jobs:
           cargo install --path tools/cli
 
           cargo fmt --all -- --check --color always
-          cargo check -v --all-features -p marine -p fluence-faas -p fluence-app-service -p fcli -p frepl
+          cargo check -v --all-features -p marine-runtime -p fluence-faas -p fluence-app-service -p mcli -p mrepl
 
           (cd ./examples; ./build.sh)
           (cd ./fluence-faas/tests/wasm_tests; ./build.sh)
 
-          cargo test --release -v --all-features -p marine -p fluence-faas -p fluence-app-service -p fcli -p frepl
-          cargo clippy -v -p marine -p fluence-faas -p fluence-app-service -p fcli -p frepl
+          cargo test --release -v --all-features -p marine-runtime -p fluence-faas -p fluence-app-service -p mcli -p mrepl
+          cargo clippy -v -p marine-runtime -p fluence-faas -p fluence-app-service -p mcli -p mrepl
 
       - save_cache:
           paths:

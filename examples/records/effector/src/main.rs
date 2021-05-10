@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use fluence::marine;
 use fluence::module_manifest;
 
 use test_record::TestRecord;
@@ -23,7 +23,7 @@ module_manifest!();
 
 pub fn main() {}
 
-#[fce]
+#[marine]
 pub fn mutate_struct(mut test_record: test_record::TestRecord) -> TestRecord {
     test_record.field_0 = true;
     test_record.field_1 = 1;

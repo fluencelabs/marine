@@ -11,7 +11,7 @@ name = "marine_module_info_parser"
 path = "src/lib.rs"
 
 [dependencies]
-fluence-sdk-main = "0.6.1"
+fluence-sdk-main = "0.6.2"
 
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0" }
 

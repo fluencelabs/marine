@@ -36,6 +36,6 @@ impl RecordResolvable for LiHelper {
         self.record_types
             .get(&record_type_id)
             .map(|r| r.as_ref())
-            .ok_or_else(|| RecordResolvableError::RecordNotFound(record_type_id))
+            .ok_or(RecordResolvableError::RecordNotFound(record_type_id))
     }
 }

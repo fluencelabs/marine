@@ -15,7 +15,7 @@
  */
 #![allow(improper_ctypes)]
 
-use fluence::fce;
+use fluence::marine;
 use fluence::module_manifest;
 use fluence::WasmLoggerBuilder;
 
@@ -27,7 +27,7 @@ pub fn main() {
 
 /// Combining of modules: `curl` and `local_storage`.
 /// Calls `curl` and stores returned result into a file.
-#[fce]
+#[marine]
 pub fn get_n_save(url: String, file_name: String) -> String {
     log::info!("get_n_save called with {} {}\n", url, file_name);
 
@@ -38,14 +38,14 @@ pub fn get_n_save(url: String, file_name: String) -> String {
 }
 
 /// Importing `curl` module
-#[fce]
+#[marine]
 #[link(wasm_import_module = "curl_adapter")]
 extern "C" {
     pub fn download(url: String) -> String;
 }
 
 /// Importing `local_storage` module
-#[fce]
+#[marine]
 #[link(wasm_import_module = "local_storage")]
 extern "C" {
     #[link_name = "get"]

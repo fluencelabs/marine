@@ -20,8 +20,8 @@ use super::utils::ptype_to_itype_checked;
 use crate::default_export_api_config::*;
 use crate::Result;
 
-use fluence_sdk_wit::FnType;
-use fluence_sdk_wit::ParsedType;
+use marine_macro_impl::FnType;
+use marine_macro_impl::ParsedType;
 use wasmer_it::interpreter::Instruction;
 use wasmer_it::ast::FunctionArg as IFunctionArg;
 use wasmer_it::IType;

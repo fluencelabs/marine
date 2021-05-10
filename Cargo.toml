@@ -5,7 +5,6 @@ members = [
     "crates/it-parser",
     "crates/module-info-parser",
     "crates/utils",
-    "engine",
     "examples/call_parameters",
     "examples/greeting",
     "examples/ipfs-node/effector",
@@ -22,6 +21,7 @@ members = [
     "fluence-faas/tests/wasm_tests/arguments_passing",
     "fluence-faas/tests/wasm_tests/arrays_passing",
     "fluence-faas/tests/wasm_tests/records_passing",
+    "runtime",
     "tools/cli",
     "tools/repl",
 ]

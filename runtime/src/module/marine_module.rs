@@ -213,7 +213,7 @@ impl MModule {
 
     fn create_import_objects(
         config: MModuleConfig,
-        fce_wit: &MITInterfaces<'_>,
+        mit: &MITInterfaces<'_>,
         wit_import_object: ImportObject,
     ) -> MResult<(ImportObject, ImportObject)> {
         use crate::host_imports::create_host_import_func;
@@ -240,7 +240,7 @@ impl MModule {
         .map_err(MError::WASIPrepareError)?;
 
         let mut host_closures_namespace = Namespace::new();
-        let record_types = fce_wit
+        let record_types = mit
             .record_types()
             .map(|(id, r)| (id, r.clone()))
             .collect::<HashMap<_, _>>();

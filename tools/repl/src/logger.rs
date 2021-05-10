@@ -49,7 +49,7 @@ pub(super) fn init_logger() {
         .filter(Some("cranelift_codegen"), Info)
         .filter(Some("wasmer_wasi"), Info)
         //.filter(Some(WIT_MODULE_PATH), Info)
-        // the same for rustyline and fce
+        // the same for rustyline and marine
         .filter(Some("rustyline"), Info)
         .filter(Some("marine"), Info)
         .init();

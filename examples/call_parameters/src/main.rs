@@ -15,7 +15,7 @@
  */
 
 #[cfg(target_arch = "wasm32")]
-use fluence::fce;
+use fluence::marine;
 #[cfg(target_arch = "wasm32")]
 use fluence::module_manifest;
 
@@ -24,7 +24,7 @@ module_manifest!();
 
 pub fn main() {}
 
-#[fce]
+#[marine]
 #[cfg(target_arch = "wasm32")]
 pub fn call_parameters() -> String {
     let cp = fluence::get_call_parameters();

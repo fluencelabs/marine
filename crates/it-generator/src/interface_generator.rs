@@ -20,7 +20,7 @@ use crate::instructions_generator::ITGenerator;
 use crate::instructions_generator::ITResolver;
 use crate::Result;
 
-pub use fluence_sdk_wit::SDKAst;
+pub use marine_macro_impl::SDKAst;
 use wasmer_it::ast::Interfaces;
 use wasmer_it::IRecordType;
 use wasmer_it::IType;
@@ -48,14 +48,14 @@ where
 }
 
 pub(crate) struct ModuleAST {
-    pub(crate) records: Vec<fluence_sdk_wit::RecordType>,
-    pub(crate) functions: Vec<fluence_sdk_wit::FnType>,
-    pub(crate) extern_mods: Vec<fluence_sdk_wit::ExternModType>,
+    pub(crate) records: Vec<marine_macro_impl::RecordType>,
+    pub(crate) functions: Vec<marine_macro_impl::FnType>,
+    pub(crate) extern_mods: Vec<marine_macro_impl::ExternModType>,
 }
 
 /// Extract all custom AST types previously embedded by rust-sdk from compiled binary.
 fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<ModuleAST> {
-    use fluence_sdk_wit::*;
+    use marine_macro_impl::*;
 
     let mut records: Vec<RecordType> = Vec::new();
     let mut functions: Vec<FnType> = Vec::new();
@@ -65,7 +65,7 @@ fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<ModuleAST> {
     for custom_module in wasm_module.customs.iter().filter(|(_, section)| {
         section
             .name()
-            .starts_with(fluence_sdk_wit::GENERATED_SECTION_PREFIX)
+            .starts_with(marine_macro_impl::GENERATED_SECTION_PREFIX)
     }) {
         let default_ids = walrus::IdsToIndices::default();
         let raw_data = custom_module.1.data(&default_ids);

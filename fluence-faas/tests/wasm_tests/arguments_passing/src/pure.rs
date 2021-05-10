@@ -16,11 +16,11 @@
 
 #![allow(improper_ctypes)]
 
-use fluence::fce;
+use fluence::marine;
 
 pub fn main() {}
 
-#[fce]
+#[marine]
 pub fn all_types(
     arg_0: i8,
     arg_1: i16,
@@ -66,7 +66,7 @@ pub fn all_types(
     result
 }
 
-#[fce]
+#[marine]
 pub fn all_ref_types(
     arg_0: &i8,
     arg_1: &i16,
@@ -101,28 +101,28 @@ pub fn all_ref_types(
     result
 }
 
-#[fce]
+#[marine]
 pub fn string_type(arg: String) -> String {
     let arg = effector::string_type(arg);
 
     format!("{}_{}", arg, arg)
 }
 
-#[fce]
+#[marine]
 pub fn string_ref_type(arg: &String) -> String {
     let arg = effector::string_ref_type(arg);
 
     format!("{}_{}", arg, arg)
 }
 
-#[fce]
+#[marine]
 pub fn str_type(arg: &str) -> String {
     let arg = effector::str_type(arg);
 
     format!("{}_{}", arg, arg)
 }
 
-#[fce]
+#[marine]
 pub fn bytearray_type(arg: Vec<u8>) -> Vec<u8> {
     let mut arg = effector::bytearray_type(arg);
     println!("pure: {:?}", arg);
@@ -131,7 +131,7 @@ pub fn bytearray_type(arg: Vec<u8>) -> Vec<u8> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn bytearray_ref_type(arg: &Vec<u8>) -> Vec<u8> {
     let mut arg = effector::bytearray_ref_type(arg);
 
@@ -139,98 +139,98 @@ pub fn bytearray_ref_type(arg: &Vec<u8>) -> Vec<u8> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn bool_type(arg: bool) -> bool {
     let ret = effector::bool_type(arg);
     ret
 }
 
-#[fce]
+#[marine]
 pub fn bool_ref_type(arg: &bool) -> bool {
     effector::bool_ref_type(arg)
 }
 
-#[fce]
+#[marine]
 pub fn f32_type(arg: f32) -> f32 {
     let arg = effector::f32_type(arg);
     arg + 1.0
 }
 
-#[fce]
+#[marine]
 pub fn f32_ref_type(arg: &f32) -> f32 {
     let arg = effector::f32_ref_type(arg);
     arg + 1.0
 }
 
-#[fce]
+#[marine]
 pub fn f64_type(arg: f64) -> f64 {
     let arg = effector::f64_type(arg);
     arg + 1.0
 }
 
-#[fce]
+#[marine]
 pub fn f64_ref_type(arg: &f64) -> f64 {
     let arg = effector::f64_ref_type(arg);
     arg + 1.0
 }
 
-#[fce]
+#[marine]
 pub fn u32_type(arg: u32) -> u32 {
     let arg = effector::u32_type(arg);
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn u32_ref_type(arg: &u32) -> u32 {
     let arg = effector::u32_ref_type(arg);
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn u64_type(arg: u64) -> u64 {
     let arg = effector::u64_type(arg);
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn u64_ref_type(arg: &u64) -> u64 {
     let arg = effector::u64_ref_type(arg);
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn i32_type(arg: i32) -> i32 {
     let arg = effector::i32_type(arg);
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn i32_ref_type(arg: &i32) -> i32 {
     let arg = effector::i32_ref_type(arg);
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn i64_type(arg: i64) -> i64 {
     let arg = effector::i64_type(arg);
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn i64_ref_type(arg: &i64) -> i64 {
     let arg = effector::i64_ref_type(arg);
     arg + 1
 }
 
-#[fce]
+#[marine]
 pub fn empty_type() -> String {
     effector::empty_type()
 }
 
 mod effector {
-    use fluence::fce;
+    use fluence::marine;
 
-    #[fce]
+    #[marine]
     #[link(wasm_import_module = "arguments_passing_effector")]
     extern "C" {
         pub fn all_types(

@@ -39,7 +39,7 @@ impl<'a> ITResolver<'a> {
         match self.types.get(record_name) {
             Some(type_index) => Ok(*type_index),
             None => Err(crate::errors::ITGeneratorError::CorruptedRecord(format!(
-                "Can't find record with name='{}', don't you forget to wrap it with #[fce]",
+                "Can't find record with name='{}', don't you forget to wrap it with #[marine]",
                 record_name
             ))),
         }
@@ -67,7 +67,7 @@ impl<'a> ITResolver<'a> {
     pub(crate) fn get_record_type(&self, record_type_id: u64) -> Result<&IRecordType> {
         if record_type_id >= self.interfaces.types.len() as u64 {
             return Err(crate::errors::ITGeneratorError::CorruptedRecord(format!(
-                "Can't find record with id {}, don't you forget to wrap it with #[fce]",
+                "Can't find record with id {}, don't you forget to wrap it with #[marine]",
                 record_type_id
             )));
         }

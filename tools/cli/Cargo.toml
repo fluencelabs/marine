@@ -1,5 +1,5 @@
 [package]
-name = "fcli"
+name = "marine"
 description = "Fluence Marine command line tool"
 version = "0.4.1"
 authors = ["Fluence Labs"]

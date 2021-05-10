@@ -37,7 +37,7 @@ pub enum ITParserError {
     #[error(
         "IT section is corrupted: {0}.\
     \nProbably the module was compiled with an old version of marine cli, please try to update and recompile.\
-    \nTo update fce run: cargo install fcli --force"
+    \nTo update marine run: cargo install mcli --force"
     )]
     CorruptedITSection(nom::Err<(Vec<u8>, nom::error::ErrorKind)>),
 

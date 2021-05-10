@@ -16,11 +16,11 @@
 
 #![allow(improper_ctypes)]
 
-use fluence::fce;
+use fluence::marine;
 
 pub fn main() {}
 
-#[fce]
+#[marine]
 pub fn byte_type(mut arg: Vec<u8>) -> Vec<u8> {
     arg.push(0);
 
@@ -30,7 +30,7 @@ pub fn byte_type(mut arg: Vec<u8>) -> Vec<u8> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn inner_arrays_1(mut arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<Vec<Vec<Vec<u8>>>> {
     arg.push(vec![vec![vec![0]]]);
 
@@ -40,14 +40,14 @@ pub fn inner_arrays_1(mut arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<Vec<Vec<Vec<u8>>>>
     arg
 }
 
-#[fce]
+#[marine]
 #[derive(Default, Debug)]
 pub struct TestRecord {
     pub field_0: i32,
     pub field_1: Vec<Vec<u8>>,
 }
 
-#[fce]
+#[marine]
 pub fn inner_arrays_2(mut arg: Vec<Vec<Vec<Vec<TestRecord>>>>) -> Vec<Vec<Vec<Vec<TestRecord>>>> {
     arg.push(vec![vec![vec![
         TestRecord {
@@ -70,7 +70,7 @@ pub fn inner_arrays_2(mut arg: Vec<Vec<Vec<Vec<TestRecord>>>>) -> Vec<Vec<Vec<Ve
     arg
 }
 
-#[fce]
+#[marine]
 pub fn string_type(mut arg: Vec<String>) -> Vec<String> {
     arg.push(String::from("fce"));
 
@@ -80,7 +80,7 @@ pub fn string_type(mut arg: Vec<String>) -> Vec<String> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn bool_type(mut arg: Vec<bool>) -> Vec<bool> {
     arg[0] = !arg[0];
     let mut arg = effector::bool_type(arg);
@@ -90,7 +90,7 @@ pub fn bool_type(mut arg: Vec<bool>) -> Vec<bool> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn f32_type(mut arg: Vec<f32>) -> Vec<f32> {
     arg.push(0.0);
 
@@ -100,7 +100,7 @@ pub fn f32_type(mut arg: Vec<f32>) -> Vec<f32> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn f64_type(mut arg: Vec<f64>) -> Vec<f64> {
     arg.push(0.0);
 
@@ -110,7 +110,7 @@ pub fn f64_type(mut arg: Vec<f64>) -> Vec<f64> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn u32_type(mut arg: Vec<u32>) -> Vec<u32> {
     arg.push(0);
 
@@ -120,7 +120,7 @@ pub fn u32_type(mut arg: Vec<u32>) -> Vec<u32> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn u64_type(mut arg: Vec<u64>) -> Vec<u64> {
     arg.push(0);
 
@@ -130,7 +130,7 @@ pub fn u64_type(mut arg: Vec<u64>) -> Vec<u64> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn i32_type(mut arg: Vec<i32>) -> Vec<i32> {
     arg.push(0);
 
@@ -140,7 +140,7 @@ pub fn i32_type(mut arg: Vec<i32>) -> Vec<i32> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn i64_type(mut arg: Vec<i64>) -> Vec<i64> {
     arg.push(0);
 
@@ -150,16 +150,16 @@ pub fn i64_type(mut arg: Vec<i64>) -> Vec<i64> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn empty_type() -> Vec<String> {
     effector::empty_type()
 }
 
 mod effector {
-    use fluence::fce;
+    use fluence::marine;
     use super::TestRecord;
 
-    #[fce]
+    #[marine]
     #[link(wasm_import_module = "arrays_passing_effector")]
     extern "C" {
         pub fn inner_arrays_1(arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<Vec<Vec<Vec<u8>>>>;

@@ -107,7 +107,7 @@ impl FluenceFaaS {
         }
 
         Ok(Self {
-            marine: marine,
+            marine,
             call_parameters,
             module_interfaces_cache: HashMap::new(),
         })
