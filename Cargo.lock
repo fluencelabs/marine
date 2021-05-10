@@ -1341,7 +1341,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.4.1"
+version = "0.5.2"
 dependencies = [
  "anyhow",
  "check-latest",
@@ -1350,6 +1350,7 @@ dependencies = [
  "marine-it-generator",
  "marine-it-parser",
  "marine-module-info-parser",
+ "mrepl",
  "semver 0.11.0",
  "serde",
  "serde_json",
@@ -1462,6 +1463,15 @@ dependencies = [
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
  "wasmer-wasi-fl",
+]
+
+[[package]]
+name = "marine-sqlite-connector"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85c2fd7ad36352fb72288c2cebf862b9404c4b2759b592a50e396a48e49263fa"
+dependencies = [
+ "fluence",
 ]
 
 [[package]]
@@ -3079,6 +3089,7 @@ name = "wasm-sqlite-test"
 version = "0.1.0"
 dependencies = [
  "fluence",
+ "marine-sqlite-connector",
 ]
 
 [[package]]

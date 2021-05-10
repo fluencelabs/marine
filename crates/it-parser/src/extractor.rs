@@ -52,9 +52,9 @@ where
         .map_err(ITParserError::CorruptedWasmFile)?;
     let raw_custom_section = extract_custom_section(&module)?;
     let custom_section_bytes = raw_custom_section.as_ref();
-    let wit = extract_it_from_bytes(custom_section_bytes)?;
+    let it = extract_it_from_bytes(custom_section_bytes)?;
 
-    let mit = MITInterfaces::new(wit);
+    let mit = MITInterfaces::new(it);
 
     transformer(mit)
 }

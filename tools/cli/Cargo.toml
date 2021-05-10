@@ -1,7 +1,7 @@
 [package]
 name = "marine"
 description = "Fluence Marine command line tool"
-version = "0.4.1"
+version = "0.5.2"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine/tools/cli"
 license = "Apache-2.0"
@@ -27,3 +27,9 @@ exitfailure = "0.5.1"
 serde = "=1.0.118"
 serde_json = "1.0.56"
 termion = "1.5.6"
+
+mrepl = { path = "../repl", version = "0.7.2", optional = true }
+
+[features]
+default = ["repl"]
+repl = ["mrepl"]

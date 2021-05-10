@@ -12,7 +12,7 @@ name = "mrepl"
 path = "src/main.rs"
 
 [dependencies]
-fluence-app-service = { path = "../../fluence-app-service", version = "0.7.0", features = ["raw-module-api"] }
+fluence-app-service = { path = "../../fluence-app-service", version = "0.7.1", features = ["raw-module-api"] }
 fluence-sdk-main = { version = "0.6.2", features = ["logger"] }
 
 anyhow = "1.0.31"
