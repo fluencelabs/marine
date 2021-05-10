@@ -2,7 +2,7 @@
 
 # This script builds all subprojects and puts all created Wasm modules in one dir
 cargo update --aggressive
-fce build --release
+marine build --release
 
 rm artifacts/* || true
 mkdir -p artifacts

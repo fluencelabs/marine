@@ -4,19 +4,19 @@
 (
   cd local_storage || exit;
   cargo update --aggressive;
-  fce build --release;
+  marine build --release;
 )
 
 (
   cd curl_adapter || exit;
   cargo update --aggressive;
-  fce build --release;
+  marine build --release;
 )
 
 (
   cd facade || exit;
   cargo update --aggressive;
-  fce build --release;
+  marine build --release;
 )
 
 rm -f artifacts/* || true

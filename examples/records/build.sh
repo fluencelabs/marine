@@ -4,13 +4,13 @@
 (
   cd effector || exit;
   cargo update --aggressive;
-  fce build --release;
+  marine build --release;
 )
 
 (
   cd pure || exit;
   cargo update --aggressive;
-  fce build --release;
+  marine build --release;
 )
 
 rm artifacts/* || true
