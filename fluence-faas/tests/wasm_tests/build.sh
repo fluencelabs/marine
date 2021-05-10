@@ -1,4 +1,4 @@
-#!/bin/sh
+#/bin/sh
 
 # This script builds all tests
 (

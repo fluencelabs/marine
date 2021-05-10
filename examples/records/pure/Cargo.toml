@@ -10,5 +10,5 @@ name = "records_pure"
 path = "src/main.rs"
 
 [dependencies]
-fluence = "0.6.3"
+fluence = "0.6.4"
 test-record = { path = "../test-record" }

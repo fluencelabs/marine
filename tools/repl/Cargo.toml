@@ -13,7 +13,7 @@ path = "src/main.rs"
 
 [dependencies]
 fluence-app-service = { path = "../../fluence-app-service", version = "0.7.1", features = ["raw-module-api"] }
-fluence-sdk-main = { version = "0.6.2", features = ["logger"] }
+fluence-sdk-main = { version = "0.6.3", features = ["logger"] }
 
 anyhow = "1.0.31"
 clap = "2.33.1"

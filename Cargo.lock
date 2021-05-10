@@ -664,9 +664,9 @@ dependencies = [
 
 [[package]]
 name = "fluence"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2afff792b0ffc2a47a6f34d156fc1a138ae201ecd69004016fecaba5aeae67d1"
+checksum = "916f05f558b0de8a21b5447a6a790ac8d312324ced8b43a713b30a82b891720c"
 dependencies = [
  "fluence-sdk-main",
  "marine-macro",
@@ -728,9 +728,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.6.2"
+version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65c672dadb9c35c3b183c5c542fcf777cc74cad50f6cd88c2b15fc915deaf4f3"
+checksum = "95a32b74adb1bf8d2783a4690c378c7ebfc5cc1abaa6f99c6537d1a0f1a19e5d"
 dependencies = [
  "log",
  "marine-macro",
@@ -1028,9 +1028,9 @@ dependencies = [
 
 [[package]]
 name = "httparse"
-version = "1.4.0"
+version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a1ce40d6fc9764887c2fdc7305c3dcc429ba11ff981c1509416afd5697e4437"
+checksum = "f3a87b616e37e93c22fb19bcd386f02f3af5ea98a25670ad0fce773de23c5e68"
 
 [[package]]
 name = "httpdate"
@@ -1341,7 +1341,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "anyhow",
  "check-latest",
@@ -1350,7 +1350,6 @@ dependencies = [
  "marine-it-generator",
  "marine-it-parser",
  "marine-module-info-parser",
- "mrepl",
  "semver 0.11.0",
  "serde",
  "serde_json",
@@ -1400,18 +1399,18 @@ dependencies = [
 
 [[package]]
 name = "marine-macro"
-version = "0.6.2"
+version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "feda48c4456caee315cdcf161d8d074ec093ba46252bc9301c92648c7bfeaeae"
+checksum = "5b939048200868595393f9f42696398f683ed23d45e7ee7a0199cf1cfce7303d"
 dependencies = [
  "marine-macro-impl",
 ]
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.6.2"
+version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e4345b648ca59a1b31d4731577470e340e3f5bd24fe9b76fa5862445242ce84"
+checksum = "58a4b4e7308a9401f08a46bddd1f7221bbdeb0ed6530b95f5956451084b72439"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1467,9 +1466,9 @@ dependencies = [
 
 [[package]]
 name = "marine-sqlite-connector"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85c2fd7ad36352fb72288c2cebf862b9404c4b2759b592a50e396a48e49263fa"
+checksum = "6ffc3801a49d91595f2b8a80b4fbef21b15ea84bc69624ba84052a37b3b5b1a5"
 dependencies = [
  "fluence",
 ]

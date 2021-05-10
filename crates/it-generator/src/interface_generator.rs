@@ -70,6 +70,7 @@ fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<ModuleAST> {
         let default_ids = walrus::IdsToIndices::default();
         let raw_data = custom_module.1.data(&default_ids);
         let decoded_json: SDKAst = serde_json::from_slice(&raw_data)?;
+
         match decoded_json {
             SDKAst::Record(record) => records.push(record),
             SDKAst::Function(function) => functions.push(function),
