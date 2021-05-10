@@ -72,7 +72,7 @@ pub fn inner_arrays_2(mut arg: Vec<Vec<Vec<Vec<TestRecord>>>>) -> Vec<Vec<Vec<Ve
 
 #[marine]
 pub fn string_type(mut arg: Vec<String>) -> Vec<String> {
-    arg.push(String::from("fce"));
+    arg.push(String::from("marine"));
 
     let mut arg = effector::string_type(arg);
 

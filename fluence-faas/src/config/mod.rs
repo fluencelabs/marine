@@ -15,7 +15,7 @@
  */
 
 mod raw_faas_config;
-mod to_fce_config;
+mod to_marine_config;
 mod faas_config;
 
 pub use faas_config::FaaSModuleConfig;
@@ -28,4 +28,4 @@ pub use raw_faas_config::TomlWASIConfig;
 pub use raw_faas_config::TomlFaaSConfig;
 pub use raw_faas_config::TomlFaaSModuleConfig;
 
-pub(crate) use to_fce_config::make_marine_config;
+pub(crate) use to_marine_config::make_marine_config;

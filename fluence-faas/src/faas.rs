@@ -97,13 +97,13 @@ impl FluenceFaaS {
                 }
             })?;
 
-            let fce_module_config = crate::config::make_marine_config(
+            let marine_module_config = crate::config::make_marine_config(
                 module.import_name.clone(),
                 Some(module.config),
                 call_parameters.clone(),
                 &logger_filter,
             )?;
-            marine.load_module(module.import_name, &module_bytes, fce_module_config)?;
+            marine.load_module(module.import_name, &module_bytes, marine_module_config)?;
         }
 
         Ok(Self {
@@ -250,14 +250,14 @@ impl FluenceFaaS {
         let wasm_log_env = std::env::var(WASM_LOG_ENV_NAME).unwrap_or_default();
         let logger_filter = LoggerFilter::from_env_string(&wasm_log_env);
 
-        let fce_module_config = crate::config::make_marine_config(
+        let marine_module_config = crate::config::make_marine_config(
             name.clone(),
             config,
             self.call_parameters.clone(),
             &logger_filter,
         )?;
         self.marine
-            .load_module(name, &wasm_bytes, fce_module_config)
+            .load_module(name, &wasm_bytes, marine_module_config)
             .map_err(Into::into)
     }
 

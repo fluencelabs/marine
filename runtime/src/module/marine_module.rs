@@ -121,24 +121,24 @@ impl MModule {
         let it = extract_it_from_module(&wasmer_module)?;
         crate::misc::check_it_version(name, &it.version)?;
 
-        let fce_wit = MITInterfaces::new(it);
+        let mit = MITInterfaces::new(it);
 
         let mut wit_instance = Arc::new_uninit();
-        let wit_import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
+        let wit_import_object = Self::adjust_wit_imports(&mit, wit_instance.clone())?;
         let raw_imports = config.raw_imports.clone();
         let (wasi_import_object, host_closures_import_object) =
-            Self::create_import_objects(config, &fce_wit, wit_import_object.clone())?;
+            Self::create_import_objects(config, &mit, wit_import_object.clone())?;
 
         let wasmer_instance = wasmer_module.instantiate(&wasi_import_object)?;
         let wit_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
-                MaybeUninit::new(ITInstance::new(&wasmer_instance, name, &fce_wit, modules)?);
+                MaybeUninit::new(ITInstance::new(&wasmer_instance, name, &mit, modules)?);
             std::mem::transmute::<_, Arc<ITInstance>>(wit_instance)
         };
 
-        let export_funcs = Self::instantiate_wit_exports(&wit_instance, &fce_wit)?;
+        let export_funcs = Self::instantiate_wit_exports(&wit_instance, &mit)?;
         let export_record_types = Self::extract_export_record_types(&export_funcs, &wit_instance)?;
 
         // call _start to populate the WASI state of the module
