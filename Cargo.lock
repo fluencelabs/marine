@@ -1341,7 +1341,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.5.3"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "check-latest",
@@ -1360,7 +1360,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "cargo_toml",
  "it-lilo",
@@ -1376,7 +1376,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-interfaces"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -1384,7 +1384,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-parser"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "marine-it-interfaces",

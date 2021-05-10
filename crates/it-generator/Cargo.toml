@@ -1,7 +1,7 @@
 [package]
 name = "marine-it-generator"
 description = "Fluence Marine interface types generator"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -11,8 +11,8 @@ name = "marine_it_generator"
 path = "src/lib.rs"
 
 [dependencies]
-marine-it-parser = { path = "../it-parser", version = "0.5.0"}
-marine-macro-impl = "0.6.3"
+marine-it-parser = { path = "../it-parser", version = "0.6.0"}
+marine-macro-impl = "=0.6.3"
 
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.0" }
 it-lilo = "0.1.0"
