@@ -671,9 +671,9 @@ dependencies = [
  "check-latest",
  "clap",
  "exitfailure",
+ "marine-it-generator",
+ "marine-it-parser",
  "marine-module-info-parser",
- "marine-wit-generator",
- "marine-wit-parser",
  "semver 0.11.0",
  "serde",
  "serde_json",
@@ -1412,11 +1412,11 @@ dependencies = [
  "bytes 0.5.6",
  "it-lilo",
  "log",
+ "marine-it-generator",
+ "marine-it-interfaces",
+ "marine-it-parser",
  "marine-module-info-parser",
  "marine-utils",
- "marine-wit-generator",
- "marine-wit-interfaces",
- "marine-wit-parser",
  "multimap",
  "once_cell",
  "parity-wasm",
@@ -1431,6 +1431,45 @@ dependencies = [
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
  "wasmer-wasi-fl",
+]
+
+[[package]]
+name = "marine-it-generator"
+version = "0.4.0"
+dependencies = [
+ "cargo_toml",
+ "fluence-sdk-wit",
+ "it-lilo",
+ "marine-it-parser",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "walrus",
+ "wasmer-interface-types-fl",
+]
+
+[[package]]
+name = "marine-it-interfaces"
+version = "0.3.0"
+dependencies = [
+ "multimap",
+ "wasmer-interface-types-fl",
+]
+
+[[package]]
+name = "marine-it-parser"
+version = "0.5.0"
+dependencies = [
+ "anyhow",
+ "marine-it-interfaces",
+ "nom",
+ "semver 0.11.0",
+ "serde",
+ "thiserror",
+ "walrus",
+ "wasmer-interface-types-fl",
+ "wasmer-runtime-core-fl",
 ]
 
 [[package]]
@@ -1450,45 +1489,6 @@ dependencies = [
 [[package]]
 name = "marine-utils"
 version = "0.2.0"
-
-[[package]]
-name = "marine-wit-generator"
-version = "0.4.0"
-dependencies = [
- "cargo_toml",
- "fluence-sdk-wit",
- "it-lilo",
- "marine-wit-parser",
- "once_cell",
- "serde",
- "serde_json",
- "thiserror",
- "walrus",
- "wasmer-interface-types-fl",
-]
-
-[[package]]
-name = "marine-wit-interfaces"
-version = "0.3.0"
-dependencies = [
- "multimap",
- "wasmer-interface-types-fl",
-]
-
-[[package]]
-name = "marine-wit-parser"
-version = "0.5.0"
-dependencies = [
- "anyhow",
- "marine-wit-interfaces",
- "nom",
- "semver 0.11.0",
- "serde",
- "thiserror",
- "walrus",
- "wasmer-interface-types-fl",
- "wasmer-runtime-core-fl",
-]
 
 [[package]]
 name = "matches"

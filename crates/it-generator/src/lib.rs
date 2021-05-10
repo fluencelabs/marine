@@ -30,9 +30,9 @@ mod errors;
 mod instructions_generator;
 mod interface_generator;
 
-pub use interface_generator::embed_wit;
-pub use errors::WITGeneratorError;
+pub use interface_generator::embed_it;
+pub use errors::ITGeneratorError;
 
 pub const TYPE_RESOLVE_RECURSION_LIMIT: u32 = 1024;
 
-pub(crate) type Result<T> = std::result::Result<T, WITGeneratorError>;
+pub(crate) type Result<T> = std::result::Result<T, ITGeneratorError>;

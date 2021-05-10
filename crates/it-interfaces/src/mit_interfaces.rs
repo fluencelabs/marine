@@ -16,9 +16,9 @@
 
 use super::errors::MITInterfacesError;
 
-use wasmer_wit::interpreter::Instruction;
-use wasmer_wit::ast::*;
-use wasmer_wit::IRecordType;
+use wasmer_it::interpreter::Instruction;
+use wasmer_it::ast::*;
+use wasmer_it::IRecordType;
 use multimap::MultiMap;
 
 use std::iter::Iterator;

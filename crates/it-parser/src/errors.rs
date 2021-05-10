@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-use wasmer_wit::decoders::wat::Error as WATError;
+use wasmer_it::decoders::wat::Error as WATError;
 use thiserror::Error as ThisError;
 
 use std::io::Error as IOError;
 
 #[derive(Debug, ThisError)]
-pub enum WITParserError {
-    /// WIT section is absent.
+pub enum ITParserError {
+    /// IT section is absent.
     #[error("the module doesn't contain IT section")]
     NoITSection,
 
-    /// Multiple WIT sections.
+    /// Multiple IT sections.
     #[error("the module contains multiple IT sections that is unsupported")]
     MultipleITSections,
 
-    /// WIT section remainder isn't empty.
+    /// IT section remainder isn't empty.
     #[error("IT section is corrupted: IT section remainder isn't empty")]
     ITRemainderNotEmpty,
 
-    /// An error occurred while parsing WIT section.
+    /// An error occurred while parsing IT section.
     #[error(
         "IT section is corrupted: {0}.\
     \nProbably the module was compiled with an old version of marine cli, please try to update and recompile.\
@@ -41,7 +41,7 @@ pub enum WITParserError {
     )]
     CorruptedITSection(nom::Err<(Vec<u8>, nom::error::ErrorKind)>),
 
-    /// An error related to incorrect data of wit section.
+    /// An error related to incorrect data in IT section.
     #[error("{0}")]
     IncorrectITFormat(String),
 

@@ -15,15 +15,15 @@
  */
 
 mod functions;
-mod wit;
+mod it;
 
 pub use functions::*;
-pub use wit::*;
+pub use it::*;
 
 use crate::Result;
-use crate::WITParserError;
+use crate::ITParserError;
 
-use marine_wit_interfaces::MITInterfaces;
+use marine_it_interfaces::MITInterfaces;
 use std::path::Path;
 
 pub fn module_interface<P>(module_path: P) -> Result<ServiceInterface>
@@ -49,10 +49,10 @@ where
 {
     let module = walrus::ModuleConfig::new()
         .parse_file(module_path)
-        .map_err(WITParserError::CorruptedWasmFile)?;
+        .map_err(ITParserError::CorruptedWasmFile)?;
     let raw_custom_section = extract_custom_section(&module)?;
     let custom_section_bytes = raw_custom_section.as_ref();
-    let wit = extract_wit_from_bytes(custom_section_bytes)?;
+    let wit = extract_it_from_bytes(custom_section_bytes)?;
 
     let fce_interface = MITInterfaces::new(wit);
 

@@ -21,24 +21,24 @@ mod utils;
 
 use crate::Result;
 
-use wasmer_wit::IType;
-use wasmer_wit::ast::Interfaces;
-use wasmer_wit::IRecordType;
+use wasmer_it::IType;
+use wasmer_it::ast::Interfaces;
+use wasmer_it::IRecordType;
 
 use std::rc::Rc;
 
 #[derive(PartialEq, Debug, Default)]
-pub(crate) struct WITResolver<'a> {
+pub(crate) struct ITResolver<'a> {
     types: std::collections::HashMap<String, usize>,
     pub(crate) interfaces: Interfaces<'a>,
     unresolved_types_count: usize,
 }
 
-impl<'a> WITResolver<'a> {
+impl<'a> ITResolver<'a> {
     pub(crate) fn get_record_type_id(&self, record_name: &str) -> Result<usize> {
         match self.types.get(record_name) {
             Some(type_index) => Ok(*type_index),
-            None => Err(crate::errors::WITGeneratorError::CorruptedRecord(format!(
+            None => Err(crate::errors::ITGeneratorError::CorruptedRecord(format!(
                 "Can't find record with name='{}', don't you forget to wrap it with #[fce]",
                 record_name
             ))),
@@ -47,7 +47,7 @@ impl<'a> WITResolver<'a> {
 
     // adds a stub for type with such a name if it wasn't found
     pub(crate) fn get_record_type_id_unchecked(&mut self, record_name: &str) -> usize {
-        use wasmer_wit::ast::Type;
+        use wasmer_it::ast::Type;
 
         match self.types.get(record_name) {
             Some(type_index) => *type_index,
@@ -66,22 +66,22 @@ impl<'a> WITResolver<'a> {
 
     pub(crate) fn get_record_type(&self, record_type_id: u64) -> Result<&IRecordType> {
         if record_type_id >= self.interfaces.types.len() as u64 {
-            return Err(crate::errors::WITGeneratorError::CorruptedRecord(format!(
+            return Err(crate::errors::ITGeneratorError::CorruptedRecord(format!(
                 "Can't find record with id {}, don't you forget to wrap it with #[fce]",
                 record_type_id
             )));
         }
 
         match &self.interfaces.types[record_type_id as usize] {
-            wasmer_wit::ast::Type::Function { .. } => {
-                panic!("internal error inside WITResolver: interfaces AST type should be record not record")
+            wasmer_it::ast::Type::Function { .. } => {
+                panic!("internal error inside ITResolver: interfaces AST type should be record not record")
             }
-            wasmer_wit::ast::Type::Record(record_type) => Ok(record_type),
+            wasmer_it::ast::Type::Record(record_type) => Ok(record_type),
         }
     }
 
     pub(crate) fn insert_record_type(&mut self, record: IRecordType) {
-        use wasmer_wit::ast::Type;
+        use wasmer_it::ast::Type;
 
         match self.types.get(&record.name) {
             Some(pos) => {
@@ -102,6 +102,6 @@ impl<'a> WITResolver<'a> {
     }
 }
 
-pub(crate) trait WITGenerator {
-    fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()>;
+pub(crate) trait ITGenerator {
+    fn generate_it<'a>(&'a self, it_resolver: &mut ITResolver<'a>) -> Result<()>;
 }

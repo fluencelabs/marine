@@ -76,7 +76,7 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
     let version = semver::Version::from_str(RUST_SDK_VERSION).unwrap();
     for wasm in wasms {
         let wasm_path = std::path::PathBuf::from(wasm);
-        marine_wit_generator::embed_wit(&wasm_path)?;
+        marine_it_generator::embed_it(&wasm_path)?;
         marine_module_info_parser::sdk_version::embed_from_path(&wasm_path, &wasm_path, &version)?;
     }
 

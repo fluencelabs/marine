@@ -15,12 +15,12 @@
  */
 
 use crate::Result;
-use crate::WITParserError;
-use marine_wit_interfaces::MITInterfaces;
+use crate::ITParserError;
+use marine_it_interfaces::MITInterfaces;
 
-use wasmer_wit::IRecordType;
-use wasmer_wit::ast::FunctionArg as IFunctionArg;
-use wasmer_wit::IType;
+use wasmer_it::IRecordType;
+use wasmer_it::ast::FunctionArg as IFunctionArg;
+use wasmer_it::IType;
 use serde::Serialize;
 use serde::Deserialize;
 
@@ -61,12 +61,12 @@ pub fn get_raw_interface(fce_it_interface: &MITInterfaces<'_>) -> Result<MModule
     Ok(fce_interface)
 }
 
-fn get_exports(wit: &MITInterfaces<'_>) -> Result<Vec<MFunctionSignature>> {
-    use marine_wit_interfaces::ITAstType;
+fn get_exports(it: &MITInterfaces<'_>) -> Result<Vec<MFunctionSignature>> {
+    use marine_it_interfaces::ITAstType;
 
-    wit.implementations()
+    it.implementations()
         .filter_map(|(adapter_function_type, core_function_type)| {
-            wit.exports_by_type(*core_function_type)
+            it.exports_by_type(*core_function_type)
                 .map(|export_function_name| (adapter_function_type, export_function_name))
         })
         .map(|(adapter_function_type, export_function_names)| {
@@ -76,9 +76,9 @@ fn get_exports(wit: &MITInterfaces<'_>) -> Result<Vec<MFunctionSignature>> {
         })
         .flatten()
         .map(|(adapter_function_type, export_function_name)| {
-            let wit_type = wit.type_by_idx_r(adapter_function_type).unwrap();
+            let it_type = it.type_by_idx_r(adapter_function_type).unwrap();
 
-            match wit_type {
+            match it_type {
                 ITAstType::Function {
                     arguments,
                     output_types,
@@ -90,7 +90,7 @@ fn get_exports(wit: &MITInterfaces<'_>) -> Result<Vec<MFunctionSignature>> {
                     };
                     Ok(signature)
                 }
-                _ => Err(WITParserError::IncorrectITFormat(format!(
+                _ => Err(ITParserError::IncorrectITFormat(format!(
                     "type with idx = {} isn't a function type",
                     adapter_function_type
                 ))),
@@ -99,10 +99,10 @@ fn get_exports(wit: &MITInterfaces<'_>) -> Result<Vec<MFunctionSignature>> {
         .collect::<Result<Vec<MFunctionSignature>>>()
 }
 
-fn extract_record_types(wit: &MITInterfaces<'_>) -> MRecordTypes {
-    use marine_wit_interfaces::ITAstType;
+fn extract_record_types(it: &MITInterfaces<'_>) -> MRecordTypes {
+    use marine_it_interfaces::ITAstType;
 
-    let (record_types_by_id, _) = wit.types().fold(
+    let (record_types_by_id, _) = it.types().fold(
         (HashMap::new(), 0u64),
         |(mut record_types_by_id, id), ty| {
             match ty {

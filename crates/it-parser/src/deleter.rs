@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-use super::errors::WITParserError;
+use super::errors::ITParserError;
 use super::custom::IT_SECTION_NAME;
 
 use walrus::ModuleConfig;
 
 use std::path::PathBuf;
 
-/// Delete all custom sections with WIT from provided Wasm file.
-pub fn delete_wit_section_from_file(
+/// Delete all custom sections with IT from provided Wasm file.
+pub fn delete_it_section_from_file(
     in_wasm_path: PathBuf,
     out_wasm_path: PathBuf,
-) -> Result<(), WITParserError> {
+) -> Result<(), ITParserError> {
     let module = ModuleConfig::new()
         .parse_file(&in_wasm_path)
-        .map_err(WITParserError::CorruptedWasmFile)?;
+        .map_err(ITParserError::CorruptedWasmFile)?;
 
-    let mut module = delete_wit_section(module);
+    let mut module = delete_it_section(module);
 
     module
         .emit_wasm_file(&out_wasm_path)
-        .map_err(WITParserError::WasmEmitError)?;
+        .map_err(ITParserError::WasmEmitError)?;
 
     Ok(())
 }
 
-/// Delete all custom sections with WIT from provided Wasm module.
-pub fn delete_wit_section(mut wasm_module: walrus::Module) -> walrus::Module {
+/// Delete all custom sections with IT from provided Wasm module.
+pub fn delete_it_section(mut wasm_module: walrus::Module) -> walrus::Module {
     let wit_section_ids = wasm_module
         .customs
         .iter()

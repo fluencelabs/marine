@@ -23,13 +23,13 @@ mod type_converters;
 
 pub use wit_instance::RecordTypes;
 
-pub use wasmer_wit::IType;
-pub use wasmer_wit::IRecordType;
-pub use wasmer_wit::ast::FunctionArg as IFunctionArg;
-pub use wasmer_wit::IValue;
+pub use wasmer_it::IType;
+pub use wasmer_it::IRecordType;
+pub use wasmer_it::ast::FunctionArg as IFunctionArg;
+pub use wasmer_it::IValue;
 pub use marine_module::MFunctionSignature;
-pub use wasmer_wit::from_interface_values;
-pub use wasmer_wit::to_interface_value;
+pub use wasmer_it::from_interface_values;
+pub use wasmer_it::to_interface_value;
 
 pub(crate) use marine_module::MModule;
 pub(self) use wasmer_core::types::Type as WType;
@@ -38,7 +38,7 @@ pub(self) use wasmer_core::types::Value as WValue;
 // types that often used together
 pub(self) mod wit_prelude {
     pub(super) use super::wit_instance::ITInstance;
-    pub(super) use super::exports::WITExport;
+    pub(super) use super::exports::ITExport;
     pub(super) use crate::MError;
     pub(super) use super::wit_function::WITFunction;
     pub(super) use super::memory::WITMemoryView;

@@ -50,9 +50,9 @@ pub use module::MFunctionSignature;
 pub use module::from_interface_values;
 pub use module::to_interface_value;
 
-pub use wasmer_wit::IRecordFieldType;
+pub use wasmer_it::IRecordFieldType;
 pub mod ne_vec {
-    pub use wasmer_wit::NEVec;
+    pub use wasmer_it::NEVec;
 }
 
 pub(crate) type MResult<T> = std::result::Result<T, MError>;

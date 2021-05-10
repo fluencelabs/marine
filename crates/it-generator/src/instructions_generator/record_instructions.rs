@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-use super::WITGenerator;
-use super::WITResolver;
+use super::ITGenerator;
+use super::ITResolver;
 use crate::Result;
 
 use fluence_sdk_wit::RecordType;
 use fluence_sdk_wit::RecordFields;
 
-use wasmer_wit::IRecordFieldType;
-use wasmer_wit::IRecordType;
-use wasmer_wit::NEVec;
+use wasmer_it::IRecordFieldType;
+use wasmer_it::IRecordType;
+use wasmer_it::NEVec;
 
-impl WITGenerator for RecordType {
-    fn generate_wit<'a>(&'a self, wit_resolver: &mut WITResolver<'a>) -> Result<()> {
+impl ITGenerator for RecordType {
+    fn generate_it<'a>(&'a self, it_resolver: &mut ITResolver<'a>) -> Result<()> {
         let fields = match &self.fields {
             RecordFields::Named(fields) => fields,
             RecordFields::Unnamed(fields) => fields,
@@ -37,12 +37,12 @@ impl WITGenerator for RecordType {
             .iter()
             .map(|field| IRecordFieldType {
                 name: field.name.clone().unwrap_or_default(),
-                ty: super::utils::ptype_to_itype_unchecked(&field.ty, wit_resolver),
+                ty: super::utils::ptype_to_itype_unchecked(&field.ty, it_resolver),
             })
             .collect::<Vec<_>>();
 
         let fields = NEVec::new(fields).map_err(|_| {
-            crate::errors::WITGeneratorError::CorruptedRecord(format!(
+            crate::errors::ITGeneratorError::CorruptedRecord(format!(
                 "serialized record with name '{}' contains no fields",
                 self.name
             ))
@@ -53,7 +53,7 @@ impl WITGenerator for RecordType {
             fields,
         };
 
-        wit_resolver.insert_record_type(new_record_type);
+        it_resolver.insert_record_type(new_record_type);
 
         Ok(())
     }

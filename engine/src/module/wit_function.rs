@@ -19,7 +19,7 @@ use super::{IType, IFunctionArg, IValue, WValue};
 use super::marine_module::Callable;
 use crate::MResult;
 
-use wasmer_wit::interpreter::wasm;
+use wasmer_it::interpreter::wasm;
 use wasmer_core::instance::DynFunc;
 
 // use std::sync::Arc;
@@ -36,7 +36,7 @@ enum WITFunctionInner {
     },
 }
 
-/// Represents all import and export functions that could be called from WIT context by call-core.
+/// Represents all import and export functions that could be called from IT context by call-core.
 #[derive(Clone)]
 pub(super) struct WITFunction {
     name: String,
@@ -46,7 +46,7 @@ pub(super) struct WITFunction {
 }
 
 impl WITFunction {
-    /// Creates functions from a "usual" (not WIT) module export.
+    /// Creates functions from a "usual" (not IT) module export.
     pub(super) fn from_export(dyn_func: DynFunc<'static>, name: String) -> MResult<Self> {
         use super::type_converters::wtype_to_itype;
 

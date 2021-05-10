@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use wasmer_wit::interpreter::wasm;
+use wasmer_it::interpreter::wasm;
 use wasmer_core::memory::{Memory, MemoryView};
 
 pub(super) struct WITMemoryView<'a>(pub(super) MemoryView<'a, u8>);

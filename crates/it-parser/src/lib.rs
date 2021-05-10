@@ -30,17 +30,17 @@ mod embedder;
 mod errors;
 mod extractor;
 
-pub use errors::WITParserError;
+pub use errors::ITParserError;
 
-pub use deleter::delete_wit_section;
-pub use deleter::delete_wit_section_from_file;
+pub use deleter::delete_it_section;
+pub use deleter::delete_it_section_from_file;
 
-pub use embedder::embed_wit;
-pub use embedder::embed_text_wit;
+pub use embedder::embed_it;
+pub use embedder::embed_text_it;
 
-pub use extractor::extract_wit_from_module;
+pub use extractor::extract_it_from_module;
 pub use extractor::extract_version_from_module;
-pub use extractor::extract_text_wit;
+pub use extractor::extract_text_it;
 pub use extractor::module_interface;
 pub use extractor::module_raw_interface;
 
@@ -53,11 +53,11 @@ pub mod interface {
     pub use crate::extractor::MRecordTypes;
     pub use crate::extractor::MFunctionSignature;
     pub mod it {
-        pub use wasmer_wit::IType;
-        pub use wasmer_wit::ast::FunctionArg as IFunctionArg;
-        pub use wasmer_wit::IRecordType;
-        pub use wasmer_wit::IRecordFieldType;
+        pub use wasmer_it::IType;
+        pub use wasmer_it::ast::FunctionArg as IFunctionArg;
+        pub use wasmer_it::IRecordType;
+        pub use wasmer_it::IRecordFieldType;
     }
 }
 
-pub(crate) type Result<T> = std::result::Result<T, WITParserError>;
+pub(crate) type Result<T> = std::result::Result<T, ITParserError>;

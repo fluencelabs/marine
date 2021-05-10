@@ -18,16 +18,16 @@ use std::error::Error;
 
 #[derive(Debug)]
 pub enum MITInterfacesError {
-    /// WIT doesn't contain such type.
+    /// IT doesn't contain such type.
     NoSuchType(u32),
 
-    /// WIT doesn't contain such export.
+    /// IT doesn't contain such export.
     NoSuchExport(u32),
 
-    /// WIT doesn't contain such import.
+    /// IT doesn't contain such import.
     NoSuchImport(u32),
 
-    /// WIT doesn't contain such import.
+    /// IT doesn't contain such import.
     NoSuchAdapter(u32),
 }
 

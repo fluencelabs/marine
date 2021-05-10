@@ -15,41 +15,41 @@
  */
 
 use super::custom::ITCustomSection;
-use super::errors::WITParserError;
+use super::errors::ITParserError;
 use crate::Result;
 
 use walrus::ModuleConfig;
-use wasmer_wit::{
+use wasmer_it::{
     ast::Interfaces,
     decoders::wat::{parse, Buffer},
 };
-use wasmer_wit::ToBytes;
+use wasmer_it::ToBytes;
 
 use std::path::Path;
 
-/// Embed provided WIT to a Wasm file by path.
-pub fn embed_text_wit<I, O>(in_wasm_path: I, out_wasm_path: O, wit: &str) -> Result<()>
+/// Embed provided IT to a Wasm file by path.
+pub fn embed_text_it<I, O>(in_wasm_path: I, out_wasm_path: O, it: &str) -> Result<()>
 where
     I: AsRef<Path>,
     O: AsRef<Path>,
 {
     let module = ModuleConfig::new()
         .parse_file(in_wasm_path)
-        .map_err(WITParserError::CorruptedWasmFile)?;
+        .map_err(ITParserError::CorruptedWasmFile)?;
 
-    let buffer = Buffer::new(wit)?;
+    let buffer = Buffer::new(it)?;
     let ast = parse(&buffer)?;
 
-    let mut module = embed_wit(module, &ast);
+    let mut module = embed_it(module, &ast);
     module
         .emit_wasm_file(out_wasm_path)
-        .map_err(WITParserError::WasmEmitError)?;
+        .map_err(ITParserError::WasmEmitError)?;
 
     Ok(())
 }
 
-/// Embed provided WIT to a Wasm module.
-pub fn embed_wit(mut wasm_module: walrus::Module, interfaces: &Interfaces<'_>) -> walrus::Module {
+/// Embed provided IT to a Wasm module.
+pub fn embed_it(mut wasm_module: walrus::Module, interfaces: &Interfaces<'_>) -> walrus::Module {
     let mut bytes = vec![];
     // TODO: think about possible errors here
     interfaces.to_bytes(&mut bytes).unwrap();

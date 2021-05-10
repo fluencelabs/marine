@@ -15,8 +15,8 @@
  */
 
 use marine_module_info_parser::ModuleInfoError;
-use marine_wit_generator::WITGeneratorError;
-use marine_wit_parser::WITParserError;
+use marine_it_generator::WITGeneratorError;
+use marine_it_parser::ITParserError;
 
 use thiserror::Error as ThisError;
 
@@ -36,7 +36,7 @@ pub enum CLIError {
 
     /// An error occurred while parsing interface types.
     #[error("{0}")]
-    WITParserError(#[from] WITParserError),
+    ITParserError(#[from] ITParserError),
 
     /// An error occurred when no Wasm file was compiled.
     #[error("{0}")]

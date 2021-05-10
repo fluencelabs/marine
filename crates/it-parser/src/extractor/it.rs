@@ -15,58 +15,58 @@
  */
 
 use crate::custom::IT_SECTION_NAME;
-use crate::errors::WITParserError;
+use crate::errors::ITParserError;
 use crate::Result;
 
 use walrus::IdsToIndices;
-use wasmer_wit::ast::Interfaces;
+use wasmer_it::ast::Interfaces;
 use wasmer_core::Module as WasmerModule;
 
 use std::borrow::Cow;
 use std::path::Path;
 
-/// Extracts WIT section of provided Wasm binary and converts it to a string.
-pub fn extract_text_wit<P>(wasm_file_path: P) -> Result<String>
+/// Extracts IT section of provided Wasm binary and converts it to a string.
+pub fn extract_text_it<P>(wasm_file_path: P) -> Result<String>
 where
     P: AsRef<Path>,
 {
     let module = walrus::ModuleConfig::new()
         .parse_file(wasm_file_path)
-        .map_err(WITParserError::CorruptedWasmFile)?;
+        .map_err(ITParserError::CorruptedWasmFile)?;
 
     let raw_custom_section = extract_custom_section(&module)?;
     let wit_section_bytes = raw_custom_section.as_ref();
-    let wit = extract_wit_from_bytes(wit_section_bytes)?;
+    let it = extract_it_from_bytes(wit_section_bytes)?;
 
-    Ok((&wit).to_string())
+    Ok((&it).to_string())
 }
 
-/// Extracts WIT section of provided Wasm binary and converts it to a MITInterfaces.
-pub fn extract_wit_from_module(wasmer_module: &WasmerModule) -> Result<Interfaces<'_>> {
+/// Extracts IT section of provided Wasm binary and converts it to a MITInterfaces.
+pub fn extract_it_from_module(wasmer_module: &WasmerModule) -> Result<Interfaces<'_>> {
     let wit_sections = wasmer_module
         .custom_sections(IT_SECTION_NAME)
-        .ok_or(WITParserError::NoITSection)?;
+        .ok_or(ITParserError::NoITSection)?;
 
     if wit_sections.len() > 1 {
-        return Err(WITParserError::MultipleITSections);
+        return Err(ITParserError::MultipleITSections);
     }
 
-    extract_wit_from_bytes(&wit_sections[0])
+    extract_it_from_bytes(&wit_sections[0])
 }
 
 pub fn extract_version_from_module(module: &walrus::Module) -> Result<semver::Version> {
     let raw_custom_section = extract_custom_section(&module)?;
     let wit_section_bytes = raw_custom_section.as_ref();
-    let wit = extract_wit_from_bytes(wit_section_bytes)?;
+    let it = extract_it_from_bytes(wit_section_bytes)?;
 
-    Ok(wit.version)
+    Ok(it.version)
 }
 
-pub(crate) fn extract_wit_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>> {
-    match wasmer_wit::decoders::binary::parse::<(&[u8], nom::error::ErrorKind)>(wit_section_bytes) {
-        Ok((remainder, wit)) if remainder.is_empty() => Ok(wit),
-        Ok(_) => Err(WITParserError::ITRemainderNotEmpty),
-        Err(e) => Err(WITParserError::CorruptedITSection(e.to_owned())),
+pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>> {
+    match wasmer_it::decoders::binary::parse::<(&[u8], nom::error::ErrorKind)>(wit_section_bytes) {
+        Ok((remainder, it)) if remainder.is_empty() => Ok(it),
+        Ok(_) => Err(ITParserError::ITRemainderNotEmpty),
+        Err(e) => Err(ITParserError::CorruptedITSection(e.to_owned())),
     }
 }
 
@@ -78,10 +78,10 @@ pub(crate) fn extract_custom_section(module: &walrus::Module) -> Result<Cow<'_, 
         .collect::<Vec<_>>();
 
     if sections.is_empty() {
-        return Err(WITParserError::NoITSection);
+        return Err(ITParserError::NoITSection);
     }
     if sections.len() > 1 {
-        return Err(WITParserError::MultipleITSections);
+        return Err(ITParserError::MultipleITSections);
     }
 
     let default_ids = IdsToIndices::default();

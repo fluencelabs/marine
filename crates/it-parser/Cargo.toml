@@ -1,5 +1,5 @@
 [package]
-name = "marine-wit-parser"
+name = "marine-it-parser"
 description = "Fluence Marine interface types parser"
 version = "0.5.0"
 authors = ["Fluence Labs"]
@@ -7,16 +7,16 @@ license = "Apache-2.0"
 edition = "2018"
 
 [lib]
-name = "marine_wit_parser"
+name = "marine_it_parser"
 path = "src/lib.rs"
 
 [dependencies]
-marine-wit-interfaces = { path = "../wit-interfaces", version = "0.3.0" }
+marine-it-interfaces = { path = "../it-interfaces", version = "0.3.0" }
 
 anyhow = "1.0.31"
 walrus = "0.18.0"
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0"}
-wasmer-wit = { package = "wasmer-interface-types-fl", version = "0.20.0" }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.0" }
 nom = "5.1"
 
 semver = "0.11.0"

@@ -21,7 +21,7 @@ pub const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 pub const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
 
 pub const IN_WASM_PATH: &str = "in-wasm-path";
-pub const WIT_PATH: &str = "wit-path";
+pub const IT_PATH: &str = "it-path";
 pub const OUT_WASM_PATH: &str = "out-wasm-path";
 
 pub const SDK_VERSION: &str = "sdk-version";
@@ -50,7 +50,7 @@ fn set_it<'a, 'b>() -> App<'a, 'b> {
                 .takes_value(true)
                 .short("i")
                 .help("a path to a Wasm file"),
-            Arg::with_name(WIT_PATH)
+            Arg::with_name(IT_PATH)
                 .required(true)
                 .takes_value(true)
                 .short("w")

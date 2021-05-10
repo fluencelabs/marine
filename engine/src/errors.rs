@@ -15,8 +15,8 @@
  */
 
 use crate::HostImportError;
-use marine_wit_interfaces::MITInterfacesError;
-use marine_wit_parser::WITParserError;
+use marine_it_interfaces::MITInterfacesError;
+use marine_it_parser::ITParserError;
 use marine_module_info_parser::ModuleInfoError;
 
 use wasmer_runtime::error as wasmer_error;
@@ -65,33 +65,33 @@ pub enum MError {
 
     /// Error arisen during execution of Wasm modules (especially, interface types).
     #[error("Execution error: {0}")]
-    ITInstructionError(#[from] wasmer_wit::errors::InstructionError),
+    ITInstructionError(#[from] wasmer_it::errors::InstructionError),
 
     /// Error that raises on the preparation step.
     #[error("PrepareError: {0}, probably module is malformed")]
     PrepareError(#[from] parity_wasm::elements::Error),
 
     /// Indicates that there is already a module with such name.
-    #[error("Module with name {0} already loaded in Marine, please specify another name")]
+    #[error("module with name {0} already loaded in Marine, please specify another name")]
     NonUniqueModuleName(String),
 
     /// Returns when there is no module with such name.
-    #[error("Module with name {0} doesn't have function with name {1}")]
+    #[error("module with name {0} doesn't have function with name {1}")]
     NoSuchFunction(String, String),
 
     /// Returns when there is no module with such name.
-    #[error("Module with name {0} doesn't loaded in Marine")]
+    #[error("module with name {0} doesn't loaded in Marine")]
     NoSuchModule(String),
 
     /// An error occurred when host functions tries to lift IValues from WValues and lowering back.
     #[error("{0}")]
     HostImportError(#[from] HostImportError),
 
-    /// WIT section parse error.
+    /// IT section parse error.
     #[error("{0}")]
-    WITParseError(#[from] WITParserError),
+    WITParseError(#[from] ITParserError),
 
-    /// Incorrect WIT section.
+    /// Incorrect IT section.
     #[error("{0}")]
     IncorrectWIT(String),
 

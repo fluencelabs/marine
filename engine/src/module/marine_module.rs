@@ -20,14 +20,14 @@ use super::RecordTypes;
 use crate::MResult;
 use crate::MModuleConfig;
 
-use marine_wit_interfaces::MITInterfaces;
-use marine_wit_parser::extract_wit_from_module;
+use marine_it_interfaces::MITInterfaces;
+use marine_it_parser::extract_it_from_module;
 use marine_utils::SharedString;
 use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
 use wasmer_runtime::compile;
 use wasmer_runtime::ImportObject;
-use wasmer_wit::interpreter::Interpreter;
+use wasmer_it::interpreter::Interpreter;
 
 use serde::Serialize;
 use serde::Deserialize;
@@ -38,12 +38,12 @@ use std::mem::MaybeUninit;
 use std::sync::Arc;
 use std::rc::Rc;
 
-type WITInterpreter =
-    Interpreter<ITInstance, WITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
+type ITInterpreter =
+    Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
 
 #[derive(Clone)]
 pub(super) struct ITModuleFunc {
-    interpreter: Arc<WITInterpreter>,
+    interpreter: Arc<ITInterpreter>,
     pub(super) arguments: Rc<Vec<IFunctionArg>>,
     pub(super) output_types: Rc<Vec<IType>>,
 }
@@ -64,7 +64,7 @@ pub(super) struct Callable {
 
 impl Callable {
     pub fn call(&mut self, args: &[IValue]) -> MResult<Vec<IValue>> {
-        use wasmer_wit::interpreter::stack::Stackable;
+        use wasmer_it::interpreter::stack::Stackable;
 
         let result = self
             .wit_module_func
@@ -118,10 +118,10 @@ impl MModule {
         let wasmer_module = compile(&wasm_bytes)?;
         crate::misc::check_sdk_version(name, &wasmer_module)?;
 
-        let wit = extract_wit_from_module(&wasmer_module)?;
-        crate::misc::check_it_version(name, &wit.version)?;
+        let it = extract_it_from_module(&wasmer_module)?;
+        crate::misc::check_it_version(name, &it.version)?;
 
-        let fce_wit = MITInterfaces::new(wit);
+        let fce_wit = MITInterfaces::new(it);
 
         let mut wit_instance = Arc::new_uninit();
         let wit_import_object = Self::adjust_wit_imports(&fce_wit, wit_instance.clone())?;
@@ -264,7 +264,7 @@ impl MModule {
         wit_instance: &Arc<ITInstance>,
         wit: &MITInterfaces<'_>,
     ) -> MResult<ExportFunctions> {
-        use marine_wit_interfaces::ITAstType;
+        use marine_it_interfaces::ITAstType;
 
         wit.implementations()
             .filter_map(|(adapter_function_type, core_function_type)| {
@@ -286,8 +286,7 @@ impl MModule {
                         arguments,
                         output_types,
                     } => {
-                        let interpreter: WITInterpreter =
-                            adapter_instructions.clone().try_into()?;
+                        let interpreter: ITInterpreter = adapter_instructions.clone().try_into()?;
                         let wit_module_func = ITModuleFunc {
                             interpreter: Arc::new(interpreter),
                             arguments: arguments.clone(),
@@ -316,7 +315,7 @@ impl MModule {
         wit: &MITInterfaces<'_>,
         wit_instance: Arc<MaybeUninit<ITInstance>>,
     ) -> MResult<ImportObject> {
-        use marine_wit_interfaces::ITAstType;
+        use marine_it_interfaces::ITAstType;
         use wasmer_core::typed_func::DynamicFunc;
         use wasmer_core::vm::Ctx;
 
@@ -337,15 +336,15 @@ impl MModule {
             DynamicFunc::new(Arc::new(FuncSig::new(inputs, outputs)), raw_import)
         }
 
-        // creates a closure that is represent a WIT module import
+        // creates a closure that is represent a IT module import
         fn create_raw_import(
             wit_instance: Arc<MaybeUninit<ITInstance>>,
-            interpreter: WITInterpreter,
+            interpreter: ITInterpreter,
             import_namespace: String,
             import_name: String,
         ) -> impl Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static {
             move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
-                use wasmer_wit::interpreter::stack::Stackable;
+                use wasmer_it::interpreter::stack::Stackable;
 
                 use super::type_converters::wval_to_ival;
                 use super::type_converters::ival_to_wval;
@@ -405,8 +404,7 @@ impl MModule {
                         arguments,
                         output_types,
                     } => {
-                        let interpreter: WITInterpreter =
-                            adapter_instructions.clone().try_into()?;
+                        let interpreter: ITInterpreter = adapter_instructions.clone().try_into()?;
 
                         let raw_import = create_raw_import(
                             wit_instance.clone(),
@@ -450,7 +448,7 @@ impl MModule {
         export_funcs: &ExportFunctions,
         wit_instance: &Arc<ITInstance>,
     ) -> MResult<RecordTypes> {
-        use marine_wit_generator::TYPE_RESOLVE_RECURSION_LIMIT;
+        use marine_it_generator::TYPE_RESOLVE_RECURSION_LIMIT;
         use MError::RecordResolveError;
 
         fn handle_itype(
@@ -459,7 +457,7 @@ impl MModule {
             export_record_types: &mut RecordTypes,
             recursion_level: u32,
         ) -> MResult<()> {
-            use wasmer_wit::interpreter::wasm::structures::Instance;
+            use wasmer_it::interpreter::wasm::structures::Instance;
 
             if recursion_level > TYPE_RESOLVE_RECURSION_LIMIT {
                 return Err(RecordResolveError(String::from(

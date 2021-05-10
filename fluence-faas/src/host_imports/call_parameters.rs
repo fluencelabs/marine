@@ -16,8 +16,8 @@
 
 use marine::HostImportDescriptor;
 use wasmer_core::vm::Ctx;
-use wasmer_wit::IValue;
-use wasmer_wit::IType;
+use wasmer_it::IValue;
+use wasmer_it::IType;
 
 use std::rc::Rc;
 use std::cell::RefCell;

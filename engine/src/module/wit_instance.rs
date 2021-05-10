@@ -19,10 +19,10 @@ use super::marine_module::MModule;
 use super::IRecordType;
 use crate::MResult;
 
-use marine_wit_interfaces::MITInterfaces;
-use marine_wit_interfaces::ITAstType;
-use wasmer_wit::interpreter::wasm;
-use wasmer_wit::interpreter::wasm::structures::{LocalImportIndex, TypedIndex};
+use marine_it_interfaces::MITInterfaces;
+use marine_it_interfaces::ITAstType;
+use wasmer_it::interpreter::wasm;
+use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, TypedIndex};
 use wasmer_core::Instance as WasmerInstance;
 
 use std::collections::HashMap;
@@ -31,13 +31,13 @@ use std::rc::Rc;
 
 pub type RecordTypes = HashMap<u64, Rc<IRecordType>>;
 
-/// Contains all import and export functions that could be called from WIT context by call-core.
+/// Contains all import and export functions that could be called from IT context by call-core.
 #[derive(Clone)]
 pub(super) struct ITInstance {
-    /// WIT functions indexed by id.
+    /// IT functions indexed by id.
     funcs: HashMap<usize, WITFunction>,
 
-    /// WIT memories.
+    /// IT memories.
     memories: Vec<WITMemory>,
 
     /// All record types that instance contains.
@@ -69,13 +69,13 @@ impl ITInstance {
 
     fn extract_raw_exports(
         wasmer_instance: &WasmerInstance,
-        wit: &MITInterfaces<'_>,
+        it: &MITInterfaces<'_>,
     ) -> MResult<HashMap<usize, WITFunction>> {
         use wasmer_core::DynFunc;
 
         let module_exports = &wasmer_instance.exports;
 
-        wit.exports()
+        it.exports()
             .enumerate()
             .map(|(export_id, export)| {
                 let export_func = module_exports.get(export.name)?;
@@ -107,7 +107,7 @@ impl ITInstance {
             .enumerate()
             .map(|(idx, import)| match modules.get(import.namespace) {
                 Some(module) => {
-                    use wasmer_wit::ast::Type;
+                    use wasmer_it::ast::Type;
                     let (arguments, output_types) =
                         match wit.type_by_idx_r(import.function_type - 2)? {
                             Type::Function {
@@ -116,7 +116,7 @@ impl ITInstance {
                             } => (arguments.clone(), output_types.clone()),
                             ty => {
                                 return Err(MError::IncorrectWIT(format!(
-                                    "WIT should has Type::Function, but {:?} met",
+                                    "IT should has Type::Function, but {:?} met",
                                     ty
                                 )))
                             }
@@ -176,11 +176,11 @@ impl ITInstance {
     }
 }
 
-impl wasm::structures::Instance<WITExport, WITFunction, WITMemory, WITMemoryView<'_>>
+impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<'_>>
     for ITInstance
 {
-    fn export(&self, _export_name: &str) -> Option<&WITExport> {
-        // exports aren't used in this version of WIT
+    fn export(&self, _export_name: &str) -> Option<&ITExport> {
+        // exports aren't used in this version of IT
         None
     }
 

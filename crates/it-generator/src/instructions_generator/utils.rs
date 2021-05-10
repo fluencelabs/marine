@@ -15,7 +15,7 @@
  */
 
 use super::IType;
-use crate::instructions_generator::WITResolver;
+use crate::instructions_generator::ITResolver;
 use crate::Result;
 
 use fluence_sdk_wit::ParsedType;
@@ -24,7 +24,7 @@ use fluence_sdk_wit::RustType;
 // return error if there is no record with such name
 pub(crate) fn ptype_to_itype_checked(
     pty: &ParsedType,
-    wit_resolver: &mut WITResolver<'_>,
+    it_resolver: &mut ITResolver<'_>,
 ) -> Result<IType> {
     match pty {
         ParsedType::I8(_) => Ok(IType::S8),
@@ -41,7 +41,7 @@ pub(crate) fn ptype_to_itype_checked(
         ParsedType::Utf8Str(_) => Ok(IType::String),
         ParsedType::Utf8String(_) => Ok(IType::String),
         ParsedType::Vector(ty, _) => {
-            let array_itype = ptype_to_itype_checked(ty, wit_resolver)?;
+            let array_itype = ptype_to_itype_checked(ty, it_resolver)?;
             if let IType::U8 = array_itype {
                 Ok(IType::ByteArray)
             } else {
@@ -49,7 +49,7 @@ pub(crate) fn ptype_to_itype_checked(
             }
         }
         ParsedType::Record(record_name, _) => {
-            let record_type_id = wit_resolver.get_record_type_id(record_name)?;
+            let record_type_id = it_resolver.get_record_type_id(record_name)?;
             Ok(IType::Record(record_type_id as _))
         }
     }
@@ -57,7 +57,7 @@ pub(crate) fn ptype_to_itype_checked(
 
 pub(crate) fn ptype_to_itype_unchecked(
     pty: &ParsedType,
-    wit_resolver: &mut WITResolver<'_>,
+    it_resolver: &mut ITResolver<'_>,
 ) -> IType {
     match pty {
         ParsedType::I8(_) => IType::S8,
@@ -74,7 +74,7 @@ pub(crate) fn ptype_to_itype_unchecked(
         ParsedType::Utf8Str(_) => IType::String,
         ParsedType::Utf8String(_) => IType::String,
         ParsedType::Vector(ty, _) => {
-            let array_itype = ptype_to_itype_unchecked(ty, wit_resolver);
+            let array_itype = ptype_to_itype_unchecked(ty, it_resolver);
             if let IType::U8 = array_itype {
                 IType::ByteArray
             } else {
@@ -82,7 +82,7 @@ pub(crate) fn ptype_to_itype_unchecked(
             }
         }
         ParsedType::Record(record_name, _) => {
-            let record_type_id = wit_resolver.get_record_type_id_unchecked(record_name);
+            let record_type_id = it_resolver.get_record_type_id_unchecked(record_name);
             IType::Record(record_type_id as _)
         }
     }

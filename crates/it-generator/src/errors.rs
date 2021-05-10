@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#![warn(rust_2018_idioms)]
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
 
-mod errors;
-mod fce_wit_interfaces;
+use thiserror::Error as ThisError;
+use serde_json::Error as SerdeDeserializationError;
 
-pub use errors::*;
-pub use self::fce_wit_interfaces::*;
+#[derive(Debug, ThisError)]
+pub enum ITGeneratorError {
+    /// An error related to serde deserialization.
+    #[error("Embedded by rust-sdk metadata couldn't be parsed by serde: {0:?}")]
+    DeserializationError(#[from] SerdeDeserializationError),
+
+    /// Various errors related to records
+    #[error("{0}")]
+    CorruptedRecord(String),
+
+    /// Various errors occurred during the parsing/emitting a Wasm file.
+    #[error("I/O error occurred: {0}")]
+    IOError(String),
+}

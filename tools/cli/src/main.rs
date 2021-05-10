@@ -94,7 +94,7 @@ fn set(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
 
 fn set_it(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let in_wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
-    let it_path = args.value_of(args::WIT_PATH).unwrap();
+    let it_path = args.value_of(args::IT_PATH).unwrap();
     let out_wasm_path = match args.value_of(args::OUT_WASM_PATH) {
         Some(path) => path,
         None => in_wasm_path,
@@ -103,7 +103,7 @@ fn set_it(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let it = std::fs::read(it_path)?;
     let it = String::from_utf8(it)?;
 
-    marine_wit_parser::embed_text_wit(in_wasm_path, out_wasm_path, &it)?;
+    marine_it_parser::embed_text_it(in_wasm_path, out_wasm_path, &it)?;
 
     println!("interface types were successfully embedded");
 
@@ -131,7 +131,7 @@ fn set_version(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
 fn it(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
 
-    let it = marine_wit_parser::extract_text_wit(wasm_path)?;
+    let it = marine_it_parser::extract_text_it(wasm_path)?;
     println!("{}", it);
 
     Ok(())
@@ -143,7 +143,7 @@ fn info(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let wasm_module = walrus::ModuleConfig::new().parse_file(wasm_path)?;
     let sdk_version = sdk_version::extract_from_module(&wasm_module)?;
     let module_manifest = manifest::extract_from_module(&wasm_module)?;
-    let it_version = marine_wit_parser::extract_version_from_module(&wasm_module)?;
+    let it_version = marine_it_parser::extract_version_from_module(&wasm_module)?;
 
     println!("it version:  {}", it_version);
     match sdk_version {
