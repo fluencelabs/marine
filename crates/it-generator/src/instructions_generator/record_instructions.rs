@@ -18,8 +18,8 @@ use super::ITGenerator;
 use super::ITResolver;
 use crate::Result;
 
-use fluence_sdk_wit::RecordType;
-use fluence_sdk_wit::RecordFields;
+use marine_macro_impl::RecordType;
+use marine_macro_impl::RecordFields;
 
 use wasmer_it::IRecordFieldType;
 use wasmer_it::IRecordType;

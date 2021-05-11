@@ -16,7 +16,7 @@
 
 #![allow(improper_ctypes)]
 
-use fluence::fce;
+use fluence::marine;
 use fluence::module_manifest;
 
 use test_record::TestRecord;
@@ -25,7 +25,7 @@ module_manifest!();
 
 pub fn main() {}
 
-#[fce]
+#[marine]
 pub fn invoke() -> TestRecord {
     let test_record = TestRecord {
         field_0: false,
@@ -46,7 +46,7 @@ pub fn invoke() -> TestRecord {
     mutate_struct(test_record)
 }
 
-#[fce]
+#[marine]
 #[link(wasm_import_module = "records_effector")]
 extern "C" {
     pub fn mutate_struct(test_record: TestRecord) -> TestRecord;

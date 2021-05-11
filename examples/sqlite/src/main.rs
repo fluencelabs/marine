@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use fluence::marine;
 use fluence::module_manifest;
 
 use marine_sqlite_connector;
@@ -24,9 +24,9 @@ module_manifest!();
 
 pub fn main() {}
 
-#[fce]
+#[marine]
 pub fn test1(age: i64) {
-    let connection = fce_sqlite_connector::open(":memory:").unwrap();
+    let connection = marine_sqlite_connector::open(":memory:").unwrap();
 
     connection
         .execute(
@@ -50,11 +50,11 @@ pub fn test1(age: i64) {
     }
 }
 
-#[fce]
+#[marine]
 pub fn test2(age: i64) {
     use marine_sqlite_connector::Value;
 
-    let connection = fce_sqlite_connector::open(":memory:").unwrap();
+    let connection = marine_sqlite_connector::open(":memory:").unwrap();
 
     connection
         .execute(
@@ -85,10 +85,10 @@ pub fn test2(age: i64) {
     }
 }
 
-#[fce]
+#[marine]
 pub fn test3() {
     let db_path = "/tmp/users.sqlite";
-    let connection = fce_sqlite_connector::open(db_path).expect("db should be opened");
+    let connection = marine_sqlite_connector::open(db_path).expect("db should be opened");
 
     connection
         .execute(
@@ -100,7 +100,7 @@ pub fn test3() {
         )
         .expect("table should be created successfully");
 
-    let connection = fce_sqlite_connector::open(db_path).expect("db should be opened");
+    let connection = marine_sqlite_connector::open(db_path).expect("db should be opened");
     let cursor = connection.prepare("SELECT * FROM users").unwrap().cursor();
 
     println!("table size is: {:?}", cursor.count());

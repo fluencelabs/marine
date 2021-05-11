@@ -18,8 +18,8 @@ use super::IType;
 use crate::instructions_generator::ITResolver;
 use crate::Result;
 
-use fluence_sdk_wit::ParsedType;
-use fluence_sdk_wit::RustType;
+use marine_macro_impl::ParsedType;
+use marine_macro_impl::RustType;
 
 // return error if there is no record with such name
 pub(crate) fn ptype_to_itype_checked(

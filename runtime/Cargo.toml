@@ -1,5 +1,5 @@
 [package]
-name = "marine"
+name = "marine-runtime"
 description = "Marine is the Fluence Compute Runtime"
 version = "0.5.0"
 authors = ["Fluence Labs"]
@@ -12,9 +12,9 @@ path = "src/lib.rs"
 
 [dependencies]
 marine-module-info-parser = { path = "../crates/module-info-parser", version = "0.1.0" }
-marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.3.0" }
-marine-it-parser = { path = "../crates/it-parser", version = "0.5.0" }
-marine-it-generator = { path = "../crates/it-generator", version = "0.4.0" }
+marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.4.0" }
+marine-it-parser = { path = "../crates/it-parser", version = "0.6.0" }
+marine-it-generator = { path = "../crates/it-generator", version = "0.5.0" }
 marine-utils = { path = "../crates/utils", version = "0.2.0" }
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }

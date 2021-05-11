@@ -14,6 +14,5 @@ name = "arguments_passing_effector"
 path = "src/effector.rs"
 
 [dependencies]
-# fluence = "0.6.1"
-fluence = "0.6.1"
+fluence = "0.6.4"
 safe-transmute = "0.11.0"

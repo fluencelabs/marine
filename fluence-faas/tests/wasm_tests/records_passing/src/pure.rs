@@ -16,15 +16,15 @@
 
 #![allow(improper_ctypes)]
 
-use fluence::fce;
+use fluence::marine;
 
-#[fce]
+#[marine]
 #[derive(Clone, Debug, Default)]
 pub struct TestRecord0 {
     pub field_0: i32,
 }
 
-#[fce]
+#[marine]
 #[derive(Clone, Debug, Default)]
 pub struct TestRecord1 {
     pub field_0: i32,
@@ -33,7 +33,7 @@ pub struct TestRecord1 {
     pub test_record_0: TestRecord0,
 }
 
-#[fce]
+#[marine]
 #[derive(Clone, Debug, Default)]
 pub struct TestRecord2 {
     pub test_record_0: TestRecord0,
@@ -42,7 +42,7 @@ pub struct TestRecord2 {
 
 fn main() {}
 
-#[fce]
+#[marine]
 pub fn test_record(test_record: TestRecord2) -> TestRecord2 {
     let mut test_record = effector::test_record(test_record);
 
@@ -56,7 +56,7 @@ pub fn test_record(test_record: TestRecord2) -> TestRecord2 {
     test_record
 }
 
-#[fce]
+#[marine]
 fn test_record_ref(test_record: &TestRecord2) -> TestRecord2 {
     let mut test_record = effector::test_record_ref(test_record);
 
@@ -71,10 +71,10 @@ fn test_record_ref(test_record: &TestRecord2) -> TestRecord2 {
 }
 
 mod effector {
-    use fluence::fce;
+    use fluence::marine;
     use super::TestRecord2;
 
-    #[fce]
+    #[marine]
     #[link(wasm_import_module = "records_passing_effector")]
     extern "C" {
         pub fn test_record(test_record: TestRecord2) -> TestRecord2;

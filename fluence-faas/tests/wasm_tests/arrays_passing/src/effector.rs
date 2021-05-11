@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use fluence::marine;
 
 pub fn main() {}
 
-#[fce]
+#[marine]
 pub fn byte_type(mut arg: Vec<u8>) -> Vec<u8> {
     arg.push(1);
     arg
 }
 
-#[fce]
+#[marine]
 pub fn inner_arrays_1(mut arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<Vec<Vec<Vec<u8>>>> {
     arg.push(vec![]);
     arg.push(vec![vec![]]);
@@ -34,14 +34,14 @@ pub fn inner_arrays_1(mut arg: Vec<Vec<Vec<Vec<u8>>>>) -> Vec<Vec<Vec<Vec<u8>>>>
     arg
 }
 
-#[fce]
+#[marine]
 #[derive(Debug, Default)]
 pub struct TestRecord {
     pub field_0: i32,
     pub field_1: Vec<Vec<u8>>,
 }
 
-#[fce]
+#[marine]
 pub fn inner_arrays_2(mut arg: Vec<Vec<Vec<Vec<TestRecord>>>>) -> Vec<Vec<Vec<Vec<TestRecord>>>> {
     arg.push(vec![]);
     arg.push(vec![vec![]]);
@@ -54,13 +54,13 @@ pub fn inner_arrays_2(mut arg: Vec<Vec<Vec<Vec<TestRecord>>>>) -> Vec<Vec<Vec<Ve
     arg
 }
 
-#[fce]
+#[marine]
 pub fn string_type(mut arg: Vec<String>) -> Vec<String> {
     arg.push(String::from("from effector"));
     arg
 }
 
-#[fce]
+#[marine]
 pub fn bool_type(mut arg: Vec<bool>) -> Vec<bool> {
     arg.push(true);
     arg.push(false);
@@ -68,26 +68,26 @@ pub fn bool_type(mut arg: Vec<bool>) -> Vec<bool> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn f32_type(mut arg: Vec<f32>) -> Vec<f32> {
     arg.push(13.37);
     arg
 }
 
-#[fce]
+#[marine]
 pub fn f64_type(mut arg: Vec<f64>) -> Vec<f64> {
     arg.push(13.37);
     arg
 }
 
-#[fce]
+#[marine]
 pub fn u32_type(mut arg: Vec<u32>) -> Vec<u32> {
     arg.push(13);
     arg.push(37);
     arg
 }
 
-#[fce]
+#[marine]
 pub fn u64_type(mut arg: Vec<u64>) -> Vec<u64> {
     arg.push(1);
     arg.push(2);
@@ -97,7 +97,7 @@ pub fn u64_type(mut arg: Vec<u64>) -> Vec<u64> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn i32_type(mut arg: Vec<i32>) -> Vec<i32> {
     arg.push(1);
     arg.push(2);
@@ -107,7 +107,7 @@ pub fn i32_type(mut arg: Vec<i32>) -> Vec<i32> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn i64_type(mut arg: Vec<i64>) -> Vec<i64> {
     arg.push(1);
     arg.push(2);
@@ -117,7 +117,7 @@ pub fn i64_type(mut arg: Vec<i64>) -> Vec<i64> {
     arg
 }
 
-#[fce]
+#[marine]
 pub fn empty_type() -> Vec<String> {
     vec![String::from("from effector")]
 }

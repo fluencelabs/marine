@@ -10,5 +10,5 @@ name = "sqlite_test"
 path = "src/main.rs"
 
 [dependencies]
-fluence = "0.6.1"
-#marine-sqlite-connector = "0.4.0"
+fluence = "0.6.4"
+marine-sqlite-connector = "0.4.0"

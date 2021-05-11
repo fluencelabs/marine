@@ -84,7 +84,7 @@ pub(crate) fn create_host_import_func(
 
         let lo_helper = LoHelper::new(&ctx, &allocate_func);
         let t = ILowerer::new(&lo_helper)
-            .map_err(|e| HostImportError::LowererError(e))
+            .map_err(HostImportError::LowererError)
             .and_then(|lowerer| ivalue_to_wvalues(&lowerer, result));
 
         let wvalues = match t {

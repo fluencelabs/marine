@@ -16,7 +16,7 @@
 
 #![allow(improper_ctypes)]
 
-use fluence::fce;
+use fluence::marine;
 use fluence::module_manifest;
 
 use fluence::WasmLoggerBuilder;
@@ -29,7 +29,7 @@ pub fn main() {
     WasmLoggerBuilder::new().build().unwrap();
 }
 
-#[fce]
+#[marine]
 pub fn download(url: String) -> String {
     log::info!("download called with url {}\n", url);
 
@@ -39,7 +39,7 @@ pub fn download(url: String) -> String {
 }
 
 /// Permissions in `Config.toml` should exist to use host functions.
-#[fce]
+#[marine]
 #[link(wasm_import_module = "host")]
 extern "C" {
     fn curl(cmd: Vec<String>) -> MountedBinaryResult;

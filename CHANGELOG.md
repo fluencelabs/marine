@@ -4,17 +4,17 @@
 
 1. **Support of references** in the following form:
      ```rust
-    #[fce]
+    #[marine]
     fn foo(arg: &Vec<Vec<u8>>) → Vec<u8>
     ```
 
     ```rust
-    #[fce]
+    #[marine]
     fn foo(arg: &String) → &String
    ```
 
     ```rust
-    #[fce]
+    #[marine]
     #[link(wasm_import_module = "module_name")]
     extern "C" {
       fn foo(arg: &Vec<&Vec<&String>>) → Vec<Vec<u8>>;
@@ -24,12 +24,12 @@
 
 2. Added **&str** type:
      ```rust
-    #[fce]
+    #[marine]
     fn foo(arg: &str) → &str
     ```
     
    ```rust
-    #[fce]
+    #[marine]
     #[link(wasm_import_module = "module_name")]
     extern "C" {
       fn foo(arg: &Vec<&Vec<&str>>) → Vec<Vec<u8>>;

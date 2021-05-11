@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-use fluence::fce;
+use fluence::marine;
 
-#[fce]
+#[marine]
 #[derive(Clone, Debug, Default)]
 pub struct TestRecord0 {
     pub field_0: i32,
 }
 
-#[fce]
+#[marine]
 #[derive(Clone, Debug, Default)]
 pub struct TestRecord1 {
     pub field_0: i32,
@@ -31,7 +31,7 @@ pub struct TestRecord1 {
     pub test_record_0: TestRecord0,
 }
 
-#[fce]
+#[marine]
 #[derive(Clone, Debug, Default)]
 pub struct TestRecord2 {
     pub test_record_0: TestRecord0,
@@ -40,14 +40,14 @@ pub struct TestRecord2 {
 
 fn main() {}
 
-#[fce]
+#[marine]
 pub fn test_record(mut test_record: TestRecord2) -> TestRecord2 {
     test_record.test_record_0 = TestRecord0 { field_0: 1 };
 
     test_record
 }
 
-#[fce]
+#[marine]
 pub fn test_record_ref(test_record: &mut TestRecord2) -> TestRecord2 {
     test_record.test_record_0 = TestRecord0 { field_0: 1 };
 

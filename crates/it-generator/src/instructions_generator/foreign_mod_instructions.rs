@@ -21,10 +21,10 @@ use crate::Result;
 use crate::default_export_api_config::*;
 use crate::instructions_generator::utils::wtype_to_itype;
 
-use fluence_sdk_wit::ExternModType;
-use fluence_sdk_wit::ExternFnType;
-use fluence_sdk_wit::ParsedType;
-use fluence_sdk_wit::FnArgument;
+use marine_macro_impl::ExternModType;
+use marine_macro_impl::ExternFnType;
+use marine_macro_impl::ParsedType;
+use marine_macro_impl::FnArgument;
 use wasmer_it::ast::FunctionArg as IFunctionArg;
 use wasmer_it::interpreter::Instruction;
 use wasmer_it::IType;
@@ -303,7 +303,7 @@ impl ForeignModInstructionGenerator for ParsedType {
     }
 }
 
-use fluence_sdk_wit::RustType;
+use marine_macro_impl::RustType;
 
 pub fn to_raw_input_types(arg: &FnArgument) -> Vec<IFunctionArg> {
     match arg.ty {

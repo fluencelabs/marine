@@ -412,7 +412,7 @@ pub fn string_type() {
     );
     assert!(result2.is_err());
 
-    let expected_result = json!(["Fluence", "fce", "from effector", "test"]);
+    let expected_result = json!(["Fluence", "marine", "from effector", "test"]);
 
     let result3 = call_faas!(
         faas,

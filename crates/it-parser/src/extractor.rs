@@ -30,17 +30,17 @@ pub fn module_interface<P>(module_path: P) -> Result<ServiceInterface>
 where
     P: AsRef<Path>,
 {
-    create_fce_it_with(module_path, |it| get_interface(&it))
+    create_mit_with(module_path, |it| get_interface(&it))
 }
 
 pub fn module_raw_interface<P>(module_path: P) -> Result<MModuleInterface>
 where
     P: AsRef<Path>,
 {
-    create_fce_it_with(module_path, |it| get_raw_interface(&it))
+    create_mit_with(module_path, |it| get_raw_interface(&it))
 }
 
-fn create_fce_it_with<P, T>(
+fn create_mit_with<P, T>(
     module_path: P,
     transformer: impl FnOnce(MITInterfaces<'_>) -> Result<T>,
 ) -> Result<T>
@@ -52,9 +52,9 @@ where
         .map_err(ITParserError::CorruptedWasmFile)?;
     let raw_custom_section = extract_custom_section(&module)?;
     let custom_section_bytes = raw_custom_section.as_ref();
-    let wit = extract_it_from_bytes(custom_section_bytes)?;
+    let it = extract_it_from_bytes(custom_section_bytes)?;
 
-    let fce_interface = MITInterfaces::new(wit);
+    let mit = MITInterfaces::new(it);
 
-    transformer(fce_interface)
+    transformer(mit)
 }

@@ -42,23 +42,23 @@ pub struct MModuleInterface {
     pub function_signatures: Vec<MFunctionSignature>,
 }
 
-pub fn get_interface(fce_it_interface: &MITInterfaces<'_>) -> Result<ServiceInterface> {
-    let fce_interface = get_raw_interface(fce_it_interface)?;
-    let service_interface = into_service_interface(fce_interface);
+pub fn get_interface(mit: &MITInterfaces<'_>) -> Result<ServiceInterface> {
+    let marine_interface = get_raw_interface(mit)?;
+    let service_interface = into_service_interface(marine_interface);
 
     Ok(service_interface)
 }
 
-pub fn get_raw_interface(fce_it_interface: &MITInterfaces<'_>) -> Result<MModuleInterface> {
-    let function_signatures = get_exports(fce_it_interface)?;
-    let record_types = extract_record_types(fce_it_interface);
+pub fn get_raw_interface(mit: &MITInterfaces<'_>) -> Result<MModuleInterface> {
+    let function_signatures = get_exports(mit)?;
+    let record_types = extract_record_types(mit);
 
-    let fce_interface = MModuleInterface {
+    let mm_interface = MModuleInterface {
         record_types,
         function_signatures,
     };
 
-    Ok(fce_interface)
+    Ok(mm_interface)
 }
 
 fn get_exports(it: &MITInterfaces<'_>) -> Result<Vec<MFunctionSignature>> {
@@ -138,10 +138,10 @@ pub struct ServiceInterface {
     pub record_types: Vec<RecordType>,
 }
 
-pub(crate) fn into_service_interface(fce_interface: MModuleInterface) -> ServiceInterface {
-    let record_types = fce_interface.record_types;
+pub(crate) fn into_service_interface(mm_interface: MModuleInterface) -> ServiceInterface {
+    let record_types = mm_interface.record_types;
 
-    let function_signatures = fce_interface
+    let function_signatures = mm_interface
         .function_signatures
         .into_iter()
         .map(|sign| serialize_function_signature(sign, &record_types))

@@ -32,6 +32,7 @@ pub type ImportName<'a> = &'a str;
 pub type ImportNamespace<'a> = &'a str;
 pub type ITAstType = Type;
 
+#[derive(Debug)]
 pub struct MITInterfaces<'a> {
     /// All the types.
     types: Vec<ITAstType>,
