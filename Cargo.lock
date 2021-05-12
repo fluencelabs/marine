@@ -664,9 +664,9 @@ dependencies = [
 
 [[package]]
 name = "fluence"
-version = "0.6.4"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "916f05f558b0de8a21b5447a6a790ac8d312324ced8b43a713b30a82b891720c"
+checksum = "bd1f159a4da6aef89e8e4a0bf061a8031d669d03d9928266942581a52df03f56"
 dependencies = [
  "fluence-sdk-main",
  "marine-macro",
@@ -728,9 +728,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95a32b74adb1bf8d2783a4690c378c7ebfc5cc1abaa6f99c6537d1a0f1a19e5d"
+checksum = "b3a5d1ca20ada064379d959a9a82f9c006e4d9388533cf06010186fef6dd583b"
 dependencies = [
  "log",
  "marine-macro",
@@ -786,43 +786,44 @@ checksum = "3dcaa9ae7725d12cdb85b3ad99a434db70b468c09ded17e012d86b5c1010f7a7"
 
 [[package]]
 name = "futures-channel"
-version = "0.3.14"
+version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce79c6a52a299137a6013061e0cf0e688fce5d7f1bc60125f520912fdb29ec25"
+checksum = "e682a68b29a882df0545c143dc3646daefe80ba479bcdede94d5a703de2871e2"
 dependencies = [
  "futures-core",
 ]
 
 [[package]]
 name = "futures-core"
-version = "0.3.14"
+version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "098cd1c6dda6ca01650f1a37a794245eb73181d0d4d4e955e2f3c37db7af1815"
+checksum = "0402f765d8a89a26043b889b26ce3c4679d268fa6bb22cd7c6aad98340e179d1"
 
 [[package]]
 name = "futures-io"
-version = "0.3.14"
+version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "365a1a1fb30ea1c03a830fdb2158f5236833ac81fa0ad12fe35b29cddc35cb04"
+checksum = "acc499defb3b348f8d8f3f66415835a9131856ff7714bf10dadfc4ec4bdb29a1"
 
 [[package]]
 name = "futures-sink"
-version = "0.3.14"
+version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c5629433c555de3d82861a7a4e3794a4c40040390907cfbfd7143a92a426c23"
+checksum = "a57bead0ceff0d6dde8f465ecd96c9338121bb7717d3e7b108059531870c4282"
 
 [[package]]
 name = "futures-task"
-version = "0.3.14"
+version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba7aa51095076f3ba6d9a1f702f74bd05ec65f555d70d2033d55ba8d69f581bc"
+checksum = "8a16bef9fc1a4dddb5bee51c989e3fbba26569cbb0e31f5b303c184e3dd33dae"
 
 [[package]]
 name = "futures-util"
-version = "0.3.14"
+version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c144ad54d60f23927f0a6b6d816e4271278b64f005ad65e4e35291d2de9c025"
+checksum = "feb5c238d27e2bf94ffdfd27b2c29e3df4a68c4193bb6427384259e2bf191967"
 dependencies = [
+ "autocfg",
  "futures-core",
  "futures-io",
  "futures-task",
@@ -1399,18 +1400,18 @@ dependencies = [
 
 [[package]]
 name = "marine-macro"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b939048200868595393f9f42696398f683ed23d45e7ee7a0199cf1cfce7303d"
+checksum = "1c1652b6ac1bbdde9a66c16c8a2f9cd34d005a1f1b211a538c5b28764faa6ef4"
 dependencies = [
  "marine-macro-impl",
 ]
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58a4b4e7308a9401f08a46bddd1f7221bbdeb0ed6530b95f5956451084b72439"
+checksum = "80fee75eaf1a97ee9fe2d382c0537c06a79e5d7ab9d81bda6cb263fb8fd1a15a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1777,9 +1778,9 @@ dependencies = [
 
 [[package]]
 name = "openssl-probe"
-version = "0.1.2"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77af24da69f9d9341038eba93a073b1fdaaa1b788221b00a69bce9e762cb32de"
+checksum = "28988d872ab76095a6e6ac88d99b54fd267702734fd7ffe610ca27f533ddb95a"
 
 [[package]]
 name = "openssl-sys"

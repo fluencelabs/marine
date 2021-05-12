@@ -63,9 +63,10 @@ fn wasm_ast_extractor(wasm_module: &walrus::Module) -> Result<ModuleAST> {
 
     // consider only sections name of that starts with GENERATED_SECTION_PREFIX
     for custom_module in wasm_module.customs.iter().filter(|(_, section)| {
-        section
-            .name()
-            .starts_with(marine_macro_impl::GENERATED_SECTION_PREFIX)
+        let name = section.name();
+
+        name.starts_with(marine_macro_impl::GENERATED_SECTION_PREFIX)
+            || name.starts_with(marine_macro_impl::GENERATED_SECTION_PREFIX_FCE)
     }) {
         let default_ids = walrus::IdsToIndices::default();
         let raw_data = custom_module.1.data(&default_ids);
