@@ -26,6 +26,7 @@ use serde::Deserialize;
 
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::fmt::Formatter;
 
 pub type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
 
@@ -132,6 +133,20 @@ pub struct RecordType {
     pub fields: Vec<(String, String)>,
 }
 
+use std::fmt;
+
+impl fmt::Display for RecordType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        writeln!(f, "data {}:", self.name)?;
+
+        for (name, ty) in self.fields.iter() {
+            writeln!(f, "  {}: {}", name, ty)?;
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(Serialize)]
 pub struct ServiceInterface {
     pub function_signatures: Vec<FunctionSignature>,
@@ -199,6 +214,7 @@ fn serialize_record_type(
     }
 }
 
+// TODO: refactor it to avoid code deduplication
 fn itype_text_view(arg_ty: &IType, record_types: &MRecordTypes) -> String {
     match arg_ty {
         IType::Record(record_type_id) => {
@@ -207,7 +223,21 @@ fn itype_text_view(arg_ty: &IType, record_types: &MRecordTypes) -> String {
             let record = record_types.get(record_type_id).unwrap();
             record.name.clone()
         }
-        IType::Array(array_ty) => format!("Array<{}>", itype_text_view(array_ty, record_types)),
-        t => format!("{:?}", t),
+        IType::Array(array_ty) => format!("[]{}", itype_text_view(array_ty, record_types)),
+        IType::Boolean => "bool".to_string(),
+        IType::S8 => "i8".to_string(),
+        IType::S16 => "i16".to_string(),
+        IType::S32 => "i32".to_string(),
+        IType::S64 => "i64".to_string(),
+        IType::U8 => "u8".to_string(),
+        IType::U16 => "u16".to_string(),
+        IType::U32 => "u32".to_string(),
+        IType::U64 => "u64".to_string(),
+        IType::F32 => "f32".to_string(),
+        IType::F64 => "f64".to_string(),
+        IType::String => "string".to_string(),
+        IType::ByteArray => "[]u8".to_string(),
+        IType::I32 => "i32".to_string(),
+        IType::I64 => "i64".to_string(),
     }
 }

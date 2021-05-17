@@ -24,7 +24,6 @@ use serde::Serialize;
 
 use std::fmt;
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct FaaSInterface<'a> {
@@ -33,67 +32,82 @@ pub struct FaaSInterface<'a> {
 
 impl<'a> fmt::Display for FaaSInterface<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut printed_record_types: HashSet<&IRecordType> = HashSet::new();
-
-        for (_, module_interface) in self.modules.iter() {
-            for (_, record_type) in module_interface.record_types.iter() {
-                if !printed_record_types.insert(record_type) {
-                    // do not print record if it has been already printed
-                    continue;
-                }
-
-                writeln!(f, "{} {{", record_type.name)?;
-
-                for field in record_type.fields.iter() {
-                    writeln!(
-                        f,
-                        "  {}: {}",
-                        field.name,
-                        itype_text_view(&field.ty, &module_interface.record_types)
-                    )?;
-                }
-
-                writeln!(f, "}}")?;
-            }
-        }
-
-        for (name, module_interface) in self.modules.iter() {
-            writeln!(f, "\n{}:", *name)?;
-
-            for function_signature in module_interface.function_signatures.iter() {
-                write!(f, "  fn {}(", function_signature.name)?;
-
-                let args = function_signature
-                    .arguments
-                    .iter()
-                    .map(|arg| {
-                        format!(
-                            "{}: {}",
-                            arg.name,
-                            itype_text_view(&arg.ty, &module_interface.record_types)
-                        )
-                    })
-                    .join(", ");
-
-                let outputs = &function_signature.outputs;
-                if outputs.is_empty() {
-                    writeln!(f, "{})", args)?;
-                } else if outputs.len() == 1 {
-                    writeln!(
-                        f,
-                        "{}) -> {}",
-                        args,
-                        itype_text_view(&outputs[0], &module_interface.record_types)
-                    )?;
-                } else {
-                    // At now, multi values aren't supported - only one output type is possible
-                    unimplemented!()
-                }
-            }
-        }
-
-        Ok(())
+        print_record_types(self.modules.values(), f)?;
+        print_functions_sign(self.modules.iter(), f)
     }
+}
+
+fn print_record_types<'r>(
+    modules: impl Iterator<Item = &'r FaaSModuleInterface<'r>>,
+    f: &mut fmt::Formatter<'_>,
+) -> fmt::Result {
+    use std::collections::HashSet;
+
+    let mut printed_record_types: HashSet<&IRecordType> = HashSet::new();
+
+    for module in modules {
+        for (_, record_type) in module.record_types.iter() {
+            if !printed_record_types.insert(record_type) {
+                // do not print record if it has been already printed
+                continue;
+            }
+
+            writeln!(f, "data {}:", record_type.name)?;
+
+            for field in record_type.fields.iter() {
+                writeln!(
+                    f,
+                    "  {}: {}",
+                    field.name,
+                    itype_text_view(&field.ty, &module.record_types)
+                )?;
+            }
+        }
+    }
+
+    writeln!(f, "")
+}
+
+fn print_functions_sign<'r>(
+    modules: impl Iterator<Item = (&'r &'r str, &'r FaaSModuleInterface<'r>)>,
+    f: &mut fmt::Formatter<'_>,
+) -> fmt::Result {
+    for (name, module_interface) in modules {
+        writeln!(f, "{}:", *name)?;
+
+        for function_signature in module_interface.function_signatures.iter() {
+            write!(f, "  fn {}(", function_signature.name)?;
+
+            let args = function_signature
+                .arguments
+                .iter()
+                .map(|arg| {
+                    format!(
+                        "{}: {}",
+                        arg.name,
+                        itype_text_view(&arg.ty, &module_interface.record_types)
+                    )
+                })
+                .join(", ");
+
+            let outputs = &function_signature.outputs;
+            if outputs.is_empty() {
+                writeln!(f, "{})", args)?;
+            } else if outputs.len() == 1 {
+                writeln!(
+                    f,
+                    "{}) -> {}",
+                    args,
+                    itype_text_view(&outputs[0], &module_interface.record_types)
+                )?;
+            } else {
+                // At now, multi values aren't supported - only one output type is possible
+                unimplemented!()
+            }
+        }
+    }
+
+    Ok(())
 }
 
 pub fn itype_text_view(arg_ty: &IType, record_types: &RecordTypes) -> String {
@@ -104,7 +118,21 @@ pub fn itype_text_view(arg_ty: &IType, record_types: &RecordTypes) -> String {
             let record = record_types.get(record_type_id).unwrap();
             record.name.clone()
         }
-        IType::Array(array_ty) => format!("Array<{}>", itype_text_view(array_ty, record_types)),
-        t => format!("{:?}", t),
+        IType::Array(array_ty) => format!("[]{}", itype_text_view(array_ty, record_types)),
+        IType::Boolean => "bool".to_string(),
+        IType::S8 => "i8".to_string(),
+        IType::S16 => "i16".to_string(),
+        IType::S32 => "i32".to_string(),
+        IType::S64 => "i64".to_string(),
+        IType::U8 => "u8".to_string(),
+        IType::U16 => "u16".to_string(),
+        IType::U32 => "u32".to_string(),
+        IType::U64 => "u64".to_string(),
+        IType::F32 => "f32".to_string(),
+        IType::F64 => "f64".to_string(),
+        IType::String => "string".to_string(),
+        IType::ByteArray => "[]u8".to_string(),
+        IType::I32 => "i32".to_string(),
+        IType::I64 => "i64".to_string(),
     }
 }

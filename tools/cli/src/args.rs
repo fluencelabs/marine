@@ -26,6 +26,16 @@ pub const OUT_WASM_PATH: &str = "out-wasm-path";
 
 pub const SDK_VERSION: &str = "sdk-version";
 
+pub fn aqua<'a, 'b>() -> App<'a, 'b> {
+    SubCommand::with_name("aqua")
+        .about("Shows data types of provided module in a format suitable for Aqua")
+        .args(&[Arg::with_name(IN_WASM_PATH)
+            .required(true)
+            .takes_value(true)
+            .short("i")
+            .help("a path to a Wasm file")])
+}
+
 pub fn build<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("build")
         .about("Builds provided Rust project to Wasm")

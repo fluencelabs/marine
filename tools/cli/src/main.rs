@@ -39,6 +39,7 @@ pub fn main() -> Result<(), anyhow::Error> {
         .version(args::VERSION)
         .author(args::AUTHORS)
         .setting(clap::AppSettings::ArgRequiredElseHelp)
+        .subcommand(args::aqua())
         .subcommand(args::build())
         .subcommand(args::set())
         .subcommand(args::show_manifest())
@@ -47,6 +48,7 @@ pub fn main() -> Result<(), anyhow::Error> {
     let arg_matches = app.get_matches();
 
     match arg_matches.subcommand() {
+        ("aqua", Some(args)) => aqua(args),
         ("build", Some(args)) => build(args),
         ("set", Some(args)) => set(args),
         ("it", Some(args)) => it(args),
@@ -71,6 +73,17 @@ pub fn main() -> Result<(), anyhow::Error> {
             color::Fg(color::LightBlack),
             color::Fg(color::Reset)
         );
+    }
+
+    Ok(())
+}
+
+fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+    let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
+
+    let service_interface = marine_it_parser::module_interface(wasm_path)?;
+    for record in service_interface.record_types.iter() {
+        println!("{}", record);
     }
 
     Ok(())
