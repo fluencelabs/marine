@@ -12,10 +12,10 @@ marine-utils = { path = "../crates/utils", version = "0.2.0" }
 fluence-sdk-main = { version = "0.6.3", features = ["logger"] }
 fluence = { version = "0.6.3", features = ["logger"] }
 
-wasmer-runtime = { package = "wasmer-runtime-fl", path = "/Users/mike/dev/work/fluence/wasm/wasmer/lib/runtime", version = "0.17.0" }
+wasmer-runtime = { package = "wasmer-runtime-fl", git = "https://github.com/fluencelabs/wasmer", branch = "fluence_instrument", version = "0.17.0" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
-wasmer-core = { package = "wasmer-runtime-core-fl", path = "/Users/mike/dev/work/fluence/wasm/wasmer/lib/runtime-core", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
-wasmer-wasi = { package = "wasmer-wasi-fl", path = "/Users/mike/dev/work/fluence/wasm/wasmer/lib/wasi", version = "0.17.0" }
+wasmer-core = { package = "wasmer-runtime-core-fl", git = "https://github.com/fluencelabs/wasmer", branch = "fluence_instrument", version = "0.17.0", features = ["dynamicfunc-fat-closures"] }
+wasmer-wasi = { package = "wasmer-wasi-fl", git = "https://github.com/fluencelabs/wasmer", branch = "fluence_instrument", version = "0.17.0" }
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.0" }
 
 toml = "0.5.6"
