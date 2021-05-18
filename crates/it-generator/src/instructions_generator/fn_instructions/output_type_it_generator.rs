@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ use wasmer_it::interpreter::Instruction;
 use wasmer_it::IType;
 
 /// Generates IT instructions for a output type of an export function.
-pub(super) trait OutputTypeGenerator {
+pub(super) trait OutputITGenerator {
     fn generate_instructions_for_output_type<'a>(
         &self,
         it_resolver: &mut ITResolver<'a>,
     ) -> Result<Vec<Instruction>>;
 }
 
-impl OutputTypeGenerator for ParsedType {
+impl OutputITGenerator for ParsedType {
     #[rustfmt::skip]
     fn generate_instructions_for_output_type<'a>(&self, it_resolver: &mut ITResolver<'a>) -> Result<Vec<Instruction>> {
         let instructions = match self {

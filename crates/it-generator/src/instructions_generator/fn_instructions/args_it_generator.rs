@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,17 @@ use wasmer_it::interpreter::Instruction;
 use wasmer_it::IType;
 
 /// Generates IT instructions for a argument of an export function.
-pub(super) trait ArgumentTypeGenerator {
-    fn generate_instructions_for_input_type<'a>(
+pub(super) trait ArgumentITGenerator {
+    fn generate_instructions_for_arg<'a>(
         &self,
         arg_id: u32,
         it_resolver: &mut ITResolver<'a>,
     ) -> Result<Vec<Instruction>>;
 }
 
-impl ArgumentTypeGenerator for ParsedType {
+impl ArgumentITGenerator for ParsedType {
     #[rustfmt::skip]
-    fn generate_instructions_for_input_type<'a>(&self, index: u32, it_resolver: &mut ITResolver<'a>) -> Result<Vec<Instruction>> {
+    fn generate_instructions_for_arg<'a>(&self, index: u32, it_resolver: &mut ITResolver<'a>) -> Result<Vec<Instruction>> {
         let instructions = match self {
             ParsedType::Boolean(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromBool],
             ParsedType::I8(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS8],

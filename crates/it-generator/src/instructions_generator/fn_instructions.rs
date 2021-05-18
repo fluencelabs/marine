@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-mod input_type_generator;
-mod output_type_generator;
+mod args_it_generator;
+mod output_type_it_generator;
 
 use super::ITGenerator;
 use super::ITResolver;
-use super::utils::ptype_to_itype_checked;
+use super::utils::*;
 use crate::Result;
 use crate::default_export_api_config::RELEASE_OBJECTS;
 
 use marine_macro_impl::FnType;
 use wasmer_it::interpreter::Instruction;
-use wasmer_it::ast::FunctionArg as IFunctionArg;
-
-use std::rc::Rc;
 
 impl ITGenerator for FnType {
     fn generate_it<'a>(&'a self, it_resolver: &mut ITResolver<'a>) -> Result<()> {
@@ -39,27 +36,8 @@ impl ITGenerator for FnType {
 fn generate_it_types<'f>(fn_type: &'f FnType, it_resolver: &mut ITResolver<'f>) -> Result<()> {
     use wasmer_it::ast::Type;
 
-    let arguments = fn_type
-        .signature
-        .arguments
-        .iter()
-        .map(|arg| -> Result<IFunctionArg> {
-            Ok(IFunctionArg {
-                name: arg.name.clone(),
-                ty: ptype_to_itype_checked(&arg.ty, it_resolver)?,
-            })
-        })
-        .collect::<Result<Vec<_>>>()?;
-
-    let arguments = Rc::new(arguments);
-
-    let output_types = fn_type
-        .signature
-        .output_types
-        .iter()
-        .map(|ty| ptype_to_itype_checked(ty, it_resolver))
-        .collect::<Result<Vec<_>>>()?;
-    let output_types = Rc::new(output_types);
+    let arguments = generate_it_args(&fn_type.signature, it_resolver)?;
+    let output_types = generate_it_output_type(&fn_type.signature, it_resolver)?;
 
     let interfaces = &mut it_resolver.interfaces;
     interfaces.types.push(Type::Function {
@@ -84,8 +62,8 @@ fn generate_it_types<'f>(fn_type: &'f FnType, it_resolver: &mut ITResolver<'f>) 
 }
 
 fn generate_instructions<'f>(fn_type: &'f FnType, it_resolver: &mut ITResolver<'f>) -> Result<()> {
-    use input_type_generator::ArgumentTypeGenerator;
-    use output_type_generator::OutputTypeGenerator;
+    use args_it_generator::ArgumentITGenerator;
+    use output_type_it_generator::OutputITGenerator;
     use wasmer_it::ast::Adapter;
 
     let mut instructions = fn_type
@@ -96,7 +74,7 @@ fn generate_instructions<'f>(fn_type: &'f FnType, it_resolver: &mut ITResolver<'
         .try_fold::<_, _, Result<_>>(Vec::new(), |mut instructions, (arg_id, arg)| {
             let new_instructions = arg
                 .ty
-                .generate_instructions_for_input_type(arg_id as _, it_resolver)?;
+                .generate_instructions_for_arg(arg_id as _, it_resolver)?;
 
             instructions.extend(new_instructions);
             Ok(instructions)
@@ -107,7 +85,7 @@ fn generate_instructions<'f>(fn_type: &'f FnType, it_resolver: &mut ITResolver<'
         function_index: export_function_index,
     });
 
-    let mut shoud_generate_release = false;
+    let mut should_generate_release = false;
     let mut instructions = fn_type
         .signature
         .output_types
@@ -116,12 +94,14 @@ fn generate_instructions<'f>(fn_type: &'f FnType, it_resolver: &mut ITResolver<'
             let new_instructions = ty.generate_instructions_for_output_type(it_resolver)?;
             instructions.extend(new_instructions);
 
-            shoud_generate_release |= ty.is_complex_type();
+            should_generate_release |= ty.is_complex_type();
             Ok(instructions)
         })?;
 
-    if shoud_generate_release {
-        instructions.push(Instruction::CallCore { function_index: RELEASE_OBJECTS.id });
+    if should_generate_release {
+        instructions.push(Instruction::CallCore {
+            function_index: RELEASE_OBJECTS.id,
+        });
     }
 
     let interfaces = &mut it_resolver.interfaces;
