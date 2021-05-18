@@ -28,6 +28,7 @@ use marine_macro_impl::ExternModType;
 use marine_macro_impl::ExternFnType;
 use marine_macro_impl::ParsedType;
 use marine_macro_impl::FnArgument;
+use marine_macro_impl::FnSignature;
 use wasmer_it::ast::FunctionArg as IFunctionArg;
 use wasmer_it::interpreter::Instruction;
 use wasmer_it::IType;
@@ -76,37 +77,17 @@ fn generate_it_types<'f>(
         output_types,
     });
 
-    let raw_inputs = fn_type
-        .signature
-        .arguments
-        .iter()
-        .map(to_raw_input_types)
-        .flatten()
-        .collect::<Vec<_>>();
-    let raw_inputs = Rc::new(raw_inputs);
-
-    let raw_outputs = fn_type
-        .signature
-        .output_types
-        .iter()
-        .map(|ty| {
-            to_raw_output_type(ty)
-                .iter()
-                .map(wtype_to_itype)
-                .collect::<Vec<_>>()
-        })
-        .flatten()
-        .collect::<Vec<_>>();
-    let raw_outputs = Rc::new(raw_outputs);
+    let raw_arguments = generate_raw_args(&fn_type.signature);
+    let raw_output_types = generate_raw_output_type(&fn_type.signature);
 
     interfaces.types.push(Type::Function {
-        arguments: raw_inputs.clone(),
-        output_types: raw_outputs.clone(),
+        arguments: raw_arguments.clone(),
+        output_types: raw_output_types.clone(),
     });
 
     interfaces.types.push(Type::Function {
-        arguments: raw_inputs,
-        output_types: raw_outputs,
+        arguments: raw_arguments,
+        output_types: raw_output_types,
     });
 
     let import_idx = (interfaces.types.len() - 3) as u32;
@@ -198,6 +179,38 @@ fn generate_it_instructions<'f>(
     it_resolver.interfaces.implementations.push(implementation);
 
     Ok(())
+}
+
+pub(crate) fn generate_raw_args<'f>(
+    signature: &FnSignature,
+) -> Rc<Vec<IFunctionArg>> {
+    let raw_inputs =
+        signature
+        .arguments
+        .iter()
+        .map(to_raw_input_types)
+        .flatten()
+        .collect::<Vec<_>>();
+
+    Rc::new(raw_inputs)
+}
+
+pub(crate) fn generate_raw_output_type<'f>(
+    signature: &FnSignature,
+) -> Rc<Vec<IType>> {
+    let raw_outputs = signature
+        .output_types
+        .iter()
+        .map(|ty| {
+            to_raw_output_type(ty)
+                .iter()
+                .map(wtype_to_itype)
+                .collect::<Vec<_>>()
+        })
+        .flatten()
+        .collect::<Vec<_>>();
+
+    Rc::new(raw_outputs)
 }
 
 use marine_macro_impl::RustType;
