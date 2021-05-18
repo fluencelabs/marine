@@ -700,9 +700,9 @@ dependencies = [
 
 [[package]]
 name = "fluence"
-version = "0.6.5"
+version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd1f159a4da6aef89e8e4a0bf061a8031d669d03d9928266942581a52df03f56"
+checksum = "a92116bbed3be3afee952d62d6009f1a365bde985a1cf59fb933144308660743"
 dependencies = [
  "fluence-sdk-main",
  "marine-macro",
@@ -805,9 +805,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-sdk-main"
-version = "0.6.4"
+version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3a5d1ca20ada064379d959a9a82f9c006e4d9388533cf06010186fef6dd583b"
+checksum = "fcbf30472768d331ea6a6853bdf1fc6166ba697d46a9ce74c3ccf5764a58414a"
 dependencies = [
  "log",
  "marine-macro",
@@ -830,9 +830,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-test"
-version = "0.1.7"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7be0d7928e5e6a74a8e303b7f539116fdb4043f5788f78e9eaf32c53700c4c18"
+checksum = "886ac15e0e95754d5d9339b541a5119dc47cc1a8d80101dc4e3e238d06a4b28b"
 dependencies = [
  "fluence-app-service 0.7.2",
  "marine-test-macro",
@@ -1064,8 +1064,8 @@ dependencies = [
  "http",
  "indexmap",
  "slab",
- "tokio 1.5.0",
- "tokio-util 0.6.6",
+ "tokio 1.6.0",
+ "tokio-util 0.6.7",
  "tracing",
 ]
 
@@ -1200,7 +1200,7 @@ dependencies = [
  "itoa",
  "pin-project",
  "socket2 0.4.0",
- "tokio 1.5.0",
+ "tokio 1.6.0",
  "tower-service",
  "tracing",
  "want",
@@ -1228,7 +1228,7 @@ dependencies = [
  "bytes 1.0.1",
  "hyper 0.14.7",
  "native-tls",
- "tokio 1.5.0",
+ "tokio 1.6.0",
  "tokio-native-tls",
 ]
 
@@ -1537,6 +1537,7 @@ name = "marine-it-parser"
 version = "0.6.1"
 dependencies = [
  "anyhow",
+ "itertools 0.10.0",
  "marine-it-interfaces 0.4.0",
  "nom",
  "semver 0.11.0",
@@ -1549,18 +1550,18 @@ dependencies = [
 
 [[package]]
 name = "marine-macro"
-version = "0.6.4"
+version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c1652b6ac1bbdde9a66c16c8a2f9cd34d005a1f1b211a538c5b28764faa6ef4"
+checksum = "b9107f5956f578d4815a17c963836cffadf481801ae453e0247693e87f1de734"
 dependencies = [
  "marine-macro-impl",
 ]
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.6.4"
+version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80fee75eaf1a97ee9fe2d382c0537c06a79e5d7ab9d81bda6cb263fb8fd1a15a"
+checksum = "7244dd6e5d624bb9d1e63777c3bbc3a8c857973d2b7633aa8d0b612d7770a55d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1670,9 +1671,9 @@ dependencies = [
 
 [[package]]
 name = "marine-test-macro"
-version = "0.1.6"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "709eebc4ee6c8e6aa49066ab066c9f137d9cf164f298f578a67bfb11a0508f65"
+checksum = "089a1d98ebee2fa24928e23019b477222562beda663f8625d3d490dce290e532"
 dependencies = [
  "marine-test-macro-impl",
  "proc-macro-error",
@@ -1683,9 +1684,9 @@ dependencies = [
 
 [[package]]
 name = "marine-test-macro-impl"
-version = "0.1.5"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2432fd5233a088981c79324668b76f3ee2ae6d313d4522b5490226e5e7827ce"
+checksum = "b6e79cfbde74677cbeb60fe5944c345617739aae37dc5ac5ef5f12d487472071"
 dependencies = [
  "darling 0.12.4",
  "fluence-app-service 0.7.2",
@@ -1699,9 +1700,9 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.6.2"
+version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6feb612ccd3fd39ec3d50c9a1a96885e1fd32d36a92cf674a0fbe6f7c452613"
+checksum = "ecb3037577a262360b7e2f0fb5470b7ad0aabcefcb8d2421a4871a854d0a37b2"
 dependencies = [
  "chrono",
  "quote",
@@ -2446,7 +2447,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_urlencoded",
- "tokio 1.5.0",
+ "tokio 1.6.0",
  "tokio-native-tls",
  "url",
  "wasm-bindgen",
@@ -2934,9 +2935,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.5.0"
+version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83f0c8e7c0addab50b663055baf787d0af7f413a46e6e7fb9559a4e4db7137a5"
+checksum = "bd3076b5c8cc18138b8f8814895c11eb4de37114a5d127bafdc5e55798ceef37"
 dependencies = [
  "autocfg",
  "bytes 1.0.1",
@@ -2965,7 +2966,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7d995660bd2b7f8c1568414c1126076c13fbb725c40112dc0120b78eb9b717b"
 dependencies = [
  "native-tls",
- "tokio 1.5.0",
+ "tokio 1.6.0",
 ]
 
 [[package]]
@@ -2994,16 +2995,16 @@ dependencies = [
 
 [[package]]
 name = "tokio-util"
-version = "0.6.6"
+version = "0.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "940a12c99365c31ea8dd9ba04ec1be183ffe4920102bb7122c2f515437601e8e"
+checksum = "1caa0b0c8d94a049db56b5acf8cba99dc0623aab1b26d5b5f5e2d945846b3592"
 dependencies = [
  "bytes 1.0.1",
  "futures-core",
  "futures-sink",
  "log",
  "pin-project-lite 0.2.6",
- "tokio 1.5.0",
+ "tokio 1.6.0",
 ]
 
 [[package]]

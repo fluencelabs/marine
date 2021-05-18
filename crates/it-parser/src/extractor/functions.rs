@@ -135,6 +135,25 @@ pub struct RecordType {
 
 use std::fmt;
 
+impl fmt::Display for FunctionSignature {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        use itertools::Itertools;
+
+        let output = match self.output_types.len() {
+            0 => "()",
+            1 => &self.output_types[0],
+            _ => unimplemented!("more than 1 output type is unsupported"),
+        };
+
+        if self.arguments.is_empty() {
+            writeln!(f, "{}: -> {}", self.name, output)
+        } else {
+            let args = self.arguments.iter().map(|(_, ty)| ty).format(",");
+            writeln!(f, "{}: {} -> {}", self.name, args, output)
+        }
+    }
+}
+
 impl fmt::Display for RecordType {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         writeln!(f, "data {}:", self.name)?;

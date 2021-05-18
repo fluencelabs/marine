@@ -80,10 +80,27 @@ pub fn main() -> Result<(), anyhow::Error> {
 
 fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
+    let wasm_path = std::path::Path::new(wasm_path);
 
     let service_interface = marine_it_parser::module_interface(wasm_path)?;
     for record in service_interface.record_types.iter() {
         println!("{}", record);
+    }
+
+    match args.value_of(args::SERVICE_NAME) {
+        Some(service_name) => println!("service {}:", service_name),
+        None => {
+            let service_name = wasm_path
+                .file_stem()
+                .ok_or(anyhow::Error::msg("provided path isn't a path to a file"))?;
+            let service_name = service_name.to_string_lossy();
+
+            println!("service {}:", service_name);
+        }
+    }
+
+    for sign in service_interface.function_signatures {
+        println!("  {}", sign);
     }
 
     Ok(())
