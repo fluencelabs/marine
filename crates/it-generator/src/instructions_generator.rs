@@ -102,6 +102,80 @@ impl<'a> ITResolver<'a> {
     }
 }
 
+impl<'a> ITResolver<'a> {
+    pub(crate) fn add_adapter(
+        &mut self,
+        function_type: u32,
+        instructions: Vec<wasmer_it::interpreter::Instruction>,
+    ) {
+        let adapter = wasmer_it::ast::Adapter {
+            function_type,
+            instructions,
+        };
+
+        self.interfaces.adapters.push(adapter);
+    }
+
+    pub(crate) fn add_implementation(
+        &mut self,
+        core_function_type: u32,
+        adapter_function_type: u32,
+    ) {
+        let implementation = wasmer_it::ast::Implementation {
+            core_function_type,
+            adapter_function_type,
+        };
+
+        self.interfaces.implementations.push(implementation);
+    }
+
+    pub(crate) fn add_export(&mut self, name: &'a str, function_type: u32) {
+        let export = wasmer_it::ast::Export {
+            name,
+            function_type,
+        };
+
+        self.interfaces.exports.push(export);
+    }
+
+    pub(crate) fn add_import(&mut self, namespace: &'a str, name: &'a str, function_type: u32) {
+        let import = wasmer_it::ast::Import {
+            namespace,
+            name,
+            function_type,
+        };
+
+        self.interfaces.imports.push(import);
+    }
+
+    pub(crate) fn add_fn_type(
+        &mut self,
+        arguments: Rc<Vec<wasmer_it::ast::FunctionArg>>,
+        output_types: Rc<Vec<IType>>,
+    ) {
+        let fn_type = wasmer_it::ast::Type::Function {
+            arguments,
+            output_types,
+        };
+
+        self.interfaces.types.push(fn_type);
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn add_record_type(
+        &mut self,
+        name: String,
+        fields: wasmer_it::NEVec<wasmer_it::IRecordFieldType>,
+    ) {
+        let irecord = wasmer_it::IRecordType { name, fields };
+        let irecord = Rc::new(irecord);
+
+        let record_type = wasmer_it::ast::Type::Record(irecord);
+
+        self.interfaces.types.push(record_type);
+    }
+}
+
 pub(crate) trait ITGenerator {
     fn generate_it<'a>(&'a self, it_resolver: &mut ITResolver<'a>) -> Result<()>;
 }

@@ -66,49 +66,26 @@ fn generate_it_types<'f>(
     namespace: &'f str,
     it_resolver: &mut ITResolver<'f>,
 ) -> Result<()> {
-    use wasmer_it::ast::Type;
-
     let arguments = generate_it_args(&fn_type.signature, it_resolver)?;
     let output_types = generate_it_output_type(&fn_type.signature, it_resolver)?;
-
-    let interfaces = &mut it_resolver.interfaces;
-    interfaces.types.push(Type::Function {
-        arguments,
-        output_types,
-    });
+    it_resolver.add_fn_type(arguments, output_types);
 
     let raw_arguments = generate_raw_args(&fn_type.signature);
     let raw_output_types = generate_raw_output_type(&fn_type.signature);
+    it_resolver.add_fn_type(raw_arguments.clone(), raw_output_types.clone());
+    it_resolver.add_fn_type(raw_arguments, raw_output_types);
 
-    interfaces.types.push(Type::Function {
-        arguments: raw_arguments.clone(),
-        output_types: raw_output_types.clone(),
-    });
-
-    interfaces.types.push(Type::Function {
-        arguments: raw_arguments,
-        output_types: raw_output_types,
-    });
-
-    let import_idx = (interfaces.types.len() - 3) as u32;
-    let raw_import_idx = (interfaces.types.len() - 1) as u32;
+    let types_count = it_resolver.interfaces.types.len() as u32;
+    let import_idx = types_count - 3;
+    let raw_import_idx = types_count - 1;
 
     let link_name = match &fn_type.link_name {
         Some(link_name) => link_name,
         None => &fn_type.signature.name,
     };
 
-    interfaces.imports.push(wasmer_it::ast::Import {
-        namespace: &namespace,
-        name: link_name,
-        function_type: import_idx,
-    });
-
-    interfaces.imports.push(wasmer_it::ast::Import {
-        namespace: &namespace,
-        name: link_name,
-        function_type: raw_import_idx,
-    });
+    it_resolver.add_import(namespace, link_name, import_idx);
+    it_resolver.add_import(namespace, link_name, raw_import_idx);
 
     Ok(())
 }
@@ -119,7 +96,6 @@ fn generate_it_instructions<'f>(
 ) -> Result<()> {
     use args_it_generator::ArgumentITGenerator;
     use output_type_it_generator::OutputITGenerator;
-    use wasmer_it::ast::Adapter;
 
     let adapter_idx = (it_resolver.interfaces.types.len() - 2) as u32;
     let raw_import_idx = (it_resolver.interfaces.types.len() - 1) as u32;
@@ -166,17 +142,8 @@ fn generate_it_instructions<'f>(
             Ok(instructions)
         })?;
 
-    let adapter = Adapter {
-        function_type: adapter_idx,
-        instructions,
-    };
-    it_resolver.interfaces.adapters.push(adapter);
-
-    let implementation = wasmer_it::ast::Implementation {
-        core_function_type: raw_import_idx,
-        adapter_function_type: adapter_idx,
-    };
-    it_resolver.interfaces.implementations.push(implementation);
+    it_resolver.add_adapter(adapter_idx, instructions);
+    it_resolver.add_implementation(raw_import_idx, adapter_idx);
 
     Ok(())
 }

@@ -34,29 +34,15 @@ impl ITGenerator for FnType {
 }
 
 fn generate_it_types<'f>(fn_type: &'f FnType, it_resolver: &mut ITResolver<'f>) -> Result<()> {
-    use wasmer_it::ast::Type;
-
     let arguments = generate_it_args(&fn_type.signature, it_resolver)?;
     let output_types = generate_it_output_type(&fn_type.signature, it_resolver)?;
 
-    let interfaces = &mut it_resolver.interfaces;
-    interfaces.types.push(Type::Function {
-        arguments: arguments.clone(),
-        output_types: output_types.clone(),
-    });
-
+    it_resolver.add_fn_type(arguments.clone(), output_types.clone());
     // TODO: replace with Wasm types
-    interfaces.types.push(Type::Function {
-        arguments,
-        output_types,
-    });
+    it_resolver.add_fn_type(arguments, output_types);
 
-    let export_idx = (interfaces.types.len() - 1) as u32;
-
-    interfaces.exports.push(wasmer_it::ast::Export {
-        name: &fn_type.signature.name,
-        function_type: export_idx,
-    });
+    let export_idx = (it_resolver.interfaces.types.len() - 1) as u32;
+    it_resolver.add_export(&fn_type.signature.name, export_idx);
 
     Ok(())
 }
@@ -64,7 +50,6 @@ fn generate_it_types<'f>(fn_type: &'f FnType, it_resolver: &mut ITResolver<'f>) 
 fn generate_instructions<'f>(fn_type: &'f FnType, it_resolver: &mut ITResolver<'f>) -> Result<()> {
     use args_it_generator::ArgumentITGenerator;
     use output_type_it_generator::OutputITGenerator;
-    use wasmer_it::ast::Adapter;
 
     let mut instructions = fn_type
         .signature
@@ -104,23 +89,12 @@ fn generate_instructions<'f>(fn_type: &'f FnType, it_resolver: &mut ITResolver<'
         });
     }
 
-    let interfaces = &mut it_resolver.interfaces;
-    let adapter_idx = (interfaces.types.len() - 2) as u32;
-    let export_idx = (interfaces.types.len() - 1) as u32;
+    let types_count = it_resolver.interfaces.types.len() as u32;
+    let adapter_idx = types_count - 2;
+    let export_idx = types_count - 1;
 
-    let adapter = Adapter {
-        function_type: adapter_idx,
-        instructions,
-    };
-
-    interfaces.adapters.push(adapter);
-
-    let implementation = wasmer_it::ast::Implementation {
-        core_function_type: export_idx,
-        adapter_function_type: adapter_idx,
-    };
-
-    interfaces.implementations.push(implementation);
+    it_resolver.add_adapter(adapter_idx, instructions);
+    it_resolver.add_implementation(export_idx, adapter_idx);
 
     Ok(())
 }
