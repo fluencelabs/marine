@@ -13,7 +13,7 @@ path = "src/lib.rs"
 [dependencies]
 fluence-sdk-main = "0.6.3"
 
-wasmer-core = { package = "wasmer-runtime-core-fl", version = "0.17.0" }
+wasmer-core = { package = "wasmer-runtime-core-fl", path = "/Users/mike/dev/work/fluence/wasm/wasmer/lib/runtime-core", version = "0.17.0" }
 
 anyhow = "1.0.31"
 chrono = "0.4.19"

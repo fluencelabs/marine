@@ -721,7 +721,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "toml",
- "wasmer-wasi-fl",
+ "wasmer-wasi-fl 0.17.1",
 ]
 
 [[package]]
@@ -737,7 +737,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "toml",
- "wasmer-wasi-fl",
+ "wasmer-wasi-fl 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -761,9 +761,9 @@ dependencies = [
  "thiserror",
  "toml",
  "wasmer-interface-types-fl",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
- "wasmer-wasi-fl",
+ "wasmer-runtime-core-fl 0.17.0",
+ "wasmer-runtime-fl 0.17.0",
+ "wasmer-wasi-fl 0.17.1",
 ]
 
 [[package]]
@@ -786,9 +786,9 @@ dependencies = [
  "thiserror",
  "toml",
  "wasmer-interface-types-fl",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
- "wasmer-wasi-fl",
+ "wasmer-runtime-core-fl 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-runtime-fl 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-wasi-fl 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1529,7 +1529,7 @@ dependencies = [
  "thiserror",
  "walrus",
  "wasmer-interface-types-fl",
- "wasmer-runtime-core-fl",
+ "wasmer-runtime-core-fl 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1544,7 +1544,7 @@ dependencies = [
  "thiserror",
  "walrus",
  "wasmer-interface-types-fl",
- "wasmer-runtime-core-fl",
+ "wasmer-runtime-core-fl 0.17.0",
 ]
 
 [[package]]
@@ -1581,7 +1581,7 @@ dependencies = [
  "serde",
  "thiserror",
  "walrus",
- "wasmer-runtime-core-fl",
+ "wasmer-runtime-core-fl 0.17.0",
 ]
 
 [[package]]
@@ -1597,7 +1597,7 @@ dependencies = [
  "serde",
  "thiserror",
  "walrus",
- "wasmer-runtime-core-fl",
+ "wasmer-runtime-core-fl 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1625,9 +1625,9 @@ dependencies = [
  "thiserror",
  "tokio 0.2.25",
  "wasmer-interface-types-fl",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
- "wasmer-wasi-fl",
+ "wasmer-runtime-core-fl 0.17.0",
+ "wasmer-runtime-fl 0.17.0",
+ "wasmer-wasi-fl 0.17.1",
 ]
 
 [[package]]
@@ -1654,9 +1654,9 @@ dependencies = [
  "serde",
  "thiserror",
  "wasmer-interface-types-fl",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
- "wasmer-wasi-fl",
+ "wasmer-runtime-core-fl 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-runtime-fl 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-wasi-fl 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1845,7 +1845,7 @@ dependencies = [
  "serde_json",
  "termion",
  "uuid",
- "wasmer-wasi-fl",
+ "wasmer-wasi-fl 0.17.1",
 ]
 
 [[package]]
@@ -3363,6 +3363,30 @@ dependencies = [
 [[package]]
 name = "wasmer-clif-backend-fl"
 version = "0.17.0"
+dependencies = [
+ "byteorder",
+ "cranelift-codegen",
+ "cranelift-entity",
+ "cranelift-native",
+ "libc",
+ "nix 0.15.0",
+ "rayon",
+ "serde",
+ "serde-bench",
+ "serde_bytes",
+ "serde_derive",
+ "target-lexicon",
+ "wasmer-clif-fork-frontend",
+ "wasmer-clif-fork-wasm",
+ "wasmer-runtime-core-fl 0.17.0",
+ "wasmer-win-exception-handler 0.17.0",
+ "wasmparser 0.51.4",
+ "winapi 0.3.9",
+]
+
+[[package]]
+name = "wasmer-clif-backend-fl"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "532fb6cef712d9cd1ec68f9fc561447df33313393926f9bdb91fc3d67eed918f"
 dependencies = [
@@ -3380,8 +3404,8 @@ dependencies = [
  "target-lexicon",
  "wasmer-clif-fork-frontend",
  "wasmer-clif-fork-wasm",
- "wasmer-runtime-core-fl",
- "wasmer-win-exception-handler",
+ "wasmer-runtime-core-fl 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-win-exception-handler 0.17.1",
  "wasmparser 0.51.4",
  "winapi 0.3.9",
 ]
@@ -3464,6 +3488,33 @@ dependencies = [
 [[package]]
 name = "wasmer-runtime-core-fl"
 version = "0.17.0"
+dependencies = [
+ "bincode",
+ "blake3",
+ "cc",
+ "digest 0.8.1",
+ "errno",
+ "hex",
+ "indexmap",
+ "lazy_static",
+ "libc",
+ "nix 0.15.0",
+ "page_size",
+ "parking_lot",
+ "rustc_version",
+ "serde",
+ "serde-bench",
+ "serde_bytes",
+ "serde_derive",
+ "smallvec",
+ "target-lexicon",
+ "wasmparser 0.51.4",
+ "winapi 0.3.9",
+]
+
+[[package]]
+name = "wasmer-runtime-core-fl"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4630ff544a2d7f76938bcf82ae217e0bd5c9ee078c653459d4f117c2045d315"
 dependencies = [
@@ -3493,6 +3544,18 @@ dependencies = [
 [[package]]
 name = "wasmer-runtime-fl"
 version = "0.17.0"
+dependencies = [
+ "lazy_static",
+ "memmap",
+ "serde",
+ "serde_derive",
+ "wasmer-clif-backend-fl 0.17.0",
+ "wasmer-runtime-core-fl 0.17.0",
+]
+
+[[package]]
+name = "wasmer-runtime-fl"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e855c8942f998a6938e43c1d0bb11b76a60b1c8341e08db36cc36b97b58bb1e9"
 dependencies = [
@@ -3500,8 +3563,26 @@ dependencies = [
  "memmap",
  "serde",
  "serde_derive",
- "wasmer-clif-backend-fl",
- "wasmer-runtime-core-fl",
+ "wasmer-clif-backend-fl 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-runtime-core-fl 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "wasmer-wasi-fl"
+version = "0.17.1"
+dependencies = [
+ "bincode",
+ "byteorder",
+ "generational-arena",
+ "getrandom 0.1.16",
+ "libc",
+ "log",
+ "serde",
+ "thiserror",
+ "time",
+ "typetag",
+ "wasmer-runtime-core-fl 0.17.0",
+ "winapi 0.3.9",
 ]
 
 [[package]]
@@ -3520,7 +3601,17 @@ dependencies = [
  "thiserror",
  "time",
  "typetag",
- "wasmer-runtime-core-fl",
+ "wasmer-runtime-core-fl 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "winapi 0.3.9",
+]
+
+[[package]]
+name = "wasmer-win-exception-handler"
+version = "0.17.0"
+dependencies = [
+ "cc",
+ "libc",
+ "wasmer-runtime-core-fl 0.17.0",
  "winapi 0.3.9",
 ]
 

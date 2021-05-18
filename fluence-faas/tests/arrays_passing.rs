@@ -468,6 +468,23 @@ pub fn byte_type() {
         json!([[0x13, 0x37]])
     );
     assert_eq!(result4, expected_result);
+
+    let test_value = vec![1; 10 * 1024 * 1024];
+    let expected_result = json!([test_value]);
+    for _ in 0..10000 {
+        let result3 = call_faas!(
+            faas,
+            "arrays_passing_pure",
+            "byte_type",
+            json!([test_value])
+        );
+        let last = match result3 {
+            serde_json::Value::Array(array) => array[10 * 1024 * 1024 + 2].clone(),
+            _ => unimplemented!(),
+        };
+
+        assert_eq!(last, json!(2))
+    }
 }
 
 #[test]

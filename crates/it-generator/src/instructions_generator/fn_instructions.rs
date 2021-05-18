@@ -94,16 +94,21 @@ impl ITGenerator for FnType {
             function_index: export_function_index,
         });
 
-        let instructions = self
+        let mut should_generate_release = false;
+        let mut instructions = self
             .signature
             .output_types
             .iter()
             .try_fold::<_, _, Result<_>>(instructions, |mut instructions, ty| {
                 let new_instructions = ty.generate_instructions_for_output_type(it_resolver)?;
+                should_generate_release |= ty.is_complex_type();
 
                 instructions.extend(new_instructions);
                 Ok(instructions)
             })?;
+        instructions.push(Instruction::CallCore {
+            function_index: RELEASE_OBJECTS.id,
+        });
 
         let adapter = Adapter {
             function_type: adapter_idx,
@@ -202,7 +207,6 @@ impl FnInstructionGenerator for ParsedType {
                 Instruction::CallCore { function_index: GET_RESULT_PTR_FUNC.id },
                 Instruction::CallCore { function_index: GET_RESULT_SIZE_FUNC.id },
                 Instruction::StringLiftMemory,
-                Instruction::CallCore { function_index: RELEASE_OBJECTS.id },
             ],
             ParsedType::Vector(value_type, _) => {
                 let value_type = ptype_to_itype_checked(value_type, it_resolver)?;
