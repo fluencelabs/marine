@@ -17,6 +17,8 @@
 mod fn_instructions;
 mod foreign_mod_instructions;
 mod record_instructions;
+#[cfg(test)]
+mod tests;
 mod utils;
 
 use crate::Result;
@@ -161,18 +163,13 @@ impl<'a> ITResolver<'a> {
         self.interfaces.types.push(fn_type);
     }
 
-    #[allow(dead_code)]
     pub(crate) fn add_record_type(
         &mut self,
         name: String,
         fields: wasmer_it::NEVec<wasmer_it::IRecordFieldType>,
     ) {
-        let irecord = wasmer_it::IRecordType { name, fields };
-        let irecord = Rc::new(irecord);
-
-        let record_type = wasmer_it::ast::Type::Record(irecord);
-
-        self.interfaces.types.push(record_type);
+        let record = wasmer_it::IRecordType { name, fields };
+        self.insert_record_type(record);
     }
 }
 
