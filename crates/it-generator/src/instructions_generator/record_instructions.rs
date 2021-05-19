@@ -22,7 +22,6 @@ use marine_macro_impl::RecordType;
 use marine_macro_impl::RecordFields;
 
 use wasmer_it::IRecordFieldType;
-use wasmer_it::IRecordType;
 use wasmer_it::NEVec;
 
 impl ITGenerator for RecordType {
@@ -48,12 +47,7 @@ impl ITGenerator for RecordType {
             ))
         })?;
 
-        let new_record_type = IRecordType {
-            name: self.name.clone(),
-            fields,
-        };
-
-        it_resolver.insert_record_type(new_record_type);
+        it_resolver.add_record_type(self.name.clone(), fields);
 
         Ok(())
     }

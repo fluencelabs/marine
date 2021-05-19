@@ -18,8 +18,12 @@ use super::IType;
 use crate::instructions_generator::ITResolver;
 use crate::Result;
 
+use marine_macro_impl::FnSignature;
 use marine_macro_impl::ParsedType;
 use marine_macro_impl::RustType;
+use wasmer_it::ast::FunctionArg as IFunctionArg;
+
+use std::rc::Rc;
 
 // return error if there is no record with such name
 pub(crate) fn ptype_to_itype_checked(
@@ -101,4 +105,38 @@ pub(crate) fn wtype_to_itype(pty: &RustType) -> IType {
         RustType::F32 => IType::F32,
         RustType::F64 => IType::F64,
     }
+}
+
+pub(crate) fn generate_it_args<'f>(
+    signature: &FnSignature,
+    it_resolver: &mut ITResolver<'f>,
+) -> Result<Rc<Vec<IFunctionArg>>> {
+    let arguments = signature
+        .arguments
+        .iter()
+        .map(|arg| -> Result<IFunctionArg> {
+            Ok(IFunctionArg {
+                name: arg.name.clone(),
+                ty: ptype_to_itype_checked(&arg.ty, it_resolver)?,
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+
+    let arguments = Rc::new(arguments);
+    Ok(arguments)
+}
+
+pub(crate) fn generate_it_output_type<'f>(
+    signature: &FnSignature,
+    it_resolver: &mut ITResolver<'f>,
+) -> Result<Rc<Vec<IType>>> {
+    let output_types = signature
+        .output_types
+        .iter()
+        .map(|ty| ptype_to_itype_checked(ty, it_resolver))
+        .collect::<Result<Vec<_>>>()?;
+
+    let output_types = Rc::new(output_types);
+
+    Ok(output_types)
 }

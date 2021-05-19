@@ -12,7 +12,7 @@ name = "greeting"
 path = "src/main.rs"
 
 [dependencies]
-fluence = "0.6.4"
+fluence = "0.6.9"
 
 [dev-dependencies]
 fluence-test = "0.1.7"
