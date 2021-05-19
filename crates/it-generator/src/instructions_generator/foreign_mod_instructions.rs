@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
+mod args_it_generator;
+mod output_type_it_generator;
+
 use super::ITGenerator;
 use super::ITResolver;
-use super::utils::ptype_to_itype_checked;
+use super::utils::*;
 use crate::Result;
-use crate::default_export_api_config::*;
+use crate::default_export_api_config::RELEASE_OBJECTS;
 use crate::instructions_generator::utils::wtype_to_itype;
 
 use marine_macro_impl::ExternModType;
 use marine_macro_impl::ExternFnType;
 use marine_macro_impl::ParsedType;
 use marine_macro_impl::FnArgument;
+use marine_macro_impl::FnSignature;
 use wasmer_it::ast::FunctionArg as IFunctionArg;
 use wasmer_it::interpreter::Instruction;
 use wasmer_it::IType;
@@ -49,107 +53,75 @@ impl ITGenerator for ExternModType {
 }
 
 fn generate_it_for_import<'a>(
-    import: &'a ExternFnType,
+    fn_type: &'a ExternFnType,
     namespace: &'a str,
     it_resolver: &mut ITResolver<'a>,
 ) -> Result<()> {
-    use wasmer_it::ast::Type;
-    use wasmer_it::ast::Adapter;
+    generate_it_types(fn_type, namespace, it_resolver)?;
+    generate_it_instructions(fn_type, it_resolver)
+}
 
-    let arguments = import
-        .signature
-        .arguments
-        .iter()
-        .map(|arg| -> Result<IFunctionArg> {
-            Ok(IFunctionArg {
-                name: arg.name.clone(),
-                ty: ptype_to_itype_checked(&arg.ty, it_resolver)?,
-            })
-        })
-        .collect::<Result<Vec<_>>>()?;
-    let arguments = Rc::new(arguments);
+fn generate_it_types<'f>(
+    fn_type: &'f ExternFnType,
+    namespace: &'f str,
+    it_resolver: &mut ITResolver<'f>,
+) -> Result<()> {
+    let arguments = generate_it_args(&fn_type.signature, it_resolver)?;
+    let output_types = generate_it_output_type(&fn_type.signature, it_resolver)?;
+    it_resolver.add_fn_type(arguments, output_types);
 
-    let output_types = import
-        .signature
-        .output_types
-        .iter()
-        .map(|ty| ptype_to_itype_checked(ty, it_resolver))
-        .collect::<Result<Vec<_>>>()?;
-    let output_types = Rc::new(output_types);
+    let raw_arguments = generate_raw_args(&fn_type.signature);
+    let raw_output_types = generate_raw_output_type(&fn_type.signature);
+    it_resolver.add_fn_type(raw_arguments.clone(), raw_output_types.clone());
+    it_resolver.add_fn_type(raw_arguments, raw_output_types);
 
-    let interfaces = &mut it_resolver.interfaces;
-    interfaces.types.push(Type::Function {
-        arguments,
-        output_types,
-    });
+    let types_count = it_resolver.interfaces.types.len() as u32;
+    let import_idx = types_count - 3;
+    let raw_import_idx = types_count - 1;
 
-    let raw_inputs = import
-        .signature
-        .arguments
-        .iter()
-        .map(to_raw_input_types)
-        .flatten()
-        .collect::<Vec<_>>();
-    let raw_inputs = Rc::new(raw_inputs);
-
-    let raw_outputs = import
-        .signature
-        .output_types
-        .iter()
-        .map(|ty| {
-            to_raw_output_type(ty)
-                .iter()
-                .map(wtype_to_itype)
-                .collect::<Vec<_>>()
-        })
-        .flatten()
-        .collect::<Vec<_>>();
-    let raw_outputs = Rc::new(raw_outputs);
-
-    interfaces.types.push(Type::Function {
-        arguments: raw_inputs.clone(),
-        output_types: raw_outputs.clone(),
-    });
-
-    interfaces.types.push(Type::Function {
-        arguments: raw_inputs,
-        output_types: raw_outputs,
-    });
-
-    let adapter_idx = (interfaces.types.len() - 2) as u32;
-    let import_idx = (interfaces.types.len() - 3) as u32;
-    let raw_import_idx = (interfaces.types.len() - 1) as u32;
-
-    let link_name = match &import.link_name {
+    let link_name = match &fn_type.link_name {
         Some(link_name) => link_name,
-        None => &import.signature.name,
+        None => &fn_type.signature.name,
     };
 
-    interfaces.imports.push(wasmer_it::ast::Import {
-        namespace: &namespace,
-        name: link_name,
-        function_type: import_idx,
-    });
+    it_resolver.add_import(namespace, link_name, import_idx);
+    it_resolver.add_import(namespace, link_name, raw_import_idx);
 
-    interfaces.imports.push(wasmer_it::ast::Import {
-        namespace: &namespace,
-        name: link_name,
-        function_type: raw_import_idx,
-    });
+    Ok(())
+}
 
-    let mut instructions = import
+fn generate_it_instructions<'f>(
+    fn_type: &'f ExternFnType,
+    it_resolver: &mut ITResolver<'f>,
+) -> Result<()> {
+    use args_it_generator::ArgumentITGenerator;
+    use output_type_it_generator::OutputITGenerator;
+
+    let adapter_idx = (it_resolver.interfaces.types.len() - 2) as u32;
+    let raw_import_idx = (it_resolver.interfaces.types.len() - 1) as u32;
+
+    let mut should_generate_release = false;
+    let mut instructions = fn_type
         .signature
         .arguments
         .iter()
         .try_fold::<_, _, Result<_>>((0, Vec::new()), |(arg_id, mut instructions), arg| {
             let (new_instructions, shift) = arg
                 .ty
-                .generate_instructions_for_input_type(arg_id as _, it_resolver)?;
+                .generate_instructions_for_arg(arg_id as _, it_resolver)?;
+
+            should_generate_release |= arg.ty.is_complex_type();
 
             instructions.extend(new_instructions);
             Ok((arg_id + shift, instructions))
         })?
         .1;
+
+    if should_generate_release {
+        instructions.push(Instruction::CallCore {
+            function_index: RELEASE_OBJECTS.id,
+        });
+    }
 
     // TODO: refactor
     let import_function_index = (it_resolver.interfaces.exports.len()
@@ -159,7 +131,7 @@ fn generate_it_for_import<'a>(
         function_index: import_function_index,
     });
 
-    let instructions = import
+    let instructions = fn_type
         .signature
         .output_types
         .iter()
@@ -170,137 +142,37 @@ fn generate_it_for_import<'a>(
             Ok(instructions)
         })?;
 
-    let adapter = Adapter {
-        function_type: adapter_idx,
-        instructions,
-    };
-    it_resolver.interfaces.adapters.push(adapter);
-
-    let implementation = wasmer_it::ast::Implementation {
-        core_function_type: raw_import_idx,
-        adapter_function_type: adapter_idx,
-    };
-    it_resolver.interfaces.implementations.push(implementation);
+    it_resolver.add_adapter(adapter_idx, instructions);
+    it_resolver.add_implementation(raw_import_idx, adapter_idx);
 
     Ok(())
 }
 
-/// Generate IT instructions for a foreign mod.
-trait ForeignModInstructionGenerator {
-    fn generate_instructions_for_input_type<'a>(
-        &self,
-        arg_id: u32,
-        it_resolver: &mut ITResolver<'a>,
-    ) -> Result<(Vec<Instruction>, u32)>;
+pub(crate) fn generate_raw_args<'f>(signature: &FnSignature) -> Rc<Vec<IFunctionArg>> {
+    let raw_inputs = signature
+        .arguments
+        .iter()
+        .map(to_raw_input_types)
+        .flatten()
+        .collect::<Vec<_>>();
 
-    fn generate_instructions_for_output_type<'a>(
-        &self,
-        it_resolver: &mut ITResolver<'a>,
-    ) -> Result<Vec<Instruction>>;
+    Rc::new(raw_inputs)
 }
 
-#[rustfmt::skip]
-impl ForeignModInstructionGenerator for ParsedType {
-    fn generate_instructions_for_input_type<'a>(
-        &self,
-        index: u32,
-        it_resolver: &mut ITResolver<'a>,
-    ) -> Result<(Vec<Instruction>, u32)> {
-        let instructions = match self {
-            ParsedType::Boolean(_) => (vec![Instruction::ArgumentGet { index }, Instruction::BoolFromI32], 1),
-            ParsedType::I8(_) => (vec![Instruction::ArgumentGet { index }, Instruction::S8FromI32], 1),
-            ParsedType::I16(_) => (vec![Instruction::ArgumentGet { index }, Instruction::S16FromI32], 1),
-            ParsedType::I32(_) => (vec![Instruction::ArgumentGet { index }, Instruction::S32FromI32], 1),
-            ParsedType::I64(_) => (vec![Instruction::ArgumentGet { index }, Instruction::S64FromI64], 1),
-            ParsedType::U8(_) => (vec![Instruction::ArgumentGet { index }, Instruction::U8FromI32], 1),
-            ParsedType::U16(_) => (vec![Instruction::ArgumentGet { index }, Instruction::U16FromI32], 1),
-            ParsedType::U32(_) => (vec![Instruction::ArgumentGet { index }, Instruction::U32FromI32], 1),
-            ParsedType::U64(_) => (vec![Instruction::ArgumentGet { index }, Instruction::U64FromI64], 1),
-            ParsedType::F32(_) => (vec![Instruction::ArgumentGet { index }], 1),
-            ParsedType::F64(_) => (vec![Instruction::ArgumentGet { index }], 1),
-            ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) => (vec![
-                Instruction::ArgumentGet { index },
-                Instruction::ArgumentGet { index: index + 1 },
-                Instruction::StringLiftMemory,
-            ], 2),
-            ParsedType::Vector(value_type, _) => {
-                let value_type = ptype_to_itype_checked(value_type, it_resolver)?;
-                if let IType::U8 = value_type {
-                    (vec![
-                        Instruction::ArgumentGet { index },
-                        Instruction::ArgumentGet { index: index + 1 },
-                        Instruction::ByteArrayLiftMemory,
-                    ], 2)
-                } else {
-                    (vec![
-                        Instruction::ArgumentGet { index },
-                        Instruction::ArgumentGet { index: index + 1 },
-                        Instruction::ArrayLiftMemory { value_type },
-                    ], 2)
-                }
-            },
-            ParsedType::Record(record_name, _) => {
-                let record_type_id = it_resolver.get_record_type_id(record_name)? as u32;
+pub(crate) fn generate_raw_output_type<'f>(signature: &FnSignature) -> Rc<Vec<IType>> {
+    let raw_outputs = signature
+        .output_types
+        .iter()
+        .map(|ty| {
+            to_raw_output_type(ty)
+                .iter()
+                .map(wtype_to_itype)
+                .collect::<Vec<_>>()
+        })
+        .flatten()
+        .collect::<Vec<_>>();
 
-                (vec![
-                    Instruction::ArgumentGet { index },
-                    Instruction::RecordLiftMemory { record_type_id },
-                ], 1)
-            }
-        };
-
-        Ok(instructions)
-    }
-
-    #[rustfmt::skip]
-    fn generate_instructions_for_output_type<'a>(&self, it_resolver: &mut ITResolver<'a>) -> Result<Vec<Instruction>> {
-        let instructions = match self {
-            ParsedType::Boolean(_) => vec![Instruction::I32FromBool],
-            ParsedType::I8(_) => vec![Instruction::I32FromS8],
-            ParsedType::I16(_) => vec![Instruction::I32FromS16],
-            ParsedType::I32(_) => vec![Instruction::I32FromS32],
-            ParsedType::I64(_) => vec![Instruction::I64FromS64],
-            ParsedType::U8(_) => vec![Instruction::I32FromU8],
-            ParsedType::U16(_) => vec![Instruction::I32FromU16],
-            ParsedType::U32(_) => vec![Instruction::I32FromU32],
-            ParsedType::U64(_) => vec![Instruction::I64FromU64],
-            ParsedType::F32(_) => vec![],
-            ParsedType::F64(_) => vec![],
-            ParsedType::Utf8Str(_) | ParsedType::Utf8String(_) => {
-                let type_tag = it_lilo::utils::ser_type_size(&IType::U8) as i32;
-
-                vec![
-                    Instruction::Dup,
-                    Instruction::StringSize,
-                    Instruction::PushI32 { value: type_tag },
-                    Instruction::CallCore { function_index: ALLOCATE_FUNC.id },
-                    Instruction::Swap2,
-                    Instruction::StringLowerMemory,
-                    Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
-                    Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
-                ]
-            },
-            ParsedType::Vector(value_type, _) => {
-                let value_type = ptype_to_itype_checked(value_type, it_resolver)?;
-
-                vec![
-                    Instruction::ArrayLowerMemory { value_type },
-                    Instruction::CallCore { function_index: SET_RESULT_SIZE_FUNC.id },
-                    Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
-                ]
-            },
-            ParsedType::Record(record_name, _) => {
-                let record_type_id = it_resolver.get_record_type_id(record_name)? as u32;
-
-                vec![
-                    Instruction::RecordLowerMemory { record_type_id },
-                    Instruction::CallCore { function_index: SET_RESULT_PTR_FUNC.id },
-                ]
-            },
-        };
-
-        Ok(instructions)
-    }
+    Rc::new(raw_outputs)
 }
 
 use marine_macro_impl::RustType;
