@@ -39,7 +39,7 @@ pub fn aqua<'a, 'b>() -> App<'a, 'b> {
             Arg::with_name(SERVICE_NAME)
                 .required(false)
                 .takes_value(true)
-                .short("n")
+                .short("s")
                 .help("optional service name"),
         ])
 }

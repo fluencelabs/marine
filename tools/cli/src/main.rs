@@ -25,12 +25,12 @@
     unreachable_patterns
 )]
 
+use marine_module_info_parser::manifest;
+use marine_module_info_parser::sdk_version;
+
 mod args;
 mod build;
 mod errors;
-
-use marine_module_info_parser::manifest;
-use marine_module_info_parser::sdk_version;
 
 pub(crate) type CLIResult<T> = std::result::Result<T, crate::errors::CLIError>;
 

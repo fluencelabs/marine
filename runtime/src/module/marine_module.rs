@@ -29,9 +29,6 @@ use wasmer_runtime::compile;
 use wasmer_runtime::ImportObject;
 use wasmer_it::interpreter::Interpreter;
 
-use serde::Serialize;
-use serde::Deserialize;
-
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
@@ -46,14 +43,6 @@ pub(super) struct ITModuleFunc {
     interpreter: Arc<ITInterpreter>,
     pub(super) arguments: Rc<Vec<IFunctionArg>>,
     pub(super) output_types: Rc<Vec<IType>>,
-}
-
-/// Represent a function type inside Marine module.
-#[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
-pub struct MFunctionSignature {
-    pub name: Rc<String>,
-    pub arguments: Rc<Vec<IFunctionArg>>,
-    pub outputs: Rc<Vec<IType>>,
 }
 
 #[derive(Clone)]
@@ -444,90 +433,4 @@ impl MModule {
     }
 
     // TODO : move it to a separate crate
-    fn extract_export_record_types(
-        export_funcs: &ExportFunctions,
-        wit_instance: &Arc<ITInstance>,
-    ) -> MResult<RecordTypes> {
-        use marine_it_generator::TYPE_RESOLVE_RECURSION_LIMIT;
-        use MError::RecordResolveError;
-
-        fn handle_itype(
-            itype: &IType,
-            wit_instance: &Arc<ITInstance>,
-            export_record_types: &mut RecordTypes,
-            recursion_level: u32,
-        ) -> MResult<()> {
-            use wasmer_it::interpreter::wasm::structures::Instance;
-
-            if recursion_level > TYPE_RESOLVE_RECURSION_LIMIT {
-                return Err(RecordResolveError(String::from(
-                    "mailformed module: a record contains more recursion level then allowed",
-                )));
-            }
-
-            fn handle_record_type(
-                record_type_id: u64,
-                wit_instance: &Arc<ITInstance>,
-                export_record_types: &mut RecordTypes,
-                recursion_level: u32,
-            ) -> MResult<()> {
-                let record_type =
-                    wit_instance
-                        .wit_record_by_id(record_type_id)
-                        .ok_or_else(|| {
-                            RecordResolveError(format!(
-                                "record type with type id {} not found",
-                                record_type_id
-                            ))
-                        })?;
-                export_record_types.insert(record_type_id, record_type.clone());
-
-                for field in record_type.fields.iter() {
-                    handle_itype(
-                        &field.ty,
-                        wit_instance,
-                        export_record_types,
-                        recursion_level + 1,
-                    )?;
-                }
-
-                Ok(())
-            }
-
-            match itype {
-                IType::Record(record_type_id) => handle_record_type(
-                    *record_type_id,
-                    wit_instance,
-                    export_record_types,
-                    recursion_level + 1,
-                )?,
-                IType::Array(array_ty) => handle_itype(
-                    array_ty,
-                    wit_instance,
-                    export_record_types,
-                    recursion_level + 1,
-                )?,
-                _ => {}
-            }
-
-            Ok(())
-        }
-
-        let mut export_record_types = HashMap::new();
-
-        let itypes = export_funcs.iter().flat_map(|(_, ref mut callable)| {
-            callable
-                .wit_module_func
-                .arguments
-                .iter()
-                .map(|arg| &arg.ty)
-                .chain(callable.wit_module_func.output_types.iter())
-        });
-
-        for itype in itypes {
-            handle_itype(itype, wit_instance, &mut export_record_types, 0)?;
-        }
-
-        Ok(export_record_types)
-    }
 }

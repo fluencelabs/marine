@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-mod functions;
 mod it;
 
 pub use functions::*;
