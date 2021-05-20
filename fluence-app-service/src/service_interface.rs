@@ -17,7 +17,7 @@
 use fluence_faas::FaaSModuleInterface;
 use fluence_faas::FaaSFunctionSignature;
 use fluence_faas::IRecordType;
-use fluence_faas::RecordTypes;
+use fluence_faas::MRecordTypes;
 use fluence_faas::itype_text_view;
 
 use serde::Serialize;
@@ -66,7 +66,7 @@ pub(crate) fn into_service_interface(faas_interface: FaaSModuleInterface<'_>) ->
 
 fn serialize_function_signature(
     signature: FaaSFunctionSignature,
-    record_types: &RecordTypes,
+    record_types: &MRecordTypes,
 ) -> FunctionSignature {
     let arguments = signature
         .arguments
@@ -90,7 +90,7 @@ fn serialize_function_signature(
 fn serialize_record_type(
     id: u64,
     record: Rc<IRecordType>,
-    record_types: &RecordTypes,
+    record_types: &MRecordTypes,
 ) -> RecordType {
     let fields = record
         .fields

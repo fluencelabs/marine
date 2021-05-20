@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::RecordTypes;
+use crate::MRecordTypes;
 use crate::IRecordType;
 use it_lilo::traits::RecordResolvable;
 use it_lilo::traits::RecordResolvableError;
@@ -22,11 +22,11 @@ use it_lilo::traits::RecordResolvableError;
 use std::rc::Rc;
 
 pub(crate) struct LiHelper {
-    record_types: Rc<RecordTypes>,
+    record_types: Rc<MRecordTypes>,
 }
 
 impl LiHelper {
-    pub(crate) fn new(record_types: Rc<RecordTypes>) -> Self {
+    pub(crate) fn new(record_types: Rc<MRecordTypes>) -> Self {
         Self { record_types }
     }
 }

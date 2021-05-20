@@ -42,16 +42,20 @@ pub use extractor::extract_it_from_module;
 pub use extractor::extract_version_from_module;
 pub use extractor::extract_text_it;
 pub use extractor::module_interface;
-pub use extractor::module_raw_interface;
+pub use extractor::module_it_interface;
 
 pub mod interface {
-    pub use crate::extractor::ServiceInterface;
-    pub use crate::extractor::RecordType;
-    pub use crate::extractor::FunctionSignature;
+    pub use marine_module_interface::interface::ModuleInterface;
+    pub use marine_module_interface::interface::RecordType;
+    pub use marine_module_interface::interface::RecordField;
+    pub use marine_module_interface::interface::FunctionSignature;
+}
 
-    pub use crate::extractor::MModuleInterface;
-    pub use crate::extractor::MRecordTypes;
-    pub use crate::extractor::MFunctionSignature;
+pub mod it_interface {
+    pub use marine_module_interface::it_interface::IModuleInterface;
+    pub use marine_module_interface::it_interface::IRecordTypes;
+    pub use marine_module_interface::it_interface::IFunctionSignature;
+
     pub mod it {
         pub use wasmer_it::IType;
         pub use wasmer_it::ast::FunctionArg as IFunctionArg;
@@ -60,4 +64,4 @@ pub mod interface {
     }
 }
 
-pub(crate) type Result<T> = std::result::Result<T, ITParserError>;
+pub(crate) type ParserResult<T> = std::result::Result<T, ITParserError>;

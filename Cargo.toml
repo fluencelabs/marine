@@ -4,6 +4,7 @@ members = [
     "crates/it-interfaces",
     "crates/it-parser",
     "crates/module-info-parser",
+    "crates/module-interface",
     "crates/utils",
     "examples/call_parameters",
     "examples/greeting",

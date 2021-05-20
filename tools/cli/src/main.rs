@@ -25,12 +25,12 @@
     unreachable_patterns
 )]
 
+use marine_module_info_parser::manifest;
+use marine_module_info_parser::sdk_version;
+
 mod args;
 mod build;
 mod errors;
-
-use marine_module_info_parser::manifest;
-use marine_module_info_parser::sdk_version;
 
 pub(crate) type CLIResult<T> = std::result::Result<T, crate::errors::CLIError>;
 
@@ -39,6 +39,7 @@ pub fn main() -> Result<(), anyhow::Error> {
         .version(args::VERSION)
         .author(args::AUTHORS)
         .setting(clap::AppSettings::ArgRequiredElseHelp)
+        .subcommand(args::aqua())
         .subcommand(args::build())
         .subcommand(args::set())
         .subcommand(args::show_manifest())
@@ -47,6 +48,7 @@ pub fn main() -> Result<(), anyhow::Error> {
     let arg_matches = app.get_matches();
 
     match arg_matches.subcommand() {
+        ("aqua", Some(args)) => aqua(args),
         ("build", Some(args)) => build(args),
         ("set", Some(args)) => set(args),
         ("it", Some(args)) => it(args),
@@ -71,6 +73,36 @@ pub fn main() -> Result<(), anyhow::Error> {
             color::Fg(color::LightBlack),
             color::Fg(color::Reset)
         );
+    }
+
+    Ok(())
+}
+
+fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+    use inflector::Inflector;
+
+    let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
+    let wasm_path = std::path::Path::new(wasm_path);
+
+    let module_interface = marine_it_parser::module_interface(wasm_path)?;
+    for record in module_interface.record_types.iter() {
+        println!("{}", record);
+    }
+
+    match args.value_of(args::SERVICE_NAME) {
+        Some(service_name) => println!("service {}:", service_name.to_title_case()),
+        None => {
+            let service_name = wasm_path
+                .file_stem()
+                .ok_or(anyhow::Error::msg("provided path isn't a path to a file"))?;
+            let service_name = service_name.to_string_lossy().to_title_case();
+
+            println!("service {}:", service_name);
+        }
+    }
+
+    for sign in module_interface.function_signatures {
+        println!("  {}", sign);
     }
 
     Ok(())

@@ -14,38 +14,41 @@
  * limitations under the License.
  */
 
-mod functions;
 mod it;
 
-pub use functions::*;
 pub use it::*;
 
-use crate::Result;
+use crate::interface::ModuleInterface;
+use crate::it_interface::IModuleInterface;
+use crate::ParserResult;
 use crate::ITParserError;
 
+use marine_module_interface::it_interface;
+use marine_module_interface::interface;
 use marine_it_interfaces::MITInterfaces;
 use std::path::Path;
 
-pub fn module_interface<P>(module_path: P) -> Result<ServiceInterface>
+pub fn module_interface<P>(module_path: P) -> ParserResult<ModuleInterface>
 where
     P: AsRef<Path>,
 {
-    create_mit_with(module_path, |it| get_interface(&it))
+    create_mit_with(module_path, |it| interface::get_interface(&it))
 }
 
-pub fn module_raw_interface<P>(module_path: P) -> Result<MModuleInterface>
+pub fn module_it_interface<P>(module_path: P) -> ParserResult<IModuleInterface>
 where
     P: AsRef<Path>,
 {
-    create_mit_with(module_path, |it| get_raw_interface(&it))
+    create_mit_with(module_path, |it| it_interface::get_interface(&it))
 }
 
-fn create_mit_with<P, T>(
+fn create_mit_with<P, T, E>(
     module_path: P,
-    transformer: impl FnOnce(MITInterfaces<'_>) -> Result<T>,
-) -> Result<T>
+    transformer: impl FnOnce(MITInterfaces<'_>) -> std::result::Result<T, E>,
+) -> ParserResult<T>
 where
     P: AsRef<Path>,
+    ITParserError: From<E>,
 {
     let module = walrus::ModuleConfig::new()
         .parse_file(module_path)
@@ -56,5 +59,5 @@ where
 
     let mit = MITInterfaces::new(it);
 
-    transformer(mit)
+    transformer(mit).map_err(Into::into)
 }

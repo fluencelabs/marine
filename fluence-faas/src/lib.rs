@@ -36,7 +36,6 @@ pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
 
 pub use faas::FluenceFaaS;
 pub use faas_interface::FaaSInterface;
-pub use faas_interface::itype_text_view;
 
 pub use config::FaaSConfig;
 pub use config::FaaSModuleConfig;
@@ -57,7 +56,7 @@ pub use marine::IFunctionArg;
 pub use marine::IType;
 pub use marine::MModuleInterface as FaaSModuleInterface;
 pub use marine::MFunctionSignature as FaaSFunctionSignature;
-pub use marine::RecordTypes;
+pub use marine::MRecordTypes;
 pub use marine::HostExportedFunc;
 pub use marine::HostImportDescriptor;
 pub use marine::HostImportError;
@@ -66,6 +65,8 @@ pub use marine::from_interface_values;
 pub use marine::ne_vec;
 pub use marine::min_sdk_version;
 pub use marine::min_it_version;
+
+pub use marine_module_interface::interface::itype_text_view;
 
 pub use fluence::CallParameters;
 pub use fluence::SecurityTetraplet;

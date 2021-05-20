@@ -28,7 +28,7 @@ use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use marine::Marine;
 use marine::IFunctionArg;
 use marine_utils::SharedString;
-use marine::RecordTypes;
+use marine::MRecordTypes;
 use fluence::CallParameters;
 
 use serde_json::Value as JValue;
@@ -39,7 +39,7 @@ use std::rc::Rc;
 
 struct ModuleInterface {
     function_signatures: HashMap<SharedString, (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>)>,
-    record_types: Rc<RecordTypes>,
+    record_types: Rc<MRecordTypes>,
 }
 
 // TODO: remove and use mutex instead
@@ -186,7 +186,7 @@ impl FluenceFaaS {
         &'faas mut self,
         module_name: &str,
         func_name: &str,
-    ) -> Result<(Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>, Rc<RecordTypes>)> {
+    ) -> Result<(Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>, Rc<MRecordTypes>)> {
         use FaaSError::NoSuchModule;
         use FaaSError::MissingFunctionError;
 

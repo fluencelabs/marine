@@ -18,6 +18,7 @@ use crate::HostImportError;
 use marine_it_interfaces::MITInterfacesError;
 use marine_it_parser::ITParserError;
 use marine_module_info_parser::ModuleInfoError;
+use marine_module_interface::it_interface::ITInterfaceError;
 
 use wasmer_runtime::error as wasmer_error;
 
@@ -62,6 +63,10 @@ pub enum MError {
     /// Errors arisen during creation of a WASI context.
     #[error("{0}")]
     WASIPrepareError(String),
+
+    /// Errors occurred inside marine-module-interface crate.
+    #[error("{0}")]
+    ModuleInterfaceError(#[from] ITInterfaceError),
 
     /// Error arisen during execution of Wasm modules (especially, interface types).
     #[error("Execution error: {0}")]

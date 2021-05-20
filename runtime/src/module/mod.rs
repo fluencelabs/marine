@@ -21,15 +21,25 @@ mod wit_function;
 mod wit_instance;
 mod type_converters;
 
-pub use wit_instance::RecordTypes;
-
+pub use wit_instance::MRecordTypes;
 pub use wasmer_it::IType;
 pub use wasmer_it::IRecordType;
 pub use wasmer_it::ast::FunctionArg as IFunctionArg;
 pub use wasmer_it::IValue;
-pub use marine_module::MFunctionSignature;
 pub use wasmer_it::from_interface_values;
 pub use wasmer_it::to_interface_value;
+
+use serde::Serialize;
+use serde::Deserialize;
+use std::rc::Rc;
+
+/// Represent a function type inside Marine module.
+#[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
+pub struct MFunctionSignature {
+    pub name: Rc<String>,
+    pub arguments: Rc<Vec<IFunctionArg>>,
+    pub outputs: Rc<Vec<IType>>,
+}
 
 pub(crate) use marine_module::MModule;
 pub(self) use wasmer_core::types::Type as WType;

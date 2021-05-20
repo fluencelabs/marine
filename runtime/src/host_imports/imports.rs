@@ -22,7 +22,7 @@ use super::lowering::LoHelper;
 use super::utils::itypes_args_to_wtypes;
 use super::utils::itypes_output_to_wtypes;
 
-use crate::RecordTypes;
+use crate::MRecordTypes;
 use crate::init_wasm_func_once;
 use crate::call_wasm_func;
 use crate::HostImportDescriptor;
@@ -41,7 +41,7 @@ use std::ops::Deref;
 
 pub(crate) fn create_host_import_func(
     descriptor: HostImportDescriptor,
-    record_types: Rc<RecordTypes>,
+    record_types: Rc<MRecordTypes>,
 ) -> DynamicFunc<'static> {
     let allocate_func: AllocateFunc = Box::new(RefCell::new(None));
     let set_result_ptr_func: SetResultPtrFunc = Box::new(RefCell::new(None));
