@@ -66,7 +66,7 @@ pub use marine::ne_vec;
 pub use marine::min_sdk_version;
 pub use marine::min_it_version;
 
-use marine_module_interface::interface::itype_text_view;
+pub use marine_module_interface::interface::itype_text_view;
 
 pub use fluence::CallParameters;
 pub use fluence::SecurityTetraplet;
