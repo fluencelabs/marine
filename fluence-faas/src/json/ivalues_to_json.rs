@@ -19,13 +19,13 @@ use crate::IType;
 use crate::Result;
 use crate::errors::FaaSError::JsonOutputSerializationError as OutputDeError;
 
-use marine::RecordTypes;
+use marine::MRecordTypes;
 use serde_json::Value as JValue;
 
 pub(crate) fn ivalues_to_json(
     mut ivalues: Vec<IValue>,
     outputs: &[IType],
-    record_types: &RecordTypes,
+    record_types: &MRecordTypes,
 ) -> Result<JValue> {
     if outputs.len() != ivalues.len() {
         return Err(OutputDeError(format!(
@@ -42,7 +42,7 @@ pub(crate) fn ivalues_to_json(
     }
 }
 
-fn ivalue_to_json(ivalue: IValue, output: &IType, record_types: &RecordTypes) -> Result<JValue> {
+fn ivalue_to_json(ivalue: IValue, output: &IType, record_types: &MRecordTypes) -> Result<JValue> {
     use serde_json::json;
 
     // clone here needed because binding by-value and by-ref in the same pattern in unstable

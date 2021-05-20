@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-use super::IType;
 use super::IRecordType;
+use super::itype_text_view;
 use crate::FaaSModuleInterface;
 
-use marine::RecordTypes;
 use itertools::Itertools;
 use serde::Serialize;
 
@@ -65,7 +64,7 @@ fn print_record_types<'r>(
         }
     }
 
-    writeln!(f, "")
+    writeln!(f)
 }
 
 fn print_functions_sign<'r>(
@@ -108,31 +107,4 @@ fn print_functions_sign<'r>(
     }
 
     Ok(())
-}
-
-pub fn itype_text_view(arg_ty: &IType, record_types: &RecordTypes) -> String {
-    match arg_ty {
-        IType::Record(record_type_id) => {
-            // unwrap is safe because FaaSInterface here is well-formed
-            // (it was checked on the module startup stage)
-            let record = record_types.get(record_type_id).unwrap();
-            record.name.clone()
-        }
-        IType::Array(array_ty) => format!("[]{}", itype_text_view(array_ty, record_types)),
-        IType::Boolean => "bool".to_string(),
-        IType::S8 => "i8".to_string(),
-        IType::S16 => "i16".to_string(),
-        IType::S32 => "i32".to_string(),
-        IType::S64 => "i64".to_string(),
-        IType::U8 => "u8".to_string(),
-        IType::U16 => "u16".to_string(),
-        IType::U32 => "u32".to_string(),
-        IType::U64 => "u64".to_string(),
-        IType::F32 => "f32".to_string(),
-        IType::F64 => "f64".to_string(),
-        IType::String => "string".to_string(),
-        IType::ByteArray => "[]u8".to_string(),
-        IType::I32 => "i32".to_string(),
-        IType::I64 => "i64".to_string(),
-    }
 }

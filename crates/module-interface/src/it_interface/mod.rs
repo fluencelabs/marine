@@ -28,33 +28,17 @@ pub type RIResult<T> = std::result::Result<T, ITInterfaceError>;
 
 use marine_it_interfaces::MITInterfaces;
 
-/// Returns so-called full Marine module interface that includes both export and all record types.
-pub fn get_full_interface(mit: &MITInterfaces<'_>) -> RIResult<FullMModuleInterface> {
+/// Returns Marine module interface that includes both export and all record types.
+pub fn get_interface(mit: &MITInterfaces<'_>) -> RIResult<IModuleInterface> {
     let function_signatures = get_export_funcs(mit)?;
     let FullRecordTypes {
-        all_record_types,
+        record_types,
         export_record_types,
     } = get_record_types(mit, function_signatures.iter())?;
 
-    let mm_interface = FullMModuleInterface {
-        all_record_types,
+    let mm_interface = IModuleInterface {
+        record_types,
         export_record_types,
-        function_signatures,
-    };
-
-    Ok(mm_interface)
-}
-
-/// Returns interface of a Marine module.
-pub fn get_interface(mit: &MITInterfaces<'_>) -> RIResult<MModuleInterface> {
-    let FullMModuleInterface {
-        export_record_types,
-        function_signatures,
-        ..
-    } = get_full_interface(mit)?;
-
-    let mm_interface = MModuleInterface {
-        record_types: export_record_types,
         function_signatures,
     };
 

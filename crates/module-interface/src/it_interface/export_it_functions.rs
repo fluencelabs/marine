@@ -73,6 +73,7 @@ pub fn get_export_funcs(mit: &MITInterfaces<'_>) -> RIResult<Vec<MFunctionSignat
                         name: Rc::new(descriptor.name.to_string()),
                         arguments: arguments.clone(),
                         outputs: output_types.clone(),
+                        adapter_function_type: descriptor.adapter_function_type,
                     };
                     Ok(signature)
                 }

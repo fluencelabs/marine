@@ -27,7 +27,7 @@ use std::collections::HashMap;
 const TYPE_RESOLVE_RECURSION_LIMIT: u32 = 1024;
 
 pub struct FullRecordTypes {
-    pub all_record_types: MRecordTypes,
+    pub record_types: MRecordTypes,
     pub export_record_types: MRecordTypes,
 }
 
@@ -51,7 +51,7 @@ pub fn get_record_types<'f>(
     }
 
     let full_record_types = FullRecordTypes {
-        all_record_types,
+        record_types: all_record_types,
         export_record_types,
     };
 

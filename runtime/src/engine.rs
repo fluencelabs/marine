@@ -16,7 +16,7 @@
 
 use super::*;
 use crate::module::MModule;
-use crate::module::RecordTypes;
+use crate::module::MRecordTypes;
 
 use serde::Serialize;
 
@@ -27,7 +27,7 @@ use std::rc::Rc;
 /// Represent Marine module interface.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
 pub struct MModuleInterface<'a> {
-    pub record_types: &'a RecordTypes,
+    pub record_types: &'a MRecordTypes,
     pub function_signatures: Vec<MFunctionSignature>,
 }
 
@@ -119,7 +119,7 @@ impl Marine {
     }
 
     /// Return record types exported by module with given name.
-    pub fn module_record_types<S: AsRef<str>>(&self, module_name: S) -> Option<&RecordTypes> {
+    pub fn module_record_types<S: AsRef<str>>(&self, module_name: S) -> Option<&MRecordTypes> {
         self.modules
             .get(module_name.as_ref())
             .map(|module| module.export_record_types())

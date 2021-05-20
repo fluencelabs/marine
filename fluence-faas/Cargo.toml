@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 marine-runtime = { path = "../runtime", version = "0.5.0" }
+marine-module-interface = { path = "../crates/module-interface", version = "0.1.0" }
 marine-utils = { path = "../crates/utils", version = "0.2.0" }
 fluence-sdk-main = { version = "0.6.9", features = ["logger"] }
 fluence = { version = "0.6.3", features = ["logger"] }

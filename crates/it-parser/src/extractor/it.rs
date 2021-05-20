@@ -16,7 +16,7 @@
 
 use crate::custom::IT_SECTION_NAME;
 use crate::errors::ITParserError;
-use crate::Result;
+use crate::ParserResult;
 
 use walrus::IdsToIndices;
 use wasmer_it::ast::Interfaces;
@@ -26,7 +26,7 @@ use std::borrow::Cow;
 use std::path::Path;
 
 /// Extracts IT section of provided Wasm binary and converts it to a string.
-pub fn extract_text_it<P>(wasm_file_path: P) -> Result<String>
+pub fn extract_text_it<P>(wasm_file_path: P) -> ParserResult<String>
 where
     P: AsRef<Path>,
 {
@@ -42,7 +42,7 @@ where
 }
 
 /// Extracts IT section of provided Wasm binary and converts it to a MITInterfaces.
-pub fn extract_it_from_module(wasmer_module: &WasmerModule) -> Result<Interfaces<'_>> {
+pub fn extract_it_from_module(wasmer_module: &WasmerModule) -> ParserResult<Interfaces<'_>> {
     let wit_sections = wasmer_module
         .custom_sections(IT_SECTION_NAME)
         .ok_or(ITParserError::NoITSection)?;
@@ -54,7 +54,7 @@ pub fn extract_it_from_module(wasmer_module: &WasmerModule) -> Result<Interfaces
     extract_it_from_bytes(&wit_sections[0])
 }
 
-pub fn extract_version_from_module(module: &walrus::Module) -> Result<semver::Version> {
+pub fn extract_version_from_module(module: &walrus::Module) -> ParserResult<semver::Version> {
     let raw_custom_section = extract_custom_section(&module)?;
     let wit_section_bytes = raw_custom_section.as_ref();
     let it = extract_it_from_bytes(wit_section_bytes)?;
@@ -62,7 +62,7 @@ pub fn extract_version_from_module(module: &walrus::Module) -> Result<semver::Ve
     Ok(it.version)
 }
 
-pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>> {
+pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> ParserResult<Interfaces<'_>> {
     match wasmer_it::decoders::binary::parse::<(&[u8], nom::error::ErrorKind)>(wit_section_bytes) {
         Ok((remainder, it)) if remainder.is_empty() => Ok(it),
         Ok(_) => Err(ITParserError::ITRemainderNotEmpty),
@@ -70,7 +70,7 @@ pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfac
     }
 }
 
-pub(crate) fn extract_custom_section(module: &walrus::Module) -> Result<Cow<'_, [u8]>> {
+pub(crate) fn extract_custom_section(module: &walrus::Module) -> ParserResult<Cow<'_, [u8]>> {
     let sections = module
         .customs
         .iter()

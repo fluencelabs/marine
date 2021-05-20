@@ -29,7 +29,7 @@ use std::collections::HashMap;
 use std::cell::Cell;
 use std::rc::Rc;
 
-pub type RecordTypes = HashMap<u64, Rc<IRecordType>>;
+pub type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
 
 /// Contains all import and export functions that could be called from IT context by call-core.
 #[derive(Clone)]
@@ -41,7 +41,7 @@ pub(super) struct ITInstance {
     memories: Vec<WITMemory>,
 
     /// All record types that instance contains.
-    record_types_by_id: RecordTypes,
+    record_types_by_id: MRecordTypes,
 }
 
 impl ITInstance {
@@ -158,7 +158,7 @@ impl ITInstance {
         memories
     }
 
-    fn extract_record_types(wit: &MITInterfaces<'_>) -> RecordTypes {
+    fn extract_record_types(wit: &MITInterfaces<'_>) -> MRecordTypes {
         let (record_types_by_id, _) = wit.types().fold(
             (HashMap::new(), 0u64),
             |(mut record_types_by_id, id), ty| {

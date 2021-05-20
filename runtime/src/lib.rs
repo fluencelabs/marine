@@ -45,7 +45,7 @@ pub use module::IValue;
 pub use module::IRecordType;
 pub use module::IFunctionArg;
 pub use module::IType;
-pub use module::RecordTypes;
+pub use module::MRecordTypes;
 pub use module::MFunctionSignature;
 pub use module::from_interface_values;
 pub use module::to_interface_value;

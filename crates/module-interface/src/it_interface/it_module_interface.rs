@@ -32,20 +32,13 @@ pub struct MFunctionSignature {
     pub name: Rc<String>,
     pub arguments: Rc<Vec<IFunctionArg>>,
     pub outputs: Rc<Vec<IType>>,
+    pub adapter_function_type: u32,
 }
 
 /// Represent an interface of a Wasm module.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
-pub struct MModuleInterface {
-    pub record_types: MRecordTypes,
-    pub function_signatures: Vec<MFunctionSignature>,
-}
-
-/// Represent an interface of a Wasm module. This interface is intended for Marine runtime internal
-/// usage and includes export and all record types.
-#[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
-pub struct FullMModuleInterface {
-    pub all_record_types: MRecordTypes,
+pub struct IModuleInterface {
     pub export_record_types: MRecordTypes,
+    pub record_types: MRecordTypes,
     pub function_signatures: Vec<MFunctionSignature>,
 }

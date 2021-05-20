@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+use marine_module_interface::interface::InterfaceError;
+use marine_module_interface::it_interface::ITInterfaceError;
+
 use wasmer_it::decoders::wat::Error as WATError;
 use thiserror::Error as ThisError;
 
@@ -44,6 +47,14 @@ pub enum ITParserError {
     /// An error related to incorrect data in IT section.
     #[error("{0}")]
     IncorrectITFormat(String),
+
+    /// An error occurred while processing module interface.
+    #[error("{0}")]
+    ModuleInterfaceError(#[from] InterfaceError),
+
+    /// An error occurred while processing module IT interface.
+    #[error("{0}")]
+    ModuleITInterfaceError(#[from] ITInterfaceError),
 
     /// An error occurred while parsing file in Wat format.
     #[error("provided file with IT definitions is corrupted: {0}")]

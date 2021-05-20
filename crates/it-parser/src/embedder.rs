@@ -16,7 +16,7 @@
 
 use super::custom::ITCustomSection;
 use super::errors::ITParserError;
-use crate::Result;
+use crate::ParserResult;
 
 use walrus::ModuleConfig;
 use wasmer_it::{
@@ -28,7 +28,7 @@ use wasmer_it::ToBytes;
 use std::path::Path;
 
 /// Embed provided IT to a Wasm file by path.
-pub fn embed_text_it<I, O>(in_wasm_path: I, out_wasm_path: O, it: &str) -> Result<()>
+pub fn embed_text_it<I, O>(in_wasm_path: I, out_wasm_path: O, it: &str) -> ParserResult<()>
 where
     I: AsRef<Path>,
     O: AsRef<Path>,

@@ -15,8 +15,9 @@
  */
 
 use super::wit_prelude::*;
+use super::MFunctionSignature;
+use super::MRecordTypes;
 use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
-use super::RecordTypes;
 use crate::MResult;
 use crate::MModuleConfig;
 
@@ -47,8 +48,8 @@ pub(super) struct ITModuleFunc {
 
 #[derive(Clone)]
 pub(super) struct Callable {
-    pub(super) wit_instance: Arc<ITInstance>,
-    pub(super) wit_module_func: ITModuleFunc,
+    pub(super) it_instance: Arc<ITInstance>,
+    pub(super) it_module_func: ITModuleFunc,
 }
 
 impl Callable {
@@ -56,9 +57,9 @@ impl Callable {
         use wasmer_it::interpreter::stack::Stackable;
 
         let result = self
-            .wit_module_func
+            .it_module_func
             .interpreter
-            .run(args, Arc::make_mut(&mut self.wit_instance))?
+            .run(args, Arc::make_mut(&mut self.it_instance))?
             .as_slice()
             .to_owned();
 
@@ -94,7 +95,7 @@ pub(crate) struct MModule {
 
     // TODO: save refs instead copying of a record types HashMap.
     /// Record types used in exported functions as arguments or return values.
-    export_record_types: RecordTypes,
+    export_record_types: MRecordTypes,
 }
 
 impl MModule {
@@ -119,7 +120,7 @@ impl MModule {
             Self::create_import_objects(config, &mit, wit_import_object.clone())?;
 
         let wasmer_instance = wasmer_module.instantiate(&wasi_import_object)?;
-        let wit_instance = unsafe {
+        let it_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
@@ -127,8 +128,7 @@ impl MModule {
             std::mem::transmute::<_, Arc<ITInstance>>(wit_instance)
         };
 
-        let export_funcs = Self::instantiate_wit_exports(&wit_instance, &mit)?;
-        let export_record_types = Self::extract_export_record_types(&export_funcs, &wit_instance)?;
+        let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
 
         // call _start to populate the WASI state of the module
         #[rustfmt::skip]
@@ -168,12 +168,12 @@ impl MModule {
             .iter()
             .map(|(func_name, func)| MFunctionSignature {
                 name: func_name.0.clone(),
-                arguments: func.wit_module_func.arguments.clone(),
-                outputs: func.wit_module_func.output_types.clone(),
+                arguments: func.it_module_func.arguments.clone(),
+                outputs: func.it_module_func.output_types.clone(),
             })
     }
 
-    pub(crate) fn export_record_types(&self) -> &RecordTypes {
+    pub(crate) fn export_record_types(&self) -> &MRecordTypes {
         &self.export_record_types
     }
 
@@ -249,54 +249,36 @@ impl MModule {
         Ok((wasi_import_object, host_closures_import_object))
     }
 
-    fn instantiate_wit_exports(
-        wit_instance: &Arc<ITInstance>,
-        wit: &MITInterfaces<'_>,
-    ) -> MResult<ExportFunctions> {
-        use marine_it_interfaces::ITAstType;
+    fn instantiate_exports(
+        it_instance: &Arc<ITInstance>,
+        mit: &MITInterfaces<'_>,
+    ) -> MResult<(ExportFunctions, MRecordTypes)> {
+        let module_interface = marine_module_interface::it_interface::get_interface(mit)?;
 
-        wit.implementations()
-            .filter_map(|(adapter_function_type, core_function_type)| {
-                wit.exports_by_type(*core_function_type)
-                    .map(|export_function_name| (adapter_function_type, export_function_name))
+        let export_funcs = module_interface
+            .function_signatures
+            .into_iter()
+            .map(|sign| {
+                let adapter_instructions = mit.adapter_by_type_r(sign.adapter_function_type)?;
+
+                let interpreter: ITInterpreter = adapter_instructions.clone().try_into()?;
+                let it_module_func = ITModuleFunc {
+                    interpreter: Arc::new(interpreter),
+                    arguments: sign.arguments.clone(),
+                    output_types: sign.outputs.clone(),
+                };
+
+                let shared_string = SharedString(sign.name);
+                let callable = Rc::new(Callable {
+                    it_instance: it_instance.clone(),
+                    it_module_func,
+                });
+
+                Ok((shared_string, callable))
             })
-            .map(|(adapter_function_type, export_function_names)| {
-                export_function_names
-                    .iter()
-                    .map(move |export_function_name| (*adapter_function_type, export_function_name))
-            })
-            .flatten()
-            .map(|(adapter_function_type, export_function_name)| {
-                let adapter_instructions = wit.adapter_by_type_r(adapter_function_type)?;
-                let wit_type = wit.type_by_idx_r(adapter_function_type)?;
+            .collect::<MResult<ExportFunctions>>()?;
 
-                match wit_type {
-                    ITAstType::Function {
-                        arguments,
-                        output_types,
-                    } => {
-                        let interpreter: ITInterpreter = adapter_instructions.clone().try_into()?;
-                        let wit_module_func = ITModuleFunc {
-                            interpreter: Arc::new(interpreter),
-                            arguments: arguments.clone(),
-                            output_types: output_types.clone(),
-                        };
-
-                        let shared_string = SharedString(Rc::new(export_function_name.to_string()));
-                        let callable = Rc::new(Callable {
-                            wit_instance: wit_instance.clone(),
-                            wit_module_func,
-                        });
-
-                        Ok((shared_string, callable))
-                    }
-                    _ => Err(MError::IncorrectWIT(format!(
-                        "type with idx = {} isn't a function type",
-                        adapter_function_type
-                    ))),
-                }
-            })
-            .collect::<MResult<ExportFunctions>>()
+        Ok((export_funcs, module_interface.export_record_types))
     }
 
     // this function deals only with import functions that have an adaptor implementation
@@ -431,6 +413,4 @@ impl MModule {
 
         Ok(import_object)
     }
-
-    // TODO : move it to a separate crate
 }

@@ -18,12 +18,12 @@ use super::ModuleInterface;
 use super::InterfaceResult;
 use super::FunctionSignature;
 use super::records_transformer::RecordsTransformer;
-use crate::it_interface::MModuleInterface;
+use crate::it_interface::IModuleInterface;
 use crate::it_interface::MFunctionSignature;
 use crate::it_interface::MRecordTypes;
 
-pub fn it_to_module_interface(mm_interface: MModuleInterface) -> InterfaceResult<ModuleInterface> {
-    let record_types = mm_interface.record_types;
+pub fn it_to_module_interface(mm_interface: IModuleInterface) -> InterfaceResult<ModuleInterface> {
+    let record_types = mm_interface.export_record_types;
 
     let function_signatures = mm_interface
         .function_signatures

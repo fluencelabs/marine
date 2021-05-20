@@ -148,7 +148,7 @@ fn generate_it_instructions<'f>(
     Ok(())
 }
 
-pub(crate) fn generate_raw_args<'f>(signature: &FnSignature) -> Rc<Vec<IFunctionArg>> {
+pub(crate) fn generate_raw_args(signature: &FnSignature) -> Rc<Vec<IFunctionArg>> {
     let raw_inputs = signature
         .arguments
         .iter()
@@ -159,7 +159,7 @@ pub(crate) fn generate_raw_args<'f>(signature: &FnSignature) -> Rc<Vec<IFunction
     Rc::new(raw_inputs)
 }
 
-pub(crate) fn generate_raw_output_type<'f>(signature: &FnSignature) -> Rc<Vec<IType>> {
+pub(crate) fn generate_raw_output_type(signature: &FnSignature) -> Rc<Vec<IType>> {
     let raw_outputs = signature
         .output_types
         .iter()
