@@ -18,7 +18,7 @@ use super::RecordType;
 use super::RecordField;
 use super::InterfaceResult;
 use super::InterfaceError;
-use crate::it_interface::MRecordTypes;
+use crate::it_interface::IRecordTypes;
 
 use wasmer_it::IRecordType;
 use wasmer_it::IType;
@@ -32,7 +32,7 @@ pub(crate) struct RecordsTransformer {
 }
 
 impl RecordsTransformer {
-    pub(crate) fn transform(record_types: &MRecordTypes) -> InterfaceResult<Vec<RecordType>> {
+    pub(crate) fn transform(record_types: &IRecordTypes) -> InterfaceResult<Vec<RecordType>> {
         let records_count = record_types.len();
 
         let mut transformer = Self {
@@ -47,7 +47,7 @@ impl RecordsTransformer {
         Ok(record_types)
     }
 
-    fn topological_sort(&mut self, exported_records: &MRecordTypes) -> InterfaceResult<()> {
+    fn topological_sort(&mut self, exported_records: &IRecordTypes) -> InterfaceResult<()> {
         for (id, record) in exported_records {
             self.dfs(*id, record, exported_records)?;
         }
@@ -59,22 +59,14 @@ impl RecordsTransformer {
         &mut self,
         record_id: u64,
         record: &Rc<IRecordType>,
-        exported_records: &MRecordTypes,
+        exported_records: &IRecordTypes,
     ) -> InterfaceResult<()> {
-        if self.used.contains(&record_id) {
+        if !self.used.insert(record_id) {
             return Ok(());
         }
 
-        self.used.insert(record_id);
-
         for field in (&record.fields).iter() {
-            if let IType::Record(type_id) = &field.ty {
-                let child_record = exported_records
-                    .get(type_id)
-                    .ok_or(InterfaceError::NotFoundRecordTypeId(*type_id))?;
-
-                self.dfs(*type_id, child_record, exported_records)?;
-            }
+            self.type_dfs(&field.ty, exported_records)?;
         }
 
         self.sorted_order.push(record_id);
@@ -82,7 +74,25 @@ impl RecordsTransformer {
         Ok(())
     }
 
-    fn into_transformed_records(self, record_types: &MRecordTypes) -> Vec<RecordType> {
+    fn type_dfs(
+        &mut self,
+        field_ty: &IType,
+        exported_records: &IRecordTypes,
+    ) -> InterfaceResult<()> {
+        match field_ty {
+            IType::Record(type_id) => {
+                let child_record = exported_records
+                    .get(type_id)
+                    .ok_or(InterfaceError::NotFoundRecordTypeId(*type_id))?;
+
+                self.dfs(*type_id, child_record, exported_records)
+            }
+            IType::Array(ty) => self.type_dfs(ty, exported_records),
+            _ => Ok(()),
+        }
+    }
+
+    fn into_transformed_records(self, record_types: &IRecordTypes) -> Vec<RecordType> {
         self.sorted_order
             .into_iter()
             .map(|id| {
@@ -96,7 +106,7 @@ impl RecordsTransformer {
     fn convert_record(
         id: u64,
         record: &Rc<IRecordType>,
-        record_types: &MRecordTypes,
+        record_types: &IRecordTypes,
     ) -> RecordType {
         use super::itype_text_view;
 

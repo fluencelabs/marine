@@ -79,6 +79,8 @@ pub fn main() -> Result<(), anyhow::Error> {
 }
 
 fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+    use inflector::Inflector;
+
     let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
     let wasm_path = std::path::Path::new(wasm_path);
 
@@ -88,12 +90,12 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     }
 
     match args.value_of(args::SERVICE_NAME) {
-        Some(service_name) => println!("service {}:", service_name),
+        Some(service_name) => println!("service {}:", service_name.to_title_case()),
         None => {
             let service_name = wasm_path
                 .file_stem()
                 .ok_or(anyhow::Error::msg("provided path isn't a path to a file"))?;
-            let service_name = service_name.to_string_lossy();
+            let service_name = service_name.to_string_lossy().to_title_case();
 
             println!("service {}:", service_name);
         }

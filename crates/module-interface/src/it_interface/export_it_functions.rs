@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::MFunctionSignature;
+use super::IFunctionSignature;
 use super::ITInterfaceError;
 use super::RIResult;
 
@@ -54,7 +54,7 @@ pub fn get_export_funcs_descriptors<'i>(
 }
 
 /// Returns all exported IT functions.
-pub fn get_export_funcs(mit: &MITInterfaces<'_>) -> RIResult<Vec<MFunctionSignature>> {
+pub fn get_export_funcs(mit: &MITInterfaces<'_>) -> RIResult<Vec<IFunctionSignature>> {
     use marine_it_interfaces::ITAstType;
 
     let funcs_descriptors = get_export_funcs_descriptors(mit);
@@ -69,7 +69,7 @@ pub fn get_export_funcs(mit: &MITInterfaces<'_>) -> RIResult<Vec<MFunctionSignat
                     arguments,
                     output_types,
                 } => {
-                    let signature = MFunctionSignature {
+                    let signature = IFunctionSignature {
                         name: Rc::new(descriptor.name.to_string()),
                         arguments: arguments.clone(),
                         outputs: output_types.clone(),
@@ -82,5 +82,5 @@ pub fn get_export_funcs(mit: &MITInterfaces<'_>) -> RIResult<Vec<MFunctionSignat
                 )),
             }
         })
-        .collect::<RIResult<Vec<MFunctionSignature>>>()
+        .collect::<RIResult<Vec<IFunctionSignature>>>()
 }

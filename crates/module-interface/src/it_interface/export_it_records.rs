@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use super::MRecordTypes;
+use super::IRecordTypes;
 use super::RIResult;
 use super::ITInterfaceError;
-use super::MFunctionSignature;
+use super::IFunctionSignature;
 
 use marine_it_interfaces::MITInterfaces;
 use wasmer_it::IType;
@@ -27,13 +27,13 @@ use std::collections::HashMap;
 const TYPE_RESOLVE_RECURSION_LIMIT: u32 = 1024;
 
 pub struct FullRecordTypes {
-    pub record_types: MRecordTypes,
-    pub export_record_types: MRecordTypes,
+    pub record_types: IRecordTypes,
+    pub export_record_types: IRecordTypes,
 }
 
 pub fn get_record_types<'f>(
     mit: &MITInterfaces<'_>,
-    export_funcs: impl ExactSizeIterator<Item = &'f MFunctionSignature>,
+    export_funcs: impl ExactSizeIterator<Item = &'f IFunctionSignature>,
 ) -> RIResult<FullRecordTypes> {
     let all_record_types = get_all_records(mit);
     let mut export_record_types = HashMap::new();
@@ -60,8 +60,8 @@ pub fn get_record_types<'f>(
 
 fn handle_itype(
     itype: &IType,
-    all_record_types: &MRecordTypes,
-    export_record_types: &mut MRecordTypes,
+    all_record_types: &IRecordTypes,
+    export_record_types: &mut IRecordTypes,
     recursion_level: u32,
 ) -> RIResult<()> {
     if recursion_level > TYPE_RESOLVE_RECURSION_LIMIT {
@@ -89,8 +89,8 @@ fn handle_itype(
 
 fn handle_record_type(
     record_type_id: u64,
-    all_record_types: &MRecordTypes,
-    export_record_types: &mut MRecordTypes,
+    all_record_types: &IRecordTypes,
+    export_record_types: &mut IRecordTypes,
     recursion_level: u32,
 ) -> RIResult<()> {
     let record_type = all_record_types
@@ -111,7 +111,7 @@ fn handle_record_type(
     Ok(())
 }
 
-fn get_all_records(mit: &MITInterfaces<'_>) -> MRecordTypes {
+fn get_all_records(mit: &MITInterfaces<'_>) -> IRecordTypes {
     use marine_it_interfaces::ITAstType;
 
     mit.types()

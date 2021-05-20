@@ -19,8 +19,8 @@ use super::InterfaceResult;
 use super::FunctionSignature;
 use super::records_transformer::RecordsTransformer;
 use crate::it_interface::IModuleInterface;
-use crate::it_interface::MFunctionSignature;
-use crate::it_interface::MRecordTypes;
+use crate::it_interface::IFunctionSignature;
+use crate::it_interface::IRecordTypes;
 
 pub fn it_to_module_interface(mm_interface: IModuleInterface) -> InterfaceResult<ModuleInterface> {
     let record_types = mm_interface.export_record_types;
@@ -42,8 +42,8 @@ pub fn it_to_module_interface(mm_interface: IModuleInterface) -> InterfaceResult
 }
 
 fn serialize_function_signature(
-    signature: MFunctionSignature,
-    record_types: &MRecordTypes,
+    signature: IFunctionSignature,
+    record_types: &IRecordTypes,
 ) -> FunctionSignature {
     use super::itype_text_view;
 

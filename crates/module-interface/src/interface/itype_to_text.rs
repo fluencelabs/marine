@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::it_interface::MRecordTypes;
+use crate::it_interface::IRecordTypes;
 
 use wasmer_it::IType;
 
@@ -23,7 +23,7 @@ use wasmer_it::IType;
 /// SAFETY:
 ///     It's assumed that arguments are well-formed and all records have a corresponded type in
 ///     record_types.
-pub fn itype_text_view(arg_ty: &IType, record_types: &MRecordTypes) -> String {
+pub fn itype_text_view(arg_ty: &IType, record_types: &IRecordTypes) -> String {
     match arg_ty {
         IType::Record(record_type_id) => {
             // assumed that this functions called with well-formed args

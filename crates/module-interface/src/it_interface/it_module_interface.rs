@@ -24,11 +24,11 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-pub type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
+pub type IRecordTypes = HashMap<u64, Rc<IRecordType>>;
 
 /// Represent a function type inside Marine module.
 #[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
-pub struct MFunctionSignature {
+pub struct IFunctionSignature {
     pub name: Rc<String>,
     pub arguments: Rc<Vec<IFunctionArg>>,
     pub outputs: Rc<Vec<IType>>,
@@ -38,7 +38,7 @@ pub struct MFunctionSignature {
 /// Represent an interface of a Wasm module.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
 pub struct IModuleInterface {
-    pub export_record_types: MRecordTypes,
-    pub record_types: MRecordTypes,
-    pub function_signatures: Vec<MFunctionSignature>,
+    pub export_record_types: IRecordTypes,
+    pub record_types: IRecordTypes,
+    pub function_signatures: Vec<IFunctionSignature>,
 }

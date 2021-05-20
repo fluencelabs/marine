@@ -53,8 +53,8 @@ pub mod interface {
 
 pub mod it_interface {
     pub use marine_module_interface::it_interface::IModuleInterface;
-    pub use marine_module_interface::it_interface::MRecordTypes;
-    pub use marine_module_interface::it_interface::MFunctionSignature;
+    pub use marine_module_interface::it_interface::IRecordTypes;
+    pub use marine_module_interface::it_interface::IFunctionSignature;
 
     pub mod it {
         pub use wasmer_it::IType;
