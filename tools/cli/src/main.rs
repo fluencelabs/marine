@@ -90,16 +90,16 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     }
 
     let service_name = match args.value_of(args::SERVICE_NAME) {
-        Some(service_name) => service_name,
+        Some(service_name) => service_name.to_string(),
         None => {
             let service_name = wasm_path
                 .file_stem()
                 .ok_or(anyhow::Error::msg("provided path isn't a path to a file"))?;
 
-            service_name.to_string_lossy().replace("[ -]", "_");
+            service_name.to_string_lossy().replace("[ -]", "_")
         }
     };
-    let service_name = uppercase_first_letter(service_name);
+    let service_name = uppercase_first_letter(&service_name);
     println!("service {}:", service_name);
 
     for sign in module_interface.function_signatures {
