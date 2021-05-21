@@ -24,6 +24,7 @@ pub const IN_WASM_PATH: &str = "in-wasm-path";
 pub const IT_PATH: &str = "it-path";
 pub const OUT_WASM_PATH: &str = "out-wasm-path";
 pub const SERVICE_NAME: &str = "service-name";
+pub const SERVICE_ID: &str = "service-id";
 
 pub const SDK_VERSION: &str = "sdk-version";
 
@@ -40,7 +41,14 @@ pub fn aqua<'a, 'b>() -> App<'a, 'b> {
                 .required(false)
                 .takes_value(true)
                 .short("s")
+                .long("service")
                 .help("optional service name"),
+            Arg::with_name(SERVICE_ID)
+                .required(false)
+                .takes_value(true)
+                .short("i")
+                .long("id")
+                .help("optional service id"),
         ])
 }
 

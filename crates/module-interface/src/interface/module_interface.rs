@@ -64,7 +64,7 @@ impl fmt::Display for FunctionSignature {
                 .iter()
                 .map(|(name, ty)| format!("{}: {}", name, ty))
                 .format(", ");
-            writeln!(f, "{}({}): -> {}", self.name, args, output)
+            writeln!(f, "{}({}) -> {}", self.name, args, output)
         }
     }
 }
