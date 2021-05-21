@@ -59,8 +59,12 @@ impl fmt::Display for FunctionSignature {
         if self.arguments.is_empty() {
             writeln!(f, "{}: -> {}", self.name, output)
         } else {
-            let args = self.arguments.iter().map(|(_, ty)| ty).format(",");
-            writeln!(f, "{}: {} -> {}", self.name, args, output)
+            let args = self
+                .arguments
+                .iter()
+                .map(|(name, ty)| format!("{}: {}", name, ty))
+                .format(", ");
+            writeln!(f, "{}({}): -> {}", self.name, args, output)
         }
     }
 }
