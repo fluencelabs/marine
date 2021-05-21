@@ -27,12 +27,10 @@
 
 use marine_module_info_parser::manifest;
 use marine_module_info_parser::sdk_version;
-use crate::uppercase::uppercase_first_letter;
 
 mod args;
 mod build;
 mod errors;
-mod uppercase;
 
 pub(crate) type CLIResult<T> = std::result::Result<T, crate::errors::CLIError>;
 
@@ -101,7 +99,7 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
             service_name.to_string_lossy()
         }
     };
-    let service_name = uppercase_first_letter(&service_name.to_camel_case());
+    let service_name = service_name.to_class_case();
     match args.value_of(args::SERVICE_ID) {
         Some(id) => println!(r#"service {}("{}"):"#, service_name, id),
         None => println!("service {}:", service_name),
