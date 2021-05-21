@@ -30,14 +30,14 @@ mod tests {
     #[test]
     fn uppercase() {
         let s = String::from("hello, world!");
-        let result = uppercase_first_letter(s);
+        let result = uppercase_first_letter(&s);
         assert_eq!(s, "Hello, world!");
     }
 
     #[test]
     fn identity() {
         let s = String::from("Hello, world!");
-        let result = uppercase_first_letter(s);
+        let result = uppercase_first_letter(&s);
         assert_eq!(s, "Hello, world!");
     }
 }
