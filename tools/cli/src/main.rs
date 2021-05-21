@@ -89,20 +89,24 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
         println!("{}", record);
     }
 
-    match args.value_of(args::SERVICE_NAME) {
-        Some(service_name) => println!("service {}:", service_name.to_title_case()),
+    let service_name = match args.value_of(args::SERVICE_NAME) {
+        Some(service_name) => service_name.into(),
         None => {
             let service_name = wasm_path
                 .file_stem()
                 .ok_or(anyhow::Error::msg("provided path isn't a path to a file"))?;
-            let service_name = service_name.to_string_lossy().to_title_case();
 
-            println!("service {}:", service_name);
+            service_name.to_string_lossy()
         }
+    };
+    let service_name = service_name.to_class_case();
+    match args.value_of(args::SERVICE_ID) {
+        Some(id) => println!(r#"service {}("{}"):"#, service_name, id),
+        None => println!("service {}:", service_name),
     }
 
     for sign in module_interface.function_signatures {
-        println!("  {}", sign);
+        print!("  {}", sign);
     }
 
     Ok(())
