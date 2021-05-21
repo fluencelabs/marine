@@ -15,7 +15,7 @@ marine-module-info-parser = { path = "../crates/module-info-parser", version = "
 marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.4.0" }
 marine-it-parser = { path = "../crates/it-parser", version = "0.6.0" }
 marine-it-generator = { path = "../crates/it-generator", version = "0.5.0" }
-marine-module-interface = { path = "../crates/module-interface", version = "0.1.0" }
+marine-module-interface = { path = "../crates/module-interface", version = "0.1.1" }
 marine-utils = { path = "../crates/utils", version = "0.2.0" }
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "0.17.0" }
