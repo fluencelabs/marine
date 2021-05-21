@@ -18,7 +18,6 @@ marine-module-info-parser = { path = "../../crates/module-info-parser", version 
 
 semver = "0.11.0"
 walrus = "0.18.0"
-Inflector = "0.11.4"
 
 thiserror = "1.0.24"
 anyhow = "1.0.31"

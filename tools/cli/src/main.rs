@@ -27,10 +27,12 @@
 
 use marine_module_info_parser::manifest;
 use marine_module_info_parser::sdk_version;
+use crate::uppercase::uppercase_first_letter;
 
 mod args;
 mod build;
 mod errors;
+mod uppercase;
 
 pub(crate) type CLIResult<T> = std::result::Result<T, crate::errors::CLIError>;
 
@@ -79,8 +81,6 @@ pub fn main() -> Result<(), anyhow::Error> {
 }
 
 fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
-    use inflector::Inflector;
-
     let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
     let wasm_path = std::path::Path::new(wasm_path);
 
@@ -89,20 +89,18 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
         println!("{}", record);
     }
 
-    match args.value_of(args::SERVICE_NAME) {
-        Some(service_name) => println!("service {}:", service_name.to_title_case()),
+    let service_name = match args.value_of(args::SERVICE_NAME) {
+        Some(service_name) => service_name,
         None => {
             let service_name = wasm_path
                 .file_stem()
                 .ok_or(anyhow::Error::msg("provided path isn't a path to a file"))?;
-            let service_name = service_name
-                .to_string_lossy()
-                .to_title_case()
-                .replace("[ -]", "_");
 
-            println!("service {}:", service_name);
+            service_name.to_string_lossy().replace("[ -]", "_");
         }
-    }
+    };
+    let service_name = uppercase_first_letter(service_name);
+    println!("service {}:", service_name);
 
     for sign in module_interface.function_signatures {
         println!("  {}", sign);
