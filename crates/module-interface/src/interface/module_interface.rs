@@ -56,16 +56,12 @@ impl fmt::Display for FunctionSignature {
             _ => unimplemented!("more than 1 output type is unsupported"),
         };
 
-        if self.arguments.is_empty() {
-            writeln!(f, "{}: -> {}", self.name, output)
-        } else {
-            let args = self
-                .arguments
-                .iter()
-                .map(|(name, ty)| format!("{}: {}", name, ty))
-                .format(", ");
-            writeln!(f, "{}({}) -> {}", self.name, args, output)
-        }
+        let args = self
+            .arguments
+            .iter()
+            .map(|(name, ty)| format!("{}: {}", name, ty))
+            .format(", ");
+        writeln!(f, "{}({}) -> {}", self.name, args, output)
     }
 }
 
