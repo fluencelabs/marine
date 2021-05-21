@@ -1465,7 +1465,7 @@ dependencies = [
  "clap",
  "exitfailure",
  "marine-it-generator 0.5.2",
- "marine-it-parser 0.6.1",
+ "marine-it-parser 0.6.2",
  "marine-module-info-parser 0.1.0",
  "semver 0.11.0",
  "serde",
@@ -1499,7 +1499,7 @@ version = "0.5.2"
 dependencies = [
  "cargo_toml",
  "it-lilo",
- "marine-it-parser 0.6.1",
+ "marine-it-parser 0.6.2",
  "marine-macro-impl",
  "once_cell",
  "serde",
@@ -1546,7 +1546,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-parser"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "anyhow",
  "itertools 0.10.0",
@@ -1641,7 +1641,7 @@ dependencies = [
  "log",
  "marine-it-generator 0.5.2",
  "marine-it-interfaces 0.4.0",
- "marine-it-parser 0.6.1",
+ "marine-it-parser 0.6.2",
  "marine-module-info-parser 0.1.0",
  "marine-module-interface",
  "marine-utils 0.2.0",

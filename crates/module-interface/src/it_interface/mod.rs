@@ -37,8 +37,8 @@ pub fn get_interface(mit: &MITInterfaces<'_>) -> RIResult<IModuleInterface> {
     } = get_record_types(mit, function_signatures.iter())?;
 
     let mm_interface = IModuleInterface {
-        record_types,
         export_record_types,
+        record_types,
         function_signatures,
     };
 

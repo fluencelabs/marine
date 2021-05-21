@@ -94,7 +94,7 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
         None => {
             let service_name = wasm_path
                 .file_stem()
-                .ok_or(anyhow::Error::msg("provided path isn't a path to a file"))?;
+                .ok_or_else(|| anyhow::Error::msg("provided path isn't a path to a file"))?;
 
             service_name.to_string_lossy()
         }
