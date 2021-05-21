@@ -95,7 +95,10 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
             let service_name = wasm_path
                 .file_stem()
                 .ok_or(anyhow::Error::msg("provided path isn't a path to a file"))?;
-            let service_name = service_name.to_string_lossy().to_title_case();
+            let service_name = service_name
+                .to_string_lossy()
+                .to_title_case()
+                .replace("[ -]", "_");
 
             println!("service {}:", service_name);
         }
