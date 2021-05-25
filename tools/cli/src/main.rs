@@ -49,6 +49,7 @@ pub fn main() -> Result<(), anyhow::Error> {
 
     match arg_matches.subcommand() {
         ("aqua", Some(args)) => {
+            // avoid printing version
             return aqua(args);
         }
         ("build", Some(args)) => build(args),
@@ -59,7 +60,7 @@ pub fn main() -> Result<(), anyhow::Error> {
         (c, _) => Err(crate::errors::CLIError::NoSuchCommand(c.to_string()).into()),
     }?;
 
-    // avoid printing version in not TTY
+    // avoid printing version update into not TTY targets
     if !atty::is(atty::Stream::Stdout) {
         return Ok(());
     }
