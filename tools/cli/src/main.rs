@@ -48,7 +48,9 @@ pub fn main() -> Result<(), anyhow::Error> {
     let arg_matches = app.get_matches();
 
     match arg_matches.subcommand() {
-        ("aqua", Some(args)) => aqua(args),
+        ("aqua", Some(args)) => {
+            return aqua(args);
+        },
         ("build", Some(args)) => build(args),
         ("set", Some(args)) => set(args),
         ("it", Some(args)) => it(args),
@@ -56,6 +58,11 @@ pub fn main() -> Result<(), anyhow::Error> {
         ("repl", Some(args)) => repl(args),
         (c, _) => Err(crate::errors::CLIError::NoSuchCommand(c.to_string()).into()),
     }?;
+
+    // avoid printing version in not TTY
+    if !atty::is(atty::Stream::Stdout) {
+        return Ok(());
+    }
 
     if let Ok(Some(new_version)) = check_latest::check_max!() {
         use termion::color;
