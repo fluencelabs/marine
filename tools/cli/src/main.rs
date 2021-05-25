@@ -50,7 +50,7 @@ pub fn main() -> Result<(), anyhow::Error> {
     match arg_matches.subcommand() {
         ("aqua", Some(args)) => {
             return aqua(args);
-        },
+        }
         ("build", Some(args)) => build(args),
         ("set", Some(args)) => set(args),
         ("it", Some(args)) => it(args),
