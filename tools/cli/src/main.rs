@@ -92,7 +92,7 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
     let wasm_path = std::path::Path::new(wasm_path);
 
-    let module_interface = marine_it_parser::module_interface(wasm_path)?;
+    let mut module_interface = marine_it_parser::module_interface(wasm_path)?;
     for record in module_interface.record_types.iter() {
         println!("{}", record);
     }
@@ -113,6 +113,7 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
         None => println!("service {}:", service_name),
     }
 
+    module_interface.function_signatures.sort();
     for sign in module_interface.function_signatures {
         print!("  {}", sign);
     }
