@@ -17,11 +17,24 @@
 use serde::Serialize;
 use serde::Deserialize;
 
-#[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Ord, Hash, Serialize, Deserialize)]
 pub struct FunctionSignature {
     pub name: String,
     pub arguments: Vec<(String, String)>,
     pub output_types: Vec<String>,
+}
+
+use std::cmp::Ordering;
+impl PartialOrd for FunctionSignature {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if self.name < other.name {
+            Some(Ordering::Less)
+        } else if self == other {
+            Some(Ordering::Equal)
+        } else {
+            Some(Ordering::Greater)
+        }
+    }
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
