@@ -5,7 +5,6 @@ on:
     branches:
       - "master"
       - "main"
-      - "no_unit"
 
 jobs:
   npm-publish:
@@ -51,7 +50,8 @@ jobs:
         run: |
           set -x
           PKG_NAME=marine
-          VERSION=$(cargo ws list -l | grep "$PKG_NAME " | head -n1 | awk '{ print $2 }')
+          # substr(x, 2) removes first character from x. In case of version it's 'v' in 'v0.0.0'
+          VERSION=$(cargo ws list -l | grep "$PKG_NAME " | head -n1 | awk '{ print substr($2, 2) }')
           echo "VERSION=$VERSION" | tee -a $GITHUB_ENV
           echo "PKG_NAME=$PKG_NAME" | tee -a $GITHUB_ENV
 
@@ -66,7 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.VERSION }}
-          release_name: Fluence Rust SDK ${{ env.VERSION }}
+          release_name: Marine WASM Runtime ${{ env.VERSION }}
           body: |
             - [${{ env.VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.VERSION }})
           draft: false
