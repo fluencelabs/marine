@@ -1,0 +1,73 @@
+name: "publish-release"
+
+on:
+  push:
+    branches:
+      - "master"
+      - "main"
+      - "no_unit"
+
+jobs:
+  npm-publish:
+    name: "Publish release"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      ### Prepare cargo & toolchains
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          toolchain: nightly
+          command: update
+          args: --aggressive
+
+      - name: Install cargo-workspaces
+        run: cargo install cargo-workspaces || true
+
+      ### === Rust package release ===
+      - name: Login to crates.io
+        run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
+
+      - name: Save fluence's crate version to env
+        run: |
+          set -x
+          PKG_NAME=marine
+          VERSION=$(cargo ws list -l | grep "$PKG_NAME"$ | head -n1 | awk '{ print $2 }')
+          echo "VERSION=$VERSION" | tee -a $GITHUB_ENV
+          echo "PKG_NAME=$PKG_NAME" | tee -a $GITHUB_ENV
+
+      - name: Publish to crates.io
+        run: cargo ws publish --no-git-commit --from-git --skip-published --yes
+
+      ### Create a pre-release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: Fluence Rust SDK ${{ env.VERSION }}
+          body: |
+            - [${{ env.VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.VERSION }})
+          draft: false
+          prerelease: false
