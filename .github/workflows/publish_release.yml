@@ -62,15 +62,12 @@ jobs:
       - name: Build release binaries of marine & mrepl
         run: cargo build --release -p marine -p mrepl
 
-      ### Create a pre-release
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
+          name: Marine WASM Runtime ${{ env.VERSION }}
           tag_name: ${{ env.VERSION }}
-          release_name: Marine WASM Runtime ${{ env.VERSION }}
           body: |
             - [${{ env.VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.VERSION }})
           files: |
@@ -78,3 +75,6 @@ jobs:
             target/release/mrepl
           draft: false
           prerelease: false
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
