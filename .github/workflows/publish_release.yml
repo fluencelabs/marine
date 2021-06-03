@@ -5,6 +5,7 @@ on:
     branches:
       - "master"
       - "main"
+      - "no_unit"
 
 jobs:
   npm-publish:
@@ -55,8 +56,11 @@ jobs:
           echo "VERSION=$VERSION" | tee -a $GITHUB_ENV
           echo "PKG_NAME=$PKG_NAME" | tee -a $GITHUB_ENV
 
-      - name: Publish to crates.io
-        run: cargo ws publish --no-git-commit --from-git --skip-published --yes
+#      - name: Publish to crates.io
+#        run: cargo ws publish --no-git-commit --from-git --skip-published --yes
+
+      - name: Build release binaries of marine & mrepl
+        run: cargo build --release -p marine -p mrepl
 
       ### Create a pre-release
       - name: Create Release
@@ -69,5 +73,8 @@ jobs:
           release_name: Marine WASM Runtime ${{ env.VERSION }}
           body: |
             - [${{ env.VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.VERSION }})
+          files: |
+            target/release/marine
+            target/release/mrepl
           draft: false
           prerelease: false
