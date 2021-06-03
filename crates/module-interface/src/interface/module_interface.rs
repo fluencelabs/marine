@@ -69,9 +69,9 @@ impl fmt::Display for FunctionSignature {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use itertools::Itertools;
 
-        let output = match self.output_types.len() {
-            0 => "()",
-            1 => &self.output_types[0],
+        let (designator, output) = match self.output_types.len() {
+            0 => ("", ""),
+            1 => ("->", &self.output_types[0]),
             _ => unimplemented!("more than 1 output type is unsupported"),
         };
 
@@ -80,7 +80,7 @@ impl fmt::Display for FunctionSignature {
             .iter()
             .map(|(name, ty)| format!("{}: {}", name, ty))
             .format(", ");
-        writeln!(f, "{}({}) -> {}", self.name, args, output)
+        writeln!(f, "{}({}) {} {}", self.name, args, designator, output)
     }
 }
 
