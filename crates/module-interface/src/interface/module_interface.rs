@@ -70,7 +70,7 @@ impl fmt::Display for FunctionSignature {
         use itertools::Itertools;
 
         let (designator, output) = match self.output_types.len() {
-            0 => ("", ""),
+            0 => ("", String::new()),
             1 => ("->", &self.output_types[0]),
             _ => unimplemented!("more than 1 output type is unsupported"),
         };
