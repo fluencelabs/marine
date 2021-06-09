@@ -1,0 +1,79 @@
+name: "publish-release"
+
+on:
+  push:
+    branches:
+      - "master"
+      - "main"
+
+jobs:
+  npm-publish:
+    name: "Publish release"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      ### Prepare cargo & toolchains
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          toolchain: nightly
+          command: update
+          args: --aggressive
+
+      - name: Install cargo-workspaces
+        run: cargo install cargo-workspaces || true
+
+      ### === Rust package release ===
+      - name: Login to crates.io
+        run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
+
+      - name: Save crate version to env
+        run: |
+          set -x
+          PKG_NAME=marine
+          # substr(x, 2) removes first character from x. In case of version it's 'v' in 'v0.0.0'
+          VERSION=$(cargo ws list -l | grep "$PKG_NAME " | head -n1 | awk '{ print substr($2, 2) }')
+          echo "VERSION=$VERSION" | tee -a $GITHUB_ENV
+          echo "PKG_NAME=$PKG_NAME" | tee -a $GITHUB_ENV
+
+#      - name: Publish to crates.io
+#        run: cargo ws publish --no-git-commit --from-git --skip-published --yes
+
+      - name: Build release binaries of marine & mrepl
+        run: cargo build --release -p marine -p mrepl
+
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Marine WASM Runtime ${{ env.VERSION }}
+          tag_name: ${{ env.VERSION }}
+          body: |
+            - [${{ env.VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.VERSION }})
+          files: |
+            target/release/marine
+            target/release/mrepl
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
