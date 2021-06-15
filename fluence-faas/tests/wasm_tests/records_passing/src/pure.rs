@@ -16,7 +16,7 @@
 
 #![allow(improper_ctypes)]
 
-use fluence::marine;
+use marine_rs_sdk::marine;
 
 #[marine]
 #[derive(Clone, Debug, Default)]
@@ -71,7 +71,7 @@ fn test_record_ref(test_record: &TestRecord2) -> TestRecord2 {
 }
 
 mod effector {
-    use fluence::marine;
+    use marine_rs_sdk::marine;
     use super::TestRecord2;
 
     #[marine]

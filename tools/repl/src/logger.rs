@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fluence_sdk_main::WASM_LOG_ENV_NAME;
+use marine_rs_sdk_main::WASM_LOG_ENV_NAME;
 
 use std::io::Write;
 use std::env::var;

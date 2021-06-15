@@ -21,7 +21,7 @@ use crate::extract_custom_sections_by_name;
 use crate::try_as_one_section;
 
 use wasmer_core::Module as WasmerModule;
-use fluence_sdk_main::MANIFEST_SECTION_NAME;
+use marine_rs_sdk_main::MANIFEST_SECTION_NAME;
 use walrus::ModuleConfig;
 use walrus::Module;
 

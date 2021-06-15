@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use fluence::marine;
-use fluence::module_manifest;
+use marine_rs_sdk::marine;
+use marine_rs_sdk::module_manifest;
 
 module_manifest!();
 
@@ -28,7 +28,7 @@ pub fn greeting(name: String) -> String {
 
 #[cfg(test)]
 mod tests {
-    use fluence_test::marine_test;
+    use marine_rs_sdk_test::marine_test;
 
     #[marine_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
     fn empty_string() {

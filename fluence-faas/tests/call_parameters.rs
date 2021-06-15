@@ -46,7 +46,7 @@ pub fn call_parameters() {
     tetraplet.json_path = "some_json_path".to_string();
     let tetraplets = vec![vec![tetraplet]];
 
-    let call_parameters = fluence::CallParameters {
+    let call_parameters = marine_rs_sdk::CallParameters {
         init_peer_id: init_peer_id.to_string(),
         service_id: service_id.to_string(),
         service_creator_peer_id: service_creator_peer_id.to_string(),

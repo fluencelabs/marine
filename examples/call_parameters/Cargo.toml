@@ -10,7 +10,7 @@ name = "call_parameters"
 path = "src/main.rs"
 
 [dependencies]
-fluence = "0.6.9"
+marine-rs-sdk ="0.6.10"
 
 [dev-dependencies]
 fluence-test = "0.1.7"

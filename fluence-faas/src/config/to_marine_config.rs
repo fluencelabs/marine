@@ -34,7 +34,7 @@ use std::rc::Rc;
 pub(crate) fn make_marine_config(
     module_name: String,
     faas_module_config: Option<FaaSModuleConfig>,
-    call_parameters: Rc<RefCell<fluence::CallParameters>>,
+    call_parameters: Rc<RefCell<marine_rs_sdk::CallParameters>>,
     logger_filter: &LoggerFilter<'_>,
 ) -> Result<MModuleConfig> {
     let mut marine_module_cfg = MModuleConfig::default();

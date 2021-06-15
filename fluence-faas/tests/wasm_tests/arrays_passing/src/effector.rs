@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use fluence::marine;
+use marine_rs_sdk::marine;
 
 pub fn main() {}
 

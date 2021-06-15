@@ -29,7 +29,7 @@ use marine::Marine;
 use marine::IFunctionArg;
 use marine_utils::SharedString;
 use marine::MRecordTypes;
-use fluence::CallParameters;
+use marine_rs_sdk::CallParameters;
 
 use serde_json::Value as JValue;
 use std::cell::RefCell;
@@ -136,7 +136,7 @@ impl FluenceFaaS {
         module_name: MN,
         func_name: FN,
         args: &[IValue],
-        call_parameters: fluence::CallParameters,
+        call_parameters: marine_rs_sdk::CallParameters,
     ) -> Result<Vec<IValue>> {
         self.call_parameters.replace(call_parameters);
 
@@ -151,7 +151,7 @@ impl FluenceFaaS {
         module_name: MN,
         func_name: FN,
         json_args: JValue,
-        call_parameters: fluence::CallParameters,
+        call_parameters: marine_rs_sdk::CallParameters,
     ) -> Result<JValue> {
         use crate::json::json_to_ivalues;
         use crate::json::ivalues_to_json;

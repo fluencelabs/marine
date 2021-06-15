@@ -20,10 +20,10 @@ mod path;
 
 use crate::path::to_full_path;
 
-use fluence::marine;
-use fluence::module_manifest;
-use fluence::WasmLoggerBuilder;
-use fluence::MountedBinaryResult;
+use marine_rs_sdk::marine;
+use marine_rs_sdk::module_manifest;
+use marine_rs_sdk::WasmLoggerBuilder;
+use marine_rs_sdk::MountedBinaryResult;
 
 const RESULT_FILE_PATH: &str = "/tmp/ipfs_rpc_file";
 const IPFS_ADDR_ENV_NAME: &str = "IPFS_ADDR";

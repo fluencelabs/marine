@@ -15,7 +15,7 @@
  */
 
 use marine::HostImportDescriptor;
-use fluence::MountedBinaryResult;
+use marine_rs_sdk::MountedBinaryResult;
 
 use wasmer_core::vm::Ctx;
 use wasmer_it::IValue;
