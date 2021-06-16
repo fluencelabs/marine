@@ -16,7 +16,7 @@
 
 #![allow(improper_ctypes)]
 
-use fluence::marine;
+use marine_rs_sdk::marine;
 
 pub fn main() {}
 
@@ -227,7 +227,7 @@ pub fn empty_type() -> String {
 }
 
 mod effector {
-    use fluence::marine;
+    use marine_rs_sdk::marine;
 
     #[marine]
     #[link(wasm_import_module = "arguments_passing_effector")]

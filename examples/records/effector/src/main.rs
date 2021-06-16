@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use fluence::marine;
-use fluence::module_manifest;
+use marine_rs_sdk::marine;
+use marine_rs_sdk::module_manifest;
 
 use test_record::TestRecord;
 

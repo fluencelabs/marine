@@ -15,9 +15,9 @@
  */
 
 #[cfg(target_arch = "wasm32")]
-use fluence::marine;
+use marine_rs_sdk::marine;
 #[cfg(target_arch = "wasm32")]
-use fluence::module_manifest;
+use marine_rs_sdk::module_manifest;
 
 #[cfg(target_arch = "wasm32")]
 module_manifest!();
@@ -27,7 +27,7 @@ pub fn main() {}
 #[marine]
 #[cfg(target_arch = "wasm32")]
 pub fn call_parameters() -> String {
-    let cp = fluence::get_call_parameters();
+    let cp = marine_rs_sdk::get_call_parameters();
     format!(
         "{}\n{}\n{}\n{}\n{}\n{:?}",
         cp.init_peer_id,
@@ -41,9 +41,9 @@ pub fn call_parameters() -> String {
 
 #[cfg(test)]
 mod tests {
-    use fluence_test::marine_test;
-    use fluence_test::CallParameters;
-    use fluence_test::SecurityTetraplet;
+    use marine_rs_sdk_test::marine_test;
+    use marine_rs_sdk_test::CallParameters;
+    use marine_rs_sdk_test::SecurityTetraplet;
 
     #[marine_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
     fn empty_string() {

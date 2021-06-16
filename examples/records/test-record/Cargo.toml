@@ -10,4 +10,4 @@ name = "test_record"
 path = "src/test_record.rs"
 
 [dependencies]
-fluence = "0.6.9"
+marine-rs-sdk ="0.6.10"

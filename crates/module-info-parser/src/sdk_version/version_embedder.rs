@@ -16,7 +16,7 @@
 
 use crate::ModuleInfoResult;
 use crate::ModuleInfoError;
-use fluence_sdk_main::VERSION_SECTION_NAME;
+use marine_rs_sdk_main::VERSION_SECTION_NAME;
 
 use walrus::ModuleConfig;
 use walrus::CustomSection;

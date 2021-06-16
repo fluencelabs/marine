@@ -68,7 +68,7 @@ pub use marine::min_it_version;
 
 pub use marine_module_interface::interface::itype_text_view;
 
-pub use fluence::CallParameters;
-pub use fluence::SecurityTetraplet;
+pub use marine_rs_sdk::CallParameters;
+pub use marine_rs_sdk::SecurityTetraplet;
 
 pub use wasmer_core::vm::Ctx;

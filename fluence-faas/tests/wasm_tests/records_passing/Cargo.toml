@@ -14,5 +14,5 @@ name = "records_passing_pure"
 path = "src/pure.rs"
 
 [dependencies]
-fluence = "0.6.9"
+marine-rs-sdk ="0.6.10"
 safe-transmute = "0.11.0"

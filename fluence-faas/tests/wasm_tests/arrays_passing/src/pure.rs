@@ -16,7 +16,7 @@
 
 #![allow(improper_ctypes)]
 
-use fluence::marine;
+use marine_rs_sdk::marine;
 
 pub fn main() {}
 
@@ -156,7 +156,7 @@ pub fn empty_type() -> Vec<String> {
 }
 
 mod effector {
-    use fluence::marine;
+    use marine_rs_sdk::marine;
     use super::TestRecord;
 
     #[marine]

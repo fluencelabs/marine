@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use fluence::marine;
-use fluence::module_manifest;
+use marine_rs_sdk::marine;
+use marine_rs_sdk::module_manifest;
 
 use marine_sqlite_connector;
 use marine_sqlite_connector::State;
