@@ -747,9 +747,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.7.4"
+version = "0.8.0"
 dependencies = [
- "fluence-faas 0.7.4",
+ "fluence-faas 0.8.0",
  "log",
  "maplit",
  "serde",
@@ -786,7 +786,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.7.4"
+version = "0.8.0"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -1708,7 +1708,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.5.1"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "boolinator",
@@ -1907,13 +1907,13 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.7.4"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "check-latest",
  "clap",
  "env_logger 0.7.1",
- "fluence-app-service 0.7.4",
+ "fluence-app-service 0.8.0",
  "itertools 0.9.0",
  "log",
  "marine-rs-sdk-main",
