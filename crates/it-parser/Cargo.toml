@@ -1,7 +1,7 @@
 [package]
 name = "marine-it-parser"
 description = "Fluence Marine interface types parser"
-version = "0.6.4"
+version = "0.6.5"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -12,7 +12,7 @@ path = "src/lib.rs"
 
 [dependencies]
 marine-it-interfaces = { path = "../it-interfaces", version = "0.4.0" }
-marine-module-interface = { path = "../module-interface", version = "0.1.3" }
+marine-module-interface = { path = "../module-interface", version = "0.1.4" }
 
 anyhow = "1.0.31"
 walrus = "0.18.0"
