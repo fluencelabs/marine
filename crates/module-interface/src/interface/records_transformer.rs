@@ -49,6 +49,7 @@ impl RecordsTransformer {
     }
 
     fn topological_sort(&mut self, exported_records: &IRecordTypes) -> InterfaceResult<()> {
+        // sort records types inside HashMap to achieve their deterministic order
         for (id, record) in exported_records.iter().sorted_by_key(|(_, v)| &v.name) {
             self.dfs(*id, record, exported_records)?;
         }
