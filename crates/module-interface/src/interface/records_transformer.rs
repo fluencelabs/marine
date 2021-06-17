@@ -25,6 +25,7 @@ use wasmer_it::IType;
 
 use std::collections::HashSet;
 use std::rc::Rc;
+use itertools::Itertools;
 
 pub(crate) struct RecordsTransformer {
     used: HashSet<u64>,
@@ -48,7 +49,7 @@ impl RecordsTransformer {
     }
 
     fn topological_sort(&mut self, exported_records: &IRecordTypes) -> InterfaceResult<()> {
-        for (id, record) in exported_records {
+        for (id, record) in exported_records.iter().sorted_by_key(|(_, v)| &v.name) {
             self.dfs(*id, record, exported_records)?;
         }
 
