@@ -107,7 +107,7 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
             service_name.to_string_lossy()
         }
     };
-    let service_name = service_name.to_class_case();
+    let service_name = service_name.to_pascal_case();
     match args.value_of(args::SERVICE_ID) {
         Some(id) => println!(r#"service {}("{}"):"#, service_name, id),
         None => println!("service {}:", service_name),
