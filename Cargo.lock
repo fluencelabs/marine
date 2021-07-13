@@ -749,7 +749,7 @@ dependencies = [
 name = "fluence-app-service"
 version = "0.8.0"
 dependencies = [
- "fluence-faas 0.8.0",
+ "fluence-faas 0.8.1",
  "log",
  "maplit",
  "serde",
@@ -786,7 +786,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.8.0"
+version = "0.8.1"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -1496,7 +1496,7 @@ dependencies = [
 
 [[package]]
 name = "marine"
-version = "0.6.9"
+version = "0.6.10"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -1708,7 +1708,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "anyhow",
  "boolinator",
