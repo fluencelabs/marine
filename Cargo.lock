@@ -749,7 +749,7 @@ dependencies = [
 name = "fluence-app-service"
 version = "0.8.0"
 dependencies = [
- "fluence-faas 0.8.0",
+ "fluence-faas 0.8.1",
  "log",
  "maplit",
  "serde",
@@ -786,7 +786,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.8.0"
+version = "0.8.1"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -1485,7 +1485,7 @@ dependencies = [
  "exitfailure",
  "marine-it-generator 0.4.0",
  "marine-it-parser 0.5.0",
- "marine-module-info-parser 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-module-info-parser 0.1.0",
  "semver 0.11.0",
  "serde",
  "serde_json",
@@ -1496,7 +1496,7 @@ dependencies = [
 
 [[package]]
 name = "marine"
-version = "0.6.9"
+version = "0.6.10"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -1506,7 +1506,7 @@ dependencies = [
  "exitfailure",
  "marine-it-generator 0.5.3",
  "marine-it-parser 0.6.5",
- "marine-module-info-parser 0.1.0",
+ "marine-module-info-parser 0.2.0",
  "semver 0.11.0",
  "serde",
  "serde_json",
@@ -1627,10 +1627,12 @@ dependencies = [
 [[package]]
 name = "marine-module-info-parser"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "003017e314cebb5c774569a4257f5eca82106cff170b124c6712f2fcd3ceefef"
 dependencies = [
  "anyhow",
  "chrono",
- "marine-rs-sdk-main",
+ "fluence-sdk-main",
  "semver 0.11.0",
  "serde",
  "thiserror",
@@ -1640,13 +1642,11 @@ dependencies = [
 
 [[package]]
 name = "marine-module-info-parser"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "003017e314cebb5c774569a4257f5eca82106cff170b124c6712f2fcd3ceefef"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "chrono",
- "fluence-sdk-main",
+ "marine-rs-sdk-main",
  "semver 0.11.0",
  "serde",
  "thiserror",
@@ -1708,7 +1708,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "anyhow",
  "boolinator",
@@ -1718,7 +1718,7 @@ dependencies = [
  "marine-it-generator 0.5.3",
  "marine-it-interfaces 0.4.0",
  "marine-it-parser 0.6.5",
- "marine-module-info-parser 0.1.0",
+ "marine-module-info-parser 0.2.0",
  "marine-module-interface",
  "marine-utils 0.2.0",
  "multimap",

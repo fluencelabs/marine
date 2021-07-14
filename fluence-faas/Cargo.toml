@@ -1,13 +1,13 @@
 [package]
 name = "fluence-faas"
 description = "Fluence FaaS"
-version = "0.8.0"
+version = "0.8.1"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-marine-runtime = { path = "../runtime", version = "0.6.0" }
+marine-runtime = { path = "../runtime", version = "0.6.1" }
 marine-module-interface = { path = "../crates/module-interface", version = "0.1.4" }
 marine-utils = { path = "../crates/utils", version = "0.2.0" }
 marine-rs-sdk-main = { version = "0.6.10", features = ["logger"] }
