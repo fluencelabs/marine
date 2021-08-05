@@ -32,7 +32,7 @@ macro_rules! next_wvalue {
         {
             WValue::$wtype(v) => *v,
             v => return Err(HostImportError::MismatchWValues(WType::$wtype, v.clone())),
-        };
+        }
     };
 }
 
