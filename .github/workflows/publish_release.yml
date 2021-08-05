@@ -55,8 +55,8 @@ jobs:
           echo "VERSION=$VERSION" | tee -a $GITHUB_ENV
           echo "PKG_NAME=$PKG_NAME" | tee -a $GITHUB_ENV
 
-#      - name: Publish to crates.io
-#        run: cargo ws publish --no-git-commit --from-git --skip-published --yes
+      - name: Publish to crates.io
+        run: cargo ws publish --no-git-commit --from-git --skip-published --yes
 
       - name: Build release binaries of marine & mrepl
         run: cargo build --release -p marine -p mrepl

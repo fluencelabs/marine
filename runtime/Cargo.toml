@@ -11,7 +11,7 @@ name = "marine"
 path = "src/lib.rs"
 
 [dependencies]
-marine-module-info-parser = { path = "../crates/module-info-parser", version = "0.1.0" }
+marine-module-info-parser = { path = "../crates/module-info-parser", version = "0.2.0" }
 marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.4.0" }
 marine-it-parser = { path = "../crates/it-parser", version = "0.6.4" }
 marine-it-generator = { path = "../crates/it-generator", version = "0.5.3" }
