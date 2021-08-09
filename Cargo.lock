@@ -2073,6 +2073,7 @@ dependencies = [
  "rustop",
  "rustyline",
  "rustyline-derive",
+ "serde",
  "serde_json",
  "termion",
  "uuid",

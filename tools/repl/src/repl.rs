@@ -20,9 +20,11 @@ use print_state::print_envs;
 use print_state::print_fs_state;
 use crate::ReplResult;
 
-use fluence_app_service::AppService;
+use fluence_app_service::{AppService, CallParameters};
 use fluence_app_service::FaaSModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
+
+use serde::Deserialize;
 
 use std::collections::HashMap;
 use std::fs;
@@ -144,20 +146,34 @@ impl REPL {
         };
 
         let module_arg: String = args.join(" ");
-        let module_arg: serde_json::Value = match serde_json::from_str(&module_arg) {
+        let mut de = serde_json::Deserializer::from_str(&module_arg);
+        let module_arg: serde_json::Value = match serde_json::Value::deserialize(&mut de) {
             Ok(module_arg) => module_arg,
             Err(e) => {
-                println!("incorrect arguments {}", e);
+                println!("incorrect arguments: {}", e);
                 return;
             }
         };
 
+        let call_parameters = match Option::<CallParameters>::deserialize(&mut de) {
+            Ok(Some(call_parameters)) => call_parameters,
+            Ok(None) => CallParameters::default(),
+            Err(e) => {
+                println!("incorrect call parameters: {}", e);
+                return;
+            }
+        };
+
+        if let Err(e) = de.end() {
+            println!("data after call patameters is not supported: {}", e);
+            return;
+        }
+
         let start = Instant::now();
-        // TODO: add support of call parameters
         let result =
             match self
                 .app_service
-                .call_module(module_name, func_name, module_arg, <_>::default())
+                .call_module(module_name, func_name, module_arg, call_parameters)
             {
                 Ok(result) if show_result_arg => {
                     let elapsed_time = start.elapsed();
@@ -223,14 +239,14 @@ impl REPL {
 fn print_help() {
     println!(
         "Commands:\n\n\
-            n/new [config_path]                       create a new service (current will be removed)\n\
-            l/load <module_name> <module_path>        load a new Wasm module\n\
-            u/unload <module_name>                    unload a Wasm module\n\
-            c/call <module_name> <func_name> [args]   call function with given name from given module\n\
-            i/interface                               print public interface of all loaded modules\n\
-            e/envs <module_name>                      print environment variables of a module\n\
-            f/fs <module_name>                        print filesystem state of a module\n\
-            h/help                                    print this message\n\
-            q/quit/Ctrl-C                             exit"
+            n/new [config_path]                                   create a new service (current will be removed)\n\
+            l/load <module_name> <module_path>                    load a new Wasm module\n\
+            u/unload <module_name>                                unload a Wasm module\n\
+            c/call <module_name> <func_name> <args> [call_params] call function with given name from given module\n\
+            i/interface                                           print public interface of all loaded modules\n\
+            e/envs <module_name>                                  print environment variables of a module\n\
+            f/fs <module_name>                                    print filesystem state of a module\n\
+            h/help                                                print this message\n\
+            q/quit/Ctrl-C                                         exit"
     );
 }
