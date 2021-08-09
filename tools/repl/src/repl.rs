@@ -156,7 +156,7 @@ impl REPL {
         };
 
         let call_parameters = match de.end() {
-            Err(_) => match <CallParameters>::deserialize(&mut de) {
+            Err(_) => match CallParameters::deserialize(&mut de) {
                 Ok(call_parameters) => call_parameters,
                 Err(e) => {
                     println!("incorrect call parameters: {}", e);
