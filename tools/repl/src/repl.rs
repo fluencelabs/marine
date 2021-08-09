@@ -155,13 +155,15 @@ impl REPL {
             }
         };
 
-        let call_parameters = match Option::<CallParameters>::deserialize(&mut de) {
-            Ok(Some(call_parameters)) => call_parameters,
-            Ok(None) => CallParameters::default(),
-            Err(e) => {
-                println!("incorrect call parameters: {}", e);
-                return;
-            }
+        let call_parameters = match de.end() {
+            Err(_) => match <CallParameters>::deserialize(&mut de) {
+                Ok(call_parameters) => call_parameters,
+                Err(e) => {
+                    println!("incorrect call parameters: {}", e);
+                    return;
+                }
+            },
+            Ok(_) => CallParameters::default(),
         };
 
         if let Err(e) = de.end() {
