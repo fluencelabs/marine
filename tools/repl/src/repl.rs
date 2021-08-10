@@ -33,28 +33,28 @@ use std::time::Instant;
 
 macro_rules! next_argument {
     ($arg_name:ident, $args:ident, $error_msg:expr) => {
-        let $arg_name = if let Some($arg_name) = $args.next() {
-            $arg_name
-        } else {
-            println!($error_msg);
-            return;
+        let $arg_name = match $args.next() {
+            Some($arg_name) => $arg_name,
+            None => {
+                println!($error_msg);
+                return;
+            }
         };
     };
 }
 
 macro_rules! next_argument_or_result {
     ($arg_name:ident, $args:ident, $error_msg:expr) => {
-        let $arg_name = if let Some($arg_name) = $args.next() {
-            $arg_name
-        } else {
-            return Err(String::from($error_msg));
+        let $arg_name = match $args.next() {
+            Some($arg_name) => $arg_name,
+            None => return Err(String::from($error_msg))
         };
     };
 }
 
-struct CallModuleArguments<'a> {
-    module_name: &'a str,
-    func_name: &'a str,
+struct CallModuleArguments<'args> {
+    module_name: &'args str,
+    func_name: &'args str,
     show_result_arg: bool,
     args: serde_json::Value,
     call_parameters: CallParameters,
@@ -263,7 +263,7 @@ fn parse_call_module_arguments<'args>(
         },
     };
 
-    if let Err(_) = de.end() {
+    if de.end().is_err() {
         return Err(String::from(
             "trailing characters after call parameters are not supported",
         ));
