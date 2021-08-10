@@ -47,7 +47,7 @@ macro_rules! next_argument_or_result {
     ($arg_name:ident, $args:ident, $error_msg:expr) => {
         let $arg_name = match $args.next() {
             Some($arg_name) => $arg_name,
-            None => return Err(String::from($error_msg))
+            None => return Err(String::from($error_msg)),
         };
     };
 }
