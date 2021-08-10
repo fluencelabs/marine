@@ -20,9 +20,11 @@ use print_state::print_envs;
 use print_state::print_fs_state;
 use crate::ReplResult;
 
-use fluence_app_service::AppService;
+use fluence_app_service::{AppService, CallParameters};
 use fluence_app_service::FaaSModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
+
+use serde::Deserialize;
 
 use std::collections::HashMap;
 use std::fs;
@@ -31,13 +33,31 @@ use std::time::Instant;
 
 macro_rules! next_argument {
     ($arg_name:ident, $args:ident, $error_msg:expr) => {
-        let $arg_name = if let Some($arg_name) = $args.next() {
-            $arg_name
-        } else {
-            println!($error_msg);
-            return;
+        let $arg_name = match $args.next() {
+            Some($arg_name) => $arg_name,
+            None => {
+                println!($error_msg);
+                return;
+            }
         };
     };
+}
+
+macro_rules! next_argument_or_result {
+    ($arg_name:ident, $args:ident, $error_msg:expr) => {
+        let $arg_name = match $args.next() {
+            Some($arg_name) => $arg_name,
+            None => return Err(String::from($error_msg)),
+        };
+    };
+}
+
+struct CallModuleArguments<'args> {
+    module_name: &'args str,
+    func_name: &'args str,
+    show_result_arg: bool,
+    args: serde_json::Value,
+    call_parameters: CallParameters,
 }
 
 pub(super) struct REPL {
@@ -129,35 +149,25 @@ impl REPL {
     }
 
     fn call_module<'args>(&mut self, args: impl Iterator<Item = &'args str>) {
-        use itertools::Itertools;
-
-        let mut args = args.peekable();
-        next_argument!(module_name, args, "Module name should be specified");
-        next_argument!(func_name, args, "Function name should be specified");
-        let show_result_arg = match args.peek() {
-            Some(option) if *option == "-nr" => {
-                args.next();
-                false
-            }
-            Some(_) => true,
-            None => true,
-        };
-
-        let module_arg: String = args.join(" ");
-        let module_arg: serde_json::Value = match serde_json::from_str(&module_arg) {
-            Ok(module_arg) => module_arg,
-            Err(e) => {
-                println!("incorrect arguments {}", e);
+        let CallModuleArguments {
+            module_name,
+            func_name,
+            show_result_arg,
+            args,
+            call_parameters,
+        } = match parse_call_module_arguments(args) {
+            Ok(call_module_arguments) => call_module_arguments,
+            Err(message) => {
+                println!("{}", message);
                 return;
             }
         };
 
         let start = Instant::now();
-        // TODO: add support of call parameters
         let result =
             match self
                 .app_service
-                .call_module(module_name, func_name, module_arg, <_>::default())
+                .call_module(module_name, func_name, args, call_parameters)
             {
                 Ok(result) if show_result_arg => {
                     let elapsed_time = start.elapsed();
@@ -220,17 +230,67 @@ impl REPL {
     }
 }
 
+fn parse_call_module_arguments<'args>(
+    args: impl Iterator<Item = &'args str>,
+) -> Result<CallModuleArguments<'args>, String> {
+    use itertools::Itertools;
+
+    let mut args = args.peekable();
+    next_argument_or_result!(module_name, args, "Module name should be specified");
+    next_argument_or_result!(func_name, args, "Function name should be specified");
+    let show_result_arg = match args.peek() {
+        Some(option) if *option == "-nr" => {
+            args.next();
+            false
+        }
+        Some(_) => true,
+        None => true,
+    };
+
+    let module_arg: String = args.join(" ");
+    let mut de = serde_json::Deserializer::from_str(&module_arg);
+
+    let args = match serde_json::Value::deserialize(&mut de) {
+        Ok(args) => args,
+        Err(e) => return Err(format!("invalid args: {}", e)),
+    };
+
+    let call_parameters = match de.end() {
+        Ok(_) => CallParameters::default(),
+        Err(_) => match CallParameters::deserialize(&mut de) {
+            Ok(call_parameters) => call_parameters,
+            Err(e) => return Err(format!("invalid call parameters: {}", e)),
+        },
+    };
+
+    if de.end().is_err() {
+        return Err(String::from(
+            "trailing characters after call parameters are not supported",
+        ));
+    }
+
+    Ok(CallModuleArguments {
+        module_name,
+        func_name,
+        show_result_arg,
+        args,
+        call_parameters,
+    })
+}
+
 fn print_help() {
     println!(
         "Commands:\n\n\
-            n/new [config_path]                       create a new service (current will be removed)\n\
-            l/load <module_name> <module_path>        load a new Wasm module\n\
-            u/unload <module_name>                    unload a Wasm module\n\
-            c/call <module_name> <func_name> [args]   call function with given name from given module\n\
-            i/interface                               print public interface of all loaded modules\n\
-            e/envs <module_name>                      print environment variables of a module\n\
-            f/fs <module_name>                        print filesystem state of a module\n\
-            h/help                                    print this message\n\
-            q/quit/Ctrl-C                             exit"
+            n/new [config_path]                                   create a new service (current will be removed)\n\
+            l/load <module_name> <module_path>                    load a new Wasm module\n\
+            u/unload <module_name>                                unload a Wasm module\n\
+            c/call <module_name> <func_name> <args> [call_params] call function with given name from given module\n\
+            i/interface                                           print public interface of all loaded modules\n\
+            e/envs <module_name>                                  print environment variables of a module\n\
+            f/fs <module_name>                                    print filesystem state of a module\n\
+            h/help                                                print this message\n\
+            q/quit/Ctrl-C                                         exit\n\
+            \n\
+            <args> and [call_params] should be in json"
     );
 }
