@@ -289,6 +289,8 @@ fn print_help() {
             e/envs <module_name>                                  print environment variables of a module\n\
             f/fs <module_name>                                    print filesystem state of a module\n\
             h/help                                                print this message\n\
-            q/quit/Ctrl-C                                         exit"
+            q/quit/Ctrl-C                                         exit\n\
+            \n\
+            <args> and [call_params] should be in json"
     );
 }
