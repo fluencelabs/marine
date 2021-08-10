@@ -42,6 +42,24 @@ macro_rules! next_argument {
     };
 }
 
+macro_rules! next_argument_or_result {
+    ($arg_name:ident, $args:ident, $error_msg:expr) => {
+        let $arg_name = if let Some($arg_name) = $args.next() {
+            $arg_name
+        } else {
+            return Err(String::from($error_msg));
+        };
+    };
+}
+
+struct CallModuleArguments<'a> {
+    module_name: &'a str,
+    func_name: &'a str,
+    show_result_arg: bool,
+    args: serde_json::Value,
+    call_parameters: CallParameters,
+}
+
 pub(super) struct REPL {
     app_service: AppService,
 }
@@ -131,51 +149,25 @@ impl REPL {
     }
 
     fn call_module<'args>(&mut self, args: impl Iterator<Item = &'args str>) {
-        use itertools::Itertools;
-
-        let mut args = args.peekable();
-        next_argument!(module_name, args, "Module name should be specified");
-        next_argument!(func_name, args, "Function name should be specified");
-        let show_result_arg = match args.peek() {
-            Some(option) if *option == "-nr" => {
-                args.next();
-                false
-            }
-            Some(_) => true,
-            None => true,
-        };
-
-        let module_arg: String = args.join(" ");
-        let mut de = serde_json::Deserializer::from_str(&module_arg);
-        let module_arg: serde_json::Value = match serde_json::Value::deserialize(&mut de) {
-            Ok(module_arg) => module_arg,
-            Err(e) => {
-                println!("incorrect arguments: {}", e);
+        let CallModuleArguments {
+            module_name,
+            func_name,
+            show_result_arg,
+            args,
+            call_parameters,
+        } = match parse_call_module_arguments(args) {
+            Ok(call_module_arguments) => call_module_arguments,
+            Err(message) => {
+                println!("{}", message);
                 return;
             }
         };
-
-        let call_parameters = match de.end() {
-            Err(_) => match CallParameters::deserialize(&mut de) {
-                Ok(call_parameters) => call_parameters,
-                Err(e) => {
-                    println!("incorrect call parameters: {}", e);
-                    return;
-                }
-            },
-            Ok(_) => CallParameters::default(),
-        };
-
-        if let Err(e) = de.end() {
-            println!("data after call patameters is not supported: {}", e);
-            return;
-        }
 
         let start = Instant::now();
         let result =
             match self
                 .app_service
-                .call_module(module_name, func_name, module_arg, call_parameters)
+                .call_module(module_name, func_name, args, call_parameters)
             {
                 Ok(result) if show_result_arg => {
                     let elapsed_time = start.elapsed();
@@ -236,6 +228,54 @@ impl REPL {
 
         Ok(app_service)
     }
+}
+
+fn parse_call_module_arguments<'args>(
+    args: impl Iterator<Item = &'args str>,
+) -> Result<CallModuleArguments<'args>, String> {
+    use itertools::Itertools;
+
+    let mut args = args.peekable();
+    next_argument_or_result!(module_name, args, "Module name should be specified");
+    next_argument_or_result!(func_name, args, "Function name should be specified");
+    let show_result_arg = match args.peek() {
+        Some(option) if *option == "-nr" => {
+            args.next();
+            false
+        }
+        Some(_) => true,
+        None => true,
+    };
+
+    let module_arg: String = args.join(" ");
+    let mut de = serde_json::Deserializer::from_str(&module_arg);
+
+    let args = match serde_json::Value::deserialize(&mut de) {
+        Ok(args) => args,
+        Err(e) => return Err(format!("invalid args: {}", e)),
+    };
+
+    let call_parameters = match de.end() {
+        Ok(_) => CallParameters::default(),
+        Err(_) => match CallParameters::deserialize(&mut de) {
+            Ok(call_parameters) => call_parameters,
+            Err(e) => return Err(format!("invalid call parameters: {}", e)),
+        },
+    };
+
+    if let Err(_) = de.end() {
+        return Err(String::from(
+            "trailing characters after call parameters are not supported",
+        ));
+    }
+
+    Ok(CallModuleArguments {
+        module_name,
+        func_name,
+        show_result_arg,
+        args,
+        call_parameters,
+    })
 }
 
 fn print_help() {
