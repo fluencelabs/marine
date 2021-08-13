@@ -8,4 +8,7 @@ Fluence [nodes](https://github.com/fluencelabs/fluence) uses Marine to execute [
     <img alt="fluence stack" align="center" src="images/fluence_stack_overview.png" width="663"/>
 </p>
 
-At now, it is in the heavily developing phase, more detailed information could be found in [docs](https://fluence-labs.readme.io/docs/services-development)
+## Documentation
+
+To learn more about tooling around marine, see [Marine](https://doc.fluence.dev/docs/knowledge_aquamarine/marine) doc. For a more high-level usage, take a look at how to [create Fluence services with WASM & Marine](https://doc.fluence.dev/docs/quick-start/2.-hosted-services).
+
