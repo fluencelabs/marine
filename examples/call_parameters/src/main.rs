@@ -46,7 +46,7 @@ mod tests {
     use marine_rs_sdk_test::SecurityTetraplet;
 
     #[marine_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
-    fn empty_string() {
+    fn empty_string(call_parameters: marine_test_env::call_parameters::ModuleInterface) {
         let init_peer_id = "init_peer_id";
         let service_id = "service_id";
         let service_creator_peer_id = "service_creator_peer_id";

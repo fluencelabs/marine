@@ -13,4 +13,4 @@ path = "src/main.rs"
 marine-rs-sdk ="0.6.10"
 
 [dev-dependencies]
-fluence-test = "0.1.7"
+marine-rs-sdk-test = "0.2.0"

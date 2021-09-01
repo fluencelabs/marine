@@ -31,13 +31,13 @@ mod tests {
     use marine_rs_sdk_test::marine_test;
 
     #[marine_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
-    fn empty_string() {
+    fn empty_string(greeting: marine_test_env::greeting::ModuleInterface) {
         let actual = greeting.greeting(String::new());
         assert_eq!(actual, "Hi, ");
     }
 
     #[marine_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
-    fn non_empty_string() {
+    fn non_empty_string(greeting: marine_test_env::greeting::ModuleInterface) {
         let actual = greeting.greeting("name".to_string());
         assert_eq!(actual, "Hi, name");
     }
