@@ -13,12 +13,12 @@ jobs:
           keys:
             - marine04-{{ checksum "Cargo.lock" }}
       - run: |
-          rustup toolchain install nightly-2021-05-16
-          rustup default nightly-2021-05-16
-          rustup override set nightly-2021-05-16
+          rustup toolchain install nightly-2021-05-21
+          rustup default nightly-2021-05-21
+          rustup override set nightly-2021-05-21
 
-          rustup component add rustfmt --toolchain nightly-2021-05-16
-          rustup component add clippy --toolchain nightly-2021-05-16
+          rustup component add rustfmt --toolchain nightly-2021-05-21
+          rustup component add clippy --toolchain nightly-2021-05-21
           rustup target add wasm32-wasi
 
           cargo install --path tools/cli
