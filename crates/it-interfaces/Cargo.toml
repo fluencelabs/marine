@@ -1,7 +1,7 @@
 [package]
 name = "marine-it-interfaces"
 description = "Fluence Marine interface types helper crate"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -11,5 +11,5 @@ name = "marine_it_interfaces"
 path = "src/lib.rs"
 
 [dependencies]
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.0" }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.2" }
 multimap = "0.8.1"
