@@ -15,4 +15,10 @@ path = "src/main.rs"
 marine-rs-sdk = "0.6.11"
 
 [dev-dependencies]
-marine-rs-sdk-test = "0.2.0"
+marine-rs-sdk-test = {path="../../../marine-rs-sdk/sdk-test"}
+
+[build-dependencies]
+marine-test-macro-impl = {path="../../../marine-rs-sdk/crates/marine-test-macro-impl"}
+quote = "1.0.9"
+proc-macro2 = "1.0.26"
+marine-rs-sdk-test = {path="../../../marine-rs-sdk/sdk-test"}

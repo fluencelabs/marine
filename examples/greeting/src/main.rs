@@ -29,6 +29,7 @@ pub fn greeting(name: String) -> String {
 #[cfg(test)]
 mod tests {
     use marine_rs_sdk_test::marine_test;
+    include!(concat!(env!("OUT_DIR"), "/marine_test_env.rs"));
 
     #[marine_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
     fn empty_string(greeting: marine_test_env::greeting::ModuleInterface) {
