@@ -92,11 +92,6 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
     let wasm_path = std::path::Path::new(wasm_path);
 
-    let mut module_interface = marine_it_parser::module_interface(wasm_path)?;
-    for record in module_interface.record_types.iter() {
-        println!("{}", record);
-    }
-
     let service_name = match args.value_of(args::SERVICE_NAME) {
         Some(service_name) => service_name.into(),
         None => {
@@ -108,6 +103,15 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
         }
     };
     let service_name = service_name.to_pascal_case();
+
+    // this line allows exporting all the stuff from generated aqua module definition
+    println!("module {} declares *\n", service_name);
+
+    let mut module_interface = marine_it_parser::module_interface(wasm_path)?;
+    for record in module_interface.record_types.iter() {
+        println!("{}", record);
+    }
+
     match args.value_of(args::SERVICE_ID) {
         Some(id) => println!(r#"service {}("{}"):"#, service_name, id),
         None => println!("service {}:", service_name),
