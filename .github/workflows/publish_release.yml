@@ -1,7 +1,9 @@
 name: "publish-release"
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   npm-publish:
@@ -47,10 +49,16 @@ jobs:
         run: |
           set -x
           PKG_NAME=marine
+          WS_LIST=$(cargo ws list -l)
           # substr(x, 2) removes first character from x. In case of version it's 'v' in 'v0.0.0'
-          VERSION=$(cargo ws list -l | grep "$PKG_NAME " | head -n1 | awk '{ print substr($2, 2) }')
+          VERSION=$(echo $WS_LIST | grep "$PKG_NAME " | head -n1 | awk '{ print substr($2, 2) }')
           echo "VERSION=$VERSION" | tee -a $GITHUB_ENV
           echo "PKG_NAME=$PKG_NAME" | tee -a $GITHUB_ENV
+          
+          # write WS_LIST to GITHUB_ENV. It's a multiline variable, that's why we need HEREDOC stuff (<<EOF)
+          echo "WS_LIST<<EOF" >> $GITHUB_ENV
+          echo "$WS_LIST" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Publish to crates.io
         run: cargo ws publish --no-git-commit --from-git --skip-published --yes
@@ -58,6 +66,34 @@ jobs:
       - name: Build release binaries of marine & mrepl
         run: cargo build --release -p marine -p mrepl
 
+      - name: Build Changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v1
+        with:
+          configuration: ".github/workflows/changelog_config.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build packages link list
+        id: link_list
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            try {
+                let ws_list = `${{ env.WS_LIST }}`
+                console.log("ws_list: ", ws_list);
+                let lines = ws_list.split("\n");
+                let columns = lines.map(l => l.split(' ').filter(e => e.length > 0));
+                let link_list = columns.map(line => 
+                  `- [${line[0]} ${line[1]}](https://crates.io/crates/${line[0]}/${line[1]})`
+                ).join('\n');
+                return link_list;
+            } catch (e) {
+              console.log("Err: " + e);
+              throw e;
+            }
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -65,11 +101,14 @@ jobs:
           name: Marine WASM Runtime ${{ env.VERSION }}
           tag_name: ${{ env.VERSION }}
           body: |
-            - [${{ env.VERSION }} @ crates.io](https://crates.io/crates/${{ env.PKG_NAME }}/${{ env.VERSION }})
+            ${{steps.changelog.outputs.changelog}}
+
+            ## crates.io
+            ${{ steps.link_list.outputs.result }}
           files: |
             target/release/marine
             target/release/mrepl
-          draft: false
+          draft: true
           prerelease: false
           fail_on_unmatched_files: true
         env:
