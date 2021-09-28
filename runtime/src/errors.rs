@@ -29,31 +29,31 @@ use thiserror::Error as ThisError;
 #[derive(Debug, ThisError)]
 pub enum MError {
     /// This error type is produced by Wasmer during resolving a Wasm function.
-    #[error("WasmerResolveError: {0}")]
+    #[error("Wasmer resolve error: {0}")]
     ResolveError(#[from] wasmer_error::ResolveError),
 
     /// Error related to calling a main Wasm module.
-    #[error("WasmerInvokeError: {0}")]
+    #[error("Wasmer invoke error: {0}")]
     WasmerInvokeError(String),
 
     /// Error that raises during compilation Wasm code by Wasmer.
-    #[error("WasmerCreationError: {0}")]
+    #[error("Wasmer creation error: {0}")]
     WasmerCreationError(#[from] wasmer_error::CreationError),
 
     /// Error that raises during creation of some Wasm objects (like table and memory) by Wasmer.
-    #[error("WasmerCompileError: {0}")]
+    #[error("Wasmer compile error: {0}")]
     WasmerCompileError(#[from] wasmer_error::CompileError),
 
     /// Errors arisen during execution of a Wasm module.
-    #[error("WasmerCompileError: {0}")]
+    #[error("Wasmer runtime error: {0}")]
     WasmerRuntimeError(String),
 
     /// Errors arisen during linking Wasm modules with already loaded into Marine modules.
-    #[error("WasmerLinkError: {0}")]
+    #[error("Wasmer link error: {0}")]
     WasmerLinkError(#[from] wasmer_error::LinkError),
 
     /// Errors from the temporary class of amalgamation errors from the Wasmer side.
-    #[error("WasmerError: {0}")]
+    #[error("Wasmer error: {0}")]
     WasmerError(String),
 
     /// Errors related to failed resolving of records.
@@ -65,7 +65,7 @@ pub enum MError {
     WASIPrepareError(String),
 
     /// Errors occurred inside marine-module-interface crate.
-    #[error("{0}")]
+    #[error(transparent)]
     ModuleInterfaceError(#[from] ITInterfaceError),
 
     /// Error arisen during execution of Wasm modules (especially, interface types).
@@ -77,23 +77,23 @@ pub enum MError {
     PrepareError(#[from] parity_wasm::elements::Error),
 
     /// Indicates that there is already a module with such name.
-    #[error("module with name {0} already loaded in Marine, please specify another name")]
+    #[error("module with name '{0}' already loaded in Marine, please specify another name")]
     NonUniqueModuleName(String),
 
     /// Returns when there is no module with such name.
-    #[error("module with name {0} doesn't have function with name {1}")]
+    #[error("module with name '{0}' doesn't have function with name {1}")]
     NoSuchFunction(String, String),
 
     /// Returns when there is no module with such name.
-    #[error("module with name {0} doesn't loaded in Marine")]
+    #[error("module with name '{0}' isn't loaded in Marine")]
     NoSuchModule(String),
 
     /// An error occurred when host functions tries to lift IValues from WValues and lowering back.
-    #[error("{0}")]
+    #[error(transparent)]
     HostImportError(#[from] HostImportError),
 
     /// IT section parse error.
-    #[error("{0}")]
+    #[error(transparent)]
     WITParseError(#[from] ITParserError),
 
     /// Incorrect IT section.
@@ -101,15 +101,15 @@ pub enum MError {
     IncorrectWIT(String),
 
     /// Error is encountered while parsing module version.
-    #[error("{0}")]
+    #[error(transparent)]
     ModuleVersionParseError(#[from] ModuleInfoError),
 
     /// Provided module doesn't contain a sdk version that is necessary.
-    #[error("module with name {0} doesn't contain a version of sdk, probably it's compiled with an old one")]
+    #[error("module with name '{0}' doesn't contain a version of sdk, probably it's compiled with an old one")]
     ModuleWithoutVersion(String),
 
     /// Module sdk versions are incompatible.
-    #[error("module with name {module_name} compiled with {provided} sdk version, but at least {required} required")]
+    #[error("module with name '{module_name}' compiled with {provided} sdk version, but at least {required} required")]
     IncompatibleSDKVersions {
         module_name: String,
         required: semver::Version,
@@ -117,7 +117,7 @@ pub enum MError {
     },
 
     /// Module IT versions are incompatible.
-    #[error("module with name {module_name} compiled with {provided} IT version, but at least {required} required")]
+    #[error("module with name '{module_name}' compiled with {provided} IT version, but at least {required} required")]
     IncompatibleITVersions {
         module_name: String,
         required: semver::Version,

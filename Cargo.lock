@@ -1517,18 +1517,18 @@ dependencies = [
 
 [[package]]
 name = "marine-macro"
-version = "0.6.10"
+version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd64d5febc6b2ed709a4461c510c1429dc6e4cfcbd6ca0d88463911630acd67b"
+checksum = "3353b7531d6110d08cf553b3340414548928dd4ed9681fb33e5055434b1d230e"
 dependencies = [
  "marine-macro-impl",
 ]
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.6.10"
+version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c644127c4a9a3345434116f6887f8522c51bddde599b51d7d312aa8b2ecfaa54"
+checksum = "93a923c20f7dc029eb6df361c1096a5a8bfbf133c1c2f0f96f1d0fdd6e075cc4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1604,9 +1604,9 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk"
-version = "0.6.11"
+version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9157bae63a4bbdd7a29984f6ded08f8ed72991b83ca3bdd59d2f889fa8b8ea02"
+checksum = "1bd39c5f9cdcf5b63c00eaf5fe50b366c88fc6d8fb6aac0dcfeaccf2ca024c5f"
 dependencies = [
  "marine-macro",
  "marine-rs-sdk-main",
@@ -1616,9 +1616,9 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk-main"
-version = "0.6.10"
+version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95c49b5893d8689589219e07cf67421cc415dc5f219ad0e9c197a9a050b5dd4f"
+checksum = "f4de7d3a515ca69e9113c424491f65992305cc6decdd56e7764c699fb8b4071a"
 dependencies = [
  "log",
  "marine-macro",
@@ -1741,9 +1741,9 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.6.10"
+version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29ae1a5630bd9b652a77405750c3c37a5fdcfcdc679818bf7d970871ae28f7e6"
+checksum = "18228f3153cb4a249752976f2e9eb7a888860c9efabe83475fcaca9f6f6e711a"
 dependencies = [
  "chrono",
  "quote",
