@@ -96,7 +96,7 @@ impl AppService {
             .get_interface()
             .modules
             .remove(self.facade_module_name.as_str())
-            // facade module must be loaded in FaaS, so unwrap is safe here
+            // facade module must be loaded into FaaS, so unwrap is safe here
             .unwrap();
 
         into_service_interface(faas_facade_interface)

@@ -77,7 +77,7 @@ pub enum MError {
     PrepareError(#[from] parity_wasm::elements::Error),
 
     /// Indicates that there is already a module with such name.
-    #[error("module with name '{0}' already loaded in Marine, please specify another name")]
+    #[error("module with name '{0}' already loaded into Marine, please specify another name")]
     NonUniqueModuleName(String),
 
     /// Returns when there is no module with such name.
@@ -85,7 +85,7 @@ pub enum MError {
     NoSuchFunction(String, String),
 
     /// Returns when there is no module with such name.
-    #[error("module with name '{0}' isn't loaded in Marine")]
+    #[error("module with name '{0}' isn't loaded into Marine")]
     NoSuchModule(String),
 
     /// An error occurred when host functions tries to lift IValues from WValues and lowering back.
