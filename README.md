@@ -1,5 +1,7 @@
 # Marine
 
+![marine version on crates.io](https://img.shields.io/crates/v/marine?color=green&style=flat-square)
+
 Marine is a general purpose Wasm runtime that could be used in different scenarios, especially in programs based on the [entity component system](https://en.wikipedia.org/wiki/Entity_component_system) (ECS) pattern or plugin architecture. It runs multi-module WebAssembly applications with interface-types and shared-nothing linking schemes.
 
 Fluence [nodes](https://github.com/fluencelabs/fluence) use Marine to execute Wasm services composed by compiled [Aqua](https://github.com/fluencelabs/aqua):

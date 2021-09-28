@@ -76,7 +76,7 @@ pub fn main() -> Result<(), anyhow::Error> {
             new_version
         );
         println!(
-            "{}To update run: {}cargo +nightly install marine --force{}",
+            "{}To update run: {}cargo install marine{}",
             color::Fg(color::Reset),
             color::Fg(color::LightBlack),
             color::Fg(color::Reset)

@@ -122,7 +122,7 @@ fn print_welcome_message() {
             new_version
         );
         println!(
-            "{}To update run: {}cargo +nightly install mrepl --force{}\n",
+            "{}To update run: {}cargo +nightly install mrepl{}\n",
             color::Fg(color::Reset),
             color::Fg(color::LightBlack),
             color::Fg(color::Reset),

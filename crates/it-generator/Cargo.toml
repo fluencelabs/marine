@@ -1,7 +1,7 @@
 [package]
 name = "marine-it-generator"
 description = "Fluence Marine interface types generator"
-version = "0.5.4"
+version = "0.5.5"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -20,6 +20,6 @@ it-lilo = "0.1.0"
 thiserror = "1.0.24"
 walrus = "0.18.0"
 once_cell = "1.4.0"
-serde = { version = "=1.0.118", features = ["derive"] }
+serde = { version = "1.0.118", features = ["derive"] }
 serde_json = "1.0.56"
 cargo_toml = "0.8.1"
