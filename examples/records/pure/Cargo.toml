@@ -10,5 +10,5 @@ name = "records_pure"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk ="0.6.10"
+marine-rs-sdk ="0.6.12"
 test-record = { path = "../test-record" }

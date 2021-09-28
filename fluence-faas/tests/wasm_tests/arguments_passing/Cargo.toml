@@ -14,5 +14,5 @@ name = "arguments_passing_effector"
 path = "src/effector.rs"
 
 [dependencies]
-marine-rs-sdk ="0.6.5"
+marine-rs-sdk ="0.6.12"
 safe-transmute = "0.11.0"
