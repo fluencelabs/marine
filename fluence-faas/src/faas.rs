@@ -257,7 +257,7 @@ impl FluenceFaaS {
             &logger_filter,
         )?;
         self.marine
-            .load_module(name, &wasm_bytes, marine_module_config)
+            .load_module(name, wasm_bytes, marine_module_config)
             .map_err(Into::into)
     }
 

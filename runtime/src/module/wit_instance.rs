@@ -51,9 +51,9 @@ impl ITInstance {
         wit: &MITInterfaces<'_>,
         modules: &HashMap<String, MModule>,
     ) -> MResult<Self> {
-        let mut exports = Self::extract_raw_exports(&wasmer_instance, wit)?;
+        let mut exports = Self::extract_raw_exports(wasmer_instance, wit)?;
         let imports = Self::extract_imports(module_name, modules, wit, exports.len())?;
-        let memories = Self::extract_memories(&wasmer_instance);
+        let memories = Self::extract_memories(wasmer_instance);
 
         exports.extend(imports);
         let funcs = exports;

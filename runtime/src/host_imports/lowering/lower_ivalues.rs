@@ -50,11 +50,11 @@ pub(crate) fn ivalue_to_wvalues<A: Allocatable>(
             vec![WValue::I32(offset as _), WValue::I32(array.len() as _)]
         }
         Some(IValue::Array(values)) => {
-            let LoweredArray { offset, size } = array_lower_memory(&lowerer, values)?;
+            let LoweredArray { offset, size } = array_lower_memory(lowerer, values)?;
             vec![WValue::I32(offset as _), WValue::I32(size as _)]
         }
         Some(IValue::Record(values)) => {
-            let offset = record_lower_memory(&lowerer, values)?;
+            let offset = record_lower_memory(lowerer, values)?;
             vec![WValue::I32(offset)]
         }
         None => vec![],

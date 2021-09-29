@@ -55,7 +55,7 @@ pub fn extract_it_from_module(wasmer_module: &WasmerModule) -> ParserResult<Inte
 }
 
 pub fn extract_version_from_module(module: &walrus::Module) -> ParserResult<semver::Version> {
-    let raw_custom_section = extract_custom_section(&module)?;
+    let raw_custom_section = extract_custom_section(module)?;
     let wit_section_bytes = raw_custom_section.as_ref();
     let it = extract_it_from_bytes(wit_section_bytes)?;
 

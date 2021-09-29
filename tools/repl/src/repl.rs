@@ -60,6 +60,7 @@ struct CallModuleArguments<'args> {
     call_parameters: CallParameters,
 }
 
+#[allow(clippy::upper_case_acronyms)]
 pub(super) struct REPL {
     app_service: AppService,
 }

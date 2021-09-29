@@ -205,7 +205,7 @@ impl AppService {
         fluence_faas::FaaSError: From<C::Error>,
     {
         self.faas
-            .load_module(name, &wasm_bytes, config)
+            .load_module(name, wasm_bytes, config)
             .map_err(Into::into)
     }
 

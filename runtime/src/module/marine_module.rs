@@ -105,7 +105,7 @@ impl MModule {
         config: MModuleConfig,
         modules: &HashMap<String, MModule>,
     ) -> MResult<Self> {
-        let wasmer_module = compile(&wasm_bytes)?;
+        let wasmer_module = compile(wasm_bytes)?;
         crate::misc::check_sdk_version(name, &wasmer_module)?;
 
         let it = extract_it_from_module(&wasmer_module)?;

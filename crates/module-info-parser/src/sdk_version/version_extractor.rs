@@ -41,7 +41,7 @@ where
 }
 
 pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<semver::Version>> {
-    let sections = extract_custom_sections_by_name(&wasm_module, VERSION_SECTION_NAME)?;
+    let sections = extract_custom_sections_by_name(wasm_module, VERSION_SECTION_NAME)?;
 
     if sections.is_empty() {
         return Ok(None);
@@ -50,7 +50,7 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<semv
 
     let version = match section {
         Cow::Borrowed(bytes) => as_semver(bytes),
-        Cow::Owned(vec) => as_semver(&vec),
+        Cow::Owned(vec) => as_semver(vec),
     }?;
 
     Ok(Some(version))

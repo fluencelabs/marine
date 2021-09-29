@@ -47,7 +47,7 @@ pub(crate) fn load_modules_from_fs(
                 .ok_or_else(|| IOError(format!("No file name in path {:?}", path)))?,
         );
 
-        if modules.should_load(&file_name) {
+        if modules.should_load(file_name) {
             let module_bytes = std::fs::read(&path)?;
             let module_name = modules.extract_module_name(&path)?;
             if hash_map.insert(module_name, module_bytes).is_some() {

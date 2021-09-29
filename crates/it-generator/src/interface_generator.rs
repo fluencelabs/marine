@@ -131,7 +131,7 @@ fn validate_records(it_resolver: &ITResolver<'_>) -> Result<()> {
             match &field.ty {
                 IType::Record(record_type_id) => {
                     let inner_record_type = it_resolver.get_record_type(*record_type_id)?;
-                    validate_record_type(&inner_record_type, recursion_level + 1, it_resolver)?;
+                    validate_record_type(inner_record_type, recursion_level + 1, it_resolver)?;
                 }
                 _ => continue,
             }

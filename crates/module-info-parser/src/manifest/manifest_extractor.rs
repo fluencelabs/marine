@@ -41,7 +41,7 @@ where
 }
 
 pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<ModuleManifest>> {
-    let sections = extract_custom_sections_by_name(&wasm_module, MANIFEST_SECTION_NAME)?;
+    let sections = extract_custom_sections_by_name(wasm_module, MANIFEST_SECTION_NAME)?;
     if sections.is_empty() {
         return Ok(None);
     }
@@ -65,7 +65,7 @@ pub fn extract_from_wasmer_module(
         None => return Ok(None),
     };
 
-    let section = try_as_one_section(&sections, MANIFEST_SECTION_NAME)?;
+    let section = try_as_one_section(sections, MANIFEST_SECTION_NAME)?;
     let manifest = section.as_slice().try_into()?;
 
     Ok(Some(manifest))
