@@ -20,6 +20,7 @@ use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
 use fluence_faas::FluenceFaaS;
+use fluence_faas::IValue;
 use serde_json::Value as JValue;
 
 use std::convert::TryInto;
@@ -69,7 +70,7 @@ impl AppService {
         })
     }
 
-    /// Call a specified function of loaded module by its name.
+    /// Call a specified function of loaded module by its name with arguments in json format.
     // TODO: replace serde_json::Value with Vec<u8>?
     pub fn call<S: AsRef<str>>(
         &mut self,
@@ -79,6 +80,23 @@ impl AppService {
     ) -> Result<JValue> {
         self.faas
             .call_with_json(
+                &self.facade_module_name,
+                func_name,
+                arguments,
+                call_parameters,
+            )
+            .map_err(Into::into)
+    }
+
+    /// Call a specified function of loaded module by its name with arguments in .
+    pub fn call_with_ivalues<S: AsRef<str>>(
+        &mut self,
+        func_name: S,
+        arguments: &[IValue],
+        call_parameters: crate::CallParameters,
+    ) -> Result<Vec<IValue>> {
+        self.faas
+            .call_with_ivalues(
                 &self.facade_module_name,
                 func_name,
                 arguments,
