@@ -88,7 +88,7 @@ impl AppService {
             .map_err(Into::into)
     }
 
-    /// Call a specified function of loaded module by its name with arguments in .
+    /// Call a specified function of loaded module by its name with arguments in IValue format.
     pub fn call_with_ivalues<S: AsRef<str>>(
         &mut self,
         func_name: S,
