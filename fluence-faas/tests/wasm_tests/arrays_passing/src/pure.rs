@@ -15,6 +15,7 @@
  */
 
 #![allow(improper_ctypes)]
+#![allow(clippy::all)]
 
 use marine_rs_sdk::marine;
 

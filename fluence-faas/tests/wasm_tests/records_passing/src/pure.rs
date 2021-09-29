@@ -15,6 +15,7 @@
  */
 
 #![allow(improper_ctypes)]
+#![allow(clippy::all)]
 
 use marine_rs_sdk::marine;
 
@@ -57,6 +58,7 @@ pub fn test_record(test_record: TestRecord2) -> TestRecord2 {
 }
 
 #[marine]
+#[allow(dead_code)]
 fn test_record_ref(test_record: &TestRecord2) -> TestRecord2 {
     let mut test_record = effector::test_record_ref(test_record);
 
