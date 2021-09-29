@@ -2,5 +2,5 @@ modules_dir = "artifacts/"
 
 [[module]]
     name = "greeting"
-    mem_pages_count = 1
+    mem_pages_count = 100
     logger_enabled = false

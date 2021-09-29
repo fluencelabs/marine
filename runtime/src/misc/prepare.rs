@@ -36,21 +36,22 @@ impl<'a> ModuleBootstrapper {
         Ok(Self { module })
     }
 
-    fn set_mem_pages_count(self, mem_pages_count: u32) -> Self {
+    fn set_mem_pages_count(self, max_mem_size: u32) -> Self {
         let Self { mut module } = self;
 
         // At now, there is could be only one memory section, so
         // it needs just to extract previous initial page count,
         // delete an old entry and add create a new one with updated limits
-        let mem_initial = match module.memory_section_mut() {
+        let mem_initial_size = match module.memory_section_mut() {
             Some(section) => match section.entries_mut().pop() {
                 Some(entry) => entry.limits().initial(),
                 None => 0,
             },
             None => 0,
         };
+        let mem_initial_size = std::cmp::min(mem_initial_size, max_mem_size);
 
-        let memory_entry = MemoryType::new(mem_initial, Some(mem_pages_count));
+        let memory_entry = MemoryType::new(mem_initial_size, Some(max_mem_size));
         let mut default_mem_section = MemorySection::default();
 
         module
@@ -73,8 +74,8 @@ impl<'a> ModuleBootstrapper {
 
 /// Prepares a Wasm module:
 ///   - set memory page count
-pub(crate) fn prepare_module(module: &[u8], mem_pages_count: u32) -> MResult<Vec<u8>> {
+pub(crate) fn prepare_module(module: &[u8], max_mem_size: u32) -> MResult<Vec<u8>> {
     ModuleBootstrapper::init(module)?
-        .set_mem_pages_count(mem_pages_count)
+        .set_mem_pages_count(max_mem_size)
         .into_wasm()
 }
