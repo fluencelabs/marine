@@ -82,7 +82,7 @@ pub(crate) fn create_host_import_func(
 
         init_wasm_func_once!(allocate_func, ctx, (i32, i32), i32, ALLOCATE_FUNC_NAME, 2);
 
-        let lo_helper = LoHelper::new(&ctx, &allocate_func);
+        let lo_helper = LoHelper::new(ctx, &allocate_func);
         let t = ILowerer::new(&lo_helper)
             .map_err(HostImportError::LowererError)
             .and_then(|lowerer| ivalue_to_wvalues(&lowerer, result));

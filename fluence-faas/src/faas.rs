@@ -37,8 +37,11 @@ use std::convert::TryInto;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+type MFunctionSignature = (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>);
+type MModuleInterface = (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>, Rc<MRecordTypes>);
+
 struct ModuleInterface {
-    function_signatures: HashMap<SharedString, (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>)>,
+    function_signatures: HashMap<SharedString, MFunctionSignature>,
     record_types: Rc<MRecordTypes>,
 }
 
@@ -186,7 +189,7 @@ impl FluenceFaaS {
         &'faas mut self,
         module_name: &str,
         func_name: &str,
-    ) -> Result<(Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>, Rc<MRecordTypes>)> {
+    ) -> Result<MModuleInterface> {
         use FaaSError::NoSuchModule;
         use FaaSError::MissingFunctionError;
 
@@ -257,7 +260,7 @@ impl FluenceFaaS {
             &logger_filter,
         )?;
         self.marine
-            .load_module(name, &wasm_bytes, marine_module_config)
+            .load_module(name, wasm_bytes, marine_module_config)
             .map_err(Into::into)
     }
 

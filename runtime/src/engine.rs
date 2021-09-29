@@ -75,7 +75,7 @@ impl Marine {
     ) -> MResult<()> {
         let _prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.mem_pages_count)?;
 
-        let module = MModule::new(&name, &wasm_bytes, config, &self.modules)?;
+        let module = MModule::new(&name, wasm_bytes, config, &self.modules)?;
 
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {

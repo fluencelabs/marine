@@ -58,7 +58,7 @@ fn print_record_types<'r>(
                     f,
                     "  {}: {}",
                     field.name,
-                    itype_text_view(&field.ty, &module.record_types)
+                    itype_text_view(&field.ty, module.record_types)
                 )?;
             }
         }
@@ -84,7 +84,7 @@ fn print_functions_sign<'r>(
                     format!(
                         "{}: {}",
                         arg.name,
-                        itype_text_view(&arg.ty, &module_interface.record_types)
+                        itype_text_view(&arg.ty, module_interface.record_types)
                     )
                 })
                 .join(", ");
@@ -97,7 +97,7 @@ fn print_functions_sign<'r>(
                     f,
                     "{}) -> {}",
                     args,
-                    itype_text_view(&outputs[0], &module_interface.record_types)
+                    itype_text_view(&outputs[0], module_interface.record_types)
                 )?;
             } else {
                 // At now, multi values aren't supported - only one output type is possible

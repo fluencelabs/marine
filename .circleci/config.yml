@@ -30,7 +30,7 @@ jobs:
           (cd ./fluence-faas/tests/wasm_tests; ./build.sh)
 
           cargo test --release -v --all-features -p marine-it-generator -p marine-runtime -p fluence-faas -p fluence-app-service -p marine -p mrepl
-          cargo clippy -v -p marine-runtime -p fluence-faas -p fluence-app-service -p marine -p mrepl
+          cargo clippy
 
       - save_cache:
           paths:

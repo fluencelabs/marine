@@ -36,7 +36,7 @@ pub fn put(name: String, file_content: Vec<u8>) -> String {
     log::info!("put called with file name {}\n", name);
     let rpc_tmp_filepath = format!("{}{}", SITES_DIR, name);
 
-    let result = fs::write(PathBuf::from(rpc_tmp_filepath.clone()), file_content);
+    let result = fs::write(PathBuf::from(rpc_tmp_filepath), file_content);
     if let Err(e) = result {
         return format!("file can't be written: {}", e);
     }

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#![allow(clippy::all)]
+
 use marine_rs_sdk::marine;
 
 #[marine]

@@ -100,7 +100,7 @@ impl RecordsTransformer {
             .map(|id| {
                 // unwrap is safe here because sorted_order is constructed based on record_types
                 let record = record_types.get(&id).unwrap();
-                Self::convert_record(id, record, &record_types)
+                Self::convert_record(id, record, record_types)
             })
             .collect::<Vec<_>>()
     }

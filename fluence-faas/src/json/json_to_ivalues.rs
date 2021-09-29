@@ -33,9 +33,9 @@ pub(crate) fn json_to_ivalues<'a, 'b>(
     record_types: &'b MRecordTypes,
 ) -> Result<Vec<IValue>> {
     let ivalues = match json_args {
-        JValue::Object(json_map) => json_map_to_ivalues(json_map, arg_types, &record_types)?,
+        JValue::Object(json_map) => json_map_to_ivalues(json_map, arg_types, record_types)?,
         JValue::Array(json_array) => {
-            json_array_to_ivalues(json_array, arg_types.map(|arg| arg.1), &record_types)?
+            json_array_to_ivalues(json_array, arg_types.map(|arg| arg.1), record_types)?
         }
         JValue::Null => json_null_to_ivalues(arg_types)?,
         json_value => json_value_to_ivalues(json_value, arg_types)?,
@@ -199,7 +199,7 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> 
         IType::I32 => to_ivalue!(jvalue, I32),
         IType::I64 => to_ivalue!(jvalue, I64),
         IType::Record(record_type_id) => {
-            let value = json_record_type_to_ivalue(jvalue, record_type_id, &record_types)?;
+            let value = json_record_type_to_ivalue(jvalue, record_type_id, record_types)?;
             Ok(IValue::Record(value))
         }
     }
