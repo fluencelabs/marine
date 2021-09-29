@@ -725,9 +725,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
- "fluence-faas 0.9.1",
+ "fluence-faas 0.10.0",
  "log",
  "maplit",
  "serde",
@@ -765,7 +765,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.9.1"
+version = "0.10.0"
 dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
@@ -774,7 +774,7 @@ dependencies = [
  "marine-module-interface 0.1.6",
  "marine-rs-sdk",
  "marine-rs-sdk-main",
- "marine-runtime 0.7.1",
+ "marine-runtime 0.8.0",
  "marine-utils 0.2.0",
  "once_cell",
  "pretty_assertions",
@@ -1664,7 +1664,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.7.1"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "boolinator",
@@ -1865,13 +1865,13 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.9.2"
+version = "0.10.0"
 dependencies = [
  "anyhow",
  "check-latest",
  "clap",
  "env_logger 0.7.1",
- "fluence-app-service 0.10.0",
+ "fluence-app-service 0.11.0",
  "itertools 0.9.0",
  "log",
  "marine-rs-sdk-main",
