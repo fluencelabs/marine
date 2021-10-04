@@ -1,0 +1,11 @@
+[package]
+name = "multiservice-marine-test"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+publish = false
+
+[dependencies]
+
+[dev-dependencies]
+marine-rs-sdk-test = "0.3.0"

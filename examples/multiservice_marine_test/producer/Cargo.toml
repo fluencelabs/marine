@@ -1,16 +1,14 @@
 [package]
-name = "call_parameters"
+name = "producer"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 edition = "2018"
 publish = false
 
 [[bin]]
-name = "call_parameters"
+name = "producer"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk ="0.6.12"
+marine-rs-sdk = "0.6.13"
 
-[dev-dependencies]
-marine-rs-sdk-test = "0.3.0"
