@@ -11,7 +11,7 @@ name = "marine_module_info_parser"
 path = "src/lib.rs"
 
 [dependencies]
-marine-rs-sdk-main = "0.6.10"
+marine-rs-sdk-main = "0.6.13"
 
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1" }
 

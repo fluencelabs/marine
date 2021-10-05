@@ -11,7 +11,7 @@ name = "marine_it_generator"
 path = "src/lib.rs"
 
 [dependencies]
-marine-it-parser = { path = "../it-parser", version = "0.6.5"}
+marine-it-parser = { path = "../it-parser", version = "0.6.7"}
 marine-macro-impl = "0.6.10"
 
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.2" }
