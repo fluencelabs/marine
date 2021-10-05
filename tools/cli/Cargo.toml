@@ -12,9 +12,9 @@ name = "marine"
 path = "src/main.rs"
 
 [dependencies]
-marine-it-generator = { path = "../../crates/it-generator", version = "0.5.5" }
-marine-it-parser = { path = "../../crates/it-parser", version = "0.6.7" }
-marine-module-info-parser = { path = "../../crates/module-info-parser", version = "0.2.1" }
+marine-it-generator = { path = "../../crates/it-generator", version = "0.5.6" }
+marine-it-parser = { path = "../../crates/it-parser", version = "0.6.8" }
+marine-module-info-parser = { path = "../../crates/module-info-parser", version = "0.2.2" }
 
 semver = "0.11.0"
 walrus = "0.18.0"

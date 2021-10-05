@@ -11,10 +11,10 @@ name = "marine"
 path = "src/lib.rs"
 
 [dependencies]
-marine-module-info-parser = { path = "../crates/module-info-parser", version = "0.2.1" }
+marine-module-info-parser = { path = "../crates/module-info-parser", version = "0.2.2" }
 marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.4.1" }
-marine-it-parser = { path = "../crates/it-parser", version = "0.6.7" }
-marine-it-generator = { path = "../crates/it-generator", version = "0.5.5" }
+marine-it-parser = { path = "../crates/it-parser", version = "0.6.8" }
+marine-it-generator = { path = "../crates/it-generator", version = "0.5.6" }
 marine-module-interface = { path = "../crates/module-interface", version = "0.1.6" }
 marine-utils = { path = "../crates/utils", version = "0.2.0" }
 
