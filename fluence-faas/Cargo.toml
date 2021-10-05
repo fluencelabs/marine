@@ -1,17 +1,17 @@
 [package]
 name = "fluence-faas"
 description = "Fluence FaaS"
-version = "0.9.1"
+version = "0.9.2"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-marine-runtime = { path = "../runtime", version = "0.7.1" }
-marine-module-interface = { path = "../crates/module-interface", version = "0.1.4" }
+marine-runtime = { path = "../runtime", version = "0.7.2" }
+marine-module-interface = { path = "../crates/module-interface", version = "0.1.6" }
 marine-utils = { path = "../crates/utils", version = "0.2.0" }
-marine-rs-sdk-main = { version = "0.6.10", features = ["logger"] }
-marine-rs-sdk = { version = "0.6.10", features = ["logger"] }
+marine-rs-sdk-main = { version = "0.6.13", features = ["logger"] }
+marine-rs-sdk = { version = "0.6.13", features = ["logger"] }
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "=0.17.1" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
