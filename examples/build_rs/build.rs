@@ -9,7 +9,7 @@ fn main() {
     ];
 
     if cfg!(not(target_arch = "wasm32")) {
-        generate_marine_test_env(&services, "marine_test_env.rs", file!());
+        generate_marine_test_env(services, "marine_test_env.rs", file!());
     }
 
     println!("cargo:rerun-if-changed=src/main.rs");
