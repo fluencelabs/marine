@@ -20,6 +20,7 @@ members = [
     "examples/multiservice_marine_test",
     "examples/multiservice_marine_test/consumer",
     "examples/multiservice_marine_test/producer",
+    "examples/build_rs",
     "fluence-app-service",
     "fluence-faas",
     "fluence-faas/tests/wasm_tests/arguments_passing",
