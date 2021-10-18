@@ -1,6 +1,6 @@
 modules_dir = "artifacts/"
 
 [[module]]
-    name = "greeting"
+    name = "build_rs_test"
     mem_pages_count = 50
     logger_enabled = false
