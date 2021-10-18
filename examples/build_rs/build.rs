@@ -8,7 +8,8 @@ fn main() {
         })
     ];
 
-    if cfg!(not(target_arch = "wasm32")) {
+    let target = std::env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+    if target != "wasm32" {
         generate_marine_test_env(services, "marine_test_env.rs", file!());
     }
 
