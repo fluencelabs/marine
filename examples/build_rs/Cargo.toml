@@ -1,18 +1,21 @@
 [package]
-name = "wasm-greeting"
+name = "wasm-build-rs"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 description = "The greeting module for the Fluence network"
-repository = "https://github.com/fluencelabs/marine/tree/master/examples/greeting"
+repository = "https://github.com/fluencelabs/marine/tree/master/examples/build_rs"
 edition = "2018"
 publish = false
 
 [[bin]]
-name = "greeting"
+name = "build_rs_test"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk = "0.6.13"
+marine-rs-sdk = "0.6.11"
 
 [dev-dependencies]
+marine-rs-sdk-test = "0.4.0"
+
+[build-dependencies]
 marine-rs-sdk-test = "0.4.0"
