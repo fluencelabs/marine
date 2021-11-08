@@ -19,7 +19,7 @@ mod marine_module;
 mod memory;
 mod wit_function;
 mod wit_instance;
-mod type_converters;
+pub mod type_converters;
 
 pub use wit_instance::MRecordTypes;
 pub use wasmer_it::IType;

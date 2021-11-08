@@ -15,19 +15,18 @@
  */
 
 use super::wit_prelude::*;
-use super::marine_module::MModule;
+//use super::marine_module::MModule;
 use super::IRecordType;
-use crate::MResult;
+use crate::{js_log, MResult};
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
 use wasmer_it::interpreter::wasm;
-use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, TypedIndex};
+use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, MemSlice2, TypedIndex};
 //use wasmer_core::Instance as WasmerInstance;
 use crate::marine_js::{Instance as WasmerInstance, DynFunc};
 
 use std::collections::HashMap;
-use std::cell::Cell;
 use std::rc::Rc;
 
 pub type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
@@ -48,15 +47,15 @@ pub(super) struct ITInstance {
 impl ITInstance {
     pub(super) fn new(
         wasmer_instance: &WasmerInstance,
-        module_name: &str,
+        //module_name: &str,
         wit: &MITInterfaces<'_>,
-        modules: &HashMap<String, MModule>,
+        //modules: &HashMap<String, MModule>,
     ) -> MResult<Self> {
-        let mut exports = Self::extract_raw_exports(wasmer_instance, wit)?;
-        let imports = Self::extract_imports(module_name, modules, wit, exports.len())?;
+        let exports = Self::extract_raw_exports(wasmer_instance, wit)?;
+        //let imports = Self::extract_imports("test", &<_>::default(), wit, exports.len())?;
         let memories = Self::extract_memories(wasmer_instance);
 
-        exports.extend(imports);
+        //exports.extend(imports);
         let funcs = exports;
 
         let record_types_by_id = Self::extract_record_types(wit);
@@ -94,6 +93,7 @@ impl ITInstance {
             .collect()
     }
 
+    /*
     /// Extracts only those imports that don't have implementations.
     fn extract_imports(
         module_name: &str,
@@ -138,14 +138,16 @@ impl ITInstance {
             .collect::<MResult<HashMap<_, _>>>()
     }
 
+     */
+
     fn extract_memories(wasmer_instance: &WasmerInstance) -> Vec<WITMemory> {
         //use wasmer_core::export::Export::Memory;
         use crate::marine_js::Export::Memory;
 
-        let mut memories = wasmer_instance
+        let memories = wasmer_instance
             .exports()
             .filter_map(|(_, export)| match export {
-                Memory(memory) => Some(WITMemory{memory}),
+                Memory => Some(WITMemory::new(wasmer_instance.module_name.clone())),
                 _ => None,
             })
             .collect::<Vec<_>>();
@@ -178,19 +180,23 @@ impl ITInstance {
     }
 }
 
-impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<'_>>
+impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<'static>>
     for ITInstance
 {
     fn export(&self, _export_name: &str) -> Option<&ITExport> {
+        js_log(&format!("called ITInstance::export with {}", _export_name));
         // exports aren't used in this version of IT
         None
     }
 
     fn local_or_import<I: TypedIndex + LocalImportIndex>(&self, index: I) -> Option<&WITFunction> {
+        js_log(&format!("called ITInstance::local_or_import with {}", index.index()));
+        js_log(&format!("ITInstance::export funcs size {}", self.funcs.len()));
         self.funcs.get(&index.index())
     }
 
     fn memory(&self, index: usize) -> Option<&WITMemory> {
+        js_log(&format!("called ITInstance::memory with {}", index));
         if index >= self.memories.len() {
             None
         } else {
@@ -198,26 +204,29 @@ impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<
         }
     }
 
-    fn memory_slice(&self, index: usize) -> Option<&[Cell<u8>]> {
+    fn memory_slice(&self, index: usize) -> Option<MemSlice2> {
         //use wasmer_core::vm::LocalMemory;
-        use crate::marine_js::LocalMemory;
-
+        //use crate::marine_js::LocalMemory;
+        js_log(&format!("called ITInstance::memory_slice with {}", index));
         if index >= self.memories.len() {
             return None;
         }
 
         let memory = &self.memories[index];
-        let LocalMemory { base, .. } = unsafe { *memory.0.vm_local_memory() };
+/*        let LocalMemory { base, .. } = unsafe { *memory.0.vm_local_memory() };
         let length = memory.0.size().bytes().0 / std::mem::size_of::<u8>();
 
         let mut_slice: &mut [u8] = unsafe { std::slice::from_raw_parts_mut(base, length) };
         let cell_slice: &Cell<[u8]> = Cell::from_mut(mut_slice);
         let slice = cell_slice.as_slice_of_cells();
+*/
 
-        Some(slice)
+        Some(*memory.view())
+        //Some(memory.view().boxed_copy())
     }
 
     fn wit_record_by_id(&self, index: u64) -> Option<&Rc<IRecordType>> {
+        js_log(&format!("called ITInstance::wit_record_by_id with {}", index));
         self.record_types_by_id.get(&index)
     }
 }

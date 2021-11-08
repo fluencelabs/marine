@@ -34,6 +34,7 @@ use wasmer_it::ast::{Interfaces, FunctionArg};
 use thiserror::Error as ThisError;
 #[allow(unused)]
 use wasmer_it::interpreter::wasm::structures::{LocalImport, Export,Memory,MemoryView};
+use module::MModule;
 
 
 pub(crate) mod marine_js;
@@ -76,6 +77,8 @@ pub(crate) type MResult<T> = std::result::Result<T, MError>;
 use once_cell::sync::Lazy;
 
 use std::str::FromStr;
+use crate::module::type_converters::ival_to_string;
+
 static MINIMAL_SUPPORTED_SDK_VERSION: Lazy<semver::Version> = Lazy::new(|| {
     semver::Version::from_str("0.6.0").expect("invalid minimal sdk version specified")
 });
@@ -102,35 +105,8 @@ pub struct JsLocalImport {
 
 }
 
-impl LocalImport for JsLocalImport {
-    fn name(&self) -> &str {
-        todo!()
-    }
-
-    fn inputs_cardinality(&self) -> usize {
-        todo!()
-    }
-
-    fn outputs_cardinality(&self) -> usize {
-        todo!()
-    }
-
-    fn arguments(&self) -> &[FunctionArg] {
-        todo!()
-    }
-
-    fn outputs(&self) -> &[IType] {
-        todo!()
-    }
-
-    fn call(&self, arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
-        //call_export(self.module_name, self.name())
-        Err(())
-    }
-}
-
 struct JsExport {
-    name: String,
+    //name: String,
 
 }
 
@@ -155,7 +131,7 @@ impl Export for JsExport {
         todo!()
     }
 
-    fn call(&self, arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
+    fn call(&self, _arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
         todo!()
     }
 }
@@ -173,6 +149,10 @@ extern "C" {
     fn log(s: &str);
 }
 
+pub fn js_log(s: &str) {
+    log(s)
+}
+
 #[wasm_bindgen]
 pub fn greet(name: &str) {
     alert(&format!("Hello, {}!", name));
@@ -180,17 +160,18 @@ pub fn greet(name: &str) {
 
 #[wasm_bindgen]
 pub fn test_call_export() {
-    call_export("greeting", "test_export");
+    call_export("greeting", "test_export", "[0]");
 }
 
 #[wasm_bindgen]
 pub fn test_read_memory() {
-    let _result = read_memory("greeting", 0, 4);
+    let result:u8 = read_byte("greeting", 0);
+    log(&result.to_string())
 }
 
 #[wasm_bindgen]
 pub fn test_write_memory() {
-    let _result = write_memory("greeting", 0, &[0, 1, 2, 3]);
+    write_byte("greeting", 0, 42);
 }
 
 #[wasm_bindgen]
@@ -202,6 +183,21 @@ pub fn test_it_section(bytes: &[u8]) {
     };
 
     log(&result)
+}
+
+#[wasm_bindgen]
+pub fn test_instantiate_module(name: &str, wit_section_bytes: &[u8]) {
+    #[allow(unused)]
+    let mut module = MModule::new(
+        name,
+        wit_section_bytes,
+    ).unwrap();
+    js_log("callng export");
+    let output = module.call("greeting", "greeting", &vec![IValue::String("wasm test".to_string())]).unwrap();
+    for out in output {
+        js_log(&format!("got output: {}", ival_to_string(&out)));
+    }
+    js_log("export call finished");
 }
 
 pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>, MyError> {

@@ -5,11 +5,13 @@
     <title>hello-wasm example</title>
 </head>
 <body>
-<script type="module">
-    import init, {greet} from "./pkg/marine_web_runtime.js";
+<script type="module" src="index.js">
+    import init, {greet, test_read_memory, test_write_memory} from "./pkg/marine_web_runtime.js";
     init()
         .then(() => {
-            greet("WebAssembly")
+            greet("WebAssembly 2");
+            test_read_memory();
+            test_write_memory();
         });
 </script>
 </body>

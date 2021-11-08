@@ -15,37 +15,59 @@
  */
 
 use wasmer_it::interpreter::wasm;
-use std::cell::Cell;
-use std::marker::PhantomData;
+use wasmer_it::interpreter::wasm::structures::MemSlice2;
+use crate::js_log;
+use crate::marine_js::WasmMemory;
 //use wasmer_core::memory::{Memory, MemoryView};
 
 // WEB TODO: implement with js interface
 
 pub(super) struct WITMemoryView<'a> {
-    data3: PhantomData<&'a i32>,
-    data: Vec<Cell<u8>>,
+    slice: MemSlice2<'a>,
 }
 
-impl<'a> std::ops::Deref for WITMemoryView<'a> {
-    type Target = [std::cell::Cell<u8>];
+impl<'a> WITMemoryView<'a> {
+    pub fn new(memory: &'a WasmMemory) -> Self {
+        crate::js_log("WITMemoryView::new called");
 
-    fn deref(&self) -> &Self::Target {
-        self.data.deref()
+         Self {
+            slice: MemSlice2 {
+                slice_ref: memory
+            }
+        }
     }
 }
 
-#[derive(Clone)]
-pub(super) struct WITMemory {
-    memory: i32,
+
+impl<'a> std::ops::Deref for WITMemoryView<'a> {
+    type Target = MemSlice2<'a>;
+
+    fn deref(&self) -> &Self::Target {
+        crate::js_log("got slice from WITMemoryView");
+        &self.slice
+    }
 }
 
-impl wasm::structures::MemoryView for WITMemoryView<'_> {}
+impl wasm::structures::MemoryView for WITMemoryView<'static> {}
 
-impl<'a> wasm::structures::Memory<WITMemoryView<'a>> for WITMemory {
-    fn view(&self) -> WITMemoryView<'a> {
-        WITMemoryView {
-            data: Vec::new(),
-            data3: <_>::default()
-        }
+const MEMORY_CONTAINTER: WasmMemory = WasmMemory {
+    module_name: "greeting",
+};
+
+#[derive(Clone)]
+pub(super) struct WITMemory {
+}
+
+impl WITMemory {
+    pub fn new(_module_name: String) -> Self {
+        js_log("created WITMemory");
+
+        Self {}
+    }
+}
+impl wasm::structures::Memory<WITMemoryView<'static>> for WITMemory {
+    fn view(&self) -> WITMemoryView<'static> {
+        crate::js_log("got memory view");
+        WITMemoryView::new(&MEMORY_CONTAINTER)
     }
 }

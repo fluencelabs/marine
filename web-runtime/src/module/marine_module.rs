@@ -25,7 +25,7 @@ use marine_it_interfaces::MITInterfaces;
 //use marine_it_parser::extract_it_from_module;
 use marine_utils::SharedString;
 //use wasmer_core::Instance as WasmerInstance;
-use crate::marine_js::Instance as WasmerInstance;
+use crate::marine_js::{Instance as WasmerInstance};
 //use wasmer_core::import::Namespace;
 //use crate::marine_js::Namespace;
 //use wasmer_runtime::compile;
@@ -43,6 +43,7 @@ use crate::module::wit_function::WITFunction;
 
 type ITInterpreter =
 Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
+use crate::js_log;
 
 #[derive(Clone)]
 pub(super) struct ITModuleFunc {
@@ -60,14 +61,13 @@ pub(super) struct Callable {
 impl Callable {
     pub fn call(&mut self, args: &[IValue]) -> MResult<Vec<IValue>> {
         use wasmer_it::interpreter::stack::Stackable;
-
+        js_log(&format!("Callable::call: start"));
         let result = self
             .it_module_func
             .interpreter
             .run(args, Arc::make_mut(&mut self.it_instance))?
             .as_slice()
             .to_owned();
-
         Ok(result)
     }
 }
@@ -110,35 +110,38 @@ pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfac
         Err(e) => Err(format!("ITParserError::CorruptedITSection({})", e)),
     }
 }
-
+#[allow(unused)]
 impl MModule {
     pub(crate) fn new(
         name: &str,
         wit_section_bytes: &[u8],
-        wasmer_instance: WasmerInstance,
+        //wasmer_instance: WasmerInstance,
         //config: MModuleConfig,
-        modules: &HashMap<String, MModule>,
+        //modules: &HashMap<String, MModule>,
     ) -> MResult<Self> {
         //let wasmer_module = compile(wasm_bytes)?;
         //crate::misc::check_sdk_version(name, &wasmer_module)?;
 
         let it = extract_it_from_bytes(&wit_section_bytes)?;
-        //crate::misc::check_it_version(name, &it.version)?;
-
+        crate::misc::check_it_version(name, &it.version)?;
+        js_log("checked it_section");
         let mit = MITInterfaces::new(it);
-
+        js_log("created mit");
+        let wasmer_instance = WasmerInstance::new(&mit, name.to_string());
+        js_log("created wasmer_instance");
         let mut wit_instance = Arc::new_uninit();
+        js_log("created wit_instance");
         //let wit_import_object = Self::adjust_wit_imports(&mit, wit_instance.clone())?;
         //let raw_imports = config.raw_imports.clone();
         //let (wasi_import_object, host_closures_import_object) =
          //   Self::create_import_objects(config, &mit, wit_import_object.clone())?;
-
+        //let wasmer_instance = Instance::new(&mit);
        // let wasmer_instance = wasmer_module.instantiate(&wasi_import_object)?;
         let it_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
-                MaybeUninit::new(ITInstance::new(&wasmer_instance, name, &mit, modules)?);
+                MaybeUninit::new(ITInstance::new(&wasmer_instance, /*name,*/ &mit, /*modules*/)?);
             std::mem::transmute::<_, Arc<ITInstance>>(wit_instance)
         };
 
@@ -169,6 +172,7 @@ impl MModule {
     ) -> MResult<Vec<IValue>> {
         self.export_funcs.get_mut(function_name).map_or_else(
             || {
+                crate::js_log(&format!("MModule::call: cannot find export {}", function_name));
                 Err(MError::NoSuchFunction(
                     module_name.to_string(),
                     function_name.to_string(),
