@@ -151,8 +151,12 @@ impl Exports {
                 let fn_type = mit.type_by_idx(export.function_type).unwrap();
                 crate::js_log(&format!("got type {}", fn_type.to_string()));
                 if let wasmer_it::ast::Type::Function{arguments, output_types} = fn_type {
-                    let arg_types = arguments.iter().map(|arg| itype_arg_to_wtypes(&arg.ty)).flatten().collect();
+                    let mut arg_types: Vec<WType> = arguments.iter().map(|arg| itype_arg_to_wtypes(&arg.ty)).flatten().collect();
                     let output_types = output_types.iter().map(itype_to_raw_output_types).flatten().collect();
+                    if export.name == "allocate" {
+                        arg_types.push(WType::I32);
+                    }
+
                     let sig = FuncSig {
                         params: Cow::Owned(arg_types),
                         returns: Cow::Owned(output_types),
