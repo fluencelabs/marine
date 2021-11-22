@@ -20,7 +20,6 @@ use crate::js_log;
 use crate::marine_js::WasmMemory;
 //use wasmer_core::memory::{Memory, MemoryView};
 
-// WEB TODO: implement with js interface
 
 pub(super) struct WITMemoryView<'a> {
     slice: MemSlice2<'a>,
@@ -50,24 +49,27 @@ impl<'a> std::ops::Deref for WITMemoryView<'a> {
 
 impl wasm::structures::MemoryView for WITMemoryView<'static> {}
 
-const MEMORY_CONTAINTER: WasmMemory = WasmMemory {
-    module_name: "greeting",
-};
-
 #[derive(Clone)]
 pub(super) struct WITMemory {
+    module_name: String,
 }
 
 impl WITMemory {
-    pub fn new(_module_name: String) -> Self {
+    pub fn new(module_name: String) -> Self {
         js_log("created WITMemory");
 
-        Self {}
+        Self {
+            module_name
+        }
     }
 }
 impl wasm::structures::Memory<WITMemoryView<'static>> for WITMemory {
     fn view(&self) -> WITMemoryView<'static> {
         crate::js_log("got memory view");
-        WITMemoryView::new(&MEMORY_CONTAINTER)
+        //TODO: remove leak
+        let mem = Box::new(WasmMemory {
+            module_name: self.module_name.clone(),
+        });
+        WITMemoryView::new(Box::leak(mem))
     }
 }

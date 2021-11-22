@@ -131,7 +131,7 @@ impl wasm::structures::LocalImport for WITFunction {
 
     fn call(&self, arguments: &[IValue]) -> std::result::Result<Vec<IValue>, ()> {
         use super::type_converters::{ival_to_wval, wval_to_ival};
-        crate::js_log(&format!("called WITFunction::call with n argts {}", arguments.len()));
+        crate::js_log(&format!("called WITFunction::call with n argts {} and n returns {}", arguments.len(), self.outputs.len()));
         match &self.inner {
             WITFunctionInner::Export { func, .. } => func
                 .as_ref()

@@ -60,7 +60,7 @@ pub struct Instance {
 impl Instance {
     pub fn new(mit: &MITInterfaces, module_name: String) -> Self {
         Self {
-            exports: Exports::new(mit),
+            exports: Exports::new(mit, module_name.clone()),
             module_name
         }
     }
@@ -140,10 +140,11 @@ impl Export {
 pub struct Exports {
     //some_export: DynFunc<'static>
     exports: Vec<Export>,
+    module_name: String,
 }
 
 impl Exports {
-    pub fn new(mit: &MITInterfaces) -> Self {
+    pub fn new(mit: &MITInterfaces, module_name: String) -> Self {
         let mut exports = mit
             .exports()
             .filter_map( |export| {
@@ -177,7 +178,8 @@ impl Exports {
         exports.push(Export::Memory);
         crate::js_log(&format!("processed exports"));
         Self {
-            exports
+            exports,
+            module_name
         }
     }
 
@@ -195,7 +197,7 @@ impl Exports {
                 Ok(DynFunc {
                     signature: function.sig.clone(),
                     name: function.name.clone(),
-                    module_name: "greeting".to_string(),
+                    module_name: self.module_name.clone(),
                     data3: Default::default()
                 })
             }
@@ -308,7 +310,7 @@ impl<'a> Iterator for ExportIter<'a> {
 
 #[derive(Clone)]
 pub struct WasmMemory {
-    pub module_name: &'static str,
+    pub module_name: String,
 }
 
 impl MemSlice3 for WasmMemory {

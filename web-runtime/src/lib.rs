@@ -72,15 +72,13 @@ pub use module::from_interface_values;
 pub use module::to_interface_value;
 
 pub use wasmer_it::IRecordFieldType;
-pub mod ne_vec {
-    pub use wasmer_it::NEVec;
-}
 
 pub(crate) type MResult<T> = std::result::Result<T, MError>;
 
 use once_cell::sync::Lazy;
 
 use std::str::FromStr;
+use wasmer_it::ne_vec;
 use crate::module::type_converters::ival_to_string;
 
 static MINIMAL_SUPPORTED_SDK_VERSION: Lazy<semver::Version> = Lazy::new(|| {
@@ -208,8 +206,81 @@ pub fn test_call_avm() {
 
     MODULES.with(|modules| {
         let mut modules = modules.borrow_mut();
-        let module = modules.get_mut("avm").unwrap();
-        let output = module.call("avm", "invoke", &[]).unwrap();
+        let module = match modules.get_mut("avm") {
+            Some(module) => module,
+            None => {
+                js_log("No AVM module in registered");
+                unreachable!();
+            }
+        };
+
+        let vm_peer_id = "some_vm_peer_id";
+
+        let script = format!(
+            r#"
+        (seq
+            (par
+                (call "{0}" ("local_service_id" "local_fn_name") [] result_1)
+                (call "remote_peer_id" ("service_id" "fn_name") [] g)
+            )
+            (call "{0}" ("local_service_id" "local_fn_name") [] result_2)
+        )"#,
+            vm_peer_id
+        );
+        let air = IValue::String(script);
+        let prev_data = IValue::Array(vec![]);
+        let data = IValue::Array(vec![]);
+        let run_parameters = IValue::Record(
+            ne_vec![
+                IValue::String("some_peer_id".to_string()),
+                IValue::String("some_current_peer_id".to_string())
+            ]
+        );
+        let call_results = IValue::ByteArray(Vec::from("{}".as_bytes()));
+
+        let output = match module.call("avm", "invoke", &[air, prev_data, data, run_parameters, call_results]) {
+            Ok(output) => output,
+            Err(e) => {
+                crate::js_log(&format!("invoke call error: {}", e));
+                unreachable!();
+            }
+        };
+
+        for out in output {
+            js_log(&format!("got output: {}", ival_to_string(&out)));
+        }
+    })/*
+    js_log("callng export");
+    let output = module.call("greeting", "greeting", &vec![IValue::String("wasm test".to_string())]).unwrap();
+
+
+    js_log("export call finished");*/
+}
+
+#[wasm_bindgen]
+pub fn test_call_greeting_array() {
+
+    MODULES.with(|modules| {
+        let mut modules = modules.borrow_mut();
+        let module = match modules.get_mut("greeting") {
+            Some(module) => module,
+            None => {
+                js_log("No AVM module in registered");
+                unreachable!();
+            }
+        };
+
+        //let data = IValue::Array(vec![IValue::U8(48), IValue::U8(49), IValue::U8(50), IValue::U8(51)]);
+        let data = IValue::ByteArray(vec![48,49,50,51]);
+
+        let output = match module.call("greeting", "greeting_array", &[data]) {
+            Ok(output) => output,
+            Err(e) => {
+                crate::js_log(&format!("invoke call error: {}", e));
+                unreachable!();
+            }
+        };
+
         for out in output {
             js_log(&format!("got output: {}", ival_to_string(&out)));
         }

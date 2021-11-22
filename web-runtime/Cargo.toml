@@ -25,8 +25,10 @@ marine-utils = { path = "../crates/utils", version = "0.2.0" }
 #wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1", features = ["dynamicfunc-fat-closures"] }
 #wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.2" }
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.1", path = "../../interface-types/wasmer-it" }
+fluence-it-types = { path = "../../interface-types/crates/it-types", version = "0.3.1", features = ["impls"] }
 it-utils = { path = "../../interface-types/crates/utils", version = "0.1.0" }
 it-lilo = "0.1.0"
+itertools = "0.10.1"
 #wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 
 multimap = "0.8.1"

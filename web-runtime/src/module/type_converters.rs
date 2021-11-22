@@ -16,6 +16,7 @@
 
 /// Contains converters of types and values between Wasmer and wasmer_interface_types.
 use super::{WType, WValue, IType, IValue};
+use itertools::join;
 
 pub(crate) fn wtype_to_itype(ty: &WType) -> IType {
     match ty {
@@ -128,12 +129,21 @@ pub fn ival_to_string(val: &IValue) -> String {
         IValue::U64(val) => {val.to_string()}
         IValue::F32(val) => {val.to_string()}
         IValue::F64(val) => {val.to_string()}
-        IValue::String(val) => {val.to_string()}
-        IValue::ByteArray(_) => {"some byte array".to_string()}
-        IValue::Array(_) => {"some array".to_string()}
+        IValue::String(val) => {format!("\"{}\"", val)}
+        IValue::ByteArray(array) => {
+            "[".to_string() + &join(array.iter().map(|val|val.to_string()), ",") + "]"
+            /*unsafe {
+                String::from_utf8_unchecked(array.clone())
+            }*/
+        }
+        IValue::Array(array) => {
+            "[".to_string() + &join(array.iter().map(ival_to_string), ",") + "]"
+        }
         IValue::I32(val) => {val.to_string()}
         IValue::I64(val) => {val.to_string()}
-        IValue::Record(_) => {"some record".to_string()}
+        IValue::Record(record) => {
+            "{".to_string() + &join(record.iter().map(ival_to_string), ",\n") + "}"
+        }
     }
 }
 
@@ -143,7 +153,7 @@ pub fn itypes_args_to_wtypes<'i>(itypes: impl Iterator<Item = &'i IType>) -> Vec
             IType::F32 => vec![WType::F32],
             IType::F64 => vec![WType::F64],
             IType::I64 | IType::U64 => vec![WType::I64],
-            IType::String | IType::Array(_) => vec![WType::I32, WType::I32],
+            IType::String | IType::Array(_) | IType::ByteArray => vec![WType::I32, WType::I32],
             _ => vec![WType::I32],
         })
         .flatten()
@@ -156,7 +166,7 @@ pub fn itypes_output_to_wtypes<'i>(itypes: impl Iterator<Item = &'i IType>) -> V
             IType::F32 => vec![WType::F32],
             IType::F64 => vec![WType::F64],
             IType::I64 | IType::U64 => vec![WType::I64],
-            IType::String | IType::Array(_) | IType::Record(_) => vec![],
+            IType::String | IType::Array(_) | IType::ByteArray | IType::Record(_) => vec![],
             _ => vec![WType::I32],
         })
         .flatten()
