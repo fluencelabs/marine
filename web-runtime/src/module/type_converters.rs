@@ -71,7 +71,7 @@ pub(super) fn wval_to_ival(value: &WValue) -> IValue {
         _ => unimplemented!(),
     }
 }
-
+/*
 pub fn itype_arg_to_wtypes(arg: &IType) -> Vec<WType> {
     match arg {
         IType::Boolean
@@ -114,7 +114,7 @@ pub fn itype_to_raw_output_types(ty: &IType) -> Vec<WType> {
         }
     }
 }
-
+*/
 pub fn ival_to_string(val: &IValue) -> String {
     match val {
         IValue::Boolean(val) => {val.to_string()}
@@ -135,4 +135,30 @@ pub fn ival_to_string(val: &IValue) -> String {
         IValue::I64(val) => {val.to_string()}
         IValue::Record(_) => {"some record".to_string()}
     }
+}
+
+pub fn itypes_args_to_wtypes<'i>(itypes: impl Iterator<Item = &'i IType>) -> Vec<WType> {
+    itypes
+        .map(|itype| match itype {
+            IType::F32 => vec![WType::F32],
+            IType::F64 => vec![WType::F64],
+            IType::I64 | IType::U64 => vec![WType::I64],
+            IType::String | IType::Array(_) => vec![WType::I32, WType::I32],
+            _ => vec![WType::I32],
+        })
+        .flatten()
+        .collect::<Vec<_>>()
+}
+
+pub fn itypes_output_to_wtypes<'i>(itypes: impl Iterator<Item = &'i IType>) -> Vec<WType> {
+    itypes
+        .map(|itype| match itype {
+            IType::F32 => vec![WType::F32],
+            IType::F64 => vec![WType::F64],
+            IType::I64 | IType::U64 => vec![WType::I64],
+            IType::String | IType::Array(_) | IType::Record(_) => vec![],
+            _ => vec![WType::I32],
+        })
+        .flatten()
+        .collect::<Vec<_>>()
 }

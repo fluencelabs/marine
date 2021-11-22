@@ -27,6 +27,10 @@ unused_unsafe,
 unreachable_patterns
 )]
 
+//use std::borrow::BorrowMut;
+use std::cell::RefCell;
+use std::collections::HashMap;
+//use std::ops::Deref;
 use wasm_bindgen::prelude::*;
 #[allow(unused)]
 use wasm_bindgen::JsValue;
@@ -89,6 +93,7 @@ static MINIMAL_SUPPORTED_IT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
 // These locals intended for check that set versions are correct at the start of an application.
 thread_local!(static MINIMAL_SUPPORTED_SDK_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_SDK_VERSION));
 thread_local!(static MINIMAL_SUPPORTED_IT_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION));
+thread_local!(static MODULES: RefCell<HashMap<String, MModule>> = RefCell::new(HashMap::default()));
 
 /// Return minimal support version of interface types.
 pub fn min_it_version() -> &'static semver::Version {
@@ -186,18 +191,34 @@ pub fn test_it_section(bytes: &[u8]) {
 }
 
 #[wasm_bindgen]
-pub fn test_instantiate_module(name: &str, wit_section_bytes: &[u8]) {
+pub fn register_module(name: &str, wit_section_bytes: &[u8]) {
     #[allow(unused)]
-    let mut module = MModule::new(
+    let module = MModule::new(
         name,
         wit_section_bytes,
     ).unwrap();
+
+    MODULES.with(|modules| {
+        modules.borrow_mut().insert(name.to_string(), module);
+    });
+}
+
+#[wasm_bindgen]
+pub fn test_call_avm() {
+
+    MODULES.with(|modules| {
+        let mut modules = modules.borrow_mut();
+        let module = modules.get_mut("avm").unwrap();
+        let output = module.call("avm", "invoke", &[]).unwrap();
+        for out in output {
+            js_log(&format!("got output: {}", ival_to_string(&out)));
+        }
+    })/*
     js_log("callng export");
     let output = module.call("greeting", "greeting", &vec![IValue::String("wasm test".to_string())]).unwrap();
-    for out in output {
-        js_log(&format!("got output: {}", ival_to_string(&out)));
-    }
-    js_log("export call finished");
+
+
+    js_log("export call finished");*/
 }
 
 pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>, MyError> {
