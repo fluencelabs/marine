@@ -17,30 +17,6 @@
 use crate::MResult;
 use crate::MError;
 
-//use marine_module_info_parser::sdk_version;
-
-//use wasmer_core::Module;
-//use crate::marine_js::Module;
-/*
-pub(crate) fn check_sdk_version(name: impl Into<String>, wasmer_module: &Module) -> MResult<()> {
-    let module_version = sdk_version::extract_from_wasmer_module(wasmer_module)?;
-    let module_version = match module_version {
-        Some(module_version) => module_version,
-        None => return Err(MError::ModuleWithoutVersion(name.into())),
-    };
-
-    let required_version = crate::min_sdk_version();
-    if module_version < *required_version {
-        return Err(MError::IncompatibleSDKVersions {
-            module_name: name.into(),
-            required: required_version.clone(),
-            provided: module_version,
-        });
-    }
-
-    Ok(())
-}
-*/
 pub(crate) fn check_it_version(
     name: impl Into<String>,
     it_version: &semver::Version,

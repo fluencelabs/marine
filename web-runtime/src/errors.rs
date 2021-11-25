@@ -42,8 +42,8 @@ pub enum MError {
     //WasmerCreationError(#[from] wasmer_error::CreationError),
 
     /// Error that raises during creation of some Wasm objects (like table and memory) by Wasmer.
-   // #[error("Wasmer compile error: {0}")]
-   // WasmerCompileError(#[from] wasmer_error::CompileError),
+    // #[error("Wasmer compile error: {0}")]
+    // WasmerCompileError(#[from] wasmer_error::CompileError),
 
     /// Errors arisen during execution of a Wasm module.
     //#[error("Wasmer runtime error: {0}")]
@@ -126,7 +126,7 @@ pub enum MError {
     },
 
     #[error("some error expressed as string: {0}")]
-    StringError(String)
+    StringError(String),
 }
 
 impl From<MITInterfacesError> for MError {

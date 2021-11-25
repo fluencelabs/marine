@@ -26,6 +26,15 @@ pub fn greeting(name: String) -> String {
     format!("Hi, {}", name)
 }
 
+#[marine]
+pub fn greeting_array(name: Vec<u8>) -> String {
+    let mut s = String::new();
+    for byte in name {
+        s.push(byte as char);
+    }
+    format!("Hi, {}", s)
+}
+
 #[cfg(test)]
 mod tests {
     use marine_rs_sdk_test::marine_test;

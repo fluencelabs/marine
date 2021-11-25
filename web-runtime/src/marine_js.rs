@@ -9,10 +9,9 @@ use marine_it_interfaces::MITInterfaces;
 use crate::js_log;
 use crate::module::type_converters::{itypes_args_to_wtypes, itypes_output_to_wtypes};
 
-
 // marine-related imports
 #[wasm_bindgen(module = "/marine-js.js")]
-extern {
+extern "C" {
     pub fn call_export(module_name: &str, export_name: &str, args: &str) -> String;
     pub fn read_memory(module_name: &str, module_offset: usize, module_len: usize) -> Vec<u8>;
     pub fn write_memory(module_name: &str, module_offset: usize, data: &[u8]) -> i32;
@@ -22,20 +21,6 @@ extern {
     pub fn get_memory_size(module_name: &str) -> i32;
 }
 
-
-
-//pub struct Ctx {}
-/*
-pub struct Func<'a, Args: 'a, Rets> {
-    data: PhantomData<Args>,
-    data2: PhantomData<Rets>,
-    data3: PhantomData<&'a i32>
-}
-
-pub struct DynamicFunc<'a> {
-    data: PhantomData<&'a i32>
-}
-*/
 #[derive(Clone)]
 pub struct FuncSig {
     params: Cow<'static, [WType]>,
@@ -61,7 +46,7 @@ impl Instance {
     pub fn new(mit: &MITInterfaces, module_name: String) -> Self {
         Self {
             exports: Exports::new(mit, module_name.clone()),
-            module_name
+            module_name,
         }
     }
 
@@ -76,7 +61,7 @@ pub struct DynFunc<'a> {
     pub module_name: String,
     //pub(crate) instance_inner: &'a InstanceInner,
     //func_index: FuncIndex,
-    data3: PhantomData<&'a i32>
+    data3: PhantomData<&'a i32>,
 }
 
 impl<'a> DynFunc<'_> {
@@ -85,7 +70,11 @@ impl<'a> DynFunc<'_> {
     }
 
     pub fn call(&self, args: &[WValue]) -> Result<Vec<WValue>, String> {
-        crate::js_log(&format!("called DynFunc::call name=({}) with n args {}", self.name, args.len()));
+        crate::js_log(&format!(
+            "called DynFunc::call name=({}) with n args {}",
+            self.name,
+            args.len()
+        ));
         let result = serde_json::ser::to_string(args);
         if let Err(e) = result {
             js_log(&format!("cannot serialize: {}", e));
@@ -97,11 +86,12 @@ impl<'a> DynFunc<'_> {
         let value = serde_json::de::from_str::<serde_json::Value>(&output);
         match value {
             Ok(serde_json::Value::Array(values)) => {
-                let values = values.iter().map(|value|{
-                    WValue::I32(value.as_i64().unwrap() as i32)
-                }).collect::<Vec<_>>();
+                let values = values
+                    .iter()
+                    .map(|value| WValue::I32(value.as_i64().unwrap() as i32))
+                    .collect::<Vec<_>>();
                 Ok(values)
-            },
+            }
             _ => {
                 js_log("invalid_json got");
                 Err("invalid json got".to_string())
@@ -110,35 +100,22 @@ impl<'a> DynFunc<'_> {
     }
 }
 
-/*
-pub struct SigRegistry {}
-pub struct ExportIndex {}
-pub struct WasmTypeList {}
-pub struct ResolveError {}
-pub struct LocalOrImport {}
-pub struct Namespace {}
-pub struct ImportObject {}
-pub struct Module {}
-pub struct LocalMemory {}
-*/
-#[allow(dead_code)]
 #[derive(Clone)]
 pub enum Export {
     Memory,
-    Function(ProcessedExport)
+    Function(ProcessedExport),
 }
 
 impl Export {
     pub fn name(&self) -> String {
         match self {
             Self::Memory => "memory".to_string(),
-            Self::Function(func) => func.name.clone()
+            Self::Function(func) => func.name.clone(),
         }
     }
 }
 
 pub struct Exports {
-    //some_export: DynFunc<'static>
     exports: Vec<Export>,
     module_name: String,
 }
@@ -147,13 +124,21 @@ impl Exports {
     pub fn new(mit: &MITInterfaces, module_name: String) -> Self {
         let mut exports = mit
             .exports()
-            .filter_map( |export| {
-                crate::js_log(&format!("processing export {} {}", export.name, export.function_type));
+            .filter_map(|export| {
+                crate::js_log(&format!(
+                    "processing export {} {}",
+                    export.name, export.function_type
+                ));
                 let fn_type = mit.type_by_idx(export.function_type).unwrap();
                 crate::js_log(&format!("got type {}", fn_type.to_string()));
-                if let wasmer_it::ast::Type::Function{arguments, output_types} = fn_type {
+                if let wasmer_it::ast::Type::Function {
+                    arguments,
+                    output_types,
+                } = fn_type
+                {
                     //let mut arg_types: Vec<WType> = arguments.iter().map(|arg| itype_arg_to_wtypes(&arg.ty)).flatten().collect();
-                    let mut arg_types = itypes_args_to_wtypes(arguments.as_slice().iter().map(|arg| &arg.ty));
+                    let mut arg_types =
+                        itypes_args_to_wtypes(arguments.as_slice().iter().map(|arg| &arg.ty));
                     //let output_types = output_types.iter().map(itype_to_raw_output_types).flatten().collect();
                     let output_types = itypes_output_to_wtypes(output_types.iter());
                     if export.name == "allocate" {
@@ -168,18 +153,19 @@ impl Exports {
                     Some(Export::Function(ProcessedExport {
                         sig,
                         index: export.function_type,
-                        name: export.name.to_string()
+                        name: export.name.to_string(),
                     }))
                 } else {
                     crate::js_log(&format!("it is not a function"));
                     None
                 }
-        }).collect::<Vec<Export>>();
+            })
+            .collect::<Vec<Export>>();
         exports.push(Export::Memory);
         crate::js_log(&format!("processed exports"));
         Self {
             exports,
-            module_name
+            module_name,
         }
     }
 
@@ -193,16 +179,13 @@ impl Exports {
             }
         });
         match export {
-            Some(Export::Function(function)) => {
-                Ok(DynFunc {
-                    signature: function.sig.clone(),
-                    name: function.name.clone(),
-                    module_name: self.module_name.clone(),
-                    data3: Default::default()
-                })
-            }
-            Some(_) |
-            None => Err(format!("cannot find export {}", name))
+            Some(Export::Function(function)) => Ok(DynFunc {
+                signature: function.sig.clone(),
+                name: function.name.clone(),
+                module_name: self.module_name.clone(),
+                data3: Default::default(),
+            }),
+            Some(_) | None => Err(format!("cannot find export {}", name)),
         }
     }
 }
@@ -279,7 +262,6 @@ impl WValue {
      */
 }
 
-
 /// An iterator to an instance's exports.
 pub struct ExportIter<'a> {
     _data: PhantomData<&'a i32>,
@@ -289,11 +271,11 @@ pub struct ExportIter<'a> {
 
 impl<'a> ExportIter<'a> {
     pub(crate) fn new(exports: &'a Exports) -> Self {
-       Self {
-           _data: PhantomData::<&'a i32>::default(),
-           exports,
-           index: 0,
-       }
+        Self {
+            _data: PhantomData::<&'a i32>::default(),
+            exports,
+            index: 0,
+        }
     }
 }
 
@@ -302,9 +284,7 @@ impl<'a> Iterator for ExportIter<'a> {
     fn next(&mut self) -> Option<(String, Export)> {
         let export = self.exports.exports.get(self.index);
         self.index += 1;
-        export.map(|export| {
-            (export.name(), export.clone())
-        })
+        export.map(|export| (export.name(), export.clone()))
     }
 }
 
@@ -315,34 +295,34 @@ pub struct WasmMemory {
 
 impl MemSlice3 for WasmMemory {
     fn len(&self) -> usize {
-        crate::js_log("WasmMemory::len calledx");
+        //crate::js_log("WasmMemory::len calledx");
         get_memory_size(&self.module_name) as usize
     }
 
     fn index(&self, index: usize) -> it_utils::ByteAccess {
-        crate::js_log(&format!("WasmMemory::index called with {}", index));
+        //crate::js_log(&format!("WasmMemory::index called with {}", index));
         ByteAccess {
-            slice: MemSlice2{ slice_ref: self},
-            index
+            slice: MemSlice2 { slice_ref: self },
+            index,
         }
     }
 
     fn get(&self, index: usize) -> u8 {
-        crate::js_log(&format!("WasmMemory::get called with {}", index));
+        //crate::js_log(&format!("WasmMemory::get called with {}", index));
         read_byte(&self.module_name, index)
     }
 
     fn set(&self, index: usize, value: u8) {
-        crate::js_log(&format!("WasmMemory::set called with {} {}", index, value));
+        //crate::js_log(&format!("WasmMemory::set called with {} {}", index, value));
         write_byte(&self.module_name, index, value);
     }
 
     fn range_iter(&self, begin: usize, end: usize) -> it_utils::MemSliceIter {
-        crate::js_log(&format!("WasmMemory::range_iter called with {} {}", begin, end));
+        //crate::js_log(&format!("WasmMemory::range_iter called with {} {}", begin, end));
         it_utils::MemSliceIter {
             begin,
             end,
-            slice: MemSlice2 {slice_ref: self}
+            slice: MemSlice2 { slice_ref: self },
         }
     }
 }

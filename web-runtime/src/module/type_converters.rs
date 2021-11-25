@@ -27,29 +27,7 @@ pub(crate) fn wtype_to_itype(ty: &WType) -> IType {
         WType::V128 => unimplemented!(),
     }
 }
-/*
-pub(crate) fn itype_to_wtype(ty: &IType) -> WType {
-    match ty {
-        IType::S8 => WType::I32,
-        IType::S16 => WType::I32,
-        IType::S32 => WType::I32,
-        IType::S64 => WType::I64,
-        IType::U8 => WType::I32,
-        IType::U16 => WType::I32,
-        IType::U32 => WType::I32,
-        IType::U64 => WType::I64,
-        IType::I32 => WType::I32,
-        IType::I64 => WType::I64,
-        IType::F32 => WType::F32,
-        IType::F64 => WType::F64,
-        ty => {
-            eprintln!("trying to convert {:?}", ty);
-            unimplemented!()
-        }
-    }
-}
 
- */
 pub(super) fn ival_to_wval(value: &IValue) -> WValue {
     match value {
         IValue::I32(v) => WValue::I32(*v),
@@ -59,7 +37,7 @@ pub(super) fn ival_to_wval(value: &IValue) -> WValue {
         _ => {
             crate::js_log(&format!("called ival_to_wval with unknown value"));
             unimplemented!()
-        },
+        }
     }
 }
 
@@ -72,66 +50,25 @@ pub(super) fn wval_to_ival(value: &WValue) -> IValue {
         _ => unimplemented!(),
     }
 }
-/*
-pub fn itype_arg_to_wtypes(arg: &IType) -> Vec<WType> {
-    match arg {
-        IType::Boolean
-        | IType::S8
-        | IType::S16
-        | IType::S32
-        | IType::I32
-        | IType::U8
-        | IType::U16
-        | IType::U32 => vec![WType::I32],
-        IType::S64 | IType::U64 | IType::I64  => vec![WType::I64],
-        IType::F32 => vec![WType::F32],
-        IType::F64 => vec![WType::F64],
-        IType::String => vec![WType::I32, WType::I32],
-        _ => {
-            crate::js_log("itype_arg_to_wtypes got unexpected type");
-            unimplemented!();
-        }
-    }
-}
 
-pub fn itype_to_raw_output_types(ty: &IType) -> Vec<WType> {
-    match ty {
-        IType::Boolean
-        | IType::S8
-        | IType::S16
-        | IType::S32
-        | IType::I32
-        | IType::U8
-        | IType::U16
-        | IType::U32 => vec![WType::I32],
-        IType::I64 | IType::U64 | IType::S64 => vec![WType::I64],
-        IType::F32 => vec![WType::F32],
-        IType::F64 => vec![WType::F64],
-        | IType::String
-        | IType::Record(..) => vec![],
-        _ => {
-            crate::js_log("itype_to_raw_output_types got unexpected type");
-            unimplemented!();
-        }
-    }
-}
-*/
 pub fn ival_to_string(val: &IValue) -> String {
     match val {
-        IValue::Boolean(val) => {val.to_string()}
-        IValue::S8(val) => {val.to_string()}
-        IValue::S16(val) => {val.to_string()}
-        IValue::S32(val) => {val.to_string()}
-        IValue::S64(val) => {val.to_string()}
-        IValue::U8(val) => {val.to_string()}
-        IValue::U16(val) => {val.to_string()}
-        IValue::U32(val) => {val.to_string()}
-        IValue::U64(val) => {val.to_string()}
-        IValue::F32(val) => {val.to_string()}
-        IValue::F64(val) => {val.to_string()}
-        IValue::String(val) => {format!("\"{}\"", val)}
+        IValue::Boolean(val) => val.to_string(),
+        IValue::S8(val) => val.to_string(),
+        IValue::S16(val) => val.to_string(),
+        IValue::S32(val) => val.to_string(),
+        IValue::S64(val) => val.to_string(),
+        IValue::U8(val) => val.to_string(),
+        IValue::U16(val) => val.to_string(),
+        IValue::U32(val) => val.to_string(),
+        IValue::U64(val) => val.to_string(),
+        IValue::F32(val) => val.to_string(),
+        IValue::F64(val) => val.to_string(),
+        IValue::String(val) => {
+            format!("\"{}\"", val)
+        }
         IValue::ByteArray(array) => {
-            "[".to_string() + &join(array.iter().map(|val|val.to_string()), ",") + "]"
+            "[".to_string() + &join(array.iter().map(|val| val.to_string()), ",") + "]"
             /*unsafe {
                 String::from_utf8_unchecked(array.clone())
             }*/
@@ -139,8 +76,8 @@ pub fn ival_to_string(val: &IValue) -> String {
         IValue::Array(array) => {
             "[".to_string() + &join(array.iter().map(ival_to_string), ",") + "]"
         }
-        IValue::I32(val) => {val.to_string()}
-        IValue::I64(val) => {val.to_string()}
+        IValue::I32(val) => val.to_string(),
+        IValue::I64(val) => val.to_string(),
         IValue::Record(record) => {
             "{".to_string() + &join(record.iter().map(ival_to_string), ",\n") + "}"
         }

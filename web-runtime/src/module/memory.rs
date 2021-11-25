@@ -18,8 +18,6 @@ use wasmer_it::interpreter::wasm;
 use wasmer_it::interpreter::wasm::structures::MemSlice2;
 use crate::js_log;
 use crate::marine_js::WasmMemory;
-//use wasmer_core::memory::{Memory, MemoryView};
-
 
 pub(super) struct WITMemoryView<'a> {
     slice: MemSlice2<'a>,
@@ -29,14 +27,11 @@ impl<'a> WITMemoryView<'a> {
     pub fn new(memory: &'a WasmMemory) -> Self {
         crate::js_log("WITMemoryView::new called");
 
-         Self {
-            slice: MemSlice2 {
-                slice_ref: memory
-            }
+        Self {
+            slice: MemSlice2 { slice_ref: memory },
         }
     }
 }
-
 
 impl<'a> std::ops::Deref for WITMemoryView<'a> {
     type Target = MemSlice2<'a>;
@@ -58,11 +53,10 @@ impl WITMemory {
     pub fn new(module_name: String) -> Self {
         js_log("created WITMemory");
 
-        Self {
-            module_name
-        }
+        Self { module_name }
     }
 }
+
 impl wasm::structures::Memory<WITMemoryView<'static>> for WITMemory {
     fn view(&self) -> WITMemoryView<'static> {
         crate::js_log("got memory view");

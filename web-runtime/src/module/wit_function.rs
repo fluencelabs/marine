@@ -14,28 +14,17 @@
  * limitations under the License.
  */
 
-//use super::marine_module::MModule;
 use super::{IType, IFunctionArg, IValue, WValue};
-//use super::marine_module::Callable;
 use crate::MResult;
-//use crate::marine_js;
 
 use wasmer_it::interpreter::wasm;
-//use wasmer_core::instance::DynFunc;
 
-// use std::sync::Arc;
 use std::rc::Rc;
 use crate::marine_js::DynFunc;
 
 #[derive(Clone)]
 enum WITFunctionInner {
-    Export {
-        func: Rc<DynFunc<'static>>,
-    },/*
-    Import {
-        // TODO: use dyn Callable here
-        callable: Rc<Callable>,
-    },*/
+    Export { func: Rc<DynFunc<'static>> },
 }
 
 /// Represents all import and export functions that could be called from IT context by call-core.
@@ -51,7 +40,6 @@ impl WITFunction {
     /// Creates functions from a "usual" (not IT) module export.
     pub(super) fn from_export(dyn_func: DynFunc<'static>, name: String) -> MResult<Self> {
         use super::type_converters::wtype_to_itype;
-
 
         let signature = dyn_func.signature();
         let arguments = signature
@@ -83,29 +71,6 @@ impl WITFunction {
             inner,
         })
     }
-/*
-    /// Creates function from a module import.
-    pub(super) fn from_import(
-        wit_module: &MModule,
-        module_name: &str,
-        function_name: &str,
-        arguments: Rc<Vec<IFunctionArg>>,
-        outputs: Rc<Vec<IType>>,
-    ) -> MResult<Self> {
-        let callable = wit_module.get_callable(module_name, function_name)?;
-
-        let inner = WITFunctionInner::Import { callable };
-
-        let name = function_name.to_string();
-
-        Ok(Self {
-            name,
-            arguments,
-            outputs,
-            inner,
-        })
-    }
- */
 }
 
 impl wasm::structures::LocalImport for WITFunction {
@@ -131,16 +96,17 @@ impl wasm::structures::LocalImport for WITFunction {
 
     fn call(&self, arguments: &[IValue]) -> std::result::Result<Vec<IValue>, ()> {
         use super::type_converters::{ival_to_wval, wval_to_ival};
-        crate::js_log(&format!("called WITFunction::call with n argts {} and n returns {}", arguments.len(), self.outputs.len()));
+        crate::js_log(&format!(
+            "called WITFunction::call with n argts {} and n returns {}",
+            arguments.len(),
+            self.outputs.len()
+        ));
         match &self.inner {
             WITFunctionInner::Export { func, .. } => func
                 .as_ref()
                 .call(&arguments.iter().map(ival_to_wval).collect::<Vec<WValue>>())
                 .map(|result| result.iter().map(wval_to_ival).collect())
-                .map_err(|_| ()),/*
-            WITFunctionInner::Import { callable, .. } => Rc::make_mut(&mut callable.clone())
-                .call(arguments)
-                .map_err(|_| ()),*/
+                .map_err(|_| ()),
         }
     }
 }

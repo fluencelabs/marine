@@ -18,50 +18,33 @@
 #![feature(new_uninit)]
 #![feature(stmt_expr_attributes)]
 #![deny(
-dead_code,
-nonstandard_style,
-unused_imports,
-unused_mut,
-unused_variables,
-unused_unsafe,
-unreachable_patterns
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
 )]
 
-//use std::borrow::BorrowMut;
-use std::cell::RefCell;
-use std::collections::HashMap;
-//use std::ops::Deref;
-use wasm_bindgen::prelude::*;
-#[allow(unused)]
-use wasm_bindgen::JsValue;
-use wasmer_it::ast::{Interfaces, FunctionArg};
-use thiserror::Error as ThisError;
-#[allow(unused)]
-use wasmer_it::interpreter::wasm::structures::{LocalImport, Export,Memory,MemoryView};
-use module::MModule;
-
-
 pub(crate) mod marine_js;
-use marine_js::*;
-
-
-
-//mod config;
 mod engine;
 mod errors;
-//mod host_imports;
 mod misc;
 mod module;
-
 mod it_interface;
 
-//pub use config::MModuleConfig;
-//pub use config::HostExportedFunc;
-//pub use config::HostImportDescriptor;
-//pub use engine::Marine;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use wasm_bindgen::prelude::*;
+use wasmer_it::ast::Interfaces;
+use thiserror::Error as ThisError;
+use module::MModule;
+
+use marine_js::*;
+
 pub use engine::MModuleInterface;
 pub use errors::MError;
-//pub use host_imports::HostImportError;
 pub use module::IValue;
 pub use module::IRecordType;
 pub use module::IFunctionArg;
@@ -70,10 +53,7 @@ pub use module::MRecordTypes;
 pub use module::MFunctionSignature;
 pub use module::from_interface_values;
 pub use module::to_interface_value;
-
 pub use wasmer_it::IRecordFieldType;
-
-pub(crate) type MResult<T> = std::result::Result<T, MError>;
 
 use once_cell::sync::Lazy;
 
@@ -81,15 +61,13 @@ use std::str::FromStr;
 use wasmer_it::ne_vec;
 use crate::module::type_converters::ival_to_string;
 
-static MINIMAL_SUPPORTED_SDK_VERSION: Lazy<semver::Version> = Lazy::new(|| {
-    semver::Version::from_str("0.6.0").expect("invalid minimal sdk version specified")
-});
+pub(crate) type MResult<T> = std::result::Result<T, MError>;
+
 static MINIMAL_SUPPORTED_IT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
     semver::Version::from_str("0.20.0").expect("invalid minimal sdk version specified")
 });
 
 // These locals intended for check that set versions are correct at the start of an application.
-thread_local!(static MINIMAL_SUPPORTED_SDK_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_SDK_VERSION));
 thread_local!(static MINIMAL_SUPPORTED_IT_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION));
 thread_local!(static MODULES: RefCell<HashMap<String, MModule>> = RefCell::new(HashMap::default()));
 
@@ -98,51 +76,9 @@ pub fn min_it_version() -> &'static semver::Version {
     Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION)
 }
 
-/// Return minimal support version of SDK.
-pub fn min_sdk_version() -> &'static semver::Version {
-    Lazy::force(&MINIMAL_SUPPORTED_SDK_VERSION)
-}
-
-
-pub struct JsLocalImport {
-
-}
-
-struct JsExport {
-    //name: String,
-
-}
-
-impl Export for JsExport {
-    fn name(&self) -> &str {
-        todo!()
-    }
-
-    fn inputs_cardinality(&self) -> usize {
-        todo!()
-    }
-
-    fn outputs_cardinality(&self) -> usize {
-        todo!()
-    }
-
-    fn arguments(&self) -> &[FunctionArg] {
-        todo!()
-    }
-
-    fn outputs(&self) -> &[IType] {
-        todo!()
-    }
-
-    fn call(&self, _arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
-        todo!()
-    }
-}
-
-
 // Common JS stuff
 #[wasm_bindgen]
-extern {
+extern "C" {
     pub fn alert(s: &str);
 }
 
@@ -168,7 +104,7 @@ pub fn test_call_export() {
 
 #[wasm_bindgen]
 pub fn test_read_memory() {
-    let result:u8 = read_byte("greeting", 0);
+    let result: u8 = read_byte("greeting", 0);
     log(&result.to_string())
 }
 
@@ -182,7 +118,7 @@ pub fn test_it_section(bytes: &[u8]) {
     let interfaces = extract_it_from_bytes(bytes);
     let result = match interfaces {
         Ok(interfaces) => interfaces.version.to_string(),
-        Err(e) => e.to_string()
+        Err(e) => e.to_string(),
     };
 
     log(&result)
@@ -191,10 +127,7 @@ pub fn test_it_section(bytes: &[u8]) {
 #[wasm_bindgen]
 pub fn register_module(name: &str, wit_section_bytes: &[u8]) {
     #[allow(unused)]
-    let module = MModule::new(
-        name,
-        wit_section_bytes,
-    ).unwrap();
+    let module = MModule::new(name, wit_section_bytes).unwrap();
 
     MODULES.with(|modules| {
         modules.borrow_mut().insert(name.to_string(), module);
@@ -203,7 +136,6 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8]) {
 
 #[wasm_bindgen]
 pub fn test_call_avm() {
-
     MODULES.with(|modules| {
         let mut modules = modules.borrow_mut();
         let module = match modules.get_mut("avm") {
@@ -230,15 +162,17 @@ pub fn test_call_avm() {
         let air = IValue::String(script);
         let prev_data = IValue::Array(vec![]);
         let data = IValue::Array(vec![]);
-        let run_parameters = IValue::Record(
-            ne_vec![
-                IValue::String("some_peer_id".to_string()),
-                IValue::String("some_current_peer_id".to_string())
-            ]
-        );
+        let run_parameters = IValue::Record(ne_vec![
+            IValue::String("some_peer_id".to_string()),
+            IValue::String("some_current_peer_id".to_string())
+        ]);
         let call_results = IValue::ByteArray(Vec::from("{}".as_bytes()));
 
-        let output = match module.call("avm", "invoke", &[air, prev_data, data, run_parameters, call_results]) {
+        let output = match module.call(
+            "avm",
+            "invoke",
+            &[air, prev_data, data, run_parameters, call_results],
+        ) {
             Ok(output) => output,
             Err(e) => {
                 crate::js_log(&format!("invoke call error: {}", e));
@@ -249,17 +183,16 @@ pub fn test_call_avm() {
         for out in output {
             js_log(&format!("got output: {}", ival_to_string(&out)));
         }
-    })/*
-    js_log("callng export");
-    let output = module.call("greeting", "greeting", &vec![IValue::String("wasm test".to_string())]).unwrap();
+    }) /*
+       js_log("callng export");
+       let output = module.call("greeting", "greeting", &vec![IValue::String("wasm test".to_string())]).unwrap();
 
 
-    js_log("export call finished");*/
+       js_log("export call finished");*/
 }
 
 #[wasm_bindgen]
 pub fn test_call_greeting_array() {
-
     MODULES.with(|modules| {
         let mut modules = modules.borrow_mut();
         let module = match modules.get_mut("greeting") {
@@ -271,7 +204,7 @@ pub fn test_call_greeting_array() {
         };
 
         //let data = IValue::Array(vec![IValue::U8(48), IValue::U8(49), IValue::U8(50), IValue::U8(51)]);
-        let data = IValue::ByteArray(vec![48,49,50,51]);
+        let data = IValue::ByteArray(vec![48, 49, 50, 51]);
 
         let output = match module.call("greeting", "greeting_array", &[data]) {
             Ok(output) => output,
@@ -284,12 +217,12 @@ pub fn test_call_greeting_array() {
         for out in output {
             js_log(&format!("got output: {}", ival_to_string(&out)));
         }
-    })/*
-    js_log("callng export");
-    let output = module.call("greeting", "greeting", &vec![IValue::String("wasm test".to_string())]).unwrap();
+    }) /*
+       js_log("callng export");
+       let output = module.call("greeting", "greeting", &vec![IValue::String("wasm test".to_string())]).unwrap();
 
 
-    js_log("export call finished");*/
+       js_log("export call finished");*/
 }
 
 pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>, MyError> {
@@ -307,4 +240,3 @@ enum MyError {
     #[error("CorruptedITSection {0}")]
     CorruptedITSection(String),
 }
-

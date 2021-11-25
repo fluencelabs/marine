@@ -15,7 +15,6 @@
  */
 
 use super::wit_prelude::*;
-//use super::marine_module::MModule;
 use super::IRecordType;
 use crate::{js_log, MResult};
 
@@ -23,7 +22,6 @@ use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
 use wasmer_it::interpreter::wasm;
 use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, MemSlice2, TypedIndex};
-//use wasmer_core::Instance as WasmerInstance;
 use crate::marine_js::{Instance as WasmerInstance, DynFunc};
 
 use std::collections::HashMap;
@@ -45,17 +43,10 @@ pub(super) struct ITInstance {
 }
 
 impl ITInstance {
-    pub(super) fn new(
-        wasmer_instance: &WasmerInstance,
-        //module_name: &str,
-        wit: &MITInterfaces<'_>,
-        //modules: &HashMap<String, MModule>,
-    ) -> MResult<Self> {
+    pub(super) fn new(wasmer_instance: &WasmerInstance, wit: &MITInterfaces<'_>) -> MResult<Self> {
         let exports = Self::extract_raw_exports(wasmer_instance, wit)?;
-        //let imports = Self::extract_imports("test", &<_>::default(), wit, exports.len())?;
         let memories = Self::extract_memories(wasmer_instance);
 
-        //exports.extend(imports);
         let funcs = exports;
 
         let record_types_by_id = Self::extract_record_types(wit);
@@ -93,55 +84,7 @@ impl ITInstance {
             .collect()
     }
 
-    /*
-    /// Extracts only those imports that don't have implementations.
-    fn extract_imports(
-        module_name: &str,
-        modules: &HashMap<String, MModule>,
-        wit: &MITInterfaces<'_>,
-        start_index: usize,
-    ) -> MResult<HashMap<usize, WITFunction>> {
-        wit.imports()
-            .filter(|import|
-                // filter out imports that have implementations
-                matches!(wit.adapter_types_by_core_type(import.function_type), Some(_)))
-            .enumerate()
-            .map(|(idx, import)| match modules.get(import.namespace) {
-                Some(module) => {
-                    use wasmer_it::ast::Type;
-                    let (arguments, output_types) =
-                        match wit.type_by_idx_r(import.function_type - 2)? {
-                            Type::Function {
-                                arguments,
-                                output_types,
-                            } => (arguments.clone(), output_types.clone()),
-                            ty => {
-                                return Err(MError::IncorrectWIT(format!(
-                                    "IT should has Type::Function, but {:?} met",
-                                    ty
-                                )))
-                            }
-                        };
-
-                    let func = WITFunction::from_import(
-                        module,
-                        module_name,
-                        import.name,
-                        arguments,
-                        output_types,
-                    )?;
-
-                    Ok((start_index + idx as usize, func))
-                }
-                None => Err(MError::NoSuchModule(import.namespace.to_string())),
-            })
-            .collect::<MResult<HashMap<_, _>>>()
-    }
-
-     */
-
     fn extract_memories(wasmer_instance: &WasmerInstance) -> Vec<WITMemory> {
-        //use wasmer_core::export::Export::Memory;
         use crate::marine_js::Export::Memory;
 
         let memories = wasmer_instance
@@ -151,14 +94,7 @@ impl ITInstance {
                 _ => None,
             })
             .collect::<Vec<_>>();
-/*
-        if let Some(Memory(memory)) = wasmer_instance
-            .import_object
-            .maybe_with_namespace("env", |env| env.get_export("memory"))
-        {
-            memories.push(WITMemory{memory});
-        }
-*/
+
         memories
     }
 
@@ -190,8 +126,14 @@ impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<
     }
 
     fn local_or_import<I: TypedIndex + LocalImportIndex>(&self, index: I) -> Option<&WITFunction> {
-        js_log(&format!("called ITInstance::local_or_import with {}", index.index()));
-        js_log(&format!("ITInstance::export funcs size {}", self.funcs.len()));
+        js_log(&format!(
+            "called ITInstance::local_or_import with {}",
+            index.index()
+        ));
+        js_log(&format!(
+            "ITInstance::export funcs size {}",
+            self.funcs.len()
+        ));
         self.funcs.get(&index.index())
     }
 
@@ -205,28 +147,21 @@ impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<
     }
 
     fn memory_slice(&self, index: usize) -> Option<MemSlice2> {
-        //use wasmer_core::vm::LocalMemory;
-        //use crate::marine_js::LocalMemory;
         js_log(&format!("called ITInstance::memory_slice with {}", index));
         if index >= self.memories.len() {
             return None;
         }
 
         let memory = &self.memories[index];
-/*        let LocalMemory { base, .. } = unsafe { *memory.0.vm_local_memory() };
-        let length = memory.0.size().bytes().0 / std::mem::size_of::<u8>();
-
-        let mut_slice: &mut [u8] = unsafe { std::slice::from_raw_parts_mut(base, length) };
-        let cell_slice: &Cell<[u8]> = Cell::from_mut(mut_slice);
-        let slice = cell_slice.as_slice_of_cells();
-*/
 
         Some(*memory.view())
-        //Some(memory.view().boxed_copy())
     }
 
     fn wit_record_by_id(&self, index: u64) -> Option<&Rc<IRecordType>> {
-        js_log(&format!("called ITInstance::wit_record_by_id with {}", index));
+        js_log(&format!(
+            "called ITInstance::wit_record_by_id with {}",
+            index
+        ));
         self.record_types_by_id.get(&index)
     }
 }

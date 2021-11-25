@@ -43,9 +43,7 @@ pub struct MFunctionSignature {
 
 #[allow(unused)]
 pub(crate) use marine_module::MModule;
-//pub(self) use wasmer_core::types::Type as WType;
 pub(self) use crate::marine_js::WType;
-//pub(self) use wasmer_core::types::Value as WValue;
 pub(self) use crate::marine_js::WValue;
 
 // types that often used together
