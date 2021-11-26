@@ -188,7 +188,7 @@ impl MModule {
         it_instance: &Arc<ITInstance>,
         mit: &MITInterfaces<'_>,
     ) -> MResult<(ExportFunctions, MRecordTypes)> {
-        let module_interface = crate::it_interface::get_interface(mit)?;
+        let module_interface = marine_module_interface::it_interface::get_interface(mit)?;
 
         let export_funcs = module_interface
             .function_signatures
