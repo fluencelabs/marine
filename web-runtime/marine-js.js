@@ -50,3 +50,63 @@ export function read_byte(module_name, offset) {
     //console.log("read_byte returns {}", buf[offset])
     return buf[offset];
 }
+/*
+export function call_import(module_name, function_name, args) {
+    call_wasm(...)
+}
+
+
+
+
+
+import { Fluence } from "@fluencelabs/fluence";
+import { krasnodar } from "@fluencelabs/fluence-network-environment"; // (1)
+import {
+    registerHelloWorld,
+    sayHello,
+    getRelayTime,
+    tellFortune,
+} from "./_aqua/hello-world"; // (2)
+
+async function main() {
+    await Fluence.start({ connectTo: krasnodar[0] }); // (3)
+    await Fluence.registerWasmAsHelloWorld(wasmUrl)
+
+    // (4)
+    registerHelloWorld({
+        hello: (str) => {
+            console.log(str);
+        },
+        getFortune: async () => {
+            await new Promise((resolve) => {
+                setTimeout(resolve, 1000);
+            });
+            return "Wealth awaits you very soon.";
+        },
+    });
+
+    await sayHello(); // (4)
+
+    console.log(await tellFortune()); // (6)
+
+    const relayTime = await getRelayTime();
+
+    console.log("The relay time is: ", new Date(relayTime).toLocaleString());
+
+    await Fluence.stop(); // (7)
+}
+
+main();
+
+
+pavel:
+  run avm with web-marine in dashboard(or something other big)
+  think about problems arised
+  design interface for loading services in fluence-js
+
+valery:
+  add interaces needed by pavel:
+    - provide names of exported functions
+    - add interface for calling wasm IT functions : func call(module_name, func_name, argsInJson)
+    -
+*/

@@ -1,7 +1,8 @@
 import { WASI } from '@wasmer/wasi'
 import browserBindings from '@wasmer/wasi/lib/bindings/browser'
 import { WasmFs } from '@wasmer/wasmfs'
-import init, {greet, test_it_section, test_call_export, test_read_memory, test_write_memory, register_module, test_call_avm, test_call_greeting_array} from "./marine_web_runtime.js";
+import init, { register_module, call_module, test_call_avm, test_call_greeting_array} from "./marine_web_runtime.js";
+
 
 const greetingPath = '/greeting.wasm'  // Path to our WASI module
 const avmPath = '/air_interpreter_server.wasm'  // Path to our WASI module
@@ -64,12 +65,13 @@ async function loadMarineModule(modulePath, moduleName) {
 async function main() {
     let greeting = await loadMarineModule(greetingPath, "greeting");
     let avm = await loadMarineModule(avmPath, "avm");
-    init()
-        .then(() => {
-            register_module(avm.name, avm.custom_section)
-            //register_module(greeting.name, greeting.custom_section)
-            test_call_avm()
-        });
+    await init()
+
+    //register_module(avm.name, avm.custom_section)
+    register_module(greeting.name, greeting.custom_section)
+    //test_call_avm()
+    let result = call_module(greeting.name, "greeting", JSON.stringify(["js"]));
+    console.log("JS: got result from call_module:", result)
 }
 
 main()

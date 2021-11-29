@@ -16,7 +16,7 @@
 
 /// Contains converters of types and values between Wasmer and wasmer_interface_types.
 use super::{WType, WValue, IType, IValue};
-use itertools::join;
+//use itertools::join;
 
 pub(crate) fn wtype_to_itype(ty: &WType) -> IType {
     match ty {
@@ -50,7 +50,7 @@ pub(super) fn wval_to_ival(value: &WValue) -> IValue {
         _ => unimplemented!(),
     }
 }
-
+/*
 pub fn ival_to_string(val: &IValue) -> String {
     match val {
         IValue::Boolean(val) => val.to_string(),
@@ -69,9 +69,7 @@ pub fn ival_to_string(val: &IValue) -> String {
         }
         IValue::ByteArray(array) => {
             "[".to_string() + &join(array.iter().map(|val| val.to_string()), ",") + "]"
-            /*unsafe {
-                String::from_utf8_unchecked(array.clone())
-            }*/
+
         }
         IValue::Array(array) => {
             "[".to_string() + &join(array.iter().map(ival_to_string), ",") + "]"
@@ -83,7 +81,7 @@ pub fn ival_to_string(val: &IValue) -> String {
         }
     }
 }
-
+*/
 pub fn itypes_args_to_wtypes<'i>(itypes: impl Iterator<Item = &'i IType>) -> Vec<WType> {
     itypes
         .map(|itype| match itype {

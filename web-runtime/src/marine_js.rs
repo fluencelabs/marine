@@ -75,14 +75,17 @@ impl<'a> DynFunc<'_> {
             self.name,
             args.len()
         ));
+
         let result = serde_json::ser::to_string(args);
         if let Err(e) = result {
             js_log(&format!("cannot serialize: {}", e));
             return Err("cannot serialize".to_string());
         }
+
         let args = result.unwrap();
         let output = call_export(&self.module_name, &self.name, &args);
         js_log(&format!("DynFunc::Call got result json {}", output));
+
         let value = serde_json::de::from_str::<serde_json::Value>(&output);
         match value {
             Ok(serde_json::Value::Array(values)) => {
@@ -136,10 +139,8 @@ impl Exports {
                     output_types,
                 } = fn_type
                 {
-                    //let mut arg_types: Vec<WType> = arguments.iter().map(|arg| itype_arg_to_wtypes(&arg.ty)).flatten().collect();
                     let mut arg_types =
                         itypes_args_to_wtypes(arguments.as_slice().iter().map(|arg| &arg.ty));
-                    //let output_types = output_types.iter().map(itype_to_raw_output_types).flatten().collect();
                     let output_types = itypes_output_to_wtypes(output_types.iter());
                     if export.name == "allocate" {
                         arg_types.push(WType::I32);
@@ -149,6 +150,7 @@ impl Exports {
                         params: Cow::Owned(arg_types),
                         returns: Cow::Owned(output_types),
                     };
+
                     crate::js_log(&format!("it is a function: {}", export.name.to_string()));
                     Some(Export::Function(ProcessedExport {
                         sig,
@@ -235,36 +237,9 @@ pub enum WValue {
     V128(u128),
 }
 
-impl WValue {
-    /*
-    /// The `Type` of this `Value`.
-    pub fn ty(&self) -> WType {
-        match self {
-            WValue::I32(_) => WType::I32,
-            WValue::I64(_) => WType::I64,
-            WValue::F32(_) => WType::F32,
-            WValue::F64(_) => WType::F64,
-            WValue::V128(_) => WType::V128,
-        }
-    }
-
-    /// Convert this `Value` to a u128 binary representation.
-    pub fn to_u128(&self) -> u128 {
-        match *self {
-            WValue::I32(x) => x as u128,
-            WValue::I64(x) => x as u128,
-            WValue::F32(x) => f32::to_bits(x) as u128,
-            WValue::F64(x) => f64::to_bits(x) as u128,
-            WValue::V128(x) => x,
-        }
-    }
-
-     */
-}
-
 /// An iterator to an instance's exports.
 pub struct ExportIter<'a> {
-    _data: PhantomData<&'a i32>,
+    //_data: PhantomData<&'a i32>,
     exports: &'a Exports,
     index: usize,
 }
@@ -272,7 +247,7 @@ pub struct ExportIter<'a> {
 impl<'a> ExportIter<'a> {
     pub(crate) fn new(exports: &'a Exports) -> Self {
         Self {
-            _data: PhantomData::<&'a i32>::default(),
+            //_data: PhantomData::<&'a i32>::default(),
             exports,
             index: 0,
         }

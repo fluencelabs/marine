@@ -32,6 +32,8 @@ mod engine;
 mod errors;
 mod misc;
 mod module;
+mod faas;
+mod config;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -43,6 +45,7 @@ use module::MModule;
 use marine_js::*;
 
 pub use engine::MModuleInterface;
+pub use engine::Marine;
 pub use errors::MError;
 pub use module::IValue;
 pub use module::IRecordType;
@@ -53,12 +56,18 @@ pub use module::MFunctionSignature;
 pub use module::from_interface_values;
 pub use module::to_interface_value;
 pub use wasmer_it::IRecordFieldType;
+pub use config::MModuleConfig;
+pub use config::HostImportDescriptor;
+//pub use config::HostExportedFunc;
+use crate::faas::FluenceFaaS;
+use marine_rs_sdk::CallParameters;
+
 
 use once_cell::sync::Lazy;
 
 use std::str::FromStr;
-use wasmer_it::ne_vec;
-use crate::module::type_converters::ival_to_string;
+pub use wasmer_it::ne_vec;
+//use crate::module::type_converters::ival_to_string;
 
 pub(crate) type MResult<T> = std::result::Result<T, MError>;
 
@@ -68,7 +77,7 @@ static MINIMAL_SUPPORTED_IT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
 
 // These locals intended for check that set versions are correct at the start of an application.
 thread_local!(static MINIMAL_SUPPORTED_IT_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION));
-thread_local!(static MODULES: RefCell<HashMap<String, MModule>> = RefCell::new(HashMap::default()));
+thread_local!(static MODULES: RefCell<Option<FluenceFaaS>> = RefCell::new(None));
 
 /// Return minimal support version of interface types.
 pub fn min_it_version() -> &'static semver::Version {
@@ -125,14 +134,53 @@ pub fn test_it_section(bytes: &[u8]) {
 
 #[wasm_bindgen]
 pub fn register_module(name: &str, wit_section_bytes: &[u8]) {
-    #[allow(unused)]
-    let module = MModule::new(name, wit_section_bytes).unwrap();
+    //#[allow(unused)]
+        //let module = MModule::new(name, wit_section_bytes).unwrap();
+    let mut map = HashMap::new();
+    map.insert(name.to_string(), Vec::<u8>::from(wit_section_bytes));
+    let faas = FluenceFaaS::with_modules(map).unwrap();
 
     MODULES.with(|modules| {
-        modules.borrow_mut().insert(name.to_string(), module);
+        modules.replace(Some(faas))
     });
 }
 
+/*
+#[wasm_bindgen]
+pub fn call(module_name: &str, function_name: &str, args: &str) -> String {
+    MODULES.with(|modules| -> String {
+        let mut modules = modules.borrow_mut();
+        let module = match modules.get_mut(module_name) {
+            Some(module) => module,
+            None => {
+                js_log(&format!(r#"No "{}" module in registered"#, module_name));
+                unreachable!();
+            }
+        };
+
+        let args = serde_json::de::from_str::<Vec<IValue>>(args).unwrap();
+
+        let output = match module.call(
+            module_name,
+            function_name,
+            &args,
+        ) {
+            Ok(output) => output,
+            Err(e) => {
+                crate::js_log(&format!(r#"{}.{} call error: {}"#, module_name, function_name, e));
+                unreachable!();
+            }
+        };
+
+        serde_json::ser::to_string(&output).unwrap()
+            /*
+        for out in output {
+            js_log(&format!("got output: {}", ival_to_string(&out)));
+        }*/
+    })
+}
+*/
+/*
 #[wasm_bindgen]
 pub fn test_call_avm() {
     MODULES.with(|modules| {
@@ -182,12 +230,7 @@ pub fn test_call_avm() {
         for out in output {
             js_log(&format!("got output: {}", ival_to_string(&out)));
         }
-    }) /*
-       js_log("callng export");
-       let output = module.call("greeting", "greeting", &vec![IValue::String("wasm test".to_string())]).unwrap();
-
-
-       js_log("export call finished");*/
+    })
 }
 
 #[wasm_bindgen]
@@ -216,12 +259,25 @@ pub fn test_call_greeting_array() {
         for out in output {
             js_log(&format!("got output: {}", ival_to_string(&out)));
         }
-    }) /*
-       js_log("callng export");
-       let output = module.call("greeting", "greeting", &vec![IValue::String("wasm test".to_string())]).unwrap();
-
-
-       js_log("export call finished");*/
+    })
+}
+*/
+#[wasm_bindgen]
+pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
+    MODULES.with(|modules| {
+        let mut modules = modules.borrow_mut();
+        match modules.as_mut() {
+            Some(modules) => {
+                let args = serde_json::from_str(args).unwrap();
+                let result = modules.call_with_json(module_name, function_name, args, CallParameters::default()).unwrap();
+                result.to_string()
+            }
+            None => {
+                js_log("attempt to run a function when module is not loaded");
+                unreachable!();
+            }
+        }
+    })
 }
 
 pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>, MyError> {
