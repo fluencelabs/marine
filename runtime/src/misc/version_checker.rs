@@ -21,7 +21,10 @@ use marine_module_info_parser::sdk_version;
 
 use wasmer_core::Module;
 
-pub(crate) fn check_sdk_version(name: impl Into<String>, wasmer_module: &Module) -> PrepareResult<()> {
+pub(crate) fn check_sdk_version(
+    name: impl Into<String>,
+    wasmer_module: &Module,
+) -> PrepareResult<()> {
     let module_version = sdk_version::extract_from_wasmer_module(wasmer_module)?;
     let module_version = match module_version {
         Some(module_version) => module_version,

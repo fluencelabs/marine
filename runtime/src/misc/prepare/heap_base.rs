@@ -61,7 +61,10 @@ fn find_global_by_index(
 fn u32_from_global_entry(global_entry: &elements::GlobalEntry) -> HResult<u32> {
     use elements::Instruction;
 
-    if !matches!(global_entry.global_type().content_type(), elements::ValueType::I32) {
+    if !matches!(
+        global_entry.global_type().content_type(),
+        elements::ValueType::I32
+    ) {
         return Err(WrongType);
     }
 
