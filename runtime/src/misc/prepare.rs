@@ -18,26 +18,42 @@
 // https://github.com/paritytech/substrate/blob/master/srml/contracts/src/wasm/prepare.rs
 // https://github.com/nearprotocol/nearcore/blob/master/runtime/near-vm-runner/src/prepare.rs
 
-use crate::MResult;
+mod heap_base;
 
-use parity_wasm::{
-    builder, elements,
-    elements::{MemorySection, MemoryType},
-};
+use super::PrepareResult;
+use heap_base::get_heap_base;
+
+use parity_wasm::builder;
+use parity_wasm::elements;
+use crate::misc::PrepareError;
+
+// not all clangs versions emits __heap_base, and this consts is a temporary solution
+// until node has a dedicated config for that
+const DEFAULT_GLOBALS_SIZE: u32 = 50;
 
 struct ModuleBootstrapper {
     module: elements::Module,
 }
 
 impl<'a> ModuleBootstrapper {
-    fn init(module_code: &[u8]) -> MResult<Self> {
+    fn init(module_code: &[u8]) -> PrepareResult<Self> {
         let module = elements::deserialize_buffer(module_code)?;
 
         Ok(Self { module })
     }
 
-    fn set_mem_pages_count(self, max_mem_size: u32) -> Self {
+    fn set_mem_pages_count(self, max_heap_size: u32) -> PrepareResult<Self> {
+        use elements::{MemoryType, MemorySection};
+
         let Self { mut module } = self;
+        let globals_size = get_heap_base(&module).unwrap_or(DEFAULT_GLOBALS_SIZE);
+        let max_mem_size =
+            globals_size
+                .checked_add(max_heap_size)
+                .ok_or(PrepareError::MemSizesOverflow {
+                    globals_size,
+                    max_heap_size,
+                })?;
 
         // At now, there is could be only one memory section, so
         // it needs just to extract previous initial page count,
@@ -62,20 +78,21 @@ impl<'a> ModuleBootstrapper {
 
         let builder = builder::from_module(module);
 
-        Self {
-            module: builder.build(),
-        }
+        let module = builder.build();
+        Ok(Self { module })
     }
 
-    fn into_wasm(self) -> MResult<Vec<u8>> {
+    fn into_wasm(self) -> PrepareResult<Vec<u8>> {
         elements::serialize(self.module).map_err(Into::into)
     }
 }
 
 /// Prepares a Wasm module:
-///   - set memory page count
-pub(crate) fn prepare_module(module: &[u8], max_mem_size: u32) -> MResult<Vec<u8>> {
+///   - extracts __heap_base global
+///   - compute module max memory size by summation of heap and globals sizes
+///   - set computed value as max memory page count of a module
+pub(crate) fn prepare_module(module: &[u8], max_heap_size: u32) -> PrepareResult<Vec<u8>> {
     ModuleBootstrapper::init(module)?
-        .set_mem_pages_count(max_mem_size)
+        .set_mem_pages_count(max_heap_size)?
         .into_wasm()
 }
