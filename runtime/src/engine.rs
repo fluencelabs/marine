@@ -114,7 +114,7 @@ impl Marine {
     pub fn module_interface<S: AsRef<str>>(&self, module_name: S) -> Option<MModuleInterface<'_>> {
         self.modules
             .get(module_name.as_ref())
-            .map(|module| Self::get_module_interface(module))
+            .map(Self::get_module_interface)
     }
 
     /// Return record types exported by module with given name.
