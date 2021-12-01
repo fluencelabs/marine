@@ -1,14 +1,14 @@
 import { WASI } from '@wasmer/wasi'
 import browserBindings from '@wasmer/wasi/lib/bindings/browser'
 import { WasmFs } from '@wasmer/wasmfs'
-import init, { register_module, call_module, test_call_avm, test_call_greeting_array} from "./marine_web_runtime.js";
+import init, { register_module, call_module} from "./marine_web_runtime.js";
 
 
 const greetingPath = '/greeting.wasm'  // Path to our WASI module
 const avmPath = '/air_interpreter_server.wasm'  // Path to our WASI module
 const echoStr      = 'Hello World!'    // Text string to echo
 
-window.MARINE_WASM_MODULES = {}
+//window.MARINE_WASM_MODULES = {}
 // Instantiate new WASI and WasmFs Instances
 // IMPORTANT:
 // Instantiating WasmFs is only needed when running in a browser.
@@ -47,7 +47,7 @@ async function loadMarineModule(modulePath, moduleName) {
     });
     console.log(instance)
 
-    window.MARINE_WASM_MODULES[moduleName] = instance;
+    //window.MARINE_WASM_MODULES[moduleName] = instance;
 
     wasi.start(instance)                       // Start the WASI instance
     let custom_sections = WebAssembly.Module.customSections(wasmModule,"interface-types");
@@ -56,8 +56,8 @@ async function loadMarineModule(modulePath, moduleName) {
     return {
         name: moduleName,
         custom_section: custom_section2,
+        instance: instance,
     }
-    //return [instance, custom_section2, moduleName]
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Everything starts here
@@ -68,7 +68,7 @@ async function main() {
     await init()
 
     //register_module(avm.name, avm.custom_section)
-    register_module(greeting.name, greeting.custom_section)
+    register_module(greeting.name, greeting.custom_section, greeting.instance)
     //test_call_avm()
     let result = call_module(greeting.name, "greeting", JSON.stringify(["js"]));
     console.log("JS: got result from call_module:", result)

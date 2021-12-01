@@ -38,11 +38,11 @@ mod config;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
-use wasmer_it::ast::Interfaces;
-use thiserror::Error as ThisError;
+//use wasmer_it::ast::Interfaces;
+//use thiserror::Error as ThisError;
 use module::MModule;
 
-use marine_js::*;
+//use marine_js::*;
 
 pub use engine::MModuleInterface;
 pub use engine::Marine;
@@ -78,6 +78,7 @@ static MINIMAL_SUPPORTED_IT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
 // These locals intended for check that set versions are correct at the start of an application.
 thread_local!(static MINIMAL_SUPPORTED_IT_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION));
 thread_local!(static MODULES: RefCell<Option<FluenceFaaS>> = RefCell::new(None));
+thread_local!(static INSTANCE: RefCell<Option<JsValue>> = RefCell::new(None));
 
 /// Return minimal support version of interface types.
 pub fn min_it_version() -> &'static semver::Version {
@@ -104,7 +105,7 @@ pub fn js_log(s: &str) {
 pub fn greet(name: &str) {
     alert(&format!("Hello, {}!", name));
 }
-
+/*
 #[wasm_bindgen]
 pub fn test_call_export() {
     call_export("greeting", "test_export", "[0]");
@@ -131,9 +132,9 @@ pub fn test_it_section(bytes: &[u8]) {
 
     log(&result)
 }
-
+*/
 #[wasm_bindgen]
-pub fn register_module(name: &str, wit_section_bytes: &[u8]) {
+pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) {
     //#[allow(unused)]
         //let module = MModule::new(name, wit_section_bytes).unwrap();
     let mut map = HashMap::new();
@@ -143,6 +144,14 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8]) {
     MODULES.with(|modules| {
         modules.replace(Some(faas))
     });
+
+    INSTANCE.with(|instance| {
+        instance.replace(Some(wasm_instance))
+    });
+/*
+    INSTANCE.with(|instance| {
+        instance.borrow().as_ref().unwrap().to_string();
+    });*/
 }
 
 /*
@@ -279,7 +288,7 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String
         }
     })
 }
-
+/*
 pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>, MyError> {
     match wasmer_it::decoders::binary::parse::<(&[u8], nom::error::ErrorKind)>(wit_section_bytes) {
         Ok((remainder, it)) if remainder.is_empty() => Ok(it),
@@ -295,3 +304,4 @@ enum MyError {
     #[error("CorruptedITSection {0}")]
     CorruptedITSection(String),
 }
+*/
