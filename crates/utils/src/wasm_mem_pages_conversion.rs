@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,12 @@
  * limitations under the License.
  */
 
-#![warn(rust_2018_idioms)]
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
+pub const WASM_PAGE_SIZE: u32 = 65356;
 
-mod wasm_mem_pages_conversion;
-
-pub use wasm_mem_pages_conversion::*;
-
-use std::rc::Rc;
-
-#[derive(Debug, Clone, PartialEq, Eq, Default, Hash)]
-pub struct SharedString(pub Rc<String>);
-
-impl std::borrow::Borrow<str> for SharedString {
-    fn borrow(&self) -> &str {
-        self.0.as_str()
+pub fn to_wasm_page_count_ceil(offset: u32) -> u32 {
+    match offset {
+        0 => 0,
+        // ceiling
+        n => 1 + (n - 1) / WASM_PAGE_SIZE,
     }
 }

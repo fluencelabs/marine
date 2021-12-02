@@ -16,7 +16,7 @@
 
 use crate::IValue;
 use crate::IType;
-use crate::Result;
+use crate::FaaSResult;
 use crate::FaaSError::JsonArgumentsDeserializationError as ArgDeError;
 
 use marine::MRecordTypes;
@@ -31,7 +31,7 @@ pub(crate) fn json_to_ivalues<'a, 'b>(
     json_args: JValue,
     arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
     record_types: &'b MRecordTypes,
-) -> Result<Vec<IValue>> {
+) -> FaaSResult<Vec<IValue>> {
     let ivalues = match json_args {
         JValue::Object(json_map) => json_map_to_ivalues(json_map, arg_types, record_types)?,
         JValue::Array(json_array) => {
@@ -49,7 +49,7 @@ fn json_map_to_ivalues<'a, 'b>(
     mut json_map: serde_json::Map<String, JValue>,
     arg_types: impl Iterator<Item = (&'a String, &'a IType)>,
     record_types: &'b MRecordTypes,
-) -> Result<Vec<IValue>> {
+) -> FaaSResult<Vec<IValue>> {
     let mut iargs = Vec::new();
 
     for (arg_name, arg_type) in arg_types {
@@ -76,7 +76,7 @@ fn json_array_to_ivalues<'a, 'b>(
     json_array: Vec<JValue>,
     arg_types: impl Iterator<Item = &'a IType> + ExactSizeIterator,
     record_types: &'b MRecordTypes,
-) -> Result<Vec<IValue>> {
+) -> FaaSResult<Vec<IValue>> {
     if json_array.len() != arg_types.len() {
         return Err(ArgDeError(format!(
             "function requires {} arguments, {} provided",
@@ -89,7 +89,7 @@ fn json_array_to_ivalues<'a, 'b>(
         .into_iter()
         .zip(arg_types)
         .map(|(json_value, arg_type)| jvalue_to_ivalue(json_value, arg_type, record_types))
-        .collect::<Result<Vec<_>>>()?;
+        .collect::<FaaSResult<Vec<_>>>()?;
 
     Ok(iargs)
 }
@@ -98,7 +98,7 @@ fn json_array_to_ivalues<'a, 'b>(
 fn json_value_to_ivalues<'a>(
     json_value: JValue,
     mut arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
-) -> Result<Vec<IValue>> {
+) -> FaaSResult<Vec<IValue>> {
     if arg_types.len() != 1 {
         return Err(ArgDeError(format!(
             "called function has the following signature: '{:?}', and it isn't suitable for an argument '{:?}' provided",
@@ -117,7 +117,7 @@ fn json_value_to_ivalues<'a>(
 /// Convert json Null to an empty array of ivalues.
 fn json_null_to_ivalues<'a>(
     arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
-) -> Result<Vec<IValue>> {
+) -> FaaSResult<Vec<IValue>> {
     if arg_types.len() != 0 {
         return Err(ArgDeError(format!(
             "the called function has the following signature: {:?}, but no arguments is provided",
@@ -129,7 +129,7 @@ fn json_null_to_ivalues<'a>(
 }
 
 /// Convert one JValue to an array of ivalues according to the supplied argument type.
-fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> Result<IValue> {
+fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> FaaSResult<IValue> {
     macro_rules! to_ivalue(
         ($json_value:expr, $ty:ident) => {
             {
@@ -169,7 +169,7 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> 
                     let iargs = json_array
                         .into_iter()
                         .map(|json_value| jvalue_to_ivalue(json_value, &IType::U8, record_types))
-                        .collect::<Result<Vec<_>>>()?;
+                        .collect::<FaaSResult<Vec<_>>>()?;
 
                     Ok(iargs)
                 }
@@ -184,7 +184,7 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> 
                     let iargs = json_array
                         .into_iter()
                         .map(|json_value| jvalue_to_ivalue(json_value, value_type, record_types))
-                        .collect::<Result<Vec<_>>>()?;
+                        .collect::<FaaSResult<Vec<_>>>()?;
 
                     Ok(iargs)
                 }
@@ -212,7 +212,7 @@ fn json_record_type_to_ivalue(
     json_value: JValue,
     record_type_id: &u64,
     record_types: &MRecordTypes,
-) -> Result<NEVec<IValue>> {
+) -> FaaSResult<NEVec<IValue>> {
     let record_type = record_types.get(record_type_id).ok_or_else(|| {
         ArgDeError(format!(
             "record with type id `{}` wasn't found",

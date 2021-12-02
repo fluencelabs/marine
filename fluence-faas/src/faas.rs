@@ -17,7 +17,7 @@
 use crate::config::FaaSConfig;
 use crate::faas_interface::FaaSInterface;
 use crate::FaaSError;
-use crate::Result;
+use crate::FaaSResult;
 use crate::IValue;
 use crate::IType;
 use crate::module_loading::load_modules_from_fs;
@@ -62,7 +62,7 @@ pub struct FluenceFaaS {
 
 impl FluenceFaaS {
     /// Creates FaaS from config deserialized from TOML.
-    pub fn with_raw_config<C>(config: C) -> Result<Self>
+    pub fn with_raw_config<C>(config: C) -> FaaSResult<Self>
     where
         C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,
@@ -77,7 +77,7 @@ impl FluenceFaaS {
     }
 
     /// Creates FaaS with given modules.
-    pub fn with_modules<C>(mut modules: HashMap<String, Vec<u8>>, config: C) -> Result<Self>
+    pub fn with_modules<C>(mut modules: HashMap<String, Vec<u8>>, config: C) -> FaaSResult<Self>
     where
         C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,
@@ -118,7 +118,7 @@ impl FluenceFaaS {
     }
 
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
-    pub fn with_module_names<C>(names: &HashMap<String, String>, config: C) -> Result<Self>
+    pub fn with_module_names<C>(names: &HashMap<String, String>, config: C) -> FaaSResult<Self>
     where
         C: TryInto<FaaSConfig>,
         FaaSError: From<C::Error>,
@@ -141,7 +141,7 @@ impl FluenceFaaS {
         func_name: FN,
         args: &[IValue],
         call_parameters: marine_rs_sdk::CallParameters,
-    ) -> Result<Vec<IValue>> {
+    ) -> FaaSResult<Vec<IValue>> {
         self.call_parameters.replace(call_parameters);
 
         self.marine
@@ -156,7 +156,7 @@ impl FluenceFaaS {
         func_name: FN,
         json_args: JValue,
         call_parameters: marine_rs_sdk::CallParameters,
-    ) -> Result<JValue> {
+    ) -> FaaSResult<JValue> {
         use crate::json::json_to_ivalues;
         use crate::json::ivalues_to_json;
 
@@ -190,7 +190,7 @@ impl FluenceFaaS {
         &'faas mut self,
         module_name: &str,
         func_name: &str,
-    ) -> Result<MModuleInterface> {
+    ) -> FaaSResult<MModuleInterface> {
         use FaaSError::NoSuchModule;
         use FaaSError::MissingFunctionError;
 
@@ -241,7 +241,12 @@ impl FluenceFaaS {
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl FluenceFaaS {
-    pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
+    pub fn load_module<S, C>(
+        &mut self,
+        name: S,
+        wasm_bytes: &[u8],
+        config: Option<C>,
+    ) -> FaaSResult<()>
     where
         S: Into<String>,
         C: TryInto<crate::FaaSModuleConfig>,
@@ -265,14 +270,14 @@ impl FluenceFaaS {
             .map_err(Into::into)
     }
 
-    pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
+    pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> FaaSResult<()> {
         self.marine.unload_module(module_name).map_err(Into::into)
     }
 
     pub fn module_wasi_state<S: AsRef<str>>(
         &mut self,
         module_name: S,
-    ) -> Result<&wasmer_wasi::state::WasiState> {
+    ) -> FaaSResult<&wasmer_wasi::state::WasiState> {
         let module_name = module_name.as_ref();
 
         self.marine

@@ -32,7 +32,7 @@ mod faas;
 mod faas_interface;
 mod module_loading;
 
-pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
+pub(crate) type FaaSResult<T> = std::result::Result<T, FaaSError>;
 
 pub use faas::FluenceFaaS;
 pub use faas_interface::FaaSInterface;

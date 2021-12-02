@@ -19,16 +19,14 @@ use crate::misc::HeapBaseError::*;
 use parity_wasm::elements;
 
 const HEAP_BASE_NAME: &str = "__heap_base";
-const WASM_PAGE_SIZE: u32 = 65356;
+
 type HResult<T> = std::result::Result<T, crate::misc::HeapBaseError>;
 
+/// Return value of __heap_base.
 pub(super) fn get_heap_base(wasm_module: &elements::Module) -> HResult<u32> {
     let heap_base_index = find_global_name_index(wasm_module, HEAP_BASE_NAME)?;
     let global_entry = find_global_by_index(wasm_module, heap_base_index as usize)?;
-    let heap_base = u32_from_global_entry(global_entry)?;
-
-    // heap_base is an offset and it's need to be converted to wasm pages count first
-    Ok(offset_to_page_count_ceil(heap_base))
+    u32_from_global_entry(global_entry)
 }
 
 fn find_global_name_index(wasm_module: &elements::Module, name: &str) -> HResult<u32> {
@@ -77,13 +75,5 @@ fn u32_from_global_entry(global_entry: &elements::GlobalEntry) -> HResult<u32> {
     match (&init_expr[0], &init_expr[1]) {
         (Instruction::I32Const(value), Instruction::End) => Ok(*value as u32),
         _ => Err(InitializationNotI32Const),
-    }
-}
-
-fn offset_to_page_count_ceil(offset: u32) -> u32 {
-    match offset {
-        0 => 0,
-        // ceiling
-        n => 1 + (n - 1) / WASM_PAGE_SIZE,
     }
 }

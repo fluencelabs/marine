@@ -46,7 +46,7 @@ pub struct HostImportDescriptor {
 pub struct MModuleConfig {
     /// Maximum number of Wasm memory pages that loaded module can use.
     /// Each Wasm pages is 65536 bytes long.
-    pub mem_pages_count: u32,
+    pub max_heap_size: u32,
 
     /// Import object that will be used in module instantiation process.
     pub raw_imports: ImportObject,
@@ -72,7 +72,7 @@ impl Default for MModuleConfig {
         // some reasonable defaults
         Self {
             // 65536*1600 ~ 100 Mb
-            mem_pages_count: 1600,
+            max_heap_size: 1600,
             raw_imports: ImportObject::new(),
             host_imports: HashMap::new(),
             wasi_version: WasiVersion::Latest,
@@ -88,7 +88,7 @@ impl Default for MModuleConfig {
 impl MModuleConfig {
     #[allow(dead_code)]
     pub fn with_mem_pages_count(mut self, mem_pages_count: u32) -> Self {
-        self.mem_pages_count = mem_pages_count;
+        self.max_heap_size = mem_pages_count;
         self
     }
 

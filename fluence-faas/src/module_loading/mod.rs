@@ -19,7 +19,7 @@ mod modules_load_strategy;
 pub(crate) use modules_load_strategy::ModulesLoadStrategy;
 
 use crate::FaaSError;
-use crate::Result;
+use crate::FaaSResult;
 
 use std::collections::HashMap;
 use std::path::Path;
@@ -28,7 +28,7 @@ use std::path::Path;
 pub(crate) fn load_modules_from_fs(
     modules_dir: &Path,
     modules: ModulesLoadStrategy<'_>,
-) -> Result<HashMap<String, Vec<u8>>> {
+) -> FaaSResult<HashMap<String, Vec<u8>>> {
     use FaaSError::IOError;
 
     let mut dir_entries =
