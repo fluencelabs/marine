@@ -1,0 +1,6 @@
+modules_dir = "artifacts/"
+
+[[module]]
+name = "producer"
+mem_pages_count = 50
+logger_enabled = false
