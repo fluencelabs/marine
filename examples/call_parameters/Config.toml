@@ -2,5 +2,5 @@ modules_dir = "artifacts/"
 
 [[module]]
     name = "call_parameters"
-    mem_pages_count = 50
+    max_heap_size = "10 KiB"
     logger_enabled = false
