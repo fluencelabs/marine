@@ -45,7 +45,7 @@ pub struct HostImportDescriptor {
 
 pub struct MModuleConfig {
     /// Maximum number of Wasm memory pages that loaded module can use.
-    /// Each Wasm pages is 65536 bytes long.
+    /// Each Wasm page is 65536 bytes long.
     pub max_heap_size: u32,
 
     /// Import object that will be used in module instantiation process.
