@@ -105,6 +105,7 @@ pub struct TomlWASIConfig {
 
 #[cfg(test)]
 mod tests {
+    use bytesize::ByteSize;
     use super::{TomlFaaSNamedModuleConfig, TomlFaaSModuleConfig, TomlWASIConfig};
 
     #[test]
@@ -114,7 +115,7 @@ mod tests {
             file_name: Some("file_name".to_string()),
             config: TomlFaaSModuleConfig {
                 mem_pages_count: Some(100),
-                max_heap_size: Some(1024 * 1024 * 1024.into()),
+                max_heap_size: Some(ByteSize::gib(4)),
                 logger_enabled: Some(false),
                 wasi: Some(TomlWASIConfig {
                     preopened_files: Some(vec!["a".to_string()]),
