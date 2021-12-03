@@ -92,8 +92,8 @@ impl<'a> ModuleBootstrapper {
 
 /// Prepares a Wasm module:
 ///   - extracts __heap_base global
-///   - compute module max memory size by summation of heap and globals sizes
-///   - set computed value as max memory page count of a module
+///   - computes module max memory size by summation of heap and globals sizes
+///   - sets computed value as max memory page count of a module
 pub(crate) fn prepare_module(module: &[u8], max_heap_size: u32) -> PrepareResult<Vec<u8>> {
     ModuleBootstrapper::init(module)?
         .set_max_heap_size(max_heap_size)?
