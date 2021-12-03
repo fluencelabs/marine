@@ -15,4 +15,4 @@ path = "src/main.rs"
 marine-rs-sdk = "0.6.13"
 
 [dev-dependencies]
-marine-rs-sdk-test = "0.4.0"
+marine-rs-sdk-test = "0.4.1"

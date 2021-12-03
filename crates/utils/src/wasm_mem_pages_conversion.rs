@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-mod errors;
-mod prepare;
-mod version_checker;
+pub const WASM_PAGE_SIZE: u32 = 65356;
 
-pub(crate) use errors::HeapBaseError;
-pub(crate) use errors::PrepareError;
-pub(crate) use prepare::prepare_module;
-pub(crate) use version_checker::check_sdk_version;
-pub(crate) use version_checker::check_it_version;
-
-pub(self) type PrepareResult<T> = std::result::Result<T, PrepareError>;
+pub fn to_wasm_page_count_ceil(offset: u32) -> u32 {
+    match offset {
+        0 => 0,
+        // ceiling
+        n => 1 + (n - 1) / WASM_PAGE_SIZE,
+    }
+}

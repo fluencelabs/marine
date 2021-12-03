@@ -1,13 +1,13 @@
 [package]
 name = "fluence-faas"
 description = "Fluence FaaS"
-version = "0.9.3"
+version = "0.10.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-marine-runtime = { path = "../runtime", version = "0.7.2" }
+marine-runtime = { path = "../runtime", version = "0.8.0" }
 marine-module-interface = { path = "../crates/module-interface", version = "0.1.6" }
 marine-utils = { path = "../crates/utils", version = "0.2.0" }
 marine-rs-sdk-main = { version = "0.6.15", features = ["logger"] }
@@ -23,6 +23,8 @@ toml = "0.5.6"
 serde = { version = "1.0.118", features = ["derive"] }
 serde_json = "1.0.53"
 serde_derive = "1.0.118"
+serde_with = "1.11.0"
+bytesize = {version = "1.1.0", features = ["serde"]}
 itertools = "0.9.0"
 cmd_lib = "0.7.8"
 log = "0.4.8"

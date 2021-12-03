@@ -1,7 +1,7 @@
 [package]
 name = "marine-runtime"
 description = "Marine is the Fluence Compute Runtime"
-version = "0.7.2"
+version = "0.8.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -27,8 +27,8 @@ wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 
 multimap = "0.8.1"
 boolinator = "2.4.0"
-parity-wasm = "0.41.0"
-pwasm-utils = "0.12.0"
+parity-wasm = "0.42.2"
+pwasm-utils = "0.18.2"
 once_cell = "1.7.2"
 semver = "0.11.0"
 serde = "1.0.118"
