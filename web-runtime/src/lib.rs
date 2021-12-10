@@ -135,6 +135,7 @@ pub fn test_it_section(bytes: &[u8]) {
 */
 #[wasm_bindgen]
 pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) {
+    console_error_panic_hook::set_once();
     //#[allow(unused)]
         //let module = MModule::new(name, wit_section_bytes).unwrap();
     let mut map = HashMap::new();
