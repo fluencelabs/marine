@@ -46,10 +46,12 @@ impl ITInstance {
     pub(super) fn new(wasmer_instance: &WasmerInstance, wit: &MITInterfaces<'_>) -> MResult<Self> {
         let exports = Self::extract_raw_exports(wasmer_instance, wit)?;
         let memories = Self::extract_memories(wasmer_instance);
+        js_log(&format!("executed Self::extract_memories"));
 
         let funcs = exports;
 
         let record_types_by_id = Self::extract_record_types(wit);
+        js_log(&format!("executed Self::extract_record_types"));
 
         Ok(Self {
             funcs,

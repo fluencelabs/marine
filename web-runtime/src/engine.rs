@@ -78,6 +78,7 @@ impl Marine {
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {
                 entry.insert(module);
+                js_log("successfully iserted module");
                 Ok(())
             }
             Entry::Occupied(entry) => Err(MError::NonUniqueModuleName(entry.key().clone())),

@@ -97,8 +97,8 @@ extern "C" {
     fn log(s: &str);
 }
 
-pub fn js_log(s: &str) {
-    log(s)
+pub fn js_log(_s: &str) {
+    //log(_s)
 }
 
 #[wasm_bindgen]
@@ -273,11 +273,17 @@ pub fn test_call_greeting_array() {
 */
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
+    js_log("ar123123");
+    js_log(&format!("call_module called with args: module_name={}, function_name={}, args={}", module_name, function_name, args));
     MODULES.with(|modules| {
         let mut modules = modules.borrow_mut();
         match modules.as_mut() {
             Some(modules) => {
-                let args = serde_json::from_str(args).unwrap();
+                js_log(&format!("call_module called with args: module_name={}, function_name={}, args={}", module_name, function_name, args));
+                let args: serde_json::Value = serde_json::from_str(args).unwrap_or_else(|e| {
+                    js_log(&format!("Error deserializing args: {}", e));
+                    unreachable!()
+                });
                 let result = modules.call_with_json(module_name, function_name, args, CallParameters::default()).unwrap();
                 result.to_string()
             }

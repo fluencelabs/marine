@@ -71,14 +71,14 @@ export function call_export(instance, export_name, args) {
         json_string = "[" + JSON.stringify(result) + "]"
     }
 
-    console.log("got result_string: ", json_string)
+    //console.log("got result_string: ", json_string)
     return json_string
 }
 
 export function get_memory_size(instance) {
     //console.log("called get_memory_size with name=", module_name);
     let buf = new Uint8Array(instance.exports.memory.buffer);
-    console.log("result=", buf.byteLength);
+    //console.log("result=", buf.byteLength);
     return buf.byteLength
 }
 

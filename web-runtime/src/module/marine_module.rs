@@ -122,7 +122,7 @@ impl MModule {
         };
 
         let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
-
+        js_log("created MModule");
         Ok(Self {
             wasmer_instance: Box::new(wasmer_instance),
             export_funcs,
