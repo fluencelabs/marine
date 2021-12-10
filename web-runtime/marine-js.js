@@ -52,8 +52,8 @@ export function read_byte(module_name, offset) {
     return buf[offset];
 }
 */
-export function call_export(instance, export_name, args) {
-    console.log("JS: call_export called with: ", instance, export_name, args)
+module.exports.call_export = function (instance, export_name, args) {
+    //console.log("JS: call_export called with: ", instance, export_name, args)
     let parsed_args = JSON.parse(args);
     console.log("parsed args: ", args);
     let prepared_args = [];
@@ -75,29 +75,21 @@ export function call_export(instance, export_name, args) {
     return json_string
 }
 
-export function get_memory_size(instance) {
+module.exports.get_memory_size = function (instance) {
     //console.log("called get_memory_size with name=", module_name);
     let buf = new Uint8Array(instance.exports.memory.buffer);
     //console.log("result=", buf.byteLength);
     return buf.byteLength
 }
 
-export function write_memory(instance, offset, bytes) {
-
-}
-
-export function read_memory(instance, offset, size) {
-
-}
-
-export function write_byte(instance, offset, value) {
+module.exports.write_byte =  function (instance, offset, value) {
     //console.log("write_byte called with args: module_name={}, offset={}, value={}", module_name, offset, value)
     let buf = new Uint8Array(instance.exports.memory.buffer);
     //console.log(buf)
     buf[offset] = value
 }
 
-export function read_byte(instance, offset) {
+module.exports.read_byte =  function (instance, offset) {
     //console.log("read_byte called with args: module_name={}, offset={}", module_name, offset)
     let buf = new Uint8Array(instance.exports.memory.buffer);
     //console.log(buf)
