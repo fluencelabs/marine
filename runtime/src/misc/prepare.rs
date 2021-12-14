@@ -47,15 +47,15 @@ impl<'a> ModuleBootstrapper {
         use elements::{MemoryType, MemorySection};
 
         let Self { mut module } = self;
-        let globals_size = get_heap_base(&module)
+        let globals_pages_count = get_heap_base(&module)
             .map(bytes_to_wasm_pages_ceil)
             .unwrap_or(DEFAULT_GLOBALS_SIZE);
-        let max_mem_size = globals_size.checked_add(max_heap_pages_count).ok_or(
-            PrepareError::MemSizesOverflow {
-                globals_size,
+        let max_mem_pages_count = globals_pages_count
+            .checked_add(max_heap_pages_count)
+            .ok_or(PrepareError::MemSizesOverflow {
+                globals_pages_count,
                 max_heap_pages_count,
-            },
-        )?;
+            })?;
 
         // At now, there is could be only one memory section, so
         // it needs just to extract previous initial page count,
@@ -67,9 +67,9 @@ impl<'a> ModuleBootstrapper {
             },
             None => 0,
         };
-        let mem_initial_size = std::cmp::min(mem_initial_size, max_mem_size);
+        let mem_initial_size = std::cmp::min(mem_initial_size, max_mem_pages_count);
 
-        let memory_entry = MemoryType::new(mem_initial_size, Some(max_mem_size));
+        let memory_entry = MemoryType::new(mem_initial_size, Some(max_mem_pages_count));
         let mut default_mem_section = MemorySection::default();
 
         module

@@ -29,7 +29,7 @@ pub enum PrepareError {
 
     #[error("overflow was happened while summation globals size '{globals_size}' and heap size '{max_heap_pages_count}'")]
     MemSizesOverflow {
-        globals_size: u32,
+        globals_pages_count: u32,
         max_heap_pages_count: u32,
     },
 
