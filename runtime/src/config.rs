@@ -27,7 +27,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 // 65536*1600 ~ 100 Mb
-const DEFAULT_WASM_PAGES_COUNT: u32 = 1600;
+const DEFAULT_HEAP_PAGES_COUNT: u32 = 1600;
 
 pub type HostExportedFunc = Box<dyn Fn(&mut Ctx, Vec<IValue>) -> Option<IValue> + 'static>;
 
@@ -74,7 +74,7 @@ impl Default for MModuleConfig {
     fn default() -> Self {
         // some reasonable defaults
         Self {
-            max_heap_pages_count: DEFAULT_WASM_PAGES_COUNT,
+            max_heap_pages_count: DEFAULT_HEAP_PAGES_COUNT,
             raw_imports: ImportObject::new(),
             host_imports: HashMap::new(),
             wasi_version: WasiVersion::Latest,
