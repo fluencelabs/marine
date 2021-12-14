@@ -792,7 +792,7 @@ dependencies = [
  "marine-rs-sdk",
  "marine-rs-sdk-main",
  "marine-runtime 0.7.2",
- "marine-utils 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-utils 0.2.0",
  "safe-transmute",
  "serde",
  "serde_derive",
@@ -818,7 +818,7 @@ dependencies = [
  "marine-rs-sdk",
  "marine-rs-sdk-main",
  "marine-runtime 0.8.0",
- "marine-utils 0.2.0",
+ "marine-utils 0.3.0",
  "once_cell",
  "pretty_assertions",
  "safe-transmute",
@@ -1689,7 +1689,7 @@ dependencies = [
  "marine-it-parser 0.6.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "marine-module-info-parser 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "marine-module-interface 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "marine-utils 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-utils 0.2.0",
  "multimap",
  "once_cell",
  "parity-wasm 0.41.0",
@@ -1718,7 +1718,7 @@ dependencies = [
  "marine-it-parser 0.6.8",
  "marine-module-info-parser 0.2.2",
  "marine-module-interface 0.1.6",
- "marine-utils 0.2.0",
+ "marine-utils 0.3.0",
  "multimap",
  "once_cell",
  "parity-wasm 0.42.2",
@@ -1788,12 +1788,12 @@ dependencies = [
 [[package]]
 name = "marine-utils"
 version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8dc5838acba84ce4d802d672afd0814fae0ae7098021ae5b06d975e70d09f812"
 
 [[package]]
 name = "marine-utils"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8dc5838acba84ce4d802d672afd0814fae0ae7098021ae5b06d975e70d09f812"
+version = "0.3.0"
 
 [[package]]
 name = "matches"
