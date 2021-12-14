@@ -27,7 +27,7 @@ pub enum PrepareError {
     #[error(transparent)]
     HeapBaseInvalidOrMissing(#[from] HeapBaseError),
 
-    #[error("overflow was happened while summation globals size '{globals_size}' and heap size '{max_heap_pages_count}'")]
+    #[error("overflow was happened while summation globals size '{globals_pages_count}' and heap size '{max_heap_pages_count}'")]
     MemSizesOverflow {
         globals_pages_count: u32,
         max_heap_pages_count: u32,
