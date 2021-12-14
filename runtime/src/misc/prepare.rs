@@ -24,7 +24,7 @@ use super::PrepareResult;
 use crate::misc::PrepareError;
 use heap_base::get_heap_base;
 
-use marine_utils::to_wasm_page_count_ceil;
+use marine_utils::bytes_to_wasm_pages_ceil;
 use parity_wasm::builder;
 use parity_wasm::elements;
 
@@ -43,20 +43,19 @@ impl<'a> ModuleBootstrapper {
         Ok(Self { module })
     }
 
-    fn set_max_heap_size(self, max_heap_size: u32) -> PrepareResult<Self> {
+    fn set_max_heap_pages_count(self, max_heap_pages_count: u32) -> PrepareResult<Self> {
         use elements::{MemoryType, MemorySection};
 
         let Self { mut module } = self;
         let globals_size = get_heap_base(&module)
-            .map(to_wasm_page_count_ceil)
+            .map(bytes_to_wasm_pages_ceil)
             .unwrap_or(DEFAULT_GLOBALS_SIZE);
-        let max_mem_size =
-            globals_size
-                .checked_add(max_heap_size)
-                .ok_or(PrepareError::MemSizesOverflow {
-                    globals_size,
-                    max_heap_size,
-                })?;
+        let max_mem_size = globals_size.checked_add(max_heap_pages_count).ok_or(
+            PrepareError::MemSizesOverflow {
+                globals_size,
+                max_heap_pages_count,
+            },
+        )?;
 
         // At now, there is could be only one memory section, so
         // it needs just to extract previous initial page count,
@@ -94,8 +93,8 @@ impl<'a> ModuleBootstrapper {
 ///   - extracts __heap_base global
 ///   - computes module max memory size by summation of heap and globals sizes
 ///   - sets computed value as max memory page count of a module
-pub(crate) fn prepare_module(module: &[u8], max_heap_size: u32) -> PrepareResult<Vec<u8>> {
+pub(crate) fn prepare_module(module: &[u8], max_heap_pages_count: u32) -> PrepareResult<Vec<u8>> {
     ModuleBootstrapper::init(module)?
-        .set_max_heap_size(max_heap_size)?
+        .set_max_heap_pages_count(max_heap_pages_count)?
         .into_wasm()
 }

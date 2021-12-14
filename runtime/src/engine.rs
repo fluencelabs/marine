@@ -73,7 +73,8 @@ impl Marine {
         wasm_bytes: &[u8],
         config: MModuleConfig,
     ) -> MResult<()> {
-        let prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.max_heap_size)?;
+        let prepared_wasm_bytes =
+            crate::misc::prepare_module(wasm_bytes, config.max_heap_pages_count)?;
         let module = MModule::new(&name, &prepared_wasm_bytes, config, &self.modules)?;
 
         match self.modules.entry(name) {

@@ -26,7 +26,7 @@ use crate::host_imports::create_call_parameters_import;
 use marine::HostImportDescriptor;
 use marine::MModuleConfig;
 use marine_rs_sdk::CallParameters;
-use marine_utils::to_wasm_page_count_ceil;
+use marine_utils::bytes_to_wasm_pages_ceil;
 use wasmer_core::import::ImportObject;
 use wasmer_core::import::Namespace;
 use wasmer_runtime::func;
@@ -127,7 +127,7 @@ impl MModuleConfigBuilder {
         mem_pages_count: Option<u32>,
         max_heap_size: Option<u64>,
     ) -> FaaSResult<Self> {
-        let mem_pages_count = match (mem_pages_count, max_heap_size) {
+        let max_heap_pages_count = match (mem_pages_count, max_heap_size) {
             (Some(v), None) => v,
             (_, Some(max_heap_size_wanted)) => {
                 if max_heap_size_wanted > WASM_MAX_HEAP_SIZE {
@@ -136,13 +136,13 @@ impl MModuleConfigBuilder {
                         max_heap_size_allowed: WASM_MAX_HEAP_SIZE,
                     });
                 };
-                to_wasm_page_count_ceil(max_heap_size_wanted as u32)
+                bytes_to_wasm_pages_ceil(max_heap_size_wanted as u32)
             }
             // leave the default value
             (None, None) => return Ok(self),
         };
 
-        self.config.max_heap_size = mem_pages_count;
+        self.config.max_heap_pages_count = max_heap_pages_count;
 
         Ok(self)
     }
