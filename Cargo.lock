@@ -767,9 +767,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
- "fluence-faas 0.10.0",
+ "fluence-faas 0.10.1",
  "log",
  "maplit",
  "serde",
@@ -807,7 +807,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "bytesize",
  "cmd_lib",
@@ -817,8 +817,8 @@ dependencies = [
  "marine-module-interface 0.1.6",
  "marine-rs-sdk",
  "marine-rs-sdk-main",
- "marine-runtime 0.8.0",
- "marine-utils 0.3.0",
+ "marine-runtime 0.8.1",
+ "marine-utils 0.4.0",
  "once_cell",
  "pretty_assertions",
  "safe-transmute",
@@ -1706,7 +1706,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.8.0"
+version = "0.8.1"
 dependencies = [
  "anyhow",
  "boolinator",
@@ -1718,7 +1718,7 @@ dependencies = [
  "marine-it-parser 0.6.8",
  "marine-module-info-parser 0.2.2",
  "marine-module-interface 0.1.6",
- "marine-utils 0.3.0",
+ "marine-utils 0.4.0",
  "multimap",
  "once_cell",
  "parity-wasm 0.42.2",
@@ -1793,7 +1793,7 @@ checksum = "8dc5838acba84ce4d802d672afd0814fae0ae7098021ae5b06d975e70d09f812"
 
 [[package]]
 name = "marine-utils"
-version = "0.3.0"
+version = "0.4.0"
 
 [[package]]
 name = "matches"
@@ -1913,7 +1913,7 @@ dependencies = [
  "check-latest",
  "clap",
  "env_logger 0.7.1",
- "fluence-app-service 0.11.0",
+ "fluence-app-service 0.11.1",
  "itertools 0.9.0",
  "log",
  "marine-rs-sdk-main",

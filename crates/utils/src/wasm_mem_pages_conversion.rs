@@ -16,10 +16,14 @@
 
 pub const WASM_PAGE_SIZE: u32 = 65356;
 
-pub fn to_wasm_page_count_ceil(offset: u32) -> u32 {
+pub fn bytes_to_wasm_pages_ceil(offset: u32) -> u32 {
     match offset {
         0 => 0,
         // ceiling
         n => 1 + (n - 1) / WASM_PAGE_SIZE,
     }
+}
+
+pub fn wasm_pages_to_bytes(pages_count: u32) -> u64 {
+    (pages_count as u64) * (WASM_PAGE_SIZE as u64)
 }
