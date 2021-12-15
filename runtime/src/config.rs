@@ -26,7 +26,7 @@ use std::path::PathBuf;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-// 65536*1600 ~ 100 Mb
+// 65536*1600 ~ 100 Mb (Wasm page size is 64 Kb)
 const DEFAULT_HEAP_PAGES_COUNT: u32 = 1600;
 
 pub type HostExportedFunc = Box<dyn Fn(&mut Ctx, Vec<IValue>) -> Option<IValue> + 'static>;
