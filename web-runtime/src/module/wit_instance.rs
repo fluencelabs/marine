@@ -21,7 +21,7 @@ use crate::{js_log, MResult};
 use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
 use wasmer_it::interpreter::wasm;
-use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, MemSlice2, TypedIndex};
+use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, TypedIndex};
 use crate::marine_js::{Instance as WasmerInstance, DynFunc};
 
 use std::collections::HashMap;
@@ -118,7 +118,7 @@ impl ITInstance {
     }
 }
 
-impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<'static>>
+impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView>
     for ITInstance
 {
     fn export(&self, _export_name: &str) -> Option<&ITExport> {
@@ -148,15 +148,15 @@ impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<
         }
     }
 
-    fn memory_slice(&self, index: usize) -> Option<MemSlice2> {
-        js_log(&format!("called ITInstance::memory_slice with {}", index));
+    fn memory_view(&self, index: usize) -> Option<WITMemoryView> {
+        js_log(&format!("called ITInstance::memory_view with {}", index));
         if index >= self.memories.len() {
             return None;
         }
 
         let memory = &self.memories[index];
 
-        Some(*memory.view())
+        Some(memory.view())
     }
 
     fn wit_record_by_id(&self, index: u64) -> Option<&Rc<IRecordType>> {

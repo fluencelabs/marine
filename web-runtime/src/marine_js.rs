@@ -4,7 +4,6 @@ use wasm_bindgen::prelude::*;
 use std::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 use std::borrow::{Cow};
-use it_utils::{MemSlice2, ByteAccess, MemSlice3};
 use marine_it_interfaces::MITInterfaces;
 use crate::js_log;
 use crate::module::type_converters::{itypes_args_to_wtypes, itypes_output_to_wtypes};
@@ -271,24 +270,14 @@ pub struct WasmMemory {
     pub module_name: String,
 }
 
-impl MemSlice3 for WasmMemory {
-    fn len(&self) -> usize {
-        //crate::js_log("WasmMemory::len calledx");
-        //get_memory_size(&self.module_name) as usize
-        INSTANCE.with(|instance| {
-            get_memory_size(instance.borrow().as_ref().unwrap()) as usize
-        })
-    }
-
-    fn index(&self, index: usize) -> it_utils::ByteAccess {
-        //crate::js_log(&format!("WasmMemory::index called with {}", index));
-        ByteAccess {
-            slice: MemSlice2 { slice_ref: self },
-            index,
+impl WasmMemory {
+    pub fn new(module_name: String) -> Self {
+        Self {
+            module_name
         }
     }
 
-    fn get(&self, index: usize) -> u8 {
+    pub fn get(&self, index: usize) -> u8 {
         //crate::js_log(&format!("WasmMemory::get called with {}", index));
         //read_byte(&self.module_name, index)
         INSTANCE.with(|instance| {
@@ -296,21 +285,12 @@ impl MemSlice3 for WasmMemory {
         })
     }
 
-    fn set(&self, index: usize, value: u8) {
+    pub fn set(&self, index: usize, value: u8) {
         //crate::js_log(&format!("WasmMemory::set called with {} {}", index, value));
         //write_byte(&self.module_name, index, value);
         INSTANCE.with(|instance| {
             //call_export(instance.as_ref().unwrap(), &self.name, &args)
             write_byte(instance.borrow().as_ref().unwrap(), index, value);
         });
-    }
-
-    fn range_iter(&self, begin: usize, end: usize) -> it_utils::MemSliceIter {
-        //crate::js_log(&format!("WasmMemory::range_iter called with {} {}", begin, end));
-        it_utils::MemSliceIter {
-            begin,
-            end,
-            slice: MemSlice2 { slice_ref: self },
-        }
     }
 }
