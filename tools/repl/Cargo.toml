@@ -19,7 +19,7 @@ anyhow = "1.0.31"
 clap = "2.33.1"
 serde = "1.0.118"
 serde_json = "1.0.57"
-wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1"}
+wasmer-wasi = { package = "wasmer-wasi-fl", git = "https://github.com/fluencelabs/wasmer", branch = "print_mem_grow"}
 
 env_logger = "0.7.1"
 check-latest = "1.0.0"

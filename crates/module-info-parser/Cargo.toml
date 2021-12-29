@@ -13,7 +13,7 @@ path = "src/lib.rs"
 [dependencies]
 marine-rs-sdk-main = "0.6.13"
 
-wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1" }
+wasmer-core = { package = "wasmer-runtime-core-fl", git = "https://github.com/fluencelabs/wasmer", branch = "print_mem_grow" }
 
 anyhow = "1.0.31"
 chrono = "0.4.19"
