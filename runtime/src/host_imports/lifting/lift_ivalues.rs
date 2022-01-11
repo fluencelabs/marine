@@ -43,8 +43,8 @@ macro_rules! simple_wvalue_to_ivalue {
     }};
 }
 
-pub(crate) fn wvalues_to_ivalues<R: RecordResolvable>(
-    lifter: &ILifter<'_, '_, R>,
+pub(crate) fn wvalues_to_ivalues<R: RecordResolvable, MV: MemoryView>(
+    lifter: &ILifter<'_, R, MV>,
     wvalues: &[WValue],
     itypes: &[IType],
 ) -> HostImportResult<Vec<IValue>> {

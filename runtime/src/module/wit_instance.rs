@@ -22,11 +22,10 @@ use crate::MResult;
 use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
 use wasmer_it::interpreter::wasm;
-use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, TypedIndex};
+use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, TypedIndex};
 use wasmer_core::Instance as WasmerInstance;
 
 use std::collections::HashMap;
-use std::cell::Cell;
 use std::rc::Rc;
 
 pub type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
@@ -176,7 +175,7 @@ impl ITInstance {
     }
 }
 
-impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<'_>>
+impl<'v> wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<'v>>
     for ITInstance
 {
     fn export(&self, _export_name: &str) -> Option<&ITExport> {
@@ -196,22 +195,15 @@ impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<
         }
     }
 
-    fn memory_slice(&self, index: usize) -> Option<&[Cell<u8>]> {
-        use wasmer_core::vm::LocalMemory;
+    fn memory_view(&self, index: usize) -> Option<WITMemoryView<'static>> {
 
         if index >= self.memories.len() {
             return None;
         }
 
         let memory = &self.memories[index];
-        let LocalMemory { base, .. } = unsafe { *memory.0.vm_local_memory() };
-        let length = memory.0.size().bytes().0 / std::mem::size_of::<u8>();
-
-        let mut_slice: &mut [u8] = unsafe { std::slice::from_raw_parts_mut(base, length) };
-        let cell_slice: &Cell<[u8]> = Cell::from_mut(mut_slice);
-        let slice = cell_slice.as_slice_of_cells();
-
-        Some(slice)
+        let view : WITMemoryView<'static> = memory.view();
+        Some(view)
     }
 
     fn wit_record_by_id(&self, index: u64) -> Option<&Rc<IRecordType>> {
