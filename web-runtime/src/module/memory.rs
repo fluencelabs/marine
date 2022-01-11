@@ -16,8 +16,8 @@
 
 use std::cell::Cell;
 use it_lilo::read_ty;
-use it_lilo::traits::SequentialWriter;
-use it_lilo::traits::SequentialReader;
+use it_traits::SequentialWriter;
+use it_traits::SequentialReader;
 use wasmer_it::interpreter::wasm;
 use crate::js_log;
 use crate::marine_js::WasmMemory;

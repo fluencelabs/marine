@@ -30,6 +30,7 @@ marine-rs-sdk = "0.6.15"
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.2" }
 fluence-it-types = {version = "0.3.1", features = ["impls"] }
 it-lilo = "0.1.0"
+it-traits = { path = "../../interface-types/crates/it-traits" }
 itertools = "0.10.1"
 #wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 
