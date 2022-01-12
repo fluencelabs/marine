@@ -1,7 +1,6 @@
 use std::cell::Cell;
 use it_traits::{SequentialReader, SequentialWriter};
 
-
 #[macro_export]
 macro_rules! value_der {
     ($self:expr, $offset:expr, @seq_start $($ids:tt),* @seq_end) => {
@@ -81,7 +80,6 @@ macro_rules! read_ty {
         }
     };
 }
-
 
 pub(crate) struct WasmerSequentialReader<'s> {
     pub memory: &'s [Cell<u8>],

@@ -33,8 +33,7 @@ use std::sync::Arc;
 use std::rc::Rc;
 use crate::module::wit_function::WITFunction;
 
-type ITInterpreter =
-    Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView>;
+type ITInterpreter = Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView>;
 use crate::js_log;
 
 #[derive(Clone)]

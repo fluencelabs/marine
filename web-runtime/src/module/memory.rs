@@ -30,9 +30,7 @@ impl WITMemoryView {
     pub fn new(module_name: String) -> Self {
         crate::js_log("WITMemoryView::new called");
 
-        Self {
-            module_name
-        }
+        Self { module_name }
     }
 }
 
@@ -117,11 +115,19 @@ impl SequentialWriter for JsSequentialWriter {
 
 impl wasm::structures::MemoryView for WITMemoryView {
     fn sequential_writer(&self, offset: usize, size: usize) -> Box<dyn SequentialWriter> {
-        Box::new(JsSequentialWriter::new(offset, size, WasmMemory::new(self.module_name.clone())))
+        Box::new(JsSequentialWriter::new(
+            offset,
+            size,
+            WasmMemory::new(self.module_name.clone()),
+        ))
     }
 
     fn sequential_reader(&self, offset: usize, size: usize) -> Box<dyn SequentialReader> {
-        Box::new(JsSequentialReader::new(offset, size, WasmMemory::new(self.module_name.clone())))
+        Box::new(JsSequentialReader::new(
+            offset,
+            size,
+            WasmMemory::new(self.module_name.clone()),
+        ))
     }
 }
 

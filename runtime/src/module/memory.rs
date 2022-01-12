@@ -38,7 +38,11 @@ impl std::ops::Deref for WITMemory {
 }
 
 impl wasm::structures::MemoryView for WITMemoryView<'_> {
-    fn sequential_writer<'s>(&'s self, offset: usize, _size: usize) -> Box<dyn SequentialWriter + 's> {
+    fn sequential_writer<'s>(
+        &'s self,
+        offset: usize,
+        _size: usize,
+    ) -> Box<dyn SequentialWriter + 's> {
         let view = &self.0;
         let slice = view.deref();
         let writer = WasmerSequentialWriter {
@@ -50,7 +54,11 @@ impl wasm::structures::MemoryView for WITMemoryView<'_> {
         Box::new(writer)
     }
 
-    fn sequential_reader<'s>(&'s self, offset: usize, _size: usize) -> Box<dyn SequentialReader + 's> {
+    fn sequential_reader<'s>(
+        &'s self,
+        offset: usize,
+        _size: usize,
+    ) -> Box<dyn SequentialReader + 's> {
         let view = &self.0;
         let slice: &[Cell<u8>] = view.deref();
         let reader = WasmerSequentialReader {

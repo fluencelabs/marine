@@ -159,29 +159,29 @@ impl TryFrom<TomlFaaSModuleConfig> for FaaSModuleConfig {
 
     fn try_from(toml_config: TomlFaaSModuleConfig) -> Result<Self, Self::Error> {
         /*
-        let mounted_binaries = toml_config.mounted_binaries.unwrap_or_default();
-        let mounted_binaries = mounted_binaries
-            .into_iter()
-            .map(|(import_func_name, host_cmd)| {
-                let host_cmd = host_cmd.try_into::<String>()?;
-                Ok((import_func_name, host_cmd))
-            })
-            .collect::<Result<Vec<_>, Self::Error>>()?;
+                let mounted_binaries = toml_config.mounted_binaries.unwrap_or_default();
+                let mounted_binaries = mounted_binaries
+                    .into_iter()
+                    .map(|(import_func_name, host_cmd)| {
+                        let host_cmd = host_cmd.try_into::<String>()?;
+                        Ok((import_func_name, host_cmd))
+                    })
+                    .collect::<Result<Vec<_>, Self::Error>>()?;
 
-        let mut host_cli_imports = HashMap::new();
-        for (import_name, host_cmd) in mounted_binaries {
-            host_cli_imports.insert(
-                import_name,
-                crate::host_imports::create_mounted_binary_import(host_cmd),
-            );
-        }
-*/
+                let mut host_cli_imports = HashMap::new();
+                for (import_name, host_cmd) in mounted_binaries {
+                    host_cli_imports.insert(
+                        import_name,
+                        crate::host_imports::create_mounted_binary_import(host_cmd),
+                    );
+                }
+        */
         //let wasi = toml_config.wasi.map(|w| w.try_into()).transpose()?;
 
         Ok(FaaSModuleConfig {
             mem_pages_count: toml_config.mem_pages_count,
             logger_enabled: toml_config.logger_enabled.unwrap_or(true),
-           // host_imports: host_cli_imports,
+            // host_imports: host_cli_imports,
             //wasi,
             logging_mask: toml_config.logging_mask.unwrap_or(i32::max_value()),
         })

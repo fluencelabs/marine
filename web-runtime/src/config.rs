@@ -30,14 +30,13 @@ use std::collections::HashSet;
 
 pub struct HostImportDescriptor {
     /// This closure will be invoked for corresponding import.
-  //  pub host_exported_func: HostExportedFunc,
+    //  pub host_exported_func: HostExportedFunc,
 
     /// Type of the closure arguments.
     pub argument_types: Vec<IType>,
 
     /// Types of output of the closure.
     pub output_type: Option<IType>,
-
     // /// If Some, this closure is called with error when errors is encountered while lifting.
     // /// If None, panic will occur.
     // pub error_handler: Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + 'static>>,
@@ -52,10 +51,10 @@ pub struct MModuleConfig {
     //pub raw_imports: ImportObject,
 
     /// Imports from the host side that will be used in module instantiation process.
-   // pub host_imports: HashMap<String, HostImportDescriptor>,
+    // pub host_imports: HashMap<String, HostImportDescriptor>,
 
     /// Desired WASI version.
-   // pub wasi_version: WasiVersion,
+    // pub wasi_version: WasiVersion,
 
     /// Environment variables for loaded modules.
     pub wasi_envs: HashMap<Vec<u8>, Vec<u8>>,
@@ -91,13 +90,13 @@ impl MModuleConfig {
         self.mem_pages_count = mem_pages_count;
         self
     }
-/*
-    #[allow(dead_code)]
-    pub fn with_wasi_version(mut self, wasi_version: WasiVersion) -> Self {
-        self.wasi_version = wasi_version;
-        self
-    }
-*/
+    /*
+        #[allow(dead_code)]
+        pub fn with_wasi_version(mut self, wasi_version: WasiVersion) -> Self {
+            self.wasi_version = wasi_version;
+            self
+        }
+    */
     #[allow(dead_code)]
     pub fn with_wasi_envs(mut self, envs: HashMap<Vec<u8>, Vec<u8>>) -> Self {
         self.wasi_envs = envs;

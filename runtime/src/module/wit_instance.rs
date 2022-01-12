@@ -196,13 +196,12 @@ impl<'v> wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryV
     }
 
     fn memory_view(&self, index: usize) -> Option<WITMemoryView<'static>> {
-
         if index >= self.memories.len() {
             return None;
         }
 
         let memory = &self.memories[index];
-        let view : WITMemoryView<'static> = memory.view();
+        let view: WITMemoryView<'static> = memory.view();
         Some(view)
     }
 

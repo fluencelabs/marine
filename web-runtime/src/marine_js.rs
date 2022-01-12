@@ -82,9 +82,8 @@ impl<'a> DynFunc<'_> {
         }
 
         let args = result.unwrap();
-        let output = INSTANCE.with(|instance| {
-           call_export(instance.borrow().as_ref().unwrap(), &self.name, &args)
-        });
+        let output = INSTANCE
+            .with(|instance| call_export(instance.borrow().as_ref().unwrap(), &self.name, &args));
 
         js_log(&format!("DynFunc::Call got result json {}", output));
 
@@ -272,17 +271,13 @@ pub struct WasmMemory {
 
 impl WasmMemory {
     pub fn new(module_name: String) -> Self {
-        Self {
-            module_name
-        }
+        Self { module_name }
     }
 
     pub fn get(&self, index: usize) -> u8 {
         //crate::js_log(&format!("WasmMemory::get called with {}", index));
         //read_byte(&self.module_name, index)
-        INSTANCE.with(|instance| {
-            read_byte(instance.borrow().as_ref().unwrap(), index)
-        })
+        INSTANCE.with(|instance| read_byte(instance.borrow().as_ref().unwrap(), index))
     }
 
     pub fn set(&self, index: usize, value: u8) {

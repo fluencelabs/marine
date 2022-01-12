@@ -62,24 +62,24 @@ pub struct FluenceFaaS {
 #[allow(unused)]
 impl FluenceFaaS {
     /*
-    /// Creates FaaS from config deserialized from TOML.
-    pub fn with_raw_config<C>(config: C) -> Result<Self>
-    where
-        C: TryInto<FaaSConfig>,
-        FaaSError: From<C::Error>,
-    {
-        let config = config.try_into()?;
-        let modules = config
-            .modules_config
-            .iter()
-            .map(|m| (m.file_name.clone(), m.import_name.clone()))
-            .collect();
-        Self::with_module_names::<FaaSConfig>(&modules, config)
-    }
-*/
+        /// Creates FaaS from config deserialized from TOML.
+        pub fn with_raw_config<C>(config: C) -> Result<Self>
+        where
+            C: TryInto<FaaSConfig>,
+            FaaSError: From<C::Error>,
+        {
+            let config = config.try_into()?;
+            let modules = config
+                .modules_config
+                .iter()
+                .map(|m| (m.file_name.clone(), m.import_name.clone()))
+                .collect();
+            Self::with_module_names::<FaaSConfig>(&modules, config)
+        }
+    */
     /// Creates FaaS with given modules.
-    pub fn with_modules(modules: HashMap<String, Vec<u8>>/*, config: C*/) -> Result<Self>
-   // where
+    pub fn with_modules(modules: HashMap<String, Vec<u8>> /*, config: C*/) -> Result<Self>
+// where
        // C: TryInto<FaaSConfig>,
        // FaaSError: From<C::Error>,
     {
@@ -102,16 +102,16 @@ impl FluenceFaaS {
                     provided_modules: modules.keys().cloned().collect::<Vec<_>>(),
                 }
             })?;*/
-/*
-            let marine_module_config = crate::faas::config::make_marine_config(
-              //  module.import_name.clone(),
-                Some(module.config),
-             //   call_parameters.clone(),
-                //&logger_filter,
-            )?;
+            /*
+                       let marine_module_config = crate::faas::config::make_marine_config(
+                         //  module.import_name.clone(),
+                           Some(module.config),
+                        //   call_parameters.clone(),
+                           //&logger_filter,
+                       )?;
 
- */
-            marine.load_module(name, &wit_section_bytes/*, marine_module_config*/)?;
+            */
+            marine.load_module(name, &wit_section_bytes /*, marine_module_config*/)?;
         }
 
         Ok(Self {

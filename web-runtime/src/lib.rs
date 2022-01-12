@@ -62,7 +62,6 @@ pub use config::HostImportDescriptor;
 use crate::faas::FluenceFaaS;
 use marine_rs_sdk::CallParameters;
 
-
 use once_cell::sync::Lazy;
 
 use std::str::FromStr;
@@ -139,19 +138,15 @@ pub fn test_it_section(bytes: &[u8]) {
 pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) {
     console_error_panic_hook::set_once();
     //#[allow(unused)]
-        //let module = MModule::new(name, wit_section_bytes).unwrap();
+    //let module = MModule::new(name, wit_section_bytes).unwrap();
     let mut map = HashMap::new();
     map.insert(name.to_string(), Vec::<u8>::from(wit_section_bytes));
     let faas = FluenceFaaS::with_modules(map).unwrap();
 
-    MODULES.with(|modules| {
-        modules.replace(Some(faas))
-    });
+    MODULES.with(|modules| modules.replace(Some(faas)));
 
-    INSTANCE.with(|instance| {
-        instance.replace(Some(wasm_instance))
-    });
-/*
+    INSTANCE.with(|instance| instance.replace(Some(wasm_instance)));
+    /*
     INSTANCE.with(|instance| {
         instance.borrow().as_ref().unwrap().to_string();
     });*/
@@ -277,17 +272,25 @@ pub fn test_call_greeting_array() {
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
     js_log("ar123123");
-    js_log(&format!("call_module called with args: module_name={}, function_name={}, args={}", module_name, function_name, args));
+    js_log(&format!(
+        "call_module called with args: module_name={}, function_name={}, args={}",
+        module_name, function_name, args
+    ));
     MODULES.with(|modules| {
         let mut modules = modules.borrow_mut();
         match modules.as_mut() {
             Some(modules) => {
-                js_log(&format!("call_module called with args: module_name={}, function_name={}, args={}", module_name, function_name, args));
+                js_log(&format!(
+                    "call_module called with args: module_name={}, function_name={}, args={}",
+                    module_name, function_name, args
+                ));
                 let args: serde_json::Value = serde_json::from_str(args).unwrap_or_else(|e| {
                     js_log(&format!("Error deserializing args: {}", e));
                     unreachable!()
                 });
-                let result = modules.call_with_json(module_name, function_name, args, CallParameters::default()).unwrap();
+                let result = modules
+                    .call_with_json(module_name, function_name, args, CallParameters::default())
+                    .unwrap();
                 result.to_string()
             }
             None => {
