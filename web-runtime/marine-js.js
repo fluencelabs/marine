@@ -55,17 +55,17 @@ export function read_byte(module_name, offset) {
 module.exports.call_export = function (instance, export_name, args) {
     //console.log("JS: call_export called with: ", instance, export_name, args)
     let parsed_args = JSON.parse(args);
-    console.log("parsed args: ", args);
+    //console.log("parsed args: ", args);
     let prepared_args = [];
     for (let i = 0; i < parsed_args.length; i++) {
         let arg = parsed_args[i];
-        console.log(arg)
+       // console.log(arg)
         prepared_args.push(arg["I32"])
     }
 
-    console.log("prepared args: ", prepared_args);
+    //console.log("prepared args: ", prepared_args);
     let result = instance.exports[export_name](...prepared_args);
-    console.log("got result: ", result)
+    //console.log("got result: ", result)
     let json_string = "[]";
     if (result !== undefined) {
         json_string = "[" + JSON.stringify(result) + "]"
