@@ -23,7 +23,7 @@ use crate::module::WasmerSequentialReader;
 
 use crate::module::WasmerSequentialWriter;
 
-use it_tratis::{SequentialReader, SequentialWriter};
+use it_traits::{SequentialReader, SequentialWriter};
 
 pub(crate) struct WITMemoryView<'a>(pub(crate) MemoryView<'a, u8>);
 
@@ -54,9 +54,8 @@ impl wasm::structures::MemoryView for WITMemoryView<'_> {
         let view = &self.0;
         let slice: &[Cell<u8>] = view.deref();
         let reader = WasmerSequentialReader {
-            offset,
-            slice,
-            current_offset: Cell::new(offset),
+            memory: slice,
+            offset: Cell::new(offset),
         };
 
         Box::new(reader)

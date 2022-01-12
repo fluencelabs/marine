@@ -20,7 +20,7 @@ use crate::IValue;
 
 use it_lilo::lowerer::*;
 use it_lilo::traits::Allocatable;
-use it_tratis::MemoryView;
+use it_traits::MemoryView;
 
 pub(crate) fn ivalue_to_wvalues<A: Allocatable, MV: MemoryView>(
     lowerer: &ILowerer<'_, A, MV>,
