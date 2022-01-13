@@ -1,6 +1,6 @@
 modules_dir = "artifacts/"
 
 [[module]]
-name = "consumer"
-mem_pages_count = 50
-logger_enabled = false
+    name = "consumer"
+    max_heap_size = "10 KiB"
+    logger_enabled = false

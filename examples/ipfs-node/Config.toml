@@ -2,7 +2,7 @@ modules_dir = "artifacts/"
 
 [[module]]
     name = "ipfs_effector"
-    mem_pages_count = 100
+    max_heap_size = "10 KiB"
     logger_enabled = true
 
     [module.mounted_binaries]
@@ -13,5 +13,5 @@ modules_dir = "artifacts/"
 
 [[module]]
     name = "ipfs_pure"
-    mem_pages_count = 100
+    max_heap_size = "10 KiB"
     logger_enabled = true

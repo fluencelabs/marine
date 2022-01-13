@@ -16,7 +16,7 @@
 
 use crate::IValue;
 use crate::IType;
-use crate::Result;
+use crate::FaaSResult;
 use crate::errors::FaaSError::JsonOutputSerializationError as OutputDeError;
 
 use marine::MRecordTypes;
@@ -26,7 +26,7 @@ pub(crate) fn ivalues_to_json(
     mut ivalues: Vec<IValue>,
     outputs: &[IType],
     record_types: &MRecordTypes,
-) -> Result<JValue> {
+) -> FaaSResult<JValue> {
     if outputs.len() != ivalues.len() {
         return Err(OutputDeError(format!(
             "resulted values {:?} and function signature {:?} aren't compatible",
@@ -42,7 +42,11 @@ pub(crate) fn ivalues_to_json(
     }
 }
 
-fn ivalue_to_json(ivalue: IValue, output: &IType, record_types: &MRecordTypes) -> Result<JValue> {
+fn ivalue_to_json(
+    ivalue: IValue,
+    output: &IType,
+    record_types: &MRecordTypes,
+) -> FaaSResult<JValue> {
     use serde_json::json;
 
     // clone here needed because binding by-value and by-ref in the same pattern in unstable
@@ -66,7 +70,7 @@ fn ivalue_to_json(ivalue: IValue, output: &IType, record_types: &MRecordTypes) -
             Ok(JValue::Array(result))
         }
         (IValue::Array(value), IType::ByteArray) => {
-            let result: Result<Vec<_>> = value
+            let result: FaaSResult<Vec<_>> = value
                 .into_iter()
                 .map(|v| ivalue_to_json(v, &IType::U8, record_types))
                 .collect();
@@ -74,7 +78,7 @@ fn ivalue_to_json(ivalue: IValue, output: &IType, record_types: &MRecordTypes) -
             Ok(JValue::Array(result?))
         }
         (IValue::ByteArray(value), IType::Array(array_ty)) => {
-            let result: Result<Vec<_>> = value
+            let result: FaaSResult<Vec<_>> = value
                 .into_iter()
                 .map(|v| ivalue_to_json(IValue::U8(v), &array_ty, record_types))
                 .collect();
@@ -82,7 +86,7 @@ fn ivalue_to_json(ivalue: IValue, output: &IType, record_types: &MRecordTypes) -
             Ok(JValue::Array(result?))
         }
         (IValue::Array(value), IType::Array(array_ty)) => {
-            let result: Result<Vec<_>> = value
+            let result: FaaSResult<Vec<_>> = value
                 .into_iter()
                 .map(|v| ivalue_to_json(v, &array_ty, record_types))
                 .collect();

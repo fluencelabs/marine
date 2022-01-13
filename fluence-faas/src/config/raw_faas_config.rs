@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-use crate::Result;
+use crate::FaaSResult;
 
 use serde_derive::Serialize;
 use serde_derive::Deserialize;
+use serde_with::serde_as;
+use serde_with::skip_serializing_none;
+use serde_with::DisplayFromStr;
 
 use std::path::Path;
 
@@ -64,7 +67,7 @@ pub struct TomlFaaSConfig {
 
 impl TomlFaaSConfig {
     /// Load config from filesystem.
-    pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
+    pub fn load<P: AsRef<Path>>(path: P) -> FaaSResult<Self> {
         let file_content = std::fs::read(path)?;
         Ok(toml::from_slice(&file_content)?)
     }
@@ -79,9 +82,14 @@ pub struct TomlFaaSNamedModuleConfig {
     pub config: TomlFaaSModuleConfig,
 }
 
+#[serde_as]
+#[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlFaaSModuleConfig {
     pub mem_pages_count: Option<u32>,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde(default)]
+    pub max_heap_size: Option<bytesize::ByteSize>,
     pub logger_enabled: Option<bool>,
     pub wasi: Option<TomlWASIConfig>,
     pub mounted_binaries: Option<toml::value::Table>,
@@ -97,6 +105,7 @@ pub struct TomlWASIConfig {
 
 #[cfg(test)]
 mod tests {
+    use bytesize::ByteSize;
     use super::{TomlFaaSNamedModuleConfig, TomlFaaSModuleConfig, TomlWASIConfig};
 
     #[test]
@@ -106,6 +115,7 @@ mod tests {
             file_name: Some("file_name".to_string()),
             config: TomlFaaSModuleConfig {
                 mem_pages_count: Some(100),
+                max_heap_size: Some(ByteSize::gib(4)),
                 logger_enabled: Some(false),
                 wasi: Some(TomlWASIConfig {
                     preopened_files: Some(vec!["a".to_string()]),

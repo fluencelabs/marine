@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #![warn(rust_2018_idioms)]
 #![deny(
     dead_code,
@@ -23,6 +24,10 @@
     unused_unsafe,
     unreachable_patterns
 )]
+
+mod wasm_mem_pages_conversion;
+
+pub use wasm_mem_pages_conversion::*;
 
 use std::rc::Rc;
 

@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-use crate::Result;
+use crate::FaaSWASIConfig;
+use crate::FaaSResult;
+use crate::FaaSError;
 use crate::config::FaaSModuleConfig;
 use crate::host_imports::logger::log_utf8_string_closure;
 use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use crate::host_imports::create_call_parameters_import;
 
+use marine::HostImportDescriptor;
 use marine::MModuleConfig;
+use marine_rs_sdk::CallParameters;
+use marine_utils::bytes_to_wasm_pages_ceil;
 use wasmer_core::import::ImportObject;
 use wasmer_core::import::Namespace;
 use wasmer_runtime::func;
@@ -30,31 +35,64 @@ use std::collections::HashMap;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// Make Marine config from provided FaaS config.
-pub(crate) fn make_marine_config(
-    module_name: String,
-    faas_module_config: Option<FaaSModuleConfig>,
-    call_parameters: Rc<RefCell<marine_rs_sdk::CallParameters>>,
-    logger_filter: &LoggerFilter<'_>,
-) -> Result<MModuleConfig> {
-    let mut marine_module_cfg = MModuleConfig::default();
+const WASM_MAX_HEAP_SIZE: u64 = 4 * 1024 * 1024 * 1024 - 1; // 4 GiB - 1
 
-    let faas_module_config = match faas_module_config {
-        Some(faas_module_config) => faas_module_config,
-        None => return Ok(marine_module_cfg),
-    };
+struct MModuleConfigBuilder {
+    config: MModuleConfig,
+}
 
-    if let Some(mem_pages_count) = faas_module_config.mem_pages_count {
-        marine_module_cfg.mem_pages_count = mem_pages_count;
+impl MModuleConfigBuilder {
+    pub(self) fn new() -> Self {
+        Self {
+            config: <_>::default(),
+        }
     }
 
-    if let Some(wasi) = faas_module_config.wasi {
-        marine_module_cfg.wasi_envs = wasi.envs;
-        marine_module_cfg.wasi_preopened_files = wasi.preopened_files;
-        marine_module_cfg.wasi_mapped_dirs = wasi.mapped_dirs;
+    pub(self) fn build(
+        self,
+        module_name: String,
+        faas_module_config: Option<FaaSModuleConfig>,
+        call_parameters: Rc<RefCell<CallParameters>>,
+        logger_filter: &LoggerFilter<'_>,
+    ) -> FaaSResult<MModuleConfig> {
+        let faas_module_config = match faas_module_config {
+            Some(config) => config,
+            None => return Ok(self.into_config()),
+        };
+
+        let FaaSModuleConfig {
+            mem_pages_count,
+            max_heap_size,
+            logger_enabled,
+            host_imports,
+            wasi,
+            logging_mask,
+        } = faas_module_config;
+
+        let config = self
+            .populate_max_heap_size(mem_pages_count, max_heap_size)?
+            .populate_logger(logger_enabled, logging_mask, logger_filter, module_name)
+            .populate_host_imports(host_imports, call_parameters)
+            .populate_wasi(wasi)
+            .add_version()
+            .into_config();
+
+        Ok(config)
+    }
+
+    fn populate_wasi(mut self, wasi: Option<FaaSWASIConfig>) -> Self {
+        let wasi = match wasi {
+            Some(wasi) => wasi,
+            None => return self,
+        };
+
+        self.config.wasi_envs = wasi.envs;
+        self.config.wasi_preopened_files = wasi.preopened_files;
+        self.config.wasi_mapped_dirs = wasi.mapped_dirs;
 
         // create environment variables for all mapped directories
-        let mapped_dirs = marine_module_cfg
+        let mapped_dirs = self
+            .config
             .wasi_mapped_dirs
             .iter()
             .map(|(from, to)| {
@@ -65,17 +103,61 @@ pub(crate) fn make_marine_config(
             })
             .collect::<HashMap<_, _>>();
 
-        marine_module_cfg.wasi_envs.extend(mapped_dirs);
-    };
+        self.config.wasi_envs.extend(mapped_dirs);
 
-    marine_module_cfg.host_imports = faas_module_config.host_imports;
-    marine_module_cfg.host_imports.insert(
-        String::from("get_call_parameters"),
-        create_call_parameters_import(call_parameters),
-    );
+        self
+    }
 
-    let mut namespace = Namespace::new();
-    if faas_module_config.logger_enabled {
+    fn populate_host_imports(
+        mut self,
+        host_imports: HashMap<String, HostImportDescriptor>,
+        call_parameters: Rc<RefCell<CallParameters>>,
+    ) -> Self {
+        self.config.host_imports = host_imports;
+        self.config.host_imports.insert(
+            String::from("get_call_parameters"),
+            create_call_parameters_import(call_parameters),
+        );
+
+        self
+    }
+
+    fn populate_max_heap_size(
+        mut self,
+        mem_pages_count: Option<u32>,
+        max_heap_size: Option<u64>,
+    ) -> FaaSResult<Self> {
+        let max_heap_pages_count = match (mem_pages_count, max_heap_size) {
+            (Some(v), None) => v,
+            (_, Some(max_heap_size_wanted)) => {
+                if max_heap_size_wanted > WASM_MAX_HEAP_SIZE {
+                    return Err(FaaSError::MaxHeapSizeOverflow {
+                        max_heap_size_wanted,
+                        max_heap_size_allowed: WASM_MAX_HEAP_SIZE,
+                    });
+                };
+                bytes_to_wasm_pages_ceil(max_heap_size_wanted as u32)
+            }
+            // leave the default value
+            (None, None) => return Ok(self),
+        };
+
+        self.config.max_heap_pages_count = max_heap_pages_count;
+
+        Ok(self)
+    }
+
+    fn populate_logger(
+        mut self,
+        logger_enabled: bool,
+        logging_mask: i32,
+        logger_filter: &LoggerFilter<'_>,
+        module_name: String,
+    ) -> Self {
+        if !logger_enabled {
+            return self;
+        }
+
         if let Some(level_filter) = logger_filter.module_level(&module_name) {
             let log_level = level_filter.to_level();
             let log_level_str = match log_level {
@@ -84,24 +166,47 @@ pub(crate) fn make_marine_config(
             };
 
             // overwrite possibly installed log variable in config
-            marine_module_cfg.wasi_envs.insert(
+            self.config.wasi_envs.insert(
                 WASM_LOG_ENV_NAME.as_bytes().to_owned(),
                 log_level_str.into_bytes(),
             );
         }
 
-        let logging_mask = faas_module_config.logging_mask;
+        let logging_mask = logging_mask;
+        let mut namespace = Namespace::new();
         namespace.insert(
             "log_utf8_string",
             func!(log_utf8_string_closure(logging_mask, module_name)),
         );
+
+        let mut raw_host_imports = ImportObject::new();
+        raw_host_imports.register("host", namespace);
+        self.config.raw_imports = raw_host_imports;
+
+        self
     }
 
-    let mut raw_host_imports = ImportObject::new();
-    raw_host_imports.register("host", namespace);
-    marine_module_cfg.raw_imports = raw_host_imports;
+    fn add_version(mut self) -> Self {
+        self.config.wasi_version = wasmer_wasi::WasiVersion::Latest;
+        self
+    }
 
-    marine_module_cfg.wasi_version = wasmer_wasi::WasiVersion::Latest;
+    fn into_config(self) -> MModuleConfig {
+        self.config
+    }
+}
 
-    Ok(marine_module_cfg)
+/// Make Marine config from provided FaaS config.
+pub(crate) fn make_marine_config(
+    module_name: String,
+    faas_module_config: Option<FaaSModuleConfig>,
+    call_parameters: Rc<RefCell<marine_rs_sdk::CallParameters>>,
+    logger_filter: &LoggerFilter<'_>,
+) -> FaaSResult<MModuleConfig> {
+    MModuleConfigBuilder::new().build(
+        module_name,
+        faas_module_config,
+        call_parameters,
+        logger_filter,
+    )
 }

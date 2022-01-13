@@ -15,9 +15,10 @@
  */
 
 use crate::HostImportError;
+use crate::misc::PrepareError;
+
 use marine_it_interfaces::MITInterfacesError;
 use marine_it_parser::ITParserError;
-use marine_module_info_parser::ModuleInfoError;
 use marine_module_interface::it_interface::ITInterfaceError;
 
 use wasmer_runtime::error as wasmer_error;
@@ -25,6 +26,7 @@ use wasmer_runtime::error as wasmer_error;
 use thiserror::Error as ThisError;
 
 // TODO: refactor errors
+// TODO: add module name to all errors variants
 
 #[derive(Debug, ThisError)]
 pub enum MError {
@@ -73,8 +75,8 @@ pub enum MError {
     ITInstructionError(#[from] wasmer_it::errors::InstructionError),
 
     /// Error that raises on the preparation step.
-    #[error("PrepareError: {0}, probably module is malformed")]
-    PrepareError(#[from] parity_wasm::elements::Error),
+    #[error(transparent)]
+    PrepareError(#[from] PrepareError),
 
     /// Indicates that there is already a module with such name.
     #[error("module with name '{0}' already loaded into Marine, please specify another name")]
@@ -99,30 +101,6 @@ pub enum MError {
     /// Incorrect IT section.
     #[error("{0}")]
     IncorrectWIT(String),
-
-    /// Error is encountered while parsing module version.
-    #[error(transparent)]
-    ModuleVersionParseError(#[from] ModuleInfoError),
-
-    /// Provided module doesn't contain a sdk version that is necessary.
-    #[error("module with name '{0}' doesn't contain a version of sdk, probably it's compiled with an old one")]
-    ModuleWithoutVersion(String),
-
-    /// Module sdk versions are incompatible.
-    #[error("module with name '{module_name}' compiled with {provided} sdk version, but at least {required} required")]
-    IncompatibleSDKVersions {
-        module_name: String,
-        required: semver::Version,
-        provided: semver::Version,
-    },
-
-    /// Module IT versions are incompatible.
-    #[error("module with name '{module_name}' compiled with {provided} IT version, but at least {required} required")]
-    IncompatibleITVersions {
-        module_name: String,
-        required: semver::Version,
-        provided: semver::Version,
-    },
 }
 
 impl From<MITInterfacesError> for MError {

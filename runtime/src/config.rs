@@ -26,6 +26,9 @@ use std::path::PathBuf;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
+// 65536*1600 ~ 100 Mb (Wasm page size is 64 Kb)
+const DEFAULT_HEAP_PAGES_COUNT: u32 = 1600;
+
 pub type HostExportedFunc = Box<dyn Fn(&mut Ctx, Vec<IValue>) -> Option<IValue> + 'static>;
 
 pub struct HostImportDescriptor {
@@ -45,8 +48,8 @@ pub struct HostImportDescriptor {
 
 pub struct MModuleConfig {
     /// Maximum number of Wasm memory pages that loaded module can use.
-    /// Each Wasm pages is 65536 bytes long.
-    pub mem_pages_count: u32,
+    /// Each Wasm page is 65536 bytes long.
+    pub max_heap_pages_count: u32,
 
     /// Import object that will be used in module instantiation process.
     pub raw_imports: ImportObject,
@@ -71,8 +74,7 @@ impl Default for MModuleConfig {
     fn default() -> Self {
         // some reasonable defaults
         Self {
-            // 65536*1600 ~ 100 Mb
-            mem_pages_count: 1600,
+            max_heap_pages_count: DEFAULT_HEAP_PAGES_COUNT,
             raw_imports: ImportObject::new(),
             host_imports: HashMap::new(),
             wasi_version: WasiVersion::Latest,
@@ -85,32 +87,28 @@ impl Default for MModuleConfig {
 
 // TODO: implement debug for MModuleConfig
 
+#[allow(dead_code)]
 impl MModuleConfig {
-    #[allow(dead_code)]
     pub fn with_mem_pages_count(mut self, mem_pages_count: u32) -> Self {
-        self.mem_pages_count = mem_pages_count;
+        self.max_heap_pages_count = mem_pages_count;
         self
     }
 
-    #[allow(dead_code)]
     pub fn with_wasi_version(mut self, wasi_version: WasiVersion) -> Self {
         self.wasi_version = wasi_version;
         self
     }
 
-    #[allow(dead_code)]
     pub fn with_wasi_envs(mut self, envs: HashMap<Vec<u8>, Vec<u8>>) -> Self {
         self.wasi_envs = envs;
         self
     }
 
-    #[allow(dead_code)]
     pub fn with_wasi_preopened_files(mut self, preopened_files: HashSet<PathBuf>) -> Self {
         self.wasi_preopened_files = preopened_files;
         self
     }
 
-    #[allow(dead_code)]
     pub fn with_wasi_mapped_dirs(mut self, mapped_dirs: HashMap<String, PathBuf>) -> Self {
         self.wasi_mapped_dirs = mapped_dirs;
         self

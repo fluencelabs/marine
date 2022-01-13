@@ -73,9 +73,9 @@ impl Marine {
         wasm_bytes: &[u8],
         config: MModuleConfig,
     ) -> MResult<()> {
-        let _prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.mem_pages_count)?;
-
-        let module = MModule::new(&name, wasm_bytes, config, &self.modules)?;
+        let prepared_wasm_bytes =
+            crate::misc::prepare_module(wasm_bytes, config.max_heap_pages_count)?;
+        let module = MModule::new(&name, &prepared_wasm_bytes, config, &self.modules)?;
 
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {
@@ -115,7 +115,7 @@ impl Marine {
     pub fn module_interface<S: AsRef<str>>(&self, module_name: S) -> Option<MModuleInterface<'_>> {
         self.modules
             .get(module_name.as_ref())
-            .map(|module| Self::get_module_interface(module))
+            .map(Self::get_module_interface)
     }
 
     /// Return record types exported by module with given name.
