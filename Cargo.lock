@@ -1273,6 +1273,7 @@ name = "it-lilo"
 version = "0.1.0"
 dependencies = [
  "fluence-it-types",
+ "it-traits",
  "log",
  "paste",
  "thiserror",
@@ -1280,6 +1281,10 @@ dependencies = [
 
 [[package]]
 name = "it-to-bytes"
+version = "0.1.0"
+
+[[package]]
+name = "it-traits"
 version = "0.1.0"
 
 [[package]]
@@ -1645,6 +1650,7 @@ dependencies = [
  "boolinator",
  "bytes 0.5.6",
  "it-lilo",
+ "it-traits",
  "log",
  "marine-it-generator 0.5.6",
  "marine-it-interfaces 0.4.1",
@@ -1767,6 +1773,7 @@ dependencies = [
  "console_error_panic_hook",
  "fluence-it-types",
  "it-lilo",
+ "it-traits",
  "itertools 0.10.3",
  "log",
  "marine-it-interfaces 0.4.1",
@@ -3541,6 +3548,7 @@ dependencies = [
  "fluence-it-types",
  "it-lilo",
  "it-to-bytes",
+ "it-traits",
  "itertools 0.10.3",
  "log",
  "nom",
