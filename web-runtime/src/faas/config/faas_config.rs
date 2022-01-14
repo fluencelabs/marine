@@ -47,6 +47,9 @@ pub struct FaaSModuleConfig {
     /// Maximum memory size accessible by a module in Wasm pages (64 Kb).
     pub mem_pages_count: Option<u32>,
 
+    /// Maximum memory size for heap of Wasm module in bytes, if it set, mem_pages_count ignored.
+    pub max_heap_size: Option<u64>,
+
     /// Defines whether FaaS should provide a special host log_utf8_string function for this module.
     pub logger_enabled: bool,
 
@@ -167,7 +170,9 @@ impl TryFrom<TomlFaaSModuleConfig> for FaaSModuleConfig {
                         Ok((import_func_name, host_cmd))
                     })
                     .collect::<Result<Vec<_>, Self::Error>>()?;
-
+        */
+        let max_heap_size = toml_config.max_heap_size.map(|v| v.as_u64());
+        /*
                 let mut host_cli_imports = HashMap::new();
                 for (import_name, host_cmd) in mounted_binaries {
                     host_cli_imports.insert(
@@ -180,6 +185,7 @@ impl TryFrom<TomlFaaSModuleConfig> for FaaSModuleConfig {
 
         Ok(FaaSModuleConfig {
             mem_pages_count: toml_config.mem_pages_count,
+            max_heap_size,
             logger_enabled: toml_config.logger_enabled.unwrap_or(true),
             // host_imports: host_cli_imports,
             //wasi,

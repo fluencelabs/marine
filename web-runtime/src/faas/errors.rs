@@ -66,6 +66,15 @@ pub enum FaaSError {
     #[error("parsing config error: {0}")]
     ParseConfigError(#[from] toml::de::Error),
 
+    /// Errors related to invalid config.
+    #[error(
+        "max_heap_size = '{max_heap_size_wanted}' can't be bigger than {max_heap_size_allowed}'"
+    )]
+    MaxHeapSizeOverflow {
+        max_heap_size_wanted: u64,
+        max_heap_size_allowed: u64,
+    },
+
     /// Marine errors.
     #[error("engine error: {0}")]
     EngineError(#[from] MError),
