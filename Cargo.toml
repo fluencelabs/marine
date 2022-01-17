@@ -35,6 +35,9 @@ members = [
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.1", path = "../interface-types/wasmer-it" }
 fluence-it-types = { path = "../interface-types/crates/it-types", version = "0.3.1", features = ["impls"] }
 it-lilo = {path = "../interface-types/crates/it-lilo"}
+
+
+[patch."https://github.com/fluencelabs/interface-types"]
 it-traits = {path = "../interface-types/crates/it-traits"}
 
 [profile.release]
