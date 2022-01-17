@@ -16,7 +16,7 @@
 
 use std::cell::Cell;
 use it_lilo::read_ty;
-use it_traits::SequentialWriter;
+use it_traits::{MemoryAccessError, SequentialWriter};
 use it_traits::SequentialReader;
 use wasmer_it::interpreter::wasm;
 use crate::js_log;
@@ -31,6 +31,23 @@ impl WITMemoryView {
         crate::js_log("WITMemoryView::new called");
 
         Self { module_name }
+    }
+
+    fn check_bounds(
+        &self,
+        offset: usize,
+        size: usize,
+        memory_size: usize,
+    ) -> Result<(), MemoryAccessError> {
+        if offset + size >= memory_size {
+            Err(MemoryAccessError::OutOfBounds {
+                offset,
+                size,
+                memory_size,
+            })
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -114,20 +131,22 @@ impl SequentialWriter for JsSequentialWriter {
 }
 
 impl wasm::structures::MemoryView for WITMemoryView {
-    fn sequential_writer(&self, offset: usize, size: usize) -> Box<dyn SequentialWriter> {
-        Box::new(JsSequentialWriter::new(
-            offset,
-            size,
-            WasmMemory::new(self.module_name.clone()),
-        ))
+    fn sequential_writer(&self, offset: usize, size: usize) -> Result<Box<dyn SequentialWriter>, MemoryAccessError> {
+        let memory = WasmMemory::new(self.module_name.clone());
+        let memory_size = memory.len();
+
+        self.check_bounds(offset, size, memory_size)?;
+
+        Ok(Box::new(JsSequentialWriter::new(offset, size, memory)))
     }
 
-    fn sequential_reader(&self, offset: usize, size: usize) -> Box<dyn SequentialReader> {
-        Box::new(JsSequentialReader::new(
-            offset,
-            size,
-            WasmMemory::new(self.module_name.clone()),
-        ))
+    fn sequential_reader(&self, offset: usize, size: usize) -> Result<Box<dyn SequentialReader>, MemoryAccessError> {
+        let memory = WasmMemory::new(self.module_name.clone());
+        let memory_size = memory.len();
+
+        self.check_bounds(offset, size, memory_size)?;
+
+        Ok(Box::new(JsSequentialReader::new(offset, size, memory)))
     }
 }
 
