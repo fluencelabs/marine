@@ -290,8 +290,6 @@ impl WasmMemory {
     }
 
     pub fn len(&self) -> usize {
-        INSTANCE.with(|instance| {
-            get_memory_size(instance.borrow().as_ref().unwrap()) as usize
-        })
+        INSTANCE.with(|instance| get_memory_size(instance.borrow().as_ref().unwrap()) as usize)
     }
 }

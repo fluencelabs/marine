@@ -131,7 +131,11 @@ impl SequentialWriter for JsSequentialWriter {
 }
 
 impl wasm::structures::MemoryView for WITMemoryView {
-    fn sequential_writer(&self, offset: usize, size: usize) -> Result<Box<dyn SequentialWriter>, MemoryAccessError> {
+    fn sequential_writer(
+        &self,
+        offset: usize,
+        size: usize,
+    ) -> Result<Box<dyn SequentialWriter>, MemoryAccessError> {
         let memory = WasmMemory::new(self.module_name.clone());
         let memory_size = memory.len();
 
@@ -140,7 +144,11 @@ impl wasm::structures::MemoryView for WITMemoryView {
         Ok(Box::new(JsSequentialWriter::new(offset, size, memory)))
     }
 
-    fn sequential_reader(&self, offset: usize, size: usize) -> Result<Box<dyn SequentialReader>, MemoryAccessError> {
+    fn sequential_reader(
+        &self,
+        offset: usize,
+        size: usize,
+    ) -> Result<Box<dyn SequentialReader>, MemoryAccessError> {
         let memory = WasmMemory::new(self.module_name.clone());
         let memory_size = memory.len();
 
