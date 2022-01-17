@@ -23,7 +23,7 @@ wasmer-runtime = { package = "wasmer-runtime-fl", version = "=0.17.1" }
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1", features = ["dynamicfunc-fat-closures"] }
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.2" }
 it-lilo = "0.1.0"
-it-traits = {path = "../../interface-types/crates/it-traits"}
+it-traits = {package = "it-traits", git = "https://github.com/fluencelabs/interface-types", branch = "marine_web_experiments"}
 wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 
 multimap = "0.8.1"
