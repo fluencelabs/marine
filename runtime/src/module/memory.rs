@@ -23,7 +23,7 @@ use crate::module::WasmerSequentialReader;
 
 use crate::module::WasmerSequentialWriter;
 
-use it_traits::{SequentialReader, SequentialWriter};
+use it_traits::{MemoryAccessError, SequentialReader, SequentialWriter};
 
 pub(crate) struct WITMemoryView<'a>(pub(crate) MemoryView<'a, u8>);
 
@@ -37,36 +37,61 @@ impl std::ops::Deref for WITMemory {
     }
 }
 
+impl WITMemoryView<'_> {
+    fn check_bounds(
+        &self,
+        offset: usize,
+        size: usize,
+        memory_size: usize,
+    ) -> Result<(), MemoryAccessError> {
+        if offset + size >= memory_size {
+            Err(MemoryAccessError::OutOfBounds {
+                offset,
+                size,
+                memory_size,
+            })
+        } else {
+            Ok(())
+        }
+    }
+}
+
 impl wasm::structures::MemoryView for WITMemoryView<'_> {
     fn sequential_writer<'s>(
         &'s self,
         offset: usize,
-        _size: usize,
-    ) -> Box<dyn SequentialWriter + 's> {
+        size: usize,
+    ) -> Result<Box<dyn SequentialWriter + 's>, MemoryAccessError> {
         let view = &self.0;
         let slice = view.deref();
+
+        self.check_bounds(offset, size, slice.len())?;
+
         let writer = WasmerSequentialWriter {
             offset,
             slice,
             current_offset: Cell::new(offset),
         };
 
-        Box::new(writer)
+        Ok(Box::new(writer))
     }
 
     fn sequential_reader<'s>(
         &'s self,
         offset: usize,
-        _size: usize,
-    ) -> Box<dyn SequentialReader + 's> {
+        size: usize,
+    ) -> Result<Box<dyn SequentialReader + 's>, MemoryAccessError> {
         let view = &self.0;
         let slice: &[Cell<u8>] = view.deref();
+
+        self.check_bounds(offset, size, slice.len())?;
+
         let reader = WasmerSequentialReader {
             memory: slice,
             offset: Cell::new(offset),
         };
 
-        Box::new(reader)
+        Ok(Box::new(reader))
     }
 }
 
