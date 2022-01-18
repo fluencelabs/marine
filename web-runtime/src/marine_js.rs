@@ -155,7 +155,6 @@ impl Exports {
                     crate::js_log(&format!("it is a function: {}", export.name.to_string()));
                     Some(Export::Function(ProcessedExport {
                         sig,
-                        index: export.function_type,
                         name: export.name.to_string(),
                     }))
                 } else {
@@ -196,7 +195,6 @@ impl Exports {
 #[derive(Clone)]
 pub struct ProcessedExport {
     sig: FuncSig,
-    index: u32,
     name: String,
 }
 
