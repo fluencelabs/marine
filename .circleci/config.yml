@@ -21,11 +21,14 @@ jobs:
           rustup component add clippy --toolchain nightly-2021-05-21
           rustup target add wasm32-wasi
 
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
           cargo install --path tools/cli
 
           cargo fmt --all -- --check --color always
-          cargo check -v --all-features -p marine-runtime -p fluence-faas -p fluence-app-service -p marine -p mrepl
+          cargo check -v --all-features -p marine-runtime -p fluence-faas -p fluence-app-service -p marine -p mrepl -p marine-web-runtime
 
+          (cd web-runtime; ./build.sh)
           (cd ./examples; ./build.sh)
           (cd ./fluence-faas/tests/wasm_tests; ./build.sh)
 
