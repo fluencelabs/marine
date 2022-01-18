@@ -32,9 +32,8 @@ members = [
     "tools/repl",
 ]
 [patch.crates-io]
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.1", git = "https://github.com/fluencelabs/interface-types", branch = "marine_web_experiments"}
-fluence-it-types = { package = "fluence-it-types", git = "https://github.com/fluencelabs/interface-types", branch = "marine_web_experiments", features = ["impls"] }
-it-lilo = {package = "it-lilo", git = "https://github.com/fluencelabs/interface-types", branch = "marine_web_experiments"}
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.0", git = "https://github.com/fluencelabs/interface-types", branch = "marine_web_experiments"
+it-lilo = {package = "it-lilo", version = "0.2.0", git = "https://github.com/fluencelabs/interface-types", branch = "marine_web_experiments"}
 
 [profile.release]
 opt-level = 3

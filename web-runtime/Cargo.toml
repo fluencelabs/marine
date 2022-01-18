@@ -27,9 +27,9 @@ marine-rs-sdk = "0.6.15"
 #wasmer-runtime = { package = "wasmer-runtime-fl", version = "=0.17.1" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
 #wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1", features = ["dynamicfunc-fat-closures"] }
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.20.2" }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.0" }
 fluence-it-types = {version = "0.3.1", features = ["impls"] }
-it-lilo = "0.1.0"
+it-lilo = "0.2.0"
 #it-traits = { path = "../../interface-types/crates/it-traits" }
 it-traits = { git = "https://github.com/fluencelabs/interface-types/", package = "it-traits", branch = "marine_web_experiments"}
 itertools = "0.10.1"
