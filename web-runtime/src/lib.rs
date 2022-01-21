@@ -91,20 +91,36 @@ pub fn js_log(_s: &str) {
     //log(_s)
 }
 
+#[wasm_bindgen(getter_with_clone)]
+pub struct RegisterModuleResult {
+    pub error: String,
+}
+
+#[wasm_bindgen(getter_with_clone)]
+pub struct CallModuleResult {
+    pub result: String,
+    pub error: String,
+}
+
 #[wasm_bindgen]
-pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
+pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> RegisterModuleResult {
     console_error_panic_hook::set_once();
     let mut map = HashMap::new();
     map.insert(name.to_string(), Vec::<u8>::from(wit_section_bytes));
-    let faas = FluenceFaaS::with_modules(map).unwrap();
+    let faas = match FluenceFaaS::with_modules(map) {
+        Ok(faas) => faas,
+        Err(e) => return RegisterModuleResult{ error: e.to_string() }
+    };
 
     MODULES.with(|modules| modules.replace(Some(faas)));
 
     INSTANCE.with(|instance| instance.replace(Some(wasm_instance)));
+
+    RegisterModuleResult { error: "".to_string() }
 }
 
 #[wasm_bindgen]
-pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
+pub fn call_module(module_name: &str, function_name: &str, args: &str) -> CallModuleResult {
     js_log("ar123123");
     js_log(&format!(
         "call_module called with args: module_name={}, function_name={}, args={}",
@@ -118,18 +134,35 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String
                     "call_module called with args: module_name={}, function_name={}, args={}",
                     module_name, function_name, args
                 ));
-                let args: serde_json::Value = serde_json::from_str(args).unwrap_or_else(|e| {
-                    js_log(&format!("Error deserializing args: {}", e));
-                    unreachable!()
-                });
-                let result = modules
-                    .call_with_json(module_name, function_name, args, CallParameters::default())
-                    .unwrap();
-                result.to_string()
+                let args: serde_json::Value = match serde_json::from_str(args) {
+                    Ok(args) => args,
+                    Err(e) => return CallModuleResult {
+                        result: "".to_string(),
+                        error: format!("Error deserializing args: {}", e),
+                    }
+                };
+
+                match modules
+                    .call_with_json(module_name, function_name, args, CallParameters::default()) {
+                        Ok(result) => {
+                            CallModuleResult {
+                                result: result.to_string(),
+                                error: "".to_string(),
+                            }
+                        },
+                        Err(e) => {
+                            CallModuleResult {
+                                result: "".to_string(),
+                                error: format!("Error calling module function: {}", e),
+                            }
+                        }
+                }
             }
             None => {
-                js_log("attempt to run a function when module is not loaded");
-                unreachable!();
+                CallModuleResult {
+                    result: "".to_string(),
+                    error: "attempt to run a function when module is not loaded".to_string(),
+                }
             }
         }
     })
