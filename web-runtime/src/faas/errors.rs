@@ -18,26 +18,9 @@ use crate::MError;
 
 use thiserror::Error;
 use std::io::Error as IOError;
-use std::path::PathBuf;
 
-#[allow(unused)]
 #[derive(Debug, Error)]
 pub enum FaaSError {
-    /// Errors that happened due to invalid config content
-    #[error("InvalidConfig: {0}")]
-    InvalidConfig(String),
-
-    /// An error occurred at the instantiation step.
-    #[error(
-        "module with name {module_import_name} is specified in config (dir: {modules_dir:?}), \
-         but not found in provided modules: {provided_modules:?}"
-    )]
-    InstantiationError {
-        module_import_name: String,
-        modules_dir: Option<PathBuf>,
-        provided_modules: Vec<String>,
-    },
-
     /// Various errors related to file i/o.
     #[error("IOError: {0}")]
     IOError(String),
@@ -45,10 +28,6 @@ pub enum FaaSError {
     /// A function with specified name is missing.
     #[error("function with name `{0}` is missing")]
     MissingFunctionError(String),
-
-    /// An argument with specified name is missing.
-    #[error(r#"argument with name "{0}" is missing"#)]
-    MissingArgumentError(String),
 
     /// Returns when there is no module with such name.
     #[error(r#"module with name "{0}" is missing"#)]
@@ -65,15 +44,6 @@ pub enum FaaSError {
     /// Errors related to invalid config.
     #[error("parsing config error: {0}")]
     ParseConfigError(#[from] toml::de::Error),
-
-    /// Errors related to invalid config.
-    #[error(
-        "max_heap_size = '{max_heap_size_wanted}' can't be bigger than {max_heap_size_allowed}'"
-    )]
-    MaxHeapSizeOverflow {
-        max_heap_size_wanted: u64,
-        max_heap_size_allowed: u64,
-    },
 
     /// Marine errors.
     #[error("engine error: {0}")]

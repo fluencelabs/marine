@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-//use crate::faas::config::FaaSConfig;
 use crate::faas::faas_interface::FaaSInterface;
 use crate::faas::FaaSError;
 use crate::faas::Result;
 use crate::IValue;
 use crate::IType;
-//use crate::faas::module_loading::load_modules_from_fs;
-//use crate::faas::module_loading::ModulesLoadStrategy;
-//use crate::faas::host_imports::logger::LoggerFilter;
-//use crate::faas::host_imports::logger::WASM_LOG_ENV_NAME;
 
 use crate::Marine;
 use crate::IFunctionArg;
@@ -61,57 +56,14 @@ pub struct FluenceFaaS {
 
 #[allow(unused)]
 impl FluenceFaaS {
-    /*
-        /// Creates FaaS from config deserialized from TOML.
-        pub fn with_raw_config<C>(config: C) -> Result<Self>
-        where
-            C: TryInto<FaaSConfig>,
-            FaaSError: From<C::Error>,
-        {
-            let config = config.try_into()?;
-            let modules = config
-                .modules_config
-                .iter()
-                .map(|m| (m.file_name.clone(), m.import_name.clone()))
-                .collect();
-            Self::with_module_names::<FaaSConfig>(&modules, config)
-        }
-    */
     /// Creates FaaS with given modules.
-    pub fn with_modules(modules: HashMap<String, Vec<u8>> /*, config: C*/) -> Result<Self>
-// where
-       // C: TryInto<FaaSConfig>,
-       // FaaSError: From<C::Error>,
+    pub fn with_modules(modules: HashMap<String, Vec<u8>>) -> Result<Self>
     {
         let mut marine = Marine::new();
-        //let config = config.try_into()?;
         let call_parameters = Rc::new(RefCell::new(CallParameters::default()));
 
-        //let modules_dir = config.modules_dir;
-
-        // LoggerFilter can be initialized with an empty string
-        //let wasm_log_env = std::env::var(WASM_LOG_ENV_NAME).unwrap_or_default();
-        //let logger_filter = LoggerFilter::from_env_string(&wasm_log_env);
-
-        //for module in config.modules_config {
         for (name, wit_section_bytes) in modules {
-            /*let module_bytes = modules.remove(&module.import_name).ok_or_else(|| {
-                FaaSError::InstantiationError {
-                    module_import_name: module.import_name.clone(),
-                    modules_dir: modules_dir.clone(),
-                    provided_modules: modules.keys().cloned().collect::<Vec<_>>(),
-                }
-            })?;*/
-            /*
-                       let marine_module_config = crate::faas::config::make_marine_config(
-                         //  module.import_name.clone(),
-                           Some(module.config),
-                        //   call_parameters.clone(),
-                           //&logger_filter,
-                       )?;
-
-            */
-            marine.load_module(name, &wit_section_bytes /*, marine_module_config*/)?;
+            marine.load_module(name, &wit_section_bytes)?;
         }
 
         Ok(Self {
@@ -120,24 +72,6 @@ impl FluenceFaaS {
             module_interfaces_cache: HashMap::new(),
         })
     }
-
-    /*
-    /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
-    pub fn with_module_names<C>(names: &HashMap<String, String>, config: C) -> Result<Self>
-    where
-        C: TryInto<FaaSConfig>,
-        FaaSError: From<C::Error>,
-    {
-        let config = config.try_into()?;
-        let modules = config
-            .modules_dir
-            .as_ref()
-            .map_or(Ok(HashMap::new()), |dir| {
-                load_modules_from_fs(dir, ModulesLoadStrategy::Named(names))
-            })?;
-
-        Self::with_modules::<FaaSConfig>(modules, config)
-    }*/
 
     /// Call a specified function of loaded on a startup module by its name.
     pub fn call_with_ivalues<MN: AsRef<str>, FN: AsRef<str>>(

@@ -14,28 +14,16 @@
  * limitations under the License.
  */
 
-mod config;
-//mod host_imports;
+//mod config;
 mod json;
 mod errors;
 mod faas;
 mod faas_interface;
-//mod module_loading;
 
 pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
 
 pub use faas::FluenceFaaS;
 pub use faas_interface::FaaSInterface;
-
-pub use config::FaaSConfig;
-pub use config::FaaSModuleConfig;
-//pub use config::FaaSWASIConfig;
-pub use config::ModuleDescriptor;
-
-pub use config::TomlFaaSConfig;
-pub use config::TomlFaaSModuleConfig;
-pub use config::TomlFaaSNamedModuleConfig;
-//pub use config::TomlWASIConfig;
 
 pub use errors::FaaSError;
 
@@ -47,18 +35,12 @@ pub use crate::IType;
 pub use crate::MModuleInterface as FaaSModuleInterface;
 pub use crate::MFunctionSignature as FaaSFunctionSignature;
 pub use crate::MRecordTypes;
-//pub use crate::HostExportedFunc;
-//pub use crate::HostImportDescriptor;
-//pub use crate::HostImportError;
 pub use crate::to_interface_value;
 pub use crate::from_interface_values;
 pub use crate::ne_vec;
-//pub use crate::min_sdk_version;
 pub use crate::min_it_version;
 
 pub use marine_module_interface::interface::itype_text_view;
 
 pub use marine_rs_sdk::CallParameters;
 pub use marine_rs_sdk::SecurityTetraplet;
-
-//pub use wasmer_core::vm::Ctx;
