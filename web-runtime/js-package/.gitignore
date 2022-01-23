@@ -1,9 +1,6 @@
 dist
 node_modules
-wasm
 *.tgz
 
-# this file is auto-generated
-src/wasm.js
-src/importObject.ts
-src/avm.wasm
+# auto-generated files
+src/*.wasm
