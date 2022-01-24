@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-//mod config;
 mod json;
 mod errors;
 mod faas;

@@ -273,14 +273,10 @@ impl WasmMemory {
     }
 
     pub fn get(&self, index: usize) -> u8 {
-        //crate::js_log(&format!("WasmMemory::get called with {}", index));
-        //read_byte(&self.module_name, index)
         INSTANCE.with(|instance| read_byte(instance.borrow().as_ref().unwrap(), index))
     }
 
     pub fn set(&self, index: usize, value: u8) {
-        //crate::js_log(&format!("WasmMemory::set called with {} {}", index, value));
-        //write_byte(&self.module_name, index, value);
         INSTANCE.with(|instance| {
             //call_export(instance.as_ref().unwrap(), &self.name, &args)
             write_byte(instance.borrow().as_ref().unwrap(), index, value);

@@ -52,7 +52,6 @@ pub(super) struct Callable {
 impl Callable {
     pub fn call(&mut self, args: &[IValue]) -> MResult<Vec<IValue>> {
         use wasmer_it::interpreter::stack::Stackable;
-        js_log(&format!("Callable::call: start"));
         let result = self
             .it_module_func
             .interpreter
@@ -113,10 +112,8 @@ impl MModule {
         let it_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
-            *Arc::get_mut_unchecked(&mut wit_instance) = MaybeUninit::new(ITInstance::new(
-                &wasmer_instance,
-                /*name,*/ &mit, /*modules*/
-            )?);
+            *Arc::get_mut_unchecked(&mut wit_instance) =
+                MaybeUninit::new(ITInstance::new(&wasmer_instance, &mit)?);
             std::mem::transmute::<_, Arc<ITInstance>>(wit_instance)
         };
 

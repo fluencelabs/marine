@@ -64,8 +64,6 @@ impl ITInstance {
         wasmer_instance: &WasmerInstance,
         it: &MITInterfaces<'_>,
     ) -> MResult<HashMap<usize, WITFunction>> {
-        //use wasmer_core::DynFunc;
-
         let module_exports = &wasmer_instance.exports;
 
         it.exports()

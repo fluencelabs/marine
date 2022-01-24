@@ -60,20 +60,12 @@ impl Marine {
         &mut self,
         name: S,
         wit_section_bytes: &[u8],
-        //config: MModuleConfig,
     ) -> MResult<()> {
-        self.load_module_(name.into(), wit_section_bytes /*, config*/)
+        self.load_module_(name.into(), wit_section_bytes)
     }
 
-    fn load_module_(
-        &mut self,
-        name: String,
-        wit_section_bytes: &[u8],
-        // config: MModuleConfig,
-    ) -> MResult<()> {
-        //  let _prepared_wasm_bytes = crate::misc::prepare_module(wasm_bytes, config.mem_pages_count)?;
-
-        let module = MModule::new(&name, wit_section_bytes /*, config, &self.modules*/)?;
+    fn load_module_(&mut self, name: String, wit_section_bytes: &[u8]) -> MResult<()> {
+        let module = MModule::new(&name, wit_section_bytes)?;
 
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {
@@ -94,16 +86,6 @@ impl Marine {
             .ok_or_else(|| MError::NoSuchModule(name.as_ref().to_string()))
     }
 
-    /*
-        pub fn module_wasi_state<S: AsRef<str>>(
-            &mut self,
-            module_name: S,
-        ) -> Option<&wasmer_wasi::state::WasiState> {
-            self.modules
-                .get_mut(module_name.as_ref())
-                .map(|module| module.get_wasi_state())
-        }
-    */
     /// Return function signatures of all loaded info Marine modules with their names.
     pub fn interface(&self) -> impl Iterator<Item = (&str, MModuleInterface<'_>)> {
         self.modules

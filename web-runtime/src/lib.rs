@@ -33,7 +33,6 @@ mod errors;
 mod misc;
 mod module;
 mod faas;
-mod config;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -52,8 +51,7 @@ pub use module::MFunctionSignature;
 pub use module::from_interface_values;
 pub use module::to_interface_value;
 pub use wasmer_it::IRecordFieldType;
-pub use config::MModuleConfig;
-pub use config::HostImportDescriptor;
+
 use crate::faas::FluenceFaaS;
 use marine_rs_sdk::CallParameters;
 
@@ -130,7 +128,6 @@ pub fn register_module(
 
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> CallModuleResult {
-    js_log("ar123123");
     js_log(&format!(
         "call_module called with args: module_name={}, function_name={}, args={}",
         module_name, function_name, args
