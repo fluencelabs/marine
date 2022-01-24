@@ -57,8 +57,7 @@ pub struct FluenceFaaS {
 #[allow(unused)]
 impl FluenceFaaS {
     /// Creates FaaS with given modules.
-    pub fn with_modules(modules: HashMap<String, Vec<u8>>) -> Result<Self>
-    {
+    pub fn with_modules(modules: HashMap<String, Vec<u8>>) -> Result<Self> {
         let mut marine = Marine::new();
         let call_parameters = Rc::new(RefCell::new(CallParameters::default()));
 

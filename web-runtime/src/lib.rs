@@ -62,7 +62,6 @@ use once_cell::sync::Lazy;
 use std::str::FromStr;
 pub use wasmer_it::ne_vec;
 
-
 pub(crate) type MResult<T> = std::result::Result<T, MError>;
 
 pub(crate) use it_lilo::value_der;
@@ -103,20 +102,30 @@ pub struct CallModuleResult {
 }
 
 #[wasm_bindgen]
-pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> RegisterModuleResult {
+pub fn register_module(
+    name: &str,
+    wit_section_bytes: &[u8],
+    wasm_instance: JsValue,
+) -> RegisterModuleResult {
     console_error_panic_hook::set_once();
     let mut map = HashMap::new();
     map.insert(name.to_string(), Vec::<u8>::from(wit_section_bytes));
     let faas = match FluenceFaaS::with_modules(map) {
         Ok(faas) => faas,
-        Err(e) => return RegisterModuleResult{ error: e.to_string() }
+        Err(e) => {
+            return RegisterModuleResult {
+                error: e.to_string(),
+            }
+        }
     };
 
     MODULES.with(|modules| modules.replace(Some(faas)));
 
     INSTANCE.with(|instance| instance.replace(Some(wasm_instance)));
 
-    RegisterModuleResult { error: "".to_string() }
+    RegisterModuleResult {
+        error: "".to_string(),
+    }
 }
 
 #[wasm_bindgen]
@@ -136,34 +145,34 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> CallMo
                 ));
                 let args: serde_json::Value = match serde_json::from_str(args) {
                     Ok(args) => args,
-                    Err(e) => return CallModuleResult {
-                        result: "".to_string(),
-                        error: format!("Error deserializing args: {}", e),
+                    Err(e) => {
+                        return CallModuleResult {
+                            result: "".to_string(),
+                            error: format!("Error deserializing args: {}", e),
+                        }
                     }
                 };
 
-                match modules
-                    .call_with_json(module_name, function_name, args, CallParameters::default()) {
-                        Ok(result) => {
-                            CallModuleResult {
-                                result: result.to_string(),
-                                error: "".to_string(),
-                            }
-                        },
-                        Err(e) => {
-                            CallModuleResult {
-                                result: "".to_string(),
-                                error: format!("Error calling module function: {}", e),
-                            }
-                        }
+                match modules.call_with_json(
+                    module_name,
+                    function_name,
+                    args,
+                    CallParameters::default(),
+                ) {
+                    Ok(result) => CallModuleResult {
+                        result: result.to_string(),
+                        error: "".to_string(),
+                    },
+                    Err(e) => CallModuleResult {
+                        result: "".to_string(),
+                        error: format!("Error calling module function: {}", e),
+                    },
                 }
             }
-            None => {
-                CallModuleResult {
-                    result: "".to_string(),
-                    error: "attempt to run a function when module is not loaded".to_string(),
-                }
-            }
+            None => CallModuleResult {
+                result: "".to_string(),
+                error: "attempt to run a function when module is not loaded".to_string(),
+            },
         }
     })
 }
