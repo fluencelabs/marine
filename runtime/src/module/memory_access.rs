@@ -88,7 +88,6 @@ pub(crate) struct WasmerSequentialReader<'s> {
 
 pub(crate) struct WasmerSequentialWriter<'s> {
     pub offset: usize,
-    //pub view: MemoryView<'s, u8>,
     pub slice: &'s [Cell<u8>],
     pub current_offset: Cell<usize>,
 }

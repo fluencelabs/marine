@@ -1,5 +1,3 @@
-#![allow(unused_attributes)]
-
 use wasm_bindgen::prelude::*;
 use std::marker::PhantomData;
 use serde::{Deserialize, Serialize};
@@ -8,6 +6,7 @@ use marine_it_interfaces::MITInterfaces;
 use crate::js_log;
 use crate::module::type_converters::{itypes_args_to_wtypes, itypes_output_to_wtypes};
 use crate::INSTANCE;
+
 // marine-related imports
 #[wasm_bindgen(module = "/marine-js.js")]
 extern "C" {
@@ -278,7 +277,6 @@ impl WasmMemory {
 
     pub fn set(&self, index: usize, value: u8) {
         INSTANCE.with(|instance| {
-            //call_export(instance.as_ref().unwrap(), &self.name, &args)
             write_byte(instance.borrow().as_ref().unwrap(), index, value);
         });
     }
