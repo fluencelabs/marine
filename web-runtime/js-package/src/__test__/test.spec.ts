@@ -65,6 +65,8 @@ describe('Tests', () => {
                 },
             },
         });
+        _wasi.start(avmInstance);
+
         const customSections = WebAssembly.Module.customSections(avmModule, 'interface-types');
         const itcustomSections = new Uint8Array(customSections[0]);
         control.register_module('avm', itcustomSections, avmInstance);
@@ -77,13 +79,16 @@ describe('Tests', () => {
             (call "${vmPeerId}" ("local_service_id" "local_fn_name") [] result_2)
         )`;
 
-        const params = { initPeerId: vmPeerId, currentPeerId: vmPeerId };
-        let res: any = control.call_module('avm', 'invoke', invokeJson(s, b(''), b(''), params, []));
-        res = res.result;
+        const params = { init_peer_id: vmPeerId, current_peer_id: vmPeerId };
+        const json = invokeJson(s, b(''), b(''), params, {});
+        console.log(json);
+        let res: any = control.call_module('avm', 'invoke', json);
+        res = JSON.parse(res);
 
+        console.log(res);
         expect(res).toMatchObject({
-            retCode: 0,
-            errorMessage: '',
+            ret_code: 0,
+            error_message: '',
         });
     });
 });

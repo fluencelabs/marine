@@ -92,7 +92,7 @@ pub fn js_log(_s: &str) {
 }
 
 #[wasm_bindgen]
-pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
+pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) {
     console_error_panic_hook::set_once();
     let mut map = HashMap::new();
     map.insert(name.to_string(), Vec::<u8>::from(wit_section_bytes));
