@@ -1,1 +1,1 @@
-export { default as init } from './marine_web_runtime';
+export { init } from './marine_web_runtime';

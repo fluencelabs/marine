@@ -1,4 +1,4 @@
-import init from '../marine_web_runtime';
+import { init } from '..';
 import fs from 'fs';
 import path from 'path';
 import { WASI } from '@wasmer/wasi';

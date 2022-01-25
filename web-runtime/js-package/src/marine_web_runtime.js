@@ -225,4 +225,4 @@ async function init(module) {
     };
 }
 
-export default init;
+export const init;
