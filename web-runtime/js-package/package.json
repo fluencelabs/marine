@@ -1,7 +1,7 @@
 {
     "name": "@fluencelabs/marine-js",
     "description": "Marine-js",
-    "version": "0.0.2-snapshot-1",
+    "version": "0.0.2-snapshot-2",
     "main": "./dist/index.js",
     "typings": "./dist/index.d.ts",
     "repository": "https://github.com/fluencelabs/marine",
