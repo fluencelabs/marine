@@ -16,6 +16,7 @@
 
 use crate::Result;
 use crate::config::AppServiceConfig;
+use crate::MemoryStats;
 use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
@@ -236,10 +237,17 @@ impl AppService {
         self.faas.get_interface()
     }
 
+    /// Return
     pub fn get_wasi_state<S: AsRef<str>>(
         &mut self,
         module_name: S,
     ) -> Result<&wasmer_wasi::state::WasiState> {
         self.faas.module_wasi_state(module_name).map_err(Into::into)
+    }
+
+    /// Return statistics of Wasm modules heap footprint.
+    /// This operation is cheap.
+    pub fn module_memory_stats(&self) -> MemoryStats<'_> {
+        self.faas.module_memory_stats()
     }
 }
