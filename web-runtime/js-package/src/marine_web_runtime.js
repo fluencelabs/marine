@@ -5,7 +5,7 @@ import {
     get_memory_size,
 } from './snippets/marine-web-runtime-6faa67b8af9cc173/marine-js.js';
 
-async function init(module) {
+export async function init(module) {
     let wasm;
 
     const heap = new Array(32).fill(undefined);
@@ -224,5 +224,3 @@ async function init(module) {
         call_module,
     };
 }
-
-export const init;
