@@ -81,12 +81,12 @@ impl REPL {
             Some("e") | Some("envs") => self.show_envs(args),
             Some("f") | Some("fs") => self.show_fs(args),
             Some("i") | Some("interface") => self.show_interface(),
-            Some("h") | Some("heap") => self.show_heap_statistic(),
+            Some("s") | Some("stats") => self.show_memory_stats(),
             Some("q") | Some("quit") => {
                 return false;
             }
 
-            _ => print_help(),
+            Some("h") | Some("help") | _ => print_help(),
         }
 
         true
@@ -207,8 +207,8 @@ impl REPL {
         print!("Loaded modules interface:\n{}", interface);
     }
 
-    fn show_heap_statistic(&mut self) {
-        let statistic = self.app_service.heap_statistic();
+    fn show_memory_stats(&mut self) {
+        let statistic = self.app_service.module_memory_stats();
 
         print!("Loaded modules heap sizes:\n{}", statistic);
     }
@@ -294,7 +294,7 @@ fn print_help() {
             u/unload <module_name>                                unload a Wasm module\n\
             c/call <module_name> <func_name> <args> [call_params] call function with given name from given module\n\
             i/interface                                           print public interface of all loaded modules\n\
-            h/heap                                                print heap sizes of all loaded modules\n\
+            s/stats                                               print memory size of all loaded modules\n\
             e/envs <module_name>                                  print environment variables of a module\n\
             f/fs <module_name>                                    print filesystem state of a module\n\
             h/help                                                print this message\n\

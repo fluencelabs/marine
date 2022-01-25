@@ -50,8 +50,8 @@ pub use module::MRecordTypes;
 pub use module::MFunctionSignature;
 pub use module::from_interface_values;
 pub use module::to_interface_value;
-pub use heap_statistic::HeapStatisticRecord;
-pub use heap_statistic::HeapStatistic;
+pub use heap_statistic::ModuleMemoryStat;
+pub use heap_statistic::MemoryStat;
 
 pub use wasmer_it::IRecordFieldType;
 pub mod ne_vec {

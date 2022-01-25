@@ -60,8 +60,8 @@ pub use fluence_faas::HostImportDescriptor;
 pub use fluence_faas::HostImportError;
 pub use fluence_faas::to_interface_value;
 pub use fluence_faas::from_interface_values;
-pub use fluence_faas::HeapStatisticRecord;
-pub use fluence_faas::HeapStatistic;
+pub use fluence_faas::ModuleMemoryStat;
+pub use fluence_faas::MemoryStat;
 pub use fluence_faas::ne_vec;
 
 pub use fluence_faas::min_sdk_version;

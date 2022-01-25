@@ -137,7 +137,7 @@ impl Marine {
     }
 
     /// Returns a heap size that all modules consume in bytes.
-    pub fn heap_statistic(&self) -> HeapStatistic<'_> {
+    pub fn module_memory_stats(&self) -> MemoryStat<'_> {
         let records = self
             .modules
             .iter()
