@@ -1,17 +1,18 @@
 {
     "name": "@fluencelabs/marine-js",
     "description": "Aquamarine VM",
-    "version": "0.0.1-snapshot",
+    "version": "0.0.2-snapshot",
     "main": "./dist/index.js",
     "typings": "./dist/index.d.ts",
     "repository": "https://github.com/fluencelabs/air",
     "author": "Fluence Labs",
     "license": "Apache 2.0",
     "files": [
-        "dist/*"
+        "dist/*",
+        "!lib/__test__/*"
     ],
     "bin": {
-        "copy-avm": "./dist/copyAvm.js"
+        "copy-marine": "./dist/copyMarine.js"
     },
     "scripts": {
         "build": "tsc",

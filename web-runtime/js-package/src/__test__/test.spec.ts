@@ -52,10 +52,10 @@ describe('Tests', () => {
         const fluencePath = eval('require').resolve(avmPackageName);
         // const avmPath = path.join(path.dirname(fluencePath), defaultAvmFileName);
         const avmPath = path.join(__dirname, '../', defaultAvmFileName);
-        const avmModule = await createModule(avmPath);
-
         const controlModule = await createModule(path.join(__dirname, '../marine-js.wasm'));
-        const control = await init(controlModule);
+
+        const avmModule = await createModule(avmPath);
+        const marineInstance = await init(controlModule);
 
         const avmInstance = await WebAssembly.instantiate(avmModule, {
             ..._wasi.getImports(avmModule),
@@ -69,7 +69,7 @@ describe('Tests', () => {
 
         const customSections = WebAssembly.Module.customSections(avmModule, 'interface-types');
         const itcustomSections = new Uint8Array(customSections[0]);
-        control.register_module('avm', itcustomSections, avmInstance);
+        marineInstance.register_module('avm', itcustomSections, avmInstance);
 
         const s = `(seq
             (par 
@@ -82,7 +82,7 @@ describe('Tests', () => {
         const params = { init_peer_id: vmPeerId, current_peer_id: vmPeerId };
         const json = invokeJson(s, b(''), b(''), params, {});
         console.log(json);
-        let res: any = control.call_module('avm', 'invoke', json);
+        let res: any = marineInstance.call_module('avm', 'invoke', json);
         res = JSON.parse(res);
 
         console.log(res);
