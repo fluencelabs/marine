@@ -53,7 +53,7 @@ impl fmt::Display for HeapStatistic<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for record in self.0.iter() {
             let byte_size = bytesize::ByteSize::b(record.memory_size as u64);
-            writeln!(f, "  {} - {}", record.module_name, byte_size)?;
+            writeln!(f, "{} - {}", record.module_name, byte_size)?;
         }
 
         Ok(())
