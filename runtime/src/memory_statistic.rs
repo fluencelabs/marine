@@ -27,7 +27,7 @@ pub struct ModuleMemoryStat<'module_name> {
     pub memory_size: usize,
 }
 
-pub struct MemoryStat<'module_name>(pub Vec<ModuleMemoryStat<'module_name>>);
+pub struct MemoryStats<'module_name>(pub Vec<ModuleMemoryStat<'module_name>>);
 
 impl<'module_name> From<(&'module_name str, usize)> for ModuleMemoryStat<'module_name> {
     fn from(raw_record: (&'module_name str, usize)) -> Self {
@@ -38,13 +38,13 @@ impl<'module_name> From<(&'module_name str, usize)> for ModuleMemoryStat<'module
     }
 }
 
-impl<'module_name> From<Vec<ModuleMemoryStat<'module_name>>> for MemoryStat<'module_name> {
+impl<'module_name> From<Vec<ModuleMemoryStat<'module_name>>> for MemoryStats<'module_name> {
     fn from(records: Vec<ModuleMemoryStat<'module_name>>) -> Self {
         Self(records)
     }
 }
 
-impl<'memory_size> Deref for MemoryStat<'memory_size> {
+impl<'memory_size> Deref for MemoryStats<'memory_size> {
     type Target = [ModuleMemoryStat<'memory_size>];
 
     fn deref(&self) -> &Self::Target {
@@ -52,7 +52,7 @@ impl<'memory_size> Deref for MemoryStat<'memory_size> {
     }
 }
 
-impl fmt::Display for MemoryStat<'_> {
+impl fmt::Display for MemoryStats<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for record in self.0.iter() {
             let byte_size = bytesize::ByteSize::b(record.memory_size as u64);
