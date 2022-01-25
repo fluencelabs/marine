@@ -81,7 +81,7 @@ impl REPL {
             Some("e") | Some("envs") => self.show_envs(args),
             Some("f") | Some("fs") => self.show_fs(args),
             Some("i") | Some("interface") => self.show_interface(),
-            Some("h") | Some("heap") => self.show_heap_statistics(),
+            Some("h") | Some("heap") => self.show_heap_statistic(),
             Some("q") | Some("quit") => {
                 return false;
             }
@@ -207,7 +207,7 @@ impl REPL {
         print!("Loaded modules interface:\n{}", interface);
     }
 
-    fn show_heap_statistics(&mut self) {
+    fn show_heap_statistic(&mut self) {
         let statistic = self.app_service.heap_statistic();
 
         print!("Loaded modules heap sizes:\n{}", statistic);

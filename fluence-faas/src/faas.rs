@@ -185,7 +185,7 @@ impl FluenceFaaS {
         FaaSInterface { modules }
     }
 
-    /// Return statistics of Wasm modules heap footprint.
+    /// Return statistic of Wasm modules heap footprint.
     pub fn heap_statistic(&self) -> HeapStatistic<'_> {
         self.marine.heap_statistic()
     }

@@ -244,7 +244,7 @@ impl AppService {
         self.faas.module_wasi_state(module_name).map_err(Into::into)
     }
 
-    /// Return statistics of Wasm modules heap footprint.
+    /// Return statistic of Wasm modules heap footprint.
     pub fn heap_statistic(&self) -> HeapStatistic<'_> {
         self.faas.heap_statistic()
     }
