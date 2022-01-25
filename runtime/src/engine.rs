@@ -138,7 +138,8 @@ impl Marine {
 
     /// Returns a heap size that all modules consume in bytes.
     pub fn heap_statistic(&self) -> HeapStatistic<'_> {
-        let records = self.modules
+        let records = self
+            .modules
             .iter()
             .map(|(module_name, module)| (module_name.as_str(), module.memory_size()).into())
             .collect::<Vec<_>>();
