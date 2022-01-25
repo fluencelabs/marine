@@ -1711,6 +1711,7 @@ dependencies = [
  "anyhow",
  "boolinator",
  "bytes 0.5.6",
+ "bytesize",
  "it-lilo",
  "log",
  "marine-it-generator 0.5.6",
