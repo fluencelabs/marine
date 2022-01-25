@@ -1,10 +1,10 @@
 {
     "name": "@fluencelabs/marine-js",
-    "description": "Aquamarine VM",
-    "version": "0.0.2-snapshot",
+    "description": "Marine-js",
+    "version": "0.0.2-snapshot-1",
     "main": "./dist/index.js",
     "typings": "./dist/index.d.ts",
-    "repository": "https://github.com/fluencelabs/air",
+    "repository": "https://github.com/fluencelabs/marine",
     "author": "Fluence Labs",
     "license": "Apache 2.0",
     "files": [
