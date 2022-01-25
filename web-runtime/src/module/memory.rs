@@ -51,14 +51,14 @@ impl WITMemoryView {
     }
 }
 
-struct JsSequentialReader {
+pub(super) struct JsSequentialReader {
     offset: Cell<usize>,
     #[allow(unused)]
     size: usize,
     memory: WasmMemory,
 }
 
-struct JsSequentialWriter {
+pub(super) struct JsSequentialWriter {
     offset: usize,
     #[allow(unused)]
     size: usize,
@@ -130,31 +130,34 @@ impl SequentialWriter for JsSequentialWriter {
     }
 }
 
-impl wasm::structures::MemoryView for WITMemoryView {
+impl<'v> wasm::structures::MemoryView<'v> for WITMemoryView {
+    type SR = JsSequentialReader;
+    type SW = JsSequentialWriter;
+
     fn sequential_writer(
-        &self,
+        &'v self,
         offset: usize,
         size: usize,
-    ) -> Result<Box<dyn SequentialWriter>, MemoryAccessError> {
+    ) -> Result<Self::SW, MemoryAccessError> {
         let memory = WasmMemory::new(self.module_name.clone());
         let memory_size = memory.len();
 
         self.check_bounds(offset, size, memory_size)?;
 
-        Ok(Box::new(JsSequentialWriter::new(offset, size, memory)))
+        Ok(JsSequentialWriter::new(offset, size, memory))
     }
 
     fn sequential_reader(
-        &self,
+        &'v self,
         offset: usize,
         size: usize,
-    ) -> Result<Box<dyn SequentialReader>, MemoryAccessError> {
+    ) -> Result<Self::SR, MemoryAccessError> {
         let memory = WasmMemory::new(self.module_name.clone());
         let memory_size = memory.len();
 
         self.check_bounds(offset, size, memory_size)?;
 
-        Ok(Box::new(JsSequentialReader::new(offset, size, memory)))
+        Ok(JsSequentialReader::new(offset, size, memory))
     }
 }
 

@@ -23,7 +23,7 @@ use crate::module::WasmerSequentialReader;
 
 use crate::module::WasmerSequentialWriter;
 
-use it_traits::{MemoryAccessError, SequentialReader, SequentialWriter};
+use it_traits::{MemoryAccessError};
 
 pub(crate) struct WITMemoryView<'a>(pub(crate) MemoryView<'a, u8>);
 
@@ -56,12 +56,15 @@ impl WITMemoryView<'_> {
     }
 }
 
-impl wasm::structures::MemoryView for WITMemoryView<'_> {
-    fn sequential_writer<'s>(
-        &'s self,
+impl<'s, 'v> wasm::structures::MemoryView<'v> for WITMemoryView<'s>{
+    type SR = WasmerSequentialReader<'v>;
+    type SW = WasmerSequentialWriter<'v>;
+
+    fn sequential_writer(
+        &'v self,
         offset: usize,
         size: usize,
-    ) -> Result<Box<dyn SequentialWriter + 's>, MemoryAccessError> {
+    ) -> Result<Self::SW, MemoryAccessError> {
         let view = &self.0;
         let slice = view.deref();
 
@@ -73,14 +76,14 @@ impl wasm::structures::MemoryView for WITMemoryView<'_> {
             current_offset: Cell::new(offset),
         };
 
-        Ok(Box::new(writer))
+        Ok(writer)
     }
 
-    fn sequential_reader<'s>(
-        &'s self,
+    fn sequential_reader(
+        &'v self,
         offset: usize,
         size: usize,
-    ) -> Result<Box<dyn SequentialReader + 's>, MemoryAccessError> {
+    ) -> Result<Self::SR, MemoryAccessError> {
         let view = &self.0;
         let slice: &[Cell<u8>] = view.deref();
 
@@ -91,7 +94,7 @@ impl wasm::structures::MemoryView for WITMemoryView<'_> {
             offset: Cell::new(offset),
         };
 
-        Ok(Box::new(reader))
+        Ok(reader)
     }
 }
 
