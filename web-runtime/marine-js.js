@@ -1,4 +1,4 @@
-/*
+
 module.exports.call_export = function (instance, export_name, args) {
     //console.log("JS: call_export called with: ", instance, export_name, args)
     let parsed_args = JSON.parse(args);
@@ -43,7 +43,8 @@ module.exports.read_byte =  function (instance, offset) {
     //console.log("read_byte returns {}", buf[offset])
     return buf[offset];
 }
-*/
+
+/*
 export function call_export(instance, export_name, args) {
     //console.log("JS: call_export called with: ", instance, export_name, args)
     let parsed_args = JSON.parse(args);
@@ -88,3 +89,4 @@ export function read_byte(instance, offset) {
     //console.log("read_byte returns {}", buf[offset])
     return buf[offset];
 }
+*/

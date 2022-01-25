@@ -88,46 +88,25 @@ pub fn js_log(_s: &str) {
     //log(_s)
 }
 
-#[wasm_bindgen(getter_with_clone)]
-pub struct RegisterModuleResult {
-    pub error: String,
-}
-
-#[wasm_bindgen(getter_with_clone)]
-pub struct CallModuleResult {
-    pub result: String,
-    pub error: String,
-}
-
 #[wasm_bindgen]
-pub fn register_module(
-    name: &str,
-    wit_section_bytes: &[u8],
-    wasm_instance: JsValue,
-) -> RegisterModuleResult {
+pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
     console_error_panic_hook::set_once();
     let mut map = HashMap::new();
     map.insert(name.to_string(), Vec::<u8>::from(wit_section_bytes));
     let faas = match FluenceFaaS::with_modules(map) {
         Ok(faas) => faas,
-        Err(e) => {
-            return RegisterModuleResult {
-                error: e.to_string(),
-            }
-        }
+        Err(e) => return make_register_module_result(e.to_string().as_str()),
     };
 
     MODULES.with(|modules| modules.replace(Some(faas)));
 
     INSTANCE.with(|instance| instance.replace(Some(wasm_instance)));
 
-    RegisterModuleResult {
-        error: "".to_string(),
-    }
+    return make_register_module_result("");
 }
 
 #[wasm_bindgen]
-pub fn call_module(module_name: &str, function_name: &str, args: &str) -> CallModuleResult {
+pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
     js_log(&format!(
         "call_module called with args: module_name={}, function_name={}, args={}",
         module_name, function_name, args
@@ -143,10 +122,10 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> CallMo
                 let args: serde_json::Value = match serde_json::from_str(args) {
                     Ok(args) => args,
                     Err(e) => {
-                        return CallModuleResult {
-                            result: "".to_string(),
-                            error: format!("Error deserializing args: {}", e),
-                        }
+                        return make_call_module_result(
+                            serde_json::Value::Null,
+                            &format!("Error deserializing args: {}", e),
+                        )
                     }
                 };
 
@@ -156,20 +135,29 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> CallMo
                     args,
                     CallParameters::default(),
                 ) {
-                    Ok(result) => CallModuleResult {
-                        result: result.to_string(),
-                        error: "".to_string(),
-                    },
-                    Err(e) => CallModuleResult {
-                        result: "".to_string(),
-                        error: format!("Error calling module function: {}", e),
-                    },
+                    Ok(result) => make_call_module_result(result, ""),
+                    Err(e) => make_call_module_result(
+                        serde_json::Value::Null,
+                        &format!("Error calling module function: {}", e),
+                    ),
                 }
             }
-            None => CallModuleResult {
-                result: "".to_string(),
-                error: "attempt to run a function when module is not loaded".to_string(),
-            },
+            None => make_call_module_result(
+                serde_json::Value::Null,
+                "attempt to run a function when module is not loaded",
+            ),
         }
     })
+}
+
+fn make_register_module_result(error: &str) -> String {
+    serde_json::json!({ "error": error }).to_string()
+}
+
+fn make_call_module_result(result: serde_json::Value, error: &str) -> String {
+    serde_json::json!({
+        "result": result,
+        "error": error,
+    })
+    .to_string()
 }

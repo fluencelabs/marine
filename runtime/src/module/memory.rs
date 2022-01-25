@@ -56,7 +56,7 @@ impl WITMemoryView<'_> {
     }
 }
 
-impl<'s, 'v> wasm::structures::MemoryView<'v> for WITMemoryView<'s>{
+impl<'s, 'v> wasm::structures::MemoryView<'v> for WITMemoryView<'s> {
     type SR = WasmerSequentialReader<'v>;
     type SW = WasmerSequentialWriter<'v>;
 
