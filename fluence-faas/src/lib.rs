@@ -56,6 +56,8 @@ pub use marine::IFunctionArg;
 pub use marine::IType;
 pub use marine::MModuleInterface as FaaSModuleInterface;
 pub use marine::MFunctionSignature as FaaSFunctionSignature;
+pub use marine::HeapStatistic;
+pub use marine::HeapStatisticRecord;
 pub use marine::MRecordTypes;
 pub use marine::HostExportedFunc;
 pub use marine::HostImportDescriptor;

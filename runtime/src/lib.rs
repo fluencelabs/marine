@@ -33,6 +33,7 @@ mod errors;
 mod host_imports;
 mod misc;
 mod module;
+mod heap_statistic;
 
 pub use config::MModuleConfig;
 pub use config::HostExportedFunc;
@@ -49,6 +50,8 @@ pub use module::MRecordTypes;
 pub use module::MFunctionSignature;
 pub use module::from_interface_values;
 pub use module::to_interface_value;
+pub use heap_statistic::HeapStatisticRecord;
+pub use heap_statistic::HeapStatistic;
 
 pub use wasmer_it::IRecordFieldType;
 pub mod ne_vec {

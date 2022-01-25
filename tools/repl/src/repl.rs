@@ -81,6 +81,7 @@ impl REPL {
             Some("e") | Some("envs") => self.show_envs(args),
             Some("f") | Some("fs") => self.show_fs(args),
             Some("i") | Some("interface") => self.show_interface(),
+            Some("h") | Some("heap") => self.show_heap_statistics(),
             Some("q") | Some("quit") => {
                 return false;
             }
@@ -206,6 +207,12 @@ impl REPL {
         print!("Loaded modules interface:\n{}", interface);
     }
 
+    fn show_heap_statistics(&mut self) {
+        let statistic = self.app_service.heap_statistic();
+
+        print!("Loaded modules heap sizes:\n{}", statistic);
+    }
+
     fn create_app_service<S: Into<PathBuf>>(config_file_path: Option<S>) -> ReplResult<AppService> {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
@@ -287,6 +294,7 @@ fn print_help() {
             u/unload <module_name>                                unload a Wasm module\n\
             c/call <module_name> <func_name> <args> [call_params] call function with given name from given module\n\
             i/interface                                           print public interface of all loaded modules\n\
+            h/heap                                                print heap sizes of all loaded modules\n\
             e/envs <module_name>                                  print environment variables of a module\n\
             f/fs <module_name>                                    print filesystem state of a module\n\
             h/help                                                print this message\n\

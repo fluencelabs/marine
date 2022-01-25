@@ -136,6 +136,16 @@ impl Marine {
             .and_then(|module| module.export_record_type_by_id(record_id))
     }
 
+    /// Returns a heap size that all modules consume in bytes.
+    pub fn heap_statistic(&self) -> HeapStatistic<'_> {
+        let records = self.modules
+            .iter()
+            .map(|(module_name, module)| (module_name.as_str(), module.memory_size()).into())
+            .collect::<Vec<_>>();
+
+        records.into()
+    }
+
     fn get_module_interface(module: &MModule) -> MModuleInterface<'_> {
         let record_types = module.export_record_types();
 

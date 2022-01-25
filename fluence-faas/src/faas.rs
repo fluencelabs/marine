@@ -20,6 +20,7 @@ use crate::FaaSError;
 use crate::FaaSResult;
 use crate::IValue;
 use crate::IType;
+use crate::HeapStatistic;
 use crate::module_loading::load_modules_from_fs;
 use crate::module_loading::ModulesLoadStrategy;
 use crate::host_imports::logger::LoggerFilter;
@@ -182,6 +183,11 @@ impl FluenceFaaS {
         let modules = self.marine.interface().collect();
 
         FaaSInterface { modules }
+    }
+
+    /// Return statistics of Wasm modules heap footprint.
+    pub fn heap_statistic(&self) -> HeapStatistic<'_> {
+        self.marine.heap_statistic()
     }
 
     /// At first, tries to find function signature and record types in module_interface_cache,
