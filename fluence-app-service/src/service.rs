@@ -178,6 +178,12 @@ impl AppService {
 
         Ok(())
     }
+
+    /// Return statistics of Wasm modules heap footprint.
+    /// This operation is cheap.
+    pub fn module_memory_stats(&self) -> MemoryStats<'_> {
+        self.faas.module_memory_stats()
+    }
 }
 
 // This API is intended for testing purposes (mostly in Marine REPL)
@@ -243,11 +249,5 @@ impl AppService {
         module_name: S,
     ) -> Result<&wasmer_wasi::state::WasiState> {
         self.faas.module_wasi_state(module_name).map_err(Into::into)
-    }
-
-    /// Return statistics of Wasm modules heap footprint.
-    /// This operation is cheap.
-    pub fn module_memory_stats(&self) -> MemoryStats<'_> {
-        self.faas.module_memory_stats()
     }
 }
