@@ -102,7 +102,7 @@ impl SequentialReader for JsSequentialReader {
         let start = offset - self.start_offset;
 
         let mut result = [0u8; COUNT];
-        result.copy_from_slice(&self.data[start..start+COUNT]);
+        result.copy_from_slice(&self.data[start..start + COUNT]);
         self.offset.set(offset + COUNT);
 
         result
@@ -138,10 +138,7 @@ impl SequentialWriter for JsSequentialWriter {
 
 impl Drop for JsSequentialWriter {
     fn drop(&mut self) {
-        let data: Vec<u8> = self.data
-            .iter()
-            .map(|v| v.get())
-            .collect();
+        let data: Vec<u8> = self.data.iter().map(|v| v.get()).collect();
         self.memory.set_range(self.start_offset(), data.as_slice());
     }
 }

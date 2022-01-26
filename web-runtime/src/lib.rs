@@ -104,10 +104,9 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsVa
     STATE.with(|state| {
         state.replace(RuntimeState {
             faas: Some(faas),
-            module: Some(wasm_instance)
+            module: Some(wasm_instance),
         });
     });
-
 
     return make_register_module_result("");
 }
