@@ -44,6 +44,20 @@ module.exports.read_byte =  function (instance, offset) {
     return buf[offset];
 }
 
+module.exports.write_byte_range =  function (instance, offset, slice) {
+    let buf = new Uint8Array(instance.exports.memory.buffer);
+    for (i = 0; i < slice.length; i++) {
+        buf[offset + i] = slice[i]
+    }
+}
+
+module.exports.read_byte_range =  function (instance, offset, slice) {
+    let buf = new Uint8Array(instance.exports.memory.buffer);
+    for (i = 0; i < slice.length; i++) {
+         slice[i] = buf[offset + i];
+    }
+}
+
 /*
 export function call_export(instance, export_name, args) {
     //console.log("JS: call_export called with: ", instance, export_name, args)

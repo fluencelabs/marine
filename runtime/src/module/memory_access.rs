@@ -93,21 +93,23 @@ pub(crate) struct WasmerSequentialWriter<'s> {
 }
 
 impl SequentialReader for WasmerSequentialReader<'_> {
-    fn read_bool(&self) -> bool {
-        let value = self.read_u8();
-        value != 0
+    fn read_byte(&self) -> u8 {
+        let offset = self.offset.get();
+        let result = self.memory[offset].get();
+        self.offset.set(offset + 1);
+        result
     }
 
-    read_ty!(read_u8, u8, 1);
-    read_ty!(read_i8, i8, 1);
-    read_ty!(read_u16, u16, 2);
-    read_ty!(read_i16, i16, 2);
-    read_ty!(read_u32, u32, 4);
-    read_ty!(read_i32, i32, 4);
-    read_ty!(read_f32, f32, 4);
-    read_ty!(read_u64, u64, 8);
-    read_ty!(read_i64, i64, 8);
-    read_ty!(read_f64, f64, 8);
+    fn read_bytes<const COUNT: usize>(&self) -> [u8; COUNT] {
+        let offset = self.offset.get();
+        let mut result = [0u8; COUNT];
+        for index in 0..COUNT {
+            result[index] = self.memory[offset + index].get();
+        }
+
+        self.offset.set(offset + COUNT);
+        result
+    }
 }
 
 impl SequentialWriter for WasmerSequentialWriter<'_> {

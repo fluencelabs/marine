@@ -17,6 +17,8 @@ extern "C" {
     pub fn read_byte(module_name: &JsValue, module_offset: usize) -> u8;
     pub fn write_byte(module_name: &JsValue, module_offset: usize, value: u8);
     pub fn get_memory_size(module_name: &JsValue) -> i32;
+    pub fn read_byte_range(module_name: &JsValue, module_offset: usize, slice: &mut [u8]);
+    pub fn write_byte_range(module_name: &JsValue, module_offset: usize, slice: &[u8]);
 }
 
 #[derive(Clone)]
@@ -271,10 +273,12 @@ impl WasmMemory {
         Self { module_name }
     }
 
+    #[allow(unused)]
     pub fn get(&self, index: usize) -> u8 {
         INSTANCE.with(|instance| read_byte(instance.borrow().as_ref().unwrap(), index))
     }
 
+    #[allow(unused)]
     pub fn set(&self, index: usize, value: u8) {
         INSTANCE.with(|instance| {
             write_byte(instance.borrow().as_ref().unwrap(), index, value);
@@ -283,5 +287,19 @@ impl WasmMemory {
 
     pub fn len(&self) -> usize {
         INSTANCE.with(|instance| get_memory_size(instance.borrow().as_ref().unwrap()) as usize)
+    }
+
+    pub fn get_range(&self, offset: usize, result: &mut [u8]) {
+        INSTANCE.with(|instance| {
+            read_byte_range(instance.borrow().as_ref().unwrap(), offset, result);
+            //js_log2(&format!("reading: {:?}", result));
+        })
+    }
+
+    pub fn set_range(&self, offset: usize, data: &[u8]) {
+        INSTANCE.with(|instance| {
+            //js_log2(&format!("writing: {:?}", data));
+            write_byte_range(instance.borrow().as_ref().unwrap(), offset, data);
+        })
     }
 }

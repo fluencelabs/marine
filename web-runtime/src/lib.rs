@@ -62,8 +62,6 @@ pub use wasmer_it::ne_vec;
 
 pub(crate) type MResult<T> = std::result::Result<T, MError>;
 
-pub(crate) use it_lilo::value_der;
-
 static MINIMAL_SUPPORTED_IT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
     semver::Version::from_str("0.20.0").expect("invalid minimal sdk version specified")
 });

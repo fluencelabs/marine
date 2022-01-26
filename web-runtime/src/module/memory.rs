@@ -15,7 +15,6 @@
  */
 
 use std::cell::Cell;
-use it_lilo::read_ty;
 use it_traits::{MemoryAccessError, SequentialWriter};
 use it_traits::SequentialReader;
 use wasmer_it::interpreter::wasm;
@@ -53,15 +52,14 @@ impl WITMemoryView {
 
 pub(super) struct JsSequentialReader {
     offset: Cell<usize>,
-    #[allow(unused)]
-    size: usize,
+    data: Vec<u8>,
     memory: WasmMemory,
+    start_offset: usize,
 }
 
 pub(super) struct JsSequentialWriter {
     offset: usize,
-    #[allow(unused)]
-    size: usize,
+    data: Vec<Cell<u8>>,
     current_offset: Cell<usize>,
     memory: WasmMemory,
 }
@@ -70,7 +68,7 @@ impl JsSequentialWriter {
     pub fn new(offset: usize, size: usize, memory: WasmMemory) -> Self {
         Self {
             offset,
-            size,
+            data: vec![Cell::new(0u8); size],
             current_offset: Cell::new(offset),
             memory,
         }
@@ -79,33 +77,36 @@ impl JsSequentialWriter {
 
 impl JsSequentialReader {
     pub fn new(offset: usize, size: usize, memory: WasmMemory) -> Self {
+        let mut data = vec![0; size];
+        memory.get_range(offset, &mut data);
         Self {
             offset: Cell::new(offset),
-            size,
+            data,
             memory,
+            start_offset: offset,
         }
     }
 }
 
 impl SequentialReader for JsSequentialReader {
-    fn read_bool(&self) -> bool {
+    fn read_byte(&self) -> u8 {
         let offset = self.offset.get();
-        let result = self.memory.get(offset) != 0;
+        let result = self.memory.get(offset);
 
         self.offset.set(offset + 1);
         result
     }
 
-    read_ty!(read_u8, u8, 1);
-    read_ty!(read_i8, i8, 1);
-    read_ty!(read_u16, u16, 2);
-    read_ty!(read_i16, i16, 2);
-    read_ty!(read_u32, u32, 4);
-    read_ty!(read_i32, i32, 4);
-    read_ty!(read_f32, f32, 4);
-    read_ty!(read_u64, u64, 8);
-    read_ty!(read_i64, i64, 8);
-    read_ty!(read_f64, f64, 8);
+    fn read_bytes<const COUNT: usize>(&self) -> [u8; COUNT] {
+        let offset = self.offset.get();
+        let start = offset - self.start_offset;
+
+        let mut result = [0u8; COUNT];
+        result.copy_from_slice(&self.data[start..start+COUNT]);
+        self.offset.set(offset + COUNT);
+
+        result
+    }
 }
 
 impl SequentialWriter for JsSequentialWriter {
@@ -114,8 +115,9 @@ impl SequentialWriter for JsSequentialWriter {
     }
 
     fn write_u8(&self, value: u8) {
-        self.memory.set(self.current_offset.get(), value);
-        self.current_offset.set(self.current_offset.get() + 1);
+        let offset = self.current_offset.get();
+        self.data[offset].set(value);
+        self.current_offset.set(offset + 1);
     }
 
     fn write_u32(&self, value: u32) {
@@ -124,9 +126,23 @@ impl SequentialWriter for JsSequentialWriter {
     }
 
     fn write_bytes(&self, bytes: &[u8]) {
-        for byte in bytes {
-            self.write_u8(*byte)
+        let offset = self.current_offset.get();
+        let start = offset - self.start_offset();
+        for index in 0..bytes.len() {
+            self.data[start + index].set(bytes[index]);
         }
+
+        self.current_offset.set(offset + bytes.len());
+    }
+}
+
+impl Drop for JsSequentialWriter {
+    fn drop(&mut self) {
+        let data: Vec<u8> = self.data
+            .iter()
+            .map(|v| v.get())
+            .collect();
+        self.memory.set_range(self.start_offset(), data.as_slice());
     }
 }
 
