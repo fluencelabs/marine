@@ -5,7 +5,7 @@ use std::borrow::{Cow};
 use marine_it_interfaces::MITInterfaces;
 use crate::js_log;
 use crate::module::type_converters::{itypes_args_to_wtypes, itypes_output_to_wtypes};
-use crate::INSTANCE;
+use crate::STATE;
 
 // marine-related imports
 #[wasm_bindgen(module = "/marine-js.js")]
@@ -83,8 +83,8 @@ impl<'a> DynFunc<'_> {
         }
 
         let args = result.unwrap();
-        let output = INSTANCE
-            .with(|instance| call_export(instance.borrow().as_ref().unwrap(), &self.name, &args));
+        let output = STATE
+            .with(|state| call_export(state.borrow().module.as_ref().unwrap(), &self.name, &args));
 
         js_log(&format!("DynFunc::Call got result json {}", output));
 
@@ -275,31 +275,31 @@ impl WasmMemory {
 
     #[allow(unused)]
     pub fn get(&self, index: usize) -> u8 {
-        INSTANCE.with(|instance| read_byte(instance.borrow().as_ref().unwrap(), index))
+        STATE.with(|state| read_byte(state.borrow().module.as_ref().unwrap(), index))
     }
 
     #[allow(unused)]
     pub fn set(&self, index: usize, value: u8) {
-        INSTANCE.with(|instance| {
-            write_byte(instance.borrow().as_ref().unwrap(), index, value);
+        STATE.with(|state| {
+            write_byte(state.borrow().module.as_ref().unwrap(), index, value);
         });
     }
 
     pub fn len(&self) -> usize {
-        INSTANCE.with(|instance| get_memory_size(instance.borrow().as_ref().unwrap()) as usize)
+        STATE.with(|state| get_memory_size(state.borrow().module.as_ref().unwrap()) as usize)
     }
 
     pub fn get_range(&self, offset: usize, result: &mut [u8]) {
-        INSTANCE.with(|instance| {
-            read_byte_range(instance.borrow().as_ref().unwrap(), offset, result);
+        STATE.with(|state| {
+            read_byte_range(state.borrow().module.as_ref().unwrap(), offset, result);
             //js_log2(&format!("reading: {:?}", result));
         })
     }
 
     pub fn set_range(&self, offset: usize, data: &[u8]) {
-        INSTANCE.with(|instance| {
+        STATE.with(|state| {
             //js_log2(&format!("writing: {:?}", data));
-            write_byte_range(instance.borrow().as_ref().unwrap(), offset, data);
+            write_byte_range(state.borrow().module.as_ref().unwrap(), offset, data);
         })
     }
 }
