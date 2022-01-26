@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { WASI } from '@wasmer/wasi';
 import { WasmFs } from '@wasmer/wasmfs';
-import nodeBindings from '@wasmer/wasi/lib/bindings/node';
+import bindings from '@wasmer/wasi/lib/bindings/browser';
 
 const createModule = async (path: string) => {
     const file = fs.readFileSync(path);
@@ -42,7 +42,7 @@ const _wasi = new WASI({
 
     // Bindings that are used by the WASI Instance (fs, path, etc...)
     bindings: {
-        ...nodeBindings,
+        ...bindings,
         fs: _wasmFs.fs,
     },
 });
@@ -50,8 +50,7 @@ const _wasi = new WASI({
 describe('Tests', () => {
     it('should work', async () => {
         const fluencePath = eval('require').resolve(avmPackageName);
-        // const avmPath = path.join(path.dirname(fluencePath), defaultAvmFileName);
-        const avmPath = path.join(__dirname, '../', defaultAvmFileName);
+        const avmPath = path.join(path.dirname(fluencePath), defaultAvmFileName);
         const controlModule = await createModule(path.join(__dirname, '../marine-js.wasm'));
 
         const avmModule = await createModule(avmPath);
@@ -81,7 +80,6 @@ describe('Tests', () => {
 
         const params = { init_peer_id: vmPeerId, current_peer_id: vmPeerId };
         const json = invokeJson(s, b(''), b(''), params, {});
-        console.log(json);
         let res: any = marineInstance.call_module('avm', 'invoke', json);
         res = JSON.parse(res);
 
