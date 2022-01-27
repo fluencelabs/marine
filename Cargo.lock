@@ -869,9 +869,9 @@ dependencies = [
 [[package]]
 name = "fluence-it-types"
 version = "0.3.1"
-source = "git+https://github.com/fluencelabs/interface-types?branch=marine_web_experiments#2e742a9fe1c857f622c4f0d3e105dec548bc53cd"
+source = "git+https://github.com/fluencelabs/interface-types/?branch=marine_web_experiments#2e742a9fe1c857f622c4f0d3e105dec548bc53cd"
 dependencies = [
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=marine_web_experiments)",
+ "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types/?branch=marine_web_experiments)",
  "nom",
  "serde",
  "variant_count",
@@ -1361,9 +1361,9 @@ dependencies = [
 [[package]]
 name = "it-lilo"
 version = "0.2.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=marine_web_experiments#2e742a9fe1c857f622c4f0d3e105dec548bc53cd"
+source = "git+https://github.com/fluencelabs/interface-types/?branch=marine_web_experiments#2e742a9fe1c857f622c4f0d3e105dec548bc53cd"
 dependencies = [
- "fluence-it-types 0.3.1 (git+https://github.com/fluencelabs/interface-types?branch=marine_web_experiments)",
+ "fluence-it-types 0.3.1 (git+https://github.com/fluencelabs/interface-types/?branch=marine_web_experiments)",
  "it-traits",
  "log",
  "paste",
@@ -1379,12 +1379,12 @@ checksum = "729c74bb4236418898a219c6d96f14cba77456dd7c04a2e99e65e9c643709b56"
 [[package]]
 name = "it-to-bytes"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=marine_web_experiments#2e742a9fe1c857f622c4f0d3e105dec548bc53cd"
+source = "git+https://github.com/fluencelabs/interface-types/?branch=marine_web_experiments#2e742a9fe1c857f622c4f0d3e105dec548bc53cd"
 
 [[package]]
 name = "it-traits"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=marine_web_experiments#2e742a9fe1c857f622c4f0d3e105dec548bc53cd"
+source = "git+https://github.com/fluencelabs/interface-types/?branch=marine_web_experiments#2e742a9fe1c857f622c4f0d3e105dec548bc53cd"
 dependencies = [
  "thiserror",
 ]
@@ -3669,11 +3669,11 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types-fl"
 version = "0.21.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=marine_web_experiments#2e742a9fe1c857f622c4f0d3e105dec548bc53cd"
+source = "git+https://github.com/fluencelabs/interface-types/?branch=marine_web_experiments#2e742a9fe1c857f622c4f0d3e105dec548bc53cd"
 dependencies = [
- "fluence-it-types 0.3.1 (git+https://github.com/fluencelabs/interface-types?branch=marine_web_experiments)",
+ "fluence-it-types 0.3.1 (git+https://github.com/fluencelabs/interface-types/?branch=marine_web_experiments)",
  "it-lilo 0.2.0",
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=marine_web_experiments)",
+ "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types/?branch=marine_web_experiments)",
  "it-traits",
  "itertools 0.10.3",
  "log",
