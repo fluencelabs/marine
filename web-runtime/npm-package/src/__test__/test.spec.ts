@@ -68,7 +68,8 @@ describe('Tests', () => {
 
         const customSections = WebAssembly.Module.customSections(avmModule, 'interface-types');
         const itcustomSections = new Uint8Array(customSections[0]);
-        marineInstance.register_module('avm', itcustomSections, avmInstance);
+        let result = marineInstance.register_module('avm', itcustomSections, avmInstance);
+        expect(result).toEqual("{\"error\":\"\"}");
 
         const s = `(seq
             (par 
@@ -84,7 +85,9 @@ describe('Tests', () => {
         res = JSON.parse(res);
 
         console.log(res);
-        expect(res).toMatchObject({
+
+        expect(res.error).toEqual("");
+        expect(res.result).toMatchObject({
             ret_code: 0,
             error_message: '',
         });
