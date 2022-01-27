@@ -66,15 +66,10 @@ static MINIMAL_SUPPORTED_IT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
     semver::Version::from_str("0.20.0").expect("invalid minimal sdk version specified")
 });
 
-#[derive(Default)]
-pub(crate) struct RuntimeState {
-    faas: Option<FluenceFaaS>,
-    module: Option<JsValue>,
-}
-
 // These locals intended for check that set versions are correct at the start of an application.
 thread_local!(static MINIMAL_SUPPORTED_IT_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION));
-thread_local!(static STATE: RefCell<RuntimeState> = RefCell::new(RuntimeState::default()));
+thread_local!(static MODULES: RefCell<Option<FluenceFaaS>> = RefCell::new(None));
+thread_local!(static INSTANCE: RefCell<Option<JsValue>> = RefCell::new(None));
 
 /// Return minimal support version of interface types.
 pub fn min_it_version() -> &'static semver::Version {
@@ -101,12 +96,9 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsVa
         Err(e) => return make_register_module_result(e.to_string().as_str()),
     };
 
-    STATE.with(|state| {
-        state.replace(RuntimeState {
-            faas: Some(faas),
-            module: Some(wasm_instance),
-        });
-    });
+    MODULES.with(|modules| modules.replace(Some(faas)));
+
+    INSTANCE.with(|instance| instance.replace(Some(wasm_instance)));
 
     return make_register_module_result("");
 }
@@ -117,10 +109,10 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String
         "call_module called with args: module_name={}, function_name={}, args={}",
         module_name, function_name, args
     ));
-    STATE.with(|state| {
-        let faas = &mut state.borrow_mut().faas;
-        match faas {
-            Some(faas) => {
+    MODULES.with(|modules| {
+        let mut modules = modules.borrow_mut();
+        match modules.as_mut() {
+            Some(modules) => {
                 js_log(&format!(
                     "call_module called with args: module_name={}, function_name={}, args={}",
                     module_name, function_name, args
@@ -135,7 +127,7 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String
                     }
                 };
 
-                match faas.call_with_json(
+                match modules.call_with_json(
                     module_name,
                     function_name,
                     args,
