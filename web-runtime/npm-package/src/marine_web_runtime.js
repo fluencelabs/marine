@@ -48,6 +48,10 @@ export async function init(module) {
         return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
     }
 
+    function getArrayU8FromWasm0(ptr, len) {
+        return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
+    }
+
     function addHeapObject(obj) {
         if (heap_next === heap.length) heap.push(heap.length + 1);
         const idx = heap_next;
