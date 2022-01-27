@@ -3,6 +3,8 @@ import {
     read_byte,
     write_byte,
     get_memory_size,
+    read_byte_range,
+    write_byte_range
 } from './snippets/marine-web-runtime-6faa67b8af9cc173/marine-js.js';
 
 export async function init(module) {
@@ -132,11 +134,20 @@ export async function init(module) {
      * @param {any} wasm_instance
      */
     function register_module(name, wit_section_bytes, wasm_instance) {
-        var ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        var ptr1 = passArray8ToWasm0(wit_section_bytes, wasm.__wbindgen_malloc);
-        var len1 = WASM_VECTOR_LEN;
-        wasm.register_module(ptr0, len0, ptr1, len1, addHeapObject(wasm_instance));
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            var ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            var len0 = WASM_VECTOR_LEN;
+            var ptr1 = passArray8ToWasm0(wit_section_bytes, wasm.__wbindgen_malloc);
+            var len1 = WASM_VECTOR_LEN;
+            wasm.register_module(retptr, ptr0, len0, ptr1, len1, addHeapObject(wasm_instance));
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getInt32Memory0()[retptr / 4 + 1];
+            return getStringFromWasm0(r0, r1);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            wasm.__wbindgen_free(r0, r1);
+        }
     }
 
     /**
@@ -188,12 +199,19 @@ export async function init(module) {
         imports.wbg.__wbindgen_object_drop_ref = function (arg0) {
             takeObject(arg0);
         };
+        imports.wbg.__wbg_writebyterange_313d990e0a3436b6 = function(arg0, arg1, arg2, arg3) {
+            write_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
+        };
+
         imports.wbg.__wbg_callexport_cb1a6ee1197892bd = function (arg0, arg1, arg2, arg3, arg4, arg5) {
             var ret = call_export(getObject(arg1), getStringFromWasm0(arg2, arg3), getStringFromWasm0(arg4, arg5));
             var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             var len0 = WASM_VECTOR_LEN;
             getInt32Memory0()[arg0 / 4 + 1] = len0;
             getInt32Memory0()[arg0 / 4 + 0] = ptr0;
+        };
+        imports.wbg.__wbg_readbyterange_ebea9d02dea05828 = function(arg0, arg1, arg2, arg3) {
+            read_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
         };
         imports.wbg.__wbg_getmemorysize_385fa0bd4e2d9ff6 = function (arg0) {
             var ret = get_memory_size(getObject(arg0));

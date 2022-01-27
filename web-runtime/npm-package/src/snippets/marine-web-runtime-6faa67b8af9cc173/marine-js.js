@@ -88,3 +88,17 @@ export function read_byte(instance, offset) {
     //console.log("read_byte returns {}", buf[offset])
     return buf[offset];
 }
+
+export function write_byte_range(instance, offset, slice) {
+    let buf = new Uint8Array(instance.exports.memory.buffer);
+    for (let i = 0; i < slice.length; i++) {
+        buf[offset + i] = slice[i]
+    }
+}
+
+export function read_byte_range(instance, offset, slice) {
+    let buf = new Uint8Array(instance.exports.memory.buffer);
+    for (let i = 0; i < slice.length; i++) {
+        slice[i] = buf[offset + i];
+    }
+}
