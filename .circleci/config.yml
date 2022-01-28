@@ -30,12 +30,23 @@ jobs:
           cargo fmt --all -- --check --color always
           cargo check -v --all-features -p marine-runtime -p fluence-faas -p fluence-app-service -p marine -p mrepl -p marine-web-runtime
 
-          (cd web-runtime; ./build.sh)
+          (
+            cd web-runtime
+            ./build.sh
+            cd npm-package
+            npm i
+            npm run build
+          )
           (cd ./examples; ./build.sh)
           (cd ./fluence-faas/tests/wasm_tests; ./build.sh)
 
           cargo test --release -v --all-features -p marine-it-generator -p marine-runtime -p fluence-faas -p fluence-app-service -p marine -p mrepl
           cargo clippy
+
+          (
+            cd web-runtime/npm-package
+            npm run test
+          }
 
       - save_cache:
           paths:
