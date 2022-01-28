@@ -18,7 +18,6 @@ use std::cell::Cell;
 use it_traits::{MemoryAccessError, SequentialWriter};
 use it_traits::SequentialReader;
 use wasmer_it::interpreter::wasm;
-use crate::js_log;
 use crate::marine_js::WasmMemory;
 
 pub(super) struct WITMemoryView {
@@ -27,8 +26,6 @@ pub(super) struct WITMemoryView {
 
 impl WITMemoryView {
     pub fn new(module_name: String) -> Self {
-        crate::js_log("WITMemoryView::new called");
-
         Self { module_name }
     }
 
@@ -181,15 +178,12 @@ pub(super) struct WITMemory {
 
 impl WITMemory {
     pub fn new(module_name: String) -> Self {
-        js_log("created WITMemory");
-
         Self { module_name }
     }
 }
 
 impl wasm::structures::Memory<WITMemoryView> for WITMemory {
     fn view(&self) -> WITMemoryView {
-        crate::js_log("got memory view");
         WITMemoryView::new(self.module_name.clone())
     }
 }

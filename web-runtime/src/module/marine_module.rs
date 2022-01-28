@@ -34,7 +34,6 @@ use std::rc::Rc;
 use crate::module::wit_function::WITFunction;
 
 type ITInterpreter = Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView>;
-use crate::js_log;
 
 #[derive(Clone)]
 pub(super) struct ITModuleFunc {
@@ -79,7 +78,6 @@ pub(crate) struct MModule {
 }
 
 pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfaces<'_>, String> {
-    crate::js_log(&format!("section_length = {}", wit_section_bytes.len()));
     match wasmer_it::decoders::binary::parse::<(&[u8], nom::error::ErrorKind)>(wit_section_bytes) {
         Ok((remainder, it)) if remainder.is_empty() => Ok(it),
         Ok(_) => Err("ITParserError::ITRemainderNotEmpty".to_string()),
@@ -93,21 +91,9 @@ impl MModule {
         let it = extract_it_from_bytes(&wit_section_bytes)?;
         crate::misc::check_it_version(name, &it.version)?;
 
-        js_log("checked it_section");
-        for adapter in &it.adapters {
-            crate::js_log(&format!("adapater: {}", adapter.function_type));
-            for instruction in &adapter.instructions {
-                let inststr = serde_json::to_string(&instruction).unwrap();
-                crate::js_log(&format!("  instruction: {}", inststr));
-            }
-        }
-
         let mit = MITInterfaces::new(it);
-        js_log("created mit");
         let wasmer_instance = WasmerInstance::new(&mit, name.to_string());
-        js_log("created wasmer_instance");
         let mut wit_instance = Arc::new_uninit();
-        js_log("created wit_instance");
 
         let it_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
@@ -118,7 +104,6 @@ impl MModule {
         };
 
         let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
-        js_log("created MModule");
         Ok(Self {
             wasmer_instance: Box::new(wasmer_instance),
             export_funcs,
@@ -134,10 +119,6 @@ impl MModule {
     ) -> MResult<Vec<IValue>> {
         self.export_funcs.get_mut(function_name).map_or_else(
             || {
-                crate::js_log(&format!(
-                    "MModule::call: cannot find export {}",
-                    function_name
-                ));
                 Err(MError::NoSuchFunction(
                     module_name.to_string(),
                     function_name.to_string(),

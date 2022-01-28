@@ -3,7 +3,6 @@ use std::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 use std::borrow::{Cow};
 use marine_it_interfaces::MITInterfaces;
-use crate::js_log;
 use crate::module::type_converters::{itypes_args_to_wtypes, itypes_output_to_wtypes};
 use crate::INSTANCE;
 
@@ -70,23 +69,15 @@ impl<'a> DynFunc<'_> {
     }
 
     pub fn call(&self, args: &[WValue]) -> Result<Vec<WValue>, String> {
-        crate::js_log(&format!(
-            "called DynFunc::call name=({}) with n args {}",
-            self.name,
-            args.len()
-        ));
-
         let result = serde_json::ser::to_string(args);
         if let Err(e) = result {
-            js_log(&format!("cannot serialize: {}", e));
-            return Err("cannot serialize".to_string());
+            return Err(format!("cannot serialize call arguments, error: {}", e));
         }
 
         let args = result.unwrap();
         let output = INSTANCE
             .with(|instance| call_export(instance.borrow().as_ref().unwrap(), &self.name, &args));
 
-        js_log(&format!("DynFunc::Call got result json {}", output));
 
         let value = serde_json::de::from_str::<serde_json::Value>(&output);
         match value {
@@ -98,7 +89,6 @@ impl<'a> DynFunc<'_> {
                 Ok(values)
             }
             _ => {
-                js_log("invalid_json got");
                 Err("invalid json got".to_string())
             }
         }
@@ -130,12 +120,7 @@ impl Exports {
         let mut exports = mit
             .exports()
             .filter_map(|export| {
-                crate::js_log(&format!(
-                    "processing export {} {}",
-                    export.name, export.function_type
-                ));
                 let fn_type = mit.type_by_idx(export.function_type).unwrap();
-                crate::js_log(&format!("got type {}", fn_type.to_string()));
                 if let wasmer_it::ast::Type::Function {
                     arguments,
                     output_types,
@@ -153,19 +138,16 @@ impl Exports {
                         returns: Cow::Owned(output_types),
                     };
 
-                    crate::js_log(&format!("it is a function: {}", export.name.to_string()));
                     Some(Export::Function(ProcessedExport {
                         sig,
                         name: export.name.to_string(),
                     }))
                 } else {
-                    crate::js_log(&format!("it is not a function"));
                     None
                 }
             })
             .collect::<Vec<Export>>();
         exports.push(Export::Memory);
-        crate::js_log(&format!("processed exports"));
         Self {
             exports,
             module_name,
@@ -173,7 +155,6 @@ impl Exports {
     }
 
     pub fn get(&self, name: &str) -> Result<DynFunc<'_>, String> {
-        crate::js_log(&format!("Exports.get called with name {}", name));
         let export = self.exports.iter().find(|export| {
             if let Export::Function(func) = export {
                 func.name == name
@@ -292,13 +273,11 @@ impl WasmMemory {
     pub fn get_range(&self, offset: usize, result: &mut [u8]) {
         INSTANCE.with(|instance| {
             read_byte_range(instance.borrow().as_ref().unwrap(), offset, result);
-            //js_log2(&format!("reading: {:?}", result));
         })
     }
 
     pub fn set_range(&self, offset: usize, data: &[u8]) {
         INSTANCE.with(|instance| {
-            //js_log2(&format!("writing: {:?}", data));
             write_byte_range(instance.borrow().as_ref().unwrap(), offset, data);
         })
     }

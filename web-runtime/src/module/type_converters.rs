@@ -34,7 +34,6 @@ pub(super) fn ival_to_wval(value: &IValue) -> WValue {
         IValue::F32(v) => WValue::F32(*v),
         IValue::F64(v) => WValue::F64(*v),
         _ => {
-            crate::js_log(&format!("called ival_to_wval with unknown value"));
             unimplemented!()
         }
     }

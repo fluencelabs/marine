@@ -16,7 +16,7 @@
 
 use super::wit_prelude::*;
 use super::IRecordType;
-use crate::{js_log, MResult};
+use crate::{MResult};
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
@@ -46,12 +46,10 @@ impl ITInstance {
     pub(super) fn new(wasmer_instance: &WasmerInstance, wit: &MITInterfaces<'_>) -> MResult<Self> {
         let exports = Self::extract_raw_exports(wasmer_instance, wit)?;
         let memories = Self::extract_memories(wasmer_instance);
-        js_log(&format!("executed Self::extract_memories"));
 
         let funcs = exports;
 
         let record_types_by_id = Self::extract_record_types(wit);
-        js_log(&format!("executed Self::extract_record_types"));
 
         Ok(Self {
             funcs,
@@ -118,25 +116,15 @@ impl ITInstance {
 
 impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView> for ITInstance {
     fn export(&self, _export_name: &str) -> Option<&ITExport> {
-        js_log(&format!("called ITInstance::export with {}", _export_name));
         // exports aren't used in this version of IT
         None
     }
 
     fn local_or_import<I: TypedIndex + LocalImportIndex>(&self, index: I) -> Option<&WITFunction> {
-        js_log(&format!(
-            "called ITInstance::local_or_import with {}",
-            index.index()
-        ));
-        js_log(&format!(
-            "ITInstance::export funcs size {}",
-            self.funcs.len()
-        ));
         self.funcs.get(&index.index())
     }
 
     fn memory(&self, index: usize) -> Option<&WITMemory> {
-        js_log(&format!("called ITInstance::memory with {}", index));
         if index >= self.memories.len() {
             None
         } else {
@@ -145,7 +133,6 @@ impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView>
     }
 
     fn memory_view(&self, index: usize) -> Option<WITMemoryView> {
-        js_log(&format!("called ITInstance::memory_view with {}", index));
         if index >= self.memories.len() {
             return None;
         }
@@ -156,10 +143,6 @@ impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView>
     }
 
     fn wit_record_by_id(&self, index: u64) -> Option<&Rc<IRecordType>> {
-        js_log(&format!(
-            "called ITInstance::wit_record_by_id with {}",
-            index
-        ));
         self.record_types_by_id.get(&index)
     }
 }

@@ -77,16 +77,6 @@ pub fn min_it_version() -> &'static semver::Version {
 }
 
 #[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
-}
-
-pub fn js_log(_s: &str) {
-    //log(_s)
-}
-
-#[wasm_bindgen]
 pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
     console_error_panic_hook::set_once();
     let mut map = HashMap::new();
@@ -105,18 +95,11 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsVa
 
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
-    js_log(&format!(
-        "call_module called with args: module_name={}, function_name={}, args={}",
-        module_name, function_name, args
-    ));
+
     MODULES.with(|modules| {
         let mut modules = modules.borrow_mut();
         match modules.as_mut() {
             Some(modules) => {
-                js_log(&format!(
-                    "call_module called with args: module_name={}, function_name={}, args={}",
-                    module_name, function_name, args
-                ));
                 let args: serde_json::Value = match serde_json::from_str(args) {
                     Ok(args) => args,
                     Err(e) => {
