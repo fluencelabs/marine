@@ -136,6 +136,7 @@ export async function init(module) {
      * @param {string} name
      * @param {Uint8Array} wit_section_bytes
      * @param {any} wasm_instance
+     * @returns {string}
      */
     function register_module(name, wit_section_bytes, wasm_instance) {
         try {
