@@ -47,7 +47,7 @@ jobs:
           override: true
       - uses: actions-rs/cargo@v1
         with:
-          toolchain: nightly-2021-07-13
+          toolchain: nightly-2022-01-25
           command: update
           args: --aggressive
 
