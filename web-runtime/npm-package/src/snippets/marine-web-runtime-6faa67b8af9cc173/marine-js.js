@@ -28,13 +28,6 @@ export function get_memory_size(instance) {
     return buf.byteLength
 }
 
-export function write_byte(instance, offset, value) {
-    //console.log("write_byte called with args: module_name={}, offset={}, value={}", module_name, offset, value)
-    let buf = new Uint8Array(instance.exports.memory.buffer);
-    //console.log(buf)
-    buf[offset] = value
-}
-
 export function read_byte(instance, offset) {
     //console.log("read_byte called with args: module_name={}, offset={}", module_name, offset)
     let buf = new Uint8Array(instance.exports.memory.buffer);

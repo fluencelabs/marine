@@ -10,11 +10,8 @@ use crate::INSTANCE;
 #[wasm_bindgen(module = "/marine-js.js")]
 extern "C" {
     pub fn call_export(module_name: &JsValue, export_name: &str, args: &str) -> String;
-    pub fn read_memory(module_name: &JsValue, module_offset: usize, module_len: usize) -> Vec<u8>;
-    pub fn write_memory(module_name: &JsValue, module_offset: usize, data: &[u8]) -> i32;
 
     pub fn read_byte(module_name: &JsValue, module_offset: usize) -> u8;
-    pub fn write_byte(module_name: &JsValue, module_offset: usize, value: u8);
     pub fn get_memory_size(module_name: &JsValue) -> i32;
     pub fn read_byte_range(module_name: &JsValue, module_offset: usize, slice: &mut [u8]);
     pub fn write_byte_range(module_name: &JsValue, module_offset: usize, slice: &[u8]);
@@ -254,16 +251,8 @@ impl WasmMemory {
         Self { module_name }
     }
 
-    #[allow(unused)]
     pub fn get(&self, index: usize) -> u8 {
         INSTANCE.with(|instance| read_byte(instance.borrow().as_ref().unwrap(), index))
-    }
-
-    #[allow(unused)]
-    pub fn set(&self, index: usize, value: u8) {
-        INSTANCE.with(|instance| {
-            write_byte(instance.borrow().as_ref().unwrap(), index, value);
-        });
     }
 
     pub fn len(&self) -> usize {
