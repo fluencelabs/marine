@@ -7,10 +7,6 @@ edition = "2018"
 [lib]
 crate-type = ["cdylib"]
 
-[profile.release]
-debug = true
-
-
 [dependencies]
 marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.4.1" }
 marine-module-interface = { path = "../crates/module-interface", version = "0.1.6" }
