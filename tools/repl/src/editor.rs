@@ -161,6 +161,7 @@ fn commands_hints() -> HashSet<String> {
     set.insert(String::from("envs"));
     set.insert(String::from("fs"));
     set.insert(String::from("interface"));
+    set.insert(String::from("heap"));
     set.insert(String::from("help"));
     set
 }
