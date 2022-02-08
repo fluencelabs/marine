@@ -143,7 +143,13 @@ impl Exports {
                 }
             })
             .collect::<Vec<Export>>();
+
+        // Exports in marine-web are extracted from interface-definition. It is a hack, it is used
+        // because extracting exports from JS is harder than extracting it from interface-types.
+        // But interface-types do not have a "memory" export, so it is added here manually.
+        // TODO: refactor when wasm module creation is fully in control of marine-web.
         exports.push(Export::Memory);
+
         Self {
             exports,
             module_name,
