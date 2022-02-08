@@ -20,7 +20,8 @@ use marine_module_interface::it_interface::ITInterfaceError;
 use thiserror::Error as ThisError;
 
 // TODO: refactor errors
-
+// these errors most likely will be used while moving wasm compilation/instantiation into marine-web
+#[allow(unused)]
 #[derive(Debug, ThisError)]
 pub enum MError {
     /// Errors related to failed resolving of records.

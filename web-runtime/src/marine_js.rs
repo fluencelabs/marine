@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::borrow::{Cow};
 use marine_it_interfaces::MITInterfaces;
 use crate::module::type_converters::{itypes_args_to_wtypes, itypes_output_to_wtypes};
-use crate::INSTANCE;
+use crate::global_state::INSTANCE;
 
 // marine-related imports
 #[wasm_bindgen(module = "/marine-js.js")]

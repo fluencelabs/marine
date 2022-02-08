@@ -27,17 +27,8 @@ pub use faas_interface::FaaSInterface;
 pub use errors::FaaSError;
 
 // Re-exports from Marine
-pub use crate::IValue;
-pub use crate::IRecordType;
-pub use crate::IFunctionArg;
-pub use crate::IType;
-pub use crate::MModuleInterface as FaaSModuleInterface;
-pub use crate::MFunctionSignature as FaaSFunctionSignature;
-pub use crate::MRecordTypes;
-pub use crate::to_interface_value;
-pub use crate::from_interface_values;
-pub use crate::ne_vec;
-pub use crate::min_it_version;
+pub(crate) use crate::IRecordType;
+pub(crate) use crate::MModuleInterface as FaaSModuleInterface;
 
 pub use marine_module_interface::interface::itype_text_view;
 

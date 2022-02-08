@@ -33,111 +33,21 @@ mod errors;
 mod misc;
 mod module;
 mod faas;
+mod global_state;
+mod min_it_version;
 
-use std::cell::RefCell;
-use std::collections::HashMap;
-use wasm_bindgen::prelude::*;
-use module::MModule;
+pub(crate) use engine::MModuleInterface;
+pub(crate) use engine::Marine;
+pub(crate) use errors::MError;
+pub(crate) use module::IValue;
+pub(crate) use module::IRecordType;
+pub(crate) use module::IFunctionArg;
+pub(crate) use module::IType;
+pub(crate) use module::MRecordTypes;
 
-pub use engine::MModuleInterface;
-pub use engine::Marine;
-pub use errors::MError;
-pub use module::IValue;
-pub use module::IRecordType;
-pub use module::IFunctionArg;
-pub use module::IType;
-pub use module::MRecordTypes;
-pub use module::MFunctionSignature;
-pub use module::from_interface_values;
-pub use module::to_interface_value;
-pub use wasmer_it::IRecordFieldType;
-
-use crate::faas::FluenceFaaS;
-use marine_rs_sdk::CallParameters;
-
-use once_cell::sync::Lazy;
-
-use std::str::FromStr;
-pub use wasmer_it::ne_vec;
+pub(crate) use min_it_version::min_it_version;
 
 pub(crate) type MResult<T> = std::result::Result<T, MError>;
 
-static MINIMAL_SUPPORTED_IT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
-    semver::Version::from_str("0.20.0").expect("invalid minimal sdk version specified")
-});
-
-// These locals intended for check that set versions are correct at the start of an application.
-thread_local!(static MINIMAL_SUPPORTED_IT_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION));
-thread_local!(static MODULES: RefCell<Option<FluenceFaaS>> = RefCell::new(None));
-thread_local!(static INSTANCE: RefCell<Option<JsValue>> = RefCell::new(None));
-
-/// Return minimal support version of interface types.
-pub fn min_it_version() -> &'static semver::Version {
-    Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION)
-}
-
-#[wasm_bindgen]
-pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
-    console_error_panic_hook::set_once();
-    let mut map = HashMap::new();
-    map.insert(name.to_string(), Vec::<u8>::from(wit_section_bytes));
-    let faas = match FluenceFaaS::with_modules(map) {
-        Ok(faas) => faas,
-        Err(e) => return make_register_module_result(e.to_string().as_str()),
-    };
-
-    MODULES.with(|modules| modules.replace(Some(faas)));
-
-    INSTANCE.with(|instance| instance.replace(Some(wasm_instance)));
-
-    return make_register_module_result("");
-}
-
-#[wasm_bindgen]
-pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
-    MODULES.with(|modules| {
-        let mut modules = modules.borrow_mut();
-        let modules = match modules.as_mut() {
-            Some(modules) => modules,
-            None => return make_call_module_result(
-                serde_json::Value::Null,
-                "attempt to run a function when module is not loaded",
-            ),
-        };
-
-        let args: serde_json::Value = match serde_json::from_str(args) {
-            Ok(args) => args,
-            Err(e) => {
-                return make_call_module_result(
-                    serde_json::Value::Null,
-                    &format!("Error deserializing args: {}", e),
-                )
-            }
-        };
-
-        match modules.call_with_json(
-            module_name,
-            function_name,
-            args,
-            CallParameters::default(),
-        ) {
-            Ok(result) => make_call_module_result(result, ""),
-            Err(e) => make_call_module_result(
-                serde_json::Value::Null,
-                &format!("Error calling module function: {}", e),
-            ),
-        }
-    })
-}
-
-fn make_register_module_result(error: &str) -> String {
-    serde_json::json!({ "error": error }).to_string()
-}
-
-fn make_call_module_result(result: serde_json::Value, error: &str) -> String {
-    serde_json::json!({
-        "result": result,
-        "error": error,
-    })
-    .to_string()
-}
+// contains public API functions exported to JS
+mod api;

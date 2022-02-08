@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-use super::*;
 use crate::module::MRecordTypes;
+use crate::module::MModule;
+use crate::module::MFunctionSignature;
+use crate::MResult;
+use crate::MError;
+use crate::IValue;
 
 use serde::Serialize;
 
+use std::collections::HashMap;
 use std::collections::hash_map::Entry;
-use std::rc::Rc;
 
 /// Represent Marine module interface.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
@@ -35,6 +39,8 @@ pub struct Marine {
     modules: HashMap<String, MModule>,
 }
 
+// these methods will be used when decoupling common code from marine-runtime end web-marine-runtime
+#[allow(unused)]
 impl Marine {
     pub fn new() -> Self {
         Self {
