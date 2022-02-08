@@ -28,7 +28,6 @@ use wasmer_it::ast::Interfaces;
 
 use std::collections::HashMap;
 use std::convert::TryInto;
-use std::mem::MaybeUninit;
 use std::sync::Arc;
 use std::rc::Rc;
 use crate::module::wit_function::WITFunction;
@@ -93,16 +92,7 @@ impl MModule {
 
         let mit = MITInterfaces::new(it);
         let wasmer_instance = WasmerInstance::new(&mit, Rc::new(name.to_string()));
-        let mut wit_instance = Arc::new_uninit();
-
-        let it_instance = unsafe {
-            // get_mut_unchecked here is safe because currently only this modules have reference to
-            // it and the environment is single-threaded
-            *Arc::get_mut_unchecked(&mut wit_instance) =
-                MaybeUninit::new(ITInstance::new(&wasmer_instance, &mit)?);
-            std::mem::transmute::<_, Arc<ITInstance>>(wit_instance)
-        };
-
+        let it_instance = Arc::new(ITInstance::new(&wasmer_instance, &mit)?);
         let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
         Ok(Self {
             wasmer_instance: Box::new(wasmer_instance),
