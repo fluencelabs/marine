@@ -2,6 +2,7 @@ use wasm_bindgen::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::borrow::{Cow};
 use std::rc::Rc;
+use wasmer_it::ast::FunctionArg;
 use marine_it_interfaces::MITInterfaces;
 use crate::module::type_converters::{itypes_args_to_wtypes, itypes_output_to_wtypes};
 use crate::global_state::INSTANCE;
@@ -109,37 +110,9 @@ pub struct Exports {
 
 impl Exports {
     pub fn new(mit: &MITInterfaces, module_name: Rc<String>) -> Self {
-        use wasmer_it::ast::Type;
-
         let mut exports = mit
             .exports()
-            .filter_map(|export| {
-                match mit.type_by_idx(export.function_type) {
-                    Some(Type::Function {
-                        arguments,
-                        output_types,
-                    }) => {
-                        let mut arg_types =
-                            itypes_args_to_wtypes(arguments.as_slice().iter().map(|arg| &arg.ty));
-                        let output_types = itypes_output_to_wtypes(output_types.iter());
-                        if export.name == "allocate" {
-                            arg_types.push(WType::I32);
-                        }
-
-                        let sig = FuncSig {
-                            params: Cow::Owned(arg_types),
-                            returns: Cow::Owned(output_types),
-                        };
-
-                        Some(Export::Function(ProcessedExport {
-                            sig,
-                            name: Rc::new(export.name.to_string()),
-                        }))
-                    },
-                    Some(_) => None,
-                    None => unreachable!("code should not reach that arm"),
-                }
-            })
+            .filter_map(|export| Self::process_export(export, mit))
             .collect::<Vec<Export>>();
 
         // Exports in marine-web are extracted from interface-definition. It is a hack, it is used
@@ -152,6 +125,41 @@ impl Exports {
             exports,
             module_name,
         }
+    }
+
+    fn process_export(export: &wasmer_it::ast::Export, mit: &MITInterfaces) -> Option<Export> {
+        use wasmer_it::ast::Type;
+        match mit.type_by_idx(export.function_type) {
+            Some(Type::Function {
+                     arguments,
+                     output_types,
+                 }) => Some(Self::process_export_function(arguments.as_slice(), output_types.as_slice(), export.name)),
+            Some(_) => None,
+            None => unreachable!("code should not reach that arm"),
+        }
+    }
+
+    fn process_export_function(arguments: &[FunctionArg], output_types: &[wasmer_it::IType], function_name: &str) -> Export {
+        let mut arg_types =
+            itypes_args_to_wtypes(arguments.iter().map(|arg| &arg.ty));
+        let output_types = itypes_output_to_wtypes(output_types.iter());
+
+        // raw export function as a slightly different signature: it takes also "tag" argument
+        // it is used in marine-runtime, and interface-types pass an argument there
+        // so here signature is updated to match the expectations
+        if function_name == "allocate" {
+            arg_types.push(WType::I32);
+        }
+
+        let sig = FuncSig {
+            params: Cow::Owned(arg_types),
+            returns: Cow::Owned(output_types),
+        };
+
+        Export::Function(ProcessedExport {
+            sig,
+            name: Rc::new(function_name.to_string()),
+        })
     }
 
     pub fn get(&self, name: &str) -> Result<DynFunc, String> {
