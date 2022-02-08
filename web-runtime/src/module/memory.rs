@@ -18,14 +18,15 @@ use std::cell::Cell;
 use it_traits::{MemoryAccessError, SequentialWriter};
 use it_traits::SequentialReader;
 use wasmer_it::interpreter::wasm;
-use crate::marine_js::WasmMemory;
+use crate::marine_js::JsWasmMemoryProxy;
+use std::rc::Rc;
 
 pub(super) struct WITMemoryView {
-    module_name: String,
+    module_name: Rc<String>,
 }
 
 impl WITMemoryView {
-    pub fn new(module_name: String) -> Self {
+    pub fn new(module_name: Rc<String>) -> Self {
         Self { module_name }
     }
 
@@ -50,7 +51,7 @@ impl WITMemoryView {
 pub(super) struct JsSequentialReader {
     offset: Cell<usize>,
     data: Vec<u8>,
-    memory: WasmMemory,
+    memory: JsWasmMemoryProxy,
     start_offset: usize,
 }
 
@@ -58,11 +59,11 @@ pub(super) struct JsSequentialWriter {
     offset: usize,
     data: Vec<Cell<u8>>,
     current_offset: Cell<usize>,
-    memory: WasmMemory,
+    memory: JsWasmMemoryProxy,
 }
 
 impl JsSequentialWriter {
-    pub fn new(offset: usize, size: usize, memory: WasmMemory) -> Self {
+    pub fn new(offset: usize, size: usize, memory: JsWasmMemoryProxy) -> Self {
         Self {
             offset,
             data: vec![Cell::new(0u8); size],
@@ -73,7 +74,7 @@ impl JsSequentialWriter {
 }
 
 impl JsSequentialReader {
-    pub fn new(offset: usize, size: usize, memory: WasmMemory) -> Self {
+    pub fn new(offset: usize, size: usize, memory: JsWasmMemoryProxy) -> Self {
         let mut data = vec![0; size];
         memory.get_range(offset, &mut data);
         Self {
@@ -149,7 +150,7 @@ impl<'v> wasm::structures::MemoryView<'v> for WITMemoryView {
         offset: usize,
         size: usize,
     ) -> Result<Self::SW, MemoryAccessError> {
-        let memory = WasmMemory::new(self.module_name.clone());
+        let memory = JsWasmMemoryProxy::new(self.module_name.clone());
         let memory_size = memory.len();
 
         self.check_bounds(offset, size, memory_size)?;
@@ -162,7 +163,7 @@ impl<'v> wasm::structures::MemoryView<'v> for WITMemoryView {
         offset: usize,
         size: usize,
     ) -> Result<Self::SR, MemoryAccessError> {
-        let memory = WasmMemory::new(self.module_name.clone());
+        let memory = JsWasmMemoryProxy::new(self.module_name.clone());
         let memory_size = memory.len();
 
         self.check_bounds(offset, size, memory_size)?;
@@ -173,11 +174,11 @@ impl<'v> wasm::structures::MemoryView<'v> for WITMemoryView {
 
 #[derive(Clone)]
 pub(super) struct WITMemory {
-    module_name: String,
+    module_name: Rc<String>,
 }
 
 impl WITMemory {
-    pub fn new(module_name: String) -> Self {
+    pub fn new(module_name: Rc<String>) -> Self {
         Self { module_name }
     }
 }

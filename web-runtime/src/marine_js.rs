@@ -1,6 +1,7 @@
 use wasm_bindgen::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::borrow::{Cow};
+use std::rc::Rc;
 use marine_it_interfaces::MITInterfaces;
 use crate::module::type_converters::{itypes_args_to_wtypes, itypes_output_to_wtypes};
 use crate::global_state::INSTANCE;
@@ -34,11 +35,11 @@ impl FuncSig {
 
 pub struct Instance {
     pub exports: Exports,
-    pub module_name: String,
+    pub module_name: Rc<String>,
 }
 
 impl Instance {
-    pub fn new(mit: &MITInterfaces, module_name: String) -> Self {
+    pub fn new(mit: &MITInterfaces, module_name: Rc<String>) -> Self {
         Self {
             exports: Exports::new(mit, module_name.clone()),
             module_name,
@@ -52,8 +53,8 @@ impl Instance {
 
 pub struct DynFunc {
     pub(crate) signature: FuncSig,
-    pub name: String,
-    pub module_name: String,
+    pub name: Rc<String>,
+    pub module_name: Rc<String>,
 }
 
 impl DynFunc {
@@ -103,11 +104,11 @@ impl Export {
 
 pub struct Exports {
     exports: Vec<Export>,
-    module_name: String,
+    module_name: Rc<String>,
 }
 
 impl Exports {
-    pub fn new(mit: &MITInterfaces, module_name: String) -> Self {
+    pub fn new(mit: &MITInterfaces, module_name: Rc<String>) -> Self {
         use wasmer_it::ast::Type;
 
         let mut exports = mit
@@ -132,7 +133,7 @@ impl Exports {
 
                         Some(Export::Function(ProcessedExport {
                             sig,
-                            name: export.name.to_string(),
+                            name: Rc::new(export.name.to_string()),
                         }))
                     },
                     Some(_) => None,
@@ -156,7 +157,7 @@ impl Exports {
     pub fn get(&self, name: &str) -> Result<DynFunc, String> {
         let export = self.exports.iter().find(|export| {
             match export {
-                Export::Function(func) => func.name == name,
+                Export::Function(func) => func.name.as_str() == name,
                 _ => false,
             }
         });
@@ -175,7 +176,7 @@ impl Exports {
 #[derive(Clone)]
 pub struct ProcessedExport {
     sig: FuncSig,
-    name: String,
+    name: Rc<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -241,12 +242,12 @@ impl<'a> Iterator for ExportIter<'a> {
 }
 
 #[derive(Clone)]
-pub struct WasmMemory {
-    pub module_name: String,
+pub struct JsWasmMemoryProxy {
+    pub module_name: Rc<String>,
 }
 
-impl WasmMemory {
-    pub fn new(module_name: String) -> Self {
+impl JsWasmMemoryProxy {
+    pub fn new(module_name: Rc<String>) -> Self {
         Self { module_name }
     }
 

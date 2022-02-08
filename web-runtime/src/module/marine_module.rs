@@ -92,7 +92,7 @@ impl MModule {
         crate::misc::check_it_version(name, &it.version)?;
 
         let mit = MITInterfaces::new(it);
-        let wasmer_instance = WasmerInstance::new(&mit, name.to_string());
+        let wasmer_instance = WasmerInstance::new(&mit, Rc::new(name.to_string()));
         let mut wit_instance = Arc::new_uninit();
 
         let it_instance = unsafe {

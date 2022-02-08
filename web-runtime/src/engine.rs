@@ -20,11 +20,13 @@ use crate::module::MFunctionSignature;
 use crate::MResult;
 use crate::MError;
 use crate::IValue;
+use crate::IRecordType;
 
 use serde::Serialize;
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
+use std::rc::Rc;
 
 /// Represent Marine module interface.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
