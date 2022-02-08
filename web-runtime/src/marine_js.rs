@@ -7,6 +7,8 @@ use marine_it_interfaces::MITInterfaces;
 use crate::module::type_converters::{itypes_args_to_wtypes, itypes_output_to_wtypes};
 use crate::global_state::INSTANCE;
 
+const ALLOCATE_FUNC_NAME: &str = "allocate";
+
 // marine-related imports
 #[wasm_bindgen(module = "/marine-js.js")]
 extern "C" {
@@ -17,6 +19,7 @@ extern "C" {
     pub fn read_byte_range(module_name: &JsValue, module_offset: usize, slice: &mut [u8]);
     pub fn write_byte_range(module_name: &JsValue, module_offset: usize, slice: &[u8]);
 }
+
 
 #[derive(Clone)]
 pub struct FuncSig {
@@ -147,7 +150,7 @@ impl Exports {
         // raw export function as a slightly different signature: it takes also "tag" argument
         // it is used in marine-runtime, and interface-types pass an argument there
         // so here signature is updated to match the expectations
-        if function_name == "allocate" {
+        if function_name == ALLOCATE_FUNC_NAME {
             arg_types.push(WType::I32);
         }
 
