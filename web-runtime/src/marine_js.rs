@@ -111,33 +111,35 @@ pub struct Exports {
 
 impl Exports {
     pub fn new(mit: &MITInterfaces, module_name: String) -> Self {
+        use wasmer_it::ast::Type;
+
         let mut exports = mit
             .exports()
             .filter_map(|export| {
-                let fn_type = mit.type_by_idx(export.function_type).unwrap();
-                if let wasmer_it::ast::Type::Function {
-                    arguments,
-                    output_types,
-                } = fn_type
-                {
-                    let mut arg_types =
-                        itypes_args_to_wtypes(arguments.as_slice().iter().map(|arg| &arg.ty));
-                    let output_types = itypes_output_to_wtypes(output_types.iter());
-                    if export.name == "allocate" {
-                        arg_types.push(WType::I32);
-                    }
+                match mit.type_by_idx(export.function_type) {
+                    Some(Type::Function {
+                        arguments,
+                        output_types,
+                    }) => {
+                        let mut arg_types =
+                            itypes_args_to_wtypes(arguments.as_slice().iter().map(|arg| &arg.ty));
+                        let output_types = itypes_output_to_wtypes(output_types.iter());
+                        if export.name == "allocate" {
+                            arg_types.push(WType::I32);
+                        }
 
-                    let sig = FuncSig {
-                        params: Cow::Owned(arg_types),
-                        returns: Cow::Owned(output_types),
-                    };
+                        let sig = FuncSig {
+                            params: Cow::Owned(arg_types),
+                            returns: Cow::Owned(output_types),
+                        };
 
-                    Some(Export::Function(ProcessedExport {
-                        sig,
-                        name: export.name.to_string(),
-                    }))
-                } else {
-                    None
+                        Some(Export::Function(ProcessedExport {
+                            sig,
+                            name: export.name.to_string(),
+                        }))
+                    },
+                    Some(_) => None,
+                    None => unreachable!("code should not reach that arm"),
                 }
             })
             .collect::<Vec<Export>>();
