@@ -158,12 +158,12 @@ impl Exports {
 
     pub fn get(&self, name: &str) -> Result<DynFunc<'_>, String> {
         let export = self.exports.iter().find(|export| {
-            if let Export::Function(func) = export {
-                func.name == name
-            } else {
-                false
+            match export {
+                Export::Function(func) => func.name == name,
+                _ => false,
             }
         });
+
         match export {
             Some(Export::Function(function)) => Ok(DynFunc {
                 signature: function.sig.clone(),
