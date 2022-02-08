@@ -95,37 +95,36 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsVa
 
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
-
     MODULES.with(|modules| {
         let mut modules = modules.borrow_mut();
-        match modules.as_mut() {
-            Some(modules) => {
-                let args: serde_json::Value = match serde_json::from_str(args) {
-                    Ok(args) => args,
-                    Err(e) => {
-                        return make_call_module_result(
-                            serde_json::Value::Null,
-                            &format!("Error deserializing args: {}", e),
-                        )
-                    }
-                };
-
-                match modules.call_with_json(
-                    module_name,
-                    function_name,
-                    args,
-                    CallParameters::default(),
-                ) {
-                    Ok(result) => make_call_module_result(result, ""),
-                    Err(e) => make_call_module_result(
-                        serde_json::Value::Null,
-                        &format!("Error calling module function: {}", e),
-                    ),
-                }
-            }
-            None => make_call_module_result(
+        let modules = match modules.as_mut() {
+            Some(modules) => modules,
+            None => return make_call_module_result(
                 serde_json::Value::Null,
                 "attempt to run a function when module is not loaded",
+            ),
+        };
+
+        let args: serde_json::Value = match serde_json::from_str(args) {
+            Ok(args) => args,
+            Err(e) => {
+                return make_call_module_result(
+                    serde_json::Value::Null,
+                    &format!("Error deserializing args: {}", e),
+                )
+            }
+        };
+
+        match modules.call_with_json(
+            module_name,
+            function_name,
+            args,
+            CallParameters::default(),
+        ) {
+            Ok(result) => make_call_module_result(result, ""),
+            Err(e) => make_call_module_result(
+                serde_json::Value::Null,
+                &format!("Error calling module function: {}", e),
             ),
         }
     })
