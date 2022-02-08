@@ -99,10 +99,10 @@ pub enum Export {
 }
 
 impl Export {
-    pub fn name(&self) -> String {
+    pub fn name(&self) -> &str {
         match self {
-            Self::Memory => "memory".to_string(),
-            Self::Function(func) => func.name.clone(),
+            Self::Memory => "memory",
+            Self::Function(func) => &func.name,
         }
     }
 }
@@ -217,7 +217,6 @@ pub enum WValue {
 
 /// An iterator to an instance's exports.
 pub struct ExportIter<'a> {
-    //_data: PhantomData<&'a i32>,
     exports: &'a Exports,
     index: usize,
 }
@@ -225,7 +224,6 @@ pub struct ExportIter<'a> {
 impl<'a> ExportIter<'a> {
     pub(crate) fn new(exports: &'a Exports) -> Self {
         Self {
-            //_data: PhantomData::<&'a i32>::default(),
             exports,
             index: 0,
         }
@@ -233,8 +231,8 @@ impl<'a> ExportIter<'a> {
 }
 
 impl<'a> Iterator for ExportIter<'a> {
-    type Item = (String, Export);
-    fn next(&mut self) -> Option<(String, Export)> {
+    type Item = (&'a str, Export);
+    fn next(&mut self) -> Option<Self::Item> {
         let export = self.exports.exports.get(self.index);
         self.index += 1;
         export.map(|export| (export.name(), export.clone()))
