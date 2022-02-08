@@ -55,8 +55,7 @@ pub struct DynFunc<'a> {
     pub(crate) signature: FuncSig,
     pub name: String,
     pub module_name: String,
-    //pub(crate) instance_inner: &'a InstanceInner,
-    //func_index: FuncIndex,
+
     data3: PhantomData<&'a i32>,
 }
 
@@ -66,15 +65,13 @@ impl<'a> DynFunc<'_> {
     }
 
     pub fn call(&self, args: &[WValue]) -> Result<Vec<WValue>, String> {
-        let result = serde_json::ser::to_string(args);
-        if let Err(e) = result {
-            return Err(format!("cannot serialize call arguments, error: {}", e));
-        }
+        let args = match serde_json::ser::to_string(args) {
+            Ok(args) => args,
+            Err(e) => return Err(format!("cannot serialize call arguments, error: {}", e)),
+        };
 
-        let args = result.unwrap();
         let output = INSTANCE
             .with(|instance| call_export(instance.borrow().as_ref().unwrap(), &self.name, &args));
-
 
         let value = serde_json::de::from_str::<serde_json::Value>(&output);
         match value {
