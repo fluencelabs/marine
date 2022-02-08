@@ -24,7 +24,7 @@ use crate::marine_js::DynFunc;
 
 #[derive(Clone)]
 enum WITFunctionInner {
-    Export { func: Rc<DynFunc<'static>> },
+    Export { func: Rc<DynFunc> },
 }
 
 /// Represents all import and export functions that could be called from IT context by call-core.
@@ -38,7 +38,7 @@ pub(super) struct WITFunction {
 
 impl WITFunction {
     /// Creates functions from a "usual" (not IT) module export.
-    pub(super) fn from_export(dyn_func: DynFunc<'static>, name: String) -> MResult<Self> {
+    pub(super) fn from_export(dyn_func: DynFunc, name: String) -> MResult<Self> {
         use super::type_converters::wtype_to_itype;
 
         let signature = dyn_func.signature();

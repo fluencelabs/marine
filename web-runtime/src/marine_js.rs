@@ -1,5 +1,4 @@
 use wasm_bindgen::prelude::*;
-use std::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 use std::borrow::{Cow};
 use marine_it_interfaces::MITInterfaces;
@@ -51,15 +50,13 @@ impl Instance {
     }
 }
 
-pub struct DynFunc<'a> {
+pub struct DynFunc {
     pub(crate) signature: FuncSig,
     pub name: String,
     pub module_name: String,
-
-    data3: PhantomData<&'a i32>,
 }
 
-impl<'a> DynFunc<'_> {
+impl DynFunc {
     pub fn signature(&self) -> &FuncSig {
         &self.signature
     }
@@ -156,7 +153,7 @@ impl Exports {
         }
     }
 
-    pub fn get(&self, name: &str) -> Result<DynFunc<'_>, String> {
+    pub fn get(&self, name: &str) -> Result<DynFunc, String> {
         let export = self.exports.iter().find(|export| {
             match export {
                 Export::Function(func) => func.name == name,
@@ -169,7 +166,6 @@ impl Exports {
                 signature: function.sig.clone(),
                 name: function.name.clone(),
                 module_name: self.module_name.clone(),
-                data3: Default::default(),
             }),
             Some(_) | None => Err(format!("cannot find export {}", name)),
         }
