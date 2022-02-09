@@ -12,7 +12,6 @@ use std::collections::HashMap;
 */
 #[wasm_bindgen]
 pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
-    console_error_panic_hook::set_once();
     let mut map = HashMap::new();
     map.insert(name.to_string(), wit_section_bytes.to_vec());
     let faas = match FluenceFaaS::with_modules(map) {

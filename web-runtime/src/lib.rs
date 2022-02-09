@@ -48,3 +48,12 @@ pub(crate) type MResult<T> = std::result::Result<T, MError>;
 
 // contains public API functions exported to JS
 mod api;
+
+use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::prelude::JsValue;
+#[wasm_bindgen( start)]
+pub fn main() -> Result<(), JsValue> {
+    // prints human-readable stracktrace on panics, useful when investigating problems
+    console_error_panic_hook::set_once();
+    Ok(())
+}
