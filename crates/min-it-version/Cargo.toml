@@ -1,0 +1,9 @@
+[package]
+name = "marine-min-it-version"
+version = "0.1.0"
+edition = "2018"
+#TODO fill fields
+
+[dependencies]
+once_cell = "1.7.2"
+semver = "0.11.0"

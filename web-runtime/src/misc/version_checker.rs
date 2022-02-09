@@ -17,11 +17,13 @@
 use crate::MResult;
 use crate::MError;
 
+use marine_min_it_version::min_it_version;
+
 pub(crate) fn check_it_version(
     name: impl Into<String>,
     it_version: &semver::Version,
 ) -> MResult<()> {
-    let required_version = crate::min_it_version();
+    let required_version = min_it_version();
     if it_version < required_version {
         return Err(MError::IncompatibleITVersions {
             module_name: name.into(),

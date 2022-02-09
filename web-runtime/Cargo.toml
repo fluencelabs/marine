@@ -11,6 +11,7 @@ crate-type = ["cdylib"]
 marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.4.1" }
 marine-module-interface = { path = "../crates/module-interface", version = "0.1.6" }
 marine-utils = { path = "../crates/utils", version = "0.4.0" }
+marine-min-it-version =  { path = "../crates/min-it-version", version = "0.1.0"}
 
 marine-rs-sdk = "0.6.15"
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.0" }

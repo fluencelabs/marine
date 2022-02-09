@@ -34,7 +34,6 @@ mod misc;
 mod module;
 mod faas;
 mod global_state;
-mod min_it_version;
 
 pub(crate) use engine::MModuleInterface;
 pub(crate) use engine::Marine;
@@ -44,8 +43,6 @@ pub(crate) use module::IRecordType;
 pub(crate) use module::IFunctionArg;
 pub(crate) use module::IType;
 pub(crate) use module::MRecordTypes;
-
-pub(crate) use min_it_version::min_it_version;
 
 pub(crate) type MResult<T> = std::result::Result<T, MError>;
 
