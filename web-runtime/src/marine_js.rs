@@ -270,9 +270,11 @@ impl JsWasmMemoryProxy {
         INSTANCE.with(|instance| get_memory_size(instance.borrow().as_ref().unwrap()) as usize)
     }
 
-    pub fn get_range(&self, offset: usize, result: &mut [u8]) {
+    pub fn get_range(&self, offset: usize, size: usize) -> Vec<u8>{
         INSTANCE.with(|instance| {
-            read_byte_range(instance.borrow().as_ref().unwrap(), offset, result);
+            let mut result = vec![0; size];
+            read_byte_range(instance.borrow().as_ref().unwrap(), offset, &mut result);
+            result
         })
     }
 

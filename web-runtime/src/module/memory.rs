@@ -75,8 +75,7 @@ impl JsSequentialWriter {
 
 impl JsSequentialReader {
     pub fn new(offset: usize, size: usize, memory: JsWasmMemoryProxy) -> Self {
-        let mut data = vec![0; size];
-        memory.get_range(offset, &mut data);
+        let data = memory.get_range(offset, size);
         Self {
             offset: Cell::new(offset),
             data,
