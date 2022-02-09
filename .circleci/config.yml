@@ -28,7 +28,7 @@ jobs:
           cargo install --path tools/cli
 
           cargo fmt --all -- --check --color always
-          cargo check -v --all-features -p marine-runtime -p fluence-faas -p fluence-app-service -p marine -p mrepl -p marine-web-runtime
+          cargo check -v --all-features -p marine-runtime -p fluence-faas -p fluence-app-service -p marine -p mrepl
 
           (
             cd web-runtime
