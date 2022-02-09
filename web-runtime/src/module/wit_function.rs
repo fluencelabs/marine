@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 use super::{IType, IFunctionArg, IValue, WValue};
 use crate::MResult;
+use crate::marine_js::DynFunc;
 
 use wasmer_it::interpreter::wasm;
 
 use std::rc::Rc;
-use crate::marine_js::DynFunc;
 
 #[derive(Clone)]
 enum WITFunctionInner {

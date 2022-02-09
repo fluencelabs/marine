@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ use crate::faas::FaaSError;
 use crate::faas::Result;
 use crate::IValue;
 use crate::IType;
-
 use crate::Marine;
 use crate::IFunctionArg;
-//use marine_utils::SharedString;
 use crate::MRecordTypes;
+
+//use marine_utils::SharedString;
 use marine_rs_sdk::CallParameters;
 
 use serde_json::Value as JValue;

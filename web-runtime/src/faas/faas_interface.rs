@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ use crate::faas::FaaSModuleInterface;
 
 use itertools::Itertools;
 use serde::Serialize;
-
 use std::fmt;
 use std::collections::HashMap;
 

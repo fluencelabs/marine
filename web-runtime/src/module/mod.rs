@@ -41,7 +41,6 @@ pub struct MFunctionSignature {
     pub outputs: Rc<Vec<IType>>,
 }
 
-#[allow(unused)]
 pub(crate) use marine_module::MModule;
 pub(self) use crate::marine_js::WType;
 pub(self) use crate::marine_js::WValue;

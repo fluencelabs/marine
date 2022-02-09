@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-use std::cell::Cell;
+use crate::marine_js::JsWasmMemoryProxy;
+
 use it_traits::{MemoryAccessError, SequentialWriter};
 use it_traits::SequentialReader;
 use wasmer_it::interpreter::wasm;
-use crate::marine_js::JsWasmMemoryProxy;
+
+use std::cell::Cell;
 use std::rc::Rc;
 
 pub(super) struct WITMemoryView {

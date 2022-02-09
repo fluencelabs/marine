@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ use crate::IValue;
 use crate::IType;
 use crate::faas::Result;
 use crate::faas::FaaSError::JsonArgumentsDeserializationError as ArgDeError;
-
 use crate::MRecordTypes;
-use serde_json::Value as JValue;
+
 use wasmer_it::NEVec;
 
+use serde_json::Value as JValue;
 use std::collections::HashMap;
 use std::iter::ExactSizeIterator;
 

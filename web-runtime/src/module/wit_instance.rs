@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 use super::wit_prelude::*;
 use super::IRecordType;
 use crate::{MResult};
+use crate::marine_js::{Instance as WasmerInstance};
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
 use wasmer_it::interpreter::wasm;
 use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, TypedIndex};
-use crate::marine_js::{Instance as WasmerInstance};
 
 use std::collections::HashMap;
 use std::rc::Rc;

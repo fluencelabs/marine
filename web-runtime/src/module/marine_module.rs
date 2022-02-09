@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ use super::MFunctionSignature;
 use super::MRecordTypes;
 use super::{IType, IRecordType, IFunctionArg, IValue};
 use crate::MResult;
+use crate::marine_js::{Instance as WasmerInstance};
+use crate::module::wit_function::WITFunction;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_utils::SharedString;
-use crate::marine_js::{Instance as WasmerInstance};
 use wasmer_it::interpreter::Interpreter;
 use wasmer_it::ast::Interfaces;
 
@@ -30,7 +31,6 @@ use std::collections::HashMap;
 use std::convert::TryInto;
 use std::sync::Arc;
 use std::rc::Rc;
-use crate::module::wit_function::WITFunction;
 
 type ITInterpreter = Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView>;
 

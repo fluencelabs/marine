@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,15 @@
     unreachable_patterns
 )]
 
-pub(crate) mod marine_js;
+
 mod engine;
 mod errors;
 mod misc;
 mod module;
 mod faas;
 mod global_state;
+mod api; // contains public API functions exported to JS
+mod marine_js;
 
 pub(crate) use engine::MModuleInterface;
 pub(crate) use engine::Marine;
@@ -46,12 +48,10 @@ pub(crate) use module::MRecordTypes;
 
 pub(crate) type MResult<T> = std::result::Result<T, MError>;
 
-// contains public API functions exported to JS
-mod api;
-
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::prelude::JsValue;
-#[wasm_bindgen( start)]
+
+#[wasm_bindgen(start)]
 pub fn main() -> Result<(), JsValue> {
     // prints human-readable stracktrace on panics, useful when investigating problems
     console_error_panic_hook::set_once();
