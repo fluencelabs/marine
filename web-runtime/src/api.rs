@@ -51,10 +51,12 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String
         let mut modules = modules.borrow_mut();
         let modules = match modules.as_mut() {
             Some(modules) => modules,
-            None => return make_call_module_result(
-                serde_json::Value::Null,
-                "attempt to run a function when module is not loaded",
-            ),
+            None => {
+                return make_call_module_result(
+                    serde_json::Value::Null,
+                    "attempt to run a function when module is not loaded",
+                )
+            }
         };
 
         let args: serde_json::Value = match serde_json::from_str(args) {
@@ -67,12 +69,7 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String
             }
         };
 
-        match modules.call_with_json(
-            module_name,
-            function_name,
-            args,
-            CallParameters::default(),
-        ) {
+        match modules.call_with_json(module_name, function_name, args, CallParameters::default()) {
             Ok(result) => make_call_module_result(result, ""),
             Err(e) => make_call_module_result(
                 serde_json::Value::Null,
@@ -91,5 +88,5 @@ fn make_call_module_result(result: serde_json::Value, error: &str) -> String {
         "result": result,
         "error": error,
     })
-        .to_string()
+    .to_string()
 }

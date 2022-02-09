@@ -38,7 +38,6 @@ extern "C" {
     pub fn write_byte_range(module_name: &JsValue, module_offset: usize, slice: &[u8]);
 }
 
-
 #[derive(Clone)]
 pub struct FuncSig {
     params: Cow<'static, [WType]>,
@@ -102,9 +101,7 @@ impl DynFunc {
                     .collect::<Vec<_>>();
                 Ok(values)
             }
-            _ => {
-                Err("invalid json got".to_string())
-            }
+            _ => Err("invalid json got".to_string()),
         }
     }
 }
@@ -152,17 +149,24 @@ impl Exports {
         use wasmer_it::ast::Type;
         match mit.type_by_idx(export.function_type) {
             Some(Type::Function {
-                     arguments,
-                     output_types,
-                 }) => Some(Self::process_export_function(arguments.as_slice(), output_types.as_slice(), export.name)),
+                arguments,
+                output_types,
+            }) => Some(Self::process_export_function(
+                arguments.as_slice(),
+                output_types.as_slice(),
+                export.name,
+            )),
             Some(_) => None,
             None => unreachable!("code should not reach that arm"),
         }
     }
 
-    fn process_export_function(arguments: &[FunctionArg], output_types: &[wasmer_it::IType], function_name: &str) -> Export {
-        let mut arg_types =
-            itypes_args_to_wtypes(arguments.iter().map(|arg| &arg.ty));
+    fn process_export_function(
+        arguments: &[FunctionArg],
+        output_types: &[wasmer_it::IType],
+        function_name: &str,
+    ) -> Export {
+        let mut arg_types = itypes_args_to_wtypes(arguments.iter().map(|arg| &arg.ty));
         let output_types = itypes_output_to_wtypes(output_types.iter());
 
         // raw export function as a slightly different signature: it takes also "tag" argument
@@ -184,11 +188,9 @@ impl Exports {
     }
 
     pub fn get(&self, name: &str) -> Result<DynFunc, String> {
-        let export = self.exports.iter().find(|export| {
-            match export {
-                Export::Function(func) => func.name.as_str() == name,
-                _ => false,
-            }
+        let export = self.exports.iter().find(|export| match export {
+            Export::Function(func) => func.name.as_str() == name,
+            _ => false,
         });
 
         match export {
@@ -254,10 +256,7 @@ pub struct ExportIter<'a> {
 
 impl<'a> ExportIter<'a> {
     pub(crate) fn new(exports: &'a Exports) -> Self {
-        Self {
-            exports,
-            index: 0,
-        }
+        Self { exports, index: 0 }
     }
 }
 
@@ -292,7 +291,7 @@ impl JsWasmMemoryProxy {
         INSTANCE.with(|instance| get_memory_size(instance.borrow().as_ref().unwrap()) as usize)
     }
 
-    pub fn get_range(&self, offset: usize, size: usize) -> Vec<u8>{
+    pub fn get_range(&self, offset: usize, size: usize) -> Vec<u8> {
         INSTANCE.with(|instance| {
             let mut result = vec![0; size];
             read_byte_range(instance.borrow().as_ref().unwrap(), offset, &mut result);
