@@ -23,7 +23,7 @@ use crate::module::WasmerSequentialReader;
 
 use crate::module::WasmerSequentialWriter;
 
-use it_traits::{MemoryAccessError};
+use it_memory_traits::{MemoryAccessError};
 
 pub(crate) struct WITMemoryView<'a>(pub(crate) MemoryView<'a, u8>);
 
@@ -56,7 +56,7 @@ impl WITMemoryView<'_> {
     }
 }
 
-impl<'s, 'v> wasm::structures::MemoryView<'v> for WITMemoryView<'s> {
+impl<'s, 'v> wasm::structures::SequentialMemoryView<'v> for WITMemoryView<'s> {
     type SR = WasmerSequentialReader<'v>;
     type SW = WasmerSequentialWriter<'v>;
 

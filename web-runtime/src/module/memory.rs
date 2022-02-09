@@ -16,8 +16,8 @@
 
 use crate::marine_js::JsWasmMemoryProxy;
 
-use it_traits::{MemoryAccessError, SequentialWriter};
-use it_traits::SequentialReader;
+use it_memory_traits::{MemoryAccessError, SequentialWriter};
+use it_memory_traits::SequentialReader;
 use wasmer_it::interpreter::wasm;
 
 use std::cell::Cell;
@@ -129,7 +129,7 @@ impl SequentialWriter for JsSequentialWriter {
     }
 }
 
-impl<'v> wasm::structures::MemoryView<'v> for WITMemoryView {
+impl<'v> wasm::structures::SequentialMemoryView<'v> for WITMemoryView {
     type SR = JsSequentialReader;
     type SW = JsSequentialWriter;
 

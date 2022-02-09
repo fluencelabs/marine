@@ -43,7 +43,7 @@ macro_rules! simple_wvalue_to_ivalue {
     }};
 }
 
-pub(crate) fn wvalues_to_ivalues<R: RecordResolvable, MV: for<'a> MemoryView<'a>>(
+pub(crate) fn wvalues_to_ivalues<R: RecordResolvable, MV: for<'a> SequentialMemoryView<'a>>(
     lifter: &ILifter<'_, R, MV>,
     wvalues: &[WValue],
     itypes: &[IType],

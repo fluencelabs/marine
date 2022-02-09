@@ -1,5 +1,5 @@
 use std::cell::Cell;
-use it_traits::{SequentialReader, SequentialWriter};
+use it_memory_traits::{SequentialReader, SequentialWriter};
 
 #[macro_export]
 macro_rules! value_der {
