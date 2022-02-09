@@ -26,6 +26,11 @@ export function read_byte(instance, offset) {
     return buf[offset];
 }
 
+export function write_byte(instance, offset, value) {
+    let buf = new Uint8Array(instance.exports.memory.buffer);
+    buf[offset] = value;
+}
+
 export function write_byte_range(instance, offset, slice) {
     let buf = new Uint8Array(instance.exports.memory.buffer);
     for (let byte_index = 0; byte_index < slice.length; byte_index++) {

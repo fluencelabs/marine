@@ -13,7 +13,7 @@ const ALLOCATE_FUNC_NAME: &str = "allocate";
 #[wasm_bindgen(module = "/marine-js.js")]
 extern "C" {
     pub fn call_export(module_name: &JsValue, export_name: &str, args: &str) -> String;
-
+    pub fn write_byte(module_name: &JsValue, module_offset: usize, value: u8);
     pub fn read_byte(module_name: &JsValue, module_offset: usize) -> u8;
     pub fn get_memory_size(module_name: &JsValue) -> i32;
     pub fn read_byte_range(module_name: &JsValue, module_offset: usize, slice: &mut [u8]);
@@ -264,6 +264,10 @@ impl JsWasmMemoryProxy {
 
     pub fn get(&self, index: usize) -> u8 {
         INSTANCE.with(|instance| read_byte(instance.borrow().as_ref().unwrap(), index))
+    }
+
+    pub fn set(&self, index: usize, value: u8) {
+        INSTANCE.with(|instance| write_byte(instance.borrow().as_ref().unwrap(), index, value))
     }
 
     pub fn len(&self) -> usize {

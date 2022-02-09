@@ -57,16 +57,14 @@ pub(super) struct JsSequentialReader {
 
 pub(super) struct JsSequentialWriter {
     offset: usize,
-    data: Vec<Cell<u8>>,
     current_offset: Cell<usize>,
     memory: JsWasmMemoryProxy,
 }
 
 impl JsSequentialWriter {
-    pub fn new(offset: usize, size: usize, memory: JsWasmMemoryProxy) -> Self {
+    pub fn new(offset: usize, memory: JsWasmMemoryProxy) -> Self {
         Self {
             offset,
-            data: vec![Cell::new(0u8); size],
             current_offset: Cell::new(offset),
             memory,
         }
@@ -113,7 +111,7 @@ impl SequentialWriter for JsSequentialWriter {
 
     fn write_u8(&self, value: u8) {
         let offset = self.current_offset.get();
-        self.data[offset].set(value);
+        self.memory.set(offset, value);
         self.current_offset.set(offset + 1);
     }
 
@@ -124,19 +122,8 @@ impl SequentialWriter for JsSequentialWriter {
 
     fn write_bytes(&self, bytes: &[u8]) {
         let offset = self.current_offset.get();
-        let start = offset - self.start_offset();
-        for index in 0..bytes.len() {
-            self.data[start + index].set(bytes[index]);
-        }
-
+        self.memory.set_range(offset, bytes);
         self.current_offset.set(offset + bytes.len());
-    }
-}
-
-impl Drop for JsSequentialWriter {
-    fn drop(&mut self) {
-        let data: Vec<u8> = self.data.iter().map(|v| v.get()).collect();
-        self.memory.set_range(self.start_offset(), data.as_slice());
     }
 }
 
@@ -154,7 +141,7 @@ impl<'v> wasm::structures::MemoryView<'v> for WITMemoryView {
 
         self.check_bounds(offset, size, memory_size)?;
 
-        Ok(JsSequentialWriter::new(offset, size, memory))
+        Ok(JsSequentialWriter::new(offset, memory))
     }
 
     fn sequential_reader(
