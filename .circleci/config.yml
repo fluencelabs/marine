@@ -1,4 +1,7 @@
 version: 2.1
+orbs:
+  node: circleci/node@5.0.0
+
 jobs:
   marine:
     docker:
@@ -12,6 +15,10 @@ jobs:
       - restore_cache:
           keys:
             - marine04-{{ checksum "Cargo.lock" }}
+
+      - node/install:
+          node-version: '16.14'
+
       - run: |
           rustup toolchain install nightly-2021-05-21
           rustup default nightly-2021-05-21
