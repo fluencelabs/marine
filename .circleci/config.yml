@@ -53,7 +53,7 @@ jobs:
           (
             cd web-runtime/npm-package
             npm run test
-          }
+          )
 
       - save_cache:
           paths:
