@@ -26,6 +26,7 @@ use std::collections::HashMap;
 /**
 * doc comment
 */
+#[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
 pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
     let mut map = HashMap::new();
@@ -45,6 +46,7 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsVa
 /**
  * doc comment
  */
+#[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
     MODULES.with(|modules| {
@@ -79,10 +81,12 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String
     })
 }
 
+#[allow(unused)] // needed because clippy marks this function as unused
 fn make_register_module_result(error: &str) -> String {
     serde_json::json!({ "error": error }).to_string()
 }
 
+#[allow(unused)] // needed because clippy marks this function as unused
 fn make_call_module_result(result: serde_json::Value, error: &str) -> String {
     serde_json::json!({
         "result": result,
