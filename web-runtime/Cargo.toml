@@ -17,7 +17,7 @@ marine-rs-sdk = "0.6.15"
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.0" }
 fluence-it-types = {version = "0.3.1", features = ["impls"] }
 it-lilo = "0.2.0"
-it-memory-traits = { git = "https://github.com/fluencelabs/interface-types/", package = "it-memory-traits", branch = "master"}
+it-memory-traits = { git = "https://github.com/fluencelabs/interface-types/", package = "it-memory-traits", branch = "fix_crash"}
 
 wasm-bindgen = "0.2"
 nom = "5.1"
