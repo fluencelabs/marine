@@ -277,6 +277,9 @@ pub struct JsWasmMemoryProxy {
     pub module_name: Rc<String>,
 }
 
+// .unwrap() on INSTANCE in these methords is safe because they can be called only if MODULES
+// is Some, and register_module sets MODULES and INSTANCE to Some at the same time.
+// And at the same time they are set to NONE at the start of the application
 impl JsWasmMemoryProxy {
     pub fn new(module_name: Rc<String>) -> Self {
         Self { module_name }
