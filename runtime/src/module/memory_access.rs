@@ -100,6 +100,8 @@ impl SequentialReader for WasmerSequentialReader<'_> {
         result
     }
 
+    // needed because clippy suggests using an iterator which looks worse
+    #[allow(clippy::needless_range_loop)]
     fn read_bytes<const COUNT: usize>(&self) -> [u8; COUNT] {
         let offset = self.offset.get();
         let mut result = [0u8; COUNT];

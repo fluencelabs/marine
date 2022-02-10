@@ -152,8 +152,7 @@ pub(crate) fn generate_raw_args(signature: &FnSignature) -> Rc<Vec<IFunctionArg>
     let raw_inputs = signature
         .arguments
         .iter()
-        .map(to_raw_input_types)
-        .flatten()
+        .flat_map(to_raw_input_types)
         .collect::<Vec<_>>();
 
     Rc::new(raw_inputs)
@@ -163,13 +162,12 @@ pub(crate) fn generate_raw_output_type(signature: &FnSignature) -> Rc<Vec<IType>
     let raw_outputs = signature
         .output_types
         .iter()
-        .map(|ty| {
+        .flat_map(|ty| {
             to_raw_output_type(ty)
                 .iter()
                 .map(wtype_to_itype)
                 .collect::<Vec<_>>()
         })
-        .flatten()
         .collect::<Vec<_>>();
 
     Rc::new(raw_outputs)

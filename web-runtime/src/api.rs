@@ -40,7 +40,7 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsVa
 
     INSTANCE.with(|instance| instance.replace(Some(wasm_instance)));
 
-    return make_register_module_result("");
+    make_register_module_result("")
 }
 
 /**

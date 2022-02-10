@@ -84,7 +84,7 @@ impl From<MITInterfacesError> for MError {
 
 impl From<String> for MError {
     fn from(err: String) -> Self {
-        MError::StringError(format!("{}", err))
+        MError::StringError(err)
     }
 }
 

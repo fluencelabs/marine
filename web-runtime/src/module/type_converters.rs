@@ -51,26 +51,24 @@ pub(super) fn wval_to_ival(value: &WValue) -> IValue {
 
 pub fn itypes_args_to_wtypes<'i>(itypes: impl Iterator<Item = &'i IType>) -> Vec<WType> {
     itypes
-        .map(|itype| match itype {
+        .flat_map(|itype| match itype {
             IType::F32 => vec![WType::F32],
             IType::F64 => vec![WType::F64],
             IType::I64 | IType::U64 => vec![WType::I64],
             IType::String | IType::Array(_) | IType::ByteArray => vec![WType::I32, WType::I32],
             _ => vec![WType::I32],
         })
-        .flatten()
         .collect::<Vec<_>>()
 }
 
 pub fn itypes_output_to_wtypes<'i>(itypes: impl Iterator<Item = &'i IType>) -> Vec<WType> {
     itypes
-        .map(|itype| match itype {
+        .flat_map(|itype| match itype {
             IType::F32 => vec![WType::F32],
             IType::F64 => vec![WType::F64],
             IType::I64 | IType::U64 => vec![WType::I64],
             IType::String | IType::Array(_) | IType::ByteArray | IType::Record(_) => vec![],
             _ => vec![WType::I32],
         })
-        .flatten()
         .collect::<Vec<_>>()
 }

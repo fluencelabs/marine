@@ -60,14 +60,14 @@ pub struct Instance {
 }
 
 impl Instance {
-    pub fn new(mit: &MITInterfaces, module_name: Rc<String>) -> Self {
+    pub fn new(mit: &MITInterfaces<'_>, module_name: Rc<String>) -> Self {
         Self {
             exports: Exports::new(mit, module_name.clone()),
             module_name,
         }
     }
 
-    pub fn exports(&self) -> ExportIter {
+    pub fn exports(&self) -> ExportIter<'_> {
         ExportIter::new(&self.exports)
     }
 }
@@ -127,7 +127,7 @@ pub struct Exports {
 }
 
 impl Exports {
-    pub fn new(mit: &MITInterfaces, module_name: Rc<String>) -> Self {
+    pub fn new(mit: &MITInterfaces<'_>, module_name: Rc<String>) -> Self {
         let mut exports = mit
             .exports()
             .filter_map(|export| Self::process_export(export, mit))
@@ -145,7 +145,10 @@ impl Exports {
         }
     }
 
-    fn process_export(export: &wasmer_it::ast::Export, mit: &MITInterfaces) -> Option<Export> {
+    fn process_export(
+        export: &wasmer_it::ast::Export<'_>,
+        mit: &MITInterfaces<'_>,
+    ) -> Option<Export> {
         use wasmer_it::ast::Type;
         match mit.type_by_idx(export.function_type) {
             Some(Type::Function {
@@ -225,7 +228,7 @@ pub enum WType {
 }
 
 impl std::fmt::Display for WType {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
 }
