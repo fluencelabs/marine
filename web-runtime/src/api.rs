@@ -23,9 +23,18 @@ use marine_rs_sdk::CallParameters;
 use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
 
-/**
-* doc comment
-*/
+/// Registers a module insite web-runtime.
+///
+/// # Arguments
+///
+/// * `name` - name of module to register
+/// * `wit_section_bytes` - bytes of "interface-types" custom section from wasm file
+/// * `instance` - `WebAssembly::Instance` made from target wasm file
+///
+/// # Return value
+///
+/// JSON object with fieldd "error". If error is empty, module is registered.
+/// otherwise, it contaits error message.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
 pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
@@ -43,9 +52,18 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsVa
     make_register_module_result("")
 }
 
-/**
- * doc comment
- */
+///  calls a function from a module
+///
+/// # Arguments
+///
+/// * module_name - name of registered module
+/// * function_name - name of the function to call
+/// * args - JSON array of function arguments
+///
+/// # Return value
+///
+/// JSON object with fields "error" and "result". If "error" is empty string,
+/// "result" contains a function return value. Othervise, "error" contains error message.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
