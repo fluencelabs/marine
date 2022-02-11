@@ -48,19 +48,6 @@ export async function init(module) {
         return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
     }
 
-    function getArrayU8FromWasm0(ptr, len) {
-        return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
-    }
-
-    function addHeapObject(obj) {
-        if (heap_next === heap.length) heap.push(heap.length + 1);
-        const idx = heap_next;
-        heap_next = heap[idx];
-
-        heap[idx] = obj;
-        return idx;
-    }
-
     let WASM_VECTOR_LEN = 0;
 
     let cachedTextEncoder = new TextEncoder('utf-8');
@@ -140,7 +127,7 @@ export async function init(module) {
     }
     /**
      */
-    export function main() {
+    function main() {
         wasm.main();
     }
 
@@ -151,8 +138,18 @@ export async function init(module) {
         return ptr;
     }
     /**
+     * Registers a module insite web-runtime.
      *
-     ** doc comment
+     * # Arguments
+     *
+     * * `name` - name of module to register
+     * * `wit_section_bytes` - bytes of "interface-types" custom section from wasm file
+     * * `instance` - `WebAssembly::Instance` made from target wasm file
+     *
+     * # Return value
+     *
+     * JSON object with field "error". If error is empty, module is registered.
+     * otherwise, it contaits error message.
      * @param {string} name
      * @param {Uint8Array} wit_section_bytes
      * @param {any} wasm_instance
@@ -176,9 +173,18 @@ export async function init(module) {
     }
 
     /**
+     *  Calls a function from a module.
      *
-     * * doc comment
+     * # Arguments
      *
+     * * module_name - name of registered module
+     * * function_name - name of the function to call
+     * * args - JSON array of function arguments
+     *
+     * # Return value
+     *
+     * JSON object with fields "error" and "result". If "error" is empty string,
+     * "result" contains a function return value. Othervise, "error" contains error message.
      * @param {string} module_name
      * @param {string} function_name
      * @param {string} args
