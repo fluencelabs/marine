@@ -33,7 +33,7 @@ use std::collections::HashMap;
 ///
 /// # Return value
 ///
-/// JSON object with fieldd "error". If error is empty, module is registered.
+/// JSON object with field "error". If error is empty, module is registered.
 /// otherwise, it contaits error message.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
@@ -52,7 +52,7 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsVa
     make_register_module_result("")
 }
 
-///  calls a function from a module
+///  Calls a function from a module.
 ///
 /// # Arguments
 ///
