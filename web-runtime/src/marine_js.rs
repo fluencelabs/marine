@@ -176,7 +176,7 @@ impl Exports {
         let mut arg_types = itypes_args_to_wtypes(arguments.iter().map(|arg| &arg.ty));
         let output_types = itypes_output_to_wtypes(output_types.iter());
 
-        // raw export function as a slightly different signature: it takes also "tag" argument
+        // raw export allocate function as a slightly different signature: it takes also "tag" argument
         // it is used in marine-runtime, and interface-types pass an argument there
         // so here signature is updated to match the expectations
         if function_name == ALLOCATE_FUNC_NAME {
@@ -281,7 +281,7 @@ pub struct JsWasmMemoryProxy {
     pub module_name: Rc<String>,
 }
 
-// .unwrap() on INSTANCE in these methords is safe because they can be called only if MODULES
+// .unwrap() on INSTANCE in these methods is safe because they can be called only if MODULES
 // is Some, and register_module sets MODULES and INSTANCE to Some at the same time.
 // And at the same time they are set to NONE at the start of the application
 impl JsWasmMemoryProxy {

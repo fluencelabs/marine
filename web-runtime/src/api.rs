@@ -36,7 +36,7 @@ struct CallModuleResult {
     result: JValue,
 }
 
-/// Registers a module insite web-runtime.
+/// Registers a module inside web-runtime.
 ///
 /// # Arguments
 ///
@@ -47,7 +47,7 @@ struct CallModuleResult {
 /// # Return value
 ///
 /// JSON object with field "error". If error is empty, module is registered.
-/// otherwise, it contaits error message.
+/// otherwise, it contains error message.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
 pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
@@ -78,7 +78,7 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsVa
 /// # Return value
 ///
 /// JSON object with fields "error" and "result". If "error" is empty string,
-/// "result" contains a function return value. Othervise, "error" contains error message.
+/// "result" contains a function return value. Otherwise, "error" contains error message.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
