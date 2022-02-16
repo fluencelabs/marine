@@ -21,9 +21,9 @@ use crate::global_state::MODULES;
 use marine_rs_sdk::CallParameters;
 
 use wasm_bindgen::prelude::*;
-use std::collections::HashMap;
 use serde_json::Value as JValue;
 use serde::{Serialize, Deserialize};
+use maplit::hashmap;
 
 #[derive(Serialize, Deserialize)]
 struct RegisterModuleResult {
@@ -51,9 +51,11 @@ struct CallModuleResult {
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
 pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
-    let mut map = HashMap::new();
-    map.insert(name.to_string(), wit_section_bytes.to_vec());
-    let faas = match FluenceFaaS::with_modules(map) {
+    let modules = hashmap! {
+        name.to_string() => wit_section_bytes.to_vec(),
+    };
+
+    let faas = match FluenceFaaS::with_modules(modules) {
         Ok(faas) => faas,
         Err(e) => return make_register_module_result(e.to_string().as_str()),
     };
