@@ -90,6 +90,9 @@ impl DynFunc {
             Err(e) => return Err(format!("cannot serialize call arguments, error: {}", e)),
         };
 
+        // .unwrap() here is safe because this method can be called only if MODULES
+        // is Some, and register_module sets MODULES and INSTANCE to Some at the same time.
+        // And at the same time they are set to NONE at the start of the application
         let output = INSTANCE
             .with(|instance| call_export(instance.borrow().as_ref().unwrap(), &self.name, &args));
 
