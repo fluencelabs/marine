@@ -22,6 +22,19 @@ use marine_rs_sdk::CallParameters;
 
 use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
+use serde_json::Value as JValue;
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize)]
+struct RegisterModuleResult {
+    error: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct CallModuleResult {
+    error: String,
+    result: JValue,
+}
 
 /// Registers a module insite web-runtime.
 ///
@@ -101,14 +114,21 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String
 
 #[allow(unused)] // needed because clippy marks this function as unused
 fn make_register_module_result(error: &str) -> String {
-    serde_json::json!({ "error": error }).to_string()
+    let result = RegisterModuleResult {
+        error: error.to_string(),
+    };
+
+    // unwrap is safe because Serialize is derived for that struct and it does not contain maps with non-string keys
+    serde_json::ser::to_string(&result).unwrap()
 }
 
 #[allow(unused)] // needed because clippy marks this function as unused
 fn make_call_module_result(result: serde_json::Value, error: &str) -> String {
-    serde_json::json!({
-        "result": result,
-        "error": error,
-    })
-    .to_string()
+    let result = CallModuleResult {
+        error: error.to_string(),
+        result,
+    };
+
+    // unwrap is safe because Serialize is derived for that struct and it does not contain maps with non-string keys
+    serde_json::ser::to_string(&result).unwrap()
 }
