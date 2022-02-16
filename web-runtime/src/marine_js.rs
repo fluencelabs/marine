@@ -22,6 +22,7 @@ use wasmer_it::ast::FunctionArg;
 
 use wasm_bindgen::prelude::*;
 use serde::{Deserialize, Serialize};
+use serde_json::Value as JValue;
 use std::borrow::{Cow};
 use std::rc::Rc;
 
@@ -92,9 +93,9 @@ impl DynFunc {
         let output = INSTANCE
             .with(|instance| call_export(instance.borrow().as_ref().unwrap(), &self.name, &args));
 
-        let value = serde_json::de::from_str::<serde_json::Value>(&output);
+        let value = serde_json::de::from_str::<JValue>(&output);
         match value {
-            Ok(serde_json::Value::Array(values)) => {
+            Ok(JValue::Array(values)) => {
                 let values = values
                     .iter()
                     .map(|value| WValue::I32(value.as_i64().unwrap() as i32))

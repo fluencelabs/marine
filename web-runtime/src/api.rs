@@ -88,17 +88,17 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String
             Some(modules) => modules,
             None => {
                 return make_call_module_result(
-                    serde_json::Value::Null,
+                    JValue::Null,
                     "attempt to run a function when module is not loaded",
                 )
             }
         };
 
-        let args: serde_json::Value = match serde_json::from_str(args) {
+        let args: JValue = match serde_json::from_str(args) {
             Ok(args) => args,
             Err(e) => {
                 return make_call_module_result(
-                    serde_json::Value::Null,
+                    JValue::Null,
                     &format!("Error deserializing args: {}", e),
                 )
             }
@@ -107,7 +107,7 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String
         match modules.call_with_json(module_name, function_name, args, CallParameters::default()) {
             Ok(result) => make_call_module_result(result, ""),
             Err(e) => make_call_module_result(
-                serde_json::Value::Null,
+                JValue::Null,
                 &format!("Error calling module function: {}", e),
             ),
         }
@@ -125,7 +125,7 @@ fn make_register_module_result(error: &str) -> String {
 }
 
 #[allow(unused)] // needed because clippy marks this function as unused
-fn make_call_module_result(result: serde_json::Value, error: &str) -> String {
+fn make_call_module_result(result: JValue, error: &str) -> String {
     let result = CallModuleResult {
         error: error.to_string(),
         result,
