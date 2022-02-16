@@ -56,9 +56,11 @@ impl Marine {
         func_name: FN,
         arguments: &[IValue],
     ) -> MResult<Vec<IValue>> {
-        self.modules.get_mut(module_name.as_ref()).map_or_else(
-            || Err(MError::NoSuchModule(module_name.as_ref().to_string())),
-            |module| module.call(module_name.as_ref(), func_name.as_ref(), arguments),
+        let module_name = module_name.as_ref();
+
+        self.modules.get_mut(module_name).map_or_else(
+            || Err(MError::NoSuchModule(module_name.to_string())),
+            |module| module.call(module_name, func_name.as_ref(), arguments),
         )
     }
 
