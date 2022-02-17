@@ -30,8 +30,6 @@ jobs:
 
           curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-          cargo update --aggressive -p it-traits
-
           cargo install --path tools/cli
 
           cargo fmt --all -- --check --color always
