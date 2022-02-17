@@ -99,11 +99,28 @@ impl DynFunc {
         let value = serde_json::de::from_str::<JValue>(&output);
         match value {
             Ok(JValue::Array(values)) => {
-                let values = values
+                if values.len() != self.signature.returns().len() {
+                    return Err(format!(
+                        "expected {} return values, got {}",
+                        self.signature.returns().len(),
+                        values.len()
+                    ));
+                }
+
+                values
                     .iter()
-                    .map(|value| WValue::I32(value.as_i64().unwrap() as i32))
-                    .collect::<Vec<_>>();
-                Ok(values)
+                    .zip(self.signature.returns())
+                    .map(|(value, ty)| {
+                        match ty {
+                            WType::I32 => value.as_i64().map(|value| WValue::I32(value as i32)),
+                            WType::I64 => value.as_i64().map(|value| WValue::I64(value)),
+                            WType::F32 => value.as_f64().map(|value| WValue::F32(value as f32)),
+                            WType::F64 => value.as_f64().map(|value| WValue::F64(value)),
+                            WType::V128 => None,
+                        }
+                        .ok_or(format!("Cannot convert value {} to type {}", value, ty))
+                    })
+                    .collect::<Result<Vec<_>, String>>()
             }
             _ => Err("invalid json got".to_string()),
         }
