@@ -4,7 +4,7 @@ import {
     get_memory_size,
     read_byte_range,
     write_byte_range
-} from './marine-js.js';
+} from '../../marine-js.js';
 
 export async function init(module) {
     let wasm;
