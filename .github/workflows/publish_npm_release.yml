@@ -72,7 +72,7 @@ jobs:
           JS_PKG_NAME="$(cat "$PACKAGE_JSON" | jq -r .name)"
 
           # get version from Cargo.toml
-          MARINE_JS_RUST_VERSION="$(toml get "MARINE_JS_CARGO_TOML" package.version | tr -d \")"
+          MARINE_JS_RUST_VERSION="$(toml get "$MARINE_JS_CARGO_TOML" package.version | tr -d \")"
           LOCAL_RUST_VERSION="$(toml get "$CARGO_TOML" package.version | tr -d \")"
 
           # get & increment version from NPM
