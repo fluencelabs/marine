@@ -2,6 +2,8 @@
 name = "marine-web-runtime"
 version = "0.1.0"
 edition = "2018"
+description = "Web version of marine-runtime"
+publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
@@ -38,3 +40,4 @@ paste = "1.0.5"
 anyhow = "1.0.31"
 thiserror = "1.0.24"
 maplit = "1.0.2"
+web-sys = {version = "0.3.56", features = ["console"]}
