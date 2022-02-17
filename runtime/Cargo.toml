@@ -1,7 +1,7 @@
 [package]
 name = "marine-runtime"
 description = "Marine is the Fluence Compute Runtime"
-version = "0.10.0"
+version = "0.11.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -12,10 +12,10 @@ path = "src/lib.rs"
 
 [dependencies]
 marine-module-info-parser = { path = "../crates/module-info-parser", version = "0.2.2" }
-marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.4.1" }
-marine-it-parser = { path = "../crates/it-parser", version = "0.6.8" }
-marine-it-generator = { path = "../crates/it-generator", version = "0.5.6" }
-marine-module-interface = { path = "../crates/module-interface", version = "0.1.6" }
+marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.5.0" }
+marine-it-parser = { path = "../crates/it-parser", version = "0.7.0" }
+marine-it-generator = { path = "../crates/it-generator", version = "0.6.0" }
+marine-module-interface = { path = "../crates/module-interface", version = "0.2.0" }
 marine-utils = { path = "../crates/utils", version = "0.4.0" }
 marine-min-it-version =  { path = "../crates/min-it-version", version = "0.1.0"}
 
@@ -24,7 +24,7 @@ wasmer-runtime = { package = "wasmer-runtime-fl", version = "=0.17.1" }
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1", features = ["dynamicfunc-fat-closures"] }
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.0" }
 it-lilo = "0.2.0"
-it-memory-traits = {package = "it-memory-traits", git = "https://github.com/fluencelabs/interface-types", branch = "fix_crash"}
+it-memory-traits = "0.1.0"
 wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 bytesize = "1.1.0"
 

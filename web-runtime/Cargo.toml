@@ -8,8 +8,8 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.4.1" }
-marine-module-interface = { path = "../crates/module-interface", version = "0.1.6" }
+marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.5.0" }
+marine-module-interface = { path = "../crates/module-interface", version = "0.2.0" }
 marine-utils = { path = "../crates/utils", version = "0.4.0" }
 marine-min-it-version =  { path = "../crates/min-it-version", version = "0.1.0"}
 
@@ -17,7 +17,7 @@ marine-rs-sdk = "0.6.15"
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.0" }
 fluence-it-types = {version = "0.3.1", features = ["impls"] }
 it-lilo = "0.2.0"
-it-memory-traits = { git = "https://github.com/fluencelabs/interface-types/", package = "it-memory-traits", branch = "fix_crash"}
+it-memory-traits = "0.1.0"
 
 wasm-bindgen = "0.2"
 nom = "5.1"

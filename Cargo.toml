@@ -32,9 +32,6 @@ members = [
     "tools/cli",
     "tools/repl",
 ]
-[patch.crates-io]
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.0", git = "https://github.com/fluencelabs/interface-types", branch = "fix_crash"}
-it-lilo = {package = "it-lilo", version = "0.2.0", git = "https://github.com/fluencelabs/interface-types", branch = "fix_crash"}
 
 [profile.release]
 opt-level = 3
