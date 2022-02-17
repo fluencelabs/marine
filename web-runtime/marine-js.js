@@ -31,14 +31,30 @@ export function call_export(instance, export_name, args) {
     let prepared_args = [];
     for (let arg_index = 0; arg_index < parsed_args.length; arg_index++) {
         let arg = parsed_args[arg_index];
-        prepared_args.push(arg["I32"])
+        if (arg["I32"] !== undefined) {
+            prepared_args.push(arg["I32"])
+        }
+        if (arg["I64"] !== undefined) {;
+            let val = BigInt(arg["I64"]);
+            prepared_args.push(val)
+        }
+        if (arg["F32"] !== undefined) {
+            prepared_args.push(arg["F32"])
+        }
+        if (arg["F64"] !== undefined) {
+            prepared_args.push(arg["F64"])
+        }
     }
 
     let result = instance.exports[export_name](...prepared_args);
 
     let json_result = "[]";
     if (result !== undefined) {
-        json_result = "[" + JSON.stringify(result) + "]"
+        if (typeof result == "bigint") {
+            json_result = "[" + result.toString() + "]"
+        } else {
+            json_result = "[" + JSON.stringify(result) + "]"
+        }
     }
 
     return json_result
