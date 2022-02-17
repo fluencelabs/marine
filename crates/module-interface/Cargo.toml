@@ -15,7 +15,7 @@ marine-it-interfaces = { path = "../it-interfaces", version = "0.5.0" }
 
 anyhow = "1.0.31"
 walrus = "0.18.0"
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.0"}
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.1"}
 nom = "5.1"
 
 itertools = "0.10.0"

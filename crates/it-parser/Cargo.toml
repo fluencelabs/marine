@@ -17,7 +17,7 @@ marine-module-interface = { path = "../module-interface", version = "0.2.0" }
 anyhow = "1.0.31"
 walrus = "0.18.0"
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1"}
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.0"}
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.1"}
 nom = "5.1"
 
 itertools = "0.10.0"
