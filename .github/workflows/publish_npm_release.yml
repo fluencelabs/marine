@@ -5,7 +5,7 @@ name: "publish-npm-release"
 
 on:
   # TODO uncomment before release
-  #push:
+  push:
   #  branches:
   #    - "master"
   workflow_dispatch:
