@@ -75,9 +75,9 @@ impl Marine {
         wasm_bytes: &[u8],
         config: MModuleConfig,
     ) -> MResult<()> {
-        let prepared_wasm_bytes =
+        let _prepared_wasm_bytes =
             crate::misc::prepare_module(wasm_bytes, config.max_heap_pages_count)?;
-        let module = MModule::new(&name, &prepared_wasm_bytes, config, &self.modules)?;
+        let module = MModule::new(&name, wasm_bytes, config, &self.modules)?;
 
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {
@@ -136,6 +136,17 @@ impl Marine {
         self.modules
             .get(module_name.as_ref())
             .and_then(|module| module.export_record_type_by_id(record_id))
+    }
+
+    /// Returns a heap size that all modules consume in bytes.
+    pub fn module_memory_stats(&self) -> MemoryStats<'_> {
+        let records = self
+            .modules
+            .iter()
+            .map(|(module_name, module)| (module_name.as_str(), module.memory_size()).into())
+            .collect::<Vec<_>>();
+
+        records.into()
     }
 
     fn get_module_interface(module: &MModule) -> MModuleInterface<'_> {
