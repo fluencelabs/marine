@@ -1,10 +1,11 @@
 import {
     call_export,
+    read_byte,
     write_byte,
     get_memory_size,
     read_byte_range,
     write_byte_range
-} from '../../marine-js.js';
+} from './snippets/marine-web-runtime-6faa67b8af9cc173/marine-js.js';
 
 export async function init(module) {
     let wasm;
