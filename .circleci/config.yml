@@ -1,4 +1,7 @@
 version: 2.1
+orbs:
+  node: circleci/node@5.0.0
+
 jobs:
   marine:
     docker:
@@ -12,6 +15,10 @@ jobs:
       - restore_cache:
           keys:
             - marine04-{{ checksum "Cargo.lock" }}
+
+      - node/install:
+          node-version: '16.14'
+
       - run: |
           rustup toolchain install nightly-2021-05-21
           rustup default nightly-2021-05-21
@@ -21,16 +28,30 @@ jobs:
           rustup component add clippy --toolchain nightly-2021-05-21
           rustup target add wasm32-wasi
 
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
           cargo install --path tools/cli
 
           cargo fmt --all -- --check --color always
           cargo check -v --all-features -p marine-runtime -p fluence-faas -p fluence-app-service -p marine -p mrepl
 
+          (
+            cd web-runtime
+            ./build.sh
+            cd npm-package
+            npm i
+            npm run build
+          )
           (cd ./examples; ./build.sh)
           (cd ./fluence-faas/tests/wasm_tests; ./build.sh)
 
           cargo test --release -v --all-features -p marine-it-generator -p marine-runtime -p fluence-faas -p fluence-app-service -p marine -p mrepl
           cargo clippy
+
+          (
+            cd web-runtime/npm-package
+            npm run test
+          )
 
       - save_cache:
           paths:

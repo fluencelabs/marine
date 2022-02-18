@@ -19,38 +19,20 @@ use crate::call_wasm_func;
 
 use it_lilo::traits::Allocatable;
 use it_lilo::traits::AllocatableError;
-use wasmer_core::vm::Ctx;
-use wasmer_core::vm::LocalMemory;
-
-use std::cell::Cell;
 
 pub(crate) struct LoHelper<'c> {
-    ctx: &'c Ctx,
     allocate_func: &'c AllocateFunc,
 }
 
 impl<'c> LoHelper<'c> {
-    pub(crate) fn new(ctx: &'c Ctx, allocate_func: &'c AllocateFunc) -> Self {
-        Self { ctx, allocate_func }
+    pub(crate) fn new(allocate_func: &'c AllocateFunc) -> Self {
+        Self { allocate_func }
     }
 }
 
-impl Allocatable for LoHelper<'_> {
+impl<'s> Allocatable for LoHelper<'s> {
     fn allocate(&self, size: u32, type_tag: u32) -> Result<usize, AllocatableError> {
         let offset = call_wasm_func!(self.allocate_func, size as _, type_tag as _);
         Ok(offset as _)
-    }
-
-    fn memory_slice(&self, memory_index: usize) -> Result<&[Cell<u8>], AllocatableError> {
-        let memory = self.ctx.memory(memory_index as _);
-
-        let LocalMemory { base, .. } = unsafe { *memory.vm_local_memory() };
-        let length = memory.size().bytes().0 / std::mem::size_of::<u8>();
-
-        let mut_slice: &mut [u8] = unsafe { std::slice::from_raw_parts_mut(base, length) };
-        let cell_slice: &Cell<[u8]> = Cell::from_mut(mut_slice);
-        let slice = cell_slice.as_slice_of_cells();
-
-        Ok(slice)
     }
 }

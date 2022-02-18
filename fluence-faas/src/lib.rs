@@ -65,8 +65,6 @@ pub use marine::HostImportError;
 pub use marine::to_interface_value;
 pub use marine::from_interface_values;
 pub use marine::ne_vec;
-pub use marine::min_sdk_version;
-pub use marine::min_it_version;
 
 pub use marine_module_interface::interface::itype_text_view;
 

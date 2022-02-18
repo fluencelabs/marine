@@ -25,6 +25,7 @@ use fluence_app_service::FaaSModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
 
 use serde::Deserialize;
+use serde_json::Value as JValue;
 
 use std::collections::HashMap;
 use std::fs;
@@ -56,7 +57,7 @@ struct CallModuleArguments<'args> {
     module_name: &'args str,
     func_name: &'args str,
     show_result_arg: bool,
-    args: serde_json::Value,
+    args: JValue,
     call_parameters: CallParameters,
 }
 
@@ -258,7 +259,7 @@ fn parse_call_module_arguments<'args>(
     let module_arg: String = args.join(" ");
     let mut de = serde_json::Deserializer::from_str(&module_arg);
 
-    let args = match serde_json::Value::deserialize(&mut de) {
+    let args = match JValue::deserialize(&mut de) {
         Ok(args) => args,
         Err(e) => return Err(format!("invalid args: {}", e)),
     };

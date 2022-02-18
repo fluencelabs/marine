@@ -1,0 +1,144 @@
+# run locally like this:
+# act -b -P ubuntu-latest=nektos/act-environments-ubuntu:18.04 -j publish-npm-branch -s "NPM_TOKEN=uuid-uuid-uuid-uuid"
+
+name: "publish-npm-branch"
+
+on:
+  push:
+    branches-ignore:
+      - master
+
+jobs:
+  npm-publish-dev:
+    name: "Publish marine-js package to NPM"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      ### Extract branch name
+      - name: Extract branch name
+        if: github.event_name != 'pull_request'
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+        id: extract_branch
+
+      - name: Extract branch name
+        if: github.event_name == 'pull_request'
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      ### Prepare cargo & toolchains
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install Rust toolchain with wasm32-unknown-unknown
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2022-01-25
+          target: wasm32-unknown-unknown
+          profile: minimal
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          toolchain: nightly-2022-01-25
+          command: update
+          args: --aggressive
+
+      ### Calculate FINAL_VERSION
+      - name: Install jq & sponge
+        run: sudo apt-get update && sudo apt-get --yes --force-yes install jq moreutils
+
+      - name: Install cargo-show & toml-cli
+        run: cargo install cargo-show toml-cli || true
+
+      - name: Get versions from npm & crates.io, and take the highest one
+        run: |
+          set -x
+          # install semver and add it to PATH
+          yarn global add semver
+          PATH="$(yarn global bin):$PATH"
+
+          MARINE_JS_CARGO_TOML="web-runtime/Cargo.toml"
+          CARGO_TOML="web-runtime/Cargo.toml"
+          PACKAGE_JSON="web-runtime/npm-package/package.json"
+
+          # sanitize branch name so it can be used as a semver suffix (replace [^0-9a-zA-Z-] with hyphen)
+          SANITIZED_BRANCH="$(echo -n "${{ env.BRANCH_NAME }}" | tr -C '[:alnum:]-' -)"
+          # JQ Version regex pattern
+          PAT="\\\\d+.\\\\d+.\\\\d+-$SANITIZED_BRANCH.\\\\d+"
+
+          # get package name from Cargo.toml
+          PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
+
+          # get package name from package.json
+          JS_PKG_NAME="$(cat "$PACKAGE_JSON" | jq -r .name)"
+
+          ### NPM
+          # take all versions from npm and replace single quotes with double quotes
+          NPM_VERSIONS=$(yarn info --silent "$JS_PKG_NAME" versions 2>/dev/null | tr \' \")
+          # take only versions that contain branch name
+          NPM_VERSIONS_FILTERED=$(echo $NPM_VERSIONS | jq -r ".[] | select(test(\"$PAT\"))")
+          # flatten into a single line
+          NPM_VERSIONS_FLATTENED=$(echo $NPM_VERSIONS_FILTERED | awk '{print}' ORS=' ')
+          # sort versions according to semver, take highest (last)
+          LAST_NPM_VERSION="$(semver -p $(echo $NPM_VERSIONS_FLATTENED) | tail -n1 || true)"
+          # increment prerelease part of the version
+          PRERELEASE_NPM_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LAST_NPM_VERSION}" || true)"
+
+          ### CRATES.IO
+          CRATE_VERSIONS=$(cargo show --json "$PKG_NAME")
+          CRATE_VERSIONS_FILTERED=$(echo $CRATE_VERSIONS | jq -r ".versions[] | .num | select(test(\"$PAT\"))")
+          CRATE_VERSIONS_FLATTENED=$(echo $CRATE_VERSIONS_FILTERED | awk '{print}' ORS=' ')
+          LAST_CRATE_VERSION="$(semver -p $(echo $CRATE_VERSIONS_FLATTENED) | tail -n1 || true)"
+          PRERELEASE_CRATE_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${LAST_CRATE_VERSION}" || true)"
+
+          ### LOCAL
+          ### (NOTE: the following code assumes that local versions do not contain prerelease suffix; existing suffix will be ignored)
+          # take local Rust version
+          LOCAL_RUST_VERSION="$(toml get "$CARGO_TOML" package.version | tr -d \")"
+          MARINE_JS_RUST_VERSION="$(toml get "$MARINE_JS_CARGO_TOML" package.version | tr -d \")"
+          MAX_RUST_VERSION="$(semver "$LOCAL_RUST_VERSION" "MARINE_JS_RUST_VERSION" | tail -n1)"
+          LOCAL_RUST_PRERELEASE_VERSION="$(semver --increment prerelease --preid "$SANITIZED_BRANCH" "${MAX_RUST_VERSION}-0")" # added '-0' here to avoid semver erroneously increment patch octet. Any suffix works, '-0' is chosen deliberately.
+
+          ### SAVE FINAL VERSION TO ENV
+          # take the highest version
+          MAX_VERSION="$(semver "$LOCAL_RUST_PRERELEASE_VERSION" "$PRERELEASE_NPM_VERSION" "$PRERELEASE_CRATE_VERSION" | tail -n1)"
+          # save info to env
+          echo "FINAL_VERSION=$MAX_VERSION" | tee -a $GITHUB_ENV
+          echo "PKG_NAME=$PKG_NAME" | tee -a $GITHUB_ENV
+          echo "JS_PKG_NAME=$JS_PKG_NAME" | tee -a $GITHUB_ENV
+
+      ### === JavaScript package release ===
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        continue-on-error: true
+
+      - name: Build npm package
+        working-directory: web-runtime
+        run: |
+          ./build.sh
+          cd npm-package
+          npm i
+          npm run build
+
+      ### Set version to FINAL_VERSION
+      - run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
+        working-directory: web-runtime/npm-package
+
+      ### Publish to NPM registry
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "16"
+          registry-url: "https://registry.npmjs.org"
+
+      - run: npm publish --access public --tag=beta
+        working-directory: web-runtime/npm-package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

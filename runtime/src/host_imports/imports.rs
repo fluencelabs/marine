@@ -26,6 +26,7 @@ use crate::MRecordTypes;
 use crate::init_wasm_func_once;
 use crate::call_wasm_func;
 use crate::HostImportDescriptor;
+use crate::module::wit_prelude::WITMemoryView;
 
 use wasmer_core::Func;
 use wasmer_core::vm::Ctx;
@@ -37,7 +38,6 @@ use it_lilo::lowerer::ILowerer;
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::ops::Deref;
 
 pub(crate) fn create_host_import_func(
     descriptor: HostImportDescriptor,
@@ -63,27 +63,31 @@ pub(crate) fn create_host_import_func(
     let raw_output = itypes_output_to_wtypes(&output_type_to_types(output_type));
 
     let func = move |ctx: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
-        let memory_index = 0;
-        let view = ctx.memory(memory_index).view::<u8>();
-        let memory = view.deref();
+        let result = {
+            let memory_index = 0;
+            let memory = ctx.memory(memory_index);
+            let memory_view = WITMemoryView(memory.view::<u8>());
+            let li_helper = LiHelper::new(record_types.clone());
+            let lifter = ILifter::new(memory_view, &li_helper);
 
-        let li_helper = LiHelper::new(record_types.clone());
-        let lifter = ILifter::new(memory, &li_helper);
-
-        let result = match wvalues_to_ivalues(&lifter, inputs, &argument_types) {
-            Ok(ivalues) => host_exported_func(ctx, ivalues),
-            Err(e) => {
-                log::error!("error occurred while lifting values in host import: {}", e);
-                error_handler
-                    .as_ref()
-                    .map_or_else(|| default_error_handler(&e), |h| h(&e))
+            match wvalues_to_ivalues(&lifter, inputs, &argument_types) {
+                Ok(ivalues) => host_exported_func(ctx, ivalues),
+                Err(e) => {
+                    log::error!("error occurred while lifting values in host import: {}", e);
+                    error_handler
+                        .as_ref()
+                        .map_or_else(|| default_error_handler(&e), |h| h(&e))
+                }
             }
         };
 
         init_wasm_func_once!(allocate_func, ctx, (i32, i32), i32, ALLOCATE_FUNC_NAME, 2);
 
-        let lo_helper = LoHelper::new(ctx, &allocate_func);
-        let t = ILowerer::new(&lo_helper)
+        let memory_index = 0;
+        let memory = ctx.memory(memory_index);
+        let memory_view = WITMemoryView(memory.view::<u8>());
+        let lo_helper = LoHelper::new(&allocate_func);
+        let t = ILowerer::new(memory_view, &lo_helper)
             .map_err(HostImportError::LowererError)
             .and_then(|lowerer| ivalue_to_wvalues(&lowerer, result));
 

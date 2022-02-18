@@ -17,6 +17,7 @@
 mod exports;
 mod marine_module;
 mod memory;
+mod memory_access;
 mod wit_function;
 mod wit_instance;
 mod type_converters;
@@ -28,6 +29,9 @@ pub use wasmer_it::ast::FunctionArg as IFunctionArg;
 pub use wasmer_it::IValue;
 pub use wasmer_it::from_interface_values;
 pub use wasmer_it::to_interface_value;
+
+pub(crate) use memory_access::WasmerSequentialWriter;
+pub(crate) use memory_access::WasmerSequentialReader;
 
 use serde::Serialize;
 use serde::Deserialize;
@@ -46,11 +50,12 @@ pub(self) use wasmer_core::types::Type as WType;
 pub(self) use wasmer_core::types::Value as WValue;
 
 // types that often used together
-pub(self) mod wit_prelude {
+pub(crate) mod wit_prelude {
     pub(super) use super::wit_instance::ITInstance;
     pub(super) use super::exports::ITExport;
     pub(super) use crate::MError;
     pub(super) use super::wit_function::WITFunction;
-    pub(super) use super::memory::WITMemoryView;
-    pub(super) use super::memory::WITMemory;
+
+    pub(crate) use super::memory::WITMemoryView;
+    pub(crate) use super::memory::WITMemory;
 }

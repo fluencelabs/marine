@@ -3,6 +3,7 @@ members = [
     "crates/it-generator",
     "crates/it-interfaces",
     "crates/it-parser",
+    "crates/min-it-version",
     "crates/module-info-parser",
     "crates/module-interface",
     "crates/utils",
@@ -27,6 +28,7 @@ members = [
     "fluence-faas/tests/wasm_tests/arrays_passing",
     "fluence-faas/tests/wasm_tests/records_passing",
     "runtime",
+    "web-runtime",
     "tools/cli",
     "tools/repl",
 ]

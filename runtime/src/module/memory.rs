@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
+use std::cell::Cell;
+use std::ops::Deref;
 use wasmer_it::interpreter::wasm;
 use wasmer_core::memory::{Memory, MemoryView};
+use wasmer_core::vm::LocalMemory;
+use crate::module::WasmerSequentialReader;
 
-pub(super) struct WITMemoryView<'a>(pub(super) MemoryView<'a, u8>);
-impl<'a> std::ops::Deref for WITMemoryView<'a> {
-    type Target = [std::cell::Cell<u8>];
+use crate::module::WasmerSequentialWriter;
 
-    fn deref(&self) -> &Self::Target {
-        self.0.deref()
-    }
-}
+use it_memory_traits::{MemoryAccessError};
+
+pub(crate) struct WITMemoryView<'a>(pub(crate) MemoryView<'a, u8>);
 
 #[derive(Clone)]
-pub(super) struct WITMemory(pub(super) Memory);
+pub(crate) struct WITMemory(pub(super) Memory);
 impl std::ops::Deref for WITMemory {
     type Target = Memory;
 
@@ -36,12 +37,69 @@ impl std::ops::Deref for WITMemory {
     }
 }
 
-impl wasm::structures::MemoryView for WITMemoryView<'_> {}
+impl WITMemoryView<'_> {
+    fn check_bounds(
+        &self,
+        offset: usize,
+        size: usize,
+        memory_size: usize,
+    ) -> Result<(), MemoryAccessError> {
+        if offset + size >= memory_size {
+            Err(MemoryAccessError::OutOfBounds {
+                offset,
+                size,
+                memory_size,
+            })
+        } else {
+            Ok(())
+        }
+    }
+}
+
+impl<'s, 'v> wasm::structures::SequentialMemoryView<'v> for WITMemoryView<'s> {
+    type SR = WasmerSequentialReader<'v>;
+    type SW = WasmerSequentialWriter<'v>;
+
+    fn sequential_writer(
+        &'v self,
+        offset: usize,
+        size: usize,
+    ) -> Result<Self::SW, MemoryAccessError> {
+        let view = &self.0;
+        let slice = view.deref();
+
+        self.check_bounds(offset, size, slice.len())?;
+
+        let writer = WasmerSequentialWriter {
+            offset,
+            slice,
+            current_offset: Cell::new(offset),
+        };
+
+        Ok(writer)
+    }
+
+    fn sequential_reader(
+        &'v self,
+        offset: usize,
+        size: usize,
+    ) -> Result<Self::SR, MemoryAccessError> {
+        let view = &self.0;
+        let slice: &[Cell<u8>] = view.deref();
+
+        self.check_bounds(offset, size, slice.len())?;
+
+        let reader = WasmerSequentialReader {
+            memory: slice,
+            offset: Cell::new(offset),
+        };
+
+        Ok(reader)
+    }
+}
 
 impl<'a> wasm::structures::Memory<WITMemoryView<'a>> for WITMemory {
     fn view(&self) -> WITMemoryView<'a> {
-        use wasmer_core::vm::LocalMemory;
-
         let LocalMemory { base, .. } = unsafe { *self.0.vm_local_memory() };
         let length = self.0.size().bytes().0 / std::mem::size_of::<u8>();
 

@@ -64,8 +64,8 @@ pub use fluence_faas::ModuleMemoryStat;
 pub use fluence_faas::MemoryStats;
 pub use fluence_faas::ne_vec;
 
-pub use fluence_faas::min_sdk_version;
-pub use fluence_faas::min_it_version;
+pub use marine_min_it_version::min_sdk_version;
+pub use marine_min_it_version::min_it_version;
 
 pub use fluence_faas::CallParameters;
 pub use fluence_faas::SecurityTetraplet;

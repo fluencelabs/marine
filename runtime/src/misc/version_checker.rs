@@ -18,6 +18,8 @@ use super::PrepareResult;
 use super::PrepareError;
 
 use marine_module_info_parser::sdk_version;
+use marine_min_it_version::min_sdk_version;
+use marine_min_it_version::min_it_version;
 
 use wasmer_core::Module;
 
@@ -31,7 +33,7 @@ pub(crate) fn check_sdk_version(
         None => return Err(PrepareError::ModuleWithoutVersion(name.into())),
     };
 
-    let required_version = crate::min_sdk_version();
+    let required_version = min_sdk_version();
     if module_version < *required_version {
         return Err(PrepareError::IncompatibleSDKVersions {
             module_name: name.into(),
@@ -47,7 +49,7 @@ pub(crate) fn check_it_version(
     name: impl Into<String>,
     it_version: &semver::Version,
 ) -> PrepareResult<()> {
-    let required_version = crate::min_it_version();
+    let required_version = min_it_version();
     if it_version < required_version {
         return Err(PrepareError::IncompatibleITVersions {
             module_name: name.into(),

@@ -41,7 +41,7 @@ pub fn get_export_funcs_descriptors<'i>(
             mit.exports_by_type(*core_function_type)
                 .map(|export_function_name| (adapter_function_type, export_function_name))
         })
-        .map(|(&adapter_function_type, export_function_names)| {
+        .flat_map(|(&adapter_function_type, export_function_names)| {
             export_function_names
                 .iter()
                 .map(move |name| ITExportFuncDescriptor {
@@ -49,7 +49,6 @@ pub fn get_export_funcs_descriptors<'i>(
                     name,
                 })
         })
-        .flatten()
         .collect::<Vec<_>>()
 }
 

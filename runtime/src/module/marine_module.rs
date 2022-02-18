@@ -369,12 +369,11 @@ impl MModule {
                 wit.imports_by_type(*core_function_type)
                     .map(|import| (adapter_function_type, import))
             })
-            .map(|(adapter_function_type, import_function_names)| {
+            .flat_map(|(adapter_function_type, import_function_names)| {
                 import_function_names
                     .iter()
                     .map(move |import_function_name| (*adapter_function_type, import_function_name))
             })
-            .flatten()
             .map(|(adapter_function_type, (import_namespace, import_name))| {
                 let adapter_instructions = wit.adapter_by_type_r(adapter_function_type)?;
                 let wit_type = wit.type_by_idx_r(adapter_function_type)?;

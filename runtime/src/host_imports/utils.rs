@@ -99,29 +99,27 @@ where
 pub(super) fn itypes_args_to_wtypes(itypes: &[IType]) -> Vec<WType> {
     itypes
         .iter()
-        .map(|itype| match itype {
+        .flat_map(|itype| match itype {
             IType::F32 => vec![WType::F32],
             IType::F64 => vec![WType::F64],
             IType::I64 | IType::U64 => vec![WType::I64],
             IType::String | IType::Array(_) => vec![WType::I32, WType::I32],
             _ => vec![WType::I32],
         })
-        .flatten()
-        .collect::<Vec<_>>()
+        .collect()
 }
 
 pub(super) fn itypes_output_to_wtypes(itypes: &[IType]) -> Vec<WType> {
     itypes
         .iter()
-        .map(|itype| match itype {
+        .flat_map(|itype| match itype {
             IType::F32 => vec![WType::F32],
             IType::F64 => vec![WType::F64],
             IType::I64 | IType::U64 => vec![WType::I64],
             IType::String | IType::Array(_) | IType::Record(_) => vec![],
             _ => vec![WType::I32],
         })
-        .flatten()
-        .collect::<Vec<_>>()
+        .collect()
 }
 
 #[macro_export] // https://github.com/rust-lang/rust/issues/57966#issuecomment-461077932

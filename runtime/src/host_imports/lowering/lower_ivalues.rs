@@ -20,9 +20,10 @@ use crate::IValue;
 
 use it_lilo::lowerer::*;
 use it_lilo::traits::Allocatable;
+use it_memory_traits::SequentialMemoryView;
 
-pub(crate) fn ivalue_to_wvalues<A: Allocatable>(
-    lowerer: &ILowerer<'_, A>,
+pub(crate) fn ivalue_to_wvalues<A: Allocatable, MV: for<'a> SequentialMemoryView<'a>>(
+    lowerer: &ILowerer<'_, A, MV>,
     ivalue: Option<IValue>,
 ) -> HostImportResult<Vec<WValue>> {
     let result = match ivalue {
