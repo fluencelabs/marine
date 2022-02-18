@@ -4,11 +4,9 @@
 name: "publish-npm-release"
 
 on:
-  # TODO uncomment before release
   push:
-  #  branches:
-  #    - "master"
-  workflow_dispatch:
+    branches:
+      - "master"
 
 jobs:
   npm-publish:
@@ -116,7 +114,7 @@ jobs:
           node-version: "16"
           registry-url: "https://registry.npmjs.org"
 
-      - run: npm publish --dry-run --access public
+      - run: npm publish --access public
         working-directory: web-runtime/npm-package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
