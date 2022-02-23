@@ -17,10 +17,10 @@
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum ItJsonSerdeError {
+pub enum ITJsonSeDeError {
     #[error("{0}")]
-    SerializationError(String),
+    Se(String),
 
     #[error("{0}")]
-    DeserializationError(String),
+    De(String),
 }

@@ -16,10 +16,10 @@
 
 use crate::IValue;
 use crate::IType;
-use super::ItJsonSerdeError::DeserializationError;
+use super::ITJsonSeDeError::De;
 use super::JsonResult;
-
 use crate::MRecordTypes;
+
 use serde_json::Value as JValue;
 use wasmer_it::NEVec;
 
@@ -54,14 +54,14 @@ fn json_map_to_ivalues<'a, 'b>(
 
     for (arg_name, arg_type) in arg_types {
         let json_value = json_map.remove(arg_name).ok_or_else(|| {
-            DeserializationError(format!("missing argument with name {}", arg_name))
+            De(format!("missing argument with name {}", arg_name))
         })?;
         let iarg = jvalue_to_ivalue(json_value, arg_type, record_types)?;
         iargs.push(iarg);
     }
 
     if !json_map.is_empty() {
-        return Err(DeserializationError(format!(
+        return Err(De(format!(
             "function requires {} arguments, {} provided",
             iargs.len(),
             iargs.len() + json_map.len()
@@ -78,7 +78,7 @@ fn json_array_to_ivalues<'a, 'b>(
     record_types: &'b MRecordTypes,
 ) -> JsonResult<Vec<IValue>> {
     if json_array.len() != arg_types.len() {
-        return Err(DeserializationError(format!(
+        return Err(De(format!(
             "function requires {} arguments, {} provided",
             arg_types.len(),
             json_array.len()
@@ -100,7 +100,7 @@ fn json_value_to_ivalues<'a>(
     mut arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
 ) -> JsonResult<Vec<IValue>> {
     if arg_types.len() != 1 {
-        return Err(DeserializationError(format!(
+        return Err(De(format!(
             "called function has the following signature: '{:?}', and it isn't suitable for an argument '{:?}' provided",
             arg_types.collect::<Vec<_>>(),
             json_value,
@@ -119,7 +119,7 @@ fn json_null_to_ivalues<'a>(
     arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
 ) -> JsonResult<Vec<IValue>> {
     if arg_types.len() != 0 {
-        return Err(DeserializationError(format!(
+        return Err(De(format!(
             "the called function has the following signature: {:?}, but no arguments is provided",
             arg_types.collect::<Vec<_>>()
         )));
@@ -142,7 +142,7 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> 
                     },
                     jvalue => serde_json::from_value(jvalue),
                 }.map_err(|e|
-                    DeserializationError(format!("error {:?} occurred while deserializing function arguments",e))
+                    De(format!("error {:?} occurred while deserializing function arguments",e))
                 )?;
 
                 Ok(IValue::$ty(value))
@@ -173,7 +173,7 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> 
 
                     Ok(iargs)
                 }
-                _ => Err(DeserializationError(format!(
+                _ => Err(De(format!(
                     "expected bytearray, got {:?}",
                     jvalue
                 ))),
@@ -191,7 +191,7 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> 
 
                     Ok(iargs)
                 }
-                _ => Err(DeserializationError(format!(
+                _ => Err(De(format!(
                     "expected array of {:?} types, got {:?}",
                     value_type, jvalue
                 ))),
@@ -217,7 +217,7 @@ fn json_record_type_to_ivalue(
     record_types: &MRecordTypes,
 ) -> JsonResult<NEVec<IValue>> {
     let record_type = record_types.get(record_type_id).ok_or_else(|| {
-        DeserializationError(format!(
+        De(format!(
             "record with type id `{}` wasn't found",
             record_type_id
         ))
@@ -239,7 +239,7 @@ fn json_record_type_to_ivalue(
             record_types,
         )?)
         .unwrap()),
-        _ => Err(DeserializationError(format!(
+        _ => Err(De(format!(
             "record with type id `{}` should be encoded as array or map of fields",
             record_type_id
         ))),

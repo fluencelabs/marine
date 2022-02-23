@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use it_json_serde::ItJsonSerdeError;
+use it_json_serde::ITJsonSeDeError;
 use marine::MError;
 
 use thiserror::Error;
@@ -59,7 +59,7 @@ pub enum FaaSError {
     JsonArgumentsDeserializationError {
         module_name: String,
         function_name: String,
-        error: ItJsonSerdeError,
+        error: ITJsonSeDeError,
     },
 
     /// Returned outputs aren't compatible with a called function signature.
@@ -67,7 +67,7 @@ pub enum FaaSError {
     JsonOutputSerializationError {
         module_name: String,
         function_name: String,
-        error: ItJsonSerdeError,
+        error: ITJsonSeDeError,
     },
 
     /// Errors related to invalid config.
@@ -104,14 +104,14 @@ impl From<std::convert::Infallible> for FaaSError {
 macro_rules! json_to_faas_err {
     ($json_expr:expr, $module_name:expr, $function_name:expr) => {
         $json_expr.map_err(|e| match e {
-            it_json_serde::ItJsonSerdeError::SerializationError(_) => {
+            it_json_serde::ITJsonSeDeError::Se(_) => {
                 FaaSError::JsonOutputSerializationError {
                     module_name: $module_name,
                     function_name: $function_name,
                     error: e,
                 }
             }
-            it_json_serde::ItJsonSerdeError::DeserializationError(_) => {
+            it_json_serde::ITJsonSeDeError::De(_) => {
                 FaaSError::JsonArgumentsDeserializationError {
                     module_name: $module_name,
                     function_name: $function_name,

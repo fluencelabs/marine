@@ -27,8 +27,8 @@ mod ivalues_to_json;
 mod json_to_ivalues;
 mod errors;
 
-pub type JsonResult<T> = Result<T, ItJsonSerdeError>;
-pub use errors::ItJsonSerdeError;
+pub type JsonResult<T> = Result<T, ITJsonSeDeError>;
+pub use errors::ITJsonSeDeError;
 pub use ivalues_to_json::ivalues_to_json;
 pub use json_to_ivalues::json_to_ivalues;
 

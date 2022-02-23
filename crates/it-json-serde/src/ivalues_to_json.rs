@@ -16,10 +16,10 @@
 
 use crate::IValue;
 use crate::IType;
-use crate::ItJsonSerdeError::SerializationError;
+use crate::ITJsonSeDeError::Se;
 use crate::JsonResult;
-
 use crate::MRecordTypes;
+
 use serde_json::Value as JValue;
 
 pub fn ivalues_to_json(
@@ -28,7 +28,7 @@ pub fn ivalues_to_json(
     record_types: &MRecordTypes,
 ) -> JsonResult<JValue> {
     if outputs.len() != ivalues.len() {
-        return Err(SerializationError(format!(
+        return Err(Se(format!(
             "resulted values {:?} and function signature {:?} aren't compatible",
             ivalues, outputs
         )));
@@ -95,7 +95,7 @@ fn ivalue_to_json(
         }
         (IValue::Record(field_values), IType::Record(record_id)) => {
             let record_type = record_types.get(&record_id).ok_or_else(|| {
-                SerializationError(format!(
+                Se(format!(
                     "record id {} wasn't found in module record types",
                     record_id
                 ))
@@ -103,7 +103,7 @@ fn ivalue_to_json(
             let field_types = &record_type.fields;
 
             if field_values.len() != field_types.len() {
-                return Err(SerializationError(format!(
+                return Err(Se(format!(
                     "output record {:?} isn't compatible to output record fields {:?}",
                     field_values, field_types
                 )));
@@ -119,7 +119,7 @@ fn ivalue_to_json(
 
             Ok(JValue::Object(result))
         }
-        (ivalue, itype) => Err(SerializationError(format!(
+        (ivalue, itype) => Err(Se(format!(
             "value {:?} is incompatible to type {:?}",
             ivalue, itype
         ))),
