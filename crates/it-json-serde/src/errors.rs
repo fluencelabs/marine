@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-mod ivalues_to_json;
-mod json_to_ivalues;
+use thiserror::Error;
 
-pub(crate) use ivalues_to_json::ivalues_to_json;
-pub(crate) use json_to_ivalues::json_to_ivalues;
+#[derive(Debug, Error)]
+pub enum ItJsonSerdeError {
+    #[error("cannot serialize IValues to Json: {0}")]
+    SerializationError(String),
+
+    #[error("cannot deserialize Json to IValues: {0}")]
+    DeserializationError(String),
+}

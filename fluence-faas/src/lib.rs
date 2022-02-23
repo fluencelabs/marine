@@ -26,7 +26,6 @@
 
 mod config;
 mod host_imports;
-mod json;
 mod errors;
 mod faas;
 mod faas_interface;

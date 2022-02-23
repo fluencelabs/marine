@@ -13,23 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#![warn(rust_2018_idioms)]
+#![deny(
+    dead_code,
+    nonstandard_style,
+    unused_imports,
+    unused_mut,
+    unused_variables,
+    unused_unsafe,
+    unreachable_patterns
+)]
+mod ivalues_to_json;
+mod json_to_ivalues;
 mod errors;
-mod faas;
-mod faas_interface;
 
-pub(crate) type Result<T> = std::result::Result<T, FaaSError>;
+pub type JsonResult<T> = Result<T, ItJsonSerdeError>;
+pub use errors::ItJsonSerdeError;
+pub use ivalues_to_json::ivalues_to_json;
+pub use json_to_ivalues::json_to_ivalues;
 
-pub use faas::FluenceFaaS;
-pub use faas_interface::FaaSInterface;
+use std::collections::HashMap;
+use std::rc::Rc;
 
-pub use errors::FaaSError;
-
-// Re-exports from Marine
-pub(crate) use crate::IRecordType;
-pub(crate) use crate::MModuleInterface as FaaSModuleInterface;
-
-pub use marine_module_interface::interface::itype_text_view;
-
-pub use marine_rs_sdk::CallParameters;
-pub use marine_rs_sdk::SecurityTetraplet;
+pub(crate) use wasmer_it::IValue;
+pub(crate) use wasmer_it::IType;
+pub(crate) use wasmer_it::IRecordType;
+pub(crate) type MRecordTypes = HashMap<u64, Rc<IRecordType>>;

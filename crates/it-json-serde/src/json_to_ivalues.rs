@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 use crate::IValue;
 use crate::IType;
-use crate::FaaSResult;
-use crate::FaaSError::JsonArgumentsDeserializationError as ArgDeError;
+use super::ItJsonSerdeError::DeserializationError;
+use super::JsonResult;
 
-use marine::MRecordTypes;
+use crate::MRecordTypes;
 use serde_json::Value as JValue;
 use wasmer_it::NEVec;
 
@@ -27,11 +27,11 @@ use std::collections::HashMap;
 use std::iter::ExactSizeIterator;
 
 /// Convert json to an array of ivalues according to the supplied argument types.
-pub(crate) fn json_to_ivalues<'a, 'b>(
+pub fn json_to_ivalues<'a, 'b>(
     json_args: JValue,
     arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
     record_types: &'b MRecordTypes,
-) -> FaaSResult<Vec<IValue>> {
+) -> JsonResult<Vec<IValue>> {
     let ivalues = match json_args {
         JValue::Object(json_map) => json_map_to_ivalues(json_map, arg_types, record_types)?,
         JValue::Array(json_array) => {
@@ -49,19 +49,19 @@ fn json_map_to_ivalues<'a, 'b>(
     mut json_map: serde_json::Map<String, JValue>,
     arg_types: impl Iterator<Item = (&'a String, &'a IType)>,
     record_types: &'b MRecordTypes,
-) -> FaaSResult<Vec<IValue>> {
+) -> JsonResult<Vec<IValue>> {
     let mut iargs = Vec::new();
 
     for (arg_name, arg_type) in arg_types {
-        let json_value = json_map
-            .remove(arg_name)
-            .ok_or_else(|| ArgDeError(format!("missing argument with name {}", arg_name)))?;
+        let json_value = json_map.remove(arg_name).ok_or_else(|| {
+            DeserializationError(format!("missing argument with name {}", arg_name))
+        })?;
         let iarg = jvalue_to_ivalue(json_value, arg_type, record_types)?;
         iargs.push(iarg);
     }
 
     if !json_map.is_empty() {
-        return Err(ArgDeError(format!(
+        return Err(DeserializationError(format!(
             "function requires {} arguments, {} provided",
             iargs.len(),
             iargs.len() + json_map.len()
@@ -76,9 +76,9 @@ fn json_array_to_ivalues<'a, 'b>(
     json_array: Vec<JValue>,
     arg_types: impl Iterator<Item = &'a IType> + ExactSizeIterator,
     record_types: &'b MRecordTypes,
-) -> FaaSResult<Vec<IValue>> {
+) -> JsonResult<Vec<IValue>> {
     if json_array.len() != arg_types.len() {
-        return Err(ArgDeError(format!(
+        return Err(DeserializationError(format!(
             "function requires {} arguments, {} provided",
             arg_types.len(),
             json_array.len()
@@ -89,7 +89,7 @@ fn json_array_to_ivalues<'a, 'b>(
         .into_iter()
         .zip(arg_types)
         .map(|(json_value, arg_type)| jvalue_to_ivalue(json_value, arg_type, record_types))
-        .collect::<FaaSResult<Vec<_>>>()?;
+        .collect::<JsonResult<Vec<_>>>()?;
 
     Ok(iargs)
 }
@@ -98,9 +98,9 @@ fn json_array_to_ivalues<'a, 'b>(
 fn json_value_to_ivalues<'a>(
     json_value: JValue,
     mut arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
-) -> FaaSResult<Vec<IValue>> {
+) -> JsonResult<Vec<IValue>> {
     if arg_types.len() != 1 {
-        return Err(ArgDeError(format!(
+        return Err(DeserializationError(format!(
             "called function has the following signature: '{:?}', and it isn't suitable for an argument '{:?}' provided",
             arg_types.collect::<Vec<_>>(),
             json_value,
@@ -117,9 +117,9 @@ fn json_value_to_ivalues<'a>(
 /// Convert json Null to an empty array of ivalues.
 fn json_null_to_ivalues<'a>(
     arg_types: impl Iterator<Item = (&'a String, &'a IType)> + ExactSizeIterator,
-) -> FaaSResult<Vec<IValue>> {
+) -> JsonResult<Vec<IValue>> {
     if arg_types.len() != 0 {
-        return Err(ArgDeError(format!(
+        return Err(DeserializationError(format!(
             "the called function has the following signature: {:?}, but no arguments is provided",
             arg_types.collect::<Vec<_>>()
         )));
@@ -129,7 +129,7 @@ fn json_null_to_ivalues<'a>(
 }
 
 /// Convert one JValue to an array of ivalues according to the supplied argument type.
-fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> FaaSResult<IValue> {
+fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> JsonResult<IValue> {
     macro_rules! to_ivalue(
         ($json_value:expr, $ty:ident) => {
             {
@@ -142,7 +142,7 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> 
                     },
                     jvalue => serde_json::from_value(jvalue),
                 }.map_err(|e|
-                    ArgDeError(format!("error {:?} occurred while deserialize output result to a json value",e))
+                    DeserializationError(format!("error {:?} occurred while deserialize output result to a json value",e))
                 )?;
 
                 Ok(IValue::$ty(value))
@@ -169,11 +169,14 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> 
                     let iargs = json_array
                         .into_iter()
                         .map(|json_value| jvalue_to_ivalue(json_value, &IType::U8, record_types))
-                        .collect::<FaaSResult<Vec<_>>>()?;
+                        .collect::<JsonResult<Vec<_>>>()?;
 
                     Ok(iargs)
                 }
-                _ => Err(ArgDeError(format!("expected bytearray, got {:?}", jvalue))),
+                _ => Err(DeserializationError(format!(
+                    "expected bytearray, got {:?}",
+                    jvalue
+                ))),
             }?;
 
             Ok(IValue::Array(value))
@@ -184,11 +187,11 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> 
                     let iargs = json_array
                         .into_iter()
                         .map(|json_value| jvalue_to_ivalue(json_value, value_type, record_types))
-                        .collect::<FaaSResult<Vec<_>>>()?;
+                        .collect::<JsonResult<Vec<_>>>()?;
 
                     Ok(iargs)
                 }
-                _ => Err(ArgDeError(format!(
+                _ => Err(DeserializationError(format!(
                     "expected array of {:?} types, got {:?}",
                     value_type, jvalue
                 ))),
@@ -212,9 +215,9 @@ fn json_record_type_to_ivalue(
     json_value: JValue,
     record_type_id: &u64,
     record_types: &MRecordTypes,
-) -> FaaSResult<NEVec<IValue>> {
+) -> JsonResult<NEVec<IValue>> {
     let record_type = record_types.get(record_type_id).ok_or_else(|| {
-        ArgDeError(format!(
+        DeserializationError(format!(
             "record with type id `{}` wasn't found",
             record_type_id
         ))
@@ -236,7 +239,7 @@ fn json_record_type_to_ivalue(
             record_types,
         )?)
         .unwrap()),
-        _ => Err(ArgDeError(format!(
+        _ => Err(DeserializationError(format!(
             "record with type id `{}` should be encoded as array or map of fields",
             record_type_id
         ))),

@@ -20,6 +20,7 @@ wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.1" }
 fluence-it-types = {version = "0.3.1", features = ["impls"] }
 it-lilo = "0.2.0"
 it-memory-traits = "0.1.0"
+it-json-serde = { path = "../crates/it-json-serde", version = "0.1.0" }
 
 wasm-bindgen = "0.2"
 nom = "5.1"

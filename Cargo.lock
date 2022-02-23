@@ -832,6 +832,7 @@ dependencies = [
  "bytesize",
  "cmd_lib",
  "env_logger 0.7.1",
+ "it-json-serde",
  "itertools 0.9.0",
  "log",
  "marine-module-interface 0.2.0",
@@ -1334,6 +1335,18 @@ name = "ipnet"
 version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68f2d64f2edebec4ce84ad108148e67e1064789bee435edc5b60ad398714a3a9"
+
+[[package]]
+name = "it-json-serde"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "serde_with",
+ "thiserror",
+ "wasmer-interface-types-fl 0.21.1",
+]
 
 [[package]]
 name = "it-lilo"
@@ -1871,6 +1884,7 @@ dependencies = [
  "bytesize",
  "console_error_panic_hook",
  "fluence-it-types",
+ "it-json-serde",
  "it-lilo 0.2.0",
  "it-memory-traits",
  "itertools 0.10.3",
