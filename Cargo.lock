@@ -786,9 +786,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.14.0"
+version = "0.14.1"
 dependencies = [
- "fluence-faas 0.13.0",
+ "fluence-faas 0.13.1",
  "log",
  "maplit",
  "marine-min-it-version",
@@ -827,7 +827,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.13.0"
+version = "0.13.1"
 dependencies = [
  "bytesize",
  "cmd_lib",
@@ -2029,7 +2029,7 @@ dependencies = [
  "check-latest",
  "clap",
  "env_logger 0.7.1",
- "fluence-app-service 0.14.0",
+ "fluence-app-service 0.14.1",
  "itertools 0.9.0",
  "log",
  "marine-rs-sdk-main",
