@@ -16,6 +16,7 @@
 
 use thiserror::Error;
 
+//TODO: use enum with strict errors instead of String
 #[derive(Debug, Error)]
 pub enum ITJsonSeDeError {
     #[error("{0}")]
