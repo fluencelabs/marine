@@ -104,20 +104,16 @@ impl From<std::convert::Infallible> for FaaSError {
 macro_rules! json_to_faas_err {
     ($json_expr:expr, $module_name:expr, $function_name:expr) => {
         $json_expr.map_err(|e| match e {
-            it_json_serde::ITJsonSeDeError::Se(_) => {
-                FaaSError::JsonOutputSerializationError {
-                    module_name: $module_name,
-                    function_name: $function_name,
-                    error: e,
-                }
-            }
-            it_json_serde::ITJsonSeDeError::De(_) => {
-                FaaSError::JsonArgumentsDeserializationError {
-                    module_name: $module_name,
-                    function_name: $function_name,
-                    error: e,
-                }
-            }
+            it_json_serde::ITJsonSeDeError::Se(_) => FaaSError::JsonOutputSerializationError {
+                module_name: $module_name,
+                function_name: $function_name,
+                error: e,
+            },
+            it_json_serde::ITJsonSeDeError::De(_) => FaaSError::JsonArgumentsDeserializationError {
+                module_name: $module_name,
+                function_name: $function_name,
+                error: e,
+            },
         })
     };
 }

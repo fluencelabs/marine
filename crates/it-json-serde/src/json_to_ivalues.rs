@@ -53,9 +53,9 @@ fn json_map_to_ivalues<'a, 'b>(
     let mut iargs = Vec::new();
 
     for (arg_name, arg_type) in arg_types {
-        let json_value = json_map.remove(arg_name).ok_or_else(|| {
-            De(format!("missing argument with name {}", arg_name))
-        })?;
+        let json_value = json_map
+            .remove(arg_name)
+            .ok_or_else(|| De(format!("missing argument with name {}", arg_name)))?;
         let iarg = jvalue_to_ivalue(json_value, arg_type, record_types)?;
         iargs.push(iarg);
     }
@@ -173,10 +173,7 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> 
 
                     Ok(iargs)
                 }
-                _ => Err(De(format!(
-                    "expected bytearray, got {:?}",
-                    jvalue
-                ))),
+                _ => Err(De(format!("expected bytearray, got {:?}", jvalue))),
             }?;
 
             Ok(IValue::Array(value))
