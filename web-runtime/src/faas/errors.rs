@@ -34,7 +34,7 @@ pub enum FaaSError {
     NoSuchModule(String),
 
     /// Provided arguments aren't compatible with a called function signature.
-    #[error("arguments from json deserialization error in module {module_name}, function {function_name}: {message}")]
+    #[error(r#"arguments from json deserialization error  in module "{module_name}", function "{function_name}": {message}"#)]
     JsonArgumentsDeserializationError {
         module_name: String,
         function_name: String,
@@ -42,7 +42,7 @@ pub enum FaaSError {
     },
 
     /// Returned outputs aren't compatible with a called function signature.
-    #[error("output to json serialization error in module {module_name}, function {function_name}: {message}")]
+    #[error(r#"output to json serialization error in module "{module_name}", function "{function_name}": {message}"#)]
     JsonOutputSerializationError {
         module_name: String,
         function_name: String,
@@ -75,14 +75,14 @@ macro_rules! json_to_faas_err {
     ($json_expr:expr, $module_name:expr, $function_name:expr) => {
         $json_expr.map_err(|e| match e {
             it_json_serde::ItJsonSerdeError::SerializationError(message) => {
-                FaaSError::JsonArgumentsDeserializationError {
+                FaaSError::JsonOutputSerializationError {
                     module_name: $module_name,
                     function_name: $function_name,
                     message,
                 }
             }
             it_json_serde::ItJsonSerdeError::DeserializationError(message) => {
-                FaaSError::JsonOutputSerializationError {
+                FaaSError::JsonArgumentsDeserializationError {
                     module_name: $module_name,
                     function_name: $function_name,
                     message,

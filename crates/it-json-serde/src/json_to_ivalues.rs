@@ -142,7 +142,7 @@ fn jvalue_to_ivalue(jvalue: JValue, ty: &IType, record_types: &MRecordTypes) -> 
                     },
                     jvalue => serde_json::from_value(jvalue),
                 }.map_err(|e|
-                    DeserializationError(format!("error {:?} occurred while deserialize output result to a json value",e))
+                    DeserializationError(format!("error {:?} occurred while deserializing function arguments",e))
                 )?;
 
                 Ok(IValue::$ty(value))
