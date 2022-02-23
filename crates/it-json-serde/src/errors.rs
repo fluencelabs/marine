@@ -18,9 +18,9 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ItJsonSerdeError {
-    #[error("cannot serialize IValues to Json: {0}")]
+    #[error("{0}")]
     SerializationError(String),
 
-    #[error("cannot deserialize Json to IValues: {0}")]
+    #[error("{0}")]
     DeserializationError(String),
 }
