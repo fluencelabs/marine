@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2022 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@
 
 use crate::IValue;
 use crate::IType;
-use crate::FaaSResult;
-use crate::errors::FaaSError::JsonOutputSerializationError as OutputDeError;
+use crate::ITJsonSeDeError::Se;
+use crate::JsonResult;
+use crate::MRecordTypes;
 
-use marine::MRecordTypes;
 use serde_json::Value as JValue;
 
-pub(crate) fn ivalues_to_json(
+pub fn ivalues_to_json(
     mut ivalues: Vec<IValue>,
     outputs: &[IType],
     record_types: &MRecordTypes,
-) -> FaaSResult<JValue> {
+) -> JsonResult<JValue> {
     if outputs.len() != ivalues.len() {
-        return Err(OutputDeError(format!(
+        return Err(Se(format!(
             "resulted values {:?} and function signature {:?} aren't compatible",
             ivalues, outputs
         )));
@@ -46,7 +46,7 @@ fn ivalue_to_json(
     ivalue: IValue,
     output: &IType,
     record_types: &MRecordTypes,
-) -> FaaSResult<JValue> {
+) -> JsonResult<JValue> {
     use serde_json::json;
 
     // clone here needed because binding by-value and by-ref in the same pattern in unstable
@@ -70,7 +70,7 @@ fn ivalue_to_json(
             Ok(JValue::Array(result))
         }
         (IValue::Array(value), IType::ByteArray) => {
-            let result: FaaSResult<Vec<_>> = value
+            let result: JsonResult<Vec<_>> = value
                 .into_iter()
                 .map(|v| ivalue_to_json(v, &IType::U8, record_types))
                 .collect();
@@ -78,7 +78,7 @@ fn ivalue_to_json(
             Ok(JValue::Array(result?))
         }
         (IValue::ByteArray(value), IType::Array(array_ty)) => {
-            let result: FaaSResult<Vec<_>> = value
+            let result: JsonResult<Vec<_>> = value
                 .into_iter()
                 .map(|v| ivalue_to_json(IValue::U8(v), &array_ty, record_types))
                 .collect();
@@ -86,7 +86,7 @@ fn ivalue_to_json(
             Ok(JValue::Array(result?))
         }
         (IValue::Array(value), IType::Array(array_ty)) => {
-            let result: FaaSResult<Vec<_>> = value
+            let result: JsonResult<Vec<_>> = value
                 .into_iter()
                 .map(|v| ivalue_to_json(v, &array_ty, record_types))
                 .collect();
@@ -95,7 +95,7 @@ fn ivalue_to_json(
         }
         (IValue::Record(field_values), IType::Record(record_id)) => {
             let record_type = record_types.get(&record_id).ok_or_else(|| {
-                OutputDeError(format!(
+                Se(format!(
                     "record id {} wasn't found in module record types",
                     record_id
                 ))
@@ -103,7 +103,7 @@ fn ivalue_to_json(
             let field_types = &record_type.fields;
 
             if field_values.len() != field_types.len() {
-                return Err(OutputDeError(format!(
+                return Err(Se(format!(
                     "output record {:?} isn't compatible to output record fields {:?}",
                     field_values, field_types
                 )));
@@ -119,7 +119,7 @@ fn ivalue_to_json(
 
             Ok(JValue::Object(result))
         }
-        (ivalue, itype) => Err(OutputDeError(format!(
+        (ivalue, itype) => Err(Se(format!(
             "value {:?} is incompatible to type {:?}",
             ivalue, itype
         ))),

@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-mod ivalues_to_json;
-mod json_to_ivalues;
+use thiserror::Error;
 
-pub(crate) use ivalues_to_json::ivalues_to_json;
-pub(crate) use json_to_ivalues::json_to_ivalues;
+//TODO: use enum with strict errors instead of String
+#[derive(Debug, Error)]
+pub enum ITJsonSeDeError {
+    #[error("{0}")]
+    Se(String),
+
+    #[error("{0}")]
+    De(String),
+}

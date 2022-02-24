@@ -22,6 +22,7 @@ use crate::IType;
 use crate::Marine;
 use crate::IFunctionArg;
 use crate::MRecordTypes;
+use crate::json_to_faas_err;
 
 //use marine_utils::SharedString;
 use marine_rs_sdk::CallParameters;
@@ -95,24 +96,32 @@ impl FluenceFaaS {
         json_args: JValue,
         call_parameters: marine_rs_sdk::CallParameters,
     ) -> Result<JValue> {
-        use crate::faas::json::json_to_ivalues;
-        use crate::faas::json::ivalues_to_json;
+        use it_json_serde::json_to_ivalues;
+        use it_json_serde::ivalues_to_json;
 
         let module_name = module_name.as_ref();
         let func_name = func_name.as_ref();
 
         let (func_signature, output_types, record_types) =
             self.lookup_module_interface(module_name, func_name)?;
-        let iargs = json_to_ivalues(
-            json_args,
-            func_signature.iter().map(|arg| (&arg.name, &arg.ty)),
-            &record_types,
+        let iargs = json_to_faas_err!(
+            json_to_ivalues(
+                json_args,
+                func_signature.iter().map(|arg| (&arg.name, &arg.ty)),
+                &record_types,
+            ),
+            module_name.to_string(),
+            func_name.to_string()
         )?;
 
         self.call_parameters.replace(call_parameters);
         let result = self.marine.call(module_name, func_name, &iargs)?;
 
-        ivalues_to_json(result, &output_types, &record_types)
+        json_to_faas_err!(
+            ivalues_to_json(result, &output_types, &record_types),
+            module_name.to_string(),
+            func_name.to_string()
+        )
     }
 
     /// Return all export functions (name and signatures) of loaded modules.

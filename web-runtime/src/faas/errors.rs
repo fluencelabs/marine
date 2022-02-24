@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use it_json_serde::ITJsonSeDeError;
 use crate::MError;
 
 use thiserror::Error;
@@ -34,12 +35,20 @@ pub enum FaaSError {
     NoSuchModule(String),
 
     /// Provided arguments aren't compatible with a called function signature.
-    #[error("arguments from json deserialization error: {0}")]
-    JsonArgumentsDeserializationError(String),
+    #[error(r#"arguments from json deserialization error in module "{module_name}", function "{function_name}": {error}"#)]
+    JsonArgumentsDeserializationError {
+        module_name: String,
+        function_name: String,
+        error: ITJsonSeDeError,
+    },
 
     /// Returned outputs aren't compatible with a called function signature.
-    #[error("output to json serialization error: {0}")]
-    JsonOutputSerializationError(String),
+    #[error(r#"output to json serialization error in module "{module_name}", function "{function_name}": {error}"#)]
+    JsonOutputSerializationError {
+        module_name: String,
+        function_name: String,
+        error: ITJsonSeDeError,
+    },
 
     /// Errors related to invalid config.
     #[error("parsing config error: {0}")]
@@ -60,4 +69,22 @@ impl From<std::convert::Infallible> for FaaSError {
     fn from(_: std::convert::Infallible) -> Self {
         unreachable!()
     }
+}
+
+#[macro_export]
+macro_rules! json_to_faas_err {
+    ($json_expr:expr, $module_name:expr, $function_name:expr) => {
+        $json_expr.map_err(|e| match e {
+            it_json_serde::ITJsonSeDeError::Se(_) => FaaSError::JsonOutputSerializationError {
+                module_name: $module_name,
+                function_name: $function_name,
+                error: e,
+            },
+            it_json_serde::ITJsonSeDeError::De(_) => FaaSError::JsonArgumentsDeserializationError {
+                module_name: $module_name,
+                function_name: $function_name,
+                error: e,
+            },
+        })
+    };
 }
