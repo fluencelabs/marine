@@ -21,12 +21,16 @@ use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
 use crate::MResult;
 use crate::MModuleConfig;
 
+use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::Module;
+use marine_wasm_backend_traits::Instance;
+
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
 use marine_utils::SharedString;
-use wasmer_core::Instance as WasmerInstance;
+//use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
-use wasmer_runtime::compile;
+//use wasmer_runtime::compile;
 use wasmer_runtime::ImportObject;
 use wasmer_it::interpreter::Interpreter;
 
@@ -36,23 +40,23 @@ use std::mem::MaybeUninit;
 use std::sync::Arc;
 use std::rc::Rc;
 
-type ITInterpreter =
-    Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
+type ITInterpreter<WB> =
+    Interpreter<ITInstance<WB>, ITExport, WITFunction<WB>, WITMemory, WITMemoryView<'static>>;
 
 #[derive(Clone)]
-pub(super) struct ITModuleFunc {
-    interpreter: Arc<ITInterpreter>,
+pub(super) struct ITModuleFunc<WB: WasmBackend> {
+    interpreter: Arc<ITInterpreter<WB>>,
     pub(super) arguments: Rc<Vec<IFunctionArg>>,
     pub(super) output_types: Rc<Vec<IType>>,
 }
 
 #[derive(Clone)]
-pub(super) struct Callable {
-    pub(super) it_instance: Arc<ITInstance>,
-    pub(super) it_module_func: ITModuleFunc,
+pub(super) struct Callable<WB: WasmBackend> {
+    pub(super) it_instance: Arc<ITInstance<WB>>,
+    pub(super) it_module_func: ITModuleFunc<WB>,
 }
 
-impl Callable {
+impl<WB: WasmBackend> Callable<WB> {
     pub fn call(&mut self, args: &[IValue]) -> MResult<Vec<IValue>> {
         use wasmer_it::interpreter::stack::Stackable;
 
@@ -67,13 +71,13 @@ impl Callable {
     }
 }
 
-type ExportFunctions = HashMap<SharedString, Rc<Callable>>;
+type ExportFunctions<WB> = HashMap<SharedString, Rc<Callable<WB>>>;
 
-pub(crate) struct MModule {
+pub(crate) struct MModule<WB: WasmBackend> {
     // wasmer_instance is needed because WITInstance contains dynamic functions
     // that internally keep pointer to it.
     #[allow(unused)]
-    wasmer_instance: Box<WasmerInstance>,
+    wasmer_instance: Box<<<WB as WasmBackend>::M as Module>::I>,
 
     // import_object is needed because ImportObject::extend doesn't really deep copy
     // imports, so we need to store imports of this module to prevent their removing.
@@ -91,21 +95,21 @@ pub(crate) struct MModule {
     host_closures_import_object: ImportObject,
 
     // TODO: replace with dyn Trait
-    export_funcs: ExportFunctions,
+    export_funcs: ExportFunctions<WB>,
 
     // TODO: save refs instead copying of a record types HashMap.
     /// Record types used in exported functions as arguments or return values.
     export_record_types: MRecordTypes,
 }
 
-impl MModule {
+impl<WB: WasmBackend> MModule<WB> {
     pub(crate) fn new(
         name: &str,
         wasm_bytes: &[u8],
         config: MModuleConfig,
-        modules: &HashMap<String, MModule>,
+        modules: &HashMap<String, MModule<WB>>,
     ) -> MResult<Self> {
-        let wasmer_module = compile(wasm_bytes)?;
+        let wasmer_module = WB::compile(wasm_bytes)?;
         crate::misc::check_sdk_version(name, &wasmer_module)?;
 
         let it = extract_it_from_module(&wasmer_module)?;
@@ -125,14 +129,14 @@ impl MModule {
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
                 MaybeUninit::new(ITInstance::new(&wasmer_instance, name, &mit, modules)?);
-            std::mem::transmute::<_, Arc<ITInstance>>(wit_instance)
+            std::mem::transmute::<_, Arc<ITInstance<WB>>>(wit_instance)
         };
 
         let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
 
         // call _start to populate the WASI state of the module
         #[rustfmt::skip]
-        if let Ok(start_func) = wasmer_instance.exports.get::<wasmer_runtime::Func<'_, (), ()>>("_start") {
+        if let Ok(start_func) = wasmer_instance.exports().get::<wasmer_runtime::Func<'_, (), ()>>("_start") {
             start_func.call()?;
         }
 
@@ -199,7 +203,7 @@ impl MModule {
         &self,
         module_name: &str,
         function_name: &str,
-    ) -> MResult<Rc<Callable>> {
+    ) -> MResult<Rc<Callable<WB>>> {
         match self.export_funcs.get(function_name) {
             Some(func) => Ok(func.clone()),
             None => Err(MError::NoSuchFunction(
@@ -259,9 +263,9 @@ impl MModule {
     }
 
     fn instantiate_exports(
-        it_instance: &Arc<ITInstance>,
+        it_instance: &Arc<ITInstance<WB>>,
         mit: &MITInterfaces<'_>,
-    ) -> MResult<(ExportFunctions, MRecordTypes)> {
+    ) -> MResult<(ExportFunctions<WB>, MRecordTypes)> {
         let module_interface = marine_module_interface::it_interface::get_interface(mit)?;
 
         let export_funcs = module_interface
@@ -270,7 +274,7 @@ impl MModule {
             .map(|sign| {
                 let adapter_instructions = mit.adapter_by_type_r(sign.adapter_function_type)?;
 
-                let interpreter: ITInterpreter = adapter_instructions.clone().try_into()?;
+                let interpreter: ITInterpreter<WB> = adapter_instructions.clone().try_into()?;
                 let it_module_func = ITModuleFunc {
                     interpreter: Arc::new(interpreter),
                     arguments: sign.arguments.clone(),
@@ -285,7 +289,7 @@ impl MModule {
 
                 Ok((shared_string, callable))
             })
-            .collect::<MResult<ExportFunctions>>()?;
+            .collect::<MResult<ExportFunctions<WB>>>()?;
 
         Ok((export_funcs, module_interface.export_record_types))
     }
@@ -293,7 +297,7 @@ impl MModule {
     // this function deals only with import functions that have an adaptor implementation
     fn adjust_wit_imports(
         wit: &MITInterfaces<'_>,
-        wit_instance: Arc<MaybeUninit<ITInstance>>,
+        wit_instance: Arc<MaybeUninit<ITInstance<WB>>>,
     ) -> MResult<ImportObject> {
         use marine_it_interfaces::ITAstType;
         use wasmer_core::typed_func::DynamicFunc;
@@ -317,9 +321,9 @@ impl MModule {
         }
 
         // creates a closure that is represent a IT module import
-        fn create_raw_import(
-            wit_instance: Arc<MaybeUninit<ITInstance>>,
-            interpreter: ITInterpreter,
+        fn create_raw_import<WB: WasmBackend + 'static>(
+            wit_instance: Arc<MaybeUninit<ITInstance<WB>>>,
+            interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
         ) -> impl Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static {
@@ -383,7 +387,7 @@ impl MModule {
                         arguments,
                         output_types,
                     } => {
-                        let interpreter: ITInterpreter = adapter_instructions.clone().try_into()?;
+                        let interpreter: ITInterpreter<WB> = adapter_instructions.clone().try_into()?;
 
                         let raw_import = create_raw_import(
                             wit_instance.clone(),

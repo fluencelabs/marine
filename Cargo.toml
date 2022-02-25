@@ -7,6 +7,8 @@ members = [
     "crates/min-it-version",
     "crates/module-info-parser",
     "crates/module-interface",
+    "crates/wasm-backend-traits",
+    "crates/wasmer-backend",
     "crates/utils",
     "examples/call_parameters",
     "examples/greeting",

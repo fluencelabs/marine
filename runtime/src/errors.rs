@@ -20,7 +20,7 @@ use crate::misc::PrepareError;
 use marine_it_interfaces::MITInterfacesError;
 use marine_it_parser::ITParserError;
 use marine_module_interface::it_interface::ITInterfaceError;
-
+use marine_wasm_backend_traits::WasmBackendError;
 use wasmer_runtime::error as wasmer_error;
 
 use thiserror::Error as ThisError;
@@ -101,6 +101,9 @@ pub enum MError {
     /// Incorrect IT section.
     #[error("{0}")]
     IncorrectWIT(String),
+
+    #[error("WASM BACKEND ERROR: {0}")]
+    WasmBackendError(WasmBackendError)
 }
 
 impl From<MITInterfacesError> for MError {
@@ -130,5 +133,11 @@ impl From<wasmer_error::InvokeError> for MError {
 impl From<()> for MError {
     fn from(_err: ()) -> Self {
         MError::IncorrectWIT("failed to parse instructions for adapter type".to_string())
+    }
+}
+
+impl From<WasmBackendError> for MError {
+    fn from(err: WasmBackendError) -> Self {
+        MError::WasmBackendError(err)
     }
 }

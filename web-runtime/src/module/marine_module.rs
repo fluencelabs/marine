@@ -86,8 +86,11 @@ pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfac
 
 #[allow(unused)]
 impl MModule {
-    pub(crate) fn new(name: &str, wit_section_bytes: &[u8]) -> MResult<Self> {
-        let it = extract_it_from_bytes(wit_section_bytes)?;
+    pub(crate) fn new(name: &str, wasm_bytes: &[u8]) -> MResult<Self> {
+        // TODO: compile module
+        // TODO: extract it section
+        // TODO: extract sdk version
+        let it = extract_it_from_bytes(wasm_bytes)?;
         crate::misc::check_it_version(name, &it.version)?;
 
         let mit = MITInterfaces::new(it);

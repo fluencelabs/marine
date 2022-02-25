@@ -14,6 +14,7 @@ path = "src/lib.rs"
 marine-rs-sdk-main = "0.6.13"
 
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1" }
+marine-wasm-backend-traits = { path = "../wasm-backend-traits", version = "0.1.0"}
 
 anyhow = "1.0.31"
 chrono = "0.4.19"

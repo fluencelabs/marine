@@ -18,6 +18,8 @@ use super::*;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
 
+use marine_wasm_backend_traits::WasmBackend;
+
 use serde::Serialize;
 
 use std::collections::hash_map::Entry;
@@ -32,12 +34,12 @@ pub struct MModuleInterface<'a> {
 }
 
 /// The base struct of Marine, the Fluence compute runtime.
-pub struct Marine {
+pub struct Marine<WB: WasmBackend> {
     // set of modules registered inside Marine
-    modules: HashMap<String, MModule>,
+    modules: HashMap<String, MModule<WB>>,
 }
 
-impl Marine {
+impl<WB: WasmBackend> Marine<WB> {
     pub fn new() -> Self {
         Self {
             modules: HashMap::new(),
@@ -149,7 +151,7 @@ impl Marine {
         records.into()
     }
 
-    fn get_module_interface(module: &MModule) -> MModuleInterface<'_> {
+    fn get_module_interface(module: &MModule<WB>) -> MModuleInterface<'_> {
         let record_types = module.export_record_types();
 
         let function_signatures = module.get_exports_signatures().collect::<Vec<_>>();
@@ -161,7 +163,7 @@ impl Marine {
     }
 }
 
-impl Default for Marine {
+impl<WB: WasmBackend> Default for Marine<WB> {
     fn default() -> Self {
         Self::new()
     }

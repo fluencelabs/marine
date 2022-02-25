@@ -13,6 +13,7 @@ path = "src/lib.rs"
 [dependencies]
 marine-it-interfaces = { path = "../it-interfaces", version = "0.5.0" }
 marine-module-interface = { path = "../module-interface", version = "0.2.0" }
+marine-wasm-backend-traits = { path = "../wasm-backend-traits", version = "0.1.0"}
 
 anyhow = "1.0.31"
 walrus = "0.18.0"

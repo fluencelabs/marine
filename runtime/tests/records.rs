@@ -17,6 +17,8 @@
 use marine::Marine;
 use marine::IValue;
 
+use marine_wasmer_backend::WasmerBackend;
+
 #[test]
 pub fn records() {
     let effector_wasm_bytes = std::fs::read("../examples/records/artifacts/records_effector.wasm")
@@ -25,7 +27,7 @@ pub fn records() {
     let pure_wasm_bytes = std::fs::read("../examples/records/artifacts/records_pure.wasm")
         .expect("../examples/records/artifacts/records_pure.wasm should presence");
 
-    let mut marine = Marine::new();
+    let mut marine = Marine::<WasmerBackend>::new();
     let load_result = marine.load_module("pure", &pure_wasm_bytes, <_>::default());
     assert!(load_result.is_err());
 

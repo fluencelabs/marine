@@ -68,13 +68,13 @@ impl Marine {
     pub fn load_module<S: Into<String>>(
         &mut self,
         name: S,
-        wit_section_bytes: &[u8],
+        wasm_bytes: &[u8],
     ) -> MResult<()> {
-        self.load_module_(name.into(), wit_section_bytes)
+        self.load_module_(name.into(), wasm_bytes)
     }
 
-    fn load_module_(&mut self, name: String, wit_section_bytes: &[u8]) -> MResult<()> {
-        let module = MModule::new(&name, wit_section_bytes)?;
+    fn load_module_(&mut self, name: String, wasm_bytes: &[u8]) -> MResult<()> {
+        let module = MModule::new(&name, wasm_bytes)?;
 
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {

@@ -16,6 +16,7 @@
 
 use marine::Marine;
 use marine::IValue;
+use marine_wasmer_backend::WasmerBackend;
 
 const REDIS_DOWNLOAD_URL: &str =
     "https://github.com/fluencelabs/redis/releases/download/v0.14.0_w/redis.wasm";
@@ -35,7 +36,7 @@ pub async fn download(url: &str) -> bytes::Bytes {
 async fn redis() {
     let wasm_bytes = download(REDIS_DOWNLOAD_URL).await;
 
-    let mut marine = Marine::new();
+    let mut marine = Marine::<WasmerBackend>::new();
     let module_name = "redis";
     let config = <_>::default();
 
@@ -95,7 +96,7 @@ async fn redis() {
 async fn sqlite() {
     let wasm_bytes = download(SQLITE_DOWNLOAD_URL).await;
 
-    let mut marine = Marine::new();
+    let mut marine = Marine::<WasmerBackend>::new();
     let module_name = "sqlite";
     let config = <_>::default();
 

@@ -19,6 +19,8 @@ use super::{IType, IFunctionArg, IValue, WValue};
 use super::marine_module::Callable;
 use crate::MResult;
 
+use marine_wasm_backend_traits::WasmBackend;
+
 use wasmer_it::interpreter::wasm;
 use wasmer_core::instance::DynFunc;
 
@@ -26,26 +28,26 @@ use wasmer_core::instance::DynFunc;
 use std::rc::Rc;
 
 #[derive(Clone)]
-enum WITFunctionInner {
+enum WITFunctionInner<WB: WasmBackend> {
     Export {
         func: Rc<DynFunc<'static>>,
     },
     Import {
         // TODO: use dyn Callable here
-        callable: Rc<Callable>,
+        callable: Rc<Callable<WB>>,
     },
 }
 
 /// Represents all import and export functions that could be called from IT context by call-core.
 #[derive(Clone)]
-pub(super) struct WITFunction {
+pub(super) struct WITFunction<WB: WasmBackend> {
     name: String,
     arguments: Rc<Vec<IFunctionArg>>,
     outputs: Rc<Vec<IType>>,
-    inner: WITFunctionInner,
+    inner: WITFunctionInner<WB>,
 }
 
-impl WITFunction {
+impl<WB: WasmBackend> WITFunction<WB> {
     /// Creates functions from a "usual" (not IT) module export.
     pub(super) fn from_export(dyn_func: DynFunc<'static>, name: String) -> MResult<Self> {
         use super::type_converters::wtype_to_itype;
@@ -83,7 +85,7 @@ impl WITFunction {
 
     /// Creates function from a module import.
     pub(super) fn from_import(
-        wit_module: &MModule,
+        wit_module: &MModule<WB>,
         module_name: &str,
         function_name: &str,
         arguments: Rc<Vec<IFunctionArg>>,
@@ -104,7 +106,7 @@ impl WITFunction {
     }
 }
 
-impl wasm::structures::LocalImport for WITFunction {
+impl<WB: WasmBackend> wasm::structures::LocalImport for WITFunction<WB> {
     fn name(&self) -> &str {
         self.name.as_str()
     }

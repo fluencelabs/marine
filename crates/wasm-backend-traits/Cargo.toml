@@ -1,0 +1,14 @@
+[package]
+name = "marine-wasm-backend-traits"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thiserror = "1.0.24"
+
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.1" }
+wasmer-runtime = { package = "wasmer-runtime-fl", version = "=0.17.1" }
+# dynamicfunc-fat-closures allows using state inside DynamicFunc
+wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1", features = ["dynamicfunc-fat-closures"] }
