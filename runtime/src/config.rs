@@ -18,8 +18,11 @@ use super::IValue;
 use super::IType;
 use crate::HostImportError;
 
+use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::ImportObject;
+
 use wasmer_wasi::WasiVersion;
-use wasmer_runtime::ImportObject;
+//use wasmer_runtime::ImportObject;
 use wasmer_core::vm::Ctx;
 
 use std::path::PathBuf;
@@ -46,13 +49,13 @@ pub struct HostImportDescriptor {
     pub error_handler: Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + 'static>>,
 }
 
-pub struct MModuleConfig {
+pub struct MModuleConfig<WB: WasmBackend> {
     /// Maximum number of Wasm memory pages that loaded module can use.
     /// Each Wasm page is 65536 bytes long.
     pub max_heap_pages_count: u32,
 
     /// Import object that will be used in module instantiation process.
-    pub raw_imports: ImportObject,
+    pub raw_imports: <WB as WasmBackend>::IO,
 
     /// Imports from the host side that will be used in module instantiation process.
     pub host_imports: HashMap<String, HostImportDescriptor>,
@@ -70,12 +73,12 @@ pub struct MModuleConfig {
     pub wasi_mapped_dirs: HashMap<String, PathBuf>,
 }
 
-impl Default for MModuleConfig {
+impl<WB: WasmBackend> Default for MModuleConfig<WB> {
     fn default() -> Self {
         // some reasonable defaults
         Self {
             max_heap_pages_count: DEFAULT_HEAP_PAGES_COUNT,
-            raw_imports: ImportObject::new(),
+            raw_imports: <WB as WasmBackend>::IO::new(),
             host_imports: HashMap::new(),
             wasi_version: WasiVersion::Latest,
             wasi_envs: HashMap::new(),
@@ -88,7 +91,7 @@ impl Default for MModuleConfig {
 // TODO: implement debug for MModuleConfig
 
 #[allow(dead_code)]
-impl MModuleConfig {
+impl<WB: WasmBackend> MModuleConfig<WB> {
     pub fn with_mem_pages_count(mut self, mem_pages_count: u32) -> Self {
         self.max_heap_pages_count = mem_pages_count;
         self

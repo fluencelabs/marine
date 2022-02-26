@@ -65,11 +65,7 @@ impl Marine {
     }
 
     /// Load a new module inside Marine.
-    pub fn load_module<S: Into<String>>(
-        &mut self,
-        name: S,
-        wasm_bytes: &[u8],
-    ) -> MResult<()> {
+    pub fn load_module<S: Into<String>>(&mut self, name: S, wasm_bytes: &[u8]) -> MResult<()> {
         self.load_module_(name.into(), wasm_bytes)
     }
 

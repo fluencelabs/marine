@@ -24,6 +24,8 @@ use crate::MModuleConfig;
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
+use marine_wasm_backend_traits::ImportObject;
+use marine_wasm_backend_traits::WasiImplementation;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
@@ -31,7 +33,7 @@ use marine_utils::SharedString;
 //use wasmer_core::Instance as WasmerInstance;
 use wasmer_core::import::Namespace;
 //use wasmer_runtime::compile;
-use wasmer_runtime::ImportObject;
+//use wasmer_runtime::ImportObject;
 use wasmer_it::interpreter::Interpreter;
 
 use std::collections::HashMap;
@@ -77,22 +79,22 @@ pub(crate) struct MModule<WB: WasmBackend> {
     // wasmer_instance is needed because WITInstance contains dynamic functions
     // that internally keep pointer to it.
     #[allow(unused)]
-    wasmer_instance: Box<<<WB as WasmBackend>::M as Module>::I>,
+    wasmer_instance: Box<<WB as WasmBackend>::I>,
 
     // import_object is needed because ImportObject::extend doesn't really deep copy
     // imports, so we need to store imports of this module to prevent their removing.
     #[allow(unused)]
-    it_import_object: ImportObject,
+    it_import_object: <WB as WasmBackend>::IO,
 
     // host_import_object is needed because ImportObject::extend doesn't really deep copy
     // imports, so we need to store imports of this module to prevent their removing.
     #[allow(unused)]
-    host_import_object: ImportObject,
+    host_import_object: <WB as WasmBackend>::IO,
 
     // host_closures_import_object is needed because ImportObject::extend doesn't really deep copy
     // imports, so we need to store imports of this module to prevent their removing.
     #[allow(unused)]
-    host_closures_import_object: ImportObject,
+    host_closures_import_object: <WB as WasmBackend>::IO,
 
     // TODO: replace with dyn Trait
     export_funcs: ExportFunctions<WB>,
@@ -106,13 +108,13 @@ impl<WB: WasmBackend> MModule<WB> {
     pub(crate) fn new(
         name: &str,
         wasm_bytes: &[u8],
-        config: MModuleConfig,
+        config: MModuleConfig<WB>,
         modules: &HashMap<String, MModule<WB>>,
     ) -> MResult<Self> {
         let wasmer_module = WB::compile(wasm_bytes)?;
-        crate::misc::check_sdk_version(name, &wasmer_module)?;
+        crate::misc::check_sdk_version::<WB>(name.to_string(), &wasmer_module)?;
 
-        let it = extract_it_from_module(&wasmer_module)?;
+        let it = extract_it_from_module::<WB>(&wasmer_module)?;
         crate::misc::check_it_version(name, &it.version)?;
 
         let mit = MITInterfaces::new(it);
@@ -214,10 +216,10 @@ impl<WB: WasmBackend> MModule<WB> {
     }
 
     fn create_import_objects(
-        config: MModuleConfig,
+        config: MModuleConfig<WB>,
         mit: &MITInterfaces<'_>,
-        wit_import_object: ImportObject,
-    ) -> MResult<(ImportObject, ImportObject)> {
+        wit_import_object: <WB as WasmBackend>::IO,
+    ) -> MResult<(<WB as WasmBackend>::IO, <WB as WasmBackend>::IO)> {
         use crate::host_imports::create_host_import_func;
 
         let wasi_envs = config
@@ -232,7 +234,7 @@ impl<WB: WasmBackend> MModule<WB> {
         let wasi_preopened_files = config.wasi_preopened_files.into_iter().collect::<Vec<_>>();
         let wasi_mapped_dirs = config.wasi_mapped_dirs.into_iter().collect::<Vec<_>>();
 
-        let mut wasi_import_object = wasmer_wasi::generate_import_object_for_version(
+        let mut wasi_import_object = <WB as WasmBackend>::Wasi::generate_import_object_for_version(
             config.wasi_version,
             vec![],
             wasi_envs,
@@ -252,12 +254,12 @@ impl<WB: WasmBackend> MModule<WB> {
             let host_import = create_host_import_func(descriptor, record_types.clone());
             host_closures_namespace.insert(import_name, host_import);
         }
-        let mut host_closures_import_object = ImportObject::new();
+        let mut host_closures_import_object = <WB as WasmBackend>::IO::new();
         host_closures_import_object.register("host", host_closures_namespace);
 
-        wasi_import_object.extend(wit_import_object);
-        wasi_import_object.extend(config.raw_imports);
-        wasi_import_object.extend(host_closures_import_object.clone());
+        wasi_import_object.extend_with_self(wit_import_object);
+        wasi_import_object.extend_with_self(config.raw_imports);
+        wasi_import_object.extend_with_self(host_closures_import_object.clone());
 
         Ok((wasi_import_object, host_closures_import_object))
     }
@@ -298,7 +300,7 @@ impl<WB: WasmBackend> MModule<WB> {
     fn adjust_wit_imports(
         wit: &MITInterfaces<'_>,
         wit_instance: Arc<MaybeUninit<ITInstance<WB>>>,
-    ) -> MResult<ImportObject> {
+    ) -> MResult<<WB as WasmBackend>::IO> {
         use marine_it_interfaces::ITAstType;
         use wasmer_core::typed_func::DynamicFunc;
         use wasmer_core::vm::Ctx;
@@ -387,7 +389,8 @@ impl<WB: WasmBackend> MModule<WB> {
                         arguments,
                         output_types,
                     } => {
-                        let interpreter: ITInterpreter<WB> = adapter_instructions.clone().try_into()?;
+                        let interpreter: ITInterpreter<WB> =
+                            adapter_instructions.clone().try_into()?;
 
                         let raw_import = create_raw_import(
                             wit_instance.clone(),
@@ -412,7 +415,7 @@ impl<WB: WasmBackend> MModule<WB> {
             })
             .collect::<MResult<multimap::MultiMap<_, _>>>()?;
 
-        let mut import_object = ImportObject::new();
+        let mut import_object = <WB as WasmBackend>::IO::new();
 
         // TODO: refactor this
         for (namespace_name, funcs) in wit_import_funcs.into_iter() {

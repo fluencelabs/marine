@@ -1887,6 +1887,7 @@ dependencies = [
  "wasmer-interface-types-fl 0.21.1",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
+ "wasmer-wasi-fl",
 ]
 
 [[package]]
@@ -1897,6 +1898,7 @@ dependencies = [
  "wasmer-interface-types-fl 0.21.1",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
+ "wasmer-wasi-fl",
 ]
 
 [[package]]

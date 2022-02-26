@@ -66,7 +66,7 @@ impl<WB: WasmBackend> Marine<WB> {
         &mut self,
         name: S,
         wasm_bytes: &[u8],
-        config: MModuleConfig,
+        config: MModuleConfig<WB>,
     ) -> MResult<()> {
         self.load_module_(name.into(), wasm_bytes, config)
     }
@@ -75,7 +75,7 @@ impl<WB: WasmBackend> Marine<WB> {
         &mut self,
         name: String,
         wasm_bytes: &[u8],
-        config: MModuleConfig,
+        config: MModuleConfig<WB>,
     ) -> MResult<()> {
         let _prepared_wasm_bytes =
             crate::misc::prepare_module(wasm_bytes, config.max_heap_pages_count)?;

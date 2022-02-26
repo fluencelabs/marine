@@ -21,7 +21,9 @@ use crate::extract_custom_sections_by_name;
 use crate::try_as_one_section;
 
 //use wasmer_core::Module as WasmerModule;
-use marine_wasm_backend_traits::Module as ModuleTrait;
+use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::Module as WasmModule;
+
 use marine_rs_sdk_main::VERSION_SECTION_NAME;
 use walrus::ModuleConfig;
 use walrus::Module;
@@ -57,8 +59,8 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<semv
     Ok(Some(version))
 }
 
-pub fn extract_from_wasmer_module<M: ModuleTrait>(
-    wasmer_module: &M,
+pub fn extract_from_wasmer_module<WB: WasmBackend>(
+    wasmer_module: &<WB as WasmBackend>::M,
 ) -> ModuleInfoResult<Option<semver::Version>> {
     let sections = wasmer_module.custom_sections(VERSION_SECTION_NAME);
 

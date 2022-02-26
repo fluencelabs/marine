@@ -103,7 +103,7 @@ pub enum MError {
     IncorrectWIT(String),
 
     #[error("WASM BACKEND ERROR: {0}")]
-    WasmBackendError(WasmBackendError)
+    WasmBackendError(WasmBackendError),
 }
 
 impl From<MITInterfacesError> for MError {

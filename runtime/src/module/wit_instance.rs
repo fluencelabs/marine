@@ -20,8 +20,9 @@ use super::IRecordType;
 use crate::MResult;
 
 use marine_wasm_backend_traits::WasmBackend;
-use marine_wasm_backend_traits::Module;
+//use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
+use marine_wasm_backend_traits::ImportObject;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
@@ -50,7 +51,7 @@ pub(super) struct ITInstance<WB: WasmBackend> {
 
 impl<WB: WasmBackend> ITInstance<WB> {
     pub(super) fn new(
-        wasmer_instance: &<<WB as WasmBackend>::M as Module>::I,
+        wasmer_instance: &<WB as WasmBackend>::I,
         module_name: &str,
         wit: &MITInterfaces<'_>,
         modules: &HashMap<String, MModule<WB>>,
@@ -71,8 +72,8 @@ impl<WB: WasmBackend> ITInstance<WB> {
         })
     }
 
-    fn extract_raw_exports<I: Instance>(
-        wasmer_instance: &I,
+    fn extract_raw_exports(
+        wasmer_instance: &<WB as WasmBackend>::I,
         it: &MITInterfaces<'_>,
     ) -> MResult<HashMap<usize, WITFunction<WB>>> {
         use wasmer_core::DynFunc;
@@ -141,7 +142,7 @@ impl<WB: WasmBackend> ITInstance<WB> {
             .collect::<MResult<HashMap<_, _>>>()
     }
 
-    fn extract_memories<I: Instance>(wasmer_instance: &I) -> Vec<WITMemory> {
+    fn extract_memories(wasmer_instance: &<WB as WasmBackend>::I) -> Vec<WITMemory> {
         use wasmer_core::export::Export::Memory;
 
         let mut memories = wasmer_instance
@@ -180,7 +181,8 @@ impl<WB: WasmBackend> ITInstance<WB> {
     }
 }
 
-impl<'v, WB: WasmBackend> wasm::structures::Instance<ITExport, WITFunction<WB>, WITMemory, WITMemoryView<'v>>
+impl<'v, WB: WasmBackend>
+    wasm::structures::Instance<ITExport, WITFunction<WB>, WITMemory, WITMemoryView<'v>>
     for ITInstance<WB>
 {
     fn export(&self, _export_name: &str) -> Option<&ITExport> {
@@ -188,7 +190,10 @@ impl<'v, WB: WasmBackend> wasm::structures::Instance<ITExport, WITFunction<WB>, 
         None
     }
 
-    fn local_or_import<I: TypedIndex + LocalImportIndex>(&self, index: I) -> Option<&WITFunction<WB>> {
+    fn local_or_import<I: TypedIndex + LocalImportIndex>(
+        &self,
+        index: I,
+    ) -> Option<&WITFunction<WB>> {
         self.funcs.get(&index.index())
     }
 
