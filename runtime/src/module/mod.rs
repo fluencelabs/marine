@@ -16,8 +16,8 @@
 
 mod exports;
 mod marine_module;
-mod memory;
-mod memory_access;
+//mod memory;
+//mod memory_access;
 mod wit_function;
 mod wit_instance;
 mod type_converters;
@@ -30,8 +30,8 @@ pub use wasmer_it::IValue;
 pub use wasmer_it::from_interface_values;
 pub use wasmer_it::to_interface_value;
 
-pub(crate) use memory_access::WasmerSequentialWriter;
-pub(crate) use memory_access::WasmerSequentialReader;
+//pub(crate) use memory_access::WasmerSequentialWriter;
+//pub(crate) use memory_access::WasmerSequentialReader;
 
 use serde::Serialize;
 use serde::Deserialize;
@@ -56,6 +56,6 @@ pub(crate) mod wit_prelude {
     pub(super) use crate::MError;
     pub(super) use super::wit_function::WITFunction;
 
-    pub(crate) use super::memory::WITMemoryView;
-    pub(crate) use super::memory::WITMemory;
+    //pub(crate) use super::memory::WITMemoryView;
+    //pub(crate) use super::memory::WITMemory;
 }

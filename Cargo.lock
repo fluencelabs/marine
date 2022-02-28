@@ -1883,6 +1883,7 @@ version = "0.4.0"
 name = "marine-wasm-backend-traits"
 version = "0.1.0"
 dependencies = [
+ "it-memory-traits",
  "thiserror",
  "wasmer-interface-types-fl 0.21.1",
  "wasmer-runtime-core-fl",
@@ -1894,6 +1895,7 @@ dependencies = [
 name = "marine-wasmer-backend"
 version = "0.1.0"
 dependencies = [
+ "it-memory-traits",
  "marine-wasm-backend-traits",
  "wasmer-interface-types-fl 0.21.1",
  "wasmer-runtime-core-fl",

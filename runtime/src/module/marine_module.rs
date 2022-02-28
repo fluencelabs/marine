@@ -26,6 +26,7 @@ use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
 use marine_wasm_backend_traits::ImportObject;
 use marine_wasm_backend_traits::WasiImplementation;
+use marine_wasm_backend_traits::Exports;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
@@ -43,7 +44,7 @@ use std::sync::Arc;
 use std::rc::Rc;
 
 type ITInterpreter<WB> =
-    Interpreter<ITInstance<WB>, ITExport, WITFunction<WB>, WITMemory, WITMemoryView<'static>>;
+    Interpreter<ITInstance<WB>, ITExport, WITFunction<WB>, <WB as WasmBackend>::WITMemory, <WB as WasmBackend>::WITMemoryView>;
 
 #[derive(Clone)]
 pub(super) struct ITModuleFunc<WB: WasmBackend> {
@@ -251,7 +252,7 @@ impl<WB: WasmBackend> MModule<WB> {
         let record_types = Rc::new(record_types);
 
         for (import_name, descriptor) in config.host_imports {
-            let host_import = create_host_import_func(descriptor, record_types.clone());
+            let host_import = create_host_import_func::<WB>(descriptor, record_types.clone());
             host_closures_namespace.insert(import_name, host_import);
         }
         let mut host_closures_import_object = <WB as WasmBackend>::IO::new();
@@ -323,7 +324,7 @@ impl<WB: WasmBackend> MModule<WB> {
         }
 
         // creates a closure that is represent a IT module import
-        fn create_raw_import<WB: WasmBackend + 'static>(
+        fn create_raw_import<WB: WasmBackend>(
             wit_instance: Arc<MaybeUninit<ITInstance<WB>>>,
             interpreter: ITInterpreter<WB>,
             import_namespace: String,

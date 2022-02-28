@@ -8,6 +8,8 @@ edition = "2021"
 [dependencies]
 thiserror = "1.0.24"
 
+it-memory-traits = "0.1.0"
+
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.1" }
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "=0.17.1" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
