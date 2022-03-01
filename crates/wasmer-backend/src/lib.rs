@@ -1,5 +1,7 @@
 use std::marker::PhantomData;
-use marine_wasm_backend_traits::{Export, Memory, WasmBackend};
+use marine_wasm_backend_traits::{
+    DynamicFunc, Export, LikeNamespace, Memory, Namespace, Value, WasmBackend,
+};
 use marine_wasm_backend_traits::WasmBackendResult;
 use marine_wasm_backend_traits::WasmBackendError;
 use marine_wasm_backend_traits::Module;
@@ -15,6 +17,7 @@ use std::slice::Windows;
 use std::sync::Arc;
 use wasmer_core::fault::raw::longjmp;
 use wasmer_core::prelude::vm::Ctx;
+use wasmer_core::types::FuncSig;
 
 mod memory_access;
 mod memory;
@@ -25,11 +28,11 @@ use crate::memory::WITMemory;
 use crate::memory_access::{WasmerSequentialReader, WasmerSequentialWriter};
 
 #[derive(Clone)]
-pub struct WasmerBackend/*<'a>*/ {
-//    _data: &'a PhantomData<i32>,
+pub struct WasmerBackend /*<'a>*/ {
+    //    _data: &'a PhantomData<i32>,
 }
 
-impl<'b> WasmBackend for WasmerBackend/*<'b>*/ {
+impl<'b> WasmBackend for WasmerBackend /*<'b>*/ {
     type Exports = WasmerInstance;
     type MemoryExport = WasmerMemoryExport;
     type FunctionExport = WasmerFunctionExport;
@@ -41,6 +44,8 @@ impl<'b> WasmBackend for WasmerBackend/*<'b>*/ {
     type WITMemory = WITMemory;
     type WITMemoryView = WITMemoryView<'static>;
     type Wasi = WasmerWasiImplementation;
+    type DynamicFunc = WasmerDynamicFunc;
+    type Namespace = WasmerNamespace;
 
     fn compile(wasm: &[u8]) -> WasmBackendResult<WasmerModule> {
         wasmer_runtime::compile(wasm)
@@ -123,9 +128,9 @@ impl
     {
         self.import_object
             .extend(iter.into_iter().map(|(s1, s2, export)| match export {
-                 Export::Memory(memory) => (s1, s2, memory.into()),
-                 Export::Function(func) => (s1, s2, func.into()),
-                 _ => unreachable!()
+                Export::Memory(memory) => (s1, s2, memory.into()),
+                Export::Function(func) => (s1, s2, func.into()),
+                _ => unreachable!(),
             }))
     }
 }
@@ -141,26 +146,32 @@ impl ImportObject<WasmerBackend> for WasmerImportObject {
         self.import_object.extend(other.import_object);
     }
 
-    fn register<S, N>(
+    fn register<S>(
         &mut self,
         name: S,
-        namespace: N,
-    ) -> Option<Box<dyn wasmer_runtime::LikeNamespace>>
+        namespace: WasmerNamespace,
+    ) -> Option<Box<dyn LikeNamespace<WasmerBackend>>>
     where
         S: Into<String>,
-        N: wasmer_runtime::LikeNamespace + Send + 'static,
     {
-        self.import_object.register(name, namespace)
+        self.import_object
+            .register(name, namespace.namespace)
+            .map(|namespace| {
+                let boxed: Box<
+                    (dyn marine_wasm_backend_traits::LikeNamespace<WasmerBackend> + 'static),
+                > = Box::new(WasmerLikeNamespace { namespace });
+                boxed
+            })
     }
 
     fn get_memory_env(&self) -> Option<Export<WasmerMemoryExport, WasmerFunctionExport>> {
         self.import_object
             .maybe_with_namespace("env", |env| env.get_export("memory"))
-            .map(|export| {
-                match export {
-                    wasmer_runtime::Export::Memory(memory) => Export::Memory(WasmerMemoryExport {memory}),
-                    _ => Export::Other
+            .map(|export| match export {
+                wasmer_runtime::Export::Memory(memory) => {
+                    Export::Memory(WasmerMemoryExport { memory })
                 }
+                _ => Export::Other,
             })
     }
 
@@ -188,8 +199,7 @@ pub struct WasmerMemoryExport {
     memory: wasmer_runtime::Memory,
 }
 
-impl MemoryExport for WasmerMemoryExport {
-}
+impl MemoryExport for WasmerMemoryExport {}
 
 pub struct WasmerWasiImplementation {}
 
@@ -221,7 +231,9 @@ impl Exports<WasmerBackend> for WasmerInstance {
     }
 }
 
-fn export_from_wasmer_export(export: wasmer_core::export::Export) -> Export<WasmerMemoryExport, WasmerFunctionExport> {
+fn export_from_wasmer_export(
+    export: wasmer_core::export::Export,
+) -> Export<WasmerMemoryExport, WasmerFunctionExport> {
     match export {
         wasmer_core::export::Export::Function {
             func,
@@ -233,14 +245,10 @@ fn export_from_wasmer_export(export: wasmer_core::export::Export) -> Export<Wasm
             signature,
         }),
         wasmer_core::export::Export::Memory(memory) => {
-            Export::Memory(WasmerMemoryExport{memory})
+            Export::Memory(WasmerMemoryExport { memory })
         }
-        wasmer_core::export::Export::Table(_table) => {
-            Export::Other
-        }
-        wasmer_core::export::Export::Global(_global) => {
-            Export::Other
-        }
+        wasmer_core::export::Export::Table(_table) => Export::Other,
+        wasmer_core::export::Export::Global(_global) => Export::Other,
     }
 }
 
@@ -252,11 +260,10 @@ impl Into<wasmer_runtime::Export> for WasmerMemoryExport {
 
 impl Into<wasmer_runtime::Export> for WasmerFunctionExport {
     fn into(self) -> wasmer_core::export::Export {
-        wasmer_runtime::Export::Function{
+        wasmer_runtime::Export::Function {
             func: self.func,
             ctx: self.ctx,
             signature: self.signature,
-
         }
     }
 }
@@ -268,9 +275,50 @@ impl Memory<WasmerBackend> for WITMemory {
 
     fn view_from_ctx(ctx: &Ctx, memory_index: u32) -> WITMemoryView<'static> {
         let memory = unsafe {
-             std::mem::transmute::<&'_ wasmer_runtime::Memory, &'static wasmer_runtime::Memory>(ctx.memory(memory_index))
+            std::mem::transmute::<&'_ wasmer_runtime::Memory, &'static wasmer_runtime::Memory>(
+                ctx.memory(memory_index),
+            )
         };
 
         WITMemoryView(memory.view::<u8>())
     }
 }
+
+pub struct WasmerDynamicFunc {
+    func: wasmer_core::typed_func::DynamicFunc<'static>,
+}
+
+impl<'a> DynamicFunc<'a> for WasmerDynamicFunc {
+    fn new<F>(sig: Arc<FuncSig>, func: F) -> Self
+    where
+        F: Fn(&mut Ctx, &[wasmer_core::prelude::Value]) -> Vec<wasmer_core::prelude::Value>
+            + 'static,
+    {
+        let func = wasmer_core::typed_func::DynamicFunc::new(sig, func);
+        Self { func }
+    }
+}
+
+pub struct WasmerNamespace {
+    namespace: wasmer_core::import::Namespace,
+}
+
+impl LikeNamespace<WasmerBackend> for WasmerNamespace {}
+
+impl Namespace<WasmerBackend> for WasmerNamespace {
+    fn new() -> Self {
+        Self {
+            namespace: wasmer_core::import::Namespace::new(),
+        }
+    }
+
+    fn insert(&mut self, name: impl Into<String>, func: WasmerDynamicFunc) {
+        self.namespace.insert(name, func.func);
+    }
+}
+
+struct WasmerLikeNamespace {
+    namespace: Box<dyn wasmer_core::import::LikeNamespace + 'static>,
+}
+
+impl LikeNamespace<WasmerBackend> for WasmerLikeNamespace {}

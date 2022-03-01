@@ -144,7 +144,9 @@ impl<WB: WasmBackend> ITInstance<WB> {
             .collect::<MResult<HashMap<_, _>>>()
     }
 
-    fn extract_memories(wasmer_instance: &<WB as WasmBackend>::I) -> Vec<<WB as WasmBackend>::WITMemory> {
+    fn extract_memories(
+        wasmer_instance: &<WB as WasmBackend>::I,
+    ) -> Vec<<WB as WasmBackend>::WITMemory> {
         use marine_wasm_backend_traits::Export::Memory;
 
         let mut memories = wasmer_instance
@@ -155,9 +157,8 @@ impl<WB: WasmBackend> ITInstance<WB> {
             })
             .collect::<Vec<_>>();
 
-        if let Some(Memory(memory)) = wasmer_instance
-            .import_object().get_memory_env()
-            //.maybe_with_namespace("env", |env| env.get_export("memory"))
+        if let Some(Memory(memory)) = wasmer_instance.import_object().get_memory_env()
+        //.maybe_with_namespace("env", |env| env.get_export("memory"))
         {
             memories.push(<WB as WasmBackend>::WITMemory::new(memory));
         }
@@ -184,8 +185,12 @@ impl<WB: WasmBackend> ITInstance<WB> {
 }
 
 impl<'v, WB: WasmBackend>
-    wasm::structures::Instance<ITExport, WITFunction<WB>, <WB as WasmBackend>::WITMemory, <WB as WasmBackend>::WITMemoryView>
-    for ITInstance<WB>
+    wasm::structures::Instance<
+        ITExport,
+        WITFunction<WB>,
+        <WB as WasmBackend>::WITMemory,
+        <WB as WasmBackend>::WITMemoryView,
+    > for ITInstance<WB>
 {
     fn export(&self, _export_name: &str) -> Option<&ITExport> {
         // exports aren't used in this version of IT

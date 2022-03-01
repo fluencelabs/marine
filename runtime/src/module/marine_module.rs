@@ -27,12 +27,14 @@ use marine_wasm_backend_traits::Instance;
 use marine_wasm_backend_traits::ImportObject;
 use marine_wasm_backend_traits::WasiImplementation;
 use marine_wasm_backend_traits::Exports;
+use marine_wasm_backend_traits::Namespace;
+use marine_wasm_backend_traits::DynamicFunc;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
 use marine_utils::SharedString;
 //use wasmer_core::Instance as WasmerInstance;
-use wasmer_core::import::Namespace;
+//use wasmer_core::import::Namespace;
 //use wasmer_runtime::compile;
 //use wasmer_runtime::ImportObject;
 use wasmer_it::interpreter::Interpreter;
@@ -43,8 +45,13 @@ use std::mem::MaybeUninit;
 use std::sync::Arc;
 use std::rc::Rc;
 
-type ITInterpreter<WB> =
-    Interpreter<ITInstance<WB>, ITExport, WITFunction<WB>, <WB as WasmBackend>::WITMemory, <WB as WasmBackend>::WITMemoryView>;
+type ITInterpreter<WB> = Interpreter<
+    ITInstance<WB>,
+    ITExport,
+    WITFunction<WB>,
+    <WB as WasmBackend>::WITMemory,
+    <WB as WasmBackend>::WITMemoryView,
+>;
 
 #[derive(Clone)]
 pub(super) struct ITModuleFunc<WB: WasmBackend> {
@@ -244,7 +251,7 @@ impl<WB: WasmBackend> MModule<WB> {
         )
         .map_err(MError::WASIPrepareError)?;
 
-        let mut host_closures_namespace = Namespace::new();
+        let mut host_closures_namespace = <WB as WasmBackend>::Namespace::new();
         let record_types = mit
             .record_types()
             .map(|(id, r)| (id, r.clone()))
@@ -303,24 +310,30 @@ impl<WB: WasmBackend> MModule<WB> {
         wit_instance: Arc<MaybeUninit<ITInstance<WB>>>,
     ) -> MResult<<WB as WasmBackend>::IO> {
         use marine_it_interfaces::ITAstType;
-        use wasmer_core::typed_func::DynamicFunc;
+        //use wasmer_core::typed_func::DynamicFunc;
         use wasmer_core::vm::Ctx;
 
         // returns function that will be called from imports of Wasmer module
-        fn dyn_func_from_raw_import<'a, 'b, F>(
-            inputs: impl Iterator<Item = &'a IType>,
-            outputs: impl Iterator<Item = &'b IType>,
+        fn dyn_func_from_raw_import<'a, 'b, F, WB, I1, I2>(
+            inputs: I1,
+            outputs: I2,
             raw_import: F,
-        ) -> DynamicFunc<'static>
+        ) -> <WB as WasmBackend>::DynamicFunc
         where
             F: Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static,
+            WB: WasmBackend,
+            I1: Iterator<Item = &'a IType>,
+            I2: Iterator<Item = &'b IType>,
         {
             use wasmer_core::types::FuncSig;
             use super::type_converters::itype_to_wtype;
 
             let inputs = inputs.map(itype_to_wtype).collect::<Vec<_>>();
             let outputs = outputs.map(itype_to_wtype).collect::<Vec<_>>();
-            DynamicFunc::new(Arc::new(FuncSig::new(inputs, outputs)), raw_import)
+            <WB as WasmBackend>::DynamicFunc::new(
+                Arc::new(FuncSig::new(inputs, outputs)),
+                raw_import,
+            )
         }
 
         // creates a closure that is represent a IT module import
@@ -400,7 +413,7 @@ impl<WB: WasmBackend> MModule<WB> {
                             import_name.to_string(),
                         );
 
-                        let wit_import = dyn_func_from_raw_import(
+                        let wit_import = dyn_func_from_raw_import::<_, WB, _, _>(
                             arguments.iter().map(|IFunctionArg { ty, .. }| ty),
                             output_types.iter(),
                             raw_import,
@@ -420,7 +433,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
         // TODO: refactor this
         for (namespace_name, funcs) in wit_import_funcs.into_iter() {
-            let mut namespace = Namespace::new();
+            let mut namespace = <WB as WasmBackend>::Namespace::new();
             for (import_name, import_func) in funcs.into_iter() {
                 namespace.insert(import_name.to_string(), import_func);
             }

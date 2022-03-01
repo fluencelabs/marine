@@ -28,9 +28,9 @@ use crate::call_wasm_func;
 use crate::HostImportDescriptor;
 //use crate::module::wit_prelude::WITMemoryView;
 
-use wasmer_core::Func;
+//use wasmer_core::Func;
 use wasmer_core::vm::Ctx;
-use wasmer_core::typed_func::DynamicFunc;
+//use wasmer_core::typed_func::DynamicFunc;
 use wasmer_core::types::Value as WValue;
 use wasmer_core::types::FuncSig;
 use it_lilo::lifter::ILifter;
@@ -41,11 +41,12 @@ use std::rc::Rc;
 
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::Memory;
+use marine_wasm_backend_traits::DynamicFunc;
 
 pub(crate) fn create_host_import_func<WB: WasmBackend>(
     descriptor: HostImportDescriptor,
     record_types: Rc<MRecordTypes>,
-) -> DynamicFunc<'static> {
+) -> <WB as WasmBackend>::DynamicFunc {
     let allocate_func: AllocateFunc = Box::new(RefCell::new(None));
     let set_result_ptr_func: SetResultPtrFunc = Box::new(RefCell::new(None));
     let set_result_size_func: SetResultSizeFunc = Box::new(RefCell::new(None));
@@ -73,7 +74,6 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             let memory_view = <WB as WasmBackend>::WITMemory::view_from_ctx(ctx, memory_index);
             let li_helper = LiHelper::new(record_types.clone());
             let lifter = ILifter::new(memory_view, &li_helper);
-
 
             match wvalues_to_ivalues(&lifter, inputs, &argument_types) {
                 Ok(ivalues) => host_exported_func(ctx, ivalues),
@@ -142,7 +142,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
         }
     };
 
-    DynamicFunc::new(
+    <WB as WasmBackend>::DynamicFunc::new(
         std::sync::Arc::new(FuncSig::new(raw_args, raw_output)),
         func,
     )

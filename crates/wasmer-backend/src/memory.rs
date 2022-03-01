@@ -101,7 +101,7 @@ impl<'s, 'v> it_memory_traits::SequentialMemoryView<'v> for WITMemoryView<'s> {
     }
 }
 
-impl<'a> /*wasm::structures::Memory*/it_memory_traits::Memory<WITMemoryView<'a>> for WITMemory {
+impl<'a> it_memory_traits::Memory<WITMemoryView<'a>> for WITMemory {
     fn view(&self) -> WITMemoryView<'a> {
         let LocalMemory { base, .. } = unsafe { *self.0.vm_local_memory() };
         let length = self.0.size().bytes().0 / std::mem::size_of::<u8>();
