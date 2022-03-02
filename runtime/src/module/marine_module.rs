@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use std::borrow::BorrowMut;
 use super::wit_prelude::*;
 use super::MFunctionSignature;
 use super::MRecordTypes;
@@ -29,6 +30,7 @@ use marine_wasm_backend_traits::WasiImplementation;
 use marine_wasm_backend_traits::Exports;
 use marine_wasm_backend_traits::Namespace;
 use marine_wasm_backend_traits::DynamicFunc;
+use marine_wasm_backend_traits::Memory;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
@@ -196,7 +198,7 @@ impl<WB: WasmBackend> MModule<WB> {
     }
 
     pub(crate) fn get_wasi_state(&mut self) -> &wasmer_wasi::state::WasiState {
-        unsafe { wasmer_wasi::state::get_wasi_state(self.wasmer_instance.context_mut()) }
+        <WB as WasmBackend>::Wasi::get_wasi_state(self.wasmer_instance.borrow_mut())
     }
 
     /// Returns heap size that this module consumes in bytes.
@@ -204,8 +206,7 @@ impl<WB: WasmBackend> MModule<WB> {
         // Wasmer 0.17.1 supports only one memory
         const MEMORY_INDEX: u32 = 0;
 
-        let pages = self.wasmer_instance.context().memory(MEMORY_INDEX).size();
-        pages.bytes().0
+        self.wasmer_instance.memory(MEMORY_INDEX).size()
     }
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
@@ -311,7 +312,7 @@ impl<WB: WasmBackend> MModule<WB> {
     ) -> MResult<<WB as WasmBackend>::IO> {
         use marine_it_interfaces::ITAstType;
         //use wasmer_core::typed_func::DynamicFunc;
-        use wasmer_core::vm::Ctx;
+        //use wasmer_core::vm::Ctx;
 
         // returns function that will be called from imports of Wasmer module
         fn dyn_func_from_raw_import<'a, 'b, F, WB, I1, I2>(
@@ -320,7 +321,7 @@ impl<WB: WasmBackend> MModule<WB> {
             raw_import: F,
         ) -> <WB as WasmBackend>::DynamicFunc
         where
-            F: Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static,
+            F: Fn(&mut <WB as WasmBackend>::ExportContext, &[WValue]) -> Vec<WValue> + 'static,
             WB: WasmBackend,
             I1: Iterator<Item = &'a IType>,
             I2: Iterator<Item = &'b IType>,
@@ -342,8 +343,9 @@ impl<WB: WasmBackend> MModule<WB> {
             interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
-        ) -> impl Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static {
-            move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
+        ) -> impl Fn(&mut <WB as WasmBackend>::ExportContext, &[WValue]) -> Vec<WValue> + 'static
+        {
+            move |_: &mut <WB as WasmBackend>::ExportContext, inputs: &[WValue]| -> Vec<WValue> {
                 use wasmer_it::interpreter::stack::Stackable;
 
                 use super::type_converters::wval_to_ival;

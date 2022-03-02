@@ -17,6 +17,7 @@
 use super::WType;
 use crate::IType;
 
+/*
 use wasmer_core::backend::SigRegistry;
 use wasmer_core::module::ExportIndex;
 use wasmer_core::vm::Ctx;
@@ -24,7 +25,9 @@ use wasmer_core::typed_func::WasmTypeList;
 use wasmer_runtime::Func;
 use wasmer_runtime::error::ResolveError;
 use wasmer_runtime::types::LocalOrImport;
+*/
 
+/*
 // based on Wasmer: https://github.com/wasmerio/wasmer/blob/081f6250e69b98b9f95a8f62ad6d8386534f3279/lib/runtime-core/src/instance.rs#L863
 /// Extract export function from Wasmer instance by name.
 pub(super) unsafe fn get_export_func_by_name<'a, Args, Rets>(
@@ -95,7 +98,7 @@ where
 
     Ok(typed_func)
 }
-
+ */
 pub(super) fn itypes_args_to_wtypes(itypes: &[IType]) -> Vec<WType> {
     itypes
         .iter()
@@ -127,9 +130,8 @@ pub(super) fn itypes_output_to_wtypes(itypes: &[IType]) -> Vec<WType> {
 macro_rules! init_wasm_func_once {
     ($func:ident, $ctx:ident, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
         if $func.borrow().is_none() {
-            let raw_func = match unsafe {
-                super::utils::get_export_func_by_name::<$args, $rets>($ctx, $func_name)
-            } {
+            let raw_func = match unsafe { $ctx.get_export_func_by_name::<$args, $rets>($func_name) }
+            {
                 Ok(func) => func,
                 Err(_) => return vec![WValue::I32($ret_error_code)],
             };

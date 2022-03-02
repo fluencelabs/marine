@@ -5,7 +5,7 @@
 use std::path::PathBuf;
 use thiserror::Error;
 use wasmer_core::types::FuncSig;
-use it_memory_traits::{SequentialMemoryView, SequentialReader, SequentialWriter};
+use it_memory_traits::{SequentialMemoryView};
 
 pub struct Value {}
 
@@ -24,13 +24,14 @@ pub trait WasmBackend: Clone + 'static {
     type WITMemory: Memory<Self> + it_memory_traits::Memory<Self::WITMemoryView> + Clone + 'static;
     //type SR: SequentialReader;
     //type SW: SequentialWriter;
-    type DynamicFunc: DynamicFunc<'static>;
+    type DynamicFunc: DynamicFunc<'static, Self>;
     type WITMemoryView: for<'a> SequentialMemoryView<'a /* SR = Self::SR, SW = Self::SW*/> + 'static;
     type FunctionExport: FunctionExport;
     type M: Module<Self>;
     type I: Instance<Self>;
     type Wasi: WasiImplementation<Self>;
     type Namespace: Namespace<Self>;
+    type ExportContext: ExportContext<Self>;
 
     fn compile(wasm: &[u8]) -> WasmBackendResult<Self::M>;
 }
@@ -56,10 +57,7 @@ pub trait Instance<WB: WasmBackend> {
     >;
     fn exports(&self) -> &<WB as WasmBackend>::Exports;
     fn import_object(&self) -> &<WB as WasmBackend>::IO;
-
-    // maybe hide them inside impl
-    fn context(&self) -> &wasmer_core::vm::Ctx;
-    fn context_mut(&mut self) -> &mut wasmer_core::vm::Ctx;
+    fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
 }
 
 pub trait Exports<WB: WasmBackend> {
@@ -97,11 +95,6 @@ pub trait ImportObject<WB: WasmBackend>:
     fn get_memory_env(
         &self,
     ) -> Option<Export<<WB as WasmBackend>::MemoryExport, <WB as WasmBackend>::FunctionExport>>;
-    /*
-    fn maybe_with_namespace<Func, InnerRet>(&self, namespace: &str, f: Func) -> Option<InnerRet>
-    where
-        Func: FnOnce(&(dyn wasmer_runtime::LikeNamespace + Send)) -> Option<InnerRet>,
-        InnerRet: Sized;*/
 }
 
 pub trait WasiImplementation<WB: WasmBackend> {
@@ -112,6 +105,8 @@ pub trait WasiImplementation<WB: WasmBackend> {
         preopened_files: Vec<PathBuf>,
         mapped_dirs: Vec<(String, PathBuf)>,
     ) -> Result<<WB as WasmBackend>::IO, String>;
+
+    fn get_wasi_state(instance: &mut <WB as WasmBackend>::I) -> &wasmer_wasi::state::WasiState;
 }
 
 pub trait MemoryExport {}
@@ -120,17 +115,15 @@ pub trait FunctionExport {}
 
 pub trait Memory<WB: WasmBackend> {
     fn new(export: <WB as WasmBackend>::MemoryExport) -> Self;
-    fn view_from_ctx(
-        ctx: &wasmer_runtime::Ctx,
-        memory_index: u32,
-    ) -> <WB as WasmBackend>::WITMemoryView;
+
+    fn size(&self) -> usize;
 }
 
-pub trait DynamicFunc<'a> {
-    fn new<F>(sig: std::sync::Arc<FuncSig>, func: F) -> Self
+pub trait DynamicFunc<'a, WB: WasmBackend> {
+    fn new<'c, F>(sig: std::sync::Arc<FuncSig>, func: F) -> Self
     where
         F: Fn(
-                &mut wasmer_core::vm::Ctx,
+                &mut <WB as WasmBackend>::ExportContext,
                 &[wasmer_core::types::Value],
             ) -> Vec<wasmer_core::types::Value>
             + 'static;
@@ -143,3 +136,15 @@ pub trait Namespace<WB: WasmBackend>: LikeNamespace<WB> {
 }
 
 pub trait LikeNamespace<WB: WasmBackend> {}
+
+pub trait ExportContext<WB: WasmBackend> {
+    fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
+
+    unsafe fn get_export_func_by_name<'a, Args, Rets>(
+        &mut self,
+        name: &str,
+    ) -> Result<wasmer_runtime::Func<'a, Args, Rets>, wasmer_runtime::error::ResolveError>
+    where
+        Args: wasmer_core::typed_func::WasmTypeList,
+        Rets: wasmer_core::typed_func::WasmTypeList;
+}

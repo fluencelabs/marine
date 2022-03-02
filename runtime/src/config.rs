@@ -23,7 +23,7 @@ use marine_wasm_backend_traits::ImportObject;
 
 use wasmer_wasi::WasiVersion;
 //use wasmer_runtime::ImportObject;
-use wasmer_core::vm::Ctx;
+//use wasmer_core::vm::Ctx;
 
 use std::path::PathBuf;
 use std::collections::HashMap;
@@ -32,11 +32,12 @@ use std::collections::HashSet;
 // 65536*1600 ~ 100 Mb (Wasm page size is 64 Kb)
 const DEFAULT_HEAP_PAGES_COUNT: u32 = 1600;
 
-pub type HostExportedFunc = Box<dyn Fn(&mut Ctx, Vec<IValue>) -> Option<IValue> + 'static>;
+pub type HostExportedFunc<WB> =
+    Box<dyn Fn(&mut <WB as WasmBackend>::ExportContext, Vec<IValue>) -> Option<IValue> + 'static>;
 
-pub struct HostImportDescriptor {
+pub struct HostImportDescriptor<WB: WasmBackend> {
     /// This closure will be invoked for corresponding import.
-    pub host_exported_func: HostExportedFunc,
+    pub host_exported_func: HostExportedFunc<WB>,
 
     /// Type of the closure arguments.
     pub argument_types: Vec<IType>,
@@ -58,7 +59,7 @@ pub struct MModuleConfig<WB: WasmBackend> {
     pub raw_imports: <WB as WasmBackend>::IO,
 
     /// Imports from the host side that will be used in module instantiation process.
-    pub host_imports: HashMap<String, HostImportDescriptor>,
+    pub host_imports: HashMap<String, HostImportDescriptor<WB>>,
 
     /// Desired WASI version.
     pub wasi_version: WasiVersion,
