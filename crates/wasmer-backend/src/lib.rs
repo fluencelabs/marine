@@ -16,12 +16,12 @@ use std::path::PathBuf;
 use std::slice::Windows;
 use std::sync::Arc;
 use wasmer_core::backend::SigRegistry;
-use wasmer_core::error::ResolveError;
+use wasmer_core::error::{ResolveError, ResolveResult};
 use wasmer_core::fault::raw::longjmp;
 use wasmer_core::Func;
 use wasmer_core::module::ExportIndex;
 //use wasmer_core::prelude::vm::Ctx;
-use wasmer_core::types::{FuncSig, LocalOrImport};
+use wasmer_core::types::{FuncSig, LocalOrImport, WasmExternType};
 use wasmer_wasi::state::WasiState;
 
 mod memory_access;
@@ -235,6 +235,31 @@ impl Exports<WasmerBackend> for WasmerInstance {
         name: &str,
     ) -> wasmer_core::error::ResolveResult<T> {
         self.instance.exports.get(name)
+    }
+
+    fn get_func<'a, Args: WasmExternType, Rets: WasmExternType>(
+        &'a self,
+        name: &str,
+    ) -> wasmer_core::error::ResolveResult<Box<dyn Fn(i32) -> () +'a>> {
+        self.instance
+            .exports
+            .get::<Func<'a, Args, Rets>>(name)
+            .map(|_| {
+                let func = |args: i32| -> ()  {};
+
+                Box::new(func)
+            })
+    }
+
+    fn get_func2<'a, Args>(
+        &'a self,
+        name: &str,
+    ) -> Box<dyn Fn(Args) -> ()/*wasmer_core::error::RuntimeResult<Rets>*/> {
+        let func = move |args: Args| -> () /*wasmer_core::error::RuntimeResult<Rets>*/ {
+            //func.call(args)
+        };
+
+        Box::new(func)
     }
 }
 
