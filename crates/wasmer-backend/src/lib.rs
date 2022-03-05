@@ -20,6 +20,7 @@ use wasmer_core::error::{ResolveError, ResolveResult};
 use wasmer_core::fault::raw::longjmp;
 use wasmer_core::Func;
 use wasmer_core::module::ExportIndex;
+use wasmer_core::typed_func::WasmTypeList;
 //use wasmer_core::prelude::vm::Ctx;
 use wasmer_core::types::{FuncSig, LocalOrImport, WasmExternType};
 use wasmer_wasi::state::WasiState;
@@ -237,29 +238,24 @@ impl Exports<WasmerBackend> for WasmerInstance {
         self.instance.exports.get(name)
     }
 
-    fn get_func<'a, Args: WasmExternType, Rets: WasmExternType>(
+    fn get_func_no_args<'a, Rets: WasmTypeList + 'a>(
         &'a self,
         name: &str,
-    ) -> wasmer_core::error::ResolveResult<Box<dyn Fn(i32) -> () +'a>> {
+    ) -> wasmer_core::error::ResolveResult<
+        Box<dyn Fn() -> wasmer_core::error::RuntimeResult<Rets> + 'a>,
+    > {
         self.instance
             .exports
-            .get::<Func<'a, Args, Rets>>(name)
-            .map(|_| {
-                let func = |args: i32| -> ()  {};
-
-                Box::new(func)
+            .get::<Func<'a, (), Rets>>(name)
+            .map(|func| {
+                let func: Box<dyn Fn() -> wasmer_core::error::RuntimeResult<Rets> + 'a> =
+                    Box::new(
+                        move || -> wasmer_core::error::RuntimeResult<Rets> {
+                            func.call()
+                        },
+                    );
+                func
             })
-    }
-
-    fn get_func2<'a, Args>(
-        &'a self,
-        name: &str,
-    ) -> Box<dyn Fn(Args) -> ()/*wasmer_core::error::RuntimeResult<Rets>*/> {
-        let func = move |args: Args| -> () /*wasmer_core::error::RuntimeResult<Rets>*/ {
-            //func.call(args)
-        };
-
-        Box::new(func)
     }
 }
 

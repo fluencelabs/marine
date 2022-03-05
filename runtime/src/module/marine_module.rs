@@ -148,8 +148,8 @@ impl<WB: WasmBackend> MModule<WB> {
 
         // call _start to populate the WASI state of the module
         #[rustfmt::skip]
-        if let Ok(start_func) = wasmer_instance.exports().get::<wasmer_runtime::Func<'_, (), ()>>("_start") {
-            start_func.call()?;
+        if let Ok(start_func) = wasmer_instance.exports().get_func_no_args::<'_,  ()>("_start") {
+            start_func()?;
         }
 
         Ok(Self {

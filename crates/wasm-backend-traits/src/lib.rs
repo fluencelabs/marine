@@ -66,15 +66,10 @@ pub trait Exports<WB: WasmBackend> {
         name: &str,
     ) -> wasmer_core::error::ResolveResult<T>;
 
-    fn get_func<'a, Args: wasmer_core::types::WasmExternType, Rets: wasmer_core::types::WasmExternType>(
+    fn get_func_no_args<'a, Rets: wasmer_core::typed_func::WasmTypeList + 'a>(
         &'a self,
         name: &str,
-    ) -> wasmer_core::error::ResolveResult<Box<dyn Fn(i32) -> ()/*wasmer_core::error::RuntimeResult<Rets>*/ + 'a>>;// wasmer_core::error::ResolveResult<Box<dyn Fn(Args) -> wasmer_core::error::RuntimeResult<Rets> + 'a>>;
-
-    fn get_func2<'a, Args>(
-        &'a self,
-        name: &str,
-    ) -> Box<dyn Fn(Args) -> ()>;
+    ) -> wasmer_core::error::ResolveResult<Box<dyn Fn() -> wasmer_core::error::RuntimeResult<Rets> + 'a>>;
 }
 
 pub enum Export<M: MemoryExport, F: FunctionExport> {
