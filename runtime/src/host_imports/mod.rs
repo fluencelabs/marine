@@ -26,8 +26,11 @@ use wasmer_core::Func;
 pub use errors::HostImportError;
 pub(crate) use imports::create_host_import_func;
 
-pub(self) use wasmer_core::types::Value as WValue;
-pub(self) use wasmer_core::types::Type as WType;
+//pub(self) use wasmer_core::types::Value as WValue;
+//pub(self) use wasmer_core::types::Type as WType;
+
+pub(self) use marine_wasm_backend_traits::WValue;
+pub(self) use marine_wasm_backend_traits::WType;
 
 pub(self) type HostImportResult<T> = std::result::Result<T, HostImportError>;
 pub(self) type WasmModuleFunc<Args, Rets> = Box<RefCell<Option<Func<'static, Args, Rets>>>>;

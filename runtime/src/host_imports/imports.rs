@@ -31,8 +31,8 @@ use crate::HostImportDescriptor;
 //use wasmer_core::Func;
 //use wasmer_core::vm::Ctx;
 //use wasmer_core::typed_func::DynamicFunc;
-use wasmer_core::types::Value as WValue;
-use wasmer_core::types::FuncSig;
+//use wasmer_core::types::Value as WValue;
+//use wasmer_core::types::FuncSig;
 use it_lilo::lifter::ILifter;
 use it_lilo::lowerer::ILowerer;
 use it_memory_traits::Memory as ITMemory;
@@ -40,7 +40,7 @@ use it_memory_traits::Memory as ITMemory;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::{FuncSig, WasmBackend};
 use marine_wasm_backend_traits::DynamicFunc;
 use marine_wasm_backend_traits::ExportContext;
 
@@ -159,10 +159,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             }
         };
 
-    <WB as WasmBackend>::DynamicFunc::new(
-        std::sync::Arc::new(FuncSig::new(raw_args, raw_output)),
-        func,
-    )
+    <WB as WasmBackend>::DynamicFunc::new(FuncSig::new(raw_args, raw_output), func)
 }
 
 fn default_error_handler(err: &HostImportError) -> Option<crate::IValue> {

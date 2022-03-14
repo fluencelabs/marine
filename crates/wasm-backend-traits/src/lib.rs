@@ -1,13 +1,93 @@
 //pub mod errors;
 //pub mod it_memory_traits;
+//pub mod wasm_type_list;
 
+//pub use wasm_type_list::WasmTypeList;
+use std::borrow::Cow;
+use std::fmt::Display;
 //use std::fmt::Display;
 use std::path::PathBuf;
 use thiserror::Error;
-use wasmer_core::types::FuncSig;
 use it_memory_traits::{SequentialMemoryView};
+//use wasmer_it::IValue;
 
-pub struct Value {}
+//use wasmer_core::types::FuncSig;
+use wasmer_core::error::CallResult;
+use wasmer_core::typed_func::WasmTypeList;
+use wasmer_core::types::WasmExternType;
+//use wasmer_core::typed_func::WasmTypeList;
+//use wasmer_core::types::FuncSig as Wasme;
+//pub use tuple_list::Tuple;
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WValue {
+    /// The `i32` type.
+    I32(i32),
+    /// The `i64` type.
+    I64(i64),
+    /// The `f32` type.
+    F32(f32),
+    /// The `f64` type.
+    F64(f64),
+    // /// The `v128` type.
+    //V128(u128),
+}
+
+impl From<i32> for WValue {
+    fn from(value: i32) -> Self {
+        WValue::I32(value)
+    }
+}
+
+impl From<i64> for WValue {
+    fn from(value: i64) -> Self {
+        WValue::I64(value)
+    }
+}
+
+impl From<f32> for WValue {
+    fn from(value: f32) -> Self {
+        WValue::F32(value)
+    }
+}
+
+impl From<f64> for WValue {
+    fn from(value: f64) -> Self {
+        WValue::F64(value)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum WType {
+    /// The `i32` type.
+    I32,
+    /// The `i64` type.
+    I64,
+    /// The `f32` type.
+    F32,
+    /// The `f64` type.
+    F64,
+    // /// The `v128` type.
+    // V128,
+}
+
+impl WValue {
+    pub fn to_u128(&self) -> u128 {
+        match *self {
+            Self::I32(x) => x as u128,
+            Self::I64(x) => x as u128,
+            Self::F32(x) => f32::to_bits(x) as u128,
+            Self::F64(x) => f64::to_bits(x) as u128,
+            //Self::V128(x) => x,
+        }
+    }
+}
+
+impl std::fmt::Display for WType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
 
 #[derive(Debug, Error)]
 pub enum WasmBackendError {
@@ -31,7 +111,8 @@ pub trait WasmBackend: Clone + 'static {
     type I: Instance<Self>;
     type Wasi: WasiImplementation<Self>;
     type Namespace: Namespace<Self>;
-    type ExportContext: ExportContext<Self>;
+    type ExportContext: for<'c> ExportContext<'c, Self>;
+    type ExportedDynFunc: ExportedDynFunc<Self>;
 
     fn compile(wasm: &[u8]) -> WasmBackendResult<Self::M>;
 }
@@ -61,15 +142,17 @@ pub trait Instance<WB: WasmBackend> {
 }
 
 pub trait Exports<WB: WasmBackend> {
-    fn get<'a, T: wasmer_core::export::Exportable<'a>>(
+    fn get_func_no_args_no_rets<'a>(
         &'a self,
         name: &str,
-    ) -> wasmer_core::error::ResolveResult<T>;
+    ) -> wasmer_core::error::ResolveResult<
+        Box<dyn Fn() -> wasmer_core::error::RuntimeResult<()> + 'a>,
+    >;
 
-    fn get_func_no_args<'a, Rets: wasmer_core::typed_func::WasmTypeList + 'a>(
+    fn get_dyn_func<'a>(
         &'a self,
         name: &str,
-    ) -> wasmer_core::error::ResolveResult<Box<dyn Fn() -> wasmer_core::error::RuntimeResult<Rets> + 'a>>;
+    ) -> wasmer_core::error::ResolveResult<<WB as WasmBackend>::ExportedDynFunc>;
 }
 
 pub enum Export<M: MemoryExport, F: FunctionExport> {
@@ -125,13 +208,9 @@ pub trait Memory<WB: WasmBackend> {
 }
 
 pub trait DynamicFunc<'a, WB: WasmBackend> {
-    fn new<'c, F>(sig: std::sync::Arc<FuncSig>, func: F) -> Self
+    fn new<'c, F>(sig: FuncSig, func: F) -> Self
     where
-        F: Fn(
-                &mut <WB as WasmBackend>::ExportContext,
-                &[wasmer_core::types::Value],
-            ) -> Vec<wasmer_core::types::Value>
-            + 'static;
+        F: Fn(&mut <WB as WasmBackend>::ExportContext, &[WValue]) -> Vec<WValue> + 'static;
 }
 
 pub trait Namespace<WB: WasmBackend>: LikeNamespace<WB> {
@@ -142,14 +221,46 @@ pub trait Namespace<WB: WasmBackend>: LikeNamespace<WB> {
 
 pub trait LikeNamespace<WB: WasmBackend> {}
 
-pub trait ExportContext<WB: WasmBackend> {
+pub trait ExportContext<'c, WB: WasmBackend> {
     fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
 
-    unsafe fn get_export_func_by_name<'a, Args, Rets>(
-        &mut self,
+    unsafe fn get_export_func_by_name<Args, Rets>(
+        &'c mut self,
         name: &str,
-    ) -> Result<wasmer_runtime::Func<'a, Args, Rets>, wasmer_runtime::error::ResolveError>
+    ) -> Result<Box<dyn FnMut(Args) -> Result<Rets, wasmer_runtime::error::RuntimeError> + 'c>, wasmer_runtime::error::ResolveError>
     where
-        Args: wasmer_core::typed_func::WasmTypeList,
-        Rets: wasmer_core::typed_func::WasmTypeList;
+        Args: WasmTypeList,
+        Rets: WasmTypeList;
+}
+
+pub trait ExportedDynFunc<WB: WasmBackend> {
+    fn signature(&self) -> &FuncSig;
+
+    fn call(&self, args: &[WValue]) -> CallResult<Vec<WValue>>;
+}
+
+pub struct FuncSig {
+    params: Cow<'static, [WType]>,
+    returns: Cow<'static, [WType]>,
+}
+
+impl FuncSig {
+    pub fn new<Params, Returns>(params: Params, returns: Returns) -> Self
+    where
+        Params: Into<Cow<'static, [WType]>>,
+        Returns: Into<Cow<'static, [WType]>>,
+    {
+        Self {
+            params: params.into(),
+            returns: returns.into(),
+        }
+    }
+
+    pub fn params(&self) -> impl Iterator<Item = &WType> {
+        self.params.iter()
+    }
+
+    pub fn returns(&self) -> impl Iterator<Item = &WType> {
+        self.returns.iter()
+    }
 }

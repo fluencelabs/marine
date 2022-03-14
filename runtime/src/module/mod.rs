@@ -46,8 +46,10 @@ pub struct MFunctionSignature {
 }
 
 pub(crate) use marine_module::MModule;
-pub(self) use wasmer_core::types::Type as WType;
-pub(self) use wasmer_core::types::Value as WValue;
+//pub(self) use wasmer_core::types::Type as WType;
+//pub(self) use wasmer_core::types::Value as WValue;
+//pub(self) use marine_wasm_backend_traits::WType;
+pub(self) use marine_wasm_backend_traits::WValue;
 
 // types that often used together
 pub(crate) mod wit_prelude {

@@ -46,6 +46,8 @@ use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
 use std::rc::Rc;
+//use wasmer_core::types::FuncSig;
+use marine_wasm_backend_traits::FuncSig;
 
 type ITInterpreter<WB> = Interpreter<
     ITInstance<WB>,
@@ -148,7 +150,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
         // call _start to populate the WASI state of the module
         #[rustfmt::skip]
-        if let Ok(start_func) = wasmer_instance.exports().get_func_no_args::<'_,  ()>("_start") {
+        if let Ok(start_func) = wasmer_instance.exports().get_func_no_args_no_rets("_start") {
             start_func()?;
         }
 
@@ -326,15 +328,12 @@ impl<WB: WasmBackend> MModule<WB> {
             I1: Iterator<Item = &'a IType>,
             I2: Iterator<Item = &'b IType>,
         {
-            use wasmer_core::types::FuncSig;
+            //use wasmer_core::types::FuncSig;
             use super::type_converters::itype_to_wtype;
 
             let inputs = inputs.map(itype_to_wtype).collect::<Vec<_>>();
             let outputs = outputs.map(itype_to_wtype).collect::<Vec<_>>();
-            <WB as WasmBackend>::DynamicFunc::new(
-                Arc::new(FuncSig::new(inputs, outputs)),
-                raw_import,
-            )
+            <WB as WasmBackend>::DynamicFunc::new(FuncSig::new(inputs, outputs), raw_import)
         }
 
         // creates a closure that is represent a IT module import

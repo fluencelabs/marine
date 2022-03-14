@@ -15,14 +15,14 @@
  */
 
 use super::marine_module::MModule;
-use super::{IType, IFunctionArg, IValue, WValue};
+use super::{IType, IFunctionArg, IValue};
 use super::marine_module::Callable;
 use crate::MResult;
 
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::{WasmBackend, WValue};
+use marine_wasm_backend_traits::ExportedDynFunc;
 
 use wasmer_it::interpreter::wasm;
-use wasmer_core::instance::DynFunc;
 
 // use std::sync::Arc;
 use std::rc::Rc;
@@ -30,7 +30,7 @@ use std::rc::Rc;
 #[derive(Clone)]
 enum WITFunctionInner<WB: WasmBackend> {
     Export {
-        func: Rc<DynFunc<'static>>,
+        func: Rc<<WB as WasmBackend>::ExportedDynFunc>,
     },
     Import {
         // TODO: use dyn Callable here
@@ -49,24 +49,22 @@ pub(super) struct WITFunction<WB: WasmBackend> {
 
 impl<WB: WasmBackend> WITFunction<WB> {
     /// Creates functions from a "usual" (not IT) module export.
-    pub(super) fn from_export(dyn_func: DynFunc<'static>, name: String) -> MResult<Self> {
+    pub(super) fn from_export(
+        dyn_func: <WB as WasmBackend>::ExportedDynFunc,
+        name: String,
+    ) -> MResult<Self> {
         use super::type_converters::wtype_to_itype;
 
         let signature = dyn_func.signature();
         let arguments = signature
             .params()
-            .iter()
             .map(|wtype| IFunctionArg {
                 // here it's considered as an anonymous arguments
                 name: String::new(),
                 ty: wtype_to_itype(wtype),
             })
             .collect::<Vec<_>>();
-        let outputs = signature
-            .returns()
-            .iter()
-            .map(wtype_to_itype)
-            .collect::<Vec<_>>();
+        let outputs = signature.returns().map(wtype_to_itype).collect::<Vec<_>>();
 
         let inner = WITFunctionInner::Export {
             func: Rc::new(dyn_func),
@@ -128,14 +126,20 @@ impl<WB: WasmBackend> wasm::structures::LocalImport for WITFunction<WB> {
     }
 
     fn call(&self, arguments: &[IValue]) -> std::result::Result<Vec<IValue>, ()> {
-        use super::type_converters::{ival_to_wval, wval_to_ival};
-
+        use super::type_converters::wval_to_ival;
+        use super::type_converters::ival_to_wval;
         match &self.inner {
             WITFunctionInner::Export { func, .. } => func
                 .as_ref()
-                .call(&arguments.iter().map(ival_to_wval).collect::<Vec<WValue>>())
-                .map(|result| result.iter().map(wval_to_ival).collect())
-                .map_err(|_| ()),
+                .call(
+                    arguments
+                        .iter()
+                        .map(ival_to_wval)
+                        .collect::<Vec<WValue>>()
+                        .as_slice(),
+                )
+                .map_err(|_| ())
+                .map(|results| results.iter().map(wval_to_ival).collect()),
             WITFunctionInner::Import { callable, .. } => Rc::make_mut(&mut callable.clone())
                 .call(arguments)
                 .map_err(|_| ()),

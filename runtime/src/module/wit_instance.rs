@@ -78,24 +78,16 @@ impl<WB: WasmBackend> ITInstance<WB> {
         wasmer_instance: &<WB as WasmBackend>::I,
         it: &MITInterfaces<'_>,
     ) -> MResult<HashMap<usize, WITFunction<WB>>> {
-        use wasmer_core::DynFunc;
-
         let module_exports = &wasmer_instance.exports();
 
         it.exports()
             .enumerate()
             .map(|(export_id, export)| {
-                let export_func = module_exports.get(export.name)?;
-                unsafe {
-                    // TODO: refactor this with new Wasmer API when it is ready
-                    // here it is safe because dyn func is never lives WITInstance
-                    let export_func =
-                        std::mem::transmute::<DynFunc<'_>, DynFunc<'static>>(export_func);
-                    Ok((
-                        export_id,
-                        WITFunction::from_export(export_func, export.name.to_string())?,
-                    ))
-                }
+                let export_func = module_exports.get_dyn_func(export.name)?;
+                Ok((
+                    export_id,
+                    WITFunction::from_export(export_func, export.name.to_string())?,
+                ))
             })
             .collect()
     }
