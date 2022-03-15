@@ -43,6 +43,7 @@ use std::rc::Rc;
 use marine_wasm_backend_traits::{FuncSig, WasmBackend};
 use marine_wasm_backend_traits::DynamicFunc;
 use marine_wasm_backend_traits::ExportContext;
+use marine_wasm_backend_traits::FuncGetter;
 
 pub(crate) fn create_host_import_func<WB: WasmBackend>(
     descriptor: HostImportDescriptor<WB>,

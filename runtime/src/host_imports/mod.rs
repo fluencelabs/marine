@@ -21,7 +21,7 @@ mod imports;
 mod utils;
 
 use std::cell::RefCell;
-use wasmer_core::Func;
+use wasmer_core::error::RuntimeError;
 
 pub use errors::HostImportError;
 pub(crate) use imports::create_host_import_func;
@@ -33,7 +33,8 @@ pub(self) use marine_wasm_backend_traits::WValue;
 pub(self) use marine_wasm_backend_traits::WType;
 
 pub(self) type HostImportResult<T> = std::result::Result<T, HostImportError>;
-pub(self) type WasmModuleFunc<Args, Rets> = Box<RefCell<Option<Func<'static, Args, Rets>>>>;
+//pub(self) type WasmModuleFunc<Args, Rets> = Box<RefCell<Option<Func<'static, Args, Rets>>>>;
+pub(self) type WasmModuleFunc<Args, Rets> = Box<RefCell<Option<Box<dyn FnMut(Args)-> Result<Rets, RuntimeError>>>>>;
 pub(self) type AllocateFunc = WasmModuleFunc<(i32, i32), i32>;
 pub(self) type SetResultPtrFunc = WasmModuleFunc<i32, ()>;
 pub(self) type SetResultSizeFunc = WasmModuleFunc<i32, ()>;

@@ -130,7 +130,8 @@ pub(super) fn itypes_output_to_wtypes(itypes: &[IType]) -> Vec<WType> {
 macro_rules! init_wasm_func_once {
     ($func:ident, $ctx:ident, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
         if $func.borrow().is_none() {
-            let raw_func = match unsafe { $ctx.get_export_func_by_name::<$args, $rets>($func_name) }
+            let raw_func: Box<dyn FnMut($args) -> Result<$rets, wasmer_runtime::error::RuntimeError>> = match unsafe {
+                $ctx.get_func($func_name) }
             {
                 Ok(func) => func,
                 Err(_) => return vec![WValue::I32($ret_error_code)],
@@ -141,7 +142,10 @@ macro_rules! init_wasm_func_once {
                 // linked to a corresponding Wasm import, so it is safe to make is static
                 // because all Wasm imports live in the Wasmer instances, which
                 // is itself static (i.e., lives until the end of the program)
-                let raw_func = std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_func);
+                let raw_func = std::mem::transmute::<
+                    Box<dyn FnMut($args) -> Result<$rets, wasmer_runtime::error::RuntimeError> + '_>,
+                    Box<dyn FnMut($args) -> Result<$rets, wasmer_runtime::error::RuntimeError> + 'static>
+                >(raw_func);
 
                 *$func.borrow_mut() = Some(raw_func);
             }
@@ -153,6 +157,6 @@ macro_rules! init_wasm_func_once {
 /// Call Wasm function that have Box<RefCell<Option<Func<'static, args, rets>>>> type.
 macro_rules! call_wasm_func {
     ($func:expr, $($arg:expr),*) => {
-        $func.borrow().as_ref().unwrap().call($($arg),*).unwrap()
+        $func.borrow_mut().as_mut().unwrap()(($($arg),*)).unwrap()
     };
 }

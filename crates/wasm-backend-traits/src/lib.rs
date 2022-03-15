@@ -15,9 +15,6 @@ use it_memory_traits::{SequentialMemoryView};
 use wasmer_core::error::CallResult;
 use wasmer_core::typed_func::WasmTypeList;
 use wasmer_core::types::WasmExternType;
-//use wasmer_core::typed_func::WasmTypeList;
-//use wasmer_core::types::FuncSig as Wasme;
-//pub use tuple_list::Tuple;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum WValue {
@@ -221,16 +218,14 @@ pub trait Namespace<WB: WasmBackend>: LikeNamespace<WB> {
 
 pub trait LikeNamespace<WB: WasmBackend> {}
 
-pub trait ExportContext<'c, WB: WasmBackend> {
+pub trait ExportContext<'c, WB: WasmBackend>:
+    FuncGetter<'c, (i32,i32), i32> +
+    FuncGetter<'c, (i32,i32), ()> +
+    FuncGetter<'c, i32, i32> +
+    FuncGetter<'c, i32, ()> +
+    FuncGetter<'c, (), i32> +
+    FuncGetter<'c, (), ()> {
     fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
-
-    unsafe fn get_export_func_by_name<Args, Rets>(
-        &'c mut self,
-        name: &str,
-    ) -> Result<Box<dyn FnMut(Args) -> Result<Rets, wasmer_runtime::error::RuntimeError> + 'c>, wasmer_runtime::error::ResolveError>
-    where
-        Args: WasmTypeList,
-        Rets: WasmTypeList;
 }
 
 pub trait ExportedDynFunc<WB: WasmBackend> {
@@ -263,4 +258,8 @@ impl FuncSig {
     pub fn returns(&self) -> impl Iterator<Item = &WType> {
         self.returns.iter()
     }
+}
+
+pub trait FuncGetter<'c, Args, Rets> {
+    unsafe fn get_func(&'c mut self, name: &str) -> Result<Box<dyn FnMut(Args) -> Result<Rets, wasmer_runtime::error::RuntimeError> + 'c>, wasmer_runtime::error::ResolveError>;
 }
