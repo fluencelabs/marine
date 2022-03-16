@@ -20,10 +20,11 @@ use crate::misc::PrepareError;
 use marine_it_interfaces::MITInterfacesError;
 use marine_it_parser::ITParserError;
 use marine_module_interface::it_interface::ITInterfaceError;
-use marine_wasm_backend_traits::WasmBackendError;
-use wasmer_runtime::error as wasmer_error;
+use marine_wasm_backend_traits::{CallError, ResolveError, RuntimeError, WasmBackendError};
+//use wasmer_runtime::error as wasmer_error;
 
 use thiserror::Error as ThisError;
+//use wasmer_core::error::ResolveError;
 
 // TODO: refactor errors
 // TODO: add module name to all errors variants
@@ -32,12 +33,12 @@ use thiserror::Error as ThisError;
 pub enum MError {
     /// This error type is produced by Wasmer during resolving a Wasm function.
     #[error("Wasmer resolve error: {0}")]
-    ResolveError(#[from] wasmer_error::ResolveError),
+    ResolveError(#[from] ResolveError),
 
     /// Error related to calling a main Wasm module.
     #[error("Wasmer invoke error: {0}")]
     WasmerInvokeError(String),
-
+/*
     /// Error that raises during compilation Wasm code by Wasmer.
     #[error("Wasmer creation error: {0}")]
     WasmerCreationError(#[from] wasmer_error::CreationError),
@@ -45,15 +46,16 @@ pub enum MError {
     /// Error that raises during creation of some Wasm objects (like table and memory) by Wasmer.
     #[error("Wasmer compile error: {0}")]
     WasmerCompileError(#[from] wasmer_error::CompileError),
-
+*/
     /// Errors arisen during execution of a Wasm module.
     #[error("Wasmer runtime error: {0}")]
     WasmerRuntimeError(String),
 
+    /*
     /// Errors arisen during linking Wasm modules with already loaded into Marine modules.
     #[error("Wasmer link error: {0}")]
     WasmerLinkError(#[from] wasmer_error::LinkError),
-
+*/
     /// Errors from the temporary class of amalgamation errors from the Wasmer side.
     #[error("Wasmer error: {0}")]
     WasmerError(String),
@@ -112,12 +114,18 @@ impl From<MITInterfacesError> for MError {
     }
 }
 
-impl From<wasmer_error::RuntimeError> for MError {
-    fn from(err: wasmer_error::RuntimeError) -> Self {
+impl From<RuntimeError> for MError {
+    fn from(err: RuntimeError) -> Self {
         Self::WasmerRuntimeError(err.to_string())
     }
 }
 
+impl From<CallError> for MError {
+    fn from(err: CallError) -> Self {
+        Self::WasmerInvokeError(err.to_string())
+    }
+}
+/*
 impl From<wasmer_error::Error> for MError {
     fn from(err: wasmer_error::Error) -> Self {
         Self::WasmerError(err.to_string())
@@ -129,7 +137,7 @@ impl From<wasmer_error::InvokeError> for MError {
         Self::WasmerInvokeError(err.to_string())
     }
 }
-
+*/
 impl From<()> for MError {
     fn from(_err: ()) -> Self {
         MError::IncorrectWIT("failed to parse instructions for adapter type".to_string())

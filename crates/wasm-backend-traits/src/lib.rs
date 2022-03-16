@@ -1,20 +1,12 @@
-//pub mod errors;
-//pub mod it_memory_traits;
-//pub mod wasm_type_list;
+pub mod errors;
 
-//pub use wasm_type_list::WasmTypeList;
 use std::borrow::Cow;
 use std::fmt::Display;
-//use std::fmt::Display;
 use std::path::PathBuf;
-use thiserror::Error;
-use it_memory_traits::{SequentialMemoryView};
-//use wasmer_it::IValue;
 
-//use wasmer_core::types::FuncSig;
-use wasmer_core::error::CallResult;
-use wasmer_core::typed_func::WasmTypeList;
-use wasmer_core::types::WasmExternType;
+use it_memory_traits::{SequentialMemoryView};
+
+pub use errors::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum WValue {
@@ -86,13 +78,6 @@ impl std::fmt::Display for WType {
     }
 }
 
-#[derive(Debug, Error)]
-pub enum WasmBackendError {
-    #[error("Some error")]
-    SomeError,
-}
-
-pub type WasmBackendResult<T> = Result<T, WasmBackendError>;
 
 pub trait WasmBackend: Clone + 'static {
     type IO: ImportObject<Self>;
@@ -142,14 +127,14 @@ pub trait Exports<WB: WasmBackend> {
     fn get_func_no_args_no_rets<'a>(
         &'a self,
         name: &str,
-    ) -> wasmer_core::error::ResolveResult<
-        Box<dyn Fn() -> wasmer_core::error::RuntimeResult<()> + 'a>,
+    ) -> ResolveResult<
+        Box<dyn Fn() -> RuntimeResult<()> + 'a>,
     >;
 
     fn get_dyn_func<'a>(
         &'a self,
         name: &str,
-    ) -> wasmer_core::error::ResolveResult<<WB as WasmBackend>::ExportedDynFunc>;
+    ) -> ResolveResult<<WB as WasmBackend>::ExportedDynFunc>;
 }
 
 pub enum Export<M: MemoryExport, F: FunctionExport> {
@@ -261,5 +246,5 @@ impl FuncSig {
 }
 
 pub trait FuncGetter<'c, Args, Rets> {
-    unsafe fn get_func(&'c mut self, name: &str) -> Result<Box<dyn FnMut(Args) -> Result<Rets, wasmer_runtime::error::RuntimeError> + 'c>, wasmer_runtime::error::ResolveError>;
+    unsafe fn get_func(&'c mut self, name: &str) -> ResolveResult<Box<dyn FnMut(Args) -> RuntimeResult<Rets> + 'c>>;
 }

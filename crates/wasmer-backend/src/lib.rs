@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 //use std::marker::PhantomData;
-use marine_wasm_backend_traits::{DynamicFunc, Export, ExportContext, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue, WasmBackend};
+use marine_wasm_backend_traits::{DynamicFunc, Export, ExportContext, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue, WasmBackend, CompilationError};
 use marine_wasm_backend_traits::WasmBackendResult;
 use marine_wasm_backend_traits::WasmBackendError;
 use marine_wasm_backend_traits::Module;
@@ -12,6 +12,7 @@ use marine_wasm_backend_traits::Exports;
 use marine_wasm_backend_traits::WasiImplementation;
 use marine_wasm_backend_traits::FuncSig;
 use marine_wasm_backend_traits::FuncGetter;
+use marine_wasm_backend_traits::errors::*;
 
 
 use std::path::PathBuf;
@@ -19,7 +20,7 @@ use std::ptr::NonNull;
 use std::slice::Windows;
 use std::sync::Arc;
 use wasmer_core::backend::SigRegistry;
-use wasmer_core::error::{CallResult, ResolveError, ResolveResult, RuntimeError};
+//use wasmer_core::error::{CallResult, ResolveError, RuntimeError};
 use wasmer_core::fault::raw::longjmp;
 use wasmer_core::{DynFunc, Func};
 use wasmer_core::module::ExportIndex;
@@ -69,7 +70,9 @@ impl WasmBackend for WasmerBackend /*<'b>*/ {
 
     fn compile(wasm: &[u8]) -> WasmBackendResult<WasmerModule> {
         wasmer_runtime::compile(wasm)
-            .map_err(|_| WasmBackendError::SomeError)
+            .map_err(|e| WasmBackendError::CompilationError(
+                CompilationError::Message(e.to_string())
+            ))
             .map(|module| WasmerModule { module })
     }
 }
@@ -86,7 +89,7 @@ impl Module<WasmerBackend> for WasmerModule {
     fn instantiate(&self, imports: &WasmerImportObject) -> WasmBackendResult<WasmerInstance> {
         self.module
             .instantiate(&imports.import_object)
-            .map_err(|_| WasmBackendError::SomeError)
+            .map_err(|e| WasmBackendError::InstantiationError(e.to_string()))
             .map(|instance| WasmerInstance {
                 instance,
                 import_object: imports.clone(),
@@ -247,14 +250,21 @@ impl Exports<WasmerBackend> for WasmerInstance {
     fn get_func_no_args_no_rets<'a>(
         &'a self,
         name: &str,
-    ) -> wasmer_core::error::ResolveResult<
-        Box<dyn Fn() -> wasmer_core::error::RuntimeResult<()> + 'a>,
+    ) -> ResolveResult<
+        Box<dyn Fn() -> RuntimeResult<()> + 'a>,
     > {
-        self.instance.exports.get::<Func<'a>>(name).map(|func| {
-            let func: Box<dyn Fn() -> wasmer_core::error::RuntimeResult<()> + 'a> =
-                Box::new(move || -> wasmer_core::error::RuntimeResult<()> { func.call() });
-            func
-        })
+        self
+            .instance
+            .exports
+            .get::<Func<'a>>(name)
+            .map(|func| {
+                let func: Box<dyn Fn() -> RuntimeResult<()> + 'a> =
+                    Box::new(move || -> RuntimeResult<()> {
+                        func.call().map_err(|e| RuntimeError::Message(e.to_string()))
+                    });
+                func
+            })
+            .map_err(|e| ResolveError::Message(e.to_string()))
     }
 
     fn get_dyn_func<'a>(
@@ -270,6 +280,7 @@ impl Exports<WasmerBackend> for WasmerInstance {
                     func: std::mem::transmute::<DynFunc<'_>, DynFunc<'static>>(func),
                 }
             })
+            .map_err(|e| ResolveError::Message(e.to_string()))
     }
 }
 
@@ -405,16 +416,24 @@ impl<'c> WasmerExportContext<'c> {
                 .info
                 .exports
                 .get(name)
-                .ok_or_else(|| ResolveError::ExportNotFound {
-                    name: name.to_string(),
-                })?;
+                .ok_or_else(||
+                    ResolveError::Message(
+                        wasmer_core::error::ResolveError::ExportNotFound {
+                            name: name.to_string(),
+                        }.to_string()
+                    )
+                )?;
 
         let export_func_index = match export_index {
             ExportIndex::Func(func_index) => func_index,
             _ => {
-                return Err(ResolveError::ExportWrongType {
-                    name: name.to_string(),
-                })
+                return Err(
+                    ResolveError::Message(
+                        wasmer_core::error::ResolveError::ExportWrongType {
+                            name: name.to_string(),
+                        }.to_string()
+                    )
+                )
             }
         };
 
@@ -432,10 +451,14 @@ impl<'c> WasmerExportContext<'c> {
         if export_func_signature_ref.params() != arg_types
             || export_func_signature_ref.returns() != ret_types
         {
-            return Err(ResolveError::Signature {
-                expected: (*export_func_signature).clone(),
-                found: ret_types.to_vec(),
-            });
+            return Err(
+                ResolveError::Message(
+                    wasmer_core::error::ResolveError::Signature {
+                        expected: (*export_func_signature).clone(),
+                        found: ret_types.to_vec(),
+                    }.to_string()
+                )
+            );
         }
 
         let func_wasm_inner = module_inner
@@ -449,9 +472,13 @@ impl<'c> WasmerExportContext<'c> {
                 .get_func(&module_inner.info, local_func_index)
                 .unwrap(),
             _ => {
-                return Err(ResolveError::ExportNotFound {
-                    name: name.to_string(),
-                })
+                return Err(
+                    ResolveError::Message(
+                        wasmer_core::error::ResolveError::ExportNotFound {
+                            name: name.to_string(),
+                        }.to_string()
+                    )
+                )
             }
         };
 
@@ -462,7 +489,9 @@ impl<'c> WasmerExportContext<'c> {
         let result = Box::new(
             move |args: Args| -> Result<Rets, RuntimeError> {
                 unsafe {
-                    args.call::<Rets>(export_func_ptr, func_wasm_inner, *ctx)
+                    args
+                        .call::<Rets>(export_func_ptr, func_wasm_inner, *ctx)
+                        .map_err(|e| RuntimeError::Message(e.to_string()))
                 }
             }
         );
@@ -516,6 +545,7 @@ impl<'a> ExportedDynFunc<WasmerBackend> for WasmerExportedDynFunc<'a> {
                     .collect::<Vec<wasmer_runtime::Value>>(),
             )
             .map(|rets| rets.iter().map(wval_to_general_wval).collect())
+            .map_err(|e| CallError::Message(e.to_string()))
     }
 }
 
