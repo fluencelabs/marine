@@ -130,12 +130,11 @@ pub(super) fn itypes_output_to_wtypes(itypes: &[IType]) -> Vec<WType> {
 macro_rules! init_wasm_func_once {
     ($func:ident, $ctx:ident, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
         if $func.borrow().is_none() {
-            let raw_func: Box<dyn FnMut($args) -> RuntimeResult<$rets>> = match unsafe {
-                $ctx.get_func($func_name) }
-            {
-                Ok(func) => func,
-                Err(_) => return vec![WValue::I32($ret_error_code)],
-            };
+            let raw_func: Box<dyn FnMut($args) -> RuntimeResult<$rets>> =
+                match unsafe { $ctx.get_func($func_name) } {
+                    Ok(func) => func,
+                    Err(_) => return vec![WValue::I32($ret_error_code)],
+                };
 
             unsafe {
                 // assumed that this function will be used only in the context of closure
@@ -144,7 +143,7 @@ macro_rules! init_wasm_func_once {
                 // is itself static (i.e., lives until the end of the program)
                 let raw_func = std::mem::transmute::<
                     Box<dyn FnMut($args) -> RuntimeResult<$rets> + '_>,
-                    Box<dyn FnMut($args) -> RuntimeResult<$rets> + 'static>
+                    Box<dyn FnMut($args) -> RuntimeResult<$rets> + 'static>,
                 >(raw_func);
 
                 *$func.borrow_mut() = Some(raw_func);

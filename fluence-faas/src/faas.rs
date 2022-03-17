@@ -27,6 +27,8 @@ use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use crate::json_to_faas_err;
 
+use marine_wasm_backend_traits::WasmBackend;
+
 use marine::Marine;
 use marine::IFunctionArg;
 use marine_utils::SharedString;
@@ -49,11 +51,11 @@ struct ModuleInterface {
 
 // TODO: remove and use mutex instead
 #[allow(clippy::non_send_fields_in_send_ty)]
-unsafe impl Send for FluenceFaaS {}
+unsafe impl<WB: WasmBackend> Send for FluenceFaaS<WB> {}
 
-pub struct FluenceFaaS {
+pub struct FluenceFaaS<WB: WasmBackend> {
     /// Marine instance.
-    marine: Marine,
+    marine: Marine<WB>,
 
     /// Parameters of call accessible by Wasm modules.
     call_parameters: Rc<RefCell<CallParameters>>,
@@ -62,11 +64,11 @@ pub struct FluenceFaaS {
     module_interfaces_cache: HashMap<String, ModuleInterface>,
 }
 
-impl FluenceFaaS {
+impl<WB: WasmBackend> FluenceFaaS<WB> {
     /// Creates FaaS from config deserialized from TOML.
     pub fn with_raw_config<C>(config: C) -> FaaSResult<Self>
     where
-        C: TryInto<FaaSConfig>,
+        C: TryInto<FaaSConfig<WB>>,
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
@@ -75,13 +77,13 @@ impl FluenceFaaS {
             .iter()
             .map(|m| (m.file_name.clone(), m.import_name.clone()))
             .collect();
-        Self::with_module_names::<FaaSConfig>(&modules, config)
+        Self::with_module_names::<FaaSConfig<WB>>(&modules, config)
     }
 
     /// Creates FaaS with given modules.
     pub fn with_modules<C>(mut modules: HashMap<String, Vec<u8>>, config: C) -> FaaSResult<Self>
     where
-        C: TryInto<FaaSConfig>,
+        C: TryInto<FaaSConfig<WB>>,
         FaaSError: From<C::Error>,
     {
         let mut marine = Marine::new();
@@ -122,7 +124,7 @@ impl FluenceFaaS {
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
     pub fn with_module_names<C>(names: &HashMap<String, String>, config: C) -> FaaSResult<Self>
     where
-        C: TryInto<FaaSConfig>,
+        C: TryInto<FaaSConfig<WB>>,
         FaaSError: From<C::Error>,
     {
         let config = config.try_into()?;
@@ -133,7 +135,7 @@ impl FluenceFaaS {
                 load_modules_from_fs(dir, ModulesLoadStrategy::Named(names))
             })?;
 
-        Self::with_modules::<FaaSConfig>(modules, config)
+        Self::with_modules::<FaaSConfig<WB>>(modules, config)
     }
 
     /// Call a specified function of loaded on a startup module by its name.

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-use fluence_faas::FluenceFaaS;
+use fluence_faas::FluenceFaaS as FluenceFaaSGeneric;
+type FluenceFaaS = FluenceFaaSGeneric<marine_wasmer_backend::WasmerBackend>;
+
 use fluence_faas::IValue;
 
 use pretty_assertions::assert_eq;

@@ -12,7 +12,7 @@ pub enum WasmBackendError {
     CompilationError(CompilationError),
 
     #[error("{0}")]
-    InstantiationError(String)
+    InstantiationError(String),
 }
 
 pub type WasmBackendResult<T> = Result<T, WasmBackendError>;
@@ -20,7 +20,7 @@ pub type WasmBackendResult<T> = Result<T, WasmBackendError>;
 #[derive(Debug, Error)]
 pub enum ResolveError {
     #[error("{0}")]
-    Message(String)
+    Message(String),
 }
 
 pub type ResolveResult<T> = Result<T, ResolveError>;
@@ -28,7 +28,7 @@ pub type ResolveResult<T> = Result<T, ResolveError>;
 #[derive(Debug, Error)]
 pub enum RuntimeError {
     #[error("{0}")]
-    Message(String)
+    Message(String),
 }
 
 pub type RuntimeResult<T> = Result<T, RuntimeError>;
@@ -36,7 +36,7 @@ pub type RuntimeResult<T> = Result<T, RuntimeError>;
 #[derive(Debug, Error)]
 pub enum CompilationError {
     #[error("{0}")]
-    Message(String)
+    Message(String),
 }
 
 pub type CompilationResult<T> = Result<T, CompilationError>;
@@ -44,8 +44,7 @@ pub type CompilationResult<T> = Result<T, CompilationError>;
 #[derive(Debug, Error)]
 pub enum CallError {
     #[error("{0}")]
-    Message(String)
+    Message(String),
 }
 
 pub type CallResult<T> = Result<T, CallError>;
-

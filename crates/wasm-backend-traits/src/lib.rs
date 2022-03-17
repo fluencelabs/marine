@@ -78,7 +78,6 @@ impl std::fmt::Display for WType {
     }
 }
 
-
 pub trait WasmBackend: Clone + 'static {
     type IO: ImportObject<Self>;
     type Exports: Exports<Self>;
@@ -127,9 +126,7 @@ pub trait Exports<WB: WasmBackend> {
     fn get_func_no_args_no_rets<'a>(
         &'a self,
         name: &str,
-    ) -> ResolveResult<
-        Box<dyn Fn() -> RuntimeResult<()> + 'a>,
-    >;
+    ) -> ResolveResult<Box<dyn Fn() -> RuntimeResult<()> + 'a>>;
 
     fn get_dyn_func<'a>(
         &'a self,
@@ -195,7 +192,20 @@ pub trait DynamicFunc<'a, WB: WasmBackend> {
         F: Fn(&mut <WB as WasmBackend>::ExportContext, &[WValue]) -> Vec<WValue> + 'static;
 }
 
-pub trait Namespace<WB: WasmBackend>: LikeNamespace<WB> {
+pub trait InsertFn<WB: WasmBackend, Args, Rets> {
+    fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
+    where
+        F: 'static + Fn(&mut <WB as WasmBackend>::ExportContext, Args) -> Rets + std::marker::Send;
+}
+
+pub trait Namespace<WB: WasmBackend>:
+    LikeNamespace<WB>
+    + InsertFn<WB, (), ()>
+    + InsertFn<WB, (i32,), ()>
+    + InsertFn<WB, (i32, i32), ()>
+    + InsertFn<WB, (i32, i32, i32), ()>
+    + InsertFn<WB, (i32, i32, i32, i32), ()>
+{
     fn new() -> Self;
 
     fn insert(&mut self, name: impl Into<String>, func: <WB as WasmBackend>::DynamicFunc);
@@ -204,12 +214,13 @@ pub trait Namespace<WB: WasmBackend>: LikeNamespace<WB> {
 pub trait LikeNamespace<WB: WasmBackend> {}
 
 pub trait ExportContext<'c, WB: WasmBackend>:
-    FuncGetter<'c, (i32,i32), i32> +
-    FuncGetter<'c, (i32,i32), ()> +
-    FuncGetter<'c, i32, i32> +
-    FuncGetter<'c, i32, ()> +
-    FuncGetter<'c, (), i32> +
-    FuncGetter<'c, (), ()> {
+    FuncGetter<'c, (i32, i32), i32>
+    + FuncGetter<'c, (i32, i32), ()>
+    + FuncGetter<'c, i32, i32>
+    + FuncGetter<'c, i32, ()>
+    + FuncGetter<'c, (), i32>
+    + FuncGetter<'c, (), ()>
+{
     fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
 }
 
@@ -246,5 +257,8 @@ impl FuncSig {
 }
 
 pub trait FuncGetter<'c, Args, Rets> {
-    unsafe fn get_func(&'c mut self, name: &str) -> ResolveResult<Box<dyn FnMut(Args) -> RuntimeResult<Rets> + 'c>>;
+    unsafe fn get_func(
+        &'c mut self,
+        name: &str,
+    ) -> ResolveResult<Box<dyn FnMut(Args) -> RuntimeResult<Rets> + 'c>>;
 }

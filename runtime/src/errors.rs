@@ -38,24 +38,24 @@ pub enum MError {
     /// Error related to calling a main Wasm module.
     #[error("Wasmer invoke error: {0}")]
     WasmerInvokeError(String),
-/*
-    /// Error that raises during compilation Wasm code by Wasmer.
-    #[error("Wasmer creation error: {0}")]
-    WasmerCreationError(#[from] wasmer_error::CreationError),
+    /*
+        /// Error that raises during compilation Wasm code by Wasmer.
+        #[error("Wasmer creation error: {0}")]
+        WasmerCreationError(#[from] wasmer_error::CreationError),
 
-    /// Error that raises during creation of some Wasm objects (like table and memory) by Wasmer.
-    #[error("Wasmer compile error: {0}")]
-    WasmerCompileError(#[from] wasmer_error::CompileError),
-*/
+        /// Error that raises during creation of some Wasm objects (like table and memory) by Wasmer.
+        #[error("Wasmer compile error: {0}")]
+        WasmerCompileError(#[from] wasmer_error::CompileError),
+    */
     /// Errors arisen during execution of a Wasm module.
     #[error("Wasmer runtime error: {0}")]
     WasmerRuntimeError(String),
 
     /*
-    /// Errors arisen during linking Wasm modules with already loaded into Marine modules.
-    #[error("Wasmer link error: {0}")]
-    WasmerLinkError(#[from] wasmer_error::LinkError),
-*/
+        /// Errors arisen during linking Wasm modules with already loaded into Marine modules.
+        #[error("Wasmer link error: {0}")]
+        WasmerLinkError(#[from] wasmer_error::LinkError),
+    */
     /// Errors from the temporary class of amalgamation errors from the Wasmer side.
     #[error("Wasmer error: {0}")]
     WasmerError(String),

@@ -25,11 +25,16 @@ use crate::host_imports::create_call_parameters_import;
 
 use marine::HostImportDescriptor;
 use marine::MModuleConfig;
+use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::Namespace;
+use marine_wasm_backend_traits::ImportObject;
+use marine_wasm_backend_traits::InsertFn;
+
 use marine_rs_sdk::CallParameters;
 use marine_utils::bytes_to_wasm_pages_ceil;
-use wasmer_core::import::ImportObject;
-use wasmer_core::import::Namespace;
-use wasmer_runtime::func;
+//use wasmer_core::import::ImportObject;
+//use wasmer_core::import::Namespace;
+//use wasmer_runtime::func;
 
 use std::collections::HashMap;
 use std::cell::RefCell;
@@ -37,11 +42,11 @@ use std::rc::Rc;
 
 const WASM_MAX_HEAP_SIZE: u64 = 4 * 1024 * 1024 * 1024 - 1; // 4 GiB - 1
 
-struct MModuleConfigBuilder {
-    config: MModuleConfig,
+struct MModuleConfigBuilder<WB: WasmBackend> {
+    config: MModuleConfig<WB>,
 }
 
-impl MModuleConfigBuilder {
+impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
     pub(self) fn new() -> Self {
         Self {
             config: <_>::default(),
@@ -51,10 +56,10 @@ impl MModuleConfigBuilder {
     pub(self) fn build(
         self,
         module_name: String,
-        faas_module_config: Option<FaaSModuleConfig>,
+        faas_module_config: Option<FaaSModuleConfig<WB>>,
         call_parameters: Rc<RefCell<CallParameters>>,
         logger_filter: &LoggerFilter<'_>,
-    ) -> FaaSResult<MModuleConfig> {
+    ) -> FaaSResult<MModuleConfig<WB>> {
         let faas_module_config = match faas_module_config {
             Some(config) => config,
             None => return Ok(self.into_config()),
@@ -110,7 +115,7 @@ impl MModuleConfigBuilder {
 
     fn populate_host_imports(
         mut self,
-        host_imports: HashMap<String, HostImportDescriptor>,
+        host_imports: HashMap<String, HostImportDescriptor<WB>>,
         call_parameters: Rc<RefCell<CallParameters>>,
     ) -> Self {
         self.config.host_imports = host_imports;
@@ -173,13 +178,13 @@ impl MModuleConfigBuilder {
         }
 
         let logging_mask = logging_mask;
-        let mut namespace = Namespace::new();
-        namespace.insert(
+        let mut namespace = <WB as WasmBackend>::Namespace::new();
+        namespace.insert_fn(
             "log_utf8_string",
-            func!(log_utf8_string_closure(logging_mask, module_name)),
+            log_utf8_string_closure::<WB>(logging_mask, module_name),
         );
 
-        let mut raw_host_imports = ImportObject::new();
+        let mut raw_host_imports = <WB as WasmBackend>::IO::new();
         raw_host_imports.register("host", namespace);
         self.config.raw_imports = raw_host_imports;
 
@@ -191,18 +196,18 @@ impl MModuleConfigBuilder {
         self
     }
 
-    fn into_config(self) -> MModuleConfig {
+    fn into_config(self) -> MModuleConfig<WB> {
         self.config
     }
 }
 
 /// Make Marine config from provided FaaS config.
-pub(crate) fn make_marine_config(
+pub(crate) fn make_marine_config<WB: WasmBackend>(
     module_name: String,
-    faas_module_config: Option<FaaSModuleConfig>,
+    faas_module_config: Option<FaaSModuleConfig<WB>>,
     call_parameters: Rc<RefCell<marine_rs_sdk::CallParameters>>,
     logger_filter: &LoggerFilter<'_>,
-) -> FaaSResult<MModuleConfig> {
+) -> FaaSResult<MModuleConfig<WB>> {
     MModuleConfigBuilder::new().build(
         module_name,
         faas_module_config,

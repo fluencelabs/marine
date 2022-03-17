@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+use marine_wasm_backend_traits::WasmBackend;
+
 use marine::HostImportDescriptor;
-use wasmer_core::vm::Ctx;
 use wasmer_it::IValue;
 use wasmer_it::IType;
 
@@ -24,10 +25,11 @@ use std::cell::RefCell;
 use std::ops::Deref;
 
 /// Create the import intended for handling get_call_parameters SDK api.
-pub(crate) fn create_call_parameters_import(
+pub(crate) fn create_call_parameters_import<WB: WasmBackend>(
     call_parameters: Rc<RefCell<marine_rs_sdk::CallParameters>>,
-) -> HostImportDescriptor {
-    let call_parameters_closure = move |_ctx: &mut Ctx, _args: Vec<IValue>| {
+) -> HostImportDescriptor<WB> {
+    let call_parameters_closure = move |_ctx: &mut <WB as WasmBackend>::ExportContext,
+                                        _args: Vec<IValue>| {
         let result = crate::to_interface_value(call_parameters.borrow().deref()).unwrap();
         Some(result)
     };

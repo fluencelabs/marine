@@ -20,6 +20,8 @@ use crate::MemoryStats;
 use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
+use marine_wasm_backend_traits::WasmBackend;
+
 use fluence_faas::FluenceFaaS;
 use fluence_faas::IValue;
 use serde_json::Value as JValue;
@@ -34,20 +36,20 @@ const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
 const SERVICE_TMP_DIR_NAME: &str = "tmp";
 
-pub struct AppService {
-    faas: FluenceFaaS,
+pub struct AppService<WB: WasmBackend> {
+    faas: FluenceFaaS<WB>,
     facade_module_name: String,
 }
 
-impl AppService {
+impl<WB: WasmBackend> AppService<WB> {
     /// Create Service with given modules and service id.
     pub fn new<C, S>(config: C, service_id: S, envs: HashMap<Vec<u8>, Vec<u8>>) -> Result<Self>
     where
-        C: TryInto<AppServiceConfig>,
+        C: TryInto<AppServiceConfig<WB>>,
         S: Into<String>,
         AppServiceError: From<C::Error>,
     {
-        let mut config: AppServiceConfig = config.try_into()?;
+        let mut config: AppServiceConfig<WB> = config.try_into()?;
         let facade_module_name = config
             .faas_config
             .modules_config
@@ -127,7 +129,7 @@ impl AppService {
     ///     - service_base_dir/service_id/SERVICE_TMP_DIR_NAME
     ///  2. adding service_id to environment variables
     fn set_env_and_dirs(
-        config: &mut AppServiceConfig,
+        config: &mut AppServiceConfig<WB>,
         service_id: String,
         mut envs: HashMap<Vec<u8>, Vec<u8>>,
     ) -> Result<()> {

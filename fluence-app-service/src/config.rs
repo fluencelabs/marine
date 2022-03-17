@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+use marine_wasm_backend_traits::WasmBackend;
+
 use std::path::PathBuf;
 use fluence_faas::FaaSConfig;
 
 /// Describes behaviour of the Fluence AppService.
 #[derive(Default)]
-pub struct AppServiceConfig {
+pub struct AppServiceConfig<WB: WasmBackend> {
     /// Used for preparing filesystem on the service initialization stage.
     pub service_base_dir: PathBuf,
-    pub faas_config: FaaSConfig,
+    pub faas_config: FaaSConfig<WB>,
 }

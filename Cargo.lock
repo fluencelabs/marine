@@ -792,6 +792,8 @@ dependencies = [
  "log",
  "maplit",
  "marine-min-it-version",
+ "marine-wasm-backend-traits",
+ "marine-wasmer-backend",
  "serde",
  "serde_derive",
  "serde_json",
@@ -833,6 +835,7 @@ dependencies = [
  "cmd_lib",
  "env_logger 0.7.1",
  "it-json-serde",
+ "it-memory-traits",
  "itertools 0.9.0",
  "log",
  "marine-module-interface 0.2.0",
@@ -840,6 +843,8 @@ dependencies = [
  "marine-rs-sdk-main",
  "marine-runtime 0.11.0",
  "marine-utils 0.4.0",
+ "marine-wasm-backend-traits",
+ "marine-wasmer-backend",
  "once_cell",
  "pretty_assertions",
  "safe-transmute",
@@ -850,8 +855,6 @@ dependencies = [
  "thiserror",
  "toml",
  "wasmer-interface-types-fl 0.21.1",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
  "wasmer-wasi-fl",
 ]
 
@@ -1814,8 +1817,6 @@ dependencies = [
  "thiserror",
  "tokio 0.2.25",
  "wasmer-interface-types-fl 0.21.1",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
  "wasmer-wasi-fl",
 ]
 
@@ -1887,8 +1888,6 @@ dependencies = [
  "thiserror",
  "tuple_list",
  "wasmer-interface-types-fl 0.21.1",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
  "wasmer-wasi-fl",
 ]
 

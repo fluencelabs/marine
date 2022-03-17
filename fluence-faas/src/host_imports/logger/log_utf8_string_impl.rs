@@ -14,29 +14,35 @@
  * limitations under the License.
  */
 
-use wasmer_core::vm::Ctx;
-use wasmer_core::memory::ptr::{Array, WasmPtr};
+use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::ExportContext;
+use it_memory_traits::Memory;
+use it_memory_traits::SequentialMemoryView;
+use it_memory_traits::SequentialReader;
+//use wasmer_core::vm::Ctx;
+//use wasmer_core::memory::ptr::{Array, WasmPtr};
+//use crate::IType::String;
 
-pub(crate) fn log_utf8_string_closure(
+pub(crate) fn log_utf8_string_closure<WB: WasmBackend>(
     logging_mask: i32,
     module: String,
-) -> impl Fn(&mut Ctx, i32, i32, i32, i32) {
-    move |ctx, level, target, msg_offset, msg_size| {
+) -> impl Fn(&mut <WB as WasmBackend>::ExportContext, (i32, i32, i32, i32)) {
+    move |ctx, (level, target, msg_offset, msg_size)| {
         if target == 0 || target & logging_mask != 0 {
-            log_utf8_string(&module, ctx, level, msg_offset, msg_size)
+            log_utf8_string::<WB>(&module, ctx, level, msg_offset, msg_size)
         }
     }
 }
 
-pub(crate) fn log_utf8_string(
+pub(crate) fn log_utf8_string<WB: WasmBackend>(
     module: &str,
-    ctx: &mut Ctx,
+    ctx: &mut <WB as WasmBackend>::ExportContext,
     level: i32,
     msg_offset: i32,
     msg_size: i32,
 ) {
     let level = level_from_i32(level);
-    let msg = read_string(ctx, msg_offset, msg_size);
+    let msg = read_string::<WB>(ctx, msg_offset, msg_size);
 
     match msg {
         Some(msg) => log::logger().log(
@@ -52,9 +58,17 @@ pub(crate) fn log_utf8_string(
 }
 
 #[inline]
-fn read_string(ctx: &Ctx, offset: i32, size: i32) -> Option<&str> {
-    let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
-    wasm_ptr.get_utf8_string(ctx.memory(0), size as _)
+fn read_string<WB: WasmBackend>(
+    ctx: &<WB as WasmBackend>::ExportContext,
+    offset: i32,
+    size: i32,
+) -> Option<String> {
+    let view = ctx.memory(0).view();
+    let reader = view
+        .sequential_reader(offset as usize, size as usize)
+        .unwrap();
+    let bytes = (0..size).map(|_| reader.read_byte()).collect();
+    String::from_utf8(bytes).ok()
 }
 
 #[inline]

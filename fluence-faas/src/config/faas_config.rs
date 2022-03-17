@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use marine_wasm_backend_traits::WasmBackend;
 use marine::HostImportDescriptor;
 
 use std::collections::HashMap;
@@ -22,28 +23,28 @@ use std::path::PathBuf;
 
 /// Info to load a module from filesystem into runtime.
 #[derive(Default)]
-pub struct ModuleDescriptor {
+pub struct ModuleDescriptor<WB: WasmBackend> {
     pub file_name: String,
     pub import_name: String,
-    pub config: FaaSModuleConfig,
+    pub config: FaaSModuleConfig<WB>,
 }
 
 /// Describes the behaviour of FluenceFaaS.
 #[derive(Default)]
-pub struct FaaSConfig {
+pub struct FaaSConfig<WB: WasmBackend> {
     /// Path to a dir where compiled Wasm modules are located.
     pub modules_dir: Option<PathBuf>,
 
     /// Settings for a module with particular name (not HashMap because the order is matter).
-    pub modules_config: Vec<ModuleDescriptor>,
+    pub modules_config: Vec<ModuleDescriptor<WB>>,
 
     /// Settings for a module that name's not been found in modules_config.
-    pub default_modules_config: Option<FaaSModuleConfig>,
+    pub default_modules_config: Option<FaaSModuleConfig<WB>>,
 }
 
 /// Various settings that could be used to guide Marine how to load a module in a proper way.
 #[derive(Default)]
-pub struct FaaSModuleConfig {
+pub struct FaaSModuleConfig<WB: WasmBackend> {
     /// Maximum memory size accessible by a module in Wasm pages (64 Kb).
     pub mem_pages_count: Option<u32>,
 
@@ -54,7 +55,7 @@ pub struct FaaSModuleConfig {
     pub logger_enabled: bool,
 
     /// Export from host functions that will be accessible on the Wasm side by provided name.
-    pub host_imports: HashMap<String, HostImportDescriptor>,
+    pub host_imports: HashMap<String, HostImportDescriptor<WB>>,
 
     /// A WASI config.
     pub wasi: Option<FaaSWASIConfig>,
@@ -63,7 +64,7 @@ pub struct FaaSModuleConfig {
     pub logging_mask: i32,
 }
 
-impl FaaSModuleConfig {
+impl<WB: WasmBackend> FaaSModuleConfig<WB> {
     pub fn extend_wasi_envs(&mut self, new_envs: HashMap<Vec<u8>, Vec<u8>>) {
         match &mut self.wasi {
             Some(FaaSWASIConfig { envs, .. }) => envs.extend(new_envs),
@@ -123,7 +124,7 @@ use crate::FaaSError;
 
 use std::convert::{TryFrom, TryInto};
 
-impl TryFrom<TomlFaaSConfig> for FaaSConfig {
+impl<WB: WasmBackend> TryFrom<TomlFaaSConfig> for FaaSConfig<WB> {
     type Error = FaaSError;
 
     fn try_from(toml_config: TomlFaaSConfig) -> Result<Self, Self::Error> {
@@ -145,7 +146,7 @@ impl TryFrom<TomlFaaSConfig> for FaaSConfig {
     }
 }
 
-impl TryFrom<TomlFaaSNamedModuleConfig> for ModuleDescriptor {
+impl<WB: WasmBackend> TryFrom<TomlFaaSNamedModuleConfig> for ModuleDescriptor<WB> {
     type Error = FaaSError;
 
     fn try_from(config: TomlFaaSNamedModuleConfig) -> Result<Self, Self::Error> {
@@ -157,7 +158,7 @@ impl TryFrom<TomlFaaSNamedModuleConfig> for ModuleDescriptor {
     }
 }
 
-impl TryFrom<TomlFaaSModuleConfig> for FaaSModuleConfig {
+impl<WB: WasmBackend> TryFrom<TomlFaaSModuleConfig> for FaaSModuleConfig<WB> {
     type Error = FaaSError;
 
     fn try_from(toml_config: TomlFaaSModuleConfig) -> Result<Self, Self::Error> {
