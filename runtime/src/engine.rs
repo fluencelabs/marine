@@ -18,7 +18,7 @@ use super::*;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
 
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::{WasiState, WasmBackend};
 
 use serde::Serialize;
 
@@ -99,10 +99,10 @@ impl<WB: WasmBackend> Marine<WB> {
             .ok_or_else(|| MError::NoSuchModule(name.as_ref().to_string()))
     }
 
-    pub fn module_wasi_state<S: AsRef<str>>(
-        &mut self,
+    pub fn module_wasi_state<'s, S: AsRef<str>>(
+        &'s mut self,
         module_name: S,
-    ) -> Option<&wasmer_wasi::state::WasiState> {
+    ) -> Option<Box<dyn WasiState + 's>> {
         self.modules
             .get_mut(module_name.as_ref())
             .map(|module| module.get_wasi_state())

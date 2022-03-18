@@ -22,7 +22,7 @@ use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
 use crate::MResult;
 use crate::MModuleConfig;
 
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::{WasiState, WasmBackend};
 use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
 use marine_wasm_backend_traits::ImportObject;
@@ -199,7 +199,7 @@ impl<WB: WasmBackend> MModule<WB> {
         self.export_record_types.get(&record_type)
     }
 
-    pub(crate) fn get_wasi_state(&mut self) -> &wasmer_wasi::state::WasiState {
+    pub(crate) fn get_wasi_state<'s>(&'s mut self) -> Box<dyn WasiState + 's> {
         <WB as WasmBackend>::Wasi::get_wasi_state(self.wasmer_instance.borrow_mut())
     }
 

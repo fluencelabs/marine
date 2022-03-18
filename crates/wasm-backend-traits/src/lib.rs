@@ -91,6 +91,7 @@ pub trait WasmBackend: Clone + 'static {
     type M: Module<Self>;
     type I: Instance<Self>;
     type Wasi: WasiImplementation<Self>;
+    //type WasiState: WasiState;
     type Namespace: Namespace<Self>;
     type ExportContext: for<'c> ExportContext<'c, Self>;
     type ExportedDynFunc: ExportedDynFunc<Self>;
@@ -166,14 +167,22 @@ pub trait ImportObject<WB: WasmBackend>:
 
 pub trait WasiImplementation<WB: WasmBackend> {
     fn generate_import_object_for_version(
-        version: wasmer_wasi::WasiVersion,
+        version: WasiVersion,
         args: Vec<Vec<u8>>,
         envs: Vec<Vec<u8>>,
         preopened_files: Vec<PathBuf>,
         mapped_dirs: Vec<(String, PathBuf)>,
     ) -> Result<<WB as WasmBackend>::IO, String>;
 
-    fn get_wasi_state(instance: &mut <WB as WasmBackend>::I) -> &wasmer_wasi::state::WasiState;
+    fn get_wasi_state<'s>(instance: &'s mut <WB as WasmBackend>::I) -> Box<dyn WasiState + 's>;
+}
+pub enum WasiVersion {
+    Snapshot0,
+    Snapshot1,
+    Latest,
+}
+pub trait WasiState {
+    fn envs(&self) -> &[Vec<u8>];
 }
 
 pub trait MemoryExport {}

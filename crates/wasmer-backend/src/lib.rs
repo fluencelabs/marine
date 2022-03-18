@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 //use std::marker::PhantomData;
 use marine_wasm_backend_traits::{
     DynamicFunc, Export, ExportContext, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue,
-    WasmBackend, CompilationError, InsertFn,
+    WasmBackend, CompilationError, InsertFn, WasiVersion,
 };
 use marine_wasm_backend_traits::WasmBackendResult;
 use marine_wasm_backend_traits::WasmBackendError;
@@ -15,6 +15,7 @@ use marine_wasm_backend_traits::Exports;
 use marine_wasm_backend_traits::WasiImplementation;
 use marine_wasm_backend_traits::FuncSig;
 use marine_wasm_backend_traits::FuncGetter;
+use marine_wasm_backend_traits::WasiState;
 use marine_wasm_backend_traits::errors::*;
 
 use std::path::PathBuf;
@@ -32,7 +33,6 @@ use wasmer_core::typed_func::{ExplicitVmCtx, Host, HostFunction, Wasm, WasmTypeL
 use wasmer_core::types::{LocalOrImport, WasmExternType};
 use wasmer_core::types::FuncSig as WasmerFuncSig;
 use wasmer_core::typed_func::WasmTypeList as WasmerWasmTypeList;
-use wasmer_wasi::state::WasiState;
 use wasmer_it::IValue;
 
 mod memory_access;
@@ -62,6 +62,7 @@ impl WasmBackend for WasmerBackend /*<'b>*/ {
     type WITMemory = WITMemory;
     type WITMemoryView = WITMemoryView<'static>;
     type Wasi = WasmerWasiImplementation;
+    //type WasiState = WasmerWasiState;
     type DynamicFunc = WasmerDynamicFunc;
     type Namespace = WasmerNamespace;
     type ExportContext = WasmerExportContext<'static>;
@@ -224,12 +225,18 @@ pub struct WasmerWasiImplementation {}
 
 impl WasiImplementation<WasmerBackend> for WasmerWasiImplementation {
     fn generate_import_object_for_version(
-        version: wasmer_wasi::WasiVersion,
+        version: WasiVersion,
         args: Vec<Vec<u8>>,
         envs: Vec<Vec<u8>>,
         preopened_files: Vec<PathBuf>,
         mapped_dirs: Vec<(String, PathBuf)>,
     ) -> Result<WasmerImportObject, String> {
+        let version = match version {
+            WasiVersion::Snapshot0 => wasmer_wasi::WasiVersion::Snapshot0,
+            WasiVersion::Snapshot1 => wasmer_wasi::WasiVersion::Snapshot1,
+            WasiVersion::Latest => wasmer_wasi::WasiVersion::Latest,
+        };
+
         wasmer_wasi::generate_import_object_for_version(
             version,
             args,
@@ -240,8 +247,20 @@ impl WasiImplementation<WasmerBackend> for WasmerWasiImplementation {
         .map(|import_object| WasmerImportObject { import_object })
     }
 
-    fn get_wasi_state(instance: &mut <WasmerBackend as WasmBackend>::I) -> &WasiState {
-        unsafe { wasmer_wasi::state::get_wasi_state(instance.instance.context_mut()) }
+    fn get_wasi_state<'s>(instance: &'s mut WasmerInstance) -> Box<dyn WasiState + 's> {
+        let wasi_state =
+            unsafe { wasmer_wasi::state::get_wasi_state(instance.instance.context_mut()) };
+        Box::new(WasmerWasiState { wasi_state })
+    }
+}
+
+pub struct WasmerWasiState<'a> {
+    wasi_state: &'a wasmer_wasi::state::WasiState,
+}
+
+impl<'a> WasiState for WasmerWasiState<'a> {
+    fn envs(&self) -> &[Vec<u8>] {
+        &self.wasi_state.envs
     }
 }
 

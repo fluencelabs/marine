@@ -855,7 +855,6 @@ dependencies = [
  "thiserror",
  "toml",
  "wasmer-interface-types-fl 0.21.1",
- "wasmer-wasi-fl",
 ]
 
 [[package]]
@@ -1817,7 +1816,6 @@ dependencies = [
  "thiserror",
  "tokio 0.2.25",
  "wasmer-interface-types-fl 0.21.1",
- "wasmer-wasi-fl",
 ]
 
 [[package]]
@@ -1888,7 +1886,6 @@ dependencies = [
  "thiserror",
  "tuple_list",
  "wasmer-interface-types-fl 0.21.1",
- "wasmer-wasi-fl",
 ]
 
 [[package]]

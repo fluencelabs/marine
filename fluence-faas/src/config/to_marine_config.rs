@@ -29,6 +29,7 @@ use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::Namespace;
 use marine_wasm_backend_traits::ImportObject;
 use marine_wasm_backend_traits::InsertFn;
+use marine_wasm_backend_traits::WasiVersion;
 
 use marine_rs_sdk::CallParameters;
 use marine_utils::bytes_to_wasm_pages_ceil;
@@ -192,7 +193,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
     }
 
     fn add_version(mut self) -> Self {
-        self.config.wasi_version = wasmer_wasi::WasiVersion::Latest;
+        self.config.wasi_version = WasiVersion::Latest;
         self
     }
 

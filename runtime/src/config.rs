@@ -20,8 +20,9 @@ use crate::HostImportError;
 
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::ImportObject;
+use marine_wasm_backend_traits::WasiVersion;
 
-use wasmer_wasi::WasiVersion;
+//use wasmer_wasi::WasiVersion;
 //use wasmer_runtime::ImportObject;
 //use wasmer_core::vm::Ctx;
 

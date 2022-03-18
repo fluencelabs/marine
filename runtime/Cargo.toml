@@ -23,7 +23,6 @@ marine-wasm-backend-traits = { path = "../crates/wasm-backend-traits", version =
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.1" }
 it-lilo = "0.2.0"
 it-memory-traits = "0.1.0"
-wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 bytesize = "1.1.0"
 
 multimap = "0.8.1"
