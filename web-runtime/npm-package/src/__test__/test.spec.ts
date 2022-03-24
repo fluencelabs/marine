@@ -1,75 +1,32 @@
-import { init } from '../backgroundScript';
 import fs from 'fs';
 import path from 'path';
-import { WASI } from '@wasmer/wasi';
-import { WasmFs } from '@wasmer/wasmfs';
-import bindings from '@wasmer/wasi/lib/bindings/browser';
+import { runAvm } from '../avmHelpers';
+import { FluenceAppService } from '../FluenceAppService';
 
-const createModule = async (path: string) => {
-    const file = fs.readFileSync(path);
-    return await WebAssembly.compile(file);
-};
+const fsPromises = fs.promises;
 
-const invokeJson = (air: any, prevData: any, data: any, paramsToPass: any, callResultsToPass: any) => {
-    return JSON.stringify([
-        air,
-        Array.from(prevData),
-        Array.from(data),
-        paramsToPass,
-        Array.from(Buffer.from(JSON.stringify(callResultsToPass))),
-    ]);
-};
+const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
 
 const b = (s: string) => {
     return Buffer.from(s);
 };
 
-const defaultAvmFileName = 'avm.wasm';
-const avmPackageName = '@fluencelabs/avm';
+describe('Fluence app service tests', () => {
+    it('Running avm through FaaS infrastructure', async () => {
+        // arrange
+        const avmPackagePath = require.resolve('@fluencelabs/avm');
+        const avmFilePath = path.join(path.dirname(avmPackagePath), 'avm.wasm');
+        console.log(avmFilePath);
+        const avmBuffer = await fsPromises.readFile(avmFilePath);
+        const avm = WebAssembly.compile(avmBuffer);
 
-const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
+        const marineFilePath = path.join(__dirname, '../../dist/marine-js');
+        const marineBuffer = await fsPromises.readFile(marineFilePath);
+        const marine = WebAssembly.compile(marineBuffer);
 
-const _wasmFs = new WasmFs();
+        const testAvmFaaS = new FluenceAppService(marine, avm, 'avm');
 
-const _wasi = new WASI({
-    // Arguments passed to the Wasm Module
-    // The first argument is usually the filepath to the executable WASI module
-    // we want to run.
-    args: [],
-
-    // Environment variables that are accesible to the WASI module
-    env: {},
-
-    // Bindings that are used by the WASI Instance (fs, path, etc...)
-    bindings: {
-        ...bindings,
-        fs: _wasmFs.fs,
-    },
-});
-
-describe('Tests', () => {
-    it('should work', async () => {
-        const fluencePath = eval('require').resolve(avmPackageName);
-        const avmPath = path.join(path.dirname(fluencePath), defaultAvmFileName);
-        const controlModule = await createModule(path.join(__dirname, '../marine-js.wasm'));
-
-        const avmModule = await createModule(avmPath);
-        const marineInstance = await init(controlModule);
-
-        const avmInstance = await WebAssembly.instantiate(avmModule, {
-            ..._wasi.getImports(avmModule),
-            host: {
-                log_utf8_string: (level: any, target: any, offset: any, size: any) => {
-                    console.log('logging, logging, logging');
-                },
-            },
-        });
-        _wasi.start(avmInstance);
-
-        const customSections = WebAssembly.Module.customSections(avmModule, 'interface-types');
-        const itcustomSections = new Uint8Array(customSections[0]);
-        let result = marineInstance.register_module('avm', itcustomSections, avmInstance);
-        expect(result).toEqual('{"error":""}');
+        await testAvmFaaS.init();
 
         const s = `(seq
             (par 
@@ -79,17 +36,15 @@ describe('Tests', () => {
             (call "${vmPeerId}" ("local_service_id" "local_fn_name") [] result_2)
         )`;
 
-        const params = { init_peer_id: vmPeerId, current_peer_id: vmPeerId };
-        const json = invokeJson(s, b(''), b(''), params, {});
-        let res: any = marineInstance.call_module('avm', 'invoke', json);
-        res = JSON.parse(res);
+        // act
+        const params = { initPeerId: vmPeerId, currentPeerId: vmPeerId };
+        const res = await runAvm(testAvmFaaS, s, b(''), b(''), params, []);
+        await testAvmFaaS.terminate();
 
-        console.log(res);
-
-        expect(res.error).toEqual('');
-        expect(res.result).toMatchObject({
-            ret_code: 0,
-            error_message: '',
+        // assert
+        expect(res).toMatchObject({
+            retCode: 0,
+            errorMessage: '',
         });
     });
 });

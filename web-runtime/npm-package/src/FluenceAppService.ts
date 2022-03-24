@@ -143,13 +143,13 @@ export class FluenceAppService {
 
         const customSections = WebAssembly.Module.customSections(this._service, 'interface-types');
         const itCustomSections = new Uint8Array(customSections[0]);
-        let rawResult = marineInstance.register_module('avm', itCustomSections, serviceInstance);
+        let rawResult = marineInstance.register_module(this._serviceId, itCustomSections, serviceInstance);
 
         let result: any;
         try {
             result = JSON.parse(rawResult);
-            // @ts-ignore
             this._marineInstance = marineInstance;
+            return result;
         } catch (ex) {
             throw 'register_module result parsing error: ' + ex + ', original text: ' + rawResult;
         }
