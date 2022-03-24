@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Fluence Labs Limited
+ * Copyright 2021 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,10 @@
  * limitations under the License.
  */
 
+import { InitConfig } from './config';
 
-export { init } from './marine_web_runtime';
+export type MarineJsExpose = {
+    init: (config: InitConfig) => Promise<void>;
+    terminate: () => Promise<void>;
+    call: (function_name: string, args: string, callParams: any) => Promise<string>;
+};
