@@ -35,6 +35,11 @@ members = [
     "tools/repl",
 ]
 
+[patch.crates-io]
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.22.0", git = "https://github.com/fluencelabs/interface-types", branch = "use_u32_for_memory"}
+it-lilo = { pacakge = "it-lilo", version = "0.3.0", git = "https://github.com/fluencelabs/interface-types", branch = "use_u32_for_memory"}
+it-memory-traits = { pacakge = "it-memory-traits", version = "0.2.0", git = "https://github.com/fluencelabs/interface-types", branch = "use_u32_for_memory"}
+
 [profile.release]
 opt-level = 3
 debug = false

@@ -40,9 +40,9 @@ impl std::ops::Deref for WITMemory {
 impl WITMemoryView<'_> {
     fn check_bounds(
         &self,
-        offset: usize,
-        size: usize,
-        memory_size: usize,
+        offset: u32,
+        size: u32,
+        memory_size: u32,
     ) -> Result<(), MemoryAccessError> {
         if offset + size >= memory_size {
             Err(MemoryAccessError::OutOfBounds {
@@ -60,15 +60,11 @@ impl<'s, 'v> wasm::structures::SequentialMemoryView<'v> for WITMemoryView<'s> {
     type SR = WasmerSequentialReader<'v>;
     type SW = WasmerSequentialWriter<'v>;
 
-    fn sequential_writer(
-        &'v self,
-        offset: usize,
-        size: usize,
-    ) -> Result<Self::SW, MemoryAccessError> {
+    fn sequential_writer(&'v self, offset: u32, size: u32) -> Result<Self::SW, MemoryAccessError> {
         let view = &self.0;
         let slice = view.deref();
 
-        self.check_bounds(offset, size, slice.len())?;
+        self.check_bounds(offset, size, slice.len() as u32)?;
 
         let writer = WasmerSequentialWriter {
             offset,
@@ -79,15 +75,11 @@ impl<'s, 'v> wasm::structures::SequentialMemoryView<'v> for WITMemoryView<'s> {
         Ok(writer)
     }
 
-    fn sequential_reader(
-        &'v self,
-        offset: usize,
-        size: usize,
-    ) -> Result<Self::SR, MemoryAccessError> {
+    fn sequential_reader(&'v self, offset: u32, size: u32) -> Result<Self::SR, MemoryAccessError> {
         let view = &self.0;
         let slice: &[Cell<u8>] = view.deref();
 
-        self.check_bounds(offset, size, slice.len())?;
+        self.check_bounds(offset, size, slice.len() as u32)?;
 
         let reader = WasmerSequentialReader {
             memory: slice,

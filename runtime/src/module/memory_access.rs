@@ -83,19 +83,19 @@ macro_rules! read_ty {
 
 pub(crate) struct WasmerSequentialReader<'s> {
     pub memory: &'s [Cell<u8>],
-    pub offset: Cell<usize>,
+    pub offset: Cell<u32>,
 }
 
 pub(crate) struct WasmerSequentialWriter<'s> {
-    pub offset: usize,
+    pub offset: u32,
     pub slice: &'s [Cell<u8>],
-    pub current_offset: Cell<usize>,
+    pub current_offset: Cell<u32>,
 }
 
 impl SequentialReader for WasmerSequentialReader<'_> {
     fn read_byte(&self) -> u8 {
         let offset = self.offset.get();
-        let result = self.memory[offset].get();
+        let result = self.memory[offset as usize].get();
         self.offset.set(offset + 1);
         result
     }
@@ -106,22 +106,22 @@ impl SequentialReader for WasmerSequentialReader<'_> {
         let offset = self.offset.get();
         let mut result = [0u8; COUNT];
         for index in 0..COUNT {
-            result[index] = self.memory[offset + index].get();
+            result[index] = self.memory[offset as usize + index].get();
         }
 
-        self.offset.set(offset + COUNT);
+        self.offset.set(offset + COUNT as u32);
         result
     }
 }
 
 impl SequentialWriter for WasmerSequentialWriter<'_> {
-    fn start_offset(&self) -> usize {
+    fn start_offset(&self) -> u32 {
         self.offset
     }
 
     fn write_u8(&self, value: u8) {
         let offset = self.current_offset.get();
-        self.slice[offset].set(value);
+        self.slice[offset as usize].set(value);
         self.current_offset.set(offset + 1);
     }
 

@@ -56,7 +56,7 @@ pub(crate) fn ivalue_to_wvalues<A: Allocatable, MV: for<'a> SequentialMemoryView
         }
         Some(IValue::Record(values)) => {
             let offset = record_lower_memory(lowerer, values)?;
-            vec![WValue::I32(offset)]
+            vec![WValue::I32(offset as i32)]
         }
         None => vec![],
     };

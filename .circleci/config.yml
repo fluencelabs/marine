@@ -44,6 +44,7 @@ jobs:
           )
           (cd ./examples; ./build.sh)
           (cd ./fluence-faas/tests/wasm_tests; ./build.sh)
+          (cd ./runtime/tests/wasm_tests; ./build.sh)
 
           cargo test --release -v --all-features -p marine-it-generator -p marine-runtime -p fluence-faas -p fluence-app-service -p marine -p mrepl
           cargo clippy

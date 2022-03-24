@@ -66,8 +66,12 @@ pub fn records() {
 
 #[test]
 pub fn records_allocation() {
-    let wasm_bytes = std::fs::read("./tests/wasm_tests/records_allocation/artifacts/records_allocation.wasm")
-        .expect("./tests/wasm_tests/records_allocation/artifacts/records_allocation.wasm should be present");
+    let wasm_bytes = std::fs::read(
+        "./tests/wasm_tests/records_allocation/artifacts/records_allocation.wasm",
+    )
+    .expect(
+        "./tests/wasm_tests/records_allocation/artifacts/records_allocation.wasm should be present",
+    );
 
     let mut marine = Marine::new();
 
@@ -75,29 +79,24 @@ pub fn records_allocation() {
         .load_module("records_allocation", &wasm_bytes, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-
     let result = marine
         .call("records_allocation", "fill_2gb_mem", &[])
         .unwrap_or_else(|e| panic!("can't invoke fill_2gb_mem: {:?}", e));
 
-    assert_eq!(
-        result.len(),0
-    );
+    assert_eq!(result.len(), 0);
 
-    let args =   vec![IValue::Record(
+    let args = vec![IValue::Record(
         wasmer_it::NEVec::new(vec![
             IValue::S32(1),
             IValue::S32(1),
             IValue::S32(1),
             IValue::S32(1),
             IValue::S32(1),
-        ]).unwrap()
+        ])
+        .unwrap(),
     )];
 
     let result = marine
         .call("records_allocation", "pass_record", &args)
         .unwrap_or_else(|e| panic!("can't invoke pass_record: {:?}", e));
-
-
-
 }
