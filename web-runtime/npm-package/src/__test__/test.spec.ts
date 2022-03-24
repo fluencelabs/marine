@@ -1,4 +1,4 @@
-import { init } from '..';
+import { init } from '../backgroundScript';
 import fs from 'fs';
 import path from 'path';
 import { WASI } from '@wasmer/wasi';
@@ -69,7 +69,7 @@ describe('Tests', () => {
         const customSections = WebAssembly.Module.customSections(avmModule, 'interface-types');
         const itcustomSections = new Uint8Array(customSections[0]);
         let result = marineInstance.register_module('avm', itcustomSections, avmInstance);
-        expect(result).toEqual("{\"error\":\"\"}");
+        expect(result).toEqual('{"error":""}');
 
         const s = `(seq
             (par 
@@ -86,7 +86,7 @@ describe('Tests', () => {
 
         console.log(res);
 
-        expect(res.error).toEqual("");
+        expect(res.error).toEqual('');
         expect(res.result).toMatchObject({
             ret_code: 0,
             error_message: '',

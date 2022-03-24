@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { InitConfig } from './config';
+import { Envs, FaaSConfig } from './config';
 
-export type MarineJsExpose = {
-    init: (config: InitConfig) => Promise<void>;
+export type BackgroundFaaS = {
+    init: (marineWasm: SharedArrayBuffer) => Promise<void>;
+    createService: (wasm: SharedArrayBuffer, serviceId: string, faaSConfig?: FaaSConfig, envs?: Envs) => Promise<void>;
     terminate: () => Promise<void>;
-    call: (function_name: string, args: string, callParams: any) => Promise<string>;
+    callService: (serviceId: string, functionName: string, args: string, callParams: any) => Promise<string>;
 };

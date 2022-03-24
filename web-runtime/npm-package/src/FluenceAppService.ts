@@ -2,7 +2,7 @@ import { WASI } from '@wasmer/wasi';
 import { WasmFs } from '@wasmer/wasmfs';
 import bindings from '@wasmer/wasi/lib/bindings/browser';
 import { init } from './marine_web_runtime';
-import { InitConfig, MarineConfig } from './config';
+import { FaaSConfig } from './config';
 
 type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 
@@ -97,14 +97,25 @@ type MarineInstance = Awaited<ReturnType<typeof init>> | 'not-set' | 'terminated
 const decoder = new TextDecoder();
 
 export class FluenceAppService {
+    private _marine: WebAssembly.Module;
+    private _service: WebAssembly.Module;
+    private _serviceId: string;
+
     private _marineInstance: MarineInstance = 'not-set';
-    private _serviceId: string | null = null;
 
-    async init(config: InitConfig): Promise<void> {
-        this._serviceId = config.serviceId;
-        const marineModule = await WebAssembly.compile(new Uint8Array(config.marine));
-        const serviceModule = await WebAssembly.compile(new Uint8Array(config.service));
+    constructor(
+        marine: WebAssembly.Module,
+        service: WebAssembly.Module,
+        serviceId: string,
+        faaSConfig?: FaaSConfig,
+        envs?: Map<Uint8Array, Uint8Array>,
+    ) {
+        this._marine = marine;
+        this._service = service;
+        this._serviceId = serviceId;
+    }
 
+    async init(): Promise<void> {
         // wasi is needed to run AVM with marine-js
         const wasmFs = new WasmFs();
         const wasi = new WASI({
@@ -120,17 +131,17 @@ export class FluenceAppService {
             exports: undefined,
         };
 
-        const serviceInstance = await WebAssembly.instantiate(serviceModule, {
-            ...wasi.getImports(serviceModule),
+        const serviceInstance = await WebAssembly.instantiate(this._service, {
+            ...wasi.getImports(this._service),
             ...newImportObject(cfg),
         });
         wasi.start(serviceInstance);
         // @ts-ignore
         cfg.exports = serviceInstance.exports;
 
-        const marineInstance = await init(marineModule);
+        const marineInstance = await init(this._marine);
 
-        const customSections = WebAssembly.Module.customSections(serviceModule, 'interface-types');
+        const customSections = WebAssembly.Module.customSections(this._service, 'interface-types');
         const itCustomSections = new Uint8Array(customSections[0]);
         let rawResult = marineInstance.register_module('avm', itCustomSections, serviceInstance);
 
@@ -144,12 +155,12 @@ export class FluenceAppService {
         }
     }
 
-    async terminate(): Promise<void> {
+    terminate(): void {
         this._marineInstance = 'not-set';
     }
 
-    async call(function_name: string, args: string, callParams: any): Promise<string> {
-        if (this._marineInstance === 'not-set' || this._serviceId === null) {
+    call(function_name: string, args: string, callParams: any): string {
+        if (this._marineInstance === 'not-set') {
             throw new Error('Not initialized');
         }
 

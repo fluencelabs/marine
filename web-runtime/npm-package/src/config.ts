@@ -58,11 +58,13 @@ export interface MarineConfig {
     faas_config: FaaSConfig;
 }
 
+export type Envs = Map<Uint8Array, Uint8Array>;
+
 export interface FaaSWASIConfig {
     /**
      * A list of environment variables available for this module.
      */
-    envs: Map<Uint8Array, Uint8Array>;
+    envs: Envs;
 
     /**
      * A list of files available for this module.
@@ -74,12 +76,4 @@ export interface FaaSWASIConfig {
      * Mapping from a usually short to full file name.
      */
     mapped_dirs: Map<String, string>;
-}
-
-export interface InitConfig {
-    serviceId: string;
-    marine: SharedArrayBuffer;
-    service: SharedArrayBuffer;
-    config?: MarineConfig;
-    envs?: Map<Uint8Array, Uint8Array>;
 }
