@@ -31,8 +31,8 @@ impl<'c> LoHelper<'c> {
 }
 
 impl<'s> Allocatable for LoHelper<'s> {
-    fn allocate(&self, size: u32, type_tag: u32) -> Result<usize, AllocatableError> {
+    fn allocate(&self, size: u32, type_tag: u32) -> Result<u32, AllocatableError> {
         let offset = call_wasm_func!(self.allocate_func, size as _, type_tag as _);
-        Ok(offset as _)
+        Ok(offset as u32)
     }
 }
