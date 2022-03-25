@@ -1,7 +1,7 @@
 [package]
 name = "marine-it-interfaces"
 description = "Fluence Marine interface types helper crate"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
