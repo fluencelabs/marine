@@ -1,4 +1,7 @@
 module.exports = {
     testEnvironment: 'node',
-    testPathIgnorePatterns: ['src'],
+    testPathIgnorePatterns: ['dist'],
+    transform: {
+        '^.+\\.(ts|js)x?$': 'ts-jest',
+    },
 };
