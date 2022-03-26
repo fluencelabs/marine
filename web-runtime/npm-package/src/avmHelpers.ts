@@ -4,7 +4,7 @@ import { FluenceAppService } from './FluenceAppService';
 const decoder = new TextDecoder();
 
 export const runAvm = async (
-    faas: FluenceAppService,
+    faasCall: (function_name: string, args: string, callParams: any) => Promise<string> | string,
     air: string,
     prevData: Uint8Array,
     data: Uint8Array,
@@ -36,7 +36,7 @@ export const runAvm = async (
             Array.from(Buffer.from(JSON.stringify(callResultsToPass))),
         ]);
 
-        const rawResult = faas.call('invoke', avmArg, undefined);
+        const rawResult = await faasCall('invoke', avmArg, undefined);
 
         let result: any;
         try {
