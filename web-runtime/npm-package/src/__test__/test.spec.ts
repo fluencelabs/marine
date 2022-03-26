@@ -16,16 +16,14 @@ describe('Fluence app service tests', () => {
         // arrange
         const avmPackagePath = require.resolve('@fluencelabs/avm');
         const avmFilePath = path.join(path.dirname(avmPackagePath), 'avm.wasm');
-        console.log(avmFilePath);
         const avmBuffer = await fsPromises.readFile(avmFilePath);
-        const avm = WebAssembly.compile(avmBuffer);
+        const avm = await WebAssembly.compile(avmBuffer);
 
-        const marineFilePath = path.join(__dirname, '../../dist/marine-js');
+        const marineFilePath = path.join(__dirname, '../../dist/marine-js.wasm');
         const marineBuffer = await fsPromises.readFile(marineFilePath);
-        const marine = WebAssembly.compile(marineBuffer);
+        const marine = await WebAssembly.compile(marineBuffer);
 
         const testAvmFaaS = new FluenceAppService(marine, avm, 'avm');
-
         await testAvmFaaS.init();
 
         const s = `(seq
