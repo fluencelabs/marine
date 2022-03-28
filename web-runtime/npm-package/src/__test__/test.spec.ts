@@ -36,7 +36,7 @@ describe('Fluence app service tests', () => {
 
         // act
         const params = { initPeerId: vmPeerId, currentPeerId: vmPeerId };
-        const res = await runAvm(testAvmFaaS.call.bind(testAvmFaaS), s, b(''), b(''), params, []);
+        const res = await runAvm((arg) => testAvmFaaS.call('invoke', arg, undefined), s, b(''), b(''), params, []);
         await testAvmFaaS.terminate();
 
         // assert
