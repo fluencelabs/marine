@@ -3,8 +3,12 @@ import { FluenceAppService } from './FluenceAppService';
 
 const decoder = new TextDecoder();
 
+type FaasCall =
+    | ((function_name: string, args: string, callParams: any) => string)
+    | ((function_name: string, args: string, callParams: any) => Promise<string>);
+
 export const runAvm = async (
-    faasCall: (function_name: string, args: string, callParams: any) => Promise<string> | string,
+    faasCall: FaasCall,
     air: string,
     prevData: Uint8Array,
     data: Uint8Array,
