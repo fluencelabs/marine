@@ -1,8 +1,15 @@
 import { WASI } from '@wasmer/wasi';
 import { WasmFs } from '@wasmer/wasmfs';
-import bindings from '@wasmer/wasi/lib/bindings/browser';
 import { init } from './marine_web_runtime';
 import { FaaSConfig } from './config';
+import { isBrowser, isNode } from 'browser-or-node';
+
+let bindings: any;
+if (isBrowser) {
+    bindings = require('@wasmer/wasi/lib/bindings/browser');
+} else if (isNode) {
+    bindings = require('@wasmer/wasi/lib/bindings/node');
+}
 
 type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 

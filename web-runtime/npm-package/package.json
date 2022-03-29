@@ -22,6 +22,7 @@
     },
     "private": false,
     "dependencies": {
+        "browser-or-node": "^2.0.0",
         "threads": "^1.7.0",
         "ts-jest": "^27.1.4"
     },
