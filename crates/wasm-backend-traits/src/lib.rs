@@ -1,4 +1,7 @@
 pub mod errors;
+pub mod exports;
+pub mod wasi;
+pub mod wtype;
 
 use std::borrow::Cow;
 use std::fmt::Display;
@@ -7,76 +10,9 @@ use std::path::PathBuf;
 use it_memory_traits::{SequentialMemoryView};
 
 pub use errors::*;
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum WValue {
-    /// The `i32` type.
-    I32(i32),
-    /// The `i64` type.
-    I64(i64),
-    /// The `f32` type.
-    F32(f32),
-    /// The `f64` type.
-    F64(f64),
-    // /// The `v128` type.
-    //V128(u128),
-}
-
-impl From<i32> for WValue {
-    fn from(value: i32) -> Self {
-        WValue::I32(value)
-    }
-}
-
-impl From<i64> for WValue {
-    fn from(value: i64) -> Self {
-        WValue::I64(value)
-    }
-}
-
-impl From<f32> for WValue {
-    fn from(value: f32) -> Self {
-        WValue::F32(value)
-    }
-}
-
-impl From<f64> for WValue {
-    fn from(value: f64) -> Self {
-        WValue::F64(value)
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum WType {
-    /// The `i32` type.
-    I32,
-    /// The `i64` type.
-    I64,
-    /// The `f32` type.
-    F32,
-    /// The `f64` type.
-    F64,
-    // /// The `v128` type.
-    // V128,
-}
-
-impl WValue {
-    pub fn to_u128(&self) -> u128 {
-        match *self {
-            Self::I32(x) => x as u128,
-            Self::I64(x) => x as u128,
-            Self::F32(x) => f32::to_bits(x) as u128,
-            Self::F64(x) => f64::to_bits(x) as u128,
-            //Self::V128(x) => x,
-        }
-    }
-}
-
-impl std::fmt::Display for WType {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
+pub use exports::*;
+pub use wasi::*;
+pub use wtype::*;
 
 pub trait WasmBackend: Clone + 'static {
     type IO: ImportObject<Self>;
@@ -123,24 +59,6 @@ pub trait Instance<WB: WasmBackend> {
     fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
 }
 
-pub trait Exports<WB: WasmBackend> {
-    fn get_func_no_args_no_rets<'a>(
-        &'a self,
-        name: &str,
-    ) -> ResolveResult<Box<dyn Fn() -> RuntimeResult<()> + 'a>>;
-
-    fn get_dyn_func<'a>(
-        &'a self,
-        name: &str,
-    ) -> ResolveResult<<WB as WasmBackend>::ExportedDynFunc>;
-}
-
-pub enum Export<M: MemoryExport, F: FunctionExport> {
-    Memory(M),
-    Function(F),
-    Other,
-}
-
 pub trait ImportObject<WB: WasmBackend>:
     Clone
     + Extend<(
@@ -163,36 +81,6 @@ pub trait ImportObject<WB: WasmBackend>:
     fn get_memory_env(
         &self,
     ) -> Option<Export<<WB as WasmBackend>::MemoryExport, <WB as WasmBackend>::FunctionExport>>;
-}
-
-pub trait WasiImplementation<WB: WasmBackend> {
-    fn generate_import_object_for_version(
-        version: WasiVersion,
-        args: Vec<Vec<u8>>,
-        envs: Vec<Vec<u8>>,
-        preopened_files: Vec<PathBuf>,
-        mapped_dirs: Vec<(String, PathBuf)>,
-    ) -> Result<<WB as WasmBackend>::IO, String>;
-
-    fn get_wasi_state<'s>(instance: &'s mut <WB as WasmBackend>::I) -> Box<dyn WasiState + 's>;
-}
-pub enum WasiVersion {
-    Snapshot0,
-    Snapshot1,
-    Latest,
-}
-pub trait WasiState {
-    fn envs(&self) -> &[Vec<u8>];
-}
-
-pub trait MemoryExport {}
-
-pub trait FunctionExport {}
-
-pub trait Memory<WB: WasmBackend> {
-    fn new(export: <WB as WasmBackend>::MemoryExport) -> Self;
-
-    fn size(&self) -> usize;
 }
 
 pub trait DynamicFunc<'a, WB: WasmBackend> {
@@ -231,12 +119,6 @@ pub trait ExportContext<'c, WB: WasmBackend>:
     + FuncGetter<'c, (), ()>
 {
     fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
-}
-
-pub trait ExportedDynFunc<WB: WasmBackend> {
-    fn signature(&self) -> &FuncSig;
-
-    fn call(&self, args: &[WValue]) -> CallResult<Vec<WValue>>;
 }
 
 pub struct FuncSig {
