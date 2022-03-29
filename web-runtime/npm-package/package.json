@@ -22,15 +22,15 @@
     "private": false,
     "dependencies": {
         "threads": "^1.7.0",
-        "ts-jest": "^27.1.4",
-        "@wasmer/wasi": "^0.12.0",
-        "@wasmer/wasmfs": "^0.12.0"
+        "ts-jest": "^27.1.4"
     },
     "devDependencies": {
         "@fluencelabs/avm": "^0.21.6",
         "@fluencelabs/avm-runner-interface": "^0.2.0",
         "@types/jest": "^27.4.0",
         "@types/node": "^14.0.0",
+        "@wasmer/wasi": "^0.12.0",
+        "@wasmer/wasmfs": "^0.12.0",
         "jest": "^27.2.4",
         "ts-loader": "^8.3.0",
         "typescript": "^4.0.0",

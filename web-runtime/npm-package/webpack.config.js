@@ -7,7 +7,10 @@ const path = require('path');
 const isProduction = false;
 
 const config = {
-    entry: './src/backgroundScript.ts',
+    entry: {
+        index: './src/index.ts',
+        background: './src/backgroundScript.ts',
+    },
     output: {
         path: path.resolve('dist'),
     },
