@@ -3,9 +3,11 @@
 const config = require('./webpack.config.js');
 
 module.exports = () => {
-    const cfg = config();
+    const cfg = config({
+        NODE: true,
+        WEB: false,
+    });
     cfg.output.filename = 'marine-js.node.js';
     cfg.target = 'node';
-    cfg.externals = ['@wasmer/wasi', '@wasmer/wasmfs'];
     return cfg;
 };

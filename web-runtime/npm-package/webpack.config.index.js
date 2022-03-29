@@ -3,7 +3,10 @@
 const config = require('./webpack.config.js');
 
 module.exports = () => {
-    const cfg = config();
+    const cfg = config({
+        NODE: true,
+        WEB: false,
+    });
     cfg.entry = './src/index.ts';
     cfg.output.filename = 'index.js';
     cfg.target = 'node';

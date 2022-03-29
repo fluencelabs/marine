@@ -6,7 +6,7 @@ const path = require('path');
 // uncomment to debug
 const isProduction = false;
 
-const config = {
+const config = (ifDefOpts) => ({
     entry: './src/backgroundScript.ts',
     output: {
         path: path.resolve('dist'),
@@ -15,7 +15,11 @@ const config = {
         rules: [
             {
                 test: /\.(js|ts|tsx)$/i,
-                use: 'ts-loader',
+                use: [
+                    // force new line
+                    { loader: 'ts-loader' },
+                    { loader: 'ifdef-loader', options: ifDefOpts },
+                ],
                 exclude: ['/node_modules/'],
             },
         ],
@@ -23,14 +27,15 @@ const config = {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
-};
+});
 
-module.exports = () => {
+module.exports = (ifDefConfig) => {
+    const res = config(ifDefConfig);
     if (isProduction) {
-        config.mode = 'production';
+        res.mode = 'production';
     } else {
-        config.mode = 'development';
+        res.mode = 'development';
     }
 
-    return config;
+    return res;
 };

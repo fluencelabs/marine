@@ -1,15 +1,15 @@
 import { WASI } from '@wasmer/wasi';
+/// #if NODE
+// @ts-ignore
+import bindings from '@wasmer/wasi/lib/bindings/node';
+/// #elif WEB
+// @ts-ignore
+import bindings from '@wasmer/wasi/lib/bindings/browser';
+/// #endif
 import { WasmFs } from '@wasmer/wasmfs';
+
 import { init } from './marine_web_runtime';
 import { FaaSConfig } from './config';
-import { isBrowser, isNode } from 'browser-or-node';
-
-let bindings: any;
-if (isBrowser) {
-    bindings = require('@wasmer/wasi/lib/bindings/browser');
-} else if (isNode) {
-    bindings = require('@wasmer/wasi/lib/bindings/node');
-}
 
 type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
 
@@ -124,13 +124,12 @@ export class FluenceAppService {
 
     async init(): Promise<void> {
         // wasi is needed to run AVM with marine-js
-        const wasmFs = new WasmFs();
         const wasi = new WASI({
             args: [],
             env: {},
             bindings: {
                 ...bindings,
-                fs: wasmFs.fs,
+                fs: new WasmFs().fs,
             },
         });
 
