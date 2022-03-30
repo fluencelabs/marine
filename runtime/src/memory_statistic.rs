@@ -25,15 +25,22 @@ use std::ops::Deref;
 pub struct ModuleMemoryStat<'module_name> {
     pub name: &'module_name str,
     pub memory_size: usize,
+    // None if memory maximum wasn't set
+    pub max_memory_size: Option<usize>,
 }
 
 pub struct MemoryStats<'module_name>(pub Vec<ModuleMemoryStat<'module_name>>);
 
-impl<'module_name> From<(&'module_name str, usize)> for ModuleMemoryStat<'module_name> {
-    fn from(raw_record: (&'module_name str, usize)) -> Self {
+impl<'module_name> ModuleMemoryStat<'module_name> {
+    pub fn new(
+        module_name: &'module_name str,
+        memory_size: usize,
+        max_memory_size: Option<usize>,
+    ) -> Self {
         ModuleMemoryStat {
-            name: raw_record.0,
-            memory_size: raw_record.1,
+            name: module_name,
+            memory_size,
+            max_memory_size,
         }
     }
 }

@@ -185,13 +185,27 @@ impl MModule {
         unsafe { wasmer_wasi::state::get_wasi_state(self.wasmer_instance.context_mut()) }
     }
 
-    /// Returns heap size that this module consumes in bytes.
+    /// Returns Wasm linear memory size that this module consumes in bytes.
     pub(crate) fn memory_size(&self) -> usize {
         // Wasmer 0.17.1 supports only one memory
         const MEMORY_INDEX: u32 = 0;
 
         let pages = self.wasmer_instance.context().memory(MEMORY_INDEX).size();
         pages.bytes().0
+    }
+
+    /// Returns maximum heap size that this module consumes in bytes.
+    pub(crate) fn max_memory_size(&self) -> Option<usize> {
+        // Wasmer 0.17.1 supports only one memory
+        const MEMORY_INDEX: u32 = 0;
+
+        let maybe_pages = self
+            .wasmer_instance
+            .context()
+            .memory(MEMORY_INDEX)
+            .descriptor()
+            .maximum;
+        maybe_pages.map(|pages| pages.bytes().0)
     }
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
