@@ -193,7 +193,7 @@ impl MModule {
         pages.bytes().0
     }
 
-    /// Returns max Wasm linear memory size that this module consumes in bytes.
+    /// Returns max Wasm linear memory size that this module could consume in bytes.
     pub(crate) fn max_memory_size(&self) -> Option<usize> {
         let maybe_pages = self
             .wasmer_instance

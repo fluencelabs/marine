@@ -62,8 +62,16 @@ impl<'memory_size> Deref for MemoryStats<'memory_size> {
 impl fmt::Display for MemoryStats<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for record in self.0.iter() {
-            let byte_size = bytesize::ByteSize::b(record.memory_size as u64);
-            writeln!(f, "{} - {}", record.name, byte_size)?;
+            let memory_size = bytesize::ByteSize::b(record.memory_size as u64);
+            match record.max_memory_size {
+                Some(max_memory_size) => {
+                    let max_memory_size = bytesize::ByteSize::b(max_memory_size as u64);
+                    writeln!(f, "{} - {}/{}", record.name, memory_size, max_memory_size)?;
+                }
+                None => {
+                    writeln!(f, "{} - {}", record.name, memory_size)?;
+                }
+            }
         }
 
         Ok(())

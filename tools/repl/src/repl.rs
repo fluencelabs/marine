@@ -298,6 +298,7 @@ fn print_help() {
             s/stats                                               print memory size of all loaded modules\n\
             e/envs <module_name>                                  print environment variables of a module\n\
             f/fs <module_name>                                    print filesystem state of a module\n\
+            s/stats                                               print consumed memory size of each module\n\
             h/help                                                print this message\n\
             q/quit/Ctrl-C                                         exit\n\
             \n\
