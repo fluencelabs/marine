@@ -194,7 +194,7 @@ impl MModule {
         pages.bytes().0
     }
 
-    /// Returns maximum heap size that this module consumes in bytes.
+    /// Returns max Wasm linear memory size that this module consumes in bytes.
     pub(crate) fn max_memory_size(&self) -> Option<usize> {
         // Wasmer 0.17.1 supports only one memory
         const MEMORY_INDEX: u32 = 0;
