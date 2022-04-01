@@ -18,6 +18,7 @@ const toExpose: BackgroundFaaS = {
     ): Promise<void> => {
         const service = await WebAssembly.compile(new Uint8Array(wasm));
         const faas = new FluenceAppService(marineModule, service, serviceId, faaSConfig, envs);
+        await faas.init();
         instances.set(serviceId, faas);
     },
     terminate: async (): Promise<void> => {
