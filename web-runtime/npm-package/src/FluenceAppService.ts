@@ -1,11 +1,5 @@
 import { WASI } from '@wasmer/wasi';
-/// #if NODE
-// @ts-ignore
-import bindings from '@wasmer/wasi/lib/bindings/node';
-/// #elif WEB
-// @ts-ignore
 import bindings from '@wasmer/wasi/lib/bindings/browser';
-/// #endif
 import { WasmFs } from '@wasmer/wasmfs';
 
 import { init } from './marine_web_runtime';

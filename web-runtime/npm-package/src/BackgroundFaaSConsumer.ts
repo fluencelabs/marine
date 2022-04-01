@@ -20,7 +20,8 @@ export const defaultNames = {
 
 export const bufferToSharedArrayBuffer = (buffer: Buffer): SharedArrayBuffer => {
     const sab = new SharedArrayBuffer(buffer.length);
-    buffer.set(buffer, 0);
+    const tmp = new Uint8Array(sab);
+    tmp.set(buffer, 0);
     return sab;
 };
 
