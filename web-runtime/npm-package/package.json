@@ -12,7 +12,7 @@
         "!lib/__test__/*"
     ],
     "scripts": {
-        "build": "npm run build:index && npm run build:web && npm run build:node",
+        "build": "npm run build:tsc && npm run build:web && npm run build:node",
         "build:tsc": "tsc",
         "build:index": "webpack -c webpack.config.index.js",
         "build:web": "webpack -c webpack.config.web.js",

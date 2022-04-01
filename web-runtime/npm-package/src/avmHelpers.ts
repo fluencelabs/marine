@@ -1,11 +1,12 @@
 import { CallResultsArray, InterpreterResult, CallRequest } from '@fluencelabs/avm-runner-interface';
+import { BackgroundFaaSConsumer } from './BackgroundFaaSConsumer';
 
 const decoder = new TextDecoder();
 
 type FaaSCall = ((args: string) => Promise<string>) | ((args: string) => string);
 
 export const runAvm = async (
-    faasCall: FaaSCall,
+    faasCall: FaaSCall | BackgroundFaaSConsumer,
     air: string,
     prevData: Uint8Array,
     data: Uint8Array,
@@ -15,6 +16,11 @@ export const runAvm = async (
     },
     callResults: CallResultsArray,
 ): Promise<InterpreterResult> => {
+    const fn =
+        faasCall instanceof BackgroundFaaSConsumer
+            ? (arg: string) => faasCall.callService('avm', 'invoke', arg, undefined)
+            : faasCall;
+
     try {
         const callResultsToPass: any = {};
         for (let [k, v] of callResults) {
@@ -37,7 +43,7 @@ export const runAvm = async (
             Array.from(Buffer.from(JSON.stringify(callResultsToPass))),
         ]);
 
-        const rawResult = await faasCall(avmArg);
+        const rawResult = await fn(avmArg);
 
         let result: any;
         try {
