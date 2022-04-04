@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { runAvm } from '../avmHelpers';
-import { FluenceAppService } from '../FluenceAppService';
+import { FaaS } from '../FaaS';
 
 const fsPromises = fs.promises;
 
@@ -23,7 +23,7 @@ describe('Fluence app service tests', () => {
         const marineBuffer = await fsPromises.readFile(marineFilePath);
         const marine = await WebAssembly.compile(marineBuffer);
 
-        const testAvmFaaS = new FluenceAppService(marine, avm, 'avm');
+        const testAvmFaaS = new FaaS(marine, avm, 'avm');
         await testAvmFaaS.init();
 
         const s = `(seq
@@ -36,7 +36,14 @@ describe('Fluence app service tests', () => {
 
         // act
         const params = { initPeerId: vmPeerId, currentPeerId: vmPeerId };
-        const res = await runAvm((arg) => testAvmFaaS.call('invoke', arg, undefined), s, b(''), b(''), params, []);
+        const res = await runAvm(
+            (arg: string) => testAvmFaaS.call('invoke', arg, undefined),
+            s,
+            b(''),
+            b(''),
+            params,
+            [],
+        );
         await testAvmFaaS.terminate();
 
         // assert
