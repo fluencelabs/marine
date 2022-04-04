@@ -1,173 +1,119 @@
-import { WASI } from '@wasmer/wasi';
-import bindings from '@wasmer/wasi/lib/bindings/browser';
-import { WasmFs } from '@wasmer/wasmfs';
+import { FaaSConfig, Envs } from './config';
+import { IFluenceAppService } from './types';
+import { isBrowser, isNode } from 'browser-or-node';
+import { Thread, ModuleThread, spawn, Worker } from 'threads';
 
-import { init } from './marine_web_runtime';
-import { FaaSConfig } from './config';
-
-type LogLevel = 'info' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'off';
-
-type LogImport = {
-    log_utf8_string: (level: any, target: any, offset: any, size: any) => void;
+export const defaultNames = {
+    avm: {
+        name: 'avm.wasm',
+        package: '@fluencelabs/avm',
+    },
+    marine: {
+        name: 'marine-js.wasm',
+        package: '@fluencelabs/marine-js',
+    },
+    script: {
+        web: './marine-js.web.js',
+        node: './marine-js.node.js',
+    },
 };
 
-type ImportObject = {
-    host: LogImport;
+export const bufferToSharedArrayBuffer = (buffer: Buffer): SharedArrayBuffer => {
+    const sab = new SharedArrayBuffer(buffer.length);
+    const tmp = new Uint8Array(sab);
+    tmp.set(buffer, 0);
+    return sab;
 };
 
-type HostImportsConfig = {
-    exports: any;
-};
-
-const logFunction = (level: LogLevel, message: string) => {
-    switch (level) {
-        case 'error':
-            console.error(message);
-            break;
-        case 'warn':
-            console.warn(message);
-            break;
-        case 'info':
-            console.info(message);
-            break;
-        case 'debug':
-        case 'trace':
-            console.log(message);
-            break;
+export const loadWasmFromUrl = async (fileName: string): Promise<Buffer> => {
+    if (!isBrowser) {
+        throw new Error('Files can be loaded from url only in browser environment');
     }
+    const fullUrl = window.location.origin + '/' + fileName;
+    const res = await fetch(fullUrl);
+    const ab = await res.arrayBuffer();
+    return Buffer.from(ab);
 };
 
-let cachegetUint8Memory0: any = null;
-
-function getUint8Memory0(wasm: any) {
-    if (cachegetUint8Memory0 === null || cachegetUint8Memory0.buffer !== wasm.memory.buffer) {
-        cachegetUint8Memory0 = new Uint8Array(wasm.memory.buffer);
-    }
-    return cachegetUint8Memory0;
-}
-
-function getStringFromWasm0(wasm: any, ptr: any, len: any) {
-    return decoder.decode(getUint8Memory0(wasm).subarray(ptr, ptr + len));
-}
-
-/// Returns import object that describes host functions called by AIR interpreter
-function newImportObject(cfg: HostImportsConfig): ImportObject {
-    return {
-        host: log_import(cfg),
-    };
-}
-
-function log_import(cfg: HostImportsConfig): LogImport {
-    return {
-        log_utf8_string: (level: any, target: any, offset: any, size: any) => {
-            let wasm = cfg.exports;
-
-            try {
-                let str = getStringFromWasm0(wasm, offset, size);
-                let levelStr: LogLevel;
-                switch (level) {
-                    case 1:
-                        levelStr = 'error';
-                        break;
-                    case 2:
-                        levelStr = 'warn';
-                        break;
-                    case 3:
-                        levelStr = 'info';
-                        break;
-                    case 4:
-                        levelStr = 'debug';
-                        break;
-                    case 6:
-                        levelStr = 'trace';
-                        break;
-                    default:
-                        return;
-                }
-                logFunction(levelStr, str);
-            } finally {
-            }
-        },
-    };
-}
-
-type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
-
-type MarineInstance = Awaited<ReturnType<typeof init>> | 'not-set' | 'terminated';
-
-const decoder = new TextDecoder();
-
-export class FluenceAppService {
-    private _marine: WebAssembly.Module;
-    private _service: WebAssembly.Module;
-    private _serviceId: string;
-
-    private _marineInstance: MarineInstance = 'not-set';
-
-    constructor(
-        marine: WebAssembly.Module,
-        service: WebAssembly.Module,
-        serviceId: string,
-        faaSConfig?: FaaSConfig,
-        envs?: Map<Uint8Array, Uint8Array>,
-    ) {
-        this._marine = marine;
-        this._service = service;
-        this._serviceId = serviceId;
+export const loadWasmFromNpmPackage = async (packageName: string, fileName: string): Promise<Buffer> => {
+    if (!isNode) {
+        throw new Error('Files can be loaded from npm packages only in nodejs environment');
     }
 
-    async init(): Promise<void> {
-        // wasi is needed to run AVM with marine-js
-        const wasi = new WASI({
-            args: [],
-            env: {},
-            bindings: {
-                ...bindings,
-                fs: new WasmFs().fs,
-            },
-        });
+    // eval('require') is needed so that
+    // webpack will complain about missing dependencies for web target
+    // const require = eval('require');
+    const path = require('path');
+    const fs = require('fs').promises;
+    const packagePath = require.resolve(packageName);
+    const filePath = path.join(path.dirname(packagePath), fileName);
+    return await fs.readFile(filePath);
+};
 
-        const cfg = {
-            exports: undefined,
-        };
+export const loadWasm = async (args: { name: string; package: string }): Promise<SharedArrayBuffer> => {
+    let buffer: Buffer;
+    // check if we are running inside the browser and instantiate worker with the corresponding script
+    if (isBrowser) {
+        buffer = await loadWasmFromUrl(args.name);
+    }
+    // check if we are running inside nodejs and instantiate worker with the corresponding script
+    else if (isNode) {
+        buffer = await loadWasmFromNpmPackage(args.package, args.name);
+    } else {
+        throw new Error('Unknown environment');
+    }
 
-        const serviceInstance = await WebAssembly.instantiate(this._service, {
-            ...wasi.getImports(this._service),
-            ...newImportObject(cfg),
-        });
-        wasi.start(serviceInstance);
-        // @ts-ignore
-        cfg.exports = serviceInstance.exports;
+    return bufferToSharedArrayBuffer(buffer);
+};
 
-        const marineInstance = await init(this._marine);
+export class FluenceAppService implements IFluenceAppService {
+    private _worker?: ModuleThread<IFluenceAppService>;
+    private _workerPath: string;
 
-        const customSections = WebAssembly.Module.customSections(this._service, 'interface-types');
-        const itCustomSections = new Uint8Array(customSections[0]);
-        let rawResult = marineInstance.register_module(this._serviceId, itCustomSections, serviceInstance);
-
-        let result: any;
-        try {
-            result = JSON.parse(rawResult);
-            this._marineInstance = marineInstance;
-            return result;
-        } catch (ex) {
-            throw 'register_module result parsing error: ' + ex + ', original text: ' + rawResult;
+    constructor() {
+        // check if we are running inside the browser and instantiate worker with the corresponding script
+        if (isBrowser) {
+            this._workerPath = defaultNames.script.web;
+        }
+        // check if we are running inside nodejs and instantiate worker with the corresponding script
+        else if (isNode) {
+            this._workerPath = defaultNames.script.node;
+        } else {
+            throw new Error('Unknown environment');
         }
     }
 
-    terminate(): void {
-        this._marineInstance = 'not-set';
+    async init(marineWasm: SharedArrayBuffer): Promise<void> {
+        if (this._worker) {
+            return;
+        }
+
+        this._worker = await spawn<IFluenceAppService>(new Worker(this._workerPath));
+        await this._worker.init(marineWasm);
     }
 
-    call(function_name: string, args: string, callParams: any): string {
-        if (this._marineInstance === 'not-set') {
-            throw new Error('Not initialized');
+    createService(wasm: SharedArrayBuffer, serviceId: string, faaSConfig?: FaaSConfig, envs?: Envs): Promise<void> {
+        if (!this._worker) {
+            throw 'Worker is not initialized';
         }
 
-        if (this._marineInstance === 'terminated') {
-            throw new Error('Terminated');
+        return this._worker.createService(wasm, serviceId, faaSConfig, envs);
+    }
+
+    callService(serviceId: string, functionName: string, args: string, callParams: any): Promise<string> {
+        if (!this._worker) {
+            throw 'Worker is not initialized';
         }
 
-        return this._marineInstance.call_module(this._serviceId, function_name, args);
+        return this._worker.callService(serviceId, functionName, args, callParams);
+    }
+
+    async terminate(): Promise<void> {
+        if (!this._worker) {
+            return;
+        }
+
+        await this._worker.terminate();
+        await Thread.terminate(this._worker);
     }
 }

@@ -1,14 +1,14 @@
 import { expose } from 'threads';
 import { Envs, FaaSConfig } from './config';
-import { FluenceAppService } from './FluenceAppService';
-import { BackgroundFaaS } from './types';
+import { FaaS } from './FaaS';
+import { IFluenceAppService } from './types';
 
-const instances = new Map<string, FluenceAppService>();
-let marineModule: WebAssembly.Module;
+const faasInstances = new Map<string, FaaS>();
+let controlModule: WebAssembly.Module;
 
-const toExpose: BackgroundFaaS = {
+const toExpose: IFluenceAppService = {
     init: async (marineWasm: SharedArrayBuffer): Promise<void> => {
-        marineModule = await WebAssembly.compile(new Uint8Array(marineWasm));
+        controlModule = await WebAssembly.compile(new Uint8Array(marineWasm));
     },
     createService: async (
         wasm: SharedArrayBuffer,
@@ -17,17 +17,17 @@ const toExpose: BackgroundFaaS = {
         envs?: Envs,
     ): Promise<void> => {
         const service = await WebAssembly.compile(new Uint8Array(wasm));
-        const faas = new FluenceAppService(marineModule, service, serviceId, faaSConfig, envs);
+        const faas = new FaaS(controlModule, service, serviceId, faaSConfig, envs);
         await faas.init();
-        instances.set(serviceId, faas);
+        faasInstances.set(serviceId, faas);
     },
     terminate: async (): Promise<void> => {
-        instances.forEach((val, key) => {
+        faasInstances.forEach((val, key) => {
             val.terminate();
         });
     },
     callService: async (serviceId: string, functionName: string, args: string, callParams: any): Promise<string> => {
-        const faas = instances.get(serviceId);
+        const faas = faasInstances.get(serviceId);
         if (!faas) {
             throw new Error(`service with id=${serviceId} not found`);
         }

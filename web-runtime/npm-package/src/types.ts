@@ -16,9 +16,14 @@
 
 import { Envs, FaaSConfig } from './config';
 
-export type BackgroundFaaS = {
-    init: (marineWasm: SharedArrayBuffer) => Promise<void>;
-    createService: (wasm: SharedArrayBuffer, serviceId: string, faaSConfig?: FaaSConfig, envs?: Envs) => Promise<void>;
+export type IFluenceAppService = {
+    init: (controlModuleWasm: SharedArrayBuffer) => Promise<void>;
+    createService: (
+        serviceModule: SharedArrayBuffer,
+        serviceId: string,
+        faaSConfig?: FaaSConfig,
+        envs?: Envs,
+    ) => Promise<void>;
     terminate: () => Promise<void>;
     callService: (serviceId: string, functionName: string, args: string, callParams: any) => Promise<string>;
 };
