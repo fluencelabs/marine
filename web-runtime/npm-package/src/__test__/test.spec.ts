@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { runAvm } from '../avmHelpers';
 import { FaaS } from '../FaaS';
+import { runAvm } from '@fluencelabs/avm';
 
 const fsPromises = fs.promises;
 

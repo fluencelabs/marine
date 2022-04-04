@@ -1,12 +1,5 @@
-import {
-    BackgroundFaaSConsumer,
-    loadWasm,
-    defaultNames,
-    runAvm,
-    bufferToSharedArrayBuffer,
-} from '@fluencelabs/marine-js';
-import fs from 'fs';
-import path from 'path';
+import { FluenceAppService, loadWasm, defaultNames } from '@fluencelabs/marine-js';
+import { runAvm } from '@fluencelabs/avm';
 
 const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
 
@@ -16,23 +9,11 @@ const b = (s: string) => {
 
 describe('Nodejs integration tests', () => {
     it('Smoke test', async () => {
-        const testRunner = new BackgroundFaaSConsumer();
+        const testRunner = new FluenceAppService();
         try {
             // arrange
             const avm = await loadWasm(defaultNames.avm);
             const marine = await loadWasm(defaultNames.marine);
-            // WebAssembly.compile(new Uint8Array(avm));
-            // const marine = fs.readFileSync(__dirname + '/../../node_modules/@fluencelabs/avm/dist/avm.wasm');
-            // const marinePath = require.resolve('@fluencelabs/marine-js');
-            // const marine = fs.readFileSync(path.join(path.dirname(marinePath), 'marine-js.wasm'));
-            // const avmPath = require.resolve('@fluencelabs/avm');
-            // const avm = fs.readFileSync(path.join(path.dirname(avmPath), 'avm.wasm'));
-
-            // const marineSab = bufferToSharedArrayBuffer(marine);
-            // const avmSab = bufferToSharedArrayBuffer(avm);
-
-            // WebAssembly.compile(new Uint8Array(marineSab));
-            // WebAssembly.compile(new Uint8Array(avmSab));
             await testRunner.init(marine);
             await testRunner.createService(avm, 'avm');
 
@@ -46,7 +27,14 @@ describe('Nodejs integration tests', () => {
 
             // act
             const params = { initPeerId: vmPeerId, currentPeerId: vmPeerId };
-            const res = await runAvm(testRunner, s, b(''), b(''), params, []);
+            const res = await runAvm(
+                (arg: string) => testRunner.callService('avm', 'invoke', arg, undefined),
+                s,
+                b(''),
+                b(''),
+                params,
+                [],
+            );
             await testRunner.terminate();
 
             // assert

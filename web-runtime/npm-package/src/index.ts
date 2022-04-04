@@ -1,4 +1,4 @@
-export * from './avmHelpers';
 export * from './types';
 export * from './config';
-export * from './BackgroundFaaSConsumer';
+export * from './FaaS';
+export * from './FluenceAppService';
