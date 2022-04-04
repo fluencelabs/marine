@@ -16,28 +16,57 @@
 
 use crate::marine_js::JsWasmMemoryProxy;
 
-use it_memory_traits::{MemoryAccessError, SequentialWriter};
-use it_memory_traits::SequentialReader;
+use it_memory_traits::{MemoryAccessError, MemoryView, MemoryWritable, MemoryReadable};
 use wasmer_it::interpreter::wasm;
 
-use std::cell::Cell;
 use std::rc::Rc;
 
 pub(super) struct WITMemoryView {
-    module_name: Rc<String>,
+    memory: JsWasmMemoryProxy,
 }
 
 impl WITMemoryView {
     pub fn new(module_name: Rc<String>) -> Self {
-        Self { module_name }
+        Self {
+            memory: JsWasmMemoryProxy::new(module_name),
+        }
+    }
+}
+
+impl MemoryWritable for WITMemoryView {
+    fn write_byte(&self, offset: u32, value: u8) {
+        self.memory.set(offset, value);
     }
 
-    fn check_bounds(
-        &self,
-        offset: u32,
-        size: u32,
-        memory_size: u32,
-    ) -> Result<(), MemoryAccessError> {
+    fn write_bytes<const COUNT: usize>(&self, offset: u32, value: [u8; COUNT]) {
+        self.write_slice(offset, &value);
+    }
+
+    fn write_slice(&self, offset: u32, bytes: &[u8]) {
+        self.memory.set_range(offset, bytes);
+    }
+}
+
+impl MemoryReadable for WITMemoryView {
+    fn read_byte(&self, offset: u32) -> u8 {
+        self.memory.get(offset)
+    }
+
+    fn read_bytes<const COUNT: usize>(&self, offset: u32) -> [u8; COUNT] {
+        let mut result = [0u8; COUNT];
+        let data = self.memory.get_range(offset, COUNT as u32);
+        result.copy_from_slice(&data[..COUNT]);
+        result
+    }
+
+    fn read_vec(&self, offset: u32, size: u32) -> Vec<u8> {
+        self.memory.get_range(offset, size)
+    }
+}
+
+impl MemoryView for WITMemoryView {
+    fn check_bounds(&self, offset: u32, size: u32) -> Result<(), MemoryAccessError> {
+        let memory_size = self.memory.len();
         if offset + size >= memory_size {
             Err(MemoryAccessError::OutOfBounds {
                 offset,
@@ -47,108 +76,6 @@ impl WITMemoryView {
         } else {
             Ok(())
         }
-    }
-}
-
-pub(super) struct JsSequentialReader {
-    offset: Cell<u32>,
-    data: Vec<u8>,
-    memory: JsWasmMemoryProxy,
-    start_offset: u32,
-}
-
-pub(super) struct JsSequentialWriter {
-    offset: u32,
-    current_offset: Cell<u32>,
-    memory: JsWasmMemoryProxy,
-}
-
-impl JsSequentialWriter {
-    pub fn new(offset: u32, memory: JsWasmMemoryProxy) -> Self {
-        Self {
-            offset,
-            current_offset: Cell::new(offset),
-            memory,
-        }
-    }
-}
-
-impl JsSequentialReader {
-    pub fn new(offset: u32, size: u32, memory: JsWasmMemoryProxy) -> Self {
-        let data = memory.get_range(offset, size);
-        Self {
-            offset: Cell::new(offset),
-            data,
-            memory,
-            start_offset: offset,
-        }
-    }
-}
-
-impl SequentialReader for JsSequentialReader {
-    fn read_byte(&self) -> u8 {
-        let offset = self.offset.get();
-        let result = self.memory.get(offset);
-
-        self.offset.set(offset + 1);
-        result
-    }
-
-    fn read_bytes<const COUNT: usize>(&self) -> [u8; COUNT] {
-        let offset = self.offset.get();
-        let start = (offset - self.start_offset) as usize;
-
-        let mut result = [0u8; COUNT];
-        result.copy_from_slice(&self.data[start..start + COUNT]);
-        self.offset.set(offset + COUNT as u32);
-
-        result
-    }
-}
-
-impl SequentialWriter for JsSequentialWriter {
-    fn start_offset(&self) -> u32 {
-        self.offset
-    }
-
-    fn write_u8(&self, value: u8) {
-        let offset = self.current_offset.get();
-        self.memory.set(offset, value);
-        self.current_offset.set(offset + 1);
-    }
-
-    fn write_u32(&self, value: u32) {
-        let bytes = value.to_le_bytes();
-        self.write_bytes(&bytes);
-    }
-
-    fn write_bytes(&self, bytes: &[u8]) {
-        let offset = self.current_offset.get();
-        self.memory.set_range(offset, bytes);
-        self.current_offset.set(offset + bytes.len() as u32);
-    }
-}
-
-impl<'v> wasm::structures::SequentialMemoryView<'v> for WITMemoryView {
-    type SR = JsSequentialReader;
-    type SW = JsSequentialWriter;
-
-    fn sequential_writer(&'v self, offset: u32, size: u32) -> Result<Self::SW, MemoryAccessError> {
-        let memory = JsWasmMemoryProxy::new(self.module_name.clone());
-        let memory_size = memory.len();
-
-        self.check_bounds(offset, size, memory_size)?;
-
-        Ok(JsSequentialWriter::new(offset, memory))
-    }
-
-    fn sequential_reader(&'v self, offset: u32, size: u32) -> Result<Self::SR, MemoryAccessError> {
-        let memory = JsWasmMemoryProxy::new(self.module_name.clone());
-        let memory_size = memory.len();
-
-        self.check_bounds(offset, size, memory_size)?;
-
-        Ok(JsSequentialReader::new(offset, size, memory))
     }
 }
 

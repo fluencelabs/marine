@@ -17,7 +17,6 @@
 mod exports;
 mod marine_module;
 mod memory;
-mod memory_access;
 mod wit_function;
 mod wit_instance;
 mod type_converters;
@@ -29,9 +28,6 @@ pub use wasmer_it::ast::FunctionArg as IFunctionArg;
 pub use wasmer_it::IValue;
 pub use wasmer_it::from_interface_values;
 pub use wasmer_it::to_interface_value;
-
-pub(crate) use memory_access::WasmerSequentialWriter;
-pub(crate) use memory_access::WasmerSequentialReader;
 
 use serde::Serialize;
 use serde::Deserialize;
