@@ -83,21 +83,26 @@ export class FluenceAppService implements IFluenceAppService {
         }
     }
 
-    async init(marineWasm: SharedArrayBuffer): Promise<void> {
+    async init(controlModule: SharedArrayBuffer): Promise<void> {
         if (this._worker) {
             return;
         }
 
         this._worker = await spawn<IFluenceAppService>(new Worker(this._workerPath));
-        await this._worker.init(marineWasm);
+        await this._worker.init(controlModule);
     }
 
-    createService(wasm: SharedArrayBuffer, serviceId: string, faaSConfig?: FaaSConfig, envs?: Envs): Promise<void> {
+    createService(
+        serviceModule: SharedArrayBuffer,
+        serviceId: string,
+        faaSConfig?: FaaSConfig,
+        envs?: Envs,
+    ): Promise<void> {
         if (!this._worker) {
             throw 'Worker is not initialized';
         }
 
-        return this._worker.createService(wasm, serviceId, faaSConfig, envs);
+        return this._worker.createService(serviceModule, serviceId, faaSConfig, envs);
     }
 
     callService(serviceId: string, functionName: string, args: string, callParams: any): Promise<string> {
