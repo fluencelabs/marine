@@ -859,6 +859,7 @@ dependencies = [
 [[package]]
 name = "fluence-it-types"
 version = "0.3.1"
+source = "git+https://github.com/fluencelabs/interface-types?branch=bug/memory-writer-not-updated#36c563259c66c590ba24d00a80ecf435a50a8887"
 dependencies = [
  "it-to-bytes",
  "nom",
@@ -1362,6 +1363,7 @@ dependencies = [
 [[package]]
 name = "it-lilo"
 version = "0.4.0"
+source = "git+https://github.com/fluencelabs/interface-types?branch=bug/memory-writer-not-updated#36c563259c66c590ba24d00a80ecf435a50a8887"
 dependencies = [
  "fluence-it-types",
  "it-memory-traits",
@@ -1373,6 +1375,7 @@ dependencies = [
 [[package]]
 name = "it-memory-traits"
 version = "0.3.0"
+source = "git+https://github.com/fluencelabs/interface-types?branch=bug/memory-writer-not-updated#36c563259c66c590ba24d00a80ecf435a50a8887"
 dependencies = [
  "thiserror",
 ]
@@ -1380,6 +1383,7 @@ dependencies = [
 [[package]]
 name = "it-to-bytes"
 version = "0.1.0"
+source = "git+https://github.com/fluencelabs/interface-types?branch=bug/memory-writer-not-updated#36c563259c66c590ba24d00a80ecf435a50a8887"
 
 [[package]]
 name = "itertools"
@@ -3692,6 +3696,7 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types-fl"
 version = "0.23.0"
+source = "git+https://github.com/fluencelabs/interface-types?branch=bug/memory-writer-not-updated#36c563259c66c590ba24d00a80ecf435a50a8887"
 dependencies = [
  "fluence-it-types",
  "it-lilo 0.4.0",

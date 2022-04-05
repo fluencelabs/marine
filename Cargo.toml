@@ -36,11 +36,11 @@ members = [
 ]
 
 [patch.crates-io]
-fluence-it-types = { path = "../interface-types/crates/it-types", version = "0.3.1", features = ["impls"] }
-it-to-bytes = { path = "../interface-types/crates/to-bytes", version = "0.1.0" }
-it-lilo = { path = "../interface-types/crates/it-lilo", version = "0.4.0" }
-it-memory-traits = { path = "../interface-types/crates/it-memory-traits", version = "0.3.0" }
-wasmer-interface-types-fl = { path = "../interface-types/wasmer-it", version = "0.23.0" }
+fluence-it-types = { git = " https://github.com/fluencelabs/interface-types", branch = "bug/memory-writer-not-updated", version = "0.3.1", features = ["impls"] }
+it-to-bytes = { git = " https://github.com/fluencelabs/interface-types", branch = "bug/memory-writer-not-updated", version = "0.1.0" }
+it-lilo = { git = " https://github.com/fluencelabs/interface-types", branch = "bug/memory-writer-not-updated", version = "0.4.0" }
+it-memory-traits = { git = " https://github.com/fluencelabs/interface-types", branch = "bug/memory-writer-not-updated", version = "0.3.0" }
+wasmer-interface-types-fl = { git = " https://github.com/fluencelabs/interface-types", branch = "bug/memory-writer-not-updated", version = "0.23.0" }
 
 
 [profile.release]
