@@ -32,13 +32,13 @@ jobs:
       - name: Install Rust toolchain with wasm32-unknown-unknown
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2022-01-25
+          toolchain: nightly-2022-03-20
           target: wasm32-unknown-unknown
           profile: minimal
           override: true
       - uses: actions-rs/cargo@v1
         with:
-          toolchain: nightly-2022-01-25
+          toolchain: nightly-2022-03-20
           command: update
           args: --aggressive
 
