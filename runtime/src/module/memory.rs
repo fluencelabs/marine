@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-use std::iter::zip;
+use it_memory_traits::{MemoryAccessError, MemoryView, MemoryReadable, MemoryWritable};
 use wasmer_it::interpreter::wasm;
-use wasmer_core::memory::{Memory, MemoryView as WasmerMemoryView};
+
+use wasmer_core::memory::Memory;
+use wasmer_core::memory::MemoryView as WasmerMemoryView;
 use wasmer_core::vm::LocalMemory;
 
-use it_memory_traits::{MemoryAccessError, MemoryView, MemoryReadable, MemoryWritable};
+use std::iter::zip;
 
 pub(crate) struct WITMemoryView<'a>(pub(crate) WasmerMemoryView<'a, u8>);
 
@@ -79,11 +81,12 @@ impl<'s> MemoryWritable for WITMemoryView<'s> {
 
 impl<'s> MemoryView for WITMemoryView<'s> {
     fn check_bounds(&self, offset: u32, size: u32) -> Result<(), MemoryAccessError> {
-        if offset + size >= self.0.len() as u32 {
+        let memory_size = self.0.len() as u32;
+        if offset + size >= memory_size {
             Err(MemoryAccessError::OutOfBounds {
                 offset,
                 size,
-                memory_size: self.0.len() as u32,
+                memory_size,
             })
         } else {
             Ok(())

@@ -15,13 +15,14 @@
  */
 
 use super::AllocateFunc;
-use crate::call_wasm_func;
+use crate::module::wit_prelude::WITMemoryView;
 
-use it_lilo::traits::{Allocatable, DEFAULT_MEMORY_INDEX};
+use crate::call_wasm_func;
+use it_lilo::traits::Allocatable;
 use it_lilo::traits::AllocatableError;
 
+use it_lilo::traits::DEFAULT_MEMORY_INDEX;
 use wasmer_core::vm::Ctx;
-use crate::module::wit_prelude::WITMemoryView;
 
 pub(crate) struct LoHelper<'c> {
     allocate_func: &'c AllocateFunc,
