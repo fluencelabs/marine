@@ -42,10 +42,10 @@ export const loadWasmFromNpmPackage = async (packageName: string, fileName: stri
 
     // eval('require') is needed so that
     // webpack will complain about missing dependencies for web target
-    // const require = eval('require');
-    const path = require('path');
-    const fs = require('fs').promises;
-    const packagePath = require.resolve(packageName);
+    const r = eval('require');
+    const path = r('path');
+    const fs = r('fs').promises;
+    const packagePath = r.resolve(packageName);
     const filePath = path.join(path.dirname(packagePath), fileName);
     return await fs.readFile(filePath);
 };

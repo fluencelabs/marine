@@ -10,7 +10,6 @@ const b = (s: string) => {
 
 const main = async () => {
     const testRunner = new FluenceAppService();
-    // arrange
     const avm = await loadWasm(defaultNames.avm);
     const marine = await loadWasm(defaultNames.marine);
     await testRunner.init(marine);

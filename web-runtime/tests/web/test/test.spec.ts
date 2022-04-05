@@ -13,7 +13,8 @@ let server;
 jest.setTimeout(10000);
 
 const startServer = async (modifyConfig?) => {
-    const loadInBrowserToDebug = false; // set to true to debug
+    // const loadInBrowserToDebug = false;
+    const loadInBrowserToDebug = true; // use this line to debug
 
     modifyConfig = modifyConfig || ((_) => {});
 
@@ -32,12 +33,21 @@ const stopServer = async () => {
     await server.stop();
 };
 
-describe('Integration tests for web target', () => {
-    afterEach(async () => {
-        await stopServer();
+const copyPublicDeps = async () => {};
+
+const cleanPublicDeps = async () => {};
+
+describe('Browser integration tests', () => {
+    beforeEach(async () => {
+        await copyPublicDeps();
     });
 
-    it('AvmRunnerBackground should work correctly execute simple script"', async () => {
+    afterEach(async () => {
+        await stopServer();
+        await cleanPublicDeps();
+    });
+
+    it('Some test', async () => {
         console.log('test: starting server...');
         await startServer();
         console.log('test: navigating to page...');
@@ -55,29 +65,5 @@ describe('Integration tests for web target', () => {
             retCode: 0,
             errorMessage: '',
         });
-    });
-
-    it.skip('Should display correct error message if wasm is not served', async () => {
-        console.log('test: starting server...');
-        await startServer((cfg) => {
-            // simulating incorrect webpack setup
-            cfg.devServer.static.directory = 'public2';
-        });
-        console.log('test: navigating to page...');
-        await page.goto('http://localhost:8080/');
-
-        console.log('test: running script in browser...');
-        // @ts-ignore
-        const error = await page
-            .evaluate(async () => {
-                // @ts-ignore
-                return await window.MAIN();
-            })
-            .catch((e) => e.message);
-
-        console.log('test: checking expectations...');
-        await expect(error).toMatch(
-            'Failed to load avm.wasm. This usually means that the web server is not serving avm file correctly',
-        );
     });
 });
