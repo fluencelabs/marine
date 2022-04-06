@@ -42,7 +42,7 @@ impl<'s> MemoryReadable for WITMemoryView<'s> {
 
     // needed because clippy suggests using an iterator which looks worse
     #[allow(clippy::needless_range_loop)]
-    fn read_bytes<const COUNT: usize>(&self, offset: u32) -> [u8; COUNT] {
+    fn read_array<const COUNT: usize>(&self, offset: u32) -> [u8; COUNT] {
         let mut result = [0u8; COUNT];
         for index in 0..COUNT {
             result[index] = self.0[offset as usize + index].get();
@@ -65,11 +65,7 @@ impl<'s> MemoryWritable for WITMemoryView<'s> {
         self.0[offset as usize].set(value);
     }
 
-    fn write_bytes<const COUNT: usize>(&self, offset: u32, bytes: [u8; COUNT]) {
-        self.write_slice(offset, &bytes)
-    }
-
-    fn write_slice(&self, offset: u32, bytes: &[u8]) {
+    fn write_bytes(&self, offset: u32, bytes: &[u8]) {
         let offset = offset as usize;
         let pairs = zip(bytes.iter(), self.0[offset..offset + bytes.len()].iter());
 

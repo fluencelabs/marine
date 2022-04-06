@@ -38,11 +38,7 @@ impl MemoryWritable for WITMemoryView {
         self.memory.set(offset, value);
     }
 
-    fn write_bytes<const COUNT: usize>(&self, offset: u32, value: [u8; COUNT]) {
-        self.write_slice(offset, &value);
-    }
-
-    fn write_slice(&self, offset: u32, bytes: &[u8]) {
+    fn write_bytes(&self, offset: u32, bytes: &[u8]) {
         self.memory.set_range(offset, bytes);
     }
 }
@@ -52,7 +48,7 @@ impl MemoryReadable for WITMemoryView {
         self.memory.get(offset)
     }
 
-    fn read_bytes<const COUNT: usize>(&self, offset: u32) -> [u8; COUNT] {
+    fn read_array<const COUNT: usize>(&self, offset: u32) -> [u8; COUNT] {
         let mut result = [0u8; COUNT];
         let data = self.memory.get_range(offset, COUNT as u32);
         result.copy_from_slice(&data[..COUNT]);
