@@ -15,24 +15,34 @@
  */
 
 use super::AllocateFunc;
-use crate::call_wasm_func;
+use crate::module::wit_prelude::WITMemoryView;
 
+use crate::call_wasm_func;
 use it_lilo::traits::Allocatable;
 use it_lilo::traits::AllocatableError;
 
+use it_lilo::traits::DEFAULT_MEMORY_INDEX;
+use wasmer_core::vm::Ctx;
+
 pub(crate) struct LoHelper<'c> {
     allocate_func: &'c AllocateFunc,
+    ctx: &'c Ctx,
 }
 
 impl<'c> LoHelper<'c> {
-    pub(crate) fn new(allocate_func: &'c AllocateFunc) -> Self {
-        Self { allocate_func }
+    pub(crate) fn new(allocate_func: &'c AllocateFunc, ctx: &'c Ctx) -> Self {
+        Self { allocate_func, ctx }
     }
 }
 
-impl<'s> Allocatable for LoHelper<'s> {
-    fn allocate(&self, size: u32, type_tag: u32) -> Result<u32, AllocatableError> {
+impl<'s> Allocatable<WITMemoryView<'s>> for LoHelper<'s> {
+    fn allocate(
+        &self,
+        size: u32,
+        type_tag: u32,
+    ) -> Result<(u32, WITMemoryView<'s>), AllocatableError> {
         let offset = call_wasm_func!(self.allocate_func, size as _, type_tag as _);
-        Ok(offset as u32)
+        let view = WITMemoryView(self.ctx.memory(DEFAULT_MEMORY_INDEX as u32).view());
+        Ok((offset as u32, view))
     }
 }

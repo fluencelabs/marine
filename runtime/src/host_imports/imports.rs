@@ -86,7 +86,7 @@ pub(crate) fn create_host_import_func(
         let memory_index = 0;
         let memory = ctx.memory(memory_index);
         let memory_view = WITMemoryView(memory.view::<u8>());
-        let lo_helper = LoHelper::new(&allocate_func);
+        let lo_helper = LoHelper::new(&allocate_func, ctx);
         let t = ILowerer::new(memory_view, &lo_helper)
             .map_err(HostImportError::LowererError)
             .and_then(|lowerer| ivalue_to_wvalues(&lowerer, result));
