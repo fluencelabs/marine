@@ -35,14 +35,6 @@ members = [
     "tools/repl",
 ]
 
-[patch.crates-io]
-fluence-it-types = { git = " https://github.com/fluencelabs/interface-types", branch = "bug/memory-writer-not-updated", version = "0.3.1", features = ["impls"] }
-it-to-bytes = { git = " https://github.com/fluencelabs/interface-types", branch = "bug/memory-writer-not-updated", version = "0.1.0" }
-it-lilo = { git = " https://github.com/fluencelabs/interface-types", branch = "bug/memory-writer-not-updated", version = "0.4.0" }
-it-memory-traits = { git = " https://github.com/fluencelabs/interface-types", branch = "bug/memory-writer-not-updated", version = "0.3.0" }
-wasmer-interface-types-fl = { git = " https://github.com/fluencelabs/interface-types", branch = "bug/memory-writer-not-updated", version = "0.23.0" }
-
-
 [profile.release]
 opt-level = 3
 debug = false

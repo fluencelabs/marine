@@ -859,7 +859,8 @@ dependencies = [
 [[package]]
 name = "fluence-it-types"
 version = "0.3.1"
-source = "git+https://github.com/fluencelabs/interface-types?branch=bug/memory-writer-not-updated#6da6a39d3ded8e00c59998297da2ffa666de15b3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "047f670b4807cab8872550a607b1515daff08b3e3bb7576ce8f45971fd811a4e"
 dependencies = [
  "it-to-bytes",
  "nom",
@@ -1363,7 +1364,8 @@ dependencies = [
 [[package]]
 name = "it-lilo"
 version = "0.4.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=bug/memory-writer-not-updated#6da6a39d3ded8e00c59998297da2ffa666de15b3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a39dffcc610873b4c39b0fe04acac5ea77cf2eda9ed3d8a3b970b536d4e24c8"
 dependencies = [
  "fluence-it-types",
  "it-memory-traits",
@@ -1375,7 +1377,8 @@ dependencies = [
 [[package]]
 name = "it-memory-traits"
 version = "0.3.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=bug/memory-writer-not-updated#6da6a39d3ded8e00c59998297da2ffa666de15b3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ca1799ed89e51a192e80a14ab14589044de9e58f0be86087ae8699cbe59f5c40"
 dependencies = [
  "thiserror",
 ]
@@ -1383,7 +1386,8 @@ dependencies = [
 [[package]]
 name = "it-to-bytes"
 version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=bug/memory-writer-not-updated#6da6a39d3ded8e00c59998297da2ffa666de15b3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "729c74bb4236418898a219c6d96f14cba77456dd7c04a2e99e65e9c643709b56"
 
 [[package]]
 name = "itertools"
@@ -3708,7 +3712,8 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types-fl"
 version = "0.23.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=bug/memory-writer-not-updated#6da6a39d3ded8e00c59998297da2ffa666de15b3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1246e98bc1798552556d4ded306c37cbf73b3ffb52183d2605c0129f58fcc98a"
 dependencies = [
  "fluence-it-types",
  "it-lilo 0.4.0",
