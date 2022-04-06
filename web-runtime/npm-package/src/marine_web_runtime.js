@@ -254,8 +254,19 @@ export async function init(module) {
         imports.wbg.__wbg_writebyte_5cf11e3bc7462ec2 = function(arg0, arg1, arg2) {
             write_byte(getObject(arg0), arg1 >>> 0, arg2);
         };
+        imports.wbg.__wbg_writebyterange_bca7718185fe74fe = function(arg0, arg1, arg2, arg3) {
+            write_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
+        };
+        imports.wbg.__wbg_readbyte_4e42fb4a6e94d4cc = function(arg0, arg1) {
+            var ret = read_byte(getObject(arg0), arg1 >>> 0);
+            return ret;
+        };
         imports.wbg.__wbg_readbyterange_a6e4127576d4a165 = function(arg0, arg1, arg2, arg3) {
             read_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
+        };
+        imports.wbg.__wbg_getmemorysize_44ed7b542fa6e518 = function(arg0) {
+            var ret = get_memory_size(getObject(arg0));
+            return ret;
         };
         imports.wbg.__wbg_callexport_a4e71f5003bf3d97 = function(arg0, arg1, arg2, arg3, arg4, arg5) {
             var ret = call_export(getObject(arg1), getStringFromWasm0(arg2, arg3), getStringFromWasm0(arg4, arg5));
@@ -264,13 +275,7 @@ export async function init(module) {
             getInt32Memory0()[arg0 / 4 + 1] = len0;
             getInt32Memory0()[arg0 / 4 + 0] = ptr0;
         };
-        imports.wbg.__wbg_getmemorysize_44ed7b542fa6e518 = function(arg0) {
-            var ret = get_memory_size(getObject(arg0));
-            return ret;
-        };
-        imports.wbg.__wbg_writebyterange_bca7718185fe74fe = function(arg0, arg1, arg2, arg3) {
-            write_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
-        };
+
         const instance = await WebAssembly.instantiate(wasmModule, imports);
         wasm = instance.exports;
 
