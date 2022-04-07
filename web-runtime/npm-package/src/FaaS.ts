@@ -139,16 +139,16 @@ export class FaaS {
         // @ts-ignore
         cfg.exports = serviceInstance.exports;
 
-        const marineInstance = await init(this._controlModuleWasm);
+        const controlModuleInstance = await init(this._controlModuleWasm);
 
         const customSections = WebAssembly.Module.customSections(this._serviceWasm, 'interface-types');
         const itCustomSections = new Uint8Array(customSections[0]);
-        let rawResult = marineInstance.register_module(this._serviceId, itCustomSections, serviceInstance);
+        let rawResult = controlModuleInstance.register_module(this._serviceId, itCustomSections, serviceInstance);
 
         let result: any;
         try {
             result = JSON.parse(rawResult);
-            this._marineInstance = marineInstance;
+            this._marineInstance = controlModuleInstance;
             return result;
         } catch (ex) {
             throw 'register_module result parsing error: ' + ex + ', original text: ' + rawResult;
