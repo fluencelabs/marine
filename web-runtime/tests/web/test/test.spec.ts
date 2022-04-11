@@ -3,6 +3,7 @@ import WebpackDevServer from 'webpack-dev-server';
 import webpackConfig from '../webpack.config.js';
 import process from 'process';
 import path from 'path';
+import fs from 'fs';
 
 // change directory to the location to the test-project.
 // run all the subsequent Webpack scripts in that directory
@@ -13,8 +14,8 @@ let server;
 jest.setTimeout(10000);
 
 const startServer = async (modifyConfig?) => {
-    // const loadInBrowserToDebug = false;
-    const loadInBrowserToDebug = true; // use this line to debug
+    const loadInBrowserToDebug = false;
+    // const loadInBrowserToDebug = true; // use this line to debug
 
     modifyConfig = modifyConfig || ((_) => {});
 
@@ -33,9 +34,26 @@ const stopServer = async () => {
     await server.stop();
 };
 
-const copyPublicDeps = async () => {};
+const publicDir = 'public';
 
-const cleanPublicDeps = async () => {};
+function copyFile(packageName: string, fileName: string) {
+    const modulePath = require.resolve(packageName);
+    const source = path.join(path.dirname(modulePath), fileName);
+    const dest = path.join(publicDir, fileName);
+
+    fs.copyFileSync(source, dest);
+}
+
+const copyPublicDeps = async () => {
+    fs.mkdirSync(publicDir, { recursive: true });
+    copyFile('@fluencelabs/marine-js', 'marine-js.web.js');
+    copyFile('@fluencelabs/marine-js', 'marine-js.wasm');
+    copyFile('@fluencelabs/avm', 'avm.wasm');
+};
+
+const cleanPublicDeps = async () => {
+    fs.rmSync(publicDir, { recursive: true, force: true });
+};
 
 describe('Browser integration tests', () => {
     beforeEach(async () => {

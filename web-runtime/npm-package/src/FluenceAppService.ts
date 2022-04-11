@@ -1,7 +1,8 @@
 import { FaaSConfig, Envs } from './config';
-import { IFluenceAppService } from './types';
+import { IFluenceAppService } from './IFluenceAppService';
 import { isBrowser, isNode } from 'browser-or-node';
 import { Thread, ModuleThread, spawn, Worker } from 'threads';
+import { Buffer } from 'buffer';
 
 export const defaultNames = {
     avm: {
@@ -18,14 +19,20 @@ export const defaultNames = {
     },
 };
 
-export const bufferToSharedArrayBuffer = (buffer: Buffer): SharedArrayBuffer => {
-    const sab = new SharedArrayBuffer(buffer.length);
-    const tmp = new Uint8Array(sab);
-    tmp.set(buffer, 0);
-    return sab;
+export const bufferToSharedArrayBuffer = (buffer: Buffer): SharedArrayBuffer | Buffer => {
+    // only convert to shared buffers if necessary CORS headers have been set:
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer#security_requirements
+    if (isBrowser && eval('crossOriginIsolated')) {
+        const sab = new SharedArrayBuffer(buffer.length);
+        const tmp = new Uint8Array(sab);
+        tmp.set(buffer, 0);
+        return sab;
+    } else {
+        return buffer;
+    }
 };
 
-export const loadWasmFromUrl = async (fileName: string): Promise<Buffer> => {
+export const loadWasmFromServer = async (fileName: string): Promise<Buffer> => {
     if (!isBrowser) {
         throw new Error('Files can be loaded from url only in browser environment');
     }
@@ -50,11 +57,11 @@ export const loadWasmFromNpmPackage = async (packageName: string, fileName: stri
     return await fs.readFile(filePath);
 };
 
-export const loadWasm = async (args: { name: string; package: string }): Promise<SharedArrayBuffer> => {
+export const loadWasm = async (args: { name: string; package: string }): Promise<SharedArrayBuffer | Buffer> => {
     let buffer: Buffer;
     // check if we are running inside the browser and instantiate worker with the corresponding script
     if (isBrowser) {
-        buffer = await loadWasmFromUrl(args.name);
+        buffer = await loadWasmFromServer(args.name);
     }
     // check if we are running inside nodejs and instantiate worker with the corresponding script
     else if (isNode) {
@@ -70,9 +77,12 @@ export class FluenceAppService implements IFluenceAppService {
     private _worker?: ModuleThread<IFluenceAppService>;
     private _workerPath: string;
 
-    constructor() {
+    constructor(workerScriptPath?: string) {
+        if (workerScriptPath) {
+            this._workerPath = workerScriptPath;
+        }
         // check if we are running inside the browser and instantiate worker with the corresponding script
-        if (isBrowser) {
+        else if (isBrowser) {
             this._workerPath = defaultNames.script.web;
         }
         // check if we are running inside nodejs and instantiate worker with the corresponding script
@@ -83,7 +93,7 @@ export class FluenceAppService implements IFluenceAppService {
         }
     }
 
-    async init(controlModule: SharedArrayBuffer): Promise<void> {
+    async init(controlModule: SharedArrayBuffer | Buffer): Promise<void> {
         if (this._worker) {
             return;
         }
@@ -93,7 +103,7 @@ export class FluenceAppService implements IFluenceAppService {
     }
 
     createService(
-        serviceModule: SharedArrayBuffer,
+        serviceModule: SharedArrayBuffer | Buffer,
         serviceId: string,
         faaSConfig?: FaaSConfig,
         envs?: Envs,

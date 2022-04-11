@@ -21,14 +21,15 @@
     },
     "private": false,
     "dependencies": {
-        "browser-or-node": "^2.0.0",
-        "threads": "^1.7.0",
-        "ts-jest": "^27.1.4",
         "@wasmer/wasi": "^0.12.0",
-        "@wasmer/wasmfs": "^0.12.0"
+        "@wasmer/wasmfs": "^0.12.0",
+        "browser-or-node": "^2.0.0",
+        "buffer": "^6.0.3",
+        "threads": "^1.7.0",
+        "ts-jest": "^27.1.4"
     },
     "devDependencies": {
-        "@fluencelabs/avm": "0.21.0-marine-js-stage-2.1",
+        "@fluencelabs/avm": "0.21.0-marine-js-stage-2.3",
         "@types/jest": "^27.4.0",
         "@types/node": "^14.0.0",
         "ifdef-loader": "^2.3.2",

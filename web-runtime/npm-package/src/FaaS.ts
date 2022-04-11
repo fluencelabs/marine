@@ -98,26 +98,26 @@ type MarineInstance = Awaited<ReturnType<typeof init>> | 'not-set' | 'terminated
 const decoder = new TextDecoder();
 
 export class FaaS {
-    private _controlModuleWasm: WebAssembly.Module;
-    private _serviceWasm: WebAssembly.Module;
+    private _controlModule: WebAssembly.Module;
+    private _service: WebAssembly.Module;
     private _serviceId: string;
 
     private _marineInstance: MarineInstance = 'not-set';
 
     constructor(
-        controlModuleWasm: WebAssembly.Module,
-        serviceWasm: WebAssembly.Module,
+        controlModule: WebAssembly.Module,
+        serviceModule: WebAssembly.Module,
         serviceId: string,
         faaSConfig?: FaaSConfig,
         envs?: Map<Uint8Array, Uint8Array>,
     ) {
-        this._controlModuleWasm = controlModuleWasm;
-        this._serviceWasm = serviceWasm;
+        this._controlModule = controlModule;
+        this._service = serviceModule;
         this._serviceId = serviceId;
     }
 
     async init(): Promise<void> {
-        // wasi is needed to run marine services with marine-js
+        // wasi is needed to run marine modules with marine-js
         const wasi = new WASI({
             args: [],
             env: {},
@@ -131,17 +131,17 @@ export class FaaS {
             exports: undefined,
         };
 
-        const serviceInstance = await WebAssembly.instantiate(this._serviceWasm, {
-            ...wasi.getImports(this._serviceWasm),
+        const serviceInstance = await WebAssembly.instantiate(this._service, {
+            ...wasi.getImports(this._service),
             ...newImportObject(cfg),
         });
         wasi.start(serviceInstance);
         // @ts-ignore
         cfg.exports = serviceInstance.exports;
 
-        const controlModuleInstance = await init(this._controlModuleWasm);
+        const controlModuleInstance = await init(this._controlModule);
 
-        const customSections = WebAssembly.Module.customSections(this._serviceWasm, 'interface-types');
+        const customSections = WebAssembly.Module.customSections(this._service, 'interface-types');
         const itCustomSections = new Uint8Array(customSections[0]);
         let rawResult = controlModuleInstance.register_module(this._serviceId, itCustomSections, serviceInstance);
 

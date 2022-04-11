@@ -1,5 +1,5 @@
 import { FluenceAppService, loadWasm, defaultNames } from '@fluencelabs/marine-js';
-import { runAvm } from '@fluencelabs/avm';
+import { callAvm } from '@fluencelabs/avm';
 import { toUint8Array } from 'js-base64';
 
 const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
@@ -24,13 +24,13 @@ const main = async () => {
         )`;
 
     // act
-    const params = { initPeerId: vmPeerId, currentPeerId: vmPeerId };
-    const res = await runAvm(
+    const res = await callAvm(
         (arg: string) => testRunner.callService('avm', 'invoke', arg, undefined),
+        vmPeerId,
+        vmPeerId,
         s,
         b(''),
         b(''),
-        params,
         [],
     );
     await testRunner.terminate();

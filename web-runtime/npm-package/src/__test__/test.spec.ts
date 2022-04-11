@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { FaaS } from '../FaaS';
-import { runAvm } from '@fluencelabs/avm';
+import { callAvm } from '@fluencelabs/avm';
 
 const fsPromises = fs.promises;
 
@@ -35,13 +35,13 @@ describe('Fluence app service tests', () => {
         )`;
 
         // act
-        const params = { initPeerId: vmPeerId, currentPeerId: vmPeerId };
-        const res = await runAvm(
+        const res = await callAvm(
             (arg: string) => testAvmFaaS.call('invoke', arg, undefined),
+            vmPeerId,
+            vmPeerId,
             s,
             b(''),
             b(''),
-            params,
             [],
         );
         await testAvmFaaS.terminate();
