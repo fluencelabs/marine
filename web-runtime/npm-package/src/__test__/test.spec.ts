@@ -11,17 +11,47 @@ const b = (s: string) => {
     return Buffer.from(s);
 };
 
+const loadWasmModule = async (waspPath: string) => {
+    const fullPath = path.join(waspPath);
+    const buffer = await fsPromises.readFile(fullPath);
+    const module = await WebAssembly.compile(buffer);
+    return module;
+};
+
+const examplesDir = path.join(__dirname, '../../../../examples');
+
 describe('Fluence app service tests', () => {
+    it('Testing greeting service', async () => {
+        // arrange
+        const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
+        const greeting = await loadWasmModule(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
+
+        const faas = new FaaS(marine, greeting, 'srv');
+        await faas.init();
+
+        // act
+        const greetingResult = JSON.parse(faas.call('greeting', '{"name": "test"}', undefined));
+        const greetingRecordResult = JSON.parse(faas.call('greeting_record', '{}', undefined));
+
+        // assert
+        expect(greetingResult).toMatchObject({
+            error: '',
+            result: 'Hi, test',
+        });
+        expect(greetingRecordResult).toMatchObject({
+            error: '',
+            result: {
+                str: 'Hello, world!',
+                num: 42,
+            },
+        });
+    });
+
     it('Running avm through FaaS infrastructure', async () => {
         // arrange
         const avmPackagePath = require.resolve('@fluencelabs/avm');
-        const avmFilePath = path.join(path.dirname(avmPackagePath), 'avm.wasm');
-        const avmBuffer = await fsPromises.readFile(avmFilePath);
-        const avm = await WebAssembly.compile(avmBuffer);
-
-        const marineFilePath = path.join(__dirname, '../../dist/marine-js.wasm');
-        const marineBuffer = await fsPromises.readFile(marineFilePath);
-        const marine = await WebAssembly.compile(marineBuffer);
+        const avm = await loadWasmModule(path.join(path.dirname(avmPackagePath), 'avm.wasm'));
+        const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
 
         const testAvmFaaS = new FaaS(marine, avm, 'avm');
         await testAvmFaaS.init();

@@ -72,7 +72,6 @@ describe('Browser integration tests', () => {
         await page.goto('http://localhost:8080/');
 
         console.log('test: running script in browser...');
-        // @ts-ignore
         const res = await page.evaluate(async () => {
             // @ts-ignore
             return await window.MAIN();
