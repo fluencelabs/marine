@@ -1,3 +1,3 @@
-export * from './types';
+export * from './IFluenceAppService';
 export * from './config';
 export * from './FluenceAppService';
