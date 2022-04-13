@@ -1,4 +1,4 @@
-import { FluenceAppService, loadWasm, defaultNames } from '@fluencelabs/marine-js';
+import { FluenceAppService, loadDefaults, defaultNames } from '@fluencelabs/marine-js';
 import { callAvm } from '@fluencelabs/avm';
 
 const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
@@ -12,10 +12,9 @@ describe('Nodejs integration tests', () => {
         const testRunner = new FluenceAppService();
         try {
             // arrange
-            const avm = await loadWasm(defaultNames.avm);
-            const marine = await loadWasm(defaultNames.marine);
-            await testRunner.init(marine);
-            await testRunner.createService(avm, 'avm');
+            const wasms = await loadDefaults();
+            await testRunner.init(wasms.marine);
+            await testRunner.createService(wasms.avm, 'avm');
 
             const s = `(seq
             (par 
