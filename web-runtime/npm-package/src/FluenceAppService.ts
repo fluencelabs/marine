@@ -28,7 +28,7 @@ export const defaultNames = {
         file: 'marine-js.wasm',
         package: '@fluencelabs/marine-js',
     },
-    script: {
+    workerScriptPath: {
         web: './marine-js.web.js',
         node: './marine-js.node.js',
     },
@@ -44,11 +44,11 @@ export class FluenceAppService implements IFluenceAppService {
         }
         // check if we are running inside the browser and instantiate worker with the corresponding script
         else if (isBrowser) {
-            this._workerPath = defaultNames.script.web;
+            this._workerPath = defaultNames.workerScriptPath.web;
         }
         // check if we are running inside nodejs and instantiate worker with the corresponding script
         else if (isNode) {
-            this._workerPath = defaultNames.script.node;
+            this._workerPath = defaultNames.workerScriptPath.node;
         } else {
             throw new Error('Unknown environment');
         }
