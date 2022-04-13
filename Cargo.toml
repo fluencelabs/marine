@@ -29,6 +29,7 @@ members = [
     "fluence-faas/tests/wasm_tests/arrays_passing",
     "fluence-faas/tests/wasm_tests/records_passing",
     "runtime",
+    "runtime/tests/wasm_tests/records_allocation",
     "web-runtime",
     "tools/cli",
     "tools/repl",

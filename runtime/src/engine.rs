@@ -143,7 +143,9 @@ impl Marine {
         let records = self
             .modules
             .iter()
-            .map(|(module_name, module)| (module_name.as_str(), module.memory_size()).into())
+            .map(|(module_name, module)| {
+                ModuleMemoryStat::new(module_name, module.memory_size(), module.max_memory_size())
+            })
             .collect::<Vec<_>>();
 
         records.into()

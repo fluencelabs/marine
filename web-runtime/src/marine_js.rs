@@ -32,11 +32,11 @@ const ALLOCATE_FUNC_NAME: &str = "allocate";
 #[wasm_bindgen(module = "/marine-js.js")]
 extern "C" {
     pub fn call_export(module_name: &JsValue, export_name: &str, args: &str) -> String;
-    pub fn write_byte(module_name: &JsValue, module_offset: usize, value: u8);
-    pub fn read_byte(module_name: &JsValue, module_offset: usize) -> u8;
-    pub fn get_memory_size(module_name: &JsValue) -> i32;
-    pub fn read_byte_range(module_name: &JsValue, module_offset: usize, slice: &mut [u8]);
-    pub fn write_byte_range(module_name: &JsValue, module_offset: usize, slice: &[u8]);
+    pub fn write_byte(module_name: &JsValue, module_offset: u32, value: u8);
+    pub fn read_byte(module_name: &JsValue, module_offset: u32) -> u8;
+    pub fn get_memory_size(module_name: &JsValue) -> u32;
+    pub fn read_byte_range(module_name: &JsValue, module_offset: u32, slice: &mut [u8]);
+    pub fn write_byte_range(module_name: &JsValue, module_offset: u32, slice: &[u8]);
 }
 
 #[derive(Clone)]
@@ -306,27 +306,27 @@ impl JsWasmMemoryProxy {
         Self { module_name }
     }
 
-    pub fn get(&self, index: usize) -> u8 {
+    pub fn get(&self, index: u32) -> u8 {
         INSTANCE.with(|instance| read_byte(instance.borrow().as_ref().unwrap(), index))
     }
 
-    pub fn set(&self, index: usize, value: u8) {
+    pub fn set(&self, index: u32, value: u8) {
         INSTANCE.with(|instance| write_byte(instance.borrow().as_ref().unwrap(), index, value))
     }
 
-    pub fn len(&self) -> usize {
-        INSTANCE.with(|instance| get_memory_size(instance.borrow().as_ref().unwrap()) as usize)
+    pub fn len(&self) -> u32 {
+        INSTANCE.with(|instance| get_memory_size(instance.borrow().as_ref().unwrap()))
     }
 
-    pub fn get_range(&self, offset: usize, size: usize) -> Vec<u8> {
+    pub fn get_range(&self, offset: u32, size: u32) -> Vec<u8> {
         INSTANCE.with(|instance| {
-            let mut result = vec![0; size];
+            let mut result = vec![0; size as usize];
             read_byte_range(instance.borrow().as_ref().unwrap(), offset, &mut result);
             result
         })
     }
 
-    pub fn set_range(&self, offset: usize, data: &[u8]) {
+    pub fn set_range(&self, offset: u32, data: &[u8]) {
         INSTANCE.with(|instance| {
             write_byte_range(instance.borrow().as_ref().unwrap(), offset, data);
         })

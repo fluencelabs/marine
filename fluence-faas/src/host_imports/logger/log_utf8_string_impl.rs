@@ -53,8 +53,8 @@ pub(crate) fn log_utf8_string(
 
 #[inline]
 fn read_string(ctx: &Ctx, offset: i32, size: i32) -> Option<&str> {
-    let wasm_ptr = WasmPtr::<u8, Array>::new(offset as _);
-    wasm_ptr.get_utf8_string(ctx.memory(0), size as _)
+    let wasm_ptr = WasmPtr::<u8, Array>::new(offset as u32);
+    wasm_ptr.get_utf8_string(ctx.memory(0), size as u32)
 }
 
 #[inline]
