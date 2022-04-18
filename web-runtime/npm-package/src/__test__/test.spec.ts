@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import tmp from 'tmp';
+import download from 'download';
 import { FaaS } from '../FaaS';
 import { callAvm } from '@fluencelabs/avm';
 
@@ -18,9 +20,22 @@ const loadWasmModule = async (waspPath: string) => {
     return module;
 };
 
+const redisDownloadUrl = 'https://github.com/fluencelabs/redis/releases/download/v0.14.0_w/redis.wasm';
+const sqliteDownloadUrl = 'https://github.com/fluencelabs/sqlite/releases/download/v0.14.0_w/sqlite3.wasm';
+
 const examplesDir = path.join(__dirname, '../../../../examples');
 
+let tempFile: tmp.FileResult;
+
 describe('Fluence app service tests', () => {
+    beforeEach(() => {
+        tempFile = tmp.fileSync();
+    });
+
+    afterEach(() => {
+        tempFile?.removeCallback();
+    });
+
     it('Testing greeting service', async () => {
         // arrange
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
@@ -97,4 +112,21 @@ describe('Fluence app service tests', () => {
             errorMessage: '',
         });
     });
+
+    it('Testing sqlite wasm', async () => {
+        const control = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
+        const buf = await download(sqliteDownloadUrl);
+        const sqlite = await WebAssembly.compile(buf);
+
+        const marine = new FaaS(control, sqlite, 'sqlite');
+        await marine.init();
+
+        const result1 = marine.call('sqlite3_open_v2', a(':memory:', 6, ''), undefined);
+        console.log(result1);
+    });
 });
+
+const a = (...args: any[]) => {
+    console.log(JSON.stringify(args));
+    return JSON.stringify(args);
+};
