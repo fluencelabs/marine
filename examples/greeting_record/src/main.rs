@@ -22,8 +22,17 @@ module_manifest!();
 pub fn main() {}
 
 #[marine]
-pub fn greeting(name: String) -> String {
-    format!("Hi, {}", name)
+pub struct GreetingRecord {
+    pub str: String,
+    pub num: i32
+}
+
+#[marine]
+pub fn greeting_record() -> GreetingRecord {
+    GreetingRecord {
+        str: String::from("Hello, world!"),
+        num: 42
+    }
 }
 
 #[cfg(test)]
@@ -31,14 +40,9 @@ mod tests {
     use marine_rs_sdk_test::marine_test;
 
     #[marine_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
-    fn empty_string(greeting: marine_test_env::greeting::ModuleInterface) {
-        let actual = greeting.greeting(String::new());
-        assert_eq!(actual, "Hi, ");
-    }
-
-    #[marine_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
-    fn non_empty_string(greeting: marine_test_env::greeting::ModuleInterface) {
-        let actual = greeting.greeting("name".to_string());
-        assert_eq!(actual, "Hi, name");
+    fn smoke_test(greeting: marine_test_env::greeting_record::ModuleInterface) {
+        let actual = greeting.greeting_record();
+        assert_eq!(actual.str, "Hello, world!");
+        assert_eq!(actual.num, 42);
     }
 }

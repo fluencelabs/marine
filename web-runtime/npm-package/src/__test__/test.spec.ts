@@ -30,14 +30,29 @@ describe('Fluence app service tests', () => {
         await faas.init();
 
         // act
-        const greetingResult = JSON.parse(faas.call('greeting', '{"name": "test"}', undefined));
-        const greetingRecordResult = JSON.parse(faas.call('greeting_record', '{}', undefined));
+        const res = JSON.parse(faas.call('greeting', '{"name": "test"}', undefined));
 
         // assert
-        expect(greetingResult).toMatchObject({
+        expect(res).toMatchObject({
             error: '',
             result: 'Hi, test',
         });
+    });
+
+    it('Testing greeting service', async () => {
+        // arrange
+        const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
+        const greeting = await loadWasmModule(
+            path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
+        );
+
+        const faas = new FaaS(marine, greeting, 'srv');
+        await faas.init();
+
+        // act
+        const greetingRecordResult = JSON.parse(faas.call('greeting_record', '{}', undefined));
+
+        // assert
         expect(greetingRecordResult).toMatchObject({
             error: '',
             result: {
