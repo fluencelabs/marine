@@ -1,4 +1,4 @@
-import { FluenceAppService, loadWasm, defaultNames } from '@fluencelabs/marine-js';
+import { FluenceAppService, loadWasmFromServer, defaultNames } from '@fluencelabs/marine-js';
 import { callAvm } from '@fluencelabs/avm';
 import { toUint8Array } from 'js-base64';
 
@@ -10,8 +10,8 @@ const b = (s: string) => {
 
 const main = async () => {
     const testRunner = new FluenceAppService();
-    const avm = await loadWasm(defaultNames.avm);
-    const marine = await loadWasm(defaultNames.marine);
+    const avm = await loadWasmFromServer(defaultNames.avm.file);
+    const marine = await loadWasmFromServer(defaultNames.marine.file);
     await testRunner.init(marine);
     await testRunner.createService(avm, 'avm');
 

@@ -13,6 +13,6 @@
         "typescript": "^4.0.0"
     },
     "dependencies": {
-        "@fluencelabs/avm": "0.21.0-marine-js-stage-2.3"
+        "@fluencelabs/avm": "0.22.2"
     }
 }

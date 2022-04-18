@@ -15,6 +15,7 @@
  */
 
 import { Envs, FaaSConfig } from './config';
+import { Buffer } from 'buffer';
 
 export type IFluenceAppService = {
     init: (controlModuleWasm: SharedArrayBuffer | Buffer) => Promise<void>;

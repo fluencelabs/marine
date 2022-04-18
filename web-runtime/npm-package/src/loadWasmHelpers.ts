@@ -1,5 +1,6 @@
 import { isBrowser, isNode } from 'browser-or-node';
 import { defaultNames } from '.';
+import { Buffer } from 'buffer';
 
 const bufferToSharedArrayBuffer = (buffer: Buffer): SharedArrayBuffer => {
     const sab = new SharedArrayBuffer(buffer.length);

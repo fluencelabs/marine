@@ -29,7 +29,7 @@
         "ts-jest": "^27.1.4"
     },
     "devDependencies": {
-        "@fluencelabs/avm": "0.21.0-marine-js-stage-2.3",
+        "@fluencelabs/avm": "0.22.2",
         "@types/jest": "^27.4.0",
         "@types/node": "^14.0.0",
         "ifdef-loader": "^2.3.2",
