@@ -19,8 +19,8 @@ const loadWasmModule = async (waspPath: string) => {
     return module;
 };
 
-const redisDownloadUrl = 'https://github.com/fluencelabs/redis/releases/download/v0.10.0_w/redis.wasm';
-const sqliteDownloadUrl = 'https://github.com/fluencelabs/sqlite/releases/download/v0.15.0_w/sqlite3.wasm';
+const redisDownloadUrl = 'https://github.com/fluencelabs/redis/releases/download/v0.15.0_w/redis.wasm';
+const sqliteDownloadUrl = 'https://github.com/fluencelabs/sqlite/releases/download/v0.16.0_w/sqlite3.wasm';
 
 const examplesDir = path.join(__dirname, '../../../../examples');
 
@@ -43,7 +43,7 @@ describe('Fluence app service tests', () => {
         });
     });
 
-    it('Testing greeting service', async () => {
+    it('Testing greeting service with records', async () => {
         // arrange
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmModule(
@@ -115,6 +115,9 @@ describe('Fluence app service tests', () => {
         result = doCall(marine, 'sqlite3_open_v2', ':memory:', 6, '');
         const dbHandle = result.db_handle;
         result = doCall(marine, 'sqlite3_exec', dbHandle, 'CREATE VIRTUAL TABLE users USING FTS5(body)', 0, 0);
+
+        expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
+
         result = doCall(
             marine,
             'sqlite3_exec',
@@ -123,12 +126,12 @@ describe('Fluence app service tests', () => {
             0,
             0,
         );
+
+        expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
+
         result = doCall(marine, 'sqlite3_exec', dbHandle, "SELECT * FROM users WHERE users MATCH 'A* OR B*'", 0, 0);
 
-        console.log(result);
-
-        // TODO:
-        expect(1).toBe(2);
+        expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
     });
 
     it('Testing redis wasm', async () => {
@@ -157,7 +160,7 @@ describe('Fluence app service tests', () => {
     });
 });
 
-const doCall = (marine: FaaS, fn: string, ...args: any[]) => {
+const doCall = (marine: FaaS, fn: string, ...args: any[]): any => {
     const argsStr = JSON.stringify(args);
     const rawRes = marine.call(fn, argsStr, undefined);
     const res = JSON.parse(rawRes);

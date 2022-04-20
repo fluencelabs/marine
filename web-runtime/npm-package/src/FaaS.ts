@@ -146,8 +146,10 @@ export class FaaS {
             exports: undefined,
         };
 
+        const wasiImports = hasWasiImports(this._serviceModule) ? wasi.getImports(this._serviceModule) : {};
+
         const serviceInstance = await WebAssembly.instantiate(this._serviceModule, {
-            ...wasi.getImports(this._serviceModule),
+            ...wasiImports,
             ...newImportObject(cfg),
         });
         wasi.start(serviceInstance);
@@ -184,4 +186,10 @@ export class FaaS {
 
         return this._marineInstance.call_module(this._serviceId, function_name, args);
     }
+}
+
+function hasWasiImports(module: WebAssembly.Module): boolean {
+    const imports = WebAssembly.Module.imports(module);
+    const firstWasiImport = imports.find((x) => x.module === 'wasi_snapshot_preview1');
+    return firstWasiImport !== undefined;
 }
