@@ -134,7 +134,7 @@ describe('Fluence app service tests', () => {
         expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
     });
 
-    it('Testing redis wasm', async () => {
+    it.skip('Testing redis wasm', async () => {
         const control = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const buf = await download(redisDownloadUrl);
         const redis = await WebAssembly.compile(buf);
