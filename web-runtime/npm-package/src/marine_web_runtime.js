@@ -22,7 +22,7 @@ import {
     write_byte,
     get_memory_size,
     read_byte_range,
-    write_byte_range
+    write_byte_range,
 } from './snippets/marine-web-runtime-6faa67b8af9cc173/marine-js.js';
 
 export async function init(module) {
@@ -104,7 +104,7 @@ export async function init(module) {
 
         for (; offset < len; offset++) {
             const code = arg.charCodeAt(offset);
-            if (code > 0x7F) break;
+            if (code > 0x7f) break;
             mem[ptr + offset] = code;
         }
 
@@ -112,7 +112,7 @@ export async function init(module) {
             if (offset !== 0) {
                 arg = arg.slice(offset);
             }
-            ptr = realloc(ptr, len, len = offset + arg.length * 3);
+            ptr = realloc(ptr, len, (len = offset + arg.length * 3));
             const view = getUint8Memory0().subarray(ptr + offset, ptr + len);
             const ret = encodeString(arg, view);
 
@@ -230,45 +230,45 @@ export async function init(module) {
     async function init(wasmModule) {
         const imports = {};
         imports.wbg = {};
-        imports.wbg.__wbg_new_693216e109162396 = function() {
+        imports.wbg.__wbg_new_693216e109162396 = function () {
             var ret = new Error();
             return addHeapObject(ret);
         };
-        imports.wbg.__wbg_stack_0ddaca5d1abfb52f = function(arg0, arg1) {
+        imports.wbg.__wbg_stack_0ddaca5d1abfb52f = function (arg0, arg1) {
             var ret = getObject(arg1).stack;
             var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             var len0 = WASM_VECTOR_LEN;
             getInt32Memory0()[arg0 / 4 + 1] = len0;
             getInt32Memory0()[arg0 / 4 + 0] = ptr0;
         };
-        imports.wbg.__wbg_error_09919627ac0992f5 = function(arg0, arg1) {
+        imports.wbg.__wbg_error_09919627ac0992f5 = function (arg0, arg1) {
             try {
                 console.error(getStringFromWasm0(arg0, arg1));
             } finally {
                 wasm.__wbindgen_free(arg0, arg1);
             }
         };
-        imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+        imports.wbg.__wbindgen_object_drop_ref = function (arg0) {
             takeObject(arg0);
         };
-        imports.wbg.__wbg_writebyte_5cf11e3bc7462ec2 = function(arg0, arg1, arg2) {
+        imports.wbg.__wbg_writebyte_5cf11e3bc7462ec2 = function (arg0, arg1, arg2) {
             write_byte(getObject(arg0), arg1 >>> 0, arg2);
         };
-        imports.wbg.__wbg_writebyterange_bca7718185fe74fe = function(arg0, arg1, arg2, arg3) {
+        imports.wbg.__wbg_writebyterange_bca7718185fe74fe = function (arg0, arg1, arg2, arg3) {
             write_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
         };
-        imports.wbg.__wbg_readbyte_4e42fb4a6e94d4cc = function(arg0, arg1) {
+        imports.wbg.__wbg_readbyte_4e42fb4a6e94d4cc = function (arg0, arg1) {
             var ret = read_byte(getObject(arg0), arg1 >>> 0);
             return ret;
         };
-        imports.wbg.__wbg_readbyterange_a6e4127576d4a165 = function(arg0, arg1, arg2, arg3) {
+        imports.wbg.__wbg_readbyterange_a6e4127576d4a165 = function (arg0, arg1, arg2, arg3) {
             read_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
         };
-        imports.wbg.__wbg_getmemorysize_44ed7b542fa6e518 = function(arg0) {
+        imports.wbg.__wbg_getmemorysize_44ed7b542fa6e518 = function (arg0) {
             var ret = get_memory_size(getObject(arg0));
             return ret;
         };
-        imports.wbg.__wbg_callexport_a4e71f5003bf3d97 = function(arg0, arg1, arg2, arg3, arg4, arg5) {
+        imports.wbg.__wbg_callexport_a4e71f5003bf3d97 = function (arg0, arg1, arg2, arg3, arg4, arg5) {
             var ret = call_export(getObject(arg1), getStringFromWasm0(arg2, arg3), getStringFromWasm0(arg4, arg5));
             var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             var len0 = WASM_VECTOR_LEN;

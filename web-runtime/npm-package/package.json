@@ -11,22 +11,35 @@
         "dist/*",
         "!lib/__test__/*"
     ],
-    "bin": {
-        "copy-marine": "./dist/copyMarine.js"
-    },
     "scripts": {
-        "build": "tsc",
+        "build": "npm run build:tsc && npm run build:web && npm run build:node",
+        "build:tsc": "tsc",
+        "build:web": "webpack -c webpack.config.web.js",
+        "build:node": "webpack -c webpack.config.node.js",
         "postbuild": "cp ../marine-web-pkg/marine_web_runtime_bg.wasm ./dist/marine-js.wasm",
         "test": "jest"
     },
     "private": false,
-    "devDependencies": {
+    "dependencies": {
         "@wasmer/wasi": "^0.12.0",
         "@wasmer/wasmfs": "^0.12.0",
-        "@fluencelabs/avm": "0.20.0-marine-web-adapted.1",
+        "browser-or-node": "^2.0.0",
+        "buffer": "^6.0.3",
+        "threads": "^1.7.0",
+        "ts-jest": "^27.1.4"
+    },
+    "devDependencies": {
+        "@fluencelabs/avm": "0.22.2",
+        "@types/download": "^8.0.1",
         "@types/jest": "^27.4.0",
         "@types/node": "^14.0.0",
+        "@types/tmp": "^0.2.3",
+        "download": "^8.0.0",
+        "ifdef-loader": "^2.3.2",
         "jest": "^27.2.4",
-        "typescript": "^4.0.0"
+        "ts-loader": "^8.3.0",
+        "typescript": "^4.0.0",
+        "webpack": "^4.46.0",
+        "webpack-cli": "^4.9.1"
     }
 }

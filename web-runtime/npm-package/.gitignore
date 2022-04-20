@@ -4,3 +4,4 @@ node_modules
 
 # auto-generated files
 src/*.wasm
+snippets

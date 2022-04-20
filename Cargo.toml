@@ -10,6 +10,7 @@ members = [
     "crates/utils",
     "examples/call_parameters",
     "examples/greeting",
+    "examples/greeting_record",
     "examples/ipfs-node/effector",
     "examples/ipfs-node/pure",
     "examples/records/effector",
