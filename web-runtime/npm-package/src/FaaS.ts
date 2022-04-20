@@ -190,6 +190,8 @@ export class FaaS {
 
 function hasWasiImports(module: WebAssembly.Module): boolean {
     const imports = WebAssembly.Module.imports(module);
-    const firstWasiImport = imports.find((x) => x.module === 'wasi_snapshot_preview1');
+    const firstWasiImport = imports.find((x) => {
+        return x.module === 'wasi_snapshot_preview1' || x.module === 'wasi_unstable';
+    });
     return firstWasiImport !== undefined;
 }
