@@ -24,14 +24,14 @@ pub fn main() {}
 #[marine]
 pub struct GreetingRecord {
     pub str: String,
-    pub num: i32
+    pub num: i32,
 }
 
 #[marine]
 pub fn greeting_record() -> GreetingRecord {
     GreetingRecord {
         str: String::from("Hello, world!"),
-        num: 42
+        num: 42,
     }
 }
 
