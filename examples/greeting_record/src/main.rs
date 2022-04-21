@@ -35,6 +35,9 @@ pub fn greeting_record() -> GreetingRecord {
     }
 }
 
+#[marine]
+pub fn void_fn() {}
+
 #[cfg(test)]
 mod tests {
     use marine_rs_sdk_test::marine_test;
