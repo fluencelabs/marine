@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { WASIArgs, WASIEnv } from '@wasmer/wasi';
+
 export interface FaaSConfig {
     /**
      * Path to a dir where compiled Wasm modules are located.
@@ -74,13 +76,15 @@ export interface MarineConfig {
     faas_config: FaaSConfig;
 }
 
-export type Envs = Map<Uint8Array, Uint8Array>;
+export type Env = WASIEnv;
+
+export type Args = WASIArgs;
 
 export interface FaaSWASIConfig {
     /**
      * A list of environment variables available for this module.
      */
-    envs: Envs;
+    envs: Env;
 
     /**
      * A list of files available for this module.
