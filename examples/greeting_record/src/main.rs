@@ -16,10 +16,13 @@
 
 use marine_rs_sdk::marine;
 use marine_rs_sdk::module_manifest;
+use marine_rs_sdk::WasmLoggerBuilder;
 
 module_manifest!();
 
-pub fn main() {}
+pub fn main() {
+  WasmLoggerBuilder::new().build().unwrap();
+}
 
 #[marine]
 pub struct GreetingRecord {
@@ -29,6 +32,11 @@ pub struct GreetingRecord {
 
 #[marine]
 pub fn greeting_record() -> GreetingRecord {
+    log::info!("info");
+    log::warn!("warn");
+    log::error!("error");
+    log::debug!("debug");
+    log::trace!("trace");
     GreetingRecord {
         str: String::from("Hello, world!"),
         num: 42,
