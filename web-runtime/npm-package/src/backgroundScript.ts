@@ -15,7 +15,7 @@
  */
 
 import { expose } from 'threads';
-import { Envs, FaaSConfig } from './config';
+import { Env, FaaSConfig } from './config';
 import { FaaS } from './FaaS';
 import { IFluenceAppService } from './IFluenceAppService';
 
@@ -34,7 +34,7 @@ const toExpose: IFluenceAppService = {
         wasm: SharedArrayBuffer | Buffer,
         serviceId: string,
         faaSConfig?: FaaSConfig,
-        envs?: Envs,
+        envs?: Env,
     ): Promise<void> => {
         const service = await WebAssembly.compile(asArray(wasm));
         const faas = new FaaS(controlModule, service, serviceId, faaSConfig, envs);
