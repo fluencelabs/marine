@@ -106,7 +106,7 @@ export class FaaS {
                     let wasm = cfg.exports;
 
                     const message = getStringFromWasm0(wasm, offset, size);
-                    const str = `marine service "${this._serviceId}": ${message}`;
+                    const str = `[marine service "${this._serviceId}"]: ${message}`;
                     if (level <= LEVEL_ERROR) {
                         console.error(str);
                     } else if (level === LEVEL_WARN) {

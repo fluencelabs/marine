@@ -39,7 +39,7 @@ describe.each([
         // @ts-ignore
         expect(console[fn]).toBeCalledTimes(1);
         // @ts-ignore
-        expect(console[fn]).toHaveBeenNthCalledWith(1, 'marine service "srv": ' + level);
+        expect(console[fn]).toHaveBeenNthCalledWith(1, '[marine service "srv"]: ' + level);
     });
 });
 
