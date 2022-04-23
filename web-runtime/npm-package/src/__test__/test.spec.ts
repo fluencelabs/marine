@@ -55,6 +55,7 @@ describe('Fluence app service tests', () => {
 
         // act
         const greetingRecordResult = JSON.parse(faas.call('greeting_record', '{}', undefined));
+        const voidResult = JSON.parse(faas.call('void_fn', '{}', undefined));
 
         // assert
         expect(greetingRecordResult).toMatchObject({
@@ -64,6 +65,7 @@ describe('Fluence app service tests', () => {
                 num: 42,
             },
         });
+        expect(voidResult.result).toStrictEqual(null);
     });
 
     it('Running avm through FaaS infrastructure', async () => {
