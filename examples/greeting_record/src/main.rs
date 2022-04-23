@@ -32,15 +32,19 @@ pub struct GreetingRecord {
 
 #[marine]
 pub fn greeting_record() -> GreetingRecord {
+    GreetingRecord {
+        str: String::from("Hello, world!"),
+        num: 42,
+    }
+}
+
+#[marine]
+pub fn logging() {
     log::info!("info");
     log::warn!("warn");
     log::error!("error");
     log::debug!("debug");
     log::trace!("trace");
-    GreetingRecord {
-        str: String::from("Hello, world!"),
-        num: 42,
-    }
 }
 
 #[marine]
