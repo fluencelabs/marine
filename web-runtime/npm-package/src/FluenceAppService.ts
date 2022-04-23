@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FaaSConfig, Envs } from './config';
+import { FaaSConfig, Env } from './config';
 import { IFluenceAppService } from './IFluenceAppService';
 import { isBrowser, isNode } from 'browser-or-node';
 import { Thread, ModuleThread, spawn, Worker } from 'threads';
@@ -67,7 +67,7 @@ export class FluenceAppService implements IFluenceAppService {
         serviceModule: SharedArrayBuffer | Buffer,
         serviceId: string,
         faaSConfig?: FaaSConfig,
-        envs?: Envs,
+        envs?: Env,
     ): Promise<void> {
         if (!this._worker) {
             throw 'Worker is not initialized';

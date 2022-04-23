@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Envs, FaaSConfig } from './config';
-import { Buffer } from 'buffer';
+import { Env, FaaSConfig } from './config';
 
 export type IFluenceAppService = {
     init: (controlModuleWasm: SharedArrayBuffer | Buffer) => Promise<void>;
@@ -23,7 +22,7 @@ export type IFluenceAppService = {
         serviceModule: SharedArrayBuffer | Buffer,
         serviceId: string,
         faaSConfig?: FaaSConfig,
-        envs?: Envs,
+        envs?: Env,
     ) => Promise<void>;
     terminate: () => Promise<void>;
     callService: (serviceId: string, functionName: string, args: string, callParams: any) => Promise<string>;
