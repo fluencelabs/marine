@@ -105,7 +105,7 @@ export class FaaS {
         this._serviceModule = serviceModule;
         this._serviceId = serviceId;
         this._env = {
-            WASM_LOG: 'off',
+            WASM_LOG: 'debug',
             ...env,
         };
     }
