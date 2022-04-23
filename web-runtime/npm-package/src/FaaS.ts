@@ -46,39 +46,11 @@ function getStringFromWasm0(wasm: any, ptr: any, len: any) {
     return decoder.decode(getUint8Memory0(wasm).subarray(ptr, ptr + len));
 }
 
-/// Returns import object that describes host functions called by AIR interpreter
-function newImportObject(cfg: HostImportsConfig): ImportObject {
-    return {
-        host: log_import(cfg),
-    };
-}
-
 const LEVEL_ERROR = 1;
 const LEVEL_WARN = 2;
 const LEVEL_INFO = 3;
 const LEVEL_TRACE = 4;
 const LEVEL_DEBUG = 5;
-
-function log_import(cfg: HostImportsConfig): LogImport {
-    return {
-        log_utf8_string: (level: any, target: any, offset: any, size: any) => {
-            let wasm = cfg.exports;
-
-            let str = getStringFromWasm0(wasm, offset, size);
-            if (level <= LEVEL_ERROR) {
-                console.error(str);
-            } else if (level === LEVEL_WARN) {
-                console.warn(str);
-            } else if (level === LEVEL_INFO) {
-                console.info(str);
-            } else if (level === LEVEL_TRACE) {
-                console.log(str);
-            } else if (level >= LEVEL_DEBUG) {
-                console.log(str);
-            }
-        },
-    };
-}
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
@@ -129,7 +101,25 @@ export class FaaS {
 
         const serviceInstance = await WebAssembly.instantiate(this._serviceModule, {
             ...wasiImports,
-            ...newImportObject(cfg),
+            host: {
+                log_utf8_string: (level: any, target: any, offset: any, size: any) => {
+                    let wasm = cfg.exports;
+
+                    const message = getStringFromWasm0(wasm, offset, size);
+                    const str = `marine service "${this._serviceId}": ${message}`;
+                    if (level <= LEVEL_ERROR) {
+                        console.error(str);
+                    } else if (level === LEVEL_WARN) {
+                        console.warn(str);
+                    } else if (level === LEVEL_INFO) {
+                        console.info(str);
+                    } else if (level === LEVEL_TRACE) {
+                        console.log(str);
+                    } else if (level >= LEVEL_DEBUG) {
+                        console.log(str);
+                    }
+                },
+            },
         });
         wasi.start(serviceInstance);
         cfg.exports = serviceInstance.exports;
