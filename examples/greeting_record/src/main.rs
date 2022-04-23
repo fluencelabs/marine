@@ -21,7 +21,7 @@ use marine_rs_sdk::WasmLoggerBuilder;
 module_manifest!();
 
 pub fn main() {
-  WasmLoggerBuilder::new().build().unwrap();
+    WasmLoggerBuilder::new().build().unwrap();
 }
 
 #[marine]
@@ -39,11 +39,27 @@ pub fn greeting_record() -> GreetingRecord {
 }
 
 #[marine]
-pub fn logging() {
+pub fn log_info() {
     log::info!("info");
+}
+
+#[marine]
+pub fn log_warn() {
     log::warn!("warn");
+}
+
+#[marine]
+pub fn log_error() {
     log::error!("error");
+}
+
+#[marine]
+pub fn log_debug() {
     log::debug!("debug");
+}
+
+#[marine]
+pub fn log_trace() {
     log::trace!("trace");
 }
 

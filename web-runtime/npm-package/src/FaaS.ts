@@ -72,9 +72,9 @@ function log_import(cfg: HostImportsConfig): LogImport {
             } else if (level === LEVEL_INFO) {
                 console.info(str);
             } else if (level === LEVEL_TRACE) {
-                console.info(str);
+                console.log(str);
             } else if (level >= LEVEL_DEBUG) {
-                console.info(str);
+                console.log(str);
             }
         },
     };
