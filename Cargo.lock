@@ -862,19 +862,7 @@ version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "047f670b4807cab8872550a607b1515daff08b3e3bb7576ce8f45971fd811a4e"
 dependencies = [
- "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "nom",
- "serde",
- "variant_count",
- "wast",
-]
-
-[[package]]
-name = "fluence-it-types"
-version = "0.3.1"
-source = "git+https://github.com/fluencelabs/interface-types?branch=bug/allocating-more-than-2gb#dd4d6b7a248e00d94eb9b6ec85d01bc53359833d"
-dependencies = [
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=bug/allocating-more-than-2gb)",
+ "it-to-bytes",
  "nom",
  "serde",
  "variant_count",
@@ -1367,7 +1355,7 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "99ccf40e1e08f6f47ffbafe3cfb2e3adb721ddde80b178240f038d07dc9652fb"
 dependencies = [
- "fluence-it-types 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-it-types",
  "log",
  "paste",
  "thiserror",
@@ -1376,9 +1364,10 @@ dependencies = [
 [[package]]
 name = "it-lilo"
 version = "0.4.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=bug/allocating-more-than-2gb#dd4d6b7a248e00d94eb9b6ec85d01bc53359833d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a39dffcc610873b4c39b0fe04acac5ea77cf2eda9ed3d8a3b970b536d4e24c8"
 dependencies = [
- "fluence-it-types 0.3.1 (git+https://github.com/fluencelabs/interface-types?branch=bug/allocating-more-than-2gb)",
+ "fluence-it-types",
  "it-memory-traits",
  "log",
  "paste",
@@ -1388,7 +1377,8 @@ dependencies = [
 [[package]]
 name = "it-memory-traits"
 version = "0.3.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=bug/allocating-more-than-2gb#dd4d6b7a248e00d94eb9b6ec85d01bc53359833d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ca1799ed89e51a192e80a14ab14589044de9e58f0be86087ae8699cbe59f5c40"
 dependencies = [
  "thiserror",
 ]
@@ -1398,11 +1388,6 @@ name = "it-to-bytes"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "729c74bb4236418898a219c6d96f14cba77456dd7c04a2e99e65e9c643709b56"
-
-[[package]]
-name = "it-to-bytes"
-version = "0.1.0"
-source = "git+https://github.com/fluencelabs/interface-types?branch=bug/allocating-more-than-2gb#dd4d6b7a248e00d94eb9b6ec85d01bc53359833d"
 
 [[package]]
 name = "itertools"
@@ -1907,7 +1892,7 @@ dependencies = [
  "boolinator",
  "bytesize",
  "console_error_panic_hook",
- "fluence-it-types 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-it-types",
  "it-json-serde",
  "it-lilo 0.4.0",
  "it-memory-traits",
@@ -3717,9 +3702,9 @@ version = "0.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "14ba3b5a07989987994b96bf5cc7ac2947005f9ff6123d71b7064232f07d28fa"
 dependencies = [
- "fluence-it-types 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-it-types",
  "it-lilo 0.1.0",
- "it-to-bytes 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "it-to-bytes",
  "itertools 0.10.3",
  "log",
  "nom",
@@ -3734,12 +3719,13 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types-fl"
 version = "0.23.1"
-source = "git+https://github.com/fluencelabs/interface-types?branch=bug/allocating-more-than-2gb#dd4d6b7a248e00d94eb9b6ec85d01bc53359833d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb2da50f3cdfee8539f69c34427cef5d66dba0c0c2596db9dbefb5aceaa7f798"
 dependencies = [
- "fluence-it-types 0.3.1 (git+https://github.com/fluencelabs/interface-types?branch=bug/allocating-more-than-2gb)",
+ "fluence-it-types",
  "it-lilo 0.4.0",
  "it-memory-traits",
- "it-to-bytes 0.1.0 (git+https://github.com/fluencelabs/interface-types?branch=bug/allocating-more-than-2gb)",
+ "it-to-bytes",
  "itertools 0.10.3",
  "log",
  "nom",
