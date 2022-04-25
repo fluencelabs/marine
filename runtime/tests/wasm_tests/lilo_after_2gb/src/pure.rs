@@ -45,3 +45,39 @@ pub fn fill_2gb_mem() {
 
 #[marine]
 pub fn pass_record(_record: TestRecord) {}
+
+#[marine]
+pub fn pass_string(_record: String) {}
+
+#[marine]
+pub fn pass_byte_array(_record: Vec<u8>) {}
+
+#[marine]
+pub fn pass_array(_record: Vec<u32>) {}
+
+#[marine]
+pub fn return_record() -> TestRecord {
+    TestRecord {
+        field1: 0,
+        field2: 1,
+        field3: 2,
+        field4: 3,
+        field5: 4
+    }
+}
+
+#[marine]
+pub fn return_string() -> String {
+    String::from("1234")
+}
+
+#[marine]
+pub fn return_byte_array() -> Vec<u8> {
+    vec![0,1,2,3]
+}
+
+#[marine]
+pub fn return_array() -> Vec<u32> {
+    vec![0,1,2,3]
+}
+
