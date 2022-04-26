@@ -787,9 +787,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.17.1"
+version = "0.17.2"
 dependencies = [
- "fluence-faas 0.16.1",
+ "fluence-faas 0.16.2",
  "log",
  "maplit",
  "marine-min-it-version",
@@ -828,7 +828,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-faas"
-version = "0.16.1"
+version = "0.16.2"
 dependencies = [
  "bytesize",
  "cmd_lib",
@@ -839,7 +839,7 @@ dependencies = [
  "marine-module-interface 0.4.1",
  "marine-rs-sdk",
  "marine-rs-sdk-main",
- "marine-runtime 0.14.1",
+ "marine-runtime 0.14.2",
  "marine-utils 0.4.0",
  "once_cell",
  "pretty_assertions",
@@ -1792,7 +1792,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.14.1"
+version = "0.14.2"
 dependencies = [
  "anyhow",
  "boolinator",
@@ -2038,7 +2038,7 @@ dependencies = [
  "check-latest",
  "clap",
  "env_logger 0.7.1",
- "fluence-app-service 0.17.1",
+ "fluence-app-service 0.17.2",
  "itertools 0.9.0",
  "log",
  "marine-rs-sdk-main",
