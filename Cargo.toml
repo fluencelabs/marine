@@ -30,7 +30,7 @@ members = [
     "fluence-faas/tests/wasm_tests/arrays_passing",
     "fluence-faas/tests/wasm_tests/records_passing",
     "runtime",
-    "runtime/tests/wasm_tests/records_allocation",
+    "runtime/tests/wasm_tests/lilo_after_2gb",
     "web-runtime",
     "tools/cli",
     "tools/repl",

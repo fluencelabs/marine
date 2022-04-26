@@ -2,11 +2,11 @@
 
 # This script builds all tests
 (
-  cd records_allocation || exit;
+  cd lilo_after_2gb || exit;
   cargo update --aggressive;
   marine build --release;
   rm artifacts/* || true;
   mkdir artifacts
 )
 
-cp ../../../target/wasm32-wasi/release/records_allocation.wasm records_allocation/artifacts/
+cp ../../../target/wasm32-wasi/release/lilo_after_2gb.wasm lilo_after_2gb/artifacts/

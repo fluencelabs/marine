@@ -12,8 +12,8 @@ name = "marine"
 path = "src/main.rs"
 
 [dependencies]
-marine-it-generator = { path = "../../crates/it-generator", version = "0.8.0" }
-marine-it-parser = { path = "../../crates/it-parser", version = "0.9.0" }
+marine-it-generator = { path = "../../crates/it-generator", version = "0.8.1" }
+marine-it-parser = { path = "../../crates/it-parser", version = "0.9.1" }
 marine-module-info-parser = { path = "../../crates/module-info-parser", version = "0.2.2" }
 
 semver = "0.11.0"
