@@ -1,7 +1,7 @@
 [package]
 name = "marine-runtime"
 description = "Marine is the Fluence Compute Runtime"
-version = "0.14.1"
+version = "0.14.2"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -15,7 +15,7 @@ marine-module-info-parser = { path = "../crates/module-info-parser", version = "
 marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.7.1" }
 marine-it-parser = { path = "../crates/it-parser", version = "0.9.1" }
 marine-it-generator = { path = "../crates/it-generator", version = "0.8.1" }
-marine-module-interface = { path = "../crates/module-interface", version = "0.4.0" }
+marine-module-interface = { path = "../crates/module-interface", version = "0.4.1" }
 marine-utils = { path = "../crates/utils", version = "0.4.0" }
 marine-min-it-version =  { path = "../crates/min-it-version", version = "0.1.0"}
 
