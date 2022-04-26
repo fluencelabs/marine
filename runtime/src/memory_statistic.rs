@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+use serde::Serialize;
+use serde::Deserialize;
+
 use std::fmt;
 use std::ops::Deref;
 
@@ -21,7 +24,7 @@ use std::ops::Deref;
 /// Please note that linear memory contains not only heap, but globals, shadow stack and so on.
 /// Although it doesn't contain operand stack, additional runtime (Wasmer) structures,
 /// and some other stuff, that should be count separately.
-#[derive(Debug)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct ModuleMemoryStat<'module_name> {
     pub name: &'module_name str,
     pub memory_size: usize,
