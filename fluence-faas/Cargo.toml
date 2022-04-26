@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 marine-runtime = { path = "../runtime", version = "0.14.2" }
-marine-module-interface = { path = "../crates/module-interface", version = "=0.4.1" }
+marine-module-interface = { path = "../crates/module-interface", version = "0.4.1" }
 marine-utils = { path = "../crates/utils", version = "0.4.0" }
 marine-rs-sdk-main = { version = "0.6.15", features = ["logger"] }
 marine-rs-sdk = { version = "0.6.15", features = ["logger"] }
