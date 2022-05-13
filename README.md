@@ -4,7 +4,7 @@
 
 Marine is a modern general purpose Wasm runtime based on the [Component model](https://github.com/WebAssembly/component-model), it runs multi-module Wasm applications with interface-types and shared-nothing linking scheme. This execution model suits well for different scenarios, especially for applications based on the [entity component system](https://en.wikipedia.org/wiki/Entity_component_system) (ECS) pattern or architecture based on plugins.
 
-Fluence [nodes](https://github.com/fluencelabs/fluence) use Marine to execute Wasm services composed by compiled [Aqua](https://github.com/fluencelabs/aqua):\
+Fluence [nodes](https://github.com/fluencelabs/fluence) use Marine to execute Wasm services composed by compiled [Aqua](https://github.com/fluencelabs/aqua).
 
 ## Motivational example
 
