@@ -62,7 +62,7 @@ pub fn return_record() -> TestRecord {
         field2: 1,
         field3: 2,
         field4: 3,
-        field5: 4
+        field5: 4,
     }
 }
 
@@ -73,11 +73,10 @@ pub fn return_string() -> String {
 
 #[marine]
 pub fn return_byte_array() -> Vec<u8> {
-    vec![0,1,2,3]
+    vec![0, 1, 2, 3]
 }
 
 #[marine]
 pub fn return_array() -> Vec<u32> {
-    vec![0,1,2,3]
+    vec![0, 1, 2, 3]
 }
-

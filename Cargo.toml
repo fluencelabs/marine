@@ -13,6 +13,8 @@ members = [
     "examples/greeting_record",
     "examples/ipfs-node/effector",
     "examples/ipfs-node/pure",
+    "examples/motivational-example/donkey",
+    "examples/motivational-example/shrek",
     "examples/records/effector",
     "examples/records/pure",
     "examples/records/test-record",
