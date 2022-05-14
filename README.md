@@ -54,23 +54,23 @@ pub fn greeting(name: &str) -> String {
 In summary, our example is comprised of two independent Wasm modules, `shrek` and `donkey`, and illustrates how to link one module into another one, i.e., use the `donkey` module in the `shrek` module. Please note that the `shrek` module is called a *facade* module following the [facade pattern]((https://en.wikipedia.org/wiki/Facade_pattern)) and there can only be one *facade* module per service. 
 
 
-Make sure you have the Marine tools [installed](https://doc.fluence.dev/docs/tutorials_tutorials/recipes_setting_up#marine-tools)) and compile the `donkey` and `shrek`, respectively, which we can do with the `build.sh` script:
+Make sure you have the Marine tools [installed](https://doc.fluence.dev/docs/tutorials_tutorials/recipes_setting_up#marine-tools) and compile the `donkey` and `shrek`, respectively, which we can do with the `build.sh` script:
 
 ```bash
-./build.sh
+$> ./build.sh
 ```
 
 which creates two independent Wasm modules that are placed in the `artifact` directory:
 
 ```bash
-ls artifacts
+$> ls artifacts
 donkey.wasm    shrek.wasm
 ```
 
 Now that we have our modules, we can explore them with the Marine REPL. Note that we use the  `Config.toml` file to help out the REPL by providing the module location and names. Once we got the REPL up and running, we can interact with both modules and, as expected, the `shrek` module is successfully able to access the `donkey` module's exposed functions.
 
 ```bash
-marine mrepl Config.toml
+$> marine mrepl Config.toml
 ...
 1> interfaces
 Loaded modules interface:
