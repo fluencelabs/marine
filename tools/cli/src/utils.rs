@@ -17,6 +17,7 @@
 use std::process::Command;
 use std::process::Stdio;
 
+/// Run the provided command and returns its stdout.
 pub(crate) fn run_command(mut command: Command) -> Result<String, anyhow::Error> {
     let output = command
         .stderr(Stdio::inherit())
