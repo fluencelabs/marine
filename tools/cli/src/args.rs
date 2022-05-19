@@ -24,6 +24,8 @@ pub const IN_WASM_PATH: &str = "in-wasm-path";
 pub const IT_PATH: &str = "it-path";
 pub const OUT_WASM_PATH: &str = "out-wasm-path";
 pub const SERVICE_NAME: &str = "service-name";
+pub const PROJECT_NAME: &str = "name";
+pub const SHOULD_INIT_OPTION: &str = "init";
 pub const SERVICE_ID: &str = "service-id";
 
 pub const SDK_VERSION: &str = "sdk-version";
@@ -58,6 +60,23 @@ pub fn build<'a, 'b>() -> App<'a, 'b> {
         .setting(clap::AppSettings::TrailingVarArg)
         .setting(clap::AppSettings::AllowLeadingHyphen)
         .arg(Arg::from_usage("[optional]... 'cargo build arguments'").multiple(true))
+}
+
+pub fn generate<'a, 'b>() -> App<'a, 'b> {
+    SubCommand::with_name("generate")
+        .about("Generates a template project for a Marine Wasm module")
+        .args(&[
+            Arg::with_name(PROJECT_NAME)
+                .required(false)
+                .takes_value(true)
+                .short("n")
+                .help("a project name; if the name isn't in kebab-case, it'll be converted to kebab-case"),
+            Arg::with_name(SHOULD_INIT_OPTION)
+                .required(false)
+                .takes_value(false)
+                .short("i")
+        ]
+        )
 }
 
 pub fn set<'a, 'b>() -> App<'a, 'b> {

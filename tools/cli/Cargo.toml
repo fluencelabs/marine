@@ -1,7 +1,7 @@
 [package]
 name = "marine"
 description = "Fluence Marine command line tool"
-version = "0.9.0"
+version = "0.11.0"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine/tools/cli"
 license = "Apache-2.0"
