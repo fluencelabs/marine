@@ -31,6 +31,8 @@ use marine_module_info_parser::sdk_version;
 mod args;
 mod build;
 mod errors;
+mod generate;
+mod utils;
 
 pub(crate) type CLIResult<T> = std::result::Result<T, crate::errors::CLIError>;
 
@@ -41,6 +43,7 @@ pub fn main() -> Result<(), anyhow::Error> {
         .setting(clap::AppSettings::ArgRequiredElseHelp)
         .subcommand(args::aqua())
         .subcommand(args::build())
+        .subcommand(args::generate())
         .subcommand(args::set())
         .subcommand(args::show_manifest())
         .subcommand(args::show_wit())
@@ -53,6 +56,7 @@ pub fn main() -> Result<(), anyhow::Error> {
             return aqua(args);
         }
         ("build", Some(args)) => build(args),
+        ("generate", Some(args)) => generate(args),
         ("set", Some(args)) => set(args),
         ("it", Some(args)) => it(args),
         ("info", Some(args)) => info(args),
@@ -128,9 +132,14 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
 fn build(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let trailing_args: Vec<&str> = args.values_of("optional").unwrap_or_default().collect();
 
-    crate::build::build(trailing_args)?;
+    crate::build::build(trailing_args).map_err(Into::into)
+}
 
-    Ok(())
+fn generate(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
+    let project_name = args.value_of(args::PROJECT_NAME);
+    let should_be_initialized = args.is_present(args::SHOULD_INIT_OPTION);
+
+    crate::generate::generate(project_name, should_be_initialized)
 }
 
 fn set(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {

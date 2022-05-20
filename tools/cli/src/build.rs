@@ -31,7 +31,6 @@ enum DiagnosticMessage {
 }
 
 pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
-    use std::io::Read;
     use std::str::FromStr;
 
     let mut cargo = Command::new("cargo");
@@ -39,23 +38,8 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
     cargo.arg("--message-format").arg("json-render-diagnostics");
     cargo.args(trailing_args);
 
-    let mut process = cargo.stdout(std::process::Stdio::piped()).spawn()?;
-
-    let mut output = String::new();
-    process
-        .stdout
-        .take()
-        .ok_or_else(|| CLIError::WasmCompilationError("Compilation failed: no output".to_string()))?
-        .read_to_string(&mut output)?;
-
-    let status = process.wait()?;
-    if !status.success() {
-        return Err(CLIError::WasmCompilationError(format!(
-            "Compilation failed with status {}",
-            status
-        )));
-    }
-
+    let output = crate::utils::run_command_inherited(cargo)
+        .map_err(|e| CLIError::WasmCompilationError(e.to_string()))?;
     let mut wasms: Vec<String> = Vec::new();
     for line in output.lines() {
         if let Ok(DiagnosticMessage::CompilerArtifact { filenames }) = serde_json::from_str(line) {
