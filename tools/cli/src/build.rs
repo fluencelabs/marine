@@ -38,7 +38,7 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
     cargo.arg("--message-format").arg("json-render-diagnostics");
     cargo.args(trailing_args);
 
-    let output = crate::utils::run_command(cargo)
+    let output = crate::utils::run_command_inherited(cargo)
         .map_err(|e| CLIError::WasmCompilationError(e.to_string()))?;
     let mut wasms: Vec<String> = Vec::new();
     for line in output.lines() {

@@ -39,13 +39,13 @@ pub(crate) fn generate(
         cargo.arg("--init");
     }
 
-    crate::utils::run_command(cargo).map(|_| ())
+    crate::utils::run_command_inherited(cargo).map(|_| ())
 }
 
 fn is_cargo_generate_installed() -> Result<bool, anyhow::Error> {
     let mut cargo = Command::new("cargo");
     cargo.arg("install").arg("--list");
 
-    let output = crate::utils::run_command(cargo)?;
+    let output = crate::utils::run_command_piped(cargo)?;
     Ok(output.contains("cargo-generate"))
 }

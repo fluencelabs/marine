@@ -14,24 +14,31 @@
  * limitations under the License.
  */
 
-use std::io::Read;
 use std::process::Command;
 use std::process::Stdio;
 
-/// Run the provided command and returns its stdout.
-pub(crate) fn run_command(mut command: Command) -> Result<String, anyhow::Error> {
-    let mut process = command.stdin(Stdio::inherit()).spawn()?;
+/// Run the provided command in the inherited mode (with printing output to stdout).
+pub(crate) fn run_command_inherited(command: Command) -> Result<String, anyhow::Error> {
+    run_command(command, Stdio::inherit())
+}
 
-    let status = process.wait()?;
-    if !status.success() {
-        anyhow::bail!("failed to execute, exited with {}", status,)
+/// Run the provided command in the piped mode (without printing output to stdout).
+pub(crate) fn run_command_piped(command: Command) -> Result<String, anyhow::Error> {
+    run_command(command, Stdio::piped())
+}
+
+/// Run the provided command and returns its stdout as a string.
+fn run_command<T: Into<Stdio>>(
+    mut command: Command,
+    stdout_config: T,
+) -> Result<String, anyhow::Error> {
+    let process = command.stdout(stdout_config).spawn()?;
+
+    let output = process.wait_with_output()?;
+    if !output.status.success() {
+        anyhow::bail!("failed to execute, exited with {}", output.status)
     }
 
-    let mut output = String::new();
-    process
-        .stdout
-        .take()
-        .ok_or_else(|| anyhow::anyhow!("failed to read the stdout"))?
-        .read_to_string(&mut output)?;
-    Ok(output)
+    let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
+    Ok(stdout)
 }
