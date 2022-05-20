@@ -16,12 +16,11 @@
 
 use std::process::Command;
 
-const CARGO_GENERATE_GENERATE: &str = "generate";
-const MARINE_TEMPLATE_URL: &str = "https://github.com/fluencelabs/marine-template";
+const MARINE_TEMPLATE_URL: &str = "fluencelabs/marine-template";
 
 pub(crate) fn generate(
     project_name: Option<&str>,
-    should_be_inited: bool,
+    should_be_initialized: bool,
 ) -> Result<(), anyhow::Error> {
     if !is_cargo_generate_installed()? {
         println!(
@@ -36,7 +35,7 @@ pub(crate) fn generate(
     if let Some(project_name) = project_name {
         cargo.arg("--name").arg(project_name);
     }
-    if should_be_inited {
+    if should_be_initialized {
         cargo.arg("--init");
     }
 
@@ -45,8 +44,8 @@ pub(crate) fn generate(
 
 fn is_cargo_generate_installed() -> Result<bool, anyhow::Error> {
     let mut cargo = Command::new("cargo");
-    cargo.arg(CARGO_GENERATE_GENERATE).arg("--version");
+    cargo.arg("install").arg("--list");
 
     let output = crate::utils::run_command(cargo)?;
-    Ok(!output.contains("error"))
+    Ok(output.contains("cargo-generate"))
 }

@@ -137,9 +137,9 @@ fn build(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
 
 fn generate(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let project_name = args.value_of(args::PROJECT_NAME);
-    let should_be_inited = args.is_present(args::SHOULD_INIT_OPTION);
+    let should_be_initialized = args.is_present(args::SHOULD_INIT_OPTION);
 
-    crate::generate::generate(project_name, should_be_inited)
+    crate::generate::generate(project_name, should_be_initialized)
 }
 
 fn set(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {

@@ -31,7 +31,7 @@ pub(crate) fn run_command(mut command: Command) -> Result<String, anyhow::Error>
     process
         .stdout
         .take()
-        .ok_or_else(|| anyhow::anyhow!("failed to read an stdout"))?
+        .ok_or_else(|| anyhow::anyhow!("failed to read the stdout"))?
         .read_to_string(&mut output)?;
     Ok(output)
 }
