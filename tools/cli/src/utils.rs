@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
+use std::io::Read;
 use std::process::Command;
 use std::process::Stdio;
 
 /// Run the provided command and returns its stdout.
 pub(crate) fn run_command(mut command: Command) -> Result<String, anyhow::Error> {
-    let output = command
-        .stderr(Stdio::inherit())
-        .stdin(Stdio::inherit())
-        .output()?;
+    let mut process = command.stdin(Stdio::inherit()).spawn()?;
 
-    if output.status.success() {
-        let output = String::from_utf8_lossy(&output.stdout).into_owned();
-        Ok(output)
-    } else {
-        anyhow::bail!(
-            "failed to execute `{:?}`: exited with {}",
-            command,
-            output.status,
-        )
+    let status = process.wait()?;
+    if !status.success() {
+        anyhow::bail!("failed to execute, exited with {}", status,)
     }
+
+    let mut output = String::new();
+    process
+        .stdout
+        .take()
+        .ok_or_else(|| anyhow::anyhow!("failed to read an stdout"))?
+        .read_to_string(&mut output)?;
+    Ok(output)
 }

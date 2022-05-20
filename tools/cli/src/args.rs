@@ -24,8 +24,8 @@ pub const IN_WASM_PATH: &str = "in-wasm-path";
 pub const IT_PATH: &str = "it-path";
 pub const OUT_WASM_PATH: &str = "out-wasm-path";
 pub const SERVICE_NAME: &str = "service-name";
-pub const PROJECT_NAME: &str = "name";
-pub const SHOULD_INIT_OPTION: &str = "init";
+pub const PROJECT_NAME: &str = "generate-project-name";
+pub const SHOULD_INIT_OPTION: &str = "should-init";
 pub const SERVICE_ID: &str = "service-id";
 
 pub const SDK_VERSION: &str = "sdk-version";
@@ -70,11 +70,14 @@ pub fn generate<'a, 'b>() -> App<'a, 'b> {
                 .required(false)
                 .takes_value(true)
                 .short("n")
+                .long("name")
                 .help("a project name; if the name isn't in kebab-case, it'll be converted to kebab-case"),
             Arg::with_name(SHOULD_INIT_OPTION)
                 .required(false)
                 .takes_value(false)
                 .short("i")
+                .long("init")
+                .help("generate the template into the current dir without creating a new one"),
         ]
         )
 }
