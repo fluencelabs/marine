@@ -38,8 +38,8 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
     cargo.arg("--message-format").arg("json-render-diagnostics");
     cargo.args(trailing_args);
 
-    // piped here is used because cargo build prints all necessary for user compilation progress
-    // into stderr, while stdout is used for deep compiler-specific messages
+    // the piped mode is used here because cargo build prints all necessary for user
+    // compilation progress into stderr, while stdout is used for deep compiler-specific messages
     // that DiagnosticMessage represents
     let output = crate::utils::run_command_piped(cargo)
         .map_err(|e| CLIError::WasmCompilationError(e.to_string()))?;
