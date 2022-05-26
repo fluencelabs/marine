@@ -117,7 +117,7 @@ impl REPL {
         };
         let result_msg = match self
             .app_service
-            .load_module::<String, fluence_app_service::FaaSModuleConfig>(
+            .load_module::<fluence_app_service::FaaSModuleConfig, String>(
                 module_name.into(),
                 &wasm_bytes.unwrap(),
                 Some(config),

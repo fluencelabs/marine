@@ -36,7 +36,7 @@ struct ModuleBootstrapper {
     module: elements::Module,
 }
 
-impl<'a> ModuleBootstrapper {
+impl ModuleBootstrapper {
     fn init(module_code: &[u8]) -> PrepareResult<Self> {
         let module = elements::deserialize_buffer(module_code)?;
 
