@@ -137,10 +137,10 @@ impl FluenceFaaS {
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub fn call_with_ivalues<MN: AsRef<str>, FN: AsRef<str>>(
+    pub fn call_with_ivalues(
         &mut self,
-        module_name: MN,
-        func_name: FN,
+        module_name: impl AsRef<str>,
+        func_name: impl AsRef<str>,
         args: &[IValue],
         call_parameters: marine_rs_sdk::CallParameters,
     ) -> FaaSResult<Vec<IValue>> {
@@ -152,10 +152,10 @@ impl FluenceFaaS {
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub fn call_with_json<MN: AsRef<str>, FN: AsRef<str>>(
+    pub fn call_with_json(
         &mut self,
-        module_name: MN,
-        func_name: FN,
+        module_name: impl AsRef<str>,
+        func_name: impl AsRef<str>,
         json_args: JValue,
         call_parameters: marine_rs_sdk::CallParameters,
     ) -> FaaSResult<JValue> {
@@ -285,13 +285,13 @@ impl FluenceFaaS {
             .map_err(Into::into)
     }
 
-    pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> FaaSResult<()> {
+    pub fn unload_module(&mut self, module_name: impl AsRef<str>) -> FaaSResult<()> {
         self.marine.unload_module(module_name).map_err(Into::into)
     }
 
-    pub fn module_wasi_state<S: AsRef<str>>(
+    pub fn module_wasi_state(
         &mut self,
-        module_name: S,
+        module_name: impl AsRef<str>,
     ) -> FaaSResult<&wasmer_wasi::state::WasiState> {
         let module_name = module_name.as_ref();
 

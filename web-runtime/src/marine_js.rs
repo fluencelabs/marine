@@ -113,9 +113,9 @@ impl DynFunc {
                     .map(|(value, ty)| {
                         match ty {
                             WType::I32 => value.as_i64().map(|value| WValue::I32(value as i32)),
-                            WType::I64 => value.as_i64().map(|value| WValue::I64(value)),
+                            WType::I64 => value.as_i64().map(WValue::I64),
                             WType::F32 => value.as_f64().map(|value| WValue::F32(value as f32)),
-                            WType::F64 => value.as_f64().map(|value| WValue::F64(value)),
+                            WType::F64 => value.as_f64().map(WValue::F64),
                             WType::V128 => None,
                         }
                         .ok_or(format!("Cannot convert value {} to type {}", value, ty))

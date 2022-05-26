@@ -45,10 +45,10 @@ impl Marine {
     }
 
     /// Invoke a function of a module inside Marine by given function name with given arguments.
-    pub fn call<MN: AsRef<str>, FN: AsRef<str>>(
+    pub fn call(
         &mut self,
-        module_name: MN,
-        func_name: FN,
+        module_name: impl AsRef<str>,
+        func_name: impl AsRef<str>,
         arguments: &[IValue],
     ) -> MResult<Vec<IValue>> {
         let module_name = module_name.as_ref();
@@ -60,9 +60,9 @@ impl Marine {
     }
 
     /// Load a new module inside Marine.
-    pub fn load_module<S: Into<String>>(
+    pub fn load_module(
         &mut self,
-        name: S,
+        name: impl Into<String>,
         wasm_bytes: &[u8],
         config: MModuleConfig,
     ) -> MResult<()> {
@@ -89,7 +89,7 @@ impl Marine {
     }
 
     /// Unload previously loaded module.
-    pub fn unload_module<S: AsRef<str>>(&mut self, name: S) -> MResult<()> {
+    pub fn unload_module(&mut self, name: impl AsRef<str>) -> MResult<()> {
         // TODO: clean up all reference from adaptors after adding support of lazy linking
         self.modules
             .remove(name.as_ref())
@@ -97,9 +97,9 @@ impl Marine {
             .ok_or_else(|| MError::NoSuchModule(name.as_ref().to_string()))
     }
 
-    pub fn module_wasi_state<S: AsRef<str>>(
+    pub fn module_wasi_state(
         &mut self,
-        module_name: S,
+        module_name: impl AsRef<str>,
     ) -> Option<&wasmer_wasi::state::WasiState> {
         self.modules
             .get_mut(module_name.as_ref())
@@ -114,23 +114,23 @@ impl Marine {
     }
 
     /// Return function signatures exported by module with given name.
-    pub fn module_interface<S: AsRef<str>>(&self, module_name: S) -> Option<MModuleInterface<'_>> {
+    pub fn module_interface(&self, module_name: impl AsRef<str>) -> Option<MModuleInterface<'_>> {
         self.modules
             .get(module_name.as_ref())
             .map(Self::get_module_interface)
     }
 
     /// Return record types exported by module with given name.
-    pub fn module_record_types<S: AsRef<str>>(&self, module_name: S) -> Option<&MRecordTypes> {
+    pub fn module_record_types(&self, module_name: impl AsRef<str>) -> Option<&MRecordTypes> {
         self.modules
             .get(module_name.as_ref())
             .map(|module| module.export_record_types())
     }
 
     /// Return record type for supplied record id exported by module with given name.
-    pub fn module_record_type_by_id<S: AsRef<str>>(
+    pub fn module_record_type_by_id(
         &self,
-        module_name: S,
+        module_name: impl AsRef<str>,
         record_id: u64,
     ) -> Option<&Rc<IRecordType>> {
         self.modules

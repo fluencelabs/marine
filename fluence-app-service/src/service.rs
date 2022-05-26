@@ -41,10 +41,10 @@ pub struct AppService {
 
 impl AppService {
     /// Create Service with given modules and service id.
-    pub fn new<C, S>(config: C, service_id: S, envs: HashMap<Vec<u8>, Vec<u8>>) -> Result<Self>
+    pub fn new<S, C>(config: C, service_id: S, envs: HashMap<Vec<u8>, Vec<u8>>) -> Result<Self>
     where
-        C: TryInto<AppServiceConfig>,
         S: Into<String>,
+        C: TryInto<AppServiceConfig>,
         AppServiceError: From<C::Error>,
     {
         let mut config: AppServiceConfig = config.try_into()?;
@@ -73,9 +73,9 @@ impl AppService {
 
     /// Call a specified function of loaded module by its name with arguments in json format.
     // TODO: replace serde_json::Value with Vec<u8>?
-    pub fn call<S: AsRef<str>>(
+    pub fn call(
         &mut self,
-        func_name: S,
+        func_name: impl AsRef<str>,
         arguments: JValue,
         call_parameters: crate::CallParameters,
     ) -> Result<JValue> {
@@ -90,9 +90,9 @@ impl AppService {
     }
 
     /// Call a specified function of loaded module by its name with arguments in IValue format.
-    pub fn call_with_ivalues<S: AsRef<str>>(
+    pub fn call_with_ivalues(
         &mut self,
-        func_name: S,
+        func_name: impl AsRef<str>,
         arguments: &[IValue],
         call_parameters: crate::CallParameters,
     ) -> Result<Vec<IValue>> {
@@ -189,14 +189,14 @@ impl AppService {
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl AppService {
-    pub fn new_with_empty_facade<C, S>(
+    pub fn new_with_empty_facade<S, C>(
         config: C,
         service_id: S,
         envs: HashMap<Vec<u8>, Vec<u8>>,
     ) -> Result<Self>
     where
-        C: TryInto<AppServiceConfig>,
         S: Into<String>,
+        C: TryInto<AppServiceConfig>,
         AppServiceError: From<C::Error>,
     {
         let mut config: AppServiceConfig = config.try_into()?;
@@ -211,10 +211,10 @@ impl AppService {
         })
     }
 
-    pub fn call_module<MN: AsRef<str>, FN: AsRef<str>>(
+    pub fn call_module(
         &mut self,
-        module_name: MN,
-        func_name: FN,
+        module_name: impl AsRef<str>,
+        func_name: impl AsRef<str>,
         arguments: JValue,
         call_parameters: crate::CallParameters,
     ) -> Result<JValue> {
@@ -234,7 +234,7 @@ impl AppService {
             .map_err(Into::into)
     }
 
-    pub fn unload_module<S: AsRef<str>>(&mut self, module_name: S) -> Result<()> {
+    pub fn unload_module(&mut self, module_name: impl AsRef<str>) -> Result<()> {
         self.faas.unload_module(module_name).map_err(Into::into)
     }
 
@@ -244,9 +244,9 @@ impl AppService {
     }
 
     /// Return
-    pub fn get_wasi_state<S: AsRef<str>>(
+    pub fn get_wasi_state(
         &mut self,
-        module_name: S,
+        module_name: impl AsRef<str>,
     ) -> Result<&wasmer_wasi::state::WasiState> {
         self.faas.module_wasi_state(module_name).map_err(Into::into)
     }
