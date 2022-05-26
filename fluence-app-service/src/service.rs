@@ -41,7 +41,7 @@ pub struct AppService {
 
 impl AppService {
     /// Create Service with given modules and service id.
-    pub fn new<S, C>(config: C, service_id: S, envs: HashMap<Vec<u8>, Vec<u8>>) -> Result<Self>
+    pub fn new<C, S>(config: C, service_id: S, envs: HashMap<Vec<u8>, Vec<u8>>) -> Result<Self>
     where
         S: Into<String>,
         C: TryInto<AppServiceConfig>,
@@ -189,7 +189,7 @@ impl AppService {
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl AppService {
-    pub fn new_with_empty_facade<S, C>(
+    pub fn new_with_empty_facade<C, S>(
         config: C,
         service_id: S,
         envs: HashMap<Vec<u8>, Vec<u8>>,
@@ -223,7 +223,7 @@ impl AppService {
             .map_err(Into::into)
     }
 
-    pub fn load_module<S, C>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
+    pub fn load_module<C, S>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
     where
         S: Into<String>,
         C: TryInto<crate::FaaSModuleConfig>,

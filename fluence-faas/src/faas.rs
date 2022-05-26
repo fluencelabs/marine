@@ -256,7 +256,7 @@ impl FluenceFaaS {
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl FluenceFaaS {
-    pub fn load_module<S, C>(
+    pub fn load_module<C, S>(
         &mut self,
         name: S,
         wasm_bytes: &[u8],
