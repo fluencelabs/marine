@@ -72,7 +72,6 @@ impl AppService {
     }
 
     /// Call a specified function of loaded module by its name with arguments in json format.
-    // TODO: replace serde_json::Value with Vec<u8>?
     pub fn call(
         &mut self,
         func_name: impl AsRef<str>,
