@@ -782,7 +782,7 @@ version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "01c66660de99826038c5ec4ad0f5dccf10b1c8a15924aeaa5315ab49d718bfc9"
 dependencies = [
- "fluence-faas 0.9.3",
+ "fluence-faas",
  "log",
  "maplit",
  "serde",
@@ -794,12 +794,12 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.17.4"
+version = "0.17.3"
 dependencies = [
- "fluence-faas 0.16.4",
  "log",
  "maplit",
  "marine-min-it-version",
+ "marine-runtime 0.17.0",
  "serde",
  "serde_derive",
  "serde_json",
@@ -828,36 +828,6 @@ dependencies = [
  "thiserror",
  "toml",
  "wasmer-interface-types-fl 0.20.2",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
- "wasmer-wasi-fl",
-]
-
-[[package]]
-name = "fluence-faas"
-version = "0.16.4"
-dependencies = [
- "bytesize",
- "cmd_lib",
- "env_logger 0.7.1",
- "it-json-serde",
- "itertools 0.9.0",
- "log",
- "marine-module-interface 0.4.1",
- "marine-rs-sdk",
- "marine-rs-sdk-main",
- "marine-runtime 0.14.3",
- "marine-utils 0.4.0",
- "once_cell",
- "pretty_assertions",
- "safe-transmute",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_with",
- "thiserror",
- "toml",
- "wasmer-interface-types-fl 0.23.1",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
  "wasmer-wasi-fl",
@@ -1519,7 +1489,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.10.1"
+version = "0.10.2"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -1545,6 +1515,40 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0108407ef0528984cd5b226e6d69552b1658b205f60c83305ca33179d6e9eee1"
 dependencies = [
  "marine-test-macro-impl",
+]
+
+[[package]]
+name = "marine-core"
+version = "0.15.0"
+dependencies = [
+ "anyhow",
+ "boolinator",
+ "bytes 0.5.6",
+ "bytesize",
+ "it-lilo 0.4.0",
+ "it-memory-traits",
+ "log",
+ "marine-it-generator 0.8.1",
+ "marine-it-interfaces 0.7.1",
+ "marine-it-parser 0.9.1",
+ "marine-min-it-version",
+ "marine-module-info-parser 0.2.2",
+ "marine-module-interface 0.4.1",
+ "marine-utils 0.4.0",
+ "multimap",
+ "once_cell",
+ "parity-wasm 0.42.2",
+ "paste",
+ "pwasm-utils 0.18.2",
+ "reqwest 0.10.10",
+ "semver 0.11.0",
+ "serde",
+ "thiserror",
+ "tokio 0.2.25",
+ "wasmer-interface-types-fl 0.23.1",
+ "wasmer-runtime-core-fl",
+ "wasmer-runtime-fl",
+ "wasmer-wasi-fl",
 ]
 
 [[package]]
@@ -1633,6 +1637,42 @@ dependencies = [
  "walrus",
  "wasmer-interface-types-fl 0.23.1",
  "wasmer-runtime-core-fl",
+]
+
+[[package]]
+name = "marine-js"
+version = "0.2.1"
+dependencies = [
+ "anyhow",
+ "boolinator",
+ "bytesize",
+ "console_error_panic_hook",
+ "fluence-it-types",
+ "it-json-serde",
+ "it-lilo 0.4.0",
+ "it-memory-traits",
+ "itertools 0.10.3",
+ "log",
+ "maplit",
+ "marine-it-interfaces 0.7.1",
+ "marine-min-it-version",
+ "marine-module-interface 0.4.1",
+ "marine-rs-sdk",
+ "marine-utils 0.4.0",
+ "multimap",
+ "nom",
+ "once_cell",
+ "paste",
+ "semver 0.11.0",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "serde_with",
+ "thiserror",
+ "toml",
+ "wasm-bindgen",
+ "wasmer-interface-types-fl 0.23.1",
+ "web-sys",
 ]
 
 [[package]]
@@ -1799,32 +1839,28 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.14.3"
+version = "0.17.0"
 dependencies = [
- "anyhow",
- "boolinator",
- "bytes 0.5.6",
  "bytesize",
- "it-lilo 0.4.0",
- "it-memory-traits",
+ "cmd_lib",
+ "env_logger 0.7.1",
+ "it-json-serde",
+ "itertools 0.9.0",
  "log",
- "marine-it-generator 0.8.1",
- "marine-it-interfaces 0.7.1",
- "marine-it-parser 0.9.1",
- "marine-min-it-version",
- "marine-module-info-parser 0.2.2",
+ "marine-core",
  "marine-module-interface 0.4.1",
+ "marine-rs-sdk",
+ "marine-rs-sdk-main",
  "marine-utils 0.4.0",
- "multimap",
  "once_cell",
- "parity-wasm 0.42.2",
- "paste",
- "pwasm-utils 0.18.2",
- "reqwest 0.10.10",
- "semver 0.11.0",
+ "pretty_assertions",
+ "safe-transmute",
  "serde",
+ "serde_derive",
+ "serde_json",
+ "serde_with",
  "thiserror",
- "tokio 0.2.25",
+ "toml",
  "wasmer-interface-types-fl 0.23.1",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
@@ -1890,42 +1926,6 @@ checksum = "8dc5838acba84ce4d802d672afd0814fae0ae7098021ae5b06d975e70d09f812"
 [[package]]
 name = "marine-utils"
 version = "0.4.0"
-
-[[package]]
-name = "marine-web-runtime"
-version = "0.2.1"
-dependencies = [
- "anyhow",
- "boolinator",
- "bytesize",
- "console_error_panic_hook",
- "fluence-it-types",
- "it-json-serde",
- "it-lilo 0.4.0",
- "it-memory-traits",
- "itertools 0.10.3",
- "log",
- "maplit",
- "marine-it-interfaces 0.7.1",
- "marine-min-it-version",
- "marine-module-interface 0.4.1",
- "marine-rs-sdk",
- "marine-utils 0.4.0",
- "multimap",
- "nom",
- "once_cell",
- "paste",
- "semver 0.11.0",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_with",
- "thiserror",
- "toml",
- "wasm-bindgen",
- "wasmer-interface-types-fl 0.23.1",
- "web-sys",
-]
 
 [[package]]
 name = "matches"
@@ -2034,7 +2034,7 @@ dependencies = [
  "check-latest",
  "clap",
  "env_logger 0.7.1",
- "fluence-app-service 0.17.4",
+ "fluence-app-service 0.17.3",
  "itertools 0.9.0",
  "log",
  "marine-rs-sdk-main",
