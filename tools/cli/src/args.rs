@@ -97,16 +97,19 @@ fn set_it<'a, 'b>() -> App<'a, 'b> {
                 .required(true)
                 .takes_value(true)
                 .short("i")
+                .long("input")
                 .help("a path to a Wasm file"),
             Arg::with_name(IT_PATH)
                 .required(true)
                 .takes_value(true)
                 .short("w")
+                .long("wit")
                 .help("a path to a file with interface types"),
             Arg::with_name(OUT_WASM_PATH)
                 .takes_value(true)
                 .short("o")
-                .help("a path to the result Wasm file with set interface types"),
+                .long("output")
+                .help("A path to the result Wasm file with set interface types. If absent, modifies input file."),
         ])
 }
 
@@ -118,16 +121,21 @@ fn set_version<'a, 'b>() -> App<'a, 'b> {
                 .required(true)
                 .takes_value(true)
                 .short("i")
+                .long("input")
                 .help("a path to a Wasm file"),
             Arg::with_name(SDK_VERSION)
                 .required(true)
                 .takes_value(true)
                 .short("v")
+                .long("version")
                 .help("a version of the sdk"),
             Arg::with_name(OUT_WASM_PATH)
                 .takes_value(true)
                 .short("o")
-                .help("a path to the result file with set version"),
+                .long("output")
+                .help(
+                    "A path to the result file with set version. If absent, modifies input file.",
+                ),
         ])
 }
 
@@ -138,7 +146,7 @@ pub fn show_wit<'a, 'b>() -> App<'a, 'b> {
         .args(&[Arg::with_name(IN_WASM_PATH)
             .required(true)
             .takes_value(true)
-            .short("i")
+            .index(1)
             .help("path to the Wasm file")])
 }
 
@@ -149,7 +157,7 @@ pub fn show_manifest<'a, 'b>() -> App<'a, 'b> {
         .args(&[Arg::with_name(IN_WASM_PATH)
             .required(true)
             .takes_value(true)
-            .short("i")
+            .index(1)
             .help("path to the Wasm file")])
 }
 
