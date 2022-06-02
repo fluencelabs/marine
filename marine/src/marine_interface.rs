@@ -41,7 +41,7 @@ fn print_record_types<'r>(
     f: &mut fmt::Formatter<'_>,
 ) -> fmt::Result {
     use std::collections::HashSet;
-
+    writeln!(f, "exported data types (combined from all modules):")?;
     let mut printed_record_types: HashSet<&IRecordType> = HashSet::new();
 
     for module in modules {
@@ -64,6 +64,10 @@ fn print_record_types<'r>(
         }
     }
 
+    if printed_record_types.len() == 0 {
+        writeln!(f, "<no exported data types>")?;
+    }
+
     writeln!(f)
 }
 
@@ -71,8 +75,14 @@ fn print_functions_sign<'r>(
     modules: impl Iterator<Item = (&'r &'r str, &'r MarineModuleInterface<'r>)>,
     f: &mut fmt::Formatter<'_>,
 ) -> fmt::Result {
+    let modules = modules.sorted_by(|lhs, rhs| lhs.0.cmp(rhs.0));
+    writeln!(f, "exported functions:")?;
     for (name, module_interface) in modules {
         writeln!(f, "{}:", *name)?;
+        if module_interface.function_signatures.len() == 0 {
+            writeln!(f, "<no exported functions>")?;
+            continue;
+        }
 
         for function_signature in module_interface.function_signatures.iter() {
             write!(f, "  fn {}(", function_signature.name)?;

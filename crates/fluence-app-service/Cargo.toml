@@ -1,13 +1,13 @@
 [package]
 name = "fluence-app-service"
 description = "Fluence Application Service"
-version = "0.17.3"
+version = "0.17.4"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-marine-runtime = { path = "../../marine", version = "0.17.0" }
+marine-runtime = { path = "../../marine", version = "0.17.1" }
 marine-min-it-version = { path = "../../crates/min-it-version", version = "0.1.0" }
 
 maplit = "1.0.2"

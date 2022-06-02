@@ -214,7 +214,10 @@ impl REPL {
         print!("Loaded modules heap sizes:\n{}", statistic);
     }
 
-    fn create_app_service<S: Into<PathBuf>>(config_file_path: Option<S>, quiet: bool) -> ReplResult<AppService> {
+    fn create_app_service<S: Into<PathBuf>>(
+        config_file_path: Option<S>,
+        quiet: bool,
+    ) -> ReplResult<AppService> {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
 
