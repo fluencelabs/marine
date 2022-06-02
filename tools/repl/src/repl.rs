@@ -21,7 +21,7 @@ use print_state::print_fs_state;
 use crate::ReplResult;
 
 use fluence_app_service::{AppService, CallParameters};
-use fluence_app_service::FaaSModuleConfig;
+use fluence_app_service::MarineModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
 
 use serde::Deserialize;
@@ -111,13 +111,13 @@ impl REPL {
         }
 
         let start = Instant::now();
-        let config = FaaSModuleConfig {
+        let config = MarineModuleConfig {
             logger_enabled: true,
             ..<_>::default()
         };
         let result_msg = match self
             .app_service
-            .load_module::<fluence_app_service::FaaSModuleConfig, String>(
+            .load_module::<fluence_app_service::MarineModuleConfig, String>(
                 module_name.into(),
                 &wasm_bytes.unwrap(),
                 Some(config),
