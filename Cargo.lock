@@ -1640,6 +1640,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "marine-js"
+version = "0.2.1"
+dependencies = [
+ "anyhow",
+ "boolinator",
+ "bytesize",
+ "console_error_panic_hook",
+ "fluence-it-types",
+ "it-json-serde",
+ "it-lilo 0.4.0",
+ "it-memory-traits",
+ "itertools 0.10.3",
+ "log",
+ "maplit",
+ "marine-it-interfaces 0.7.1",
+ "marine-min-it-version",
+ "marine-module-interface 0.4.1",
+ "marine-rs-sdk",
+ "marine-utils 0.4.0",
+ "multimap",
+ "nom",
+ "once_cell",
+ "paste",
+ "semver 0.11.0",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "serde_with",
+ "thiserror",
+ "toml",
+ "wasm-bindgen",
+ "wasmer-interface-types-fl 0.23.1",
+ "web-sys",
+]
+
+[[package]]
 name = "marine-macro"
 version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1890,42 +1926,6 @@ checksum = "8dc5838acba84ce4d802d672afd0814fae0ae7098021ae5b06d975e70d09f812"
 [[package]]
 name = "marine-utils"
 version = "0.4.0"
-
-[[package]]
-name = "marine-web-runtime"
-version = "0.2.1"
-dependencies = [
- "anyhow",
- "boolinator",
- "bytesize",
- "console_error_panic_hook",
- "fluence-it-types",
- "it-json-serde",
- "it-lilo 0.4.0",
- "it-memory-traits",
- "itertools 0.10.3",
- "log",
- "maplit",
- "marine-it-interfaces 0.7.1",
- "marine-min-it-version",
- "marine-module-interface 0.4.1",
- "marine-rs-sdk",
- "marine-utils 0.4.0",
- "multimap",
- "nom",
- "once_cell",
- "paste",
- "semver 0.11.0",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_with",
- "thiserror",
- "toml",
- "wasm-bindgen",
- "wasmer-interface-types-fl 0.23.1",
- "web-sys",
-]
 
 [[package]]
 name = "matches"
