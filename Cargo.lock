@@ -166,9 +166,9 @@ checksum = "cfa8873f51c92e232f9bac4065cddef41b714152812bfc5f7672ba16d6ef8cd9"
 
 [[package]]
 name = "bumpalo"
-version = "3.9.1"
+version = "3.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4a45a46ab1f2412e53d3a0ade76ffad2025804294569aae387231a0cd6e0899"
+checksum = "37ccbd214614c6783386c1af30caf03192f17891059cecc394b4fb119e363de3"
 
 [[package]]
 name = "byteorder"
@@ -782,7 +782,7 @@ version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "01c66660de99826038c5ec4ad0f5dccf10b1c8a15924aeaa5315ab49d718bfc9"
 dependencies = [
- "fluence-faas 0.9.3",
+ "fluence-faas",
  "log",
  "maplit",
  "serde",
@@ -796,10 +796,10 @@ dependencies = [
 name = "fluence-app-service"
 version = "0.17.3"
 dependencies = [
- "fluence-faas 0.16.3",
  "log",
  "maplit",
  "marine-min-it-version",
+ "marine-runtime 0.17.0",
  "serde",
  "serde_derive",
  "serde_json",
@@ -828,36 +828,6 @@ dependencies = [
  "thiserror",
  "toml",
  "wasmer-interface-types-fl 0.20.2",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
- "wasmer-wasi-fl",
-]
-
-[[package]]
-name = "fluence-faas"
-version = "0.16.3"
-dependencies = [
- "bytesize",
- "cmd_lib",
- "env_logger 0.7.1",
- "it-json-serde",
- "itertools 0.9.0",
- "log",
- "marine-module-interface 0.4.1",
- "marine-rs-sdk",
- "marine-rs-sdk-main",
- "marine-runtime 0.14.3",
- "marine-utils 0.4.0",
- "once_cell",
- "pretty_assertions",
- "safe-transmute",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_with",
- "thiserror",
- "toml",
- "wasmer-interface-types-fl 0.23.1",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
  "wasmer-wasi-fl",
@@ -1212,9 +1182,9 @@ dependencies = [
 
 [[package]]
 name = "hyper"
-version = "0.14.18"
+version = "0.14.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b26ae0a80afebe130861d90abf98e3814a4f28a4c6ffeb5ab8ebb2be311e0ef2"
+checksum = "42dc3c131584288d375f2d07f822b0cb012d8c6fb899a5b9fdb3cb7eb9b6004f"
 dependencies = [
  "bytes 1.1.0",
  "futures-channel",
@@ -1254,7 +1224,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6183ddfa99b85da61a140bea0efc93fdf56ceaa041b37d553518030827f9905"
 dependencies = [
  "bytes 1.1.0",
- "hyper 0.14.18",
+ "hyper 0.14.19",
  "native-tls",
  "tokio 1.18.2",
  "tokio-native-tls",
@@ -1285,9 +1255,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.8.1"
+version = "1.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f647032dfaa1f8b6dc29bd3edb7bbef4861b8b8007ebb118d6db284fd59f6ee"
+checksum = "e6012d540c5baa3589337a98ce73408de9b5a25ec9fc2c6fd6be8f0d39e0ca5a"
 dependencies = [
  "autocfg",
  "hashbrown",
@@ -1548,6 +1518,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "marine-core"
+version = "0.15.0"
+dependencies = [
+ "anyhow",
+ "boolinator",
+ "bytes 0.5.6",
+ "bytesize",
+ "it-lilo 0.4.0",
+ "it-memory-traits",
+ "log",
+ "marine-it-generator 0.8.1",
+ "marine-it-interfaces 0.7.1",
+ "marine-it-parser 0.9.1",
+ "marine-min-it-version",
+ "marine-module-info-parser 0.2.2",
+ "marine-module-interface 0.4.1",
+ "marine-utils 0.4.0",
+ "multimap",
+ "once_cell",
+ "parity-wasm 0.42.2",
+ "paste",
+ "pwasm-utils 0.18.2",
+ "reqwest 0.10.10",
+ "semver 0.11.0",
+ "serde",
+ "thiserror",
+ "tokio 0.2.25",
+ "wasmer-interface-types-fl 0.23.1",
+ "wasmer-runtime-core-fl",
+ "wasmer-runtime-fl",
+ "wasmer-wasi-fl",
+]
+
+[[package]]
 name = "marine-it-generator"
 version = "0.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1633,6 +1637,42 @@ dependencies = [
  "walrus",
  "wasmer-interface-types-fl 0.23.1",
  "wasmer-runtime-core-fl",
+]
+
+[[package]]
+name = "marine-js"
+version = "0.2.1"
+dependencies = [
+ "anyhow",
+ "boolinator",
+ "bytesize",
+ "console_error_panic_hook",
+ "fluence-it-types",
+ "it-json-serde",
+ "it-lilo 0.4.0",
+ "it-memory-traits",
+ "itertools 0.10.3",
+ "log",
+ "maplit",
+ "marine-it-interfaces 0.7.1",
+ "marine-min-it-version",
+ "marine-module-interface 0.4.1",
+ "marine-rs-sdk",
+ "marine-utils 0.4.0",
+ "multimap",
+ "nom",
+ "once_cell",
+ "paste",
+ "semver 0.11.0",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "serde_with",
+ "thiserror",
+ "toml",
+ "wasm-bindgen",
+ "wasmer-interface-types-fl 0.23.1",
+ "web-sys",
 ]
 
 [[package]]
@@ -1799,32 +1839,28 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.14.3"
+version = "0.17.0"
 dependencies = [
- "anyhow",
- "boolinator",
- "bytes 0.5.6",
  "bytesize",
- "it-lilo 0.4.0",
- "it-memory-traits",
+ "cmd_lib",
+ "env_logger 0.7.1",
+ "it-json-serde",
+ "itertools 0.9.0",
  "log",
- "marine-it-generator 0.8.1",
- "marine-it-interfaces 0.7.1",
- "marine-it-parser 0.9.1",
- "marine-min-it-version",
- "marine-module-info-parser 0.2.2",
+ "marine-core",
  "marine-module-interface 0.4.1",
+ "marine-rs-sdk",
+ "marine-rs-sdk-main",
  "marine-utils 0.4.0",
- "multimap",
  "once_cell",
- "parity-wasm 0.42.2",
- "paste",
- "pwasm-utils 0.18.2",
- "reqwest 0.10.10",
- "semver 0.11.0",
+ "pretty_assertions",
+ "safe-transmute",
  "serde",
+ "serde_derive",
+ "serde_json",
+ "serde_with",
  "thiserror",
- "tokio 0.2.25",
+ "toml",
  "wasmer-interface-types-fl 0.23.1",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
@@ -1892,42 +1928,6 @@ name = "marine-utils"
 version = "0.4.0"
 
 [[package]]
-name = "marine-web-runtime"
-version = "0.2.1"
-dependencies = [
- "anyhow",
- "boolinator",
- "bytesize",
- "console_error_panic_hook",
- "fluence-it-types",
- "it-json-serde",
- "it-lilo 0.4.0",
- "it-memory-traits",
- "itertools 0.10.3",
- "log",
- "maplit",
- "marine-it-interfaces 0.7.1",
- "marine-min-it-version",
- "marine-module-interface 0.4.1",
- "marine-rs-sdk",
- "marine-utils 0.4.0",
- "multimap",
- "nom",
- "once_cell",
- "paste",
- "semver 0.11.0",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_with",
- "thiserror",
- "toml",
- "wasm-bindgen",
- "wasmer-interface-types-fl 0.23.1",
- "web-sys",
-]
-
-[[package]]
 name = "matches"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1976,9 +1976,9 @@ dependencies = [
 
 [[package]]
 name = "miniz_oxide"
-version = "0.5.1"
+version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2b29bd4bc3f33391105ebee3589c19197c4271e3e5a9ec9bfe8127eeff8f082"
+checksum = "6f5c75688da582b8ffc1f1799e9db273f32133c49e048f614d22ec3256773ccc"
 dependencies = [
  "adler",
 ]
@@ -2226,9 +2226,9 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "openssl-sys"
-version = "0.9.73"
+version = "0.9.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d5fd19fb3e0a8191c1e34935718976a3e70c112ab9a24af6d7cadccd9d90bc0"
+checksum = "835363342df5fba8354c5b453325b110ffd54044e588c539cf2f20a8014e4cb1"
 dependencies = [
  "autocfg",
  "cc",
@@ -2636,7 +2636,7 @@ dependencies = [
  "h2 0.3.13",
  "http",
  "http-body 0.4.5",
- "hyper 0.14.18",
+ "hyper 0.14.19",
  "hyper-tls 0.5.0",
  "ipnet",
  "js-sys",
@@ -2690,12 +2690,6 @@ name = "rustop"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cac77bea4e5c89acb455a2fe072bc19334cb130691af6e1bed4625d3f5396e89"
-
-[[package]]
-name = "rustversion"
-version = "1.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2cc38e8fa666e2de3c4aba7edeb5ffc5246c1c2ed0e3d17e560aeeba736b23f"
 
 [[package]]
 name = "rustyline"
@@ -2884,11 +2878,10 @@ dependencies = [
 
 [[package]]
 name = "serde_with"
-version = "1.13.0"
+version = "1.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b827f2113224f3f19a665136f006709194bdfdcb1fdc1e4b2b5cbac8e0cced54"
+checksum = "678b5a069e50bf00ecd22d0cd8ddf7c236f68581b03db652061ed5eb13a312ff"
 dependencies = [
- "rustversion",
  "serde",
  "serde_with_macros",
 ]

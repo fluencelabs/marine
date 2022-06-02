@@ -100,7 +100,7 @@ Looks like everything is in order and the modules are ready for [deployment to t
 - **[fluence-app-service](./fluence-app-service)** - Fluence Application Service layer provides basic API for service running
 - **[fluence-faas](./fluence-faas)** - Fluence FaaS layer provides host closures, IT<->JSON conversion, logger, config handling and other
 - **[runtime](./runtime)** - runtime layer provides basic functionality for loading, unloading and calling modules
-- **[web-runtime](./web-runtime)** - web runtime layer aim to run Marine in browser
+- **[marine-js](./marine-js)** - web runtime layer aim to run Marine in browser
 - **[examples](./examples)** - several Marine examples used mostly for tests
 - **[it-generator](./crates/it-generator)** - generator of IT
 - **[it-interfaces](./crates/it-interfaces)** - handy structure for interface types handling
