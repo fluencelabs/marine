@@ -67,8 +67,8 @@ pub(super) struct REPL {
 }
 
 impl REPL {
-    pub fn new<S: Into<PathBuf>>(config_file_path: Option<S>) -> ReplResult<Self> {
-        let app_service = Self::create_app_service(config_file_path)?;
+    pub fn new<S: Into<PathBuf>>(config_file_path: Option<S>, quiet: bool) -> ReplResult<Self> {
+        let app_service = Self::create_app_service(config_file_path, quiet)?;
         Ok(Self { app_service })
     }
 
@@ -94,7 +94,7 @@ impl REPL {
     }
 
     fn new_service<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
-        match Self::create_app_service(args.next()) {
+        match Self::create_app_service(args.next(), false) {
             Ok(service) => self.app_service = service,
             Err(e) => println!("failed to create a new application service: {}", e),
         };
@@ -214,7 +214,7 @@ impl REPL {
         print!("Loaded modules heap sizes:\n{}", statistic);
     }
 
-    fn create_app_service<S: Into<PathBuf>>(config_file_path: Option<S>) -> ReplResult<AppService> {
+    fn create_app_service<S: Into<PathBuf>>(config_file_path: Option<S>, quiet: bool) -> ReplResult<AppService> {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
 
@@ -230,10 +230,12 @@ impl REPL {
 
         let duration = start.elapsed();
 
-        println!(
-            "app service was created with service id = {}\nelapsed time {:?}",
-            service_id, duration
-        );
+        if !quiet {
+            println!(
+                "app service was created with service id = {}\nelapsed time {:?}",
+                service_id, duration
+            );
+        }
 
         Ok(app_service)
     }
