@@ -65,9 +65,9 @@ jobs:
           yarn global add semver
           PATH="$(yarn global bin):$PATH"
 
-          MARINE_JS_CARGO_TOML="web-runtime/Cargo.toml"
-          CARGO_TOML="web-runtime/Cargo.toml"
-          PACKAGE_JSON="web-runtime/npm-package/package.json"
+          MARINE_JS_CARGO_TOML="marine-js/Cargo.toml"
+          CARGO_TOML="marine-js/Cargo.toml"
+          PACKAGE_JSON="marine-js/npm-package/package.json"
 
           # sanitize branch name so it can be used as a semver suffix (replace [^0-9a-zA-Z-] with hyphen)
           SANITIZED_BRANCH="$(echo -n "${{ env.BRANCH_NAME }}" | tr -C '[:alnum:]-' -)"
@@ -121,7 +121,7 @@ jobs:
         continue-on-error: true
 
       - name: Build npm package
-        working-directory: web-runtime
+        working-directory: marine-js
         run: |
           ./build.sh
           cd npm-package
@@ -130,7 +130,7 @@ jobs:
 
       ### Set version to FINAL_VERSION
       - run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
-        working-directory: web-runtime/npm-package
+        working-directory: marine-js/npm-package
 
       ### Publish to NPM registry
       - uses: actions/setup-node@v1
@@ -139,6 +139,6 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - run: npm publish --access public --tag=beta
-        working-directory: web-runtime/npm-package
+        working-directory: marine-js/npm-package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,8 +1,8 @@
 [package]
-name = "marine-web-runtime"
+name = "marine-js"
 version = "0.2.1"
 edition = "2018"
-description = "Web version of marine-runtime"
+description = "Web version of the marine runtime"
 publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
