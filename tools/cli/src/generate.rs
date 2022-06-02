@@ -16,7 +16,7 @@
 
 use std::process::Command;
 
-const MARINE_TEMPLATE_URL: &str = "fluencelabs/marine-template";
+const MARINE_TEMPLATE_URL: &str = "https://github.com/fluencelabs/marine-template";
 
 pub(crate) fn generate(
     project_name: Option<&str>,
