@@ -41,7 +41,7 @@ fn print_record_types<'r>(
     f: &mut fmt::Formatter<'_>,
 ) -> fmt::Result {
     use std::collections::HashSet;
-    writeln!(f, "exported data types (combined):")?;
+    writeln!(f, "exported data types (combined from all modules):")?;
     let mut printed_record_types: HashSet<&IRecordType> = HashSet::new();
 
     for module in modules {
