@@ -71,6 +71,9 @@ fn print_functions_sign<'r>(
     modules: impl Iterator<Item = (&'r &'r str, &'r FaaSModuleInterface<'r>)>,
     f: &mut fmt::Formatter<'_>,
 ) -> fmt::Result {
+    let modules = modules
+        .sorted_by(|lhs, rhs| lhs.0.cmp(rhs.0));
+
     for (name, module_interface) in modules {
         writeln!(f, "{}:", *name)?;
 

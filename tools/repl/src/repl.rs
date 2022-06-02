@@ -28,6 +28,7 @@ use serde::Deserialize;
 use serde_json::Value as JValue;
 
 use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
 use std::fs;
 use std::path::PathBuf;
 use std::time::Instant;
@@ -205,7 +206,7 @@ impl REPL {
     fn show_interface(&mut self) {
         let interface = self.app_service.get_full_interface();
 
-        print!("Loaded modules interface:\n{}", interface);
+        print!("Loaded modules interface:\n{}", ReplPrinter(interface));
     }
 
     fn show_memory_stats(&mut self) {
@@ -306,4 +307,23 @@ fn print_help() {
             \n\
             <args> and [call_params] should be in json"
     );
+}
+
+
+trait ReplDisplay {
+    fn repl_fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result;
+}
+
+struct ReplPrinter<T: ReplDisplay>(T);
+
+impl<T: ReplDisplay> Display for ReplPrinter<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.0.repl_fmt(f)
+    }
+}
+
+impl ReplDisplay for FaasInterface {
+    fn repl_fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.fmt(f)
+    }
 }
