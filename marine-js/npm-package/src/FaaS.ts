@@ -17,7 +17,7 @@
 import { WASI } from '@wasmer/wasi';
 import bindings from '@wasmer/wasi/lib/bindings/browser';
 import { WasmFs } from '@wasmer/wasmfs';
-import { init } from './marine_web_runtime';
+import { init } from './marine_js';
 import { FaaSConfig } from './config';
 import { Env } from '.';
 
