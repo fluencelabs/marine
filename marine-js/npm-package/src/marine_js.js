@@ -23,7 +23,7 @@ import {
     get_memory_size,
     read_byte_range,
     write_byte_range,
-} from './snippets/marine-web-runtime-6faa67b8af9cc173/marine-js.js';
+} from './snippets/marine-js-6faa67b8af9cc173/marine-js.js';
 
 export async function init(module) {
     let wasm;
@@ -64,6 +64,15 @@ export async function init(module) {
 
     function getStringFromWasm0(ptr, len) {
         return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
+    }
+
+    function addHeapObject(obj) {
+        if (heap_next === heap.length) heap.push(heap.length + 1);
+        const idx = heap_next;
+        heap_next = heap[idx];
+
+        heap[idx] = obj;
+        return idx;
     }
 
     let WASM_VECTOR_LEN = 0;
@@ -251,27 +260,27 @@ export async function init(module) {
         imports.wbg.__wbindgen_object_drop_ref = function (arg0) {
             takeObject(arg0);
         };
-        imports.wbg.__wbg_writebyte_5cf11e3bc7462ec2 = function (arg0, arg1, arg2) {
+        imports.wbg.__wbg_writebyte_1cd28c289a122c3e = function (arg0, arg1, arg2) {
             write_byte(getObject(arg0), arg1 >>> 0, arg2);
         };
-        imports.wbg.__wbg_writebyterange_bca7718185fe74fe = function (arg0, arg1, arg2, arg3) {
+        imports.wbg.__wbg_writebyterange_1bd57018426e92b7 = function (arg0, arg1, arg2, arg3) {
             write_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
         };
-        imports.wbg.__wbg_readbyte_4e42fb4a6e94d4cc = function (arg0, arg1) {
-            var ret = read_byte(getObject(arg0), arg1 >>> 0);
+        imports.wbg.__wbg_readbyte_a4527cac80a9c5d9 = function (arg0, arg1) {
+            const ret = read_byte(getObject(arg0), arg1 >>> 0);
             return ret;
         };
-        imports.wbg.__wbg_readbyterange_a6e4127576d4a165 = function (arg0, arg1, arg2, arg3) {
+        imports.wbg.__wbg_readbyterange_4235674e460302c8 = function (arg0, arg1, arg2, arg3) {
             read_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
         };
-        imports.wbg.__wbg_getmemorysize_44ed7b542fa6e518 = function (arg0) {
-            var ret = get_memory_size(getObject(arg0));
+        imports.wbg.__wbg_getmemorysize_fc7dfb8141165b62 = function (arg0) {
+            const ret = get_memory_size(getObject(arg0));
             return ret;
         };
-        imports.wbg.__wbg_callexport_a4e71f5003bf3d97 = function (arg0, arg1, arg2, arg3, arg4, arg5) {
-            var ret = call_export(getObject(arg1), getStringFromWasm0(arg2, arg3), getStringFromWasm0(arg4, arg5));
-            var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-            var len0 = WASM_VECTOR_LEN;
+        imports.wbg.__wbg_callexport_afeec9400c1168e1 = function (arg0, arg1, arg2, arg3, arg4, arg5) {
+            const ret = call_export(getObject(arg1), getStringFromWasm0(arg2, arg3), getStringFromWasm0(arg4, arg5));
+            const ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
             getInt32Memory0()[arg0 / 4 + 1] = len0;
             getInt32Memory0()[arg0 / 4 + 0] = ptr0;
         };

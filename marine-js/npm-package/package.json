@@ -16,7 +16,7 @@
         "build:tsc": "tsc",
         "build:web": "webpack -c webpack.config.web.js",
         "build:node": "webpack -c webpack.config.node.js",
-        "postbuild": "cp ../marine-web-pkg/marine_web_runtime_bg.wasm ./dist/marine-js.wasm",
+        "postbuild": "cp ../marine-js-pkg/marine_js_bg.wasm ./dist/marine-js.wasm",
         "test": "jest"
     },
     "private": false,
