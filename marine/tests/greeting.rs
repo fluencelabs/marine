@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use fluence_faas::FluenceFaaS;
-use fluence_faas::FaaSModuleInterface;
-use fluence_faas::IValue;
+use marine::Marine;
+use marine::MarineModuleInterface;
+use marine::IValue;
 
 use pretty_assertions::assert_eq;
 
@@ -29,12 +29,12 @@ pub fn greeting() {
     let greeting_config_raw = std::fs::read(greeting_config_path)
         .expect("../examples/greeting/Config.toml should presence");
 
-    let mut greeting_config: fluence_faas::TomlFaaSConfig =
+    let mut greeting_config: marine::TomlMarineConfig =
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
     greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
 
-    let mut faas = FluenceFaaS::with_raw_config(greeting_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut faas = Marine::with_raw_config(greeting_config)
+        .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
     let result1 = faas
         .call_with_ivalues(
@@ -65,29 +65,29 @@ pub fn get_interfaces() {
     let greeting_config_raw = std::fs::read(greeting_config_path)
         .expect("../examples/greeting/Config.toml should presence");
 
-    let mut greeting_config: fluence_faas::TomlFaaSConfig =
+    let mut greeting_config: marine::TomlMarineConfig =
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
     greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
 
-    let faas = FluenceFaaS::with_raw_config(greeting_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let faas = Marine::with_raw_config(greeting_config)
+        .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
     let interface = faas.get_interface();
 
-    let arguments = vec![fluence_faas::IFunctionArg {
+    let arguments = vec![marine::IFunctionArg {
         name: String::from("name"),
-        ty: fluence_faas::IType::String,
+        ty: marine::IType::String,
     }];
-    let output_types = vec![fluence_faas::IType::String];
+    let output_types = vec![marine::IType::String];
 
-    let greeting_sign = fluence_faas::FaaSFunctionSignature {
+    let greeting_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("greeting")),
         arguments: Rc::new(arguments),
         outputs: Rc::new(output_types),
     };
 
     let record_types = std::collections::HashMap::new();
-    let module_interface = FaaSModuleInterface {
+    let module_interface = MarineModuleInterface {
         record_types: &record_types,
         function_signatures: vec![greeting_sign],
     };
@@ -95,5 +95,5 @@ pub fn get_interfaces() {
     let mut modules = std::collections::HashMap::new();
     modules.insert("greeting", module_interface);
 
-    assert_eq!(interface, fluence_faas::FaaSInterface { modules });
+    assert_eq!(interface, marine::MarineInterface { modules });
 }
