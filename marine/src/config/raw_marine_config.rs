@@ -129,26 +129,4 @@ mod tests {
 
         assert!(toml::to_string(&config).is_ok())
     }
-
-    #[test]
-    fn serialize_named_with_all_fields() {
-        let config = TomlMarineNamedModuleConfig {
-            name: "name".to_string(),
-            file_name: Some("file_name".to_string()),
-            config: TomlMarineModuleConfig {
-                mem_pages_count: Some(100),
-                max_heap_size: Some(ByteSize::gib(4)),
-                logger_enabled: Some(false),
-                wasi: Some(TomlWASIConfig {
-                    preopened_files: Some(vec!["a".to_string()]),
-                    envs: None,
-                    mapped_dirs: None,
-                }),
-                mounted_binaries: None,
-                logging_mask: None,
-            },
-        };
-
-        assert!(toml::to_string(&config).is_ok())
-    }
 }
