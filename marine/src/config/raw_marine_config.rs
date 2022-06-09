@@ -91,9 +91,9 @@ pub struct TomlMarineModuleConfig {
     #[serde(default)]
     pub max_heap_size: Option<bytesize::ByteSize>,
     pub logger_enabled: Option<bool>,
+    pub logging_mask: Option<i32>,
     pub wasi: Option<TomlWASIConfig>,
     pub mounted_binaries: Option<toml::value::Table>,
-    pub logging_mask: Option<i32>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
@@ -109,7 +109,13 @@ mod tests {
     use super::{TomlMarineNamedModuleConfig, TomlMarineModuleConfig, TomlWASIConfig};
 
     #[test]
-    fn serialize_named() {
+    fn serialize_marine_named_module_config() {
+        let mut mounted_binaries = toml::value::Table::new();
+        mounted_binaries.insert(
+            "curl".to_string(),
+            toml::Value::String("/usr/local/bin/curl".to_string()),
+        );
+
         let config = TomlMarineNamedModuleConfig {
             name: "name".to_string(),
             file_name: Some("file_name".to_string()),
@@ -117,13 +123,13 @@ mod tests {
                 mem_pages_count: Some(100),
                 max_heap_size: Some(ByteSize::gib(4)),
                 logger_enabled: Some(false),
+                logging_mask: Some(1),
                 wasi: Some(TomlWASIConfig {
                     preopened_files: Some(vec!["a".to_string()]),
                     envs: None,
                     mapped_dirs: None,
                 }),
-                mounted_binaries: None,
-                logging_mask: None,
+                mounted_binaries: Some(mounted_binaries),
             },
         };
 
