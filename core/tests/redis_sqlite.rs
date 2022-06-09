@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use marine::Core;
-use marine::IValue;
+use marine_core::MarineCore;
+use marine_core::IValue;
 
 const REDIS_DOWNLOAD_URL: &str =
     "https://github.com/fluencelabs/redis/releases/download/v0.14.0_w/redis.wasm";
@@ -35,43 +35,43 @@ pub async fn download(url: &str) -> bytes::Bytes {
 async fn redis() {
     let wasm_bytes = download(REDIS_DOWNLOAD_URL).await;
 
-    let mut marine = Core::new();
+    let mut marine_core = MarineCore::new();
     let module_name = "redis";
     let config = <_>::default();
 
-    marine
+    marine_core
         .load_module(module_name, wasm_bytes.as_ref(), config)
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    let result1 = marine
+    let result1 = marine_core
         .call(
             module_name,
             "invoke",
             &[IValue::String(String::from("SET A 10"))],
         )
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
-    let result2 = marine
+    let result2 = marine_core
         .call(
             module_name,
             "invoke",
             &[IValue::String(String::from("SADD B 20"))],
         )
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
-    let result3 = marine
+    let result3 = marine_core
         .call(
             module_name,
             "invoke",
             &[IValue::String(String::from("GET A"))],
         )
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
-    let result4 = marine
+    let result4 = marine_core
         .call(
             module_name,
             "invoke",
             &[IValue::String(String::from("SMEMBERS B"))],
         )
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
-    let result5 = marine
+    let result5 = marine_core
         .call(
             module_name,
             "invoke",
@@ -95,15 +95,15 @@ async fn redis() {
 async fn sqlite() {
     let wasm_bytes = download(SQLITE_DOWNLOAD_URL).await;
 
-    let mut marine = Core::new();
+    let mut marine_core = MarineCore::new();
     let module_name = "sqlite";
     let config = <_>::default();
 
-    marine
+    marine_core
         .load_module(module_name, wasm_bytes.as_ref(), config)
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    let mut result1 = marine
+    let mut result1 = marine_core
         .call(
             module_name,
             "sqlite3_open_v2",
@@ -125,7 +125,7 @@ async fn sqlite() {
         _ => panic!("db handle should have u32 type"),
     };
 
-    let mut result1 = marine
+    let mut result1 = marine_core
         .call(
             module_name,
             "sqlite3_exec",
@@ -138,7 +138,7 @@ async fn sqlite() {
         )
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
 
-    let mut result2 = marine
+    let mut result2 = marine_core
         .call(
             module_name,
             "sqlite3_exec",
@@ -153,7 +153,7 @@ async fn sqlite() {
         )
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
 
-    let mut result3 = marine
+    let mut result3 = marine_core
         .call(
             module_name,
             "sqlite3_exec",

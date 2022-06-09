@@ -16,8 +16,8 @@
 
 mod utils;
 
-use fluence_faas::FluenceFaaS;
-use fluence_faas::IType;
+use marine::Marine;
+use marine::IType;
 
 use pretty_assertions::assert_eq;
 use once_cell::sync::Lazy;
@@ -25,9 +25,9 @@ use serde_json::json;
 
 use std::rc::Rc;
 
-static ARG_CONFIG: Lazy<fluence_faas::TomlFaaSConfig> = Lazy::new(|| {
+static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
     let mut arguments_passing_config =
-        fluence_faas::TomlFaaSConfig::load("./tests/wasm_tests/arguments_passing/Config.toml")
+        marine::TomlMarineConfig::load("./tests/wasm_tests/arguments_passing/Config.toml")
             .expect("toml faas config should be created");
 
     arguments_passing_config.modules_dir = Some(String::from(
@@ -43,163 +43,163 @@ const MODULE_NAME: &str = "arguments_passing_pure";
 pub fn get_interfaces() {
     use std::collections::HashSet;
 
-    let faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let interface = faas.get_interface();
 
-    let string_type_arguments = vec![fluence_faas::IFunctionArg {
+    let string_type_arguments = vec![marine::IFunctionArg {
         name: String::from("arg"),
         ty: IType::String,
     }];
     let string_type_outputs = vec![IType::String];
 
-    let string_type_sign = fluence_faas::FaaSFunctionSignature {
+    let string_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("string_type")),
         arguments: Rc::new(string_type_arguments.clone()),
         outputs: Rc::new(string_type_outputs.clone()),
     };
 
-    let string_ref_type_sign = fluence_faas::FaaSFunctionSignature {
+    let string_ref_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("string_ref_type")),
         arguments: Rc::new(string_type_arguments),
         outputs: Rc::new(string_type_outputs),
     };
 
-    let str_type_arguments = vec![fluence_faas::IFunctionArg {
+    let str_type_arguments = vec![marine::IFunctionArg {
         name: String::from("arg"),
         ty: IType::String,
     }];
     let str_type_outputs = vec![IType::String];
 
-    let str_type_sign = fluence_faas::FaaSFunctionSignature {
+    let str_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("str_type")),
         arguments: Rc::new(str_type_arguments),
         outputs: Rc::new(str_type_outputs),
     };
 
-    let bytearray_type_arguments = vec![fluence_faas::IFunctionArg {
+    let bytearray_type_arguments = vec![marine::IFunctionArg {
         name: String::from("arg"),
         ty: IType::ByteArray,
     }];
     let bytearray_type_outputs = vec![IType::ByteArray];
 
-    let bytearray_type_sign = fluence_faas::FaaSFunctionSignature {
+    let bytearray_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("bytearray_type")),
         arguments: Rc::new(bytearray_type_arguments.clone()),
         outputs: Rc::new(bytearray_type_outputs.clone()),
     };
 
-    let bytearray_ref_type_sign = fluence_faas::FaaSFunctionSignature {
+    let bytearray_ref_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("bytearray_ref_type")),
         arguments: Rc::new(bytearray_type_arguments),
         outputs: Rc::new(bytearray_type_outputs),
     };
 
-    let i32_type_arguments = vec![fluence_faas::IFunctionArg {
+    let i32_type_arguments = vec![marine::IFunctionArg {
         name: String::from("arg"),
         ty: IType::S32,
     }];
     let i32_type_outputs = vec![IType::S32];
 
-    let i32_type_sign = fluence_faas::FaaSFunctionSignature {
+    let i32_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("i32_type")),
         arguments: Rc::new(i32_type_arguments.clone()),
         outputs: Rc::new(i32_type_outputs.clone()),
     };
 
-    let i32_ref_type_sign = fluence_faas::FaaSFunctionSignature {
+    let i32_ref_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("i32_ref_type")),
         arguments: Rc::new(i32_type_arguments),
         outputs: Rc::new(i32_type_outputs),
     };
 
-    let i64_type_arguments = vec![fluence_faas::IFunctionArg {
+    let i64_type_arguments = vec![marine::IFunctionArg {
         name: String::from("arg"),
         ty: IType::S64,
     }];
 
     let i64_type_outputs = vec![IType::S64];
 
-    let i64_type_sign = fluence_faas::FaaSFunctionSignature {
+    let i64_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("i64_type")),
         arguments: Rc::new(i64_type_arguments.clone()),
         outputs: Rc::new(i64_type_outputs.clone()),
     };
 
-    let i64_ref_type_sign = fluence_faas::FaaSFunctionSignature {
+    let i64_ref_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("i64_ref_type")),
         arguments: Rc::new(i64_type_arguments),
         outputs: Rc::new(i64_type_outputs),
     };
 
-    let u32_type_arguments = vec![fluence_faas::IFunctionArg {
+    let u32_type_arguments = vec![marine::IFunctionArg {
         name: String::from("arg"),
         ty: IType::U32,
     }];
     let u32_type_outputs = vec![IType::U32];
 
-    let u32_type_sign = fluence_faas::FaaSFunctionSignature {
+    let u32_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("u32_type")),
         arguments: Rc::new(u32_type_arguments.clone()),
         outputs: Rc::new(u32_type_outputs.clone()),
     };
 
-    let u32_ref_type_sign = fluence_faas::FaaSFunctionSignature {
+    let u32_ref_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("u32_ref_type")),
         arguments: Rc::new(u32_type_arguments),
         outputs: Rc::new(u32_type_outputs),
     };
 
-    let u64_type_arguments = vec![fluence_faas::IFunctionArg {
+    let u64_type_arguments = vec![marine::IFunctionArg {
         name: String::from("arg"),
         ty: IType::U64,
     }];
     let u64_type_outputs = vec![IType::U64];
 
-    let u64_type_sign = fluence_faas::FaaSFunctionSignature {
+    let u64_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("u64_type")),
         arguments: Rc::new(u64_type_arguments.clone()),
         outputs: Rc::new(u64_type_outputs.clone()),
     };
 
-    let u64_ref_type_sign = fluence_faas::FaaSFunctionSignature {
+    let u64_ref_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("u64_ref_type")),
         arguments: Rc::new(u64_type_arguments),
         outputs: Rc::new(u64_type_outputs),
     };
 
-    let f32_type_arguments = vec![fluence_faas::IFunctionArg {
+    let f32_type_arguments = vec![marine::IFunctionArg {
         name: String::from("arg"),
         ty: IType::F32,
     }];
     let f32_type_outputs = vec![IType::F32];
 
-    let f32_type_sign = fluence_faas::FaaSFunctionSignature {
+    let f32_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("f32_type")),
         arguments: Rc::new(f32_type_arguments.clone()),
         outputs: Rc::new(f32_type_outputs.clone()),
     };
 
-    let f32_ref_type_sign = fluence_faas::FaaSFunctionSignature {
+    let f32_ref_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("f32_ref_type")),
         arguments: Rc::new(f32_type_arguments),
         outputs: Rc::new(f32_type_outputs),
     };
 
-    let f64_type_arguments = vec![fluence_faas::IFunctionArg {
+    let f64_type_arguments = vec![marine::IFunctionArg {
         name: String::from("arg"),
         ty: IType::F64,
     }];
     let f64_type_outputs = vec![IType::F64];
 
-    let f64_type_sign = fluence_faas::FaaSFunctionSignature {
+    let f64_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("f64_type")),
         arguments: Rc::new(f64_type_arguments.clone()),
         outputs: Rc::new(f64_type_outputs.clone()),
     };
 
-    let f64_ref_type_sign = fluence_faas::FaaSFunctionSignature {
+    let f64_ref_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("f64_ref_type")),
         arguments: Rc::new(f64_type_arguments),
         outputs: Rc::new(f64_type_outputs),
@@ -208,89 +208,89 @@ pub fn get_interfaces() {
     let empty_type_arguments = vec![];
     let empty_type_outputs = vec![IType::String];
 
-    let empty_type_sign = fluence_faas::FaaSFunctionSignature {
+    let empty_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("empty_type")),
         arguments: Rc::new(empty_type_arguments),
         outputs: Rc::new(empty_type_outputs),
     };
 
-    let bool_type_arguments = vec![fluence_faas::IFunctionArg {
+    let bool_type_arguments = vec![marine::IFunctionArg {
         name: String::from("arg"),
         ty: IType::Boolean,
     }];
     let bool_type_outputs = vec![IType::Boolean];
 
-    let bool_type_sign = fluence_faas::FaaSFunctionSignature {
+    let bool_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("bool_type")),
         arguments: Rc::new(bool_type_arguments.clone()),
         outputs: Rc::new(bool_type_outputs.clone()),
     };
 
-    let bool_ref_type_sign = fluence_faas::FaaSFunctionSignature {
+    let bool_ref_type_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("bool_ref_type")),
         arguments: Rc::new(bool_type_arguments),
         outputs: Rc::new(bool_type_outputs),
     };
 
     let all_types_arguments = vec![
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_0"),
             ty: IType::S8,
         },
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_1"),
             ty: IType::S16,
         },
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_2"),
             ty: IType::S32,
         },
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_3"),
             ty: IType::S64,
         },
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_4"),
             ty: IType::U8,
         },
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_5"),
             ty: IType::U16,
         },
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_6"),
             ty: IType::U32,
         },
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_7"),
             ty: IType::U64,
         },
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_8"),
             ty: IType::F32,
         },
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_9"),
             ty: IType::F64,
         },
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_10"),
             ty: IType::String,
         },
-        fluence_faas::IFunctionArg {
+        marine::IFunctionArg {
             name: String::from("arg_11"),
             ty: IType::ByteArray,
         },
     ];
     let all_types_outputs = vec![IType::ByteArray];
 
-    let all_types_sign = fluence_faas::FaaSFunctionSignature {
+    let all_types_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("all_types")),
         arguments: Rc::new(all_types_arguments.clone()),
         outputs: Rc::new(all_types_outputs.clone()),
     };
 
-    let all_ref_types_sign = fluence_faas::FaaSFunctionSignature {
+    let all_ref_types_sign = marine::MarineFunctionSignature {
         name: Rc::new(String::from("all_ref_types")),
         arguments: Rc::new(all_types_arguments),
         outputs: Rc::new(all_types_outputs),
@@ -351,7 +351,7 @@ pub fn get_interfaces() {
 
 #[test]
 pub fn all_types() {
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -411,7 +411,7 @@ pub fn all_types() {
 #[test]
 pub fn i32_type() {
     let test = |func_name: &str| {
-        let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+        let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
             .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
         let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default());
@@ -445,7 +445,7 @@ pub fn i32_type() {
 
 #[test]
 pub fn i64_type() {
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -480,7 +480,7 @@ pub fn i64_type() {
 
 #[test]
 pub fn u32_type() {
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -504,7 +504,7 @@ pub fn u32_type() {
 
 #[test]
 pub fn u64_type() {
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -528,7 +528,7 @@ pub fn u64_type() {
 
 #[test]
 pub fn f32_type() {
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -560,7 +560,7 @@ pub fn f32_type() {
 
 #[test]
 pub fn f64_type() {
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -592,7 +592,7 @@ pub fn f64_type() {
 
 #[test]
 pub fn string_type() {
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -618,7 +618,7 @@ pub fn string_type() {
 pub fn str_type() {
     const FUNC_NAME: &'static str = "str_type";
 
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
@@ -637,7 +637,7 @@ pub fn str_type() {
 
 #[test]
 pub fn bytearray_type() {
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -664,7 +664,7 @@ pub fn bytearray_type() {
 
 #[test]
 pub fn bool_type() {
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -690,7 +690,7 @@ pub fn bool_type() {
 pub fn empty_type() {
     const FUNC_NAME: &'static str = "empty_type";
 
-    let mut faas = FluenceFaaS::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let expected_result = json!("success");

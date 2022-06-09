@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use marine::Core;
-use marine::IValue;
+use marine_core::MarineCore;
+use marine_core::IValue;
 
 #[test]
 pub fn records() {
@@ -25,19 +25,19 @@ pub fn records() {
     let pure_wasm_bytes = std::fs::read("../examples/records/artifacts/records_pure.wasm")
         .expect("../examples/records/artifacts/records_pure.wasm should presence");
 
-    let mut marine = Core::new();
-    let load_result = marine.load_module("pure", &pure_wasm_bytes, <_>::default());
+    let mut marine_core = MarineCore::new();
+    let load_result = marine_core.load_module("pure", &pure_wasm_bytes, <_>::default());
     assert!(load_result.is_err());
 
-    marine
+    marine_core
         .load_module("records_effector", &effector_wasm_bytes, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    marine
+    marine_core
         .load_module("records_pure", &pure_wasm_bytes, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    let result = marine
+    let result = marine_core
         .call("records_pure", "invoke", &[])
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 

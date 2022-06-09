@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use marine::Core;
-use marine::IValue;
+use marine_core::MarineCore;
+use marine_core::IValue;
 
 use once_cell::sync::Lazy;
 
@@ -26,12 +26,12 @@ static GREETING_WASM_BYTES: Lazy<Vec<u8>> = Lazy::new(|| {
 
 #[test]
 pub fn greeting_basic() {
-    let mut marine = Core::new();
-    marine
+    let mut marine_core = MarineCore::new();
+    marine_core
         .load_module("greeting", &*GREETING_WASM_BYTES, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    let result1 = marine
+    let result1 = marine_core
         .call(
             "greeting",
             "greeting",
@@ -39,7 +39,7 @@ pub fn greeting_basic() {
         )
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
-    let result2 = marine
+    let result2 = marine_core
         .call("greeting", "greeting", &[IValue::String(String::from(""))])
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
@@ -50,17 +50,17 @@ pub fn greeting_basic() {
 #[test]
 // test loading module with the same name twice
 pub fn non_unique_module_name() {
-    let mut marine = Core::new();
+    let mut marine_core = MarineCore::new();
     let module_name = String::from("greeting");
-    marine
+    marine_core
         .load_module(&module_name, &*GREETING_WASM_BYTES, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    let load_result = marine.load_module(&module_name, &*GREETING_WASM_BYTES, <_>::default());
+    let load_result = marine_core.load_module(&module_name, &*GREETING_WASM_BYTES, <_>::default());
     assert!(load_result.is_err());
     assert!(std::matches!(
         load_result.err().unwrap(),
-        marine::MError::NonUniqueModuleName(_)
+        marine_core::MError::NonUniqueModuleName(_)
     ));
 }
 
@@ -68,8 +68,8 @@ pub fn non_unique_module_name() {
 #[allow(unused_variables)]
 // test calling Marine with non-exist module and function names
 pub fn non_exist_module_func() {
-    let mut marine = Core::new();
-    marine
+    let mut marine_core = MarineCore::new();
+    marine_core
         .load_module("greeting", &*GREETING_WASM_BYTES, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
@@ -77,19 +77,19 @@ pub fn non_exist_module_func() {
     let function_name = "greeting";
     let non_exist_name = String::from("_");
 
-    let call_result1 = marine.call(
+    let call_result1 = marine_core.call(
         non_exist_name.as_str(),
         function_name,
         &[IValue::String(String::from("Fluence"))],
     );
 
-    let call_result2 = marine.call(
+    let call_result2 = marine_core.call(
         module_name,
         non_exist_name.as_str(),
         &[IValue::String(String::from("Fluence"))],
     );
 
-    let call_result3 = marine.call(
+    let call_result3 = marine_core.call(
         non_exist_name.as_str(),
         non_exist_name.as_str(),
         &[IValue::String(String::from("Fluence"))],
@@ -98,19 +98,19 @@ pub fn non_exist_module_func() {
     assert!(call_result1.is_err());
     assert!(matches!(
         call_result1.err().unwrap(),
-        marine::MError::NoSuchModule(non_exist_name)
+        marine_core::MError::NoSuchModule(non_exist_name)
     ));
 
     assert!(call_result2.is_err());
     assert!(matches!(
         call_result2.err().unwrap(),
-        marine::MError::NoSuchFunction(module_name, non_exist_name)
+        marine_core::MError::NoSuchFunction(module_name, non_exist_name)
     ));
 
     assert!(call_result3.is_err());
     // at first, the module name should be checked
     assert!(matches!(
         call_result3.err().unwrap(),
-        marine::MError::NoSuchModule(non_exist_name)
+        marine_core::MError::NoSuchModule(non_exist_name)
     ));
 }
