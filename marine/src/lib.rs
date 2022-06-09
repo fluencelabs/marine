@@ -33,7 +33,7 @@ mod module_loading;
 
 pub(crate) type MarineResult<T> = std::result::Result<T, MarineError>;
 
-pub use marine::Marine;
+pub use crate::marine::Marine;
 pub use marine_interface::MarineInterface;
 
 pub use config::MarineConfig;
