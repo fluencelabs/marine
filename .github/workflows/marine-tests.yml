@@ -32,6 +32,9 @@ jobs:
       - name: "Cache rust"
         uses: Swatinem/rust-cache@v1
 
+      - name: "Install wasm-pack"
+        run: cargo install wasm-pack
+
       - name: "Install marine cli"
         run: cargo install --path tools/cli
 
