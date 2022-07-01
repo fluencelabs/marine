@@ -1,4 +1,4 @@
-name: "marine-tests"
+name: "marine"
 
 on:
   pull_request:
