@@ -90,7 +90,3 @@ jobs:
       - name: "npm test marine-js"
         run: npm run test
         working-directory: marine-js/npm-package
-
-      - name: "Setup tmate"
-        if: failure()
-        uses: mxschmitt/action-tmate@v3
