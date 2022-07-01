@@ -58,11 +58,11 @@ jobs:
         run: ./build.sh
         working-directory: examples
 
-      - name: "Build marine wasm-test"
+      - name: "Build marine wasm-tests"
         run: ./build.sh
         working-directory: marine/tests/wasm_tests
 
-      - name: "Build core wasm-test"
+      - name: "Build core wasm-tests"
         run: ./build.sh
         working-directory: core/tests/wasm_tests
 
