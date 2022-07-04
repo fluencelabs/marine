@@ -27,6 +27,7 @@ use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use crate::json_to_marine_err;
 
+use marine_core::OutdatedModule;
 use marine_core::MarineCore;
 use marine_core::IFunctionArg;
 use marine_core::MRecordTypes;
@@ -250,6 +251,10 @@ impl Marine {
             .insert(func_name.to_string(), module_interface);
 
         Ok((arg_types, output_types, record_types))
+    }
+
+    pub fn list_outdated(&self) -> Vec<OutdatedModule> {
+        self.core.list_outdated()
     }
 }
 

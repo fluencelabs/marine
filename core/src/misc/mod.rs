@@ -22,6 +22,7 @@ pub(crate) use errors::HeapBaseError;
 pub(crate) use errors::PrepareError;
 pub(crate) use prepare::prepare_module;
 pub(crate) use version_checker::check_sdk_version;
+pub(crate) use version_checker::check_if_outdated;
 pub(crate) use version_checker::check_it_version;
 
-pub(self) type PrepareResult<T> = std::result::Result<T, PrepareError>;
+pub(crate) type PrepareResult<T> = Result<T, PrepareError>;

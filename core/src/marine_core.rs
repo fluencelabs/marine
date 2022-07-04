@@ -17,12 +17,15 @@
 use super::*;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
+use crate::misc::PrepareError;
 
+use semver::Version;
 use serde::Serialize;
 
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::rc::Rc;
+
 
 /// Represent Marine module interface.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
@@ -35,6 +38,22 @@ pub struct MModuleInterface<'a> {
 pub struct MarineCore {
     // set of modules registered inside Marine
     modules: HashMap<String, MModule>,
+}
+
+pub struct OutdatedModule {
+    pub name: String,
+    pub version: Version,
+    pub stable_version: Version,
+}
+
+impl OutdatedModule {
+    pub fn new(name: String, version: Version, stable_version: Version) -> Self {
+        Self {
+            name,
+            version,
+            stable_version,
+        }
+    }
 }
 
 impl MarineCore {
@@ -149,6 +168,25 @@ impl MarineCore {
             .collect::<Vec<_>>();
 
         records.into()
+    }
+
+    pub fn list_outdated(&self) -> Vec<OutdatedModule> {
+        self.modules
+            .iter()
+            .filter_map(|(name, module)| {
+                module
+                    .check_update_status(name.clone())
+                    .err()
+                    .map(|error| {
+                        match error {
+                            PrepareError::IncompatibleSDKVersions {
+                                module_name, required, provided
+                            } => Some(OutdatedModule::new(module_name, provided, required)),
+                            _ => None,
+                        }
+                    }).flatten()
+            })
+            .collect()
     }
 
     fn get_module_interface(module: &MModule) -> MModuleInterface<'_> {

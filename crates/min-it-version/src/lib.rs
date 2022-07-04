@@ -31,17 +31,28 @@ use std::str::FromStr;
 static MINIMAL_SUPPORTED_SDK_VERSION: Lazy<semver::Version> = Lazy::new(|| {
     semver::Version::from_str("0.6.0").expect("invalid minimal sdk version specified")
 });
+
+static STABLE_SUPPORTED_SDK_VERSION: Lazy<semver::Version> = Lazy::new(|| {
+    semver::Version::from_str("0.7.0").expect("invalid minimal sdk version specified")
+});
+
 static MINIMAL_SUPPORTED_IT_VERSION: Lazy<semver::Version> = Lazy::new(|| {
     semver::Version::from_str("0.20.0").expect("invalid minimal sdk version specified")
 });
 
 // These locals intended for check that set versions are correct at the start of an application.
 thread_local!(static MINIMAL_SUPPORTED_SDK_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_SDK_VERSION));
+thread_local!(static STABLE_SUPPORTED_SDK_VERSION_CHECK: &'static semver::Version = Lazy::force(&STABLE_SUPPORTED_SDK_VERSION));
 thread_local!(static MINIMAL_SUPPORTED_IT_VERSION_CHECK: &'static semver::Version = Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION));
 
 /// Return minimal support version of interface types.
 pub fn min_it_version() -> &'static semver::Version {
     Lazy::force(&MINIMAL_SUPPORTED_IT_VERSION)
+}
+
+/// Return stable supported version of SDK.
+pub fn stable_sdk_version() -> &'static semver::Version {
+    Lazy::force(&STABLE_SUPPORTED_SDK_VERSION)
 }
 
 /// Return minimal support version of SDK.

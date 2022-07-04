@@ -18,7 +18,7 @@ use super::PrepareResult;
 use super::PrepareError;
 
 use marine_module_info_parser::sdk_version;
-use marine_min_it_version::min_sdk_version;
+use marine_min_it_version::{min_sdk_version, stable_sdk_version};
 use marine_min_it_version::min_it_version;
 
 use wasmer_core::Module;
@@ -37,7 +37,7 @@ pub(crate) fn check_sdk_version(
     if module_version < *required_version {
         return Err(PrepareError::IncompatibleSDKVersions {
             module_name: name.into(),
-            required: required_version.clone(),
+            required: stable_sdk_version().clone(),
             provided: module_version,
         });
     }
@@ -55,6 +55,28 @@ pub(crate) fn check_it_version(
             module_name: name.into(),
             required: required_version.clone(),
             provided: it_version.clone(),
+        });
+    }
+
+    Ok(())
+}
+
+pub(crate) fn check_if_outdated(
+    name: impl Into<String>,
+    wasmer_module: &Module,
+) -> PrepareResult<()> {
+    let module_version = sdk_version::extract_from_wasmer_module(wasmer_module)?;
+    let module_version = match module_version {
+        Some(module_version) => module_version,
+        None => return Err(PrepareError::ModuleWithoutVersion(name.into())),
+    };
+
+    let stable_version = stable_sdk_version();
+    if module_version < *stable_version {
+        return Err(PrepareError::IncompatibleSDKVersions {
+            module_name: name.into(),
+            required: stable_version.clone(),
+            provided: module_version,
         });
     }
 
