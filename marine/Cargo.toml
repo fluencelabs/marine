@@ -1,7 +1,7 @@
 [package]
 name = "marine-runtime"
 description = "The Fluence Wasm Runtime"
-version = "0.17.2"
+version = "0.18.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -11,16 +11,16 @@ name = "marine"
 path = "src/lib.rs"
 
 [dependencies]
-marine-core = { path = "../core", version = "0.15.1" }
+marine-core = { path = "../core", version = "0.16.0" }
 marine-module-interface = { path = "../crates/module-interface", version = "0.4.1" }
 marine-utils = { path = "../crates/utils", version = "0.4.0" }
 marine-rs-sdk-main = { version = "0.6.15", features = ["logger"] }
 marine-rs-sdk = { version = "0.6.15", features = ["logger"] }
 it-json-serde = { path = "../crates/it-json-serde", version = "0.3.1" }
 
-wasmer-runtime = { package = "wasmer-runtime-fl", version = "=0.17.1" }
+wasmer-runtime = { package = "wasmer-runtime-fl", version = "=0.17.1"}
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
-wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1", features = ["dynamicfunc-fat-closures"] }
+wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1", features = ["dynamicfunc-fat-closures", "generate-debug-information", "wasm-debug"] }
 wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.23.1" }
 
@@ -40,6 +40,9 @@ thiserror = "1.0.23"
 once_cell = "1.4.0"
 env_logger = "0.7.1"
 pretty_assertions = "0.7.2"
+fluence-keypair = "0.7.0"
+libp2p-core = { version = "0.32.1", default-features = false, features = [ "secp256k1" ] }
+rusqlite = "0.26.1"
 
 [features]
 raw-module-api = []
