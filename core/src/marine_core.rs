@@ -17,7 +17,6 @@
 use super::*;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
-use crate::misc::PrepareError;
 
 use semver::Version;
 use serde::Serialize;
