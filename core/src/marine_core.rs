@@ -26,7 +26,6 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-
 /// Represent Marine module interface.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
 pub struct MModuleInterface<'a> {
@@ -177,14 +176,15 @@ impl MarineCore {
                 module
                     .check_update_status(name.clone())
                     .err()
-                    .map(|error| {
-                        match error {
-                            PrepareError::IncompatibleSDKVersions {
-                                module_name, required, provided
-                            } => Some(OutdatedModule::new(module_name, provided, required)),
-                            _ => None,
-                        }
-                    }).flatten()
+                    .map(|error| match error {
+                        PrepareError::IncompatibleSDKVersions {
+                            module_name,
+                            required,
+                            provided,
+                        } => Some(OutdatedModule::new(module_name, provided, required)),
+                        _ => None,
+                    })
+                    .flatten()
             })
             .collect()
     }
