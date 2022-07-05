@@ -20,7 +20,6 @@ use super::MRecordTypes;
 use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
 use crate::MResult;
 use crate::MModuleConfig;
-use crate::misc::PrepareResult;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
@@ -155,10 +154,6 @@ impl MModule {
             export_funcs,
             export_record_types,
         })
-    }
-
-    pub(crate) fn check_update_status(&self, name: impl Into<String>) -> PrepareResult<()> {
-        crate::misc::check_if_outdated(name, &self.wasmer_instance.module())
     }
 
     pub(crate) fn call(

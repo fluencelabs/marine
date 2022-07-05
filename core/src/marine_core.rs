@@ -169,26 +169,6 @@ impl MarineCore {
         records.into()
     }
 
-    pub fn list_outdated(&self) -> Vec<OutdatedModule> {
-        self.modules
-            .iter()
-            .filter_map(|(name, module)| {
-                module
-                    .check_update_status(name.clone())
-                    .err()
-                    .map(|error| match error {
-                        PrepareError::IncompatibleSDKVersions {
-                            module_name,
-                            required,
-                            provided,
-                        } => Some(OutdatedModule::new(module_name, provided, required)),
-                        _ => None,
-                    })
-                    .flatten()
-            })
-            .collect()
-    }
-
     fn get_module_interface(module: &MModule) -> MModuleInterface<'_> {
         let record_types = module.export_record_types();
 
