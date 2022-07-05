@@ -22,7 +22,6 @@ use super::AppServiceError;
 
 use marine::Marine;
 use marine::IValue;
-use marine::OutdatedModule;
 use serde_json::Value as JValue;
 
 use std::convert::TryInto;
@@ -183,10 +182,6 @@ impl AppService {
     /// This operation is cheap.
     pub fn module_memory_stats(&self) -> MemoryStats<'_> {
         self.marine.module_memory_stats()
-    }
-
-    pub fn list_outdated(&self) -> Vec<OutdatedModule> {
-        self.marine.list_outdated()
     }
 }
 

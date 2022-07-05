@@ -231,23 +231,6 @@ impl REPL {
 
         let app_service = AppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
 
-        for module in app_service.list_outdated() {
-            use termion::color;
-            println!(
-                "{}WARNING! module {}{}{} is built with sdk version {}{}{}, but it will be deprecated in the next release. Please update marine-rs-sdk to {}{}{}",
-                color::Fg(color::Yellow),
-                color::Fg(color::Red),
-                module.name,
-                color::Fg(color::Yellow),
-                color::Fg(color::Red),
-                module.version,
-                color::Fg(color::Yellow),
-                color::Fg(color::Green),
-                module.stable_version,
-                color::Fg(color::Reset)
-            );
-        }
-
         let duration = start.elapsed();
 
         if !quiet {
