@@ -40,7 +40,6 @@ pub use config::HostExportedFunc;
 pub use config::HostImportDescriptor;
 pub use crate::marine_core::MarineCore;
 pub use crate::marine_core::MModuleInterface;
-pub use crate::marine_core::OutdatedModule;
 pub use errors::MError;
 pub use host_imports::HostImportError;
 pub use module::IValue;

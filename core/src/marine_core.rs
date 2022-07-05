@@ -18,7 +18,6 @@ use super::*;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
 
-use semver::Version;
 use serde::Serialize;
 
 use std::collections::hash_map::Entry;
@@ -36,22 +35,6 @@ pub struct MModuleInterface<'a> {
 pub struct MarineCore {
     // set of modules registered inside Marine
     modules: HashMap<String, MModule>,
-}
-
-pub struct OutdatedModule {
-    pub name: String,
-    pub version: Version,
-    pub stable_version: Version,
-}
-
-impl OutdatedModule {
-    pub fn new(name: String, version: Version, stable_version: Version) -> Self {
-        Self {
-            name,
-            version,
-            stable_version,
-        }
-    }
 }
 
 impl MarineCore {
