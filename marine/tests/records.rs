@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-use std::collections::HashMap;
 use marine::Marine;
 use marine::IValue;
 
 use pretty_assertions::assert_eq;
 use serde_json::json;
+
+use std::collections::HashMap;
 
 #[test]
 pub fn records() {
