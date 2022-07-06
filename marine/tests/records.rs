@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use std::collections::HashMap;
 use marine::Marine;
 use marine::IValue;
 
@@ -268,4 +269,176 @@ fn records_destruction() {
     // and 4 records for return value,
     // so 4*2*2 + 4*2 destructions must happen.
     assert_eq!(result, json!([16, 8]));
+}
+
+#[test]
+fn records_return_frees() {
+    let inner_records_config_raw = std::fs::read("./tests/wasm_tests/records_passing/Config.toml")
+        .expect("./tests/wasm_tests/records_passing/Config.toml should presence");
+
+    let mut records_passing_config: marine::TomlMarineConfig =
+        toml::from_slice(&inner_records_config_raw)
+            .expect("argument passing test config should be well-formed");
+
+    records_passing_config.modules_dir =
+        Some(String::from("./tests/wasm_tests/records_passing/artifacts"));
+
+    let mut faas = Marine::with_raw_config(records_passing_config)
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+
+    let _result = faas
+        .call_with_json(
+            "records_passing_pure",
+            "return_256kb_struct",
+            json!([]),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
+
+    let stats_after_first_call = faas
+        .module_memory_stats()
+        .0
+        .iter()
+        .map(|stat| (stat.name.to_string(), stat.memory_size))
+        .collect::<HashMap<String, usize>>();
+
+    for i in 0..128 {
+        let result = faas
+            .call_with_json(
+                "records_passing_pure",
+                "return_256kb_struct",
+                json!([]),
+                <_>::default(),
+            )
+            .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
+
+        for stat in faas.module_memory_stats().0 {
+            let memory_size = stats_after_first_call.get(stat.name).unwrap();
+            assert_eq!(*memory_size, stat.memory_size)
+        }
+    }
+}
+
+#[test]
+fn records_pass_frees() {
+    let inner_records_config_raw = std::fs::read("./tests/wasm_tests/records_passing/Config.toml")
+        .expect("./tests/wasm_tests/records_passing/Config.toml should presence");
+
+    let mut records_passing_config: marine::TomlMarineConfig =
+        toml::from_slice(&inner_records_config_raw)
+            .expect("argument passing test config should be well-formed");
+
+    records_passing_config.modules_dir =
+        Some(String::from("./tests/wasm_tests/records_passing/artifacts"));
+
+    let struct_64b = json!({
+        "field1": 0,
+        "field2": 0,
+        "field3": 0,
+        "field4": 0,
+        "field5": 0,
+        "field6": 0,
+        "field7": 0,
+        "field8": 0,
+        "field11": 0,
+        "field12": 0,
+        "field13": 0,
+        "field14": 0,
+        "field15": 0,
+        "field16": 0,
+        "field17": 0,
+        "field18": 0,
+    });
+
+    let struct_1kb = json!({
+        "field1": struct_64b.clone(),
+        "field2": struct_64b.clone(),
+        "field3": struct_64b.clone(),
+        "field4": struct_64b.clone(),
+        "field5": struct_64b.clone(),
+        "field6": struct_64b.clone(),
+        "field7": struct_64b.clone(),
+        "field8": struct_64b.clone(),
+        "field11": struct_64b.clone(),
+        "field12": struct_64b.clone(),
+        "field13": struct_64b.clone(),
+        "field14": struct_64b.clone(),
+        "field15": struct_64b.clone(),
+        "field16": struct_64b.clone(),
+        "field17": struct_64b.clone(),
+        "field18": struct_64b.clone(),
+    });
+
+    let struct_16kb = json!({
+        "field1": struct_1kb.clone(),
+        "field2": struct_1kb.clone(),
+        "field3": struct_1kb.clone(),
+        "field4": struct_1kb.clone(),
+        "field5": struct_1kb.clone(),
+        "field6": struct_1kb.clone(),
+        "field7": struct_1kb.clone(),
+        "field8": struct_1kb.clone(),
+        "field11": struct_1kb.clone(),
+        "field12": struct_1kb.clone(),
+        "field13": struct_1kb.clone(),
+        "field14": struct_1kb.clone(),
+        "field15": struct_1kb.clone(),
+        "field16": struct_1kb.clone(),
+        "field17": struct_1kb.clone(),
+        "field18": struct_1kb.clone(),
+    });
+
+    let struct_256kb = json!({
+        "field1": struct_16kb.clone(),
+        "field2": struct_16kb.clone(),
+        "field3": struct_16kb.clone(),
+        "field4": struct_16kb.clone(),
+        "field5": struct_16kb.clone(),
+        "field6": struct_16kb.clone(),
+        "field7": struct_16kb.clone(),
+        "field8": struct_16kb.clone(),
+        "field11": struct_16kb.clone(),
+        "field12": struct_16kb.clone(),
+        "field13": struct_16kb.clone(),
+        "field14": struct_16kb.clone(),
+        "field15": struct_16kb.clone(),
+        "field16": struct_16kb.clone(),
+        "field17": struct_16kb.clone(),
+        "field18": struct_16kb.clone(),
+    });
+
+    let mut faas = Marine::with_raw_config(records_passing_config)
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+
+    let result = faas
+        .call_with_json(
+            "records_passing_pure",
+            "pass_256kb_struct",
+            json!([struct_256kb.clone()]),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
+
+    let stats_after_first_call = faas
+        .module_memory_stats()
+        .0
+        .iter()
+        .map(|stat| (stat.name.to_string(), stat.memory_size))
+        .collect::<HashMap<String, usize>>();
+
+    for i in 0..128 {
+        let result = faas
+            .call_with_json(
+                "records_passing_pure",
+                "pass_256kb_struct",
+                json!([struct_256kb.clone()]),
+                <_>::default(),
+            )
+            .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
+
+        for stat in faas.module_memory_stats().0 {
+            let memory_size = stats_after_first_call.get(stat.name).unwrap();
+            assert_eq!(*memory_size, stat.memory_size)
+        }
+    }
 }
