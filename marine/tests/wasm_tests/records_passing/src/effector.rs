@@ -43,7 +43,6 @@ impl Drop for DroppableRecordTree {
     }
 }
 
-
 #[marine]
 #[derive(Clone, Debug, Default)]
 pub struct TestRecord0 {
@@ -68,9 +67,11 @@ pub struct TestRecord2 {
 
 fn main() {}
 
-
 #[marine]
-pub fn pass_droppable_record(record: DroppableRecordTreeConainer, records: Vec<DroppableRecordTreeConainer>) -> Vec<DroppableRecordTreeConainer> {
+pub fn pass_droppable_record(
+    record: DroppableRecordTreeConainer,
+    records: Vec<DroppableRecordTreeConainer>,
+) -> Vec<DroppableRecordTreeConainer> {
     let mut records = records.clone();
     records.push(record.clone());
     records
@@ -90,8 +91,7 @@ pub fn test_record_ref(test_record: &mut TestRecord2) -> TestRecord2 {
     test_record.clone()
 }
 
-
 #[marine]
 pub fn get_drop_count() -> i32 {
-    DROP_COUNT.with(|count| {*count.borrow()})
+    DROP_COUNT.with(|count| *count.borrow())
 }

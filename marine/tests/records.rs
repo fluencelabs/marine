@@ -231,8 +231,6 @@ fn records_destruction() {
     let mut faas = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-
-
     let record_array = json!([
             {
                     "data": {"id": 3},
@@ -245,7 +243,6 @@ fn records_destruction() {
                 }
             ]
     ]);
-
 
     let result = faas
         .call_with_json(

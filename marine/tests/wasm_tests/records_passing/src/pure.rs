@@ -42,7 +42,6 @@ pub struct TestRecord2 {
     pub test_record_1: TestRecord1,
 }
 
-
 thread_local!(static DROP_COUNT: RefCell<i32> = RefCell::new(0));
 
 #[marine]
@@ -67,24 +66,26 @@ impl Drop for DroppableRecordTree {
     }
 }
 
-
 fn main() {}
 
 #[marine]
 #[derive(Default, Clone, Debug)]
 pub struct SomeResult {
     records: Vec<DroppableRecordTreeConainer>,
-    counts: Vec<i32>
+    counts: Vec<i32>,
 }
 
 #[marine]
-pub fn pass_droppable_record(record: DroppableRecordTreeConainer, records: Vec<DroppableRecordTreeConainer>) -> Vec<DroppableRecordTreeConainer> {
+pub fn pass_droppable_record(
+    record: DroppableRecordTreeConainer,
+    records: Vec<DroppableRecordTreeConainer>,
+) -> Vec<DroppableRecordTreeConainer> {
     effector::pass_droppable_record(record.clone(), records.clone()).clone()
 }
 
 #[marine]
-pub fn get_drop_count() -> Vec<i32>{
-    let pure_drop_count = DROP_COUNT.with(|count| {*count.borrow()});
+pub fn get_drop_count() -> Vec<i32> {
+    let pure_drop_count = DROP_COUNT.with(|count| *count.borrow());
     let effector_drop_count = effector::get_drop_count();
     vec![pure_drop_count, effector_drop_count]
 }
@@ -126,7 +127,10 @@ mod effector {
     #[marine]
     #[link(wasm_import_module = "records_passing_effector")]
     extern "C" {
-        pub fn pass_droppable_record(record: DroppableRecordTreeConainer, records: Vec<DroppableRecordTreeConainer>) -> Vec<DroppableRecordTreeConainer>;
+        pub fn pass_droppable_record(
+            record: DroppableRecordTreeConainer,
+            records: Vec<DroppableRecordTreeConainer>,
+        ) -> Vec<DroppableRecordTreeConainer>;
 
         pub fn test_record(test_record: TestRecord2) -> TestRecord2;
 
