@@ -18,6 +18,7 @@
 #![allow(clippy::all)]
 
 use marine_rs_sdk::marine;
+use core::cell::RefCell;
 
 #[marine]
 #[derive(Clone, Debug, Default)]
@@ -41,7 +42,52 @@ pub struct TestRecord2 {
     pub test_record_1: TestRecord1,
 }
 
+
+thread_local!(static DROP_COUNT: RefCell<i32> = RefCell::new(0));
+
+#[marine]
+#[derive(Debug, Clone, Default)]
+pub struct DroppableRecordTree {
+    id: i32,
+}
+
+#[marine]
+#[derive(Clone, Debug, Default)]
+pub struct DroppableRecordTreeConainer {
+    data: DroppableRecordTree,
+    data2: Vec<DroppableRecordTree>,
+}
+
+impl Drop for DroppableRecordTree {
+    fn drop(&mut self) {
+        DROP_COUNT.with(|count| {
+            let mut count = count.borrow_mut();
+            *count = *count + 1;
+        });
+    }
+}
+
+
 fn main() {}
+
+#[marine]
+#[derive(Default, Clone, Debug)]
+pub struct SomeResult {
+    records: Vec<DroppableRecordTreeConainer>,
+    counts: Vec<i32>
+}
+
+#[marine]
+pub fn pass_droppable_record(record: DroppableRecordTreeConainer, records: Vec<DroppableRecordTreeConainer>) -> Vec<DroppableRecordTreeConainer> {
+    effector::pass_droppable_record(record.clone(), records.clone()).clone()
+}
+
+#[marine]
+pub fn get_drop_count() -> Vec<i32>{
+    let pure_drop_count = DROP_COUNT.with(|count| {*count.borrow()});
+    let effector_drop_count = effector::get_drop_count();
+    vec![pure_drop_count, effector_drop_count]
+}
 
 #[marine]
 pub fn test_record(test_record: TestRecord2) -> TestRecord2 {
@@ -74,13 +120,18 @@ fn test_record_ref(test_record: &TestRecord2) -> TestRecord2 {
 
 mod effector {
     use marine_rs_sdk::marine;
+    use crate::DroppableRecordTreeConainer;
     use super::TestRecord2;
 
     #[marine]
     #[link(wasm_import_module = "records_passing_effector")]
     extern "C" {
+        pub fn pass_droppable_record(record: DroppableRecordTreeConainer, records: Vec<DroppableRecordTreeConainer>) -> Vec<DroppableRecordTreeConainer>;
+
         pub fn test_record(test_record: TestRecord2) -> TestRecord2;
 
         pub fn test_record_ref(test_record: &TestRecord2) -> TestRecord2;
+
+        pub fn get_drop_count() -> i32;
     }
 }
