@@ -17,6 +17,31 @@
 #![allow(clippy::all)]
 
 use marine_rs_sdk::marine;
+use core::cell::RefCell;
+
+thread_local!(static DROP_COUNT: RefCell<i32> = RefCell::new(0));
+
+#[marine]
+#[derive(Debug, Clone, Default)]
+pub struct DroppableRecordTree {
+    id: i32,
+}
+
+#[marine]
+#[derive(Clone, Debug, Default)]
+pub struct DroppableRecordTreeConainer {
+    data: DroppableRecordTree,
+    data2: Vec<DroppableRecordTree>,
+}
+
+impl Drop for DroppableRecordTree {
+    fn drop(&mut self) {
+        DROP_COUNT.with(|count| {
+            let mut count = count.borrow_mut();
+            *count = *count + 1;
+        });
+    }
+}
 
 #[marine]
 #[derive(Clone, Debug, Default)]
@@ -43,6 +68,16 @@ pub struct TestRecord2 {
 fn main() {}
 
 #[marine]
+pub fn pass_droppable_record(
+    record: DroppableRecordTreeConainer,
+    records: Vec<DroppableRecordTreeConainer>,
+) -> Vec<DroppableRecordTreeConainer> {
+    let mut records = records.clone();
+    records.push(record.clone());
+    records
+}
+
+#[marine]
 pub fn test_record(mut test_record: TestRecord2) -> TestRecord2 {
     test_record.test_record_0 = TestRecord0 { field_0: 1 };
 
@@ -54,4 +89,9 @@ pub fn test_record_ref(test_record: &mut TestRecord2) -> TestRecord2 {
     test_record.test_record_0 = TestRecord0 { field_0: 1 };
 
     test_record.clone()
+}
+
+#[marine]
+pub fn get_drop_count() -> i32 {
+    DROP_COUNT.with(|count| *count.borrow())
 }

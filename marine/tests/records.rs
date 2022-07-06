@@ -215,3 +215,57 @@ fn records_passing() {
     test("test_record");
     test("test_record_ref");
 }
+
+#[test]
+fn records_destruction() {
+    let inner_records_config_raw = std::fs::read("./tests/wasm_tests/records_passing/Config.toml")
+        .expect("./tests/wasm_tests/records_passing/Config.toml should presence");
+
+    let mut records_passing_config: marine::TomlMarineConfig =
+        toml::from_slice(&inner_records_config_raw)
+            .expect("argument passing test config should be well-formed");
+
+    records_passing_config.modules_dir =
+        Some(String::from("./tests/wasm_tests/records_passing/artifacts"));
+
+    let mut faas = Marine::with_raw_config(records_passing_config)
+        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+
+    let record_array = json!([
+            {
+                    "data": {"id": 3},
+                    "data2": [{"id": 4}],
+            },
+            [
+                {
+                    "data": {"id": 1},
+                    "data2": [{"id": 2}],
+                }
+            ]
+    ]);
+
+    let result = faas
+        .call_with_json(
+            "records_passing_pure",
+            "pass_droppable_record",
+            record_array.clone(),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
+
+    let result = faas
+        .call_with_json(
+            "records_passing_pure",
+            "get_drop_count",
+            json!([]),
+            <_>::default(),
+        )
+        .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
+
+    // host -> pure -> effector -> pure -> host
+    //       ^       ^           ^
+    // Three arrows inside a module, each arrow is an allocation of 4 records for arguments
+    // and 4 records for return value,
+    // so 4*2*2 + 4*2 destructions must happen.
+    assert_eq!(result, json!([16, 8]));
+}
