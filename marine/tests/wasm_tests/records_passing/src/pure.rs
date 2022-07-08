@@ -119,9 +119,103 @@ fn test_record_ref(test_record: &TestRecord2) -> TestRecord2 {
     test_record
 }
 
+#[marine]
+#[derive(Default)]
+pub struct Data64b {
+    field1: i32,
+    field2: i32,
+    field3: i32,
+    field4: i32,
+    field5: i32,
+    field6: i32,
+    field7: i32,
+    field8: i32,
+    field11: i32,
+    field12: i32,
+    field13: i32,
+    field14: i32,
+    field15: i32,
+    field16: i32,
+    field17: i32,
+    field18: i32,
+}
+
+#[marine]
+#[derive(Default)]
+pub struct Data1KB {
+    field1: Data64b,
+    field2: Data64b,
+    field3: Data64b,
+    field4: Data64b,
+    field5: Data64b,
+    field6: Data64b,
+    field7: Data64b,
+    field8: Data64b,
+    field11: Data64b,
+    field12: Data64b,
+    field13: Data64b,
+    field14: Data64b,
+    field15: Data64b,
+    field16: Data64b,
+    field17: Data64b,
+    field18: Data64b,
+}
+
+#[marine]
+#[derive(Default)]
+pub struct Data16KB {
+    field1: Data1KB,
+    field2: Data1KB,
+    field3: Data1KB,
+    field4: Data1KB,
+    field5: Data1KB,
+    field6: Data1KB,
+    field7: Data1KB,
+    field8: Data1KB,
+    field11: Data1KB,
+    field12: Data1KB,
+    field13: Data1KB,
+    field14: Data1KB,
+    field15: Data1KB,
+    field16: Data1KB,
+    field17: Data1KB,
+    field18: Data1KB,
+}
+
+#[marine]
+#[derive(Default)]
+pub struct Data256KB {
+    field1: Data16KB,
+    field2: Data16KB,
+    field3: Data16KB,
+    field4: Data16KB,
+    field5: Data16KB,
+    field6: Data16KB,
+    field7: Data16KB,
+    field8: Data16KB,
+    field11: Data16KB,
+    field12: Data16KB,
+    field13: Data16KB,
+    field14: Data16KB,
+    field15: Data16KB,
+    field16: Data16KB,
+    field17: Data16KB,
+    field18: Data16KB,
+}
+
+#[marine]
+fn return_256kb_struct() -> Data256KB {
+    effector::return_256kb_struct()
+}
+
+#[marine]
+fn pass_256kb_struct(arg: Data256KB) {
+    effector::pass_256kb_struct(arg)
+}
+
 mod effector {
     use marine_rs_sdk::marine;
-    use crate::DroppableRecordTreeConainer;
+    use crate::{Data256KB, DroppableRecordTreeConainer};
     use super::TestRecord2;
 
     #[marine]
@@ -131,6 +225,10 @@ mod effector {
             record: DroppableRecordTreeConainer,
             records: Vec<DroppableRecordTreeConainer>,
         ) -> Vec<DroppableRecordTreeConainer>;
+
+        pub fn pass_256kb_struct(arg: Data256KB);
+
+        pub fn return_256kb_struct() -> Data256KB;
 
         pub fn test_record(test_record: TestRecord2) -> TestRecord2;
 
