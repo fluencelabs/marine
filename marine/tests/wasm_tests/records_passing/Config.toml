@@ -7,6 +7,6 @@ modules_dir = "./artifacts/"
 
 [[module]]
     name = "records_passing_pure"
-    load_strategy = { FromPath = "./artifacts/records_passing_pure.wasm"}
+    random_field = true
     max_heap_size = "10 KiB"
     logger_enabled = true

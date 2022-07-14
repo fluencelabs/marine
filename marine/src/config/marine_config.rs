@@ -15,6 +15,7 @@
  */
 
 use marine_core::HostImportDescriptor;
+use thiserror::private::PathAsDisplay;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -23,52 +24,66 @@ use std::path::{Path, PathBuf};
 /// Info to load a module from filesystem into runtime.
 #[derive(Default)]
 pub struct ModuleDescriptor {
-    pub load_strategy: ModuleLoadStrategy,
+    pub load_strategy: LoadModuleFrom,
     pub file_name: String,
     pub import_name: String,
     pub config: MarineModuleConfig,
 }
 
 impl ModuleDescriptor {
-    pub fn rebase_paths(&mut self, base_path: &Path) {
+    pub fn rebase_paths(&mut self, base_path: &Path) ->MarineResult<()> {
         self.load_strategy.rebase_paths(base_path)
     }
 }
 
 #[derive(Default)]
-pub enum ModuleLoadStrategy {
+pub enum LoadModuleFrom {
     #[default]
-    FromModulesDir,
-    FromDir(PathBuf),
-    FromPath(PathBuf),
+    ModulesDir,
+    Dir(PathBuf),
+    Path(PathBuf),
 }
 
-impl ModuleLoadStrategy {
+impl LoadModuleFrom {
     pub fn get_path(
         &self,
         modules_dir: &Option<PathBuf>,
         file_name: &str,
     ) -> Result<PathBuf, MarineError> {
         match self {
-            ModuleLoadStrategy::FromModulesDir => match modules_dir {
-                Some(dir) => Ok(dir.join(file_name)),
+            LoadModuleFrom::ModulesDir => match modules_dir {
+                Some(dir) => dir.join(file_name).canonicalize().map_err(|e| {
+                    MarineError::IOError(format!("failed to canonicalize {}: {}", dir.as_display(), e))
+                }),
                 None => Err(MarineError::ModulesDirIsRequiredButNotSpecified {
                     module_name: file_name.to_string(),
                 }),
             },
-            ModuleLoadStrategy::FromDir(dir) => Ok([&dir, Path::new(file_name)].iter().collect()),
-            ModuleLoadStrategy::FromPath(path) => Ok(PathBuf::from(path)),
+            LoadModuleFrom::Dir(dir) => Ok([&dir, Path::new(file_name)].iter().collect()),
+            LoadModuleFrom::Path(path) => Ok(PathBuf::from(path)),
         }
     }
 
-    pub fn rebase_paths(&mut self, base_path: &Path) {
+    pub fn rebase_paths(&mut self, base_path: &Path) -> MarineResult<()> {
         match self {
-            ModuleLoadStrategy::FromModulesDir => {}
-            ModuleLoadStrategy::FromDir(dir) => {
-                *dir = [base_path, dir].iter().collect();
+            LoadModuleFrom::ModulesDir => {Ok(())}
+            LoadModuleFrom::Dir(dir) => {
+                *dir = [base_path, dir].iter()
+                    .collect::<PathBuf>()
+                    .canonicalize()
+                    .map_err(|e| {
+                        MarineError::IOError(format!("Failed to canonicalize path {}: {}", dir.as_path().as_display(), e))
+                    })?;
+                Ok(())
             }
-            ModuleLoadStrategy::FromPath(path) => {
-                *path = [base_path, path].iter().collect();
+            LoadModuleFrom::Path(path) => {
+                *path = [base_path, path].iter()
+                    .collect::<PathBuf>()
+                    .canonicalize()
+                    .map_err(|e| {
+                        MarineError::IOError(format!("Failed to canonicalize path {}: {}", path.as_path().as_display(), e))
+                    })?;
+                Ok(())
             }
         }
     }
@@ -169,8 +184,6 @@ use crate::{MarineError, MarineResult};
 
 use std::convert::{TryFrom, TryInto};
 
-use crate::config::raw_marine_config::TomlLoadStrategy;
-
 impl TryFrom<TomlMarineConfig> for MarineConfig {
     type Error = MarineError;
 
@@ -189,7 +202,7 @@ impl TryFrom<TomlMarineConfig> for MarineConfig {
             .into_iter()
             .map(|module| {
                 let mut module = ModuleDescriptor::try_from(module)?;
-                module.rebase_paths(&base_path);
+                module.rebase_paths(&base_path)?;
                 Ok(module)
             })
             .collect::<MarineResult<Vec<_>>>()?;
@@ -208,12 +221,16 @@ impl TryFrom<TomlMarineNamedModuleConfig> for ModuleDescriptor {
     fn try_from(config: TomlMarineNamedModuleConfig) -> Result<Self, Self::Error> {
         let file_name = config.file_name.unwrap_or(format!("{}.wasm", config.name));
 
-        let load_strategy = match config.load_strategy {
-            TomlLoadStrategy::FromModulesDir => ModuleLoadStrategy::FromModulesDir,
-            TomlLoadStrategy::FromSpecificDir(dir) => {
-                ModuleLoadStrategy::FromDir(PathBuf::from(dir))
+        let load_strategy = match config.load_from {
+            None => LoadModuleFrom::ModulesDir,
+            Some(path) => {
+                let path = PathBuf::from(path);
+                if path.is_file() {
+                    LoadModuleFrom::Path(path)
+                } else {
+                    LoadModuleFrom::Dir(path)
+                }
             }
-            TomlLoadStrategy::FromPath(path) => ModuleLoadStrategy::FromPath(PathBuf::from(path)),
         };
 
         Ok(ModuleDescriptor {

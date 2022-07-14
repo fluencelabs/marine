@@ -94,18 +94,21 @@ impl TomlMarineConfig {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
-pub enum TomlLoadStrategy {
+pub enum TomlLoadFrom {
     #[default]
-    FromModulesDir,
-    FromSpecificDir(String),
-    FromPath(String),
+    #[serde(rename = "default")]
+    Default,
+    #[serde(rename = "dir")]
+    Dir(String),
+    #[serde(rename = "path")]
+    Path(String),
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlMarineNamedModuleConfig {
     pub name: String,
     #[serde(default)]
-    pub load_strategy: TomlLoadStrategy,
+    pub load_from: Option<String>,
     #[serde(default)]
     pub file_name: Option<String>,
     #[serde(flatten)]
