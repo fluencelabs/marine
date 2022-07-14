@@ -79,13 +79,6 @@ impl TomlMarineConfig {
             ))
         })?;
 
-        unsafe {
-            println!(
-                "config\n: {}",
-                String::from_utf8_unchecked(file_content.clone())
-            );
-        }
-
         let mut config: TomlMarineConfig = toml::from_slice(&file_content)?;
         // TODO: check if unwrap is safe because it is always path to file
         config.base_path = PathBuf::from(path.as_ref().parent().unwrap());
