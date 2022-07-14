@@ -22,7 +22,6 @@ use crate::IValue;
 use crate::IType;
 use crate::MemoryStats;
 use crate::module_loading::load_modules_from_fs;
-use crate::module_loading::ModulesLoadStrategy;
 use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use crate::json_to_marine_err;
@@ -37,6 +36,7 @@ use serde_json::Value as JValue;
 use std::cell::RefCell;
 use std::convert::TryInto;
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::rc::Rc;
 
 type MFunctionSignature = (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>);
@@ -73,8 +73,15 @@ impl Marine {
         let modules = config
             .modules_config
             .iter()
-            .map(|m| (m.file_name.clone(), m.import_name.clone()))
-            .collect();
+            .map(|m| -> MarineResult<(String, PathBuf)> {
+                Ok((
+                    m.import_name.clone(),
+                    m.load_strategy
+                        .get_path(&config.modules_dir, &m.file_name)?,
+                ))
+            })
+            .collect::<MarineResult<HashMap<String, PathBuf>>>()?;
+
         Self::with_module_names::<MarineConfig>(&modules, config)
     }
 
@@ -120,18 +127,13 @@ impl Marine {
     }
 
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
-    pub fn with_module_names<C>(names: &HashMap<String, String>, config: C) -> MarineResult<Self>
+    pub fn with_module_names<C>(names: &HashMap<String, PathBuf>, config: C) -> MarineResult<Self>
     where
         C: TryInto<MarineConfig>,
         MarineError: From<C::Error>,
     {
         let config = config.try_into()?;
-        let modules = config
-            .modules_dir
-            .as_ref()
-            .map_or(Ok(HashMap::new()), |dir| {
-                load_modules_from_fs(dir, ModulesLoadStrategy::Named(names))
-            })?;
+        let modules = load_modules_from_fs(names)?;
 
         Self::with_modules::<MarineConfig>(modules, config)
     }

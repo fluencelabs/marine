@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::MarineResult;
+use crate::{MarineError, MarineResult};
 
 use serde_derive::Serialize;
 use serde_derive::Deserialize;
@@ -22,7 +22,8 @@ use serde_with::serde_as;
 use serde_with::skip_serializing_none;
 use serde_with::DisplayFromStr;
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use thiserror::private::PathAsDisplay;
 
 /*
 An example of the config:
@@ -63,19 +64,48 @@ pub struct TomlMarineConfig {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub module: Vec<TomlMarineNamedModuleConfig>,
     pub default: Option<TomlMarineModuleConfig>,
+    #[serde(skip)]
+    pub base_path: PathBuf,
 }
 
 impl TomlMarineConfig {
     /// Load config from filesystem.
     pub fn load<P: AsRef<Path>>(path: P) -> MarineResult<Self> {
-        let file_content = std::fs::read(path)?;
-        Ok(toml::from_slice(&file_content)?)
+        let file_content = std::fs::read(&path).map_err(|e| {
+            MarineError::IOError(format!(
+                "failed to load {}: {}",
+                path.as_ref().as_display(),
+                e
+            ))
+        })?;
+
+        unsafe {
+            println!(
+                "config\n: {}",
+                String::from_utf8_unchecked(file_content.clone())
+            );
+        }
+
+        let mut config: TomlMarineConfig = toml::from_slice(&file_content)?;
+        // TODO: check if unwrap is safe because it is always path to file
+        config.base_path = PathBuf::from(path.as_ref().parent().unwrap());
+        Ok(config)
     }
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+pub enum TomlLoadStrategy {
+    #[default]
+    FromModulesDir,
+    FromSpecificDir(String),
+    FromPath(String),
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlMarineNamedModuleConfig {
     pub name: String,
+    #[serde(default)]
+    pub load_strategy: TomlLoadStrategy,
     #[serde(default)]
     pub file_name: Option<String>,
     #[serde(flatten)]

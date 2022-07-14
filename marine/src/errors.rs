@@ -18,7 +18,7 @@ use marine_core::MError;
 use it_json_serde::ITJsonSeDeError;
 
 use thiserror::Error;
-use std::io::Error as IOError;
+
 use std::path::PathBuf;
 
 #[derive(Debug, Error)]
@@ -76,6 +76,12 @@ pub enum MarineError {
 
     /// Errors related to invalid config.
     #[error(
+        r#""modules_dir" field is not defined, but it is required to load module "{module_name}""#
+    )]
+    ModulesDirIsRequiredButNotSpecified { module_name: String },
+
+    /// Errors related to invalid config.
+    #[error(
         "max_heap_size = '{max_heap_size_wanted}' can't be bigger than {max_heap_size_allowed}'"
     )]
     MaxHeapSizeOverflow {
@@ -86,12 +92,6 @@ pub enum MarineError {
     /// Marine errors.
     #[error("engine error: {0}")]
     EngineError(#[from] MError),
-}
-
-impl From<IOError> for MarineError {
-    fn from(err: IOError) -> Self {
-        MarineError::IOError(format!("{}", err))
-    }
 }
 
 impl From<std::convert::Infallible> for MarineError {

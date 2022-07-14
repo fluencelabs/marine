@@ -325,12 +325,9 @@ fn records_pass_frees() {
     let inner_records_config_raw = std::fs::read("./tests/wasm_tests/records_passing/Config.toml")
         .expect("./tests/wasm_tests/records_passing/Config.toml should presence");
 
-    let mut records_passing_config: marine::TomlMarineConfig =
-        toml::from_slice(&inner_records_config_raw)
+    let mut records_passing_config =
+        marine::TomlMarineConfig::load("./tests/wasm_tests/records_passing/Config.toml")
             .expect("argument passing test config should be well-formed");
-
-    records_passing_config.modules_dir =
-        Some(String::from("./tests/wasm_tests/records_passing/artifacts"));
 
     let struct_64b = json!({
         "field1": 0,

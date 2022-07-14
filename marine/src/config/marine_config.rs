@@ -18,14 +18,60 @@ use marine_core::HostImportDescriptor;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Info to load a module from filesystem into runtime.
 #[derive(Default)]
 pub struct ModuleDescriptor {
+    pub load_strategy: ModuleLoadStrategy,
     pub file_name: String,
     pub import_name: String,
     pub config: MarineModuleConfig,
+}
+
+impl ModuleDescriptor {
+    pub fn rebase_paths(&mut self, base_path: &Path) {
+        self.load_strategy.rebase_paths(base_path)
+    }
+}
+
+#[derive(Default)]
+pub enum ModuleLoadStrategy {
+    #[default]
+    FromModulesDir,
+    FromDir(PathBuf),
+    FromPath(PathBuf),
+}
+
+impl ModuleLoadStrategy {
+    pub fn get_path(
+        &self,
+        modules_dir: &Option<PathBuf>,
+        file_name: &str,
+    ) -> Result<PathBuf, MarineError> {
+        match self {
+            ModuleLoadStrategy::FromModulesDir => match modules_dir {
+                Some(dir) => Ok(dir.join(file_name)),
+                None => Err(MarineError::ModulesDirIsRequiredButNotSpecified {
+                    module_name: file_name.to_string(),
+                }),
+            },
+            ModuleLoadStrategy::FromDir(dir) => Ok([&dir, Path::new(file_name)].iter().collect()),
+            ModuleLoadStrategy::FromPath(path) => Ok(PathBuf::from(path)),
+        }
+    }
+
+    pub fn rebase_paths(&mut self, base_path: &Path) {
+        match self {
+            ModuleLoadStrategy::FromModulesDir => {}
+            ModuleLoadStrategy::FromDir(dir) => {
+                *dir = [base_path, dir].iter().collect();
+            }
+            ModuleLoadStrategy::FromPath(path) => {
+                *path = [base_path, path].iter().collect();
+            }
+        }
+    }
 }
 
 /// Describes the behaviour of the Marine component.
@@ -119,23 +165,34 @@ use super::TomlMarineConfig;
 use super::TomlMarineModuleConfig;
 use super::TomlWASIConfig;
 use super::TomlMarineNamedModuleConfig;
-use crate::MarineError;
+use crate::{MarineError, MarineResult};
 
 use std::convert::{TryFrom, TryInto};
+
+use crate::config::raw_marine_config::TomlLoadStrategy;
 
 impl TryFrom<TomlMarineConfig> for MarineConfig {
     type Error = MarineError;
 
     fn try_from(toml_config: TomlMarineConfig) -> Result<Self, Self::Error> {
-        let modules_dir = toml_config.modules_dir.map(PathBuf::from);
+        let base_path = toml_config.base_path.clone();
+        let modules_dir = toml_config.modules_dir.as_ref().map(|dir| {
+            let mut path = base_path.clone();
+            path.push(&dir);
+            path
+        });
 
         let default_modules_config = toml_config.default.map(|m| m.try_into()).transpose()?;
 
         let modules_config = toml_config
             .module
             .into_iter()
-            .map(ModuleDescriptor::try_from)
-            .collect::<Result<Vec<_>, _>>()?;
+            .map(|module| {
+                let mut module = ModuleDescriptor::try_from(module)?;
+                module.rebase_paths(&base_path);
+                Ok(module)
+            })
+            .collect::<MarineResult<Vec<_>>>()?;
 
         Ok(MarineConfig {
             modules_dir,
@@ -149,8 +206,19 @@ impl TryFrom<TomlMarineNamedModuleConfig> for ModuleDescriptor {
     type Error = MarineError;
 
     fn try_from(config: TomlMarineNamedModuleConfig) -> Result<Self, Self::Error> {
+        let file_name = config.file_name.unwrap_or(format!("{}.wasm", config.name));
+
+        let load_strategy = match config.load_strategy {
+            TomlLoadStrategy::FromModulesDir => ModuleLoadStrategy::FromModulesDir,
+            TomlLoadStrategy::FromSpecificDir(dir) => {
+                ModuleLoadStrategy::FromDir(PathBuf::from(dir))
+            }
+            TomlLoadStrategy::FromPath(path) => ModuleLoadStrategy::FromPath(PathBuf::from(path)),
+        };
+
         Ok(ModuleDescriptor {
-            file_name: config.file_name.unwrap_or(format!("{}.wasm", config.name)),
+            load_strategy,
+            file_name,
             import_name: config.name,
             config: config.config.try_into()?,
         })
