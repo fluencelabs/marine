@@ -145,6 +145,7 @@ mod tests {
         let config = TomlMarineNamedModuleConfig {
             name: "name".to_string(),
             file_name: Some("file_name".to_string()),
+            load_from: <_>::default(),
             config: TomlMarineModuleConfig {
                 mem_pages_count: Some(100),
                 max_heap_size: Some(ByteSize::gib(4)),
