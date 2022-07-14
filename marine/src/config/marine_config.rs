@@ -31,7 +31,7 @@ pub struct ModuleDescriptor {
 }
 
 impl ModuleDescriptor {
-    pub fn rebase_paths(&mut self, base_path: &Path) ->MarineResult<()> {
+    pub fn rebase_paths(&mut self, base_path: &Path) -> MarineResult<()> {
         self.load_strategy.rebase_paths(base_path)
     }
 }
@@ -53,7 +53,11 @@ impl LoadModuleFrom {
         match self {
             LoadModuleFrom::ModulesDir => match modules_dir {
                 Some(dir) => dir.join(file_name).canonicalize().map_err(|e| {
-                    MarineError::IOError(format!("failed to canonicalize {}: {}", dir.as_display(), e))
+                    MarineError::IOError(format!(
+                        "failed to canonicalize {}: {}",
+                        dir.as_display(),
+                        e
+                    ))
                 }),
                 None => Err(MarineError::ModulesDirIsRequiredButNotSpecified {
                     module_name: file_name.to_string(),
@@ -66,22 +70,32 @@ impl LoadModuleFrom {
 
     pub fn rebase_paths(&mut self, base_path: &Path) -> MarineResult<()> {
         match self {
-            LoadModuleFrom::ModulesDir => {Ok(())}
+            LoadModuleFrom::ModulesDir => Ok(()),
             LoadModuleFrom::Dir(dir) => {
-                *dir = [base_path, dir].iter()
+                *dir = [base_path, dir]
+                    .iter()
                     .collect::<PathBuf>()
                     .canonicalize()
                     .map_err(|e| {
-                        MarineError::IOError(format!("Failed to canonicalize path {}: {}", dir.as_path().as_display(), e))
+                        MarineError::IOError(format!(
+                            "Failed to canonicalize path {}: {}",
+                            dir.as_path().as_display(),
+                            e
+                        ))
                     })?;
                 Ok(())
             }
             LoadModuleFrom::Path(path) => {
-                *path = [base_path, path].iter()
+                *path = [base_path, path]
+                    .iter()
                     .collect::<PathBuf>()
                     .canonicalize()
                     .map_err(|e| {
-                        MarineError::IOError(format!("Failed to canonicalize path {}: {}", path.as_path().as_display(), e))
+                        MarineError::IOError(format!(
+                            "Failed to canonicalize path {}: {}",
+                            path.as_path().as_display(),
+                            e
+                        ))
                     })?;
                 Ok(())
             }
