@@ -18,7 +18,6 @@ use crate::MarineError;
 use crate::MarineResult;
 
 use std::collections::HashMap;
-use std::fmt::{Display, Formatter};
 use std::path::{PathBuf};
 use thiserror::private::PathAsDisplay;
 
@@ -42,40 +41,5 @@ pub(crate) fn load_modules_from_fs(
             Ok(hash_map)
         })?;
 
-    let missing_modules = missing_modules(&modules, &loaded);
-    if !missing_modules.is_empty() {
-        return Err(MarineError::InvalidConfig(format!(
-            "failed to load modules:\n{}",
-            FailedModulesPrinter(missing_modules)
-        )));
-    }
-
     Ok(loaded)
-}
-
-struct FailedModulesPrinter(Vec<(String, PathBuf)>);
-
-impl Display for FailedModulesPrinter {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        for (name, path) in &self.0 {
-            f.write_fmt(format_args!("{} ({})", name, path.as_display()))?;
-        }
-
-        Ok(())
-    }
-}
-
-fn missing_modules(
-    required: &HashMap<String, PathBuf>,
-    loaded: &HashMap<String, Vec<u8>>,
-) -> Vec<(String, PathBuf)> {
-    required
-        .iter()
-        .fold(Vec::new(), |mut failed_to_load, (import_name, path)| {
-            if !loaded.contains_key(import_name) {
-                failed_to_load.push((import_name.clone(), path.clone()));
-            }
-
-            failed_to_load
-        })
 }
