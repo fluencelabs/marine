@@ -31,8 +31,8 @@ pub struct ModuleDescriptor {
 }
 
 impl ModuleDescriptor {
-    pub fn rebase_paths(&mut self, base_path: &Path) -> MarineResult<()> {
-        self.load_strategy.rebase_paths(base_path)
+    pub fn adjust_paths(&mut self, base_path: &Path) -> MarineResult<()> {
+        self.load_strategy.adjust_paths(base_path)
     }
 }
 
@@ -68,35 +68,15 @@ impl LoadModuleFrom {
         }
     }
 
-    pub fn rebase_paths(&mut self, base_path: &Path) -> MarineResult<()> {
+    pub fn adjust_paths(&mut self, base_path: &Path) -> MarineResult<()> {
         match self {
             LoadModuleFrom::ModulesDir => Ok(()),
             LoadModuleFrom::Dir(dir) => {
-                *dir = [base_path, dir]
-                    .iter()
-                    .collect::<PathBuf>()
-                    .canonicalize()
-                    .map_err(|e| {
-                        MarineError::IOError(format!(
-                            "Failed to canonicalize path {}: {}",
-                            dir.as_path().as_display(),
-                            e
-                        ))
-                    })?;
+                *dir = adjust_path(&base_path, dir.as_path())?;
                 Ok(())
             }
             LoadModuleFrom::Path(path) => {
-                *path = [base_path, path]
-                    .iter()
-                    .collect::<PathBuf>()
-                    .canonicalize()
-                    .map_err(|e| {
-                        MarineError::IOError(format!(
-                            "Failed to canonicalize path {}: {}",
-                            path.as_path().as_display(),
-                            e
-                        ))
-                    })?;
+                *path = adjust_path(&base_path, path.as_path())?;
                 Ok(())
             }
         }
@@ -197,6 +177,7 @@ use super::TomlMarineNamedModuleConfig;
 use crate::{MarineError, MarineResult};
 
 use std::convert::{TryFrom, TryInto};
+use crate::config::adjust_path;
 
 impl TryFrom<TomlMarineConfig> for MarineConfig {
     type Error = MarineError;
@@ -216,7 +197,7 @@ impl TryFrom<TomlMarineConfig> for MarineConfig {
             .into_iter()
             .map(|module| {
                 let mut module = ModuleDescriptor::try_from(module)?;
-                module.rebase_paths(&base_path)?;
+                module.adjust_paths(&base_path)?;
                 Ok(module)
             })
             .collect::<MarineResult<Vec<_>>>()?;
@@ -233,19 +214,26 @@ impl TryFrom<TomlMarineNamedModuleConfig> for ModuleDescriptor {
     type Error = MarineError;
 
     fn try_from(config: TomlMarineNamedModuleConfig) -> Result<Self, Self::Error> {
-        let file_name = config.file_name.unwrap_or(format!("{}.wasm", config.name));
-
         let load_strategy = match config.load_from {
             None => LoadModuleFrom::ModulesDir,
             Some(path) => {
                 let path = PathBuf::from(path);
                 if path.is_file() {
+                    if config.file_name.is_some() {
+                        return Err(MarineError::InvalidConfig(format!(
+                            r#"Ambiguous config: both "file_name" and "load_from" with filename defined for module {}."#,
+                            config.name
+                        )));
+                    }
+
                     LoadModuleFrom::Path(path)
                 } else {
                     LoadModuleFrom::Dir(path)
                 }
             }
         };
+
+        let file_name = config.file_name.unwrap_or(format!("{}.wasm", config.name));
 
         Ok(ModuleDescriptor {
             load_strategy,
