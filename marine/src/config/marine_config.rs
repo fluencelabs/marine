@@ -16,7 +16,6 @@
 
 use marine_core::HostImportDescriptor;
 
-
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
