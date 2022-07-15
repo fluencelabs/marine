@@ -74,11 +74,7 @@ impl Marine {
             .modules_config
             .iter()
             .map(|m| -> MarineResult<(String, PathBuf)> {
-                Ok((
-                    m.import_name.clone(),
-                    m.load_strategy
-                        .get_path(&config.modules_dir, &m.file_name)?,
-                ))
+                Ok((m.import_name.clone(), m.get_path(&config.modules_dir)?))
             })
             .collect::<MarineResult<HashMap<String, PathBuf>>>()?;
 

@@ -71,30 +71,17 @@ pub struct TomlMarineConfig {
 impl TomlMarineConfig {
     /// Load config from filesystem.
     pub fn load<P: AsRef<Path>>(path: P) -> MarineResult<Self> {
+        let path = PathBuf::from(path.as_ref()).canonicalize().unwrap();
         let file_content = std::fs::read(&path).map_err(|e| {
-            MarineError::IOError(format!(
-                "failed to load {}: {}",
-                path.as_ref().as_display(),
-                e
-            ))
+            MarineError::IOError(format!("failed to load {}: {}", path.as_display(), e))
         })?;
 
         let mut config: TomlMarineConfig = toml::from_slice(&file_content)?;
         // TODO: check if unwrap is safe because it is always path to file
-        config.base_path = PathBuf::from(path.as_ref().parent().unwrap());
+        config.base_path = PathBuf::from(path.parent().unwrap());
+
         Ok(config)
     }
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, Default)]
-pub enum TomlLoadFrom {
-    #[default]
-    #[serde(rename = "default")]
-    Default,
-    #[serde(rename = "dir")]
-    Dir(String),
-    #[serde(rename = "path")]
-    Path(String),
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
