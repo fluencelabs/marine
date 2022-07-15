@@ -76,12 +76,6 @@ pub enum MarineError {
 
     /// Errors related to invalid config.
     #[error(
-        r#""modules_dir" field is not defined, but it is required to load module "{module_name}""#
-    )]
-    ModulesDirIsRequiredButNotSpecified { module_name: String },
-
-    /// Errors related to invalid config.
-    #[error(
         "max_heap_size = '{max_heap_size_wanted}' can't be bigger than {max_heap_size_allowed}'"
     )]
     MaxHeapSizeOverflow {

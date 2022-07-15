@@ -34,9 +34,10 @@ impl ModuleDescriptor {
         match &self.load_from {
             None => match modules_dir {
                 Some(dir) => Ok([&dir, Path::new(&self.file_name)].iter().collect()),
-                None => Err(MarineError::ModulesDirIsRequiredButNotSpecified {
-                    module_name: self.file_name.to_string(),
-                }),
+                None => Err(MarineError::InvalidConfig(format!(
+                    r#""modules_dir" field is not defined, but it is required to load module "{}""#,
+                    self.import_name
+                ))),
             },
             Some(path) => {
                 if path.is_file() {
