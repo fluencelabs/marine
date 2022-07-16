@@ -1,0 +1,14 @@
+[package]
+name = "wasi-test"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+publish = false
+
+[[bin]]
+name = "wasi_effector"
+path = "src/effector.rs"
+
+[dependencies]
+marine-rs-sdk ="0.6.15"
+safe-transmute = "0.11.0"

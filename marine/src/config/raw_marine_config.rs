@@ -71,7 +71,14 @@ pub struct TomlMarineConfig {
 impl TomlMarineConfig {
     /// Load config from filesystem.
     pub fn load<P: AsRef<Path>>(path: P) -> MarineResult<Self> {
-        let path = PathBuf::from(path.as_ref()).canonicalize().unwrap();
+        let path = PathBuf::from(path.as_ref()).canonicalize().map_err(|e| {
+            MarineError::IOError(format!(
+                "failed to canonicalize path {}: {}",
+                path.as_ref().display(),
+                e
+            ))
+        })?;
+
         let file_content = std::fs::read(&path).map_err(|e| {
             MarineError::IOError(format!("failed to load {}: {}", path.as_display(), e))
         })?;

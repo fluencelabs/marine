@@ -49,10 +49,15 @@ impl ModuleDescriptor {
         }
     }
 
-    pub fn adjust_path(&mut self, base_path: &Path) -> MarineResult<()> {
+    pub fn adjust_paths(&mut self, base_path: &Path) -> MarineResult<()> {
         if let Some(path) = self.load_from.as_mut() {
             *path = adjust_path(&base_path, &path)?;
         }
+
+        self.config
+            .wasi
+            .as_mut()
+            .map(|wasi| wasi.adjust_paths(&base_path));
 
         Ok(())
     }
@@ -145,6 +150,23 @@ pub struct MarineWASIConfig {
     pub mapped_dirs: HashMap<String, PathBuf>,
 }
 
+impl MarineWASIConfig {
+    pub fn adjust_paths(&mut self, base_path: &Path) -> MarineResult<()> {
+        for path in self.mapped_dirs.values_mut() {
+            *path = adjust_path(base_path, &path)?;
+        }
+
+        self.preopened_files = self
+            .preopened_files
+            .iter()
+            .map(|path| adjust_path(&base_path, &path))
+            .collect::<MarineResult<HashSet<PathBuf>>>()?;
+
+        // TODO: Adjust also paths for mounted binaries
+        Ok(())
+    }
+}
+
 use super::TomlMarineConfig;
 use super::TomlMarineModuleConfig;
 use super::TomlWASIConfig;
@@ -171,7 +193,7 @@ impl TryFrom<TomlMarineConfig> for MarineConfig {
             .into_iter()
             .map(|toml_module| {
                 let mut module = ModuleDescriptor::try_from(toml_module)?;
-                module.adjust_path(&base_path)?;
+                module.adjust_paths(&base_path)?;
                 Ok(module)
             })
             .collect::<MarineResult<Vec<_>>>()?;
