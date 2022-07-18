@@ -31,7 +31,7 @@ pub struct WithContext<'c, T> {
 }
 
 impl ConfigContext {
-    fn wrapped<T>(&self, data: T) -> WithContext<T> {
+    fn wrapped<'c, T>(&'c self, data: T) -> WithContext<'c, T> {
         WithContext {
             context: &self,
             data,
@@ -52,7 +52,7 @@ impl ModuleDescriptor {
     pub fn get_path(&self, modules_dir: &Option<PathBuf>) -> Result<PathBuf, MarineError> {
         match &self.load_from {
             None => match modules_dir {
-                Some(dir) => Ok([&dir, Path::new(&self.file_name)].iter().collect()),
+                Some(dir) => Ok(dir.join(Path::new(&self.file_name))),
                 None => Err(MarineError::InvalidConfig(format!(
                     r#""modules_dir" field is not defined, but it is required to load module "{}""#,
                     self.import_name
