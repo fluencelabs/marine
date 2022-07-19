@@ -89,7 +89,13 @@ impl TomlMarineConfig {
         let default_base_path = Path::new("/");
         config.base_path = path
             .canonicalize()
-            .map_err(|e| MarineError::IOError(format!("Failed to canonicalize config path {}: {}", path.display(), e)))?
+            .map_err(|e| {
+                MarineError::IOError(format!(
+                    "Failed to canonicalize config path {}: {}",
+                    path.display(),
+                    e
+                ))
+            })?
             .parent()
             .unwrap_or(default_base_path)
             .to_path_buf();
