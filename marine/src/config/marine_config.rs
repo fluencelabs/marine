@@ -18,7 +18,8 @@ use marine_core::HostImportDescriptor;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 #[derive(Clone, Default, Debug)]
 pub struct ConfigContext {
@@ -160,10 +161,11 @@ use super::TomlMarineConfig;
 use super::TomlMarineModuleConfig;
 use super::TomlWASIConfig;
 use super::TomlMarineNamedModuleConfig;
-use crate::{MarineError, MarineResult};
+use crate::MarineError;
+use crate::MarineResult;
+use crate::config::adjust_path;
 
 use std::convert::{TryFrom, TryInto};
-use crate::config::adjust_path;
 
 impl TryFrom<TomlMarineConfig> for MarineConfig {
     type Error = MarineError;

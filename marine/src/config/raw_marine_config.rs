@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use crate::{MarineError, MarineResult};
+use crate::MarineError;
+use crate::MarineResult;
 
 use serde_derive::Serialize;
 use serde_derive::Deserialize;
@@ -22,8 +23,8 @@ use serde_with::serde_as;
 use serde_with::skip_serializing_none;
 use serde_with::DisplayFromStr;
 
-use std::path::{Path, PathBuf};
-use thiserror::private::PathAsDisplay;
+use std::path::Path;
+use std::path::PathBuf;
 
 /*
 An example of the config:
@@ -80,12 +81,18 @@ impl TomlMarineConfig {
         })?;
 
         let file_content = std::fs::read(&path).map_err(|e| {
-            MarineError::IOError(format!("failed to load {}: {}", path.as_display(), e))
+            MarineError::IOError(format!("failed to load {}: {}", path.display(), e))
         })?;
 
         let mut config: TomlMarineConfig = toml::from_slice(&file_content)?;
-        // TODO: check if unwrap is safe because it is always path to file
-        config.base_path = PathBuf::from(path.parent().unwrap());
+
+        let default_base_path = Path::new("/");
+        config.base_path = path
+            .canonicalize()
+            .map_err(|e| MarineError::IOError(format!("Failed to canonicalize config path {}: {}", path.display(), e)))?
+            .parent()
+            .unwrap_or(default_base_path)
+            .to_path_buf();
 
         Ok(config)
     }
