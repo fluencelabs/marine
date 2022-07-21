@@ -36,6 +36,8 @@ pub(crate) type MarineResult<T> = std::result::Result<T, MarineError>;
 pub use crate::marine::Marine;
 pub use marine_interface::MarineInterface;
 
+pub use config::ConfigContext;
+pub use config::WithContext;
 pub use config::MarineConfig;
 pub use config::MarineModuleConfig;
 pub use config::MarineWASIConfig;

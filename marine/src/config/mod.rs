@@ -19,6 +19,8 @@ mod to_marine_config;
 mod marine_config;
 mod path_utils;
 
+pub use marine_config::ConfigContext;
+pub use marine_config::WithContext;
 pub use marine_config::MarineModuleConfig;
 pub use marine_config::MarineConfig;
 pub use marine_config::MarineWASIConfig;

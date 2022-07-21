@@ -41,6 +41,8 @@ pub use service_interface::ServiceInterface;
 pub use config::AppServiceConfig;
 pub use raw_toml_config::TomlAppServiceConfig;
 
+pub use marine::ConfigContext;
+pub use marine::WithContext;
 pub use marine::MarineConfig;
 pub use marine::MarineModuleConfig;
 pub use marine::MarineWASIConfig;

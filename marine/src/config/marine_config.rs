@@ -32,7 +32,7 @@ pub struct WithContext<'c, T> {
 }
 
 impl ConfigContext {
-    fn wrapped<'c, T>(&'c self, data: T) -> WithContext<'c, T> {
+    pub fn wrapped<'c, T>(&'c self, data: T) -> WithContext<'c, T> {
         WithContext {
             context: &self,
             data,
