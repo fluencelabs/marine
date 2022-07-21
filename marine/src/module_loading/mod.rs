@@ -18,7 +18,7 @@ use crate::MarineError;
 use crate::MarineResult;
 
 use std::collections::HashMap;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 use thiserror::private::PathAsDisplay;
 
 /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.

@@ -174,10 +174,10 @@ impl TryFrom<TomlMarineConfig> for MarineConfig {
         let base_path = PathBuf::from(toml_config.base_path);
         let context = ConfigContext { base_path };
 
-        let modules_dir = match &toml_config.modules_dir.as_ref() {
-            None => None,
-            Some(dir) => Some(adjust_path(&context.base_path, Path::new(dir))?),
-        };
+        let modules_dir = toml_config
+            .modules_dir
+            .map(|dir| adjust_path(&context.base_path, Path::new(&dir)))
+            .transpose()?;
 
         let default_modules_config = toml_config
             .default
