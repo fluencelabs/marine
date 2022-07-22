@@ -55,7 +55,7 @@ checksum = "bb07d2053ccdbe10e2af2995a2f116c1330396493dc1269f6a91d0ae82e19704"
 name = "arguments-passing-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "safe-transmute",
 ]
 
@@ -69,7 +69,7 @@ checksum = "a4c527152e37cf757a3f78aae5a06fbeefdb07ccc535c980a3208ee3060dd544"
 name = "arrays-passing-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "safe-transmute",
 ]
 
@@ -98,9 +98,9 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "backtrace"
-version = "0.3.65"
+version = "0.3.66"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11a17d453482a265fd5f8479f2a3f405566e6ca627837aaddb85af8b1ab8ef61"
+checksum = "cab84319d616cfb654d03394f38ab7e6f0919e181b1b57e1fd15e7fb4077d9a7"
 dependencies = [
  "addr2line",
  "cc",
@@ -201,7 +201,7 @@ dependencies = [
 name = "call_parameters"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "marine-rs-sdk-test",
 ]
 
@@ -311,7 +311,7 @@ checksum = "245097e9a4535ee1e3e3931fcfcd55a796a44c643e8596ff6566d68f09b87bbc"
 name = "consumer"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
 ]
 
 [[package]]
@@ -460,7 +460,7 @@ name = "curl_adapter"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
 ]
 
 [[package]]
@@ -653,7 +653,7 @@ dependencies = [
 name = "donkey"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
 ]
 
 [[package]]
@@ -742,7 +742,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "log",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
 ]
 
 [[package]]
@@ -817,8 +817,8 @@ dependencies = [
  "itertools 0.9.0",
  "log",
  "marine-module-interface 0.1.6",
- "marine-rs-sdk",
- "marine-rs-sdk-main",
+ "marine-rs-sdk 0.6.15",
+ "marine-rs-sdk-main 0.6.15",
  "marine-runtime 0.7.2",
  "marine-utils 0.2.0",
  "safe-transmute",
@@ -1062,16 +1062,16 @@ dependencies = [
  "http",
  "indexmap",
  "slab",
- "tokio 1.19.2",
+ "tokio 1.20.0",
  "tokio-util 0.7.3",
  "tracing",
 ]
 
 [[package]]
 name = "hashbrown"
-version = "0.12.1"
+version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db0d4cf898abf0081f964436dc980e96670a0f36863e4b83aaacdb65c9d7ccc3"
+checksum = "607c8a29735385251a339424dd462993c0fed8fa09d378f259377df08c126022"
 
 [[package]]
 name = "heck"
@@ -1182,9 +1182,9 @@ dependencies = [
 
 [[package]]
 name = "hyper"
-version = "0.14.19"
+version = "0.14.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42dc3c131584288d375f2d07f822b0cb012d8c6fb899a5b9fdb3cb7eb9b6004f"
+checksum = "02c929dc5c39e335a03c405292728118860721b10190d98c2a0f0efd5baafbac"
 dependencies = [
  "bytes 1.1.0",
  "futures-channel",
@@ -1198,7 +1198,7 @@ dependencies = [
  "itoa 1.0.2",
  "pin-project-lite 0.2.9",
  "socket2 0.4.4",
- "tokio 1.19.2",
+ "tokio 1.20.0",
  "tower-service",
  "tracing",
  "want",
@@ -1224,9 +1224,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6183ddfa99b85da61a140bea0efc93fdf56ceaa041b37d553518030827f9905"
 dependencies = [
  "bytes 1.1.0",
- "hyper 0.14.19",
+ "hyper 0.14.20",
  "native-tls",
- "tokio 1.19.2",
+ "tokio 1.20.0",
  "tokio-native-tls",
 ]
 
@@ -1297,7 +1297,7 @@ name = "ipfs-effector"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
 ]
 
 [[package]]
@@ -1305,7 +1305,7 @@ name = "ipfs-pure"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
 ]
 
 [[package]]
@@ -1450,7 +1450,7 @@ checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
 name = "lilo-after-2gb-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "safe-transmute",
 ]
 
@@ -1459,7 +1459,7 @@ name = "local_storage"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "wasm-tracing-allocator",
 ]
 
@@ -1560,7 +1560,7 @@ dependencies = [
  "cargo_toml",
  "it-lilo 0.1.0",
  "marine-it-parser 0.6.8",
- "marine-macro-impl",
+ "marine-macro-impl 0.6.15",
  "once_cell",
  "serde",
  "serde_json",
@@ -1576,7 +1576,7 @@ dependencies = [
  "cargo_toml",
  "it-lilo 0.4.0",
  "marine-it-parser 0.9.1",
- "marine-macro-impl",
+ "marine-macro-impl 0.7.0",
  "once_cell",
  "serde",
  "serde_json",
@@ -1657,7 +1657,7 @@ dependencies = [
  "marine-it-interfaces 0.7.1",
  "marine-min-it-version",
  "marine-module-interface 0.4.1",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "marine-utils 0.4.0",
  "multimap",
  "nom",
@@ -1681,8 +1681,17 @@ version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfc907943772cf966ebe2a2d462d09bc79e898ef102ed065ba3d3abcc93fbb71"
 dependencies = [
- "marine-macro-impl",
- "marine-rs-sdk-main",
+ "marine-macro-impl 0.6.15",
+ "marine-rs-sdk-main 0.6.15",
+]
+
+[[package]]
+name = "marine-macro"
+version = "0.7.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+dependencies = [
+ "marine-macro-impl 0.7.0",
+ "marine-rs-sdk-main 0.7.0",
 ]
 
 [[package]]
@@ -1690,6 +1699,19 @@ name = "marine-macro-impl"
 version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfdbed3a10ae9b22df06bee8cd0023255358935aae8e8daf9d1a006cfaeeb11e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+ "uuid",
+]
+
+[[package]]
+name = "marine-macro-impl"
+version = "0.7.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1713,7 +1735,7 @@ version = "0.2.2"
 dependencies = [
  "anyhow",
  "chrono",
- "marine-rs-sdk-main",
+ "marine-rs-sdk-main 0.7.0",
  "semver 0.11.0",
  "serde",
  "thiserror",
@@ -1729,7 +1751,7 @@ checksum = "0ec8f4ab2eeeb5c1d66d9b56fe6b0b5bf39820aa8cc2f1d7be42bdf95654d529"
 dependencies = [
  "anyhow",
  "chrono",
- "marine-rs-sdk-main",
+ "marine-rs-sdk-main 0.6.15",
  "semver 0.11.0",
  "serde",
  "thiserror",
@@ -1776,9 +1798,21 @@ version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d17d44016675abdf18caf3ac1bdd4437cc17ec0db019da141bb06a9ea991726"
 dependencies = [
- "marine-macro",
- "marine-rs-sdk-main",
- "marine-timestamp-macro",
+ "marine-macro 0.6.15",
+ "marine-rs-sdk-main 0.6.15",
+ "marine-timestamp-macro 0.6.15",
+ "polyplets",
+ "serde",
+]
+
+[[package]]
+name = "marine-rs-sdk"
+version = "0.7.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+dependencies = [
+ "marine-macro 0.7.0",
+ "marine-rs-sdk-main 0.7.0",
+ "marine-timestamp-macro 0.7.0",
  "polyplets",
  "serde",
 ]
@@ -1788,6 +1822,15 @@ name = "marine-rs-sdk-main"
 version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ff262801664ce22f9d274504d6e8088c217034aba0ca431eca8d0258f3699c6"
+dependencies = [
+ "log",
+ "serde",
+]
+
+[[package]]
+name = "marine-rs-sdk-main"
+version = "0.7.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
 dependencies = [
  "log",
  "serde",
@@ -1849,8 +1892,8 @@ dependencies = [
  "log",
  "marine-core",
  "marine-module-interface 0.4.1",
- "marine-rs-sdk",
- "marine-rs-sdk-main",
+ "marine-rs-sdk 0.7.0",
+ "marine-rs-sdk-main 0.7.0",
  "marine-utils 0.4.0",
  "once_cell",
  "pretty_assertions",
@@ -1873,7 +1916,7 @@ version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a4afe9c9fe1b474f3a90cee107a827afcc606946f46eb9fdb3f7e073cb034d2"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.6.15",
 ]
 
 [[package]]
@@ -1912,6 +1955,15 @@ name = "marine-timestamp-macro"
 version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "85a9f5b1adeff98ac5a14cfc5fa814185a807ba4a0d3849c9f9e9fd868b27d1f"
+dependencies = [
+ "chrono",
+ "quote",
+]
+
+[[package]]
+name = "marine-timestamp-macro"
+version = "0.7.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
 dependencies = [
  "chrono",
  "quote",
@@ -2037,7 +2089,7 @@ dependencies = [
  "fluence-app-service 0.18.0",
  "itertools 0.9.0",
  "log",
- "marine-rs-sdk-main",
+ "marine-rs-sdk-main 0.7.0",
  "rustop",
  "rustyline",
  "rustyline-derive",
@@ -2179,24 +2231,24 @@ checksum = "b8f8bdf33df195859076e54ab11ee78a1b208382d3a26ec40d142ffc1ecc49ef"
 
 [[package]]
 name = "object"
-version = "0.28.4"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e42c982f2d955fac81dd7e1d0e1426a7d702acd9c98d19ab01083a6a0328c424"
+checksum = "21158b2c33aa6d4561f1c0a6ea283ca92bc54802a93b263e910746d679a7eb53"
 dependencies = [
  "memchr",
 ]
 
 [[package]]
 name = "once_cell"
-version = "1.12.1"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac8b1a9b2518dc799a2271eff1688707eb315f0d4697aa6b0871369ca4c4da55"
+checksum = "18a6dbe30758c9f83eb00cbea4ac95966305f5a7772f3f42ebfc7fc7eddbd8e1"
 
 [[package]]
 name = "openssl"
-version = "0.10.40"
+version = "0.10.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb81a6430ac911acb25fe5ac8f1d2af1b4ea8a4fdfda0f1ee4292af2e2d8eb0e"
+checksum = "618febf65336490dfcf20b73f885f5651a0c89c64c2d4a8c3662585a70bf5bd0"
 dependencies = [
  "bitflags",
  "cfg-if 1.0.0",
@@ -2226,9 +2278,9 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "openssl-sys"
-version = "0.9.74"
+version = "0.9.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "835363342df5fba8354c5b453325b110ffd54044e588c539cf2f20a8014e4cb1"
+checksum = "e5f9bd0c2710541a3cda73d6f9ac4f1b240de4ae261065d309dbe73d9dceb42f"
 dependencies = [
  "autocfg",
  "cc",
@@ -2363,8 +2415,8 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8cc56e7803860fa903c27675a17215e1cfb39fb26e111c0b93f6c049f9cf8d8e"
 dependencies = [
- "marine-macro",
- "marine-rs-sdk-main",
+ "marine-macro 0.6.15",
+ "marine-rs-sdk-main 0.6.15",
  "serde",
 ]
 
@@ -2416,7 +2468,7 @@ dependencies = [
 name = "producer"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
 ]
 
 [[package]]
@@ -2495,7 +2547,7 @@ dependencies = [
 name = "record-effector"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "test-record",
 ]
 
@@ -2503,7 +2555,7 @@ dependencies = [
 name = "record-pure"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "test-record",
 ]
 
@@ -2511,7 +2563,7 @@ dependencies = [
 name = "records-passing-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "safe-transmute",
 ]
 
@@ -2563,9 +2615,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.5.6"
+version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d83f127d94bdbcda4c8cc2e50f6f84f4b611f69c902699ca385a39c3a75f9ff1"
+checksum = "4c4eb3267174b8c6c2f654116623910a0fef09c4753f8dd83db29c48a0df988b"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2574,9 +2626,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.6.26"
+version = "0.6.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49b3de9ec5dc0a3417da371aab17d729997c15010e7fd24ff707773a33bddb64"
+checksum = "a3f87b73ce11b1619a3c6332f45341e0047173771e8b8b73f87bfeefb7b56244"
 
 [[package]]
 name = "remove_dir_all"
@@ -2636,7 +2688,7 @@ dependencies = [
  "h2 0.3.13",
  "http",
  "http-body 0.4.5",
- "hyper 0.14.19",
+ "hyper 0.14.20",
  "hyper-tls 0.5.0",
  "ipnet",
  "js-sys",
@@ -2649,7 +2701,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_urlencoded",
- "tokio 1.19.2",
+ "tokio 1.20.0",
  "tokio-native-tls",
  "tower-service",
  "url",
@@ -2817,9 +2869,9 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.138"
+version = "1.0.139"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1578c6245786b9d168c5447eeacfb96856573ca56c9d68fdcf394be134882a47"
+checksum = "0171ebb889e45aa68b44aee0859b3eede84c6f5f5c228e6f140c0b2a0a46cad6"
 dependencies = [
  "serde_derive",
 ]
@@ -2845,9 +2897,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.138"
+version = "1.0.139"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "023e9b1467aef8a10fb88f25611870ada9800ef7e22afce356bb0d2387b6f27c"
+checksum = "dc1d3230c1de7932af58ad8ffbe1d784bd55efd5a9d84ac24f69c72d83543dfb"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2909,7 +2961,7 @@ checksum = "7fdf1b9db47230893d76faad238fd6097fd6d6a9245cd7a4d90dbd639536bbd2"
 name = "shrek"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
 ]
 
 [[package]]
@@ -3079,7 +3131,7 @@ dependencies = [
 name = "test-record"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
 ]
 
 [[package]]
@@ -3175,10 +3227,11 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.19.2"
+version = "1.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c51a52ed6686dd62c320f9b89299e9dfb46f730c7a48e635c19f21d116cb1439"
+checksum = "57aec3cfa4c296db7255446efb4928a6be304b431a806216105542a67b6ca82e"
 dependencies = [
+ "autocfg",
  "bytes 1.1.0",
  "libc",
  "memchr",
@@ -3208,7 +3261,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7d995660bd2b7f8c1568414c1126076c13fbb725c40112dc0120b78eb9b717b"
 dependencies = [
  "native-tls",
- "tokio 1.19.2",
+ "tokio 1.20.0",
 ]
 
 [[package]]
@@ -3245,7 +3298,7 @@ dependencies = [
  "futures-core",
  "futures-sink",
  "pin-project-lite 0.2.9",
- "tokio 1.19.2",
+ "tokio 1.20.0",
  "tracing",
 ]
 
@@ -3347,9 +3400,9 @@ dependencies = [
 
 [[package]]
 name = "ucd-trie"
-version = "0.1.3"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56dee185309b50d1f11bfedef0fe6d036842e3fb77413abef29f8f8d1c5d4c1c"
+checksum = "89570599c4fe5585de2b388aab47e99f7fa4e9238a1399f707a02e356058141c"
 
 [[package]]
 name = "unicase"
@@ -3368,9 +3421,9 @@ checksum = "099b7128301d285f79ddd55b9a83d5e6b9e97c92e0ea0daebee7263e932de992"
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5bd2fe26506023ed7b5e1e315add59d6f584c621d037f9368fea9cfb988f368c"
+checksum = "15c61ba63f9235225a22310255a29b806b907c9b8c964bcbd0a2c70f3f2deea7"
 
 [[package]]
 name = "unicode-normalization"
@@ -3601,7 +3654,7 @@ checksum = "6a89911bd99e5f3659ec4acf9c4d93b0a90fe4a2a11f15328472058edc5261be"
 name = "wasm-build-rs"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "marine-rs-sdk-test",
 ]
 
@@ -3609,7 +3662,7 @@ dependencies = [
 name = "wasm-greeting"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "marine-rs-sdk-test",
 ]
 
@@ -3618,7 +3671,7 @@ name = "wasm-greeting-record"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "marine-rs-sdk-test",
 ]
 
@@ -3626,7 +3679,7 @@ dependencies = [
 name = "wasm-sqlite-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk",
+ "marine-rs-sdk 0.7.0",
  "marine-sqlite-connector",
 ]
 
@@ -3980,3 +4033,8 @@ dependencies = [
  "winapi 0.2.8",
  "winapi-build",
 ]
+
+[[patch.unused]]
+name = "polyplets"
+version = "0.3.0"
+source = "git+https://github.com/fluencelabs/aquavm?branch=bug/wasm_memory_leak#6504b31bbd8f7d62f81fbdc442aa78fd2855c3ad"

@@ -45,3 +45,10 @@ lto = true
 debug-assertions = false
 overflow-checks = false
 panic = "abort"
+
+[patch.crates-io]
+polyplets = { version = "0.3.0", git = "https://github.com/fluencelabs/aquavm", branch = "bug/wasm_memory_leak"}
+marine-rs-sdk = {version = "0.7.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/VM-115-wasm_ctors_workaround"}
+marine-rs-sdk-main = {version = "0.7.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/VM-115-wasm_ctors_workaround"}
+marine-macro = {version = "0.7.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/VM-115-wasm_ctors_workaround"}
+marine-macro-impl = {version = "0.7.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/VM-115-wasm_ctors_workaround"}
