@@ -52,4 +52,4 @@ marine-rs-sdk = {version = "0.7.0", git = "https://github.com/fluencelabs/marine
 marine-rs-sdk-main = {version = "0.7.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/VM-115-wasm_ctors_workaround"}
 marine-macro = {version = "0.7.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/VM-115-wasm_ctors_workaround"}
 marine-macro-impl = {version = "0.7.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/VM-115-wasm_ctors_workaround"}
-marine-sqlite-connector = {version = "0.5.2", git = "https://github.com/fluencelabs/sqlite-wasm-connector", branch = "update-sdk"}
+marine-sqlite-connector = {version = "0.6.0", git = "https://github.com/fluencelabs/sqlite-wasm-connector", branch = "update-sdk"}
