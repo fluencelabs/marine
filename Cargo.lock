@@ -1688,7 +1688,8 @@ dependencies = [
 [[package]]
 name = "marine-macro"
 version = "0.7.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c5f21b40612e9da310a6df1e394cc30b4962bb4ddc13ee50faec6d2704861b7b"
 dependencies = [
  "marine-macro-impl 0.7.0",
  "marine-rs-sdk-main 0.7.0",
@@ -1711,7 +1712,8 @@ dependencies = [
 [[package]]
 name = "marine-macro-impl"
 version = "0.7.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f43b2b1e5bc5aebdaac7029cfd84a038cd11b23a023e724548f863618716f44e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1801,19 +1803,20 @@ dependencies = [
  "marine-macro 0.6.15",
  "marine-rs-sdk-main 0.6.15",
  "marine-timestamp-macro 0.6.15",
- "polyplets",
+ "polyplets 0.2.0",
  "serde",
 ]
 
 [[package]]
 name = "marine-rs-sdk"
 version = "0.7.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4208762a010c41a6352a651061fcd1a7bb077c6a3548be8ccd84fe79c3e1ddbd"
 dependencies = [
  "marine-macro 0.7.0",
  "marine-rs-sdk-main 0.7.0",
  "marine-timestamp-macro 0.7.0",
- "polyplets",
+ "polyplets 0.3.0",
  "serde",
 ]
 
@@ -1830,7 +1833,8 @@ dependencies = [
 [[package]]
 name = "marine-rs-sdk-main"
 version = "0.7.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0751f4093511b4d8942bed9402dba70ff927cb4df9b18632443294d1cbc51e1a"
 dependencies = [
  "log",
  "serde",
@@ -1912,11 +1916,11 @@ dependencies = [
 
 [[package]]
 name = "marine-sqlite-connector"
-version = "0.5.2"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a4afe9c9fe1b474f3a90cee107a827afcc606946f46eb9fdb3f7e073cb034d2"
+checksum = "446079866e6acd00fd5fbaab2edb62ee518144b071ea0a3eaf735c8c225021fc"
 dependencies = [
- "marine-rs-sdk 0.6.15",
+ "marine-rs-sdk 0.7.0",
 ]
 
 [[package]]
@@ -1963,7 +1967,8 @@ dependencies = [
 [[package]]
 name = "marine-timestamp-macro"
 version = "0.7.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/VM-115-wasm_ctors_workaround#dafe2cf65b8e994d39ba0cfd953cfbdc57105089"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5297d57cecd75d71feb0c94da9027891e3c31215e23425b0e5dea9a5a7e60230"
 dependencies = [
  "chrono",
  "quote",
@@ -2417,6 +2422,17 @@ checksum = "8cc56e7803860fa903c27675a17215e1cfb39fb26e111c0b93f6c049f9cf8d8e"
 dependencies = [
  "marine-macro 0.6.15",
  "marine-rs-sdk-main 0.6.15",
+ "serde",
+]
+
+[[package]]
+name = "polyplets"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "407811d09f3e0fb2086060afdfbad2e6bb5b63c300edeec93358bb5b8a8e4257"
+dependencies = [
+ "marine-macro 0.7.0",
+ "marine-rs-sdk-main 0.7.0",
  "serde",
 ]
 
@@ -4033,8 +4049,3 @@ dependencies = [
  "winapi 0.2.8",
  "winapi-build",
 ]
-
-[[patch.unused]]
-name = "polyplets"
-version = "0.3.0"
-source = "git+https://github.com/fluencelabs/aquavm?branch=bug/wasm_memory_leak#6504b31bbd8f7d62f81fbdc442aa78fd2855c3ad"
