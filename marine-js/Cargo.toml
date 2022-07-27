@@ -1,6 +1,6 @@
 [package]
 name = "marine-js"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2018"
 description = "Web version of the marine runtime"
 publish = false
@@ -16,7 +16,7 @@ marine-utils = { path = "../crates/utils", version = "0.4.0" }
 marine-min-it-version =  { path = "../crates/min-it-version", version = "0.1.0"}
 it-json-serde = { path = "../crates/it-json-serde", version = "0.3.1" }
 
-marine-rs-sdk = "0.6.15"
+marine-rs-sdk = "0.7.0"
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.23.1" }
 fluence-it-types = {version = "0.3.1", features = ["impls"] }
 it-lilo = "0.4.0"
