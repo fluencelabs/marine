@@ -19,6 +19,7 @@ use crate::errors::CLIError;
 
 use std::process::Command;
 
+// TODO: use sdk version from cargo.toml
 const RUST_SDK_VERSION: &str = "0.7.0";
 
 #[derive(serde::Deserialize)]

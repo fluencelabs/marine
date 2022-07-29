@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::MarineError;
 use crate::MarineResult;
 
 use serde_derive::Serialize;
@@ -23,6 +24,7 @@ use serde_with::skip_serializing_none;
 use serde_with::DisplayFromStr;
 
 use std::path::Path;
+use std::path::PathBuf;
 
 /*
 An example of the config:
@@ -63,19 +65,50 @@ pub struct TomlMarineConfig {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub module: Vec<TomlMarineNamedModuleConfig>,
     pub default: Option<TomlMarineModuleConfig>,
+    #[serde(skip)]
+    pub base_path: PathBuf,
 }
 
 impl TomlMarineConfig {
     /// Load config from filesystem.
     pub fn load<P: AsRef<Path>>(path: P) -> MarineResult<Self> {
-        let file_content = std::fs::read(path)?;
-        Ok(toml::from_slice(&file_content)?)
+        let path = PathBuf::from(path.as_ref()).canonicalize().map_err(|e| {
+            MarineError::IOError(format!(
+                "failed to canonicalize path {}: {}",
+                path.as_ref().display(),
+                e
+            ))
+        })?;
+
+        let file_content = std::fs::read(&path).map_err(|e| {
+            MarineError::IOError(format!("failed to load {}: {}", path.display(), e))
+        })?;
+
+        let mut config: TomlMarineConfig = toml::from_slice(&file_content)?;
+
+        let default_base_path = Path::new("/");
+        config.base_path = path
+            .canonicalize()
+            .map_err(|e| {
+                MarineError::IOError(format!(
+                    "Failed to canonicalize config path {}: {}",
+                    path.display(),
+                    e
+                ))
+            })?
+            .parent()
+            .unwrap_or(default_base_path)
+            .to_path_buf();
+
+        Ok(config)
     }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlMarineNamedModuleConfig {
     pub name: String,
+    #[serde(default)]
+    pub load_from: Option<String>,
     #[serde(default)]
     pub file_name: Option<String>,
     #[serde(flatten)]
@@ -119,6 +152,7 @@ mod tests {
         let config = TomlMarineNamedModuleConfig {
             name: "name".to_string(),
             file_name: Some("file_name".to_string()),
+            load_from: <_>::default(),
             config: TomlMarineModuleConfig {
                 mem_pages_count: Some(100),
                 max_heap_size: Some(ByteSize::gib(4)),

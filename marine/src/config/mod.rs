@@ -17,7 +17,10 @@
 mod raw_marine_config;
 mod to_marine_config;
 mod marine_config;
+mod path_utils;
 
+pub use marine_config::ConfigContext;
+pub use marine_config::WithContext;
 pub use marine_config::MarineModuleConfig;
 pub use marine_config::MarineConfig;
 pub use marine_config::MarineWASIConfig;
@@ -29,3 +32,4 @@ pub use raw_marine_config::TomlMarineConfig;
 pub use raw_marine_config::TomlMarineModuleConfig;
 
 pub(crate) use to_marine_config::make_marine_config;
+pub(crate) use path_utils::adjust_path;

@@ -18,7 +18,7 @@ use marine_core::MError;
 use it_json_serde::ITJsonSeDeError;
 
 use thiserror::Error;
-use std::io::Error as IOError;
+
 use std::path::PathBuf;
 
 #[derive(Debug, Error)]
@@ -86,12 +86,6 @@ pub enum MarineError {
     /// Marine errors.
     #[error("engine error: {0}")]
     EngineError(#[from] MError),
-}
-
-impl From<IOError> for MarineError {
-    fn from(err: IOError) -> Self {
-        MarineError::IOError(format!("{}", err))
-    }
 }
 
 impl From<std::convert::Infallible> for MarineError {

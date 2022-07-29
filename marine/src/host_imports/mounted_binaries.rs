@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use std::path::{Path, PathBuf};
 use marine_core::HostImportDescriptor;
 use marine_rs_sdk::MountedBinaryResult;
 
@@ -21,7 +22,7 @@ use wasmer_core::vm::Ctx;
 use wasmer_it::IValue;
 use wasmer_it::IType;
 
-pub(crate) fn create_mounted_binary_import(mounted_binary_path: String) -> HostImportDescriptor {
+pub(crate) fn create_mounted_binary_import(mounted_binary_path: PathBuf) -> HostImportDescriptor {
     let host_cmd_closure = move |_ctx: &mut Ctx, raw_args: Vec<IValue>| {
         let result =
             mounted_binary_import_impl(&mounted_binary_path, raw_args).unwrap_or_else(Into::into);
@@ -40,7 +41,7 @@ pub(crate) fn create_mounted_binary_import(mounted_binary_path: String) -> HostI
 }
 
 pub(self) fn mounted_binary_import_impl(
-    mounted_binary_path: &str,
+    mounted_binary_path: &Path,
     raw_args: Vec<IValue>,
 ) -> Result<MountedBinaryResult, MountedBinaryResult> {
     let args = parse_args(raw_args)?;
@@ -67,7 +68,7 @@ pub(self) fn mounted_binary_import_impl(
 
             log::error!(
                 "error occurred on `{} {:?}`: {} ",
-                mounted_binary_path,
+                mounted_binary_path.display(),
                 args,
                 e
             );
@@ -115,7 +116,7 @@ mod tests {
 
     #[test]
     fn call_non_existent_binary() {
-        let path = String::from("____non_existent_path____");
+        let path = std::path::Path::new("____non_existent_path____");
         let actual = mounted_binary_import_impl(&path, vec![]).unwrap_err();
 
         assert_eq!(actual.ret_code, 100002);

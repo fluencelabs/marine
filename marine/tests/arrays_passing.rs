@@ -25,14 +25,8 @@ use serde_json::json;
 use std::rc::Rc;
 
 static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
-    let mut arrays_passing_config =
-        marine::TomlMarineConfig::load("./tests/wasm_tests/arrays_passing/Config.toml")
-            .expect("toml marine config should be created");
-
-    arrays_passing_config.modules_dir =
-        Some(String::from("./tests/wasm_tests/arrays_passing/artifacts"));
-
-    arrays_passing_config
+    marine::TomlMarineConfig::load("./tests/wasm_tests/arrays_passing/Config.toml")
+        .expect("toml marine config should be created")
 });
 
 #[test]

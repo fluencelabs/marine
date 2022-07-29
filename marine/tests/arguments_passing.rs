@@ -26,15 +26,8 @@ use serde_json::json;
 use std::rc::Rc;
 
 static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
-    let mut arguments_passing_config =
-        marine::TomlMarineConfig::load("./tests/wasm_tests/arguments_passing/Config.toml")
-            .expect("toml faas config should be created");
-
-    arguments_passing_config.modules_dir = Some(String::from(
-        "./tests/wasm_tests/arguments_passing/artifacts",
-    ));
-
-    arguments_passing_config
+    marine::TomlMarineConfig::load("./tests/wasm_tests/arguments_passing/Config.toml")
+        .expect("toml faas config should be created")
 });
 
 const MODULE_NAME: &str = "arguments_passing_pure";
