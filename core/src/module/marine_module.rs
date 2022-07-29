@@ -37,6 +37,8 @@ use std::sync::Arc;
 use std::rc::Rc;
 
 const MEMORY_INDEX: u32 = 0;
+const START_FUNC: &str = "_start";
+const INITIALIZE_FUNC: &str = "_initialize";
 
 type ITInterpreter =
     Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
@@ -132,9 +134,15 @@ impl MModule {
 
         let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
 
-        // call _start to populate the WASI state of the module
+        // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
-        if let Ok(start_func) = wasmer_instance.exports.get::<wasmer_runtime::Func<'_, (), ()>>("_start") {
+        if let Ok(initialize_func) = wasmer_instance.exports.get::<wasmer_runtime::Func<'_, (), ()>>(INITIALIZE_FUNC) {
+            initialize_func.call()?;
+        }
+
+        // call _start to call module's main function
+        #[rustfmt::skip]
+        if let Ok(start_func) = wasmer_instance.exports.get::<wasmer_runtime::Func<'_, (), ()>>(START_FUNC) {
             start_func.call()?;
         }
 

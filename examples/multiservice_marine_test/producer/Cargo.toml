@@ -10,4 +10,4 @@ name = "producer"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk = "0.6.13"
+marine-rs-sdk = "0.7.0"

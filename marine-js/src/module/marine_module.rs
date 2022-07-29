@@ -32,6 +32,8 @@ use std::convert::TryInto;
 use std::sync::Arc;
 use std::rc::Rc;
 
+const INITIALIZE_FUNC: &str = "_initialize";
+
 type ITInterpreter = Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView>;
 
 #[derive(Clone)]
@@ -94,6 +96,10 @@ impl MModule {
         let wasmer_instance = WasmerInstance::new(&mit, Rc::new(name.to_string()));
         let it_instance = Arc::new(ITInstance::new(&wasmer_instance, &mit)?);
         let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
+        if let Ok(initialize_func) = wasmer_instance.exports.get(INITIALIZE_FUNC) {
+            initialize_func.call(&[])?;
+        }
+
         Ok(Self {
             wasmer_instance: Box::new(wasmer_instance),
             export_funcs,
