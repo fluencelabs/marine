@@ -33,6 +33,7 @@ mod build;
 mod errors;
 mod generate;
 mod utils;
+mod cargo_manifest;
 
 pub(crate) type CLIResult<T> = std::result::Result<T, crate::errors::CLIError>;
 

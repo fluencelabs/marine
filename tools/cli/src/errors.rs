@@ -45,4 +45,10 @@ pub enum CLIError {
     /// Various errors related to I/O operations.
     #[error("{0:?}")]
     IOError(#[from] std::io::Error),
+
+    #[error("{0}")]
+    ManifestParseError(String),
+
+    #[error("{0:?}")]
+    VersionParseError(#[from] semver::SemVerError),
 }
