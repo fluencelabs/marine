@@ -1494,6 +1494,7 @@ dependencies = [
  "serde_json",
  "termion",
  "thiserror",
+ "toml",
  "walrus",
 ]
 

@@ -19,6 +19,7 @@ use crate::errors::CLIError;
 
 use semver::Version;
 
+use std::path::PathBuf;
 use std::process::Command;
 
 #[derive(serde::Deserialize)]
@@ -28,7 +29,7 @@ enum DiagnosticMessage {
     BuildFinished,
     CompilerArtifact {
         filenames: Vec<String>,
-        manifest_path: String,
+        manifest_path: PathBuf,
     },
     RunWithArgs,
 }
@@ -58,7 +59,7 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
                 .filter(|name| name.ends_with(".wasm"))
                 .collect::<Vec<_>>();
             if !new_wasms.is_empty() {
-                let sdk_version = extract_sdk_version(manifest_path)?;
+                let sdk_version = extract_sdk_version(&manifest_path)?;
                 wasms.extend(
                     new_wasms
                         .into_iter()

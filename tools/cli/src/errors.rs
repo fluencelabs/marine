@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use crate::cargo_manifest::ManifestError;
+
 use marine_module_info_parser::ModuleInfoError;
 use marine_it_generator::ITGeneratorError;
 use marine_it_parser::ITParserError;
@@ -27,15 +29,15 @@ pub enum CLIError {
     NoSuchCommand(String),
 
     /// A error occurred while embedding rust sdk version.
-    #[error("{0}")]
+    #[error(transparent)]
     VersionEmbeddingError(#[from] ModuleInfoError),
 
     /// An error occurred while generating interface types.
-    #[error("{0}")]
+    #[error(transparent)]
     ITGeneratorError(#[from] ITGeneratorError),
 
     /// An error occurred while parsing interface types.
-    #[error("{0}")]
+    #[error(transparent)]
     ITParserError(#[from] ITParserError),
 
     /// An error occurred when no Wasm file was compiled.
@@ -46,9 +48,6 @@ pub enum CLIError {
     #[error("{0:?}")]
     IOError(#[from] std::io::Error),
 
-    #[error("{0}")]
-    ManifestParseError(String),
-
-    #[error("{0:?}")]
-    VersionParseError(#[from] semver::SemVerError),
+    #[error(transparent)]
+    ManifestError(#[from] ManifestError),
 }

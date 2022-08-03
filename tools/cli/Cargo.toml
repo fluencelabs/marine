@@ -20,7 +20,7 @@ cargo_toml = "0.11.5"
 semver = "0.11.0"
 walrus = "0.18.0"
 Inflector = "0.11.4"
-
+toml = "0.5.9"
 atty = "0.2.14"
 thiserror = "1.0.24"
 anyhow = "1.0.31"
