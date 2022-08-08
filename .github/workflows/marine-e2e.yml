@@ -1,0 +1,53 @@
+name: "marine-e2e"
+
+on:
+  pull_request:
+    paths:
+      - "marine/**"
+    branches:
+      - "master"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  RUST_BACKTRACE: 1
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test-dependent:
+    name: "Test dependent"
+    runs-on: builder
+
+    strategy:
+      fail-fast: false
+      matrix:
+        dependent:
+          - name: avm-server
+            repo: fluencelabs/aquavm
+            path: avm/server
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ matrix.dependent.repo }}
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: wasm32-wasi
+
+      - uses: Swatinem/rust-cache@v1
+
+      - name: "Set marine-runtime version"
+        run: >
+          cargo add marine-runtime \
+            --git https://github.com/fluencelabs/marine \
+            --rev ${{ github.sha }}
+        working-directory: ${{ matrix.dependent.path }}
+
+      - name: "cargo build"
+        run: >
+          cargo build
+        working-directory: ${{ matrix.dependent.path }}
