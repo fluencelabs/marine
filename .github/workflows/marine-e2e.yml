@@ -2,8 +2,8 @@ name: "marine-e2e"
 
 on:
   pull_request:
-    paths:
-      - "marine/**"
+    # paths:
+    #   - "marine/**"
     branches:
       - "master"
 
