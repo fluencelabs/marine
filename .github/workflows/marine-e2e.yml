@@ -27,6 +27,9 @@ jobs:
           - name: avm-server
             repo: fluencelabs/aquavm
             path: avm/server
+          - name: fluence-app-service
+            repo: fluencelabs/marine
+            path: crates/fluence-app-service
 
     steps:
       - uses: actions/checkout@v3
@@ -51,3 +54,8 @@ jobs:
         run: >
           cargo build
         working-directory: ${{ matrix.dependent.path }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.dependent.name }}
+          path: ${{ matrix.dependent.path }}
