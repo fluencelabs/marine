@@ -1,0 +1,14 @@
+{
+  "dependent": [
+    {
+      "name": "avm-server",
+      "repo": "fluencelabs/aquavm",
+      "path": "avm/server"
+    },
+    {
+      "name": "fluence-app-service",
+      "repo": "fluencelabs/marine",
+      "path": "crates/fluence-app-service"
+    }
+  ]
+}

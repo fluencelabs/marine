@@ -16,46 +16,225 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test-dependent:
-    name: "Test dependent"
-    runs-on: builder
+  prepare:
+    name: "Prepare"
+    runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        dependent:
-          - name: avm-server
-            repo: fluencelabs/aquavm
-            path: avm/server
-          - name: fluence-app-service
-            repo: fluencelabs/marine
-            path: crates/fluence-app-service
+    outputs:
+      matrix: ${{ steps.matrix.outputs.result }}
 
     steps:
       - uses: actions/checkout@v3
+      - id: matrix
+        run: echo "::set-output name=result::$(jq -cM . .github/e2e/dependent.json)"
+
+  dependent:
+    name: "Dependent"
+    runs-on: ubuntu-latest
+
+    needs:
+      - prepare
+
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+
+    steps:
+      - name: Checkout ${{ matrix.dependent.name }}
+        uses: actions/checkout@v3
         with:
           repository: ${{ matrix.dependent.repo }}
 
-      - uses: actions-rs/toolchain@v1
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: nightly
           target: wasm32-wasi
 
-      - uses: Swatinem/rust-cache@v1
-
-      - name: "Set marine-runtime version"
+      - name: Set marine-runtime version
         run: >
           cargo add marine-runtime \
             --git https://github.com/fluencelabs/marine \
-            --rev ${{ github.sha }}
-        working-directory: ${{ matrix.dependent.path }}
-
-      - name: "cargo build"
-        run: >
-          cargo build
+            --tag v0.18.0
+            # --rev ${{ github.sha }}
         working-directory: ${{ matrix.dependent.path }}
 
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.dependent.name }}
-          path: ${{ matrix.dependent.path }}
+          path: |
+            .
+            !.git
+            !.cargo
+            !target/
+            !*.wasm
+            !*.wat
+
+  rust-peer:
+    name: "Build rust-peer snapshot"
+    runs-on: builder
+
+    permissions:
+      contents: read
+      id-token: write
+
+    needs:
+      - prepare
+      - dependent
+
+    steps:
+      - name: Checkout marine
+        uses: actions/checkout@v3
+
+      - name: Checkout rust-peer
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/rust-peer
+          ref: e2e-snapshot
+          path: rust-peer
+
+      - name: Setup rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: wasm32-wasi
+          components: clippy
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: rust-peer/external
+
+      - name: Set dependencies path
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import json
+            import os
+            from string import Template
+
+            matrix = '${{ needs.prepare.outputs.matrix }}'
+            for d in json.loads(matrix)["dependent"]:
+              entry = Template('$name = { path = "external/$name/$path" }\n')
+              with open("rust-peer/Cargo.toml", "a") as c:
+                  c.write(entry.substitute(name=d["name"],path=d["path"]))
+
+      - name: Run cargo build
+        run: cargo build --release -p particle-node
+        working-directory: rust-peer
+
+      - name: Install cargo-nextest
+        run: cargo install --locked cargo-nextest@0.9.22
+        working-directory: rust-peer
+
+      - name: Run cargo nextest
+        run: cargo nextest run --release --all-features --no-fail-fast --retries 10 --test-threads 10
+        working-directory: rust-peer
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.1
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          secrets: |
+            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
+            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          registry: docker.fluence.dev
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Build and push snapshot
+        uses: docker/build-push-action@v3
+        with:
+          context: rust-peer
+          push: true
+          file: rust-peer/.github/snapshot/Dockerfile
+          tags: |
+            docker.fluence.dev/marine:${{ github.head_ref }}
+          labels: |
+            sha=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  aqua-playground:
+    name: "Run aqua-playground tests"
+    runs-on: builder
+
+    permissions:
+      contents: read
+      id-token: write
+
+    needs:
+      - rust-peer
+      - prepare
+
+    steps:
+      - name: Import secrets
+        id: docker
+        uses: hashicorp/vault-action@v2.4.1
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          secrets: |
+            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
+            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          registry: docker.fluence.dev
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Checkout aqua-playground
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aqua-playground
+
+      - name: Checkout marine
+        uses: actions/checkout@v3
+        with:
+          path: marine
+
+      - name: Setup docker-compose
+        uses: KengoTODA/actions-setup-docker-compose@v1.0.9
+        with:
+          version: 'v2.10.0'
+
+      - name: Run rust-peer
+        uses: isbang/compose-action@v1.1.0
+        with:
+          compose-file: "marine/.github/e2e/docker-compose.yml"
+          down-flags: "--volumes"
+
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Prepare config
+        run: cat marine/.github/e2e/config.ts > src/config.ts
+
+      - run: npm install
+      - run: npm run compile-aqua
+      - run: npm run run
+      - run: npm run test
