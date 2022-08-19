@@ -20,7 +20,7 @@ use print_state::print_envs;
 use print_state::print_fs_state;
 use crate::ReplResult;
 
-use fluence_app_service::{AppService, CallParameters};
+use fluence_app_service::{AppService, CallParameters, SecurityTetraplet};
 use fluence_app_service::MarineModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
 
@@ -221,13 +221,21 @@ impl REPL {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
 
+        let config_file_path: Option<PathBuf> = config_file_path.map(Into::into);
+
         let start = Instant::now();
 
         let mut config = config_file_path
-            .map(|p| TomlAppServiceConfig::load(p.into()))
+            .as_ref()
+            .map(|p| TomlAppServiceConfig::load(p))
             .transpose()?
             .unwrap_or_default();
         config.service_base_dir = Some(tmp_path);
+
+        config.toml_marine_config.base_path = config_file_path
+            .map(|path| path.parent().map(PathBuf::from))
+            .flatten()
+            .unwrap_or_default();
 
         let app_service = AppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
 
@@ -241,6 +249,55 @@ impl REPL {
         }
 
         Ok(app_service)
+    }
+}
+
+#[derive(Clone, PartialEq, Default, Eq, Debug, Deserialize)]
+struct PartialCallParameters {
+    /// Peer id of the AIR script initiator.
+    #[serde(default)]
+    pub init_peer_id: String,
+
+    /// Id of the current service.
+    #[serde(default)]
+    pub service_id: String,
+
+    /// Id of the service creator.
+    #[serde(default)]
+    pub service_creator_peer_id: String,
+
+    /// PeerId of the peer who hosts this service.
+    #[serde(default)]
+    pub host_id: String,
+
+    /// Id of the particle which execution resulted a call this service.
+    #[serde(default)]
+    pub particle_id: String,
+
+    /// Security tetraplets which described origin of the arguments.
+    #[serde(default)]
+    pub tetraplets: Vec<Vec<SecurityTetraplet>>,
+}
+
+impl From<PartialCallParameters> for CallParameters {
+    fn from(partial_call_params: PartialCallParameters) -> Self {
+        let PartialCallParameters {
+            init_peer_id,
+            service_id,
+            service_creator_peer_id,
+            host_id,
+            particle_id,
+            tetraplets,
+        } = partial_call_params;
+
+        Self {
+            init_peer_id,
+            service_id,
+            service_creator_peer_id,
+            host_id,
+            particle_id,
+            tetraplets,
+        }
     }
 }
 
@@ -271,8 +328,8 @@ fn parse_call_module_arguments<'args>(
 
     let call_parameters = match de.end() {
         Ok(_) => CallParameters::default(),
-        Err(_) => match CallParameters::deserialize(&mut de) {
-            Ok(call_parameters) => call_parameters,
+        Err(_) => match PartialCallParameters::deserialize(&mut de) {
+            Ok(call_parameters) => call_parameters.into(),
             Err(e) => return Err(format!("invalid call parameters: {}", e)),
         },
     };
