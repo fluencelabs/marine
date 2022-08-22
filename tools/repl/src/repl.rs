@@ -231,7 +231,7 @@ impl REPL {
             .unwrap_or_default();
         config.service_base_dir = Some(tmp_path);
 
-        cfig.toml_marine_config.base_path = config_file_path
+        config.toml_marine_config.base_path = config_file_path
             .and_then(|path| path.parent().map(PathBuf::from))
             .unwrap_or_default();
 
