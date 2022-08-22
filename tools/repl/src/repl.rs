@@ -231,9 +231,8 @@ impl REPL {
             .unwrap_or_default();
         config.service_base_dir = Some(tmp_path);
 
-        config.toml_marine_config.base_path = config_file_path
-            .map(|path| path.parent().map(PathBuf::from))
-            .flatten()
+        cfig.toml_marine_config.base_path = config_file_path
+            .and_then(|path| path.parent().map(PathBuf::from))
             .unwrap_or_default();
 
         let app_service = AppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
