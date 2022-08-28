@@ -70,6 +70,58 @@ jobs:
             !*.wasm
             !*.wat
 
+  registry:
+    name: "Run registry tests"
+    runs-on: builder
+
+    needs:
+      - prepare
+      - dependent
+
+    steps:
+      - name: Checkout registry
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/registry
+
+      - name: Checkout marine-rs-sdk-test
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/marine-rs-sdk-test
+          path: marine-rs-sdk-test
+
+      - name: Setup rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: wasm32-wasi
+          components: clippy
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: fluence-app-service
+          path: marine-rs-sdk-test/fluence-app-service
+
+      - name: Set fluence-app-service path
+        run: |
+          cargo add \
+            --path fluence-app-service/crates/fluence-app-service \
+            --features raw-module-api \
+            fluence-app-service
+        working-directory: marine-rs-sdk-test
+
+      - name: Set marine-rs-sdk-test path
+        run: |
+          cargo add \
+            --path ../marine-rs-sdk-test \
+            marine-rs-sdk-test
+        working-directory: service
+
+      - name: Build registry
+        run: cargo clean; cargo build
+        working-directory: service
+
   rust-peer:
     name: "Build rust-peer snapshot"
     runs-on: builder
@@ -180,12 +232,11 @@ jobs:
       id-token: write
 
     needs:
-      - rust-peer
+      # - rust-peer
       - prepare
 
     steps:
       - name: Import secrets
-        id: docker
         uses: hashicorp/vault-action@v2.4.1
         with:
           url: https://vault.fluence.dev
@@ -209,11 +260,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: fluencelabs/aqua-playground
-
-      - name: Checkout marine
-        uses: actions/checkout@v3
-        with:
-          path: marine
+          ref: marine-e2e
 
       - name: Setup docker-compose
         uses: KengoTODA/actions-setup-docker-compose@v1.0.9
@@ -223,7 +270,7 @@ jobs:
       - name: Run rust-peer
         uses: isbang/compose-action@v1.1.0
         with:
-          compose-file: "marine/.github/e2e/docker-compose.yml"
+          compose-file: ".github/e2e/docker-compose.yml"
           down-flags: "--volumes"
 
       - name: Setup node
@@ -232,9 +279,9 @@ jobs:
           node-version: "16"
 
       - name: Prepare config
-        run: cat marine/.github/e2e/config.ts > src/config.ts
+        run: cat .github/e2e/config.ts > src/config.ts
 
       - run: npm install
-      - run: npm run compile-aqua
-      - run: npm run run
+      - run: npm run build
+      - run: npm run compile-aqua -- -c "UNIQUE_CONST = 1" -c "ANOTHER_CONST = \"ab\""
       - run: npm run test
