@@ -2058,7 +2058,7 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.18.0"
+version = "0.18.1"
 dependencies = [
  "anyhow",
  "check-latest",
