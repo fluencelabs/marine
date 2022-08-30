@@ -26,6 +26,8 @@ pub fn greeting(name: String) -> String {
     format!("Hi, {}", name)
 }
 
+#[marine]
+pub fn remove(_cid: String, _peer_id: String, _multiaddr: String) {}
 #[cfg(test)]
 mod tests {
     use marine_rs_sdk_test::marine_test;

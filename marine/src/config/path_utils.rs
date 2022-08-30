@@ -22,12 +22,15 @@ use thiserror::private::PathAsDisplay;
 use std::path::Path;
 use std::path::PathBuf;
 
-pub fn adjust_path(base: &Path, path: &Path) -> MarineResult<PathBuf> {
+pub fn as_relative_to_base(base: Option<&PathBuf>, path: &Path) -> MarineResult<PathBuf> {
     if path.is_absolute() {
         return Ok(PathBuf::from(path));
     }
 
-    let path = base.join(path);
+    let path = match base {
+        None => PathBuf::from(path),
+        Some(base) => base.join(path),
+    };
 
     path.canonicalize().map_err(|e| {
         MarineError::IOError(format!(
