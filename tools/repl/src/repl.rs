@@ -20,7 +20,7 @@ use print_state::print_envs;
 use print_state::print_fs_state;
 use crate::ReplResult;
 
-use fluence_app_service::{AppService, CallParameters};
+use fluence_app_service::{AppService, CallParameters, SecurityTetraplet};
 use fluence_app_service::MarineModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
 
@@ -244,6 +244,55 @@ impl REPL {
     }
 }
 
+#[derive(Clone, PartialEq, Default, Eq, Debug, Deserialize)]
+struct PartialCallParameters {
+    /// Peer id of the AIR script initiator.
+    #[serde(default)]
+    pub init_peer_id: String,
+
+    /// Id of the current service.
+    #[serde(default)]
+    pub service_id: String,
+
+    /// Id of the service creator.
+    #[serde(default)]
+    pub service_creator_peer_id: String,
+
+    /// PeerId of the peer who hosts this service.
+    #[serde(default)]
+    pub host_id: String,
+
+    /// Id of the particle which execution resulted a call this service.
+    #[serde(default)]
+    pub particle_id: String,
+
+    /// Security tetraplets which described origin of the arguments.
+    #[serde(default)]
+    pub tetraplets: Vec<Vec<SecurityTetraplet>>,
+}
+
+impl From<PartialCallParameters> for CallParameters {
+    fn from(partial_call_params: PartialCallParameters) -> Self {
+        let PartialCallParameters {
+            init_peer_id,
+            service_id,
+            service_creator_peer_id,
+            host_id,
+            particle_id,
+            tetraplets,
+        } = partial_call_params;
+
+        Self {
+            init_peer_id,
+            service_id,
+            service_creator_peer_id,
+            host_id,
+            particle_id,
+            tetraplets,
+        }
+    }
+}
+
 fn parse_call_module_arguments<'args>(
     args: impl Iterator<Item = &'args str>,
 ) -> Result<CallModuleArguments<'args>, String> {
@@ -271,8 +320,8 @@ fn parse_call_module_arguments<'args>(
 
     let call_parameters = match de.end() {
         Ok(_) => CallParameters::default(),
-        Err(_) => match CallParameters::deserialize(&mut de) {
-            Ok(call_parameters) => call_parameters,
+        Err(_) => match PartialCallParameters::deserialize(&mut de) {
+            Ok(call_parameters) => call_parameters.into(),
             Err(e) => return Err(format!("invalid call parameters: {}", e)),
         },
     };
