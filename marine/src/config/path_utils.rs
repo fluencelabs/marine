@@ -17,8 +17,6 @@
 use crate::MarineError;
 use crate::MarineResult;
 
-use thiserror::private::PathAsDisplay;
-
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -35,7 +33,7 @@ pub fn as_relative_to_base(base: Option<&PathBuf>, path: &Path) -> MarineResult<
     path.canonicalize().map_err(|e| {
         MarineError::IOError(format!(
             "Failed to canonicalize path {}: {}",
-            path.as_path().as_display(),
+            path.display(),
             e
         ))
     })
