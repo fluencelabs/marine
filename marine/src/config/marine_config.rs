@@ -175,7 +175,6 @@ impl TryFrom<TomlMarineConfig> for MarineConfig {
         let context = ConfigContext {
             base_path: Some(base_path),
         };
-        // unwrap is safe because it was set to Some in the line above;
 
         let modules_dir = toml_config
             .modules_dir
