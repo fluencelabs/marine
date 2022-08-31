@@ -32,4 +32,4 @@ pub use raw_marine_config::TomlMarineConfig;
 pub use raw_marine_config::TomlMarineModuleConfig;
 
 pub(crate) use to_marine_config::make_marine_config;
-pub(crate) use path_utils::adjust_path;
+pub(crate) use path_utils::as_relative_to_base;

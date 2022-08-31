@@ -61,7 +61,7 @@ modules_dir = "wasm/artifacts/wasm_modules"
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlMarineConfig {
-    pub modules_dir: Option<String>,
+    pub modules_dir: Option<PathBuf>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub module: Vec<TomlMarineNamedModuleConfig>,
     pub default: Option<TomlMarineModuleConfig>,
@@ -108,7 +108,7 @@ impl TomlMarineConfig {
 pub struct TomlMarineNamedModuleConfig {
     pub name: String,
     #[serde(default)]
-    pub load_from: Option<String>,
+    pub load_from: Option<PathBuf>,
     #[serde(default)]
     pub file_name: Option<String>,
     #[serde(flatten)]
@@ -131,7 +131,7 @@ pub struct TomlMarineModuleConfig {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlWASIConfig {
-    pub preopened_files: Option<Vec<String>>,
+    pub preopened_files: Option<Vec<PathBuf>>,
     pub envs: Option<toml::value::Table>,
     pub mapped_dirs: Option<toml::value::Table>,
 }

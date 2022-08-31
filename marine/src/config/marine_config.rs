@@ -23,7 +23,7 @@ use std::path::PathBuf;
 
 #[derive(Clone, Default, Debug)]
 pub struct ConfigContext {
-    pub base_path: PathBuf,
+    pub base_path: Option<PathBuf>,
 }
 
 pub struct WithContext<'c, T> {
@@ -163,7 +163,7 @@ use super::TomlWASIConfig;
 use super::TomlMarineNamedModuleConfig;
 use crate::MarineError;
 use crate::MarineResult;
-use crate::config::adjust_path;
+use crate::config::as_relative_to_base;
 
 use std::convert::{TryFrom, TryInto};
 
@@ -172,11 +172,13 @@ impl TryFrom<TomlMarineConfig> for MarineConfig {
 
     fn try_from(toml_config: TomlMarineConfig) -> Result<Self, Self::Error> {
         let base_path = PathBuf::from(toml_config.base_path);
-        let context = ConfigContext { base_path };
+        let context = ConfigContext {
+            base_path: Some(base_path),
+        };
 
         let modules_dir = toml_config
             .modules_dir
-            .map(|dir| adjust_path(&context.base_path, Path::new(&dir)))
+            .map(|dir| as_relative_to_base(context.base_path.as_deref(), &dir))
             .transpose()?;
 
         let default_modules_config = toml_config
@@ -210,7 +212,7 @@ impl<'c> TryFrom<WithContext<'c, TomlMarineNamedModuleConfig>> for ModuleDescrip
         let file_name = config.file_name.unwrap_or(format!("{}.wasm", config.name));
         let load_from = config
             .load_from
-            .map(|path| adjust_path(&context.base_path, Path::new(&path)))
+            .map(|path| as_relative_to_base(context.base_path.as_deref(), &path))
             .transpose()?;
 
         Ok(ModuleDescriptor {
@@ -235,7 +237,7 @@ impl<'c> TryFrom<WithContext<'c, TomlMarineModuleConfig>> for MarineModuleConfig
         let mounted_binaries = mounted_binaries
             .into_iter()
             .map(|(import_func_name, host_cmd)| {
-                let host_cmd = host_cmd.try_into::<String>()?;
+                let host_cmd = host_cmd.try_into::<PathBuf>()?;
                 Ok((import_func_name, host_cmd))
             })
             .collect::<Result<Vec<_>, Self::Error>>()?;
@@ -243,7 +245,7 @@ impl<'c> TryFrom<WithContext<'c, TomlMarineModuleConfig>> for MarineModuleConfig
         let max_heap_size = toml_config.max_heap_size.map(|v| v.as_u64());
         let mut host_cli_imports = HashMap::new();
         for (import_name, host_cmd) in mounted_binaries {
-            let host_cmd = adjust_path(&context.base_path, Path::new(&host_cmd))?;
+            let host_cmd = as_relative_to_base(context.base_path.as_deref(), &host_cmd)?;
             host_cli_imports.insert(
                 import_name,
                 crate::host_imports::create_mounted_binary_import(host_cmd),
@@ -286,9 +288,9 @@ impl<'c> TryFrom<WithContext<'c, TomlWASIConfig>> for MarineWASIConfig {
         let to_path = |elem: (String, toml::Value)| -> Result<(String, PathBuf), Self::Error> {
             let to = elem
                 .1
-                .try_into::<String>()
+                .try_into::<PathBuf>()
                 .map_err(MarineError::ParseConfigError)?;
-            let to = adjust_path(&context.base_path, Path::new(&to))?;
+            let to = as_relative_to_base(context.base_path.as_deref(), &to)?;
             Ok((elem.0, to))
         };
 
@@ -301,7 +303,7 @@ impl<'c> TryFrom<WithContext<'c, TomlWASIConfig>> for MarineWASIConfig {
         let preopened_files = toml_config.preopened_files.unwrap_or_default();
         let preopened_files = preopened_files
             .into_iter()
-            .map(|path| adjust_path(&context.base_path, Path::new(&path)))
+            .map(|path| as_relative_to_base(context.base_path.as_deref(), &path))
             .collect::<Result<HashSet<_>, _>>()?;
 
         let mapped_dirs = toml_config.mapped_dirs.unwrap_or_default();
