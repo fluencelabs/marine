@@ -179,7 +179,7 @@ impl TryFrom<TomlMarineConfig> for MarineConfig {
 
         let modules_dir = toml_config
             .modules_dir
-            .map(|dir| as_relative_to_base(context.base_path.as_ref(), Path::new(&dir)))
+            .map(|dir| as_relative_to_base(context.base_path.as_ref(), &dir))
             .transpose()?;
 
         let default_modules_config = toml_config
@@ -213,7 +213,7 @@ impl<'c> TryFrom<WithContext<'c, TomlMarineNamedModuleConfig>> for ModuleDescrip
         let file_name = config.file_name.unwrap_or(format!("{}.wasm", config.name));
         let load_from = config
             .load_from
-            .map(|path| as_relative_to_base(context.base_path.as_ref(), Path::new(&path)))
+            .map(|path| as_relative_to_base(context.base_path.as_ref(), &path))
             .transpose()?;
 
         Ok(ModuleDescriptor {
@@ -238,7 +238,7 @@ impl<'c> TryFrom<WithContext<'c, TomlMarineModuleConfig>> for MarineModuleConfig
         let mounted_binaries = mounted_binaries
             .into_iter()
             .map(|(import_func_name, host_cmd)| {
-                let host_cmd = host_cmd.try_into::<String>()?;
+                let host_cmd = host_cmd.try_into::<PathBuf>()?;
                 Ok((import_func_name, host_cmd))
             })
             .collect::<Result<Vec<_>, Self::Error>>()?;
@@ -246,7 +246,7 @@ impl<'c> TryFrom<WithContext<'c, TomlMarineModuleConfig>> for MarineModuleConfig
         let max_heap_size = toml_config.max_heap_size.map(|v| v.as_u64());
         let mut host_cli_imports = HashMap::new();
         for (import_name, host_cmd) in mounted_binaries {
-            let host_cmd = as_relative_to_base(context.base_path.as_ref(), Path::new(&host_cmd))?;
+            let host_cmd = as_relative_to_base(context.base_path.as_ref(), &host_cmd)?;
             host_cli_imports.insert(
                 import_name,
                 crate::host_imports::create_mounted_binary_import(host_cmd),
@@ -289,9 +289,9 @@ impl<'c> TryFrom<WithContext<'c, TomlWASIConfig>> for MarineWASIConfig {
         let to_path = |elem: (String, toml::Value)| -> Result<(String, PathBuf), Self::Error> {
             let to = elem
                 .1
-                .try_into::<String>()
+                .try_into::<PathBuf>()
                 .map_err(MarineError::ParseConfigError)?;
-            let to = as_relative_to_base(context.base_path.as_ref(), Path::new(&to))?;
+            let to = as_relative_to_base(context.base_path.as_ref(), &to)?;
             Ok((elem.0, to))
         };
 
@@ -304,7 +304,7 @@ impl<'c> TryFrom<WithContext<'c, TomlWASIConfig>> for MarineWASIConfig {
         let preopened_files = toml_config.preopened_files.unwrap_or_default();
         let preopened_files = preopened_files
             .into_iter()
-            .map(|path| as_relative_to_base(context.base_path.as_ref(), Path::new(&path)))
+            .map(|path| as_relative_to_base(context.base_path.as_ref(), &path))
             .collect::<Result<HashSet<_>, _>>()?;
 
         let mapped_dirs = toml_config.mapped_dirs.unwrap_or_default();
