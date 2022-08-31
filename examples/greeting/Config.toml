@@ -4,13 +4,3 @@ modules_dir = "artifacts/"
     name = "greeting"
     max_heap_size = "10 KiB"
     logger_enabled = false
-    load_from = "some/dir"
-    rust_crate = "name"
-    bin_name = "some.wasm"
-
-
-
-
-marine build ConfigBuild.toml
-marine test ConfigBuild.toml
-mrepl ConfigRun.toml
