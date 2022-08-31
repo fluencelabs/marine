@@ -20,7 +20,7 @@ use crate::MarineResult;
 use std::path::Path;
 use std::path::PathBuf;
 
-pub fn as_relative_to_base(base: Option<&PathBuf>, path: &Path) -> MarineResult<PathBuf> {
+pub fn as_relative_to_base(base: Option<&Path>, path: &Path) -> MarineResult<PathBuf> {
     if path.is_absolute() {
         return Ok(PathBuf::from(path));
     }
