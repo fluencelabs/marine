@@ -19,7 +19,6 @@ use crate::MarineResult;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
-use thiserror::private::PathAsDisplay;
 
 /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
 pub(crate) fn load_modules_from_fs(
@@ -29,7 +28,7 @@ pub(crate) fn load_modules_from_fs(
         .iter()
         .try_fold(HashMap::new(), |mut hash_map, (import_name, path)| {
             let module_bytes = std::fs::read(&path).map_err(|e| {
-                MarineError::IOError(format!("failed to load {}: {}", path.as_display(), e))
+                MarineError::IOError(format!("failed to load {}: {}", path.display(), e))
             })?;
 
             if hash_map.insert(import_name.clone(), module_bytes).is_some() {
