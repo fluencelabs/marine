@@ -14,6 +14,7 @@ concurrency:
 env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
+  FORCE_COLOR: true
 
 jobs:
   prepare:
@@ -70,57 +71,57 @@ jobs:
             !*.wasm
             !*.wat
 
-  registry:
-    name: "Run registry tests"
-    runs-on: builder
+  # registry:
+  #   name: "Run registry tests"
+  #   runs-on: builder
 
-    needs:
-      - prepare
-      - dependent
+  #   needs:
+  #     - prepare
+  #     - dependent
 
-    steps:
-      - name: Checkout registry
-        uses: actions/checkout@v3
-        with:
-          repository: fluencelabs/registry
+  #   steps:
+  #     - name: Checkout registry
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: fluencelabs/registry
 
-      - name: Checkout marine-rs-sdk-test
-        uses: actions/checkout@v3
-        with:
-          repository: fluencelabs/marine-rs-sdk-test
-          path: marine-rs-sdk-test
+  #     - name: Checkout marine-rs-sdk-test
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: fluencelabs/marine-rs-sdk-test
+  #         path: marine-rs-sdk-test
 
-      - name: Setup rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          target: wasm32-wasi
-          components: clippy
+  #     - name: Setup rust toolchain
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: nightly
+  #         target: wasm32-wasi
+  #         components: clippy
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: fluence-app-service
-          path: marine-rs-sdk-test/fluence-app-service
+  #     - name: Download artifacts
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: fluence-app-service
+  #         path: marine-rs-sdk-test/fluence-app-service
 
-      - name: Set fluence-app-service path
-        run: |
-          cargo add \
-            --path fluence-app-service/crates/fluence-app-service \
-            --features raw-module-api \
-            fluence-app-service
-        working-directory: marine-rs-sdk-test
+  #     - name: Set fluence-app-service path
+  #       run: |
+  #         cargo add \
+  #           --path fluence-app-service/crates/fluence-app-service \
+  #           --features raw-module-api \
+  #           fluence-app-service
+  #       working-directory: marine-rs-sdk-test
 
-      - name: Set marine-rs-sdk-test path
-        run: |
-          cargo add \
-            --path ../marine-rs-sdk-test \
-            marine-rs-sdk-test
-        working-directory: service
+  #     - name: Set marine-rs-sdk-test path
+  #       run: |
+  #         cargo add \
+  #           --path ../marine-rs-sdk-test \
+  #           marine-rs-sdk-test
+  #       working-directory: service
 
-      - name: Build registry
-        run: cargo clean; cargo build
-        working-directory: service
+  #     - name: Build registry
+  #       run: cargo clean; cargo build
+  #       working-directory: service
 
   rust-peer:
     name: "Build rust-peer snapshot"
@@ -225,14 +226,14 @@ jobs:
 
   aqua-playground:
     name: "Run aqua-playground tests"
-    runs-on: builder
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
       id-token: write
 
     needs:
-      # - rust-peer
+      - rust-peer
       - prepare
 
     steps:
@@ -285,3 +286,72 @@ jobs:
       - run: npm run build
       - run: npm run compile-aqua -- -c "UNIQUE_CONST = 1" -c "ANOTHER_CONST = \"ab\""
       - run: npm run test
+
+  fluence-js:
+    name: "Run fluence-js tests"
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    needs:
+      - rust-peer
+      - prepare
+
+    env:
+      CI: true
+      RUST_PEER_IMAGE: docker.fluence.dev/marine:${{ github.head_ref }}
+
+    steps:
+      - name: Checkout fluence-js
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/fluence-js
+          ref: marine-e2e
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.1
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          secrets: |
+            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
+            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          registry: docker.fluence.dev
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Setup docker-compose
+        uses: KengoTODA/actions-setup-docker-compose@v1.0.9
+        with:
+          version: 'v2.10.0'
+
+      - name: Run rust-peer
+        uses: isbang/compose-action@v1.1.0
+        with:
+          compose-file: ".github/e2e/docker-compose.yml"
+          down-flags: "--volumes"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: pnpm
+
+      - run: pnpm i
+      - run: pnpm -r build
+      - run: pnpm -r test
