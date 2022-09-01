@@ -153,28 +153,15 @@ jobs:
           target: wasm32-wasi
           components: clippy
 
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
           path: rust-peer/external
 
       - name: Set dependencies path
-        uses: jannekem/run-python-script-action@v1
-        with:
-          script: |
-            import json
-            import os
-            from string import Template
-
-            matrix = '${{ needs.prepare.outputs.matrix }}'
-            for d in json.loads(matrix)["dependent"]:
-              entry = Template('$name = { path = "external/$name/$path" }\n')
-              with open("rust-peer/Cargo.toml", "a") as c:
-                  c.write(entry.substitute(name=d["name"],path=d["path"]))
+        run: |
+          cargo add --path external/fluence-app-service/crates/fluence-app-service fluence-app-service
+          cargo add --path external/avm-server/avm/server avm-server
 
       - name: Run cargo build
         run: cargo build --release -p particle-node
