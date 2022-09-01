@@ -17,34 +17,12 @@ env:
   FORCE_COLOR: true
 
 jobs:
-  prepare:
-    name: "Prepare"
+  fluence-app-service:
     runs-on: ubuntu-latest
 
-    outputs:
-      matrix: ${{ steps.matrix.outputs.result }}
-
     steps:
-      - uses: actions/checkout@v3
-      - id: matrix
-        run: echo "::set-output name=result::$(jq -cM . .github/e2e/dependent.json)"
-
-  dependent:
-    name: "Dependent"
-    runs-on: ubuntu-latest
-
-    needs:
-      - prepare
-
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
-
-    steps:
-      - name: Checkout ${{ matrix.dependent.name }}
+      - name: Checkout marine
         uses: actions/checkout@v3
-        with:
-          repository: ${{ matrix.dependent.repo }}
 
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -56,13 +34,45 @@ jobs:
         run: >
           cargo add marine-runtime \
             --git https://github.com/fluencelabs/marine \
-            --tag v0.18.0
-            # --rev ${{ github.sha }}
-        working-directory: ${{ matrix.dependent.path }}
+            --rev ${{ github.sha }}
+        working-directory: crates/fluence-app-service
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.dependent.name }}
+          name: fluence-app-service
+          path: |
+            .
+            !.git
+            !.cargo
+            !target/
+            !*.wasm
+            !*.wat
+
+  avm-server:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout aquavm
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/aquavm
+
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: nightly
+          target: wasm32-wasi
+
+      - name: Set marine-runtime version
+        run: >
+          cargo add marine-runtime \
+            --git https://github.com/fluencelabs/marine \
+            --rev ${{ github.sha }}
+        working-directory: avm/server
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: avm-server
           path: |
             .
             !.git
@@ -76,7 +86,6 @@ jobs:
   #   runs-on: builder
 
   #   needs:
-  #     - prepare
   #     - dependent
 
   #   steps:
@@ -132,19 +141,15 @@ jobs:
       id-token: write
 
     needs:
-      - prepare
-      - dependent
+      - avm-server
+      - fluence-app-service
 
     steps:
-      - name: Checkout marine
-        uses: actions/checkout@v3
-
       - name: Checkout rust-peer
         uses: actions/checkout@v3
         with:
           repository: fluencelabs/rust-peer
           ref: e2e-snapshot
-          path: rust-peer
 
       - name: Setup rust toolchain
         uses: actions-rs/toolchain@v1
@@ -156,24 +161,23 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          path: rust-peer/external
+          path: external
 
-      - name: Set dependencies path
+      - name: Use local dependencies
         run: |
-          cargo add --path external/fluence-app-service/crates/fluence-app-service fluence-app-service
-          cargo add --path external/avm-server/avm/server avm-server
+          sed -i 's#\(fluence-app-service =\) .*#\1 { path = "external/fluence-app-service/crates/fluence-app-service" }#g' Cargo.toml
+          sed -i 's#\(avm-server =\) .*#\1 { path = "external/avm-server/avm/server" }#g' Cargo.toml
+
+      - run: cargo update
 
       - name: Run cargo build
         run: cargo build --release -p particle-node
-        working-directory: rust-peer
 
       - name: Install cargo-nextest
         run: cargo install --locked cargo-nextest@0.9.22
-        working-directory: rust-peer
 
       - name: Run cargo nextest
         run: cargo nextest run --release --all-features --no-fail-fast --retries 10 --test-threads 10
-        working-directory: rust-peer
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.4.1
@@ -201,9 +205,9 @@ jobs:
       - name: Build and push snapshot
         uses: docker/build-push-action@v3
         with:
-          context: rust-peer
+          context: .
           push: true
-          file: rust-peer/.github/snapshot/Dockerfile
+          file: .github/snapshot/Dockerfile
           tags: |
             docker.fluence.dev/marine:${{ github.head_ref }}
           labels: |
@@ -221,7 +225,6 @@ jobs:
 
     needs:
       - rust-peer
-      - prepare
 
     steps:
       - name: Import secrets
@@ -284,7 +287,6 @@ jobs:
 
     needs:
       - rust-peer
-      - prepare
 
     env:
       CI: true
@@ -295,7 +297,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: fluencelabs/fluence-js
-          ref: marine-e2e
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.4.1
