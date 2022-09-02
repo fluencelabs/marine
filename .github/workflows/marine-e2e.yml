@@ -39,24 +39,18 @@ jobs:
             --branch ${{ github.head_ref }} \
             --features raw-module-api
 
-      - run: cargo check
+      - name: Set fluence-app-service version in marine-test-macro-impl
+        run: >
+          cargo add fluence-app-service \
+            --git https://github.com/fluencelabs/marine \
+            --branch ${{ github.head_ref }} \
+            --features raw-module-api
+        working-directory: crates/marine-test-macro-impl
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: marine-rs-sdk-test
-          path: |
-            .
-            !.git
-            !.cargo
-            !target/
-            !*.wasm
-            !*.wat
+      - run: cargo test --release --all-features --no-fail-fast
 
   fluence-app-service:
     runs-on: ubuntu-latest
-
-    needs:
-      - marine-rs-sdk-test
 
     steps:
       - name: Checkout marine
@@ -68,17 +62,6 @@ jobs:
           toolchain: nightly
           target: wasm32-wasi
 
-      - name: Download marine-rs-sdk-test
-        uses: actions/download-artifact@v3
-        with:
-          name: marine-rs-sdk-test
-          path: external/marine-rs-sdk-test
-
-      - name: Set marine-rs-sdk-test version
-        run: >
-          cargo add marine-rs-sdk-test \
-            --path external/marine-rs-sdk-test
-
       - name: Set marine-runtime version
         run: >
           cargo add marine-runtime \
@@ -87,6 +70,7 @@ jobs:
         working-directory: crates/fluence-app-service
 
       - run: cargo check
+        working-directory: crates/fluence-app-service
 
       - uses: actions/upload-artifact@v3
         with:
@@ -220,8 +204,6 @@ jobs:
         run: |
           sed -i 's#\(fluence-app-service =\) .*#\1 { path = "external/fluence-app-service/crates/fluence-app-service" }#g' Cargo.toml
           sed -i 's#\(avm-server =\) .*#\1 { path = "external/avm-server/avm/server" }#g' Cargo.toml
-
-      - run: cargo update
 
       - name: Run cargo build
         run: cargo build --release -p particle-node
