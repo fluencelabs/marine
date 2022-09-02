@@ -34,7 +34,7 @@ jobs:
         run: >
           cargo add marine-runtime \
             --git https://github.com/fluencelabs/marine \
-            --rev ${{ github.sha }}
+            --branch ${{ github.head_ref }}
         working-directory: crates/fluence-app-service
 
       - run: cargo check
@@ -69,7 +69,7 @@ jobs:
         run: >
           cargo add marine-runtime \
             --git https://github.com/fluencelabs/marine \
-            --rev ${{ github.sha }}
+            --branch ${{ github.head_ref }}
         working-directory: avm/server
 
       - run: cargo check
