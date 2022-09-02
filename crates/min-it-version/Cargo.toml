@@ -1,6 +1,6 @@
 [package]
 name = "marine-min-it-version"
-version = "0.1.0"
+version = "0.1.1"
 description = "Fluence Marine interface types minimum supported version checker"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
