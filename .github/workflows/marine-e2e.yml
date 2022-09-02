@@ -308,8 +308,8 @@ jobs:
         run: cat .github/e2e/config.ts > src/config.ts
 
       - run: npm install
-      - run: npm run build
       - run: npm run compile-aqua -- -c "UNIQUE_CONST = 1" -c "ANOTHER_CONST = \"ab\""
+      - run: npm run build
       - run: npm run test
 
   fluence-js:
