@@ -1039,7 +1039,7 @@ dependencies = [
  "http",
  "indexmap",
  "slab",
- "tokio 1.20.1",
+ "tokio",
  "tokio-util",
  "tracing",
 ]
@@ -1141,7 +1141,7 @@ dependencies = [
  "itoa",
  "pin-project-lite",
  "socket2",
- "tokio 1.20.1",
+ "tokio",
  "tower-service",
  "tracing",
  "want",
@@ -1156,7 +1156,7 @@ dependencies = [
  "bytes",
  "hyper",
  "native-tls",
- "tokio 1.20.1",
+ "tokio",
  "tokio-native-tls",
 ]
 
@@ -1467,7 +1467,7 @@ dependencies = [
  "semver 0.11.0",
  "serde",
  "thiserror",
- "tokio 0.3.7",
+ "tokio",
  "wasmer-interface-types-fl",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
@@ -2501,7 +2501,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_urlencoded",
- "tokio 1.20.1",
+ "tokio",
  "tokio-native-tls",
  "tower-service",
  "url",
@@ -3002,21 +3002,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "0.3.7"
+version = "1.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46409491c9375a693ce7032101970a54f8a2010efb77e13f70788f0d84489e39"
-dependencies = [
- "autocfg",
- "pin-project-lite",
- "slab",
- "tokio-macros",
-]
-
-[[package]]
-name = "tokio"
-version = "1.20.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a8325f63a7d4774dd041e363b2409ed1c5cbbd0f867795e661df066b2b0a581"
+checksum = "89797afd69d206ccd11fb0ea560a44bbb87731d020670e79416d442919257d42"
 dependencies = [
  "autocfg",
  "bytes",
@@ -3027,14 +3015,15 @@ dependencies = [
  "once_cell",
  "pin-project-lite",
  "socket2",
+ "tokio-macros",
  "winapi",
 ]
 
 [[package]]
 name = "tokio-macros"
-version = "0.3.2"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46dfffa59fc3c8aad216ed61bdc2c263d2b9d87a9c8ac9de0c11a813e51b6db7"
+checksum = "9724f9a975fb987ef7a3cd9be0350edcbe130698af5b8f7a631e23d42d052484"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3048,7 +3037,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7d995660bd2b7f8c1568414c1126076c13fbb725c40112dc0120b78eb9b717b"
 dependencies = [
  "native-tls",
- "tokio 1.20.1",
+ "tokio",
 ]
 
 [[package]]
@@ -3061,7 +3050,7 @@ dependencies = [
  "futures-core",
  "futures-sink",
  "pin-project-lite",
- "tokio 1.20.1",
+ "tokio",
  "tracing",
 ]
 
