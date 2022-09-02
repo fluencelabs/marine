@@ -24,7 +24,7 @@ wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1"}
 env_logger = "0.9.0"
 check-latest = "1.0.1"
 log = "0.4.17"
-rustyline = { version = "6.3.0", features = ["with-fuzzy"] }
+rustyline = { version = "10.0.0", features = ["with-fuzzy"] }
 rustyline-derive = "0.7.0"
 rustop = "1.1.2"
 itertools = "0.10.3"
