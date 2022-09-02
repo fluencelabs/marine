@@ -3014,6 +3014,7 @@ checksum = "46409491c9375a693ce7032101970a54f8a2010efb77e13f70788f0d84489e39"
 dependencies = [
  "autocfg",
  "pin-project-lite",
+ "slab",
  "tokio-macros",
 ]
 
