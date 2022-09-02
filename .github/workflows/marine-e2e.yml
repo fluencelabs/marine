@@ -37,6 +37,8 @@ jobs:
             --rev ${{ github.sha }}
         working-directory: crates/fluence-app-service
 
+      - run: cargo check
+
       - uses: actions/upload-artifact@v3
         with:
           name: fluence-app-service
@@ -69,6 +71,8 @@ jobs:
             --git https://github.com/fluencelabs/marine \
             --rev ${{ github.sha }}
         working-directory: avm/server
+
+      - run: cargo check
 
       - uses: actions/upload-artifact@v3
         with:
