@@ -261,56 +261,9 @@ jobs:
     needs:
       - rust-peer
 
-    steps:
-      - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.1
-        with:
-          url: https://vault.fluence.dev
-          path: jwt/github
-          role: ci
-          method: jwt
-          jwtGithubAudience: "https://github.com/fluencelabs"
-          jwtTtl: 300
-          secrets: |
-            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
-            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          registry: docker.fluence.dev
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
-
-      - name: Checkout aqua-playground
-        uses: actions/checkout@v3
-        with:
-          repository: fluencelabs/aqua-playground
-          ref: marine-e2e
-
-      - name: Setup docker-compose
-        uses: KengoTODA/actions-setup-docker-compose@v1.0.9
-        with:
-          version: 'v2.10.0'
-
-      - name: Run rust-peer
-        uses: isbang/compose-action@v1.1.0
-        with:
-          compose-file: ".github/e2e/docker-compose.yml"
-          down-flags: "--volumes"
-
-      - name: Setup node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-
-      - name: Prepare config
-        run: cat .github/e2e/config.ts > src/config.ts
-
-      - run: npm install
-      - run: npm run compile-aqua -- -c "UNIQUE_CONST = 1" -c "ANOTHER_CONST = \"ab\""
-      - run: npm run build
-      - run: npm run test
+    uses: fluencelabs/aqua-playground/.github/workflows/test.yml@marine-e2e
+    with:
+      image: docker.fluence.dev/marine:${{ github.head_ref }}
 
   fluence-js:
     name: "Run fluence-js tests"
