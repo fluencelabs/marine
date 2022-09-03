@@ -252,7 +252,6 @@ jobs:
 
   aqua-playground:
     name: "Run aqua-playground tests"
-    runs-on: ubuntu-latest
 
     permissions:
       contents: read
