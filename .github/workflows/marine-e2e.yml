@@ -251,8 +251,6 @@ jobs:
           cache-to: type=gha,mode=max
 
   aqua-playground:
-    name: "Run aqua-playground tests"
-
     permissions:
       contents: read
       id-token: write
@@ -265,9 +263,6 @@ jobs:
       image: docker.fluence.dev/marine:${{ github.head_ref }}
 
   fluence-js:
-    name: "Run fluence-js tests"
-    runs-on: ubuntu-latest
-
     permissions:
       contents: read
       id-token: write
@@ -275,58 +270,6 @@ jobs:
     needs:
       - rust-peer
 
-    env:
-      CI: true
-      RUST_PEER_IMAGE: docker.fluence.dev/marine:${{ github.head_ref }}
-
-    steps:
-      - name: Checkout fluence-js
-        uses: actions/checkout@v3
-        with:
-          repository: fluencelabs/fluence-js
-
-      - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.1
-        with:
-          url: https://vault.fluence.dev
-          path: jwt/github
-          role: ci
-          method: jwt
-          jwtGithubAudience: "https://github.com/fluencelabs"
-          jwtTtl: 300
-          secrets: |
-            kv/docker-registry/basicauth/ci username | DOCKER_USERNAME ;
-            kv/docker-registry/basicauth/ci password | DOCKER_PASSWORD
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          registry: docker.fluence.dev
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
-
-      - name: Setup docker-compose
-        uses: KengoTODA/actions-setup-docker-compose@v1.0.9
-        with:
-          version: 'v2.10.0'
-
-      - name: Run rust-peer
-        uses: isbang/compose-action@v1.1.0
-        with:
-          compose-file: ".github/e2e/docker-compose.yml"
-          down-flags: "--volumes"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7
-
-      - name: Setup node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16
-          cache: pnpm
-
-      - run: pnpm i
-      - run: pnpm -r build
-      - run: pnpm -r test
+    uses: fluencelabs/fluence-js/.github/workflows/run_tests.yml@test-workflow-call
+    with:
+      image: docker.fluence.dev/marine:${{ github.head_ref }}
