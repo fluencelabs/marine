@@ -270,6 +270,6 @@ jobs:
     needs:
       - rust-peer
 
-    uses: fluencelabs/fluence-js/.github/workflows/run_tests.yml@test-workflow-call
+    uses: fluencelabs/fluence-js/.github/workflows/run_tests.yml@tests-workflow-call
     with:
       image: docker.fluence.dev/marine:${{ github.head_ref }}
