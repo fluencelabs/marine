@@ -46,13 +46,19 @@ const toExpose: IFluenceAppService = {
             val.terminate();
         });
     },
-    callService: async (serviceId: string, functionName: string, args: string, callParams: any): Promise<string> => {
+    callService: async (serviceId: string, functionName: string, args: string, callParams: any): Promise<unknown> => {
         const faas = faasInstances.get(serviceId);
         if (!faas) {
             throw new Error(`service with id=${serviceId} not found`);
         }
 
-        return faas.call(functionName, args, callParams);
+        const rawRes = faas.call(functionName, args, callParams);
+        const jsonRes: { result: string; error: string } = JSON.parse(rawRes);
+        if (jsonRes.error) {
+            throw new Error(`marine-js failed with: ${jsonRes.error}`);
+        }
+
+        return JSON.parse(jsonRes.result);
     },
 };
 
