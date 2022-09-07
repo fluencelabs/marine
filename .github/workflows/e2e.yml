@@ -1,9 +1,9 @@
-name: "marine-e2e"
+name: "e2e"
 
 on:
   pull_request:
-    # paths:
-    #   - "marine/**"
+    paths-ignore:
+      - "!**.md"
     branches:
       - "master"
 
@@ -18,7 +18,8 @@ env:
 
 jobs:
   marine-rs-sdk-test:
-    runs-on: ubuntu-latest
+    name: "Test marine-rs-sdk-test"
+    runs-on: builder
 
     steps:
       - name: Checkout marine-rs-sdk-test
@@ -50,6 +51,7 @@ jobs:
       - run: cargo test --release --all-features --no-fail-fast
 
   fluence-app-service:
+    name: "Build fluence-app-service"
     runs-on: ubuntu-latest
 
     steps:
@@ -84,6 +86,7 @@ jobs:
             !*.wat
 
   avm-server:
+    name: "Build avm-server"
     runs-on: ubuntu-latest
 
     steps:
@@ -118,57 +121,6 @@ jobs:
             !*.wasm
             !*.wat
 
-  # registry:
-  #   name: "Run registry tests"
-  #   runs-on: builder
-
-  #   needs:
-  #     - dependent
-
-  #   steps:
-  #     - name: Checkout registry
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: fluencelabs/registry
-
-  #     - name: Checkout marine-rs-sdk-test
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: fluencelabs/marine-rs-sdk-test
-  #         path: marine-rs-sdk-test
-
-  #     - name: Setup rust toolchain
-  #       uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: nightly
-  #         target: wasm32-wasi
-  #         components: clippy
-
-  #     - name: Download artifacts
-  #       uses: actions/download-artifact@v3
-  #       with:
-  #         name: fluence-app-service
-  #         path: marine-rs-sdk-test/fluence-app-service
-
-  #     - name: Set fluence-app-service path
-  #       run: |
-  #         cargo add \
-  #           --path fluence-app-service/crates/fluence-app-service \
-  #           --features raw-module-api \
-  #           fluence-app-service
-  #       working-directory: marine-rs-sdk-test
-
-  #     - name: Set marine-rs-sdk-test path
-  #       run: |
-  #         cargo add \
-  #           --path ../marine-rs-sdk-test \
-  #           marine-rs-sdk-test
-  #       working-directory: service
-
-  #     - name: Build registry
-  #       run: cargo clean; cargo build
-  #       working-directory: service
-
   rust-peer:
     name: "Build rust-peer snapshot"
     runs-on: builder
@@ -186,7 +138,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: fluencelabs/rust-peer
-          ref: e2e-snapshot
 
       - name: Setup rust toolchain
         uses: actions-rs/toolchain@v1
@@ -250,26 +201,21 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  aqua-playground:
-    permissions:
-      contents: read
-      id-token: write
+      - run: cat Cargo.lock
+        if: failure()
 
+  aqua-playground:
     needs:
       - rust-peer
 
-    uses: fluencelabs/aqua-playground/.github/workflows/test.yml@marine-e2e
+    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
     with:
-      image: docker.fluence.dev/marine:${{ github.head_ref }}
+      rust-peer-image: docker.fluence.dev/marine:${{ github.head_ref }}
 
   fluence-js:
-    permissions:
-      contents: read
-      id-token: write
-
     needs:
       - rust-peer
 
-    uses: fluencelabs/fluence-js/.github/workflows/run_tests.yml@tests-workflow-call
+    uses: fluencelabs/fluence-js/.github/workflows/tests.yml@master
     with:
-      image: docker.fluence.dev/marine:${{ github.head_ref }}
+      rust-peer-image: docker.fluence.dev/marine:${{ github.head_ref }}
