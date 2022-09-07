@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
+use crate::ReplResult;
+
 use rustyline::completion::{Completer, FilenameCompleter, Pair};
-use rustyline::config::OutputStreamType;
 use rustyline::error::ReadlineError;
 use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
 use rustyline::hint::{Hinter, HistoryHinter};
 use rustyline::validate::{self, MatchingBracketValidator, Validator};
-use rustyline::{Cmd, CompletionType, Config, Context, EditMode, Editor, KeyPress};
+use rustyline::{Cmd, CompletionType, Config, Context, EditMode, Editor, KeyEvent};
 use rustyline_derive::Helper;
 
 use std::borrow::Cow::{self, Borrowed, Owned};
 use std::collections::HashSet;
 
-pub(super) fn init_editor() -> Editor<REPLHelper> {
+pub(super) fn init_editor() -> ReplResult<Editor<REPLHelper>> {
     let config = Config::builder()
         .history_ignore_space(true)
         .completion_type(CompletionType::Fuzzy)
         .edit_mode(EditMode::Emacs)
-        .output_stream(OutputStreamType::Stdout)
         .build();
 
     let repl_hinter = REPLHinter {
@@ -46,12 +46,17 @@ pub(super) fn init_editor() -> Editor<REPLHelper> {
         validator: MatchingBracketValidator::new(),
     };
 
-    let mut rl = Editor::with_config(config);
+    let mut rl = Editor::with_config(config)?;
     rl.set_helper(Some(repl_helper));
-    rl.bind_sequence(KeyPress::Meta('N'), Cmd::HistorySearchForward);
-    rl.bind_sequence(KeyPress::Meta('P'), Cmd::HistorySearchBackward);
+    // On MacBook with MacOS Monterey 12.3.1
+    // KeyEvent::alt(key) triggers on control+key of laptop keyboard,
+    // KeyEvent::ctrl(key) triggers on nothing on the same setup.
+    // Did not test it on other keyboards/OS.
+    // Perhaps both versions needed to support same behavior on setups.
+    rl.bind_sequence(KeyEvent::alt('n'), Cmd::HistorySearchForward);
+    rl.bind_sequence(KeyEvent::alt('p'), Cmd::HistorySearchBackward);
 
-    rl
+    Ok(rl)
 }
 
 #[derive(Helper)]
@@ -89,6 +94,8 @@ impl Completer for REPLHelper {
 }
 
 impl Hinter for REPLHelper {
+    type Hint = String;
+
     fn hint(&self, line: &str, pos: usize, ctx: &Context<'_>) -> Option<String> {
         if pos < line.len() {
             return None;
