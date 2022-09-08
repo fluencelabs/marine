@@ -35,7 +35,7 @@ pub struct TestRecord {
 pub fn fill_2gb_mem() {
     unsafe {
         DATA = Some(Vec::new());
-        let mut data = DATA.as_mut().unwrap();
+        let data = DATA.as_mut().unwrap();
         data.reserve_exact(1);
         let data_offset = std::mem::transmute::<*const u8, usize>(data.as_ptr());
         let size = 0x80000001 - data_offset;
