@@ -1,0 +1,6 @@
+modules_dir = "artifacts/"
+
+[[module]]
+    name = "failing"
+    max_heap_size = "10 KiB"
+    logger_enabled = false

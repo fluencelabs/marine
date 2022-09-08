@@ -18,6 +18,7 @@ import { expose } from 'threads';
 import { Env, FaaSConfig } from './config';
 import { FaaS } from './FaaS';
 import { IFluenceAppService } from './IFluenceAppService';
+import { JSONArray, JSONValue } from './types';
 
 const faasInstances = new Map<string, FaaS>();
 let controlModule: WebAssembly.Module;
@@ -46,19 +47,18 @@ const toExpose: IFluenceAppService = {
             val.terminate();
         });
     },
-    callService: async (serviceId: string, functionName: string, args: string, callParams: any): Promise<unknown> => {
+    callService: async (
+        serviceId: string,
+        functionName: string,
+        args: JSONArray,
+        callParams: any,
+    ): Promise<JSONValue> => {
         const faas = faasInstances.get(serviceId);
         if (!faas) {
             throw new Error(`service with id=${serviceId} not found`);
         }
 
-        const rawRes = faas.call(functionName, args, callParams);
-        const jsonRes: { result: string; error: string } = JSON.parse(rawRes);
-        if (jsonRes.error) {
-            throw new Error(`marine-js failed with: ${jsonRes.error}`);
-        }
-
-        return JSON.parse(jsonRes.result);
+        return faas.call(functionName, args, callParams);
     },
 };
 

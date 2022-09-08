@@ -32,10 +32,10 @@ describe.each([
         await faas.init();
 
         // act
-        const res = JSON.parse(faas.call('log_' + level, '{}', undefined));
+        const res = faas.call('log_' + level, [], undefined);
 
         // assert
-        expect(res.error).toBe('');
+        expect(res).toBe(null);
         // @ts-ignore
         expect(console[fn]).toBeCalledTimes(1);
         // @ts-ignore
@@ -66,18 +66,18 @@ describe.each([
         await faas.init();
 
         // act
-        const res1 = JSON.parse(faas.call('log_error', '{}', undefined));
-        const res2 = JSON.parse(faas.call('log_warn', '{}', undefined));
-        const res3 = JSON.parse(faas.call('log_info', '{}', undefined));
-        const res4 = JSON.parse(faas.call('log_debug', '{}', undefined));
-        const res5 = JSON.parse(faas.call('log_trace', '{}', undefined));
+        const res1 = faas.call('log_error', [], undefined);
+        const res2 = faas.call('log_warn', [], undefined);
+        const res3 = faas.call('log_info', [], undefined);
+        const res4 = faas.call('log_debug', [], undefined);
+        const res5 = faas.call('log_trace', [], undefined);
 
         // assert
-        expect(res1.error).toBe('');
-        expect(res2.error).toBe('');
-        expect(res3.error).toBe('');
-        expect(res4.error).toBe('');
-        expect(res5.error).toBe('');
+        expect(res1).toBe(null);
+        expect(res2).toBe(null);
+        expect(res3).toBe(null);
+        expect(res4).toBe(null);
+        expect(res5).toBe(null);
 
         expect(console.error).toBeCalledTimes(0);
         expect(console.warn).toBeCalledTimes(0);
