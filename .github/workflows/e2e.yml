@@ -13,9 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  RUST_BACKTRACE: 1
-  CARGO_TERM_COLOR: always
   FORCE_COLOR: true
+  CARGO_HOME: "${{ github.workspace }}/cargo"
 
 jobs:
   marine-rs-sdk-test:
