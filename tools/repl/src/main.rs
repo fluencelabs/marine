@@ -52,7 +52,7 @@ fn main() -> ReplResult<()> {
     }
     .parse_or_exit();
 
-    let mut rl = init_editor();
+    let mut rl = init_editor()?;
     let _ = rl.load_history(HISTORY_FILE_PATH);
 
     if !args.quiet {
