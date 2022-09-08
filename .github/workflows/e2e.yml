@@ -202,9 +202,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - run: cat Cargo.lock
-        if: failure()
-
   aqua-playground:
     needs:
       - rust-peer
