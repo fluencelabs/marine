@@ -15,7 +15,7 @@
  */
 
 import { Env, FaaSConfig } from './config';
-import { JSONArray, JSONValue } from './types';
+import { JSONArray, JSONObject, JSONValue } from './types';
 
 export type IFluenceAppService = {
     init: (controlModuleWasm: SharedArrayBuffer | Buffer) => Promise<void>;
@@ -26,5 +26,10 @@ export type IFluenceAppService = {
         envs?: Env,
     ) => Promise<void>;
     terminate: () => Promise<void>;
-    callService: (serviceId: string, functionName: string, args: JSONArray, callParams: any) => Promise<unknown>;
+    callService: (
+        serviceId: string,
+        functionName: string,
+        args: JSONArray | JSONObject,
+        callParams: any,
+    ) => Promise<unknown>;
 };

@@ -145,7 +145,7 @@ export class FaaS {
         this._marineInstance = 'not-set';
     }
 
-    call(function_name: string, args: JSONArray, callParams: any): unknown {
+    call(function_name: string, args: JSONArray | JSONObject, callParams: any): unknown {
         if (this._marineInstance === 'not-set') {
             throw new Error('Not initialized');
         }
