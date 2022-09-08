@@ -142,9 +142,6 @@ jobs:
 
       - name: Setup rust toolchain
         uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          target: wasm32-wasi
 
       - name: Download artifacts
         uses: actions/download-artifact@v3

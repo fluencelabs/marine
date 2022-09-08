@@ -27,10 +27,6 @@ jobs:
 
       - name: Setup rust toolchain
         uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          target: wasm32-wasi
-          components: clippy, rustfmt
 
       - uses: actions/setup-node@v3
         with:
