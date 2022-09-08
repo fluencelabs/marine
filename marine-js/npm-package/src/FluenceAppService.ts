@@ -77,7 +77,7 @@ export class FluenceAppService implements IFluenceAppService {
         return this._worker.createService(serviceModule, serviceId, faaSConfig, envs);
     }
 
-    callService(serviceId: string, functionName: string, args: JSONArray, callParams: any): Promise<JSONValue> {
+    callService(serviceId: string, functionName: string, args: JSONArray, callParams: any): Promise<unknown> {
         if (!this._worker) {
             throw 'Worker is not initialized';
         }

@@ -145,7 +145,7 @@ export class FaaS {
         this._marineInstance = 'not-set';
     }
 
-    call(function_name: string, args: JSONArray, callParams: any): JSONValue {
+    call(function_name: string, args: JSONArray, callParams: any): unknown {
         if (this._marineInstance === 'not-set') {
             throw new Error('Not initialized');
         }
@@ -156,7 +156,7 @@ export class FaaS {
 
         const argsString = JSON.stringify(args);
         const rawRes = this._marineInstance.call_module(this._serviceId, function_name, argsString);
-        const jsonRes: { result: string; error: string } = JSON.parse(rawRes);
+        const jsonRes: { result: unknown; error: string } = JSON.parse(rawRes);
         if (jsonRes.error) {
             throw new Error(`marine-js failed with: ${jsonRes.error}`);
         }

@@ -26,5 +26,5 @@ export type IFluenceAppService = {
         envs?: Env,
     ) => Promise<void>;
     terminate: () => Promise<void>;
-    callService: (serviceId: string, functionName: string, args: JSONArray, callParams: any) => Promise<JSONValue>;
+    callService: (serviceId: string, functionName: string, args: JSONArray, callParams: any) => Promise<unknown>;
 };

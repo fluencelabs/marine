@@ -114,26 +114,31 @@ describe('Fluence app service tests', () => {
         const marine = new FaaS(control, sqlite, 'sqlite');
         await marine.init();
 
-        let result;
+        let result: any;
 
-        result = doCall(marine, 'sqlite3_open_v2', ':memory:', 6, '');
+        result = marine.call('sqlite3_open_v2', [':memory:', 6, ''], undefined);
         const dbHandle = result.db_handle;
-        result = doCall(marine, 'sqlite3_exec', dbHandle, 'CREATE VIRTUAL TABLE users USING FTS5(body)', 0, 0);
-
-        expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
-
-        result = doCall(
-            marine,
+        result = marine.call(
             'sqlite3_exec',
-            dbHandle,
-            "INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')",
-            0,
-            0,
+            [dbHandle, 'CREATE VIRTUAL TABLE users USING FTS5(body)', 0, 0],
+            undefined,
         );
 
         expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
 
-        result = doCall(marine, 'sqlite3_exec', dbHandle, "SELECT * FROM users WHERE users MATCH 'A* OR B*'", 0, 0);
+        result = marine.call(
+            'sqlite3_exec',
+            [dbHandle, "INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')", 0, 0],
+            undefined,
+        );
+
+        expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
+
+        result = marine.call(
+            'sqlite3_exec',
+            [dbHandle, "SELECT * FROM users WHERE users MATCH 'A* OR B*'", 0, 0],
+            undefined,
+        );
 
         expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
     });
@@ -146,14 +151,14 @@ describe('Fluence app service tests', () => {
         const marine = new FaaS(control, redis, 'redis');
         await marine.init();
 
-        const result1 = doCall(marine, 'invoke', 'SET A 10');
-        const result2 = doCall(marine, 'invoke', 'SADD B 20');
-        const result3 = doCall(marine, 'invoke', 'GET A');
-        const result4 = doCall(marine, 'invoke', 'SMEMBERS B');
-        const result5 = doCall(
-            marine,
+        const result1 = marine.call('invoke', ['SET A 10'], undefined);
+        const result2 = marine.call('invoke', ['SADD B 20'], undefined);
+        const result3 = marine.call('invoke', ['GET A'], undefined);
+        const result4 = marine.call('invoke', ['SMEMBERS B'], undefined);
+        const result5 = marine.call(
             'invoke',
-            "eval \"redis.call('incr', 'A') return redis.call('get', 'A') * 8 + 5\"  0",
+            ["eval \"redis.call('incr', 'A') return redis.call('get', 'A') * 8 + 5\"  0"],
+            undefined,
         );
 
         expect(result1).toBe('+OK\r\n');
@@ -206,7 +211,3 @@ describe('Fluence app service tests', () => {
         }
     });
 });
-
-const doCall = (marine: FaaS, fn: string, ...args: any[]): any => {
-    return marine.call(fn, args, undefined);
-};

@@ -52,7 +52,7 @@ const toExpose: IFluenceAppService = {
         functionName: string,
         args: JSONArray,
         callParams: any,
-    ): Promise<JSONValue> => {
+    ): Promise<unknown> => {
         const faas = faasInstances.get(serviceId);
         if (!faas) {
             throw new Error(`service with id=${serviceId} not found`);
