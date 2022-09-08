@@ -1749,7 +1749,7 @@ dependencies = [
  "serde",
  "serde_json",
  "syn",
- "uuid",
+ "uuid 0.8.2",
 ]
 
 [[package]]
@@ -1866,7 +1866,7 @@ dependencies = [
  "marine-test-macro",
  "serde",
  "serde_json",
- "uuid",
+ "uuid 0.8.2",
 ]
 
 [[package]]
@@ -2054,7 +2054,7 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.18.2"
+version = "0.18.3"
 dependencies = [
  "anyhow",
  "check-latest",
@@ -2070,7 +2070,7 @@ dependencies = [
  "serde",
  "serde_json",
  "termion",
- "uuid",
+ "uuid 1.1.2",
  "wasmer-wasi-fl",
 ]
 
@@ -3451,6 +3451,15 @@ name = "uuid"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
+dependencies = [
+ "getrandom 0.2.7",
+]
+
+[[package]]
+name = "uuid"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd6469f4314d5f1ffec476e05f17cc9a78bc7a27a6a857842170bdf8d6f98d2f"
 dependencies = [
  "getrandom 0.2.7",
 ]
