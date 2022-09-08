@@ -2,6 +2,8 @@ name: "marine"
 
 on:
   pull_request:
+    paths-ignore:
+      - "!**.md"
   push:
     branches:
       - "master"
@@ -10,30 +12,29 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
-jobs:
-  air:
-    name: "Run marine tests"
-    runs-on: builder
+env:
+  RUST_BACKTRACE: 1
+  CARGO_TERM_COLOR: always
+  FORCE_COLOR: true
 
-    env:
-      RUST_BACKTRACE: 1
-      CARGO_TERM_COLOR: always
+jobs:
+  marine:
+    name: "Run tests"
+    runs-on: builder
 
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
+      - name: "Setup rust toolchain"
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: nightly-2022-06-29
+          toolchain: nightly
           target: wasm32-wasi
-          components: rustfmt, clippy
+          components: clippy, rustfmt
 
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-
-      - name: "Cache rust"
-        uses: Swatinem/rust-cache@v1
 
       - name: "Install wasm-pack"
         run: cargo install wasm-pack
