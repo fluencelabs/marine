@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-import { Env, FaaSConfig } from './config';
-import { JSONArray, JSONObject, JSONValue } from './types';
+use marine_rs_sdk::marine;
+use marine_rs_sdk::module_manifest;
 
-export type IFluenceAppService = {
-    init: (controlModuleWasm: SharedArrayBuffer | Buffer) => Promise<void>;
-    createService: (
-        serviceModule: SharedArrayBuffer | Buffer,
-        serviceId: string,
-        faaSConfig?: FaaSConfig,
-        envs?: Env,
-    ) => Promise<void>;
-    terminate: () => Promise<void>;
-    callService: (
-        serviceId: string,
-        functionName: string,
-        args: JSONArray | JSONObject,
-        callParams: any,
-    ) => Promise<unknown>;
-};
+module_manifest!();
+
+pub fn main() {}
+
+#[marine]
+pub fn failing() {
+    unreachable!()
+}

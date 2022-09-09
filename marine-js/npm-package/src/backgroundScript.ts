@@ -18,6 +18,7 @@ import { expose } from 'threads';
 import { Env, FaaSConfig } from './config';
 import { FaaS } from './FaaS';
 import { IFluenceAppService } from './IFluenceAppService';
+import { JSONArray, JSONObject, JSONValue } from './types';
 
 const faasInstances = new Map<string, FaaS>();
 let controlModule: WebAssembly.Module;
@@ -46,7 +47,12 @@ const toExpose: IFluenceAppService = {
             val.terminate();
         });
     },
-    callService: async (serviceId: string, functionName: string, args: string, callParams: any): Promise<string> => {
+    callService: async (
+        serviceId: string,
+        functionName: string,
+        args: JSONArray | JSONObject,
+        callParams: any,
+    ): Promise<unknown> => {
         const faas = faasInstances.get(serviceId);
         if (!faas) {
             throw new Error(`service with id=${serviceId} not found`);

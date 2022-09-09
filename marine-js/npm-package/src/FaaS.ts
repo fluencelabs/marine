@@ -20,6 +20,7 @@ import { WasmFs } from '@wasmer/wasmfs';
 import { init } from './marine_js';
 import { FaaSConfig } from './config';
 import { Env } from '.';
+import { JSONArray, JSONObject, JSONValue } from './types';
 
 type LogImport = {
     log_utf8_string: (level: any, target: any, offset: any, size: any) => void;
@@ -144,7 +145,7 @@ export class FaaS {
         this._marineInstance = 'not-set';
     }
 
-    call(function_name: string, args: string, callParams: any): string {
+    call(function_name: string, args: JSONArray | JSONObject, callParams: any): unknown {
         if (this._marineInstance === 'not-set') {
             throw new Error('Not initialized');
         }
@@ -153,7 +154,14 @@ export class FaaS {
             throw new Error('Terminated');
         }
 
-        return this._marineInstance.call_module(this._serviceId, function_name, args);
+        const argsString = JSON.stringify(args);
+        const rawRes = this._marineInstance.call_module(this._serviceId, function_name, argsString);
+        const jsonRes: { result: unknown; error: string } = JSON.parse(rawRes);
+        if (jsonRes.error) {
+            throw new Error(`marine-js failed with: ${jsonRes.error}`);
+        }
+
+        return jsonRes.result;
     }
 }
 
