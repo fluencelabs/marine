@@ -27,6 +27,8 @@ jobs:
         with:
           repository: fluencelabs/marine-rs-sdk-test
 
+      - run: ls -alh
+
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
