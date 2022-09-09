@@ -13,7 +13,7 @@ path = "src/lib.rs"
 [dependencies]
 marine-it-interfaces = { path = "../it-interfaces", version = "0.7.1" }
 
-anyhow = "1.0.63"
+anyhow = "1.0.64"
 walrus = "0.19.0"
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.23.0"}
 nom = "5.1"
@@ -21,4 +21,4 @@ nom = "5.1"
 itertools = "0.10.3"
 semver = "0.11.0"
 serde = "1.0.144"
-thiserror = "1.0.33"
+thiserror = "1.0.34"
