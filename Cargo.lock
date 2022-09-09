@@ -941,12 +941,12 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.20.2"
+version = "0.21.0"
 dependencies = [
  "log",
  "maplit",
  "marine-min-it-version 0.1.1",
- "marine-runtime 0.20.2",
+ "marine-runtime 0.21.0",
  "serde",
  "serde_derive",
  "serde_json",
@@ -1370,12 +1370,11 @@ dependencies = [
 
 [[package]]
 name = "it-json-serde"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "serde_with 2.0.0",
  "thiserror",
  "wasmer-interface-types-fl",
 ]
@@ -1714,7 +1713,7 @@ dependencies = [
  "bytesize",
  "console_error_panic_hook",
  "fluence-it-types",
- "it-json-serde 0.3.2",
+ "it-json-serde 0.3.3",
  "it-lilo",
  "it-memory-traits",
  "itertools 0.10.3",
@@ -1733,7 +1732,6 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "serde_with 2.0.0",
  "thiserror",
  "toml",
  "wasm-bindgen",
@@ -1913,11 +1911,11 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.20.2"
+version = "0.21.0"
 dependencies = [
  "bytesize",
  "env_logger 0.9.0",
- "it-json-serde 0.3.2",
+ "it-json-serde 0.3.3",
  "itertools 0.10.3",
  "log",
  "marine-core 0.16.2",
@@ -2066,13 +2064,13 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.18.3"
+version = "0.18.4"
 dependencies = [
  "anyhow",
  "check-latest",
  "clap",
  "env_logger 0.9.0",
- "fluence-app-service 0.20.2",
+ "fluence-app-service 0.21.0",
  "itertools 0.10.3",
  "log",
  "marine-rs-sdk-main",
