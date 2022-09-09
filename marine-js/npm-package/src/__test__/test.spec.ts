@@ -3,6 +3,7 @@ import path from 'path';
 import download from 'download';
 import { FaaS } from '../FaaS';
 import { callAvm } from '@fluencelabs/avm';
+import { JSONArray, JSONObject } from '../types';
 
 const fsPromises = fs.promises;
 
@@ -34,13 +35,25 @@ describe('Fluence app service tests', () => {
         await faas.init();
 
         // act
-        const res = JSON.parse(faas.call('greeting', '{"name": "test"}', undefined));
+        const res = faas.call('greeting', ['test'], undefined);
 
         // assert
-        expect(res).toMatchObject({
-            error: '',
-            result: 'Hi, test',
-        });
+        expect(res).toBe('Hi, test');
+    });
+
+    it('Testing greeting service with object args', async () => {
+        // arrange
+        const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
+        const greeting = await loadWasmModule(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
+
+        const faas = new FaaS(marine, greeting, 'srv');
+        await faas.init();
+
+        // act
+        const res = faas.call('greeting', { name: 'test' }, undefined);
+
+        // assert
+        expect(res).toBe('Hi, test');
     });
 
     it('Testing greeting service with records', async () => {
@@ -54,18 +67,15 @@ describe('Fluence app service tests', () => {
         await faas.init();
 
         // act
-        const greetingRecordResult = JSON.parse(faas.call('greeting_record', '{}', undefined));
-        const voidResult = JSON.parse(faas.call('void_fn', '{}', undefined));
+        const greetingRecordResult = faas.call('greeting_record', [], undefined);
+        const voidResult: any = faas.call('void_fn', [], undefined);
 
         // assert
         expect(greetingRecordResult).toMatchObject({
-            error: '',
-            result: {
-                str: 'Hello, world!',
-                num: 42,
-            },
+            str: 'Hello, world!',
+            num: 42,
         });
-        expect(voidResult.result).toStrictEqual(null);
+        expect(voidResult).toStrictEqual(null);
     });
 
     it('Running avm through FaaS infrastructure', async () => {
@@ -87,9 +97,13 @@ describe('Fluence app service tests', () => {
 
         // act
         const res = await callAvm(
-            (arg: string) => testAvmFaaS.call('invoke', arg, undefined),
-            vmPeerId,
-            vmPeerId,
+            (args: JSONArray | JSONObject): unknown => testAvmFaaS.call('invoke', args, undefined),
+            {
+                currentPeerId: vmPeerId,
+                initPeerId: vmPeerId,
+                timestamp: Date.now(),
+                ttl: 10000,
+            },
             s,
             b(''),
             b(''),
@@ -112,26 +126,31 @@ describe('Fluence app service tests', () => {
         const marine = new FaaS(control, sqlite, 'sqlite');
         await marine.init();
 
-        let result;
+        let result: any;
 
-        result = doCall(marine, 'sqlite3_open_v2', ':memory:', 6, '');
+        result = marine.call('sqlite3_open_v2', [':memory:', 6, ''], undefined);
         const dbHandle = result.db_handle;
-        result = doCall(marine, 'sqlite3_exec', dbHandle, 'CREATE VIRTUAL TABLE users USING FTS5(body)', 0, 0);
-
-        expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
-
-        result = doCall(
-            marine,
+        result = marine.call(
             'sqlite3_exec',
-            dbHandle,
-            "INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')",
-            0,
-            0,
+            [dbHandle, 'CREATE VIRTUAL TABLE users USING FTS5(body)', 0, 0],
+            undefined,
         );
 
         expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
 
-        result = doCall(marine, 'sqlite3_exec', dbHandle, "SELECT * FROM users WHERE users MATCH 'A* OR B*'", 0, 0);
+        result = marine.call(
+            'sqlite3_exec',
+            [dbHandle, "INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')", 0, 0],
+            undefined,
+        );
+
+        expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
+
+        result = marine.call(
+            'sqlite3_exec',
+            [dbHandle, "SELECT * FROM users WHERE users MATCH 'A* OR B*'", 0, 0],
+            undefined,
+        );
 
         expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
     });
@@ -144,14 +163,14 @@ describe('Fluence app service tests', () => {
         const marine = new FaaS(control, redis, 'redis');
         await marine.init();
 
-        const result1 = doCall(marine, 'invoke', 'SET A 10');
-        const result2 = doCall(marine, 'invoke', 'SADD B 20');
-        const result3 = doCall(marine, 'invoke', 'GET A');
-        const result4 = doCall(marine, 'invoke', 'SMEMBERS B');
-        const result5 = doCall(
-            marine,
+        const result1 = marine.call('invoke', ['SET A 10'], undefined);
+        const result2 = marine.call('invoke', ['SADD B 20'], undefined);
+        const result3 = marine.call('invoke', ['GET A'], undefined);
+        const result4 = marine.call('invoke', ['SMEMBERS B'], undefined);
+        const result5 = marine.call(
             'invoke',
-            "eval \"redis.call('incr', 'A') return redis.call('get', 'A') * 8 + 5\"  0",
+            ["eval \"redis.call('incr', 'A') return redis.call('get', 'A') * 8 + 5\"  0"],
+            undefined,
         );
 
         expect(result1).toBe('+OK\r\n');
@@ -160,14 +179,47 @@ describe('Fluence app service tests', () => {
         expect(result4).toBe('*1\r\n$2\r\n20\r\n');
         expect(result5).toBe(':93\r\n');
     });
-});
 
-const doCall = (marine: FaaS, fn: string, ...args: any[]): any => {
-    const argsStr = JSON.stringify(args);
-    const rawRes = marine.call(fn, argsStr, undefined);
-    const res = JSON.parse(rawRes);
-    if (res.error && res.error.length > 0) {
-        throw new Error(`call failed args: ${argsStr}, res: ${rawRes}`);
-    }
-    return res.result;
-};
+    it('Testing service which fails', async () => {
+        // arrange
+        const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
+        const failing = await loadWasmModule(path.join(examplesDir, './failing/artifacts/failing.wasm'));
+
+        const faas = new FaaS(marine, failing, 'srv');
+        await await faas.init();
+
+        // act
+        try {
+            await faas.call('failing', [], undefined);
+            // should never succeed
+            expect(true).toBe(false);
+        } catch (e) {
+            // assert
+            expect(e).toBeInstanceOf(WebAssembly.RuntimeError);
+            const re = e as WebAssembly.RuntimeError;
+            expect(re.message).toBe('unreachable');
+        }
+    });
+
+    it('Checking error when calling non-existent function', async () => {
+        // arrange
+        const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
+        const greeting = await loadWasmModule(path.join(examplesDir, './failing/artifacts/failing.wasm'));
+
+        const faas = new FaaS(marine, greeting, 'srv');
+        await await faas.init();
+
+        // act
+        try {
+            await faas.call('do_not_exist', [], undefined);
+            // should never succeed
+            expect(true).toBe(false);
+        } catch (e) {
+            // assert
+            expect(e).toBeInstanceOf(Error);
+            expect((e as Error).message).toBe(
+                'marine-js failed with: Error calling module function: function with name `do_not_exist` is missing',
+            );
+        }
+    });
+});

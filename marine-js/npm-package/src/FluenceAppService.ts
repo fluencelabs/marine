@@ -18,6 +18,7 @@ import { FaaSConfig, Env } from './config';
 import { IFluenceAppService } from './IFluenceAppService';
 import { isBrowser, isNode } from 'browser-or-node';
 import { Thread, ModuleThread, spawn, Worker } from 'threads';
+import { JSONArray, JSONObject, JSONValue } from './types';
 
 export const defaultNames = {
     avm: {
@@ -76,7 +77,12 @@ export class FluenceAppService implements IFluenceAppService {
         return this._worker.createService(serviceModule, serviceId, faaSConfig, envs);
     }
 
-    callService(serviceId: string, functionName: string, args: string, callParams: any): Promise<string> {
+    callService(
+        serviceId: string,
+        functionName: string,
+        args: JSONArray | JSONObject,
+        callParams: any,
+    ): Promise<unknown> {
         if (!this._worker) {
             throw 'Worker is not initialized';
         }

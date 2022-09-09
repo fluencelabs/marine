@@ -12,6 +12,7 @@ members = [
     "crates/module-interface",
     "crates/utils",
     "examples/call_parameters",
+    "examples/failing",
     "examples/greeting",
     "examples/greeting_record",
     "examples/ipfs-node/effector",
