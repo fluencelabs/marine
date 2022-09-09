@@ -33,7 +33,7 @@ jobs:
 
       - name: Use fluence-app-service from marine branch
         run: |
-          sed -i 's#\(fluence-app-service =\) .*#\1 { git = "https://github.com/fluencelabs/marine", branch = "${{ github.head_ref }}", features = "raw-module-api" }#g' Cargo.toml
+          sed -i 's#\(fluence-app-service =\) .*#\1 { git = "https://github.com/fluencelabs/marine", branch = "${{ github.head_ref }}", features = ["raw-module-api"] }#g' Cargo.toml
 
       - run: cargo test --release --all-features --no-fail-fast
 
