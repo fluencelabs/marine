@@ -26,26 +26,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: fluencelabs/marine-rs-sdk-test
-
-      - run: ls -alh
+          ref: marine-e2e-conficts-fix
 
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Set fluence-app-service version
-        run: >
-          cargo add fluence-app-service \
-            --git https://github.com/fluencelabs/marine \
-            --branch ${{ github.head_ref }} \
-            --features raw-module-api
-
-      - name: Set fluence-app-service version in marine-test-macro-impl
-        run: >
-          cargo add fluence-app-service \
-            --git https://github.com/fluencelabs/marine \
-            --branch ${{ github.head_ref }} \
-            --features raw-module-api
-        working-directory: crates/marine-test-macro-impl
+      - name: Use fluence-app-service from marine branch
+        run: |
+          sed -i 's#\(fluence-app-service =\) .*#\1 { git = "https://github.com/fluencelabs/marine", branch = "${{ github.head_ref }}, features = "raw-module-api" }#g' Cargo.toml
 
       - run: cargo test --release --all-features --no-fail-fast
 
