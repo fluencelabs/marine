@@ -29,7 +29,7 @@
         "ts-jest": "^27.1.4"
     },
     "devDependencies": {
-        "@fluencelabs/avm": "0.27.0-json-types-in-js.0",
+        "@fluencelabs/avm": "0.28.8",
         "@types/download": "^8.0.1",
         "@types/jest": "^27.4.0",
         "@types/node": "^14.0.0",

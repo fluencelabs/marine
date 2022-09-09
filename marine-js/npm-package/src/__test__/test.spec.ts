@@ -3,7 +3,7 @@ import path from 'path';
 import download from 'download';
 import { FaaS } from '../FaaS';
 import { callAvm } from '@fluencelabs/avm';
-import { JSONArray } from '../types';
+import { JSONArray, JSONObject } from '../types';
 
 const fsPromises = fs.promises;
 
@@ -97,7 +97,7 @@ describe('Fluence app service tests', () => {
 
         // act
         const res = await callAvm(
-            (args: JSONArray): any => testAvmFaaS.call('invoke', args, undefined),
+            (args: JSONArray | JSONObject): unknown => testAvmFaaS.call('invoke', args, undefined),
             {
                 currentPeerId: vmPeerId,
                 initPeerId: vmPeerId,
