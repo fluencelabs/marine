@@ -1519,7 +1519,7 @@ dependencies = [
  "marine-it-generator 0.9.3",
  "marine-it-parser 0.10.0",
  "marine-module-info-parser 0.4.0",
- "semver 0.11.0",
+ "semver 1.0.13",
  "serde",
  "serde_json",
  "termion",
@@ -1594,7 +1594,7 @@ dependencies = [
  "paste",
  "pwasm-utils 0.19.0",
  "reqwest",
- "semver 0.11.0",
+ "semver 1.0.13",
  "serde",
  "thiserror",
  "tokio",
@@ -1682,7 +1682,7 @@ dependencies = [
  "marine-it-interfaces 0.7.2",
  "marine-module-interface 0.5.0",
  "nom",
- "semver 0.11.0",
+ "semver 1.0.13",
  "serde",
  "thiserror",
  "walrus 0.19.0",
@@ -1714,7 +1714,7 @@ dependencies = [
  "nom",
  "once_cell",
  "paste",
- "semver 0.11.0",
+ "semver 1.0.13",
  "serde",
  "serde_derive",
  "serde_json",
@@ -1763,7 +1763,7 @@ name = "marine-min-it-version"
 version = "0.1.1"
 dependencies = [
  "once_cell",
- "semver 0.11.0",
+ "semver 1.0.13",
 ]
 
 [[package]]
@@ -1789,7 +1789,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "marine-rs-sdk-main",
- "semver 0.11.0",
+ "semver 1.0.13",
  "serde",
  "thiserror",
  "walrus 0.19.0",
@@ -1821,7 +1821,7 @@ dependencies = [
  "itertools 0.10.3",
  "marine-it-interfaces 0.7.2",
  "nom",
- "semver 0.11.0",
+ "semver 1.0.13",
  "serde",
  "thiserror",
  "walrus 0.19.0",
