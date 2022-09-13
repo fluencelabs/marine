@@ -1,7 +1,7 @@
 [package]
 name = "mrepl"
 description = "Fluence Marine REPL intended for testing purposes"
-version = "0.18.5"
+version = "0.18.6"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine/tools/repl"
 license = "Apache-2.0"
@@ -12,7 +12,7 @@ name = "mrepl"
 path = "src/main.rs"
 
 [dependencies]
-fluence-app-service = { path = "../../crates/fluence-app-service", version = "0.22.0", features = ["raw-module-api"] }
+fluence-app-service = { path = "../../crates/fluence-app-service", version = "0.22.1", features = ["raw-module-api"] }
 marine-rs-sdk-main = { version = "0.7.1", features = ["logger"] }
 
 anyhow = "1.0.64"
