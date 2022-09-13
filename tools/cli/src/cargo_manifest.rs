@@ -44,5 +44,5 @@ pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError>
             .ok_or(ManifestError::NoSdkVersionError)?,
     };
 
-    Version::from_str(&version).map_err(Into::into)
+    Version::from_str(version).map_err(Into::into)
 }

@@ -74,6 +74,8 @@ impl REPL {
 
     /// Returns true, it should be the last executed command.
     pub fn execute<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) -> bool {
+        // Explicit statements on "h"/"help" options is more convenient, as we have such commands.
+        #[allow(clippy::wildcard_in_or_patterns)]
         match args.next() {
             Some("n") | Some("new") => self.new_service(args),
             Some("l") | Some("load") => self.load_module(args),
@@ -226,7 +228,7 @@ impl REPL {
 
         let mut config = config_file_path
             .as_ref()
-            .map(|p| TomlAppServiceConfig::load(p))
+            .map(TomlAppServiceConfig::load)
             .transpose()?
             .unwrap_or_default();
         config.service_base_dir = Some(tmp_path);

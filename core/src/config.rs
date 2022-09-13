@@ -30,6 +30,7 @@ use std::collections::HashSet;
 const DEFAULT_HEAP_PAGES_COUNT: u32 = 1600;
 
 pub type HostExportedFunc = Box<dyn Fn(&mut Ctx, Vec<IValue>) -> Option<IValue> + 'static>;
+pub type ErrorHandler = Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + 'static>>;
 
 pub struct HostImportDescriptor {
     /// This closure will be invoked for corresponding import.
@@ -43,7 +44,7 @@ pub struct HostImportDescriptor {
 
     /// If Some, this closure is called with error when errors is encountered while lifting.
     /// If None, panic will occur.
-    pub error_handler: Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + 'static>>,
+    pub error_handler: ErrorHandler,
 }
 
 pub struct MModuleConfig {

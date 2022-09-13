@@ -15,6 +15,8 @@
  */
 
 #![allow(clippy::all)]
+#![allow(unused_variables)]
+#![allow(dead_code)]
 
 use marine_rs_sdk::marine;
 use core::cell::RefCell;

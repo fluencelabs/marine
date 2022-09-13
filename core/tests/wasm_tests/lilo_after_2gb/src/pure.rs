@@ -16,6 +16,8 @@
 
 #![allow(improper_ctypes)]
 #![allow(clippy::all)]
+#![allow(unused_mut)]
+#![allow(dead_code)]
 
 use marine_rs_sdk::marine;
 static mut DATA: Option<Vec<u8>> = None;

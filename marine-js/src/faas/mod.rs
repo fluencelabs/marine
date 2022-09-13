@@ -15,6 +15,8 @@
  */
 
 mod errors;
+// Code will be completely rewritten anyway.
+#[allow(clippy::module_inception)]
 mod faas;
 mod faas_interface;
 

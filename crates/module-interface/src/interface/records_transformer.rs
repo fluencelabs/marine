@@ -67,7 +67,7 @@ impl RecordsTransformer {
             return Ok(());
         }
 
-        for field in (&record.fields).iter() {
+        for field in record.fields.iter() {
             self.type_dfs(&field.ty, exported_records)?;
         }
 
