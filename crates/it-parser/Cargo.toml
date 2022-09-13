@@ -11,7 +11,7 @@ name = "marine_it_parser"
 path = "src/lib.rs"
 
 [dependencies]
-marine-it-interfaces = { path = "../it-interfaces", version = "0.7.2" }
+marine-it-interfaces = { path = "../it-interfaces", version = "0.7.3" }
 marine-module-interface = { path = "../module-interface", version = "0.6.0" }
 
 anyhow = "1.0.64"
