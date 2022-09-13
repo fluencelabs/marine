@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use semver::SemVerError;
+use semver::Error as SemVerError;
 use thiserror::Error as ThisError;
 use std::str::Utf8Error;
 

@@ -945,9 +945,9 @@ dependencies = [
 
 [[package]]
 name = "fluence-it-types"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "047f670b4807cab8872550a607b1515daff08b3e3bb7576ce8f45971fd811a4e"
+checksum = "f4e11b54c84babd376e0844d4973fdf7313799c4b9531757015ea6736ef14b70"
 dependencies = [
  "it-to-bytes",
  "nom",
@@ -1352,7 +1352,7 @@ dependencies = [
  "serde_json",
  "serde_with 1.14.0",
  "thiserror",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.23.1",
 ]
 
 [[package]]
@@ -1363,14 +1363,14 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "thiserror",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.24.1",
 ]
 
 [[package]]
 name = "it-lilo"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a39dffcc610873b4c39b0fe04acac5ea77cf2eda9ed3d8a3b970b536d4e24c8"
+checksum = "59726dde6ea2df9ad15bb67341103879cb94f26642ee0e40bf9a426f8e69bec8"
 dependencies = [
  "fluence-it-types",
  "it-memory-traits",
@@ -1381,9 +1381,9 @@ dependencies = [
 
 [[package]]
 name = "it-memory-traits"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca1799ed89e51a192e80a14ab14589044de9e58f0be86087ae8699cbe59f5c40"
+checksum = "40e8f26dd64f9c94c7e9c39b2be7bac4e3c946ca31bb5db4a13298199a4d56a2"
 dependencies = [
  "thiserror",
 ]
@@ -1564,7 +1564,7 @@ dependencies = [
  "semver 0.11.0",
  "serde",
  "thiserror",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.23.1",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
  "wasmer-wasi-fl",
@@ -1598,7 +1598,7 @@ dependencies = [
  "serde",
  "thiserror",
  "tokio",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.24.1",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
  "wasmer-wasi-fl",
@@ -1618,7 +1618,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "walrus 0.18.0",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.23.1",
 ]
 
 [[package]]
@@ -1633,7 +1633,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "walrus 0.19.0",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.24.1",
 ]
 
 [[package]]
@@ -1643,7 +1643,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b3236d1068eaa0f1a07ab74b098b777c150c0c354a16d8869cd69ae3ff847014"
 dependencies = [
  "multimap",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.23.1",
 ]
 
 [[package]]
@@ -1651,7 +1651,7 @@ name = "marine-it-interfaces"
 version = "0.7.2"
 dependencies = [
  "multimap",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.24.1",
 ]
 
 [[package]]
@@ -1669,7 +1669,7 @@ dependencies = [
  "serde",
  "thiserror",
  "walrus 0.18.0",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.23.1",
  "wasmer-runtime-core-fl",
 ]
 
@@ -1686,7 +1686,7 @@ dependencies = [
  "serde",
  "thiserror",
  "walrus 0.19.0",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.24.1",
  "wasmer-runtime-core-fl",
 ]
 
@@ -1721,7 +1721,7 @@ dependencies = [
  "thiserror",
  "toml",
  "wasm-bindgen",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.24.1",
  "web-sys",
 ]
 
@@ -1810,7 +1810,7 @@ dependencies = [
  "serde",
  "thiserror",
  "walrus 0.18.0",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.23.1",
 ]
 
 [[package]]
@@ -1825,7 +1825,7 @@ dependencies = [
  "serde",
  "thiserror",
  "walrus 0.19.0",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.24.1",
 ]
 
 [[package]]
@@ -1888,7 +1888,7 @@ dependencies = [
  "serde_with 1.14.0",
  "thiserror",
  "toml",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.23.1",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
  "wasmer-wasi-fl",
@@ -1917,7 +1917,7 @@ dependencies = [
  "serde_with 2.0.0",
  "thiserror",
  "toml",
- "wasmer-interface-types-fl",
+ "wasmer-interface-types-fl 0.24.1",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
  "wasmer-wasi-fl",
@@ -3826,6 +3826,27 @@ dependencies = [
  "nom",
  "safe-transmute",
  "semver 0.11.0",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "wast",
+]
+
+[[package]]
+name = "wasmer-interface-types-fl"
+version = "0.24.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba2a3bf176a65a5a1a136be5b9440395c2ba4493a3a07ea70cac553fe924185d"
+dependencies = [
+ "fluence-it-types",
+ "it-lilo",
+ "it-memory-traits",
+ "it-to-bytes",
+ "itertools 0.10.3",
+ "log",
+ "nom",
+ "safe-transmute",
+ "semver 1.0.13",
  "serde",
  "serde_json",
  "thiserror",

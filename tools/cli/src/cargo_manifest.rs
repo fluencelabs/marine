@@ -19,7 +19,7 @@ pub enum ManifestError {
     #[error("Cannot find version of marine-rs-sdk dependency")]
     NoSdkVersionError,
     #[error("Cannot parse marine-rs-sdk version: {0}")]
-    VersionParseError(#[from] semver::SemVerError),
+    VersionParseError(#[from] semver::Error),
 }
 
 pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError> {

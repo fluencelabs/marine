@@ -17,7 +17,7 @@ marine-min-it-version =  { path = "../crates/min-it-version", version = "0.2.0" 
 it-json-serde = { path = "../crates/it-json-serde", version = "0.3.2" }
 
 marine-rs-sdk = "0.7.1"
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.23.1" }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.24.1"}
 fluence-it-types = {version = "0.3.1", features = ["impls"] }
 it-lilo = "0.4.0"
 it-memory-traits = "0.3.0"
