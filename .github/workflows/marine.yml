@@ -10,66 +10,61 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
-jobs:
-  air:
-    name: "Run marine tests"
-    runs-on: builder
+env:
+  RUST_BACKTRACE: 1
+  CARGO_TERM_COLOR: always
 
-    env:
-      RUST_BACKTRACE: 1
-      CARGO_TERM_COLOR: always
+jobs:
+  marine:
+    name: "Run tests"
+    runs-on: builder
 
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly-2022-06-29
-          target: wasm32-wasi
-          components: rustfmt, clippy
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - uses: actions/setup-node@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
         with:
           node-version: 16
 
-      - name: "Cache rust"
-        uses: Swatinem/rust-cache@v1
-
-      - name: "Install wasm-pack"
+      - name: Install wasm-pack
         run: cargo install wasm-pack
 
-      - name: "Install marine cli"
+      - name: Install marine cli
         run: cargo install --path tools/cli
 
-      - name: "cargo fmt"
+      - name: Run cargo fmt
         run: cargo fmt --all -- --check
 
-      - name: "Build marine-js"
+      - name: Build marine-js wasm
         run: ./build.sh
         working-directory: marine-js
 
-      - name: "Install marine-js npm dependencies"
+      - name: Install marine-js npm dependencies
         uses: bahmutov/npm-install@v1
         with:
           working-directory: marine-js/npm-package
 
-      - name: "Build marine-js npm package"
+      - name: Build marine-js npm package
         run: npm run build
         working-directory: marine-js/npm-package
 
-      - name: "Build exampes"
+      - name: Build examples
         run: ./build.sh
         working-directory: examples
 
-      - name: "Build marine wasm-tests"
+      - name: Build marine-runtime wasm-tests
         run: ./build.sh
         working-directory: marine/tests/wasm_tests
 
-      - name: "Build core wasm-tests"
+      - name: Build marine-core wasm-tests
         run: ./build.sh
         working-directory: core/tests/wasm_tests
 
-      - name: "cargo check"
+      - name: Run cargo check
         run: |
           cargo check -v --all-features \
             -p marine-core \
@@ -78,7 +73,7 @@ jobs:
             -p marine \
             -p mrepl
 
-      - name: "cargo test"
+      - name: Run cargo test
         run: |
           cargo test --release -v --all-features \
             -p marine-core \
@@ -87,9 +82,9 @@ jobs:
             -p marine \
             -p mrepl \
 
-      - name: "cargo clippy"
+      - name: Run cargo clippy
         run: cargo clippy -v
 
-      - name: "npm test marine-js"
+      - name: Run marine-js Node tests
         run: npm run test
         working-directory: marine-js/npm-package
