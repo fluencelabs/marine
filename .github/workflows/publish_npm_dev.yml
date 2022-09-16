@@ -112,7 +112,7 @@ jobs:
           npm i
           npm run build
 
-      - name Set version to FINAL_VERSION
+      - name: Set version to FINAL_VERSION
         run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
         working-directory: marine-js/npm-package
 
