@@ -30,26 +30,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      ### Prepare cargo & toolchains
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('**/Cargo.lock') }}
-      - name: Install Rust toolchain with wasm32-unknown-unknown
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly-2022-03-20
-          target: wasm32-unknown-unknown
-          profile: minimal
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          toolchain: nightly-2022-03-20
-          command: update
-          args: --aggressive
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - run: cargo update --aggressive
 
       ### Calculate FINAL_VERSION
       - name: Install jq & sponge
@@ -128,17 +112,18 @@ jobs:
           npm i
           npm run build
 
-      ### Set version to FINAL_VERSION
-      - run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
+      - name Set version to FINAL_VERSION
+        run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version || true
         working-directory: marine-js/npm-package
 
-      ### Publish to NPM registry
-      - uses: actions/setup-node@v1
+      - name: Setup node
+        uses: actions/setup-node@v1
         with:
           node-version: "16"
           registry-url: "https://registry.npmjs.org"
 
-      - run: npm publish --access public --tag=beta
+      - name: Publish to NPM registry
+        run: npm publish --access public --tag=beta
         working-directory: marine-js/npm-package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

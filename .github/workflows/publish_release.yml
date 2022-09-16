@@ -17,29 +17,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      ### Prepare cargo & toolchains
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          profile: minimal
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          toolchain: nightly
-          command: update
-          args: --aggressive
+      - name: Setup rust toolchain
+          uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - run: cargo update --aggressive
 
       - name: Install cargo-workspaces
-        run: cargo install cargo-workspaces || true
+        run: cargo install cargo-workspaces
 
       ### === Rust package release ===
       - name: Login to crates.io
