@@ -1,0 +1,7 @@
+dist
+node_modules
+*.tgz
+
+# auto-generated files
+src/*.wasm
+snippets

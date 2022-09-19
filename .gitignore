@@ -12,6 +12,9 @@ target/
 # REPL history files
 *.repl_history
 
+# local storage of the url-downloader service
+/examples/url-downloader/sites/*
+
 # Allowed Wasm files for examples
 !/examples/call_parameters/artifacts/*.wasm
 !/examples/greeting/artifacts/*.wasm

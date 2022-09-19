@@ -20,8 +20,8 @@ use print_state::print_envs;
 use print_state::print_fs_state;
 use crate::ReplResult;
 
-use fluence_app_service::{AppService, CallParameters};
-use fluence_app_service::FaaSModuleConfig;
+use fluence_app_service::{AppService, CallParameters, SecurityTetraplet};
+use fluence_app_service::MarineModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
 
 use serde::Deserialize;
@@ -67,13 +67,15 @@ pub(super) struct REPL {
 }
 
 impl REPL {
-    pub fn new<S: Into<PathBuf>>(config_file_path: Option<S>) -> ReplResult<Self> {
-        let app_service = Self::create_app_service(config_file_path)?;
+    pub fn new<S: Into<PathBuf>>(config_file_path: Option<S>, quiet: bool) -> ReplResult<Self> {
+        let app_service = Self::create_app_service(config_file_path, quiet)?;
         Ok(Self { app_service })
     }
 
     /// Returns true, it should be the last executed command.
     pub fn execute<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) -> bool {
+        // Explicit statements on "h"/"help" options is more convenient, as we have such commands.
+        #[allow(clippy::wildcard_in_or_patterns)]
         match args.next() {
             Some("n") | Some("new") => self.new_service(args),
             Some("l") | Some("load") => self.load_module(args),
@@ -94,7 +96,7 @@ impl REPL {
     }
 
     fn new_service<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
-        match Self::create_app_service(args.next()) {
+        match Self::create_app_service(args.next(), false) {
             Ok(service) => self.app_service = service,
             Err(e) => println!("failed to create a new application service: {}", e),
         };
@@ -111,13 +113,13 @@ impl REPL {
         }
 
         let start = Instant::now();
-        let config = FaaSModuleConfig {
+        let config = MarineModuleConfig {
             logger_enabled: true,
             ..<_>::default()
         };
         let result_msg = match self
             .app_service
-            .load_module::<String, fluence_app_service::FaaSModuleConfig>(
+            .load_module::<fluence_app_service::MarineModuleConfig, String>(
                 module_name.into(),
                 &wasm_bytes.unwrap(),
                 Some(config),
@@ -214,28 +216,88 @@ impl REPL {
         print!("Loaded modules heap sizes:\n{}", statistic);
     }
 
-    fn create_app_service<S: Into<PathBuf>>(config_file_path: Option<S>) -> ReplResult<AppService> {
+    fn create_app_service<S: Into<PathBuf>>(
+        config_file_path: Option<S>,
+        quiet: bool,
+    ) -> ReplResult<AppService> {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
+        let config_file_path: Option<PathBuf> = config_file_path.map(Into::into);
 
         let start = Instant::now();
 
         let mut config = config_file_path
-            .map(|p| TomlAppServiceConfig::load(p.into()))
+            .as_ref()
+            .map(TomlAppServiceConfig::load)
             .transpose()?
             .unwrap_or_default();
         config.service_base_dir = Some(tmp_path);
+
+        config.toml_marine_config.base_path = config_file_path
+            .and_then(|path| path.parent().map(PathBuf::from))
+            .unwrap_or_default();
 
         let app_service = AppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
 
         let duration = start.elapsed();
 
-        println!(
-            "app service was created with service id = {}\nelapsed time {:?}",
-            service_id, duration
-        );
+        if !quiet {
+            println!(
+                "app service was created with service id = {}\nelapsed time {:?}",
+                service_id, duration
+            );
+        }
 
         Ok(app_service)
+    }
+}
+
+#[derive(Clone, PartialEq, Default, Eq, Debug, Deserialize)]
+struct PartialCallParameters {
+    /// Peer id of the AIR script initiator.
+    #[serde(default)]
+    pub init_peer_id: String,
+
+    /// Id of the current service.
+    #[serde(default)]
+    pub service_id: String,
+
+    /// Id of the service creator.
+    #[serde(default)]
+    pub service_creator_peer_id: String,
+
+    /// PeerId of the peer who hosts this service.
+    #[serde(default)]
+    pub host_id: String,
+
+    /// Id of the particle which execution resulted a call this service.
+    #[serde(default)]
+    pub particle_id: String,
+
+    /// Security tetraplets which described origin of the arguments.
+    #[serde(default)]
+    pub tetraplets: Vec<Vec<SecurityTetraplet>>,
+}
+
+impl From<PartialCallParameters> for CallParameters {
+    fn from(partial_call_params: PartialCallParameters) -> Self {
+        let PartialCallParameters {
+            init_peer_id,
+            service_id,
+            service_creator_peer_id,
+            host_id,
+            particle_id,
+            tetraplets,
+        } = partial_call_params;
+
+        Self {
+            init_peer_id,
+            service_id,
+            service_creator_peer_id,
+            host_id,
+            particle_id,
+            tetraplets,
+        }
     }
 }
 
@@ -266,8 +328,8 @@ fn parse_call_module_arguments<'args>(
 
     let call_parameters = match de.end() {
         Ok(_) => CallParameters::default(),
-        Err(_) => match CallParameters::deserialize(&mut de) {
-            Ok(call_parameters) => call_parameters,
+        Err(_) => match PartialCallParameters::deserialize(&mut de) {
+            Ok(call_parameters) => call_parameters.into(),
             Err(e) => return Err(format!("invalid call parameters: {}", e)),
         },
     };
@@ -298,6 +360,7 @@ fn print_help() {
             s/stats                                               print memory size of all loaded modules\n\
             e/envs <module_name>                                  print environment variables of a module\n\
             f/fs <module_name>                                    print filesystem state of a module\n\
+            s/stats                                               print consumed memory size of each module\n\
             h/help                                                print this message\n\
             q/quit/Ctrl-C                                         exit\n\
             \n\

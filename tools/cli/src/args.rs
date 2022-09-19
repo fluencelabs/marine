@@ -24,6 +24,8 @@ pub const IN_WASM_PATH: &str = "in-wasm-path";
 pub const IT_PATH: &str = "it-path";
 pub const OUT_WASM_PATH: &str = "out-wasm-path";
 pub const SERVICE_NAME: &str = "service-name";
+pub const PROJECT_NAME: &str = "generate-project-name";
+pub const SHOULD_INIT_OPTION: &str = "should-init";
 pub const SERVICE_ID: &str = "service-id";
 
 pub const SDK_VERSION: &str = "sdk-version";
@@ -60,6 +62,26 @@ pub fn build<'a, 'b>() -> App<'a, 'b> {
         .arg(Arg::from_usage("[optional]... 'cargo build arguments'").multiple(true))
 }
 
+pub fn generate<'a, 'b>() -> App<'a, 'b> {
+    SubCommand::with_name("generate")
+        .about("Generates a template project for a Marine Wasm module")
+        .args(&[
+            Arg::with_name(PROJECT_NAME)
+                .required(false)
+                .takes_value(true)
+                .short("n")
+                .long("name")
+                .help("a project name; if the name isn't in kebab-case, it'll be converted to kebab-case"),
+            Arg::with_name(SHOULD_INIT_OPTION)
+                .required(false)
+                .takes_value(false)
+                .short("i")
+                .long("init")
+                .help("generate the template into the current dir without creating a new one"),
+        ]
+        )
+}
+
 pub fn set<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name("set")
         .about("Sets interface types and version to the provided Wasm file")
@@ -75,16 +97,19 @@ fn set_it<'a, 'b>() -> App<'a, 'b> {
                 .required(true)
                 .takes_value(true)
                 .short("i")
+                .long("input")
                 .help("a path to a Wasm file"),
             Arg::with_name(IT_PATH)
                 .required(true)
                 .takes_value(true)
                 .short("w")
+                .long("wit")
                 .help("a path to a file with interface types"),
             Arg::with_name(OUT_WASM_PATH)
                 .takes_value(true)
                 .short("o")
-                .help("a path to the result Wasm file with set interface types"),
+                .long("output")
+                .help("A path to the result Wasm file with set interface types. If absent, modifies input file."),
         ])
 }
 
@@ -96,16 +121,21 @@ fn set_version<'a, 'b>() -> App<'a, 'b> {
                 .required(true)
                 .takes_value(true)
                 .short("i")
+                .long("input")
                 .help("a path to a Wasm file"),
             Arg::with_name(SDK_VERSION)
                 .required(true)
                 .takes_value(true)
                 .short("v")
+                .long("version")
                 .help("a version of the sdk"),
             Arg::with_name(OUT_WASM_PATH)
                 .takes_value(true)
                 .short("o")
-                .help("a path to the result file with set version"),
+                .long("output")
+                .help(
+                    "A path to the result file with set version. If absent, modifies input file.",
+                ),
         ])
 }
 
@@ -116,7 +146,7 @@ pub fn show_wit<'a, 'b>() -> App<'a, 'b> {
         .args(&[Arg::with_name(IN_WASM_PATH)
             .required(true)
             .takes_value(true)
-            .short("i")
+            .index(1)
             .help("path to the Wasm file")])
 }
 
@@ -127,7 +157,7 @@ pub fn show_manifest<'a, 'b>() -> App<'a, 'b> {
         .args(&[Arg::with_name(IN_WASM_PATH)
             .required(true)
             .takes_value(true)
-            .short("i")
+            .index(1)
             .help("path to the Wasm file")])
 }
 

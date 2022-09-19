@@ -1,0 +1,15 @@
+modules_dir = "dir_without_modules"
+
+[[module]]
+name = "records_passing_effector"
+file_name = "records_passing_effector_renamed.wasm"
+load_from = "renamed_records_passing"
+max_heap_size = "10 KiB"
+logger_enabled = true
+
+[[module]]
+name = "records_passing_pure"
+load_from = "renamed_records_passing"
+random_field = true
+max_heap_size = "10 KiB"
+logger_enabled = true

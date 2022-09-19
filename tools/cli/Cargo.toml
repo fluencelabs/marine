@@ -1,7 +1,7 @@
 [package]
 name = "marine"
 description = "Fluence Marine command line tool"
-version = "0.7.0"
+version = "0.12.4"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine/tools/cli"
 license = "Apache-2.0"
@@ -12,20 +12,21 @@ name = "marine"
 path = "src/main.rs"
 
 [dependencies]
-marine-it-generator = { path = "../../crates/it-generator", version = "0.6.0" }
-marine-it-parser = { path = "../../crates/it-parser", version = "0.7.0" }
-marine-module-info-parser = { path = "../../crates/module-info-parser", version = "0.2.2" }
+marine-it-generator = { path = "../../crates/it-generator", version = "0.9.4" }
+marine-it-parser = { path = "../../crates/it-parser", version = "0.11.0" }
+marine-module-info-parser = { path = "../../crates/module-info-parser", version = "0.5.0" }
 
-semver = "0.11.0"
-walrus = "0.18.0"
+cargo_toml = "0.11.6"
+semver = "1.0.13"
+walrus = "0.19.0"
 Inflector = "0.11.4"
-
+toml = "0.5.9"
 atty = "0.2.14"
-thiserror = "1.0.24"
-anyhow = "1.0.31"
-check-latest = "1.0.0"
-clap = "2.33.1"
+thiserror = "1.0.34"
+anyhow = "1.0.64"
+check-latest = "1.0.1"
+clap = "2.34.0"
 exitfailure = "0.5.1"
-serde = "1.0.118"
-serde_json = "1.0.56"
+serde = "1.0.144"
+serde_json = "1.0.85"
 termion = "1.5.6"

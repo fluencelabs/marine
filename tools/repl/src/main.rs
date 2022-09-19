@@ -48,15 +48,18 @@ fn main() -> ReplResult<()> {
         synopsis "Fluence Application service REPL";
         version env!("CARGO_PKG_VERSION");
         param config_file_path: Option<String>, desc: "Path to a service config";
+        opt quiet: bool=false, desc: "Suppress unnecessary welcome message";
     }
     .parse_or_exit();
 
-    let mut rl = init_editor();
+    let mut rl = init_editor()?;
     let _ = rl.load_history(HISTORY_FILE_PATH);
 
-    print_welcome_message();
+    if !args.quiet {
+        print_welcome_message();
+    }
 
-    let mut repl = REPL::new(args.config_file_path)?;
+    let mut repl = REPL::new(args.config_file_path, args.quiet)?;
 
     let mut count = 1;
     loop {

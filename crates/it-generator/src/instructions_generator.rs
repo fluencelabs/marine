@@ -29,7 +29,7 @@ use wasmer_it::IRecordType;
 
 use std::rc::Rc;
 
-#[derive(PartialEq, Debug, Default)]
+#[derive(PartialEq, Eq, Debug, Default)]
 pub(crate) struct ITResolver<'a> {
     types: std::collections::HashMap<String, usize>,
     pub(crate) interfaces: Interfaces<'a>,

@@ -1,0 +1,22 @@
+[package]
+name = "fluence-app-service"
+description = "Fluence Application Service"
+version = "0.22.1"
+authors = ["Fluence Labs"]
+license = "Apache-2.0"
+edition = "2018"
+
+[dependencies]
+marine-runtime = { path = "../../marine", version = "0.23.0" }
+marine-min-it-version = { path = "../../crates/min-it-version", version = "0.2.0" }
+
+maplit = "1.0.2"
+log = "0.4.17"
+serde = "1.0.144"
+serde_derive = "1.0.144"
+serde_json = "1.0.85"
+toml = "0.5.9"
+wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
+
+[features]
+raw-module-api = ["marine-runtime/raw-module-api"]

@@ -10,7 +10,7 @@ on:
 
 jobs:
   npm-publish:
-    name: "Publish web-runtime to NPM"
+    name: "Publish marine-js to NPM"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -20,27 +20,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      ### Prepare cargo & toolchains
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            target
-          key: ${{ runner.os }}-cargo-v2-${{ hashFiles('**/Cargo.lock') }}
-      - name: Install Rust toolchain with wasm32-unknown-unknown
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly-2022-01-25
-          target: wasm32-unknown-unknown
-          profile: minimal
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          toolchain: nightly-2022-01-25
-          command: update
-          args: --aggressive
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - run: cargo update --aggressive
 
       ### Calculate FINAL_VERSION
       - name: Install jq & sponge
@@ -59,9 +42,9 @@ jobs:
           # JQ version regex pattern
           PAT="\\\\d+.\\\\d+.\\\\d+"
 
-          MARINE_JS_CARGO_TOML="web-runtime/Cargo.toml"
-          CARGO_TOML="web-runtime/Cargo.toml"
-          PACKAGE_JSON="web-runtime/npm-package/package.json"
+          MARINE_JS_CARGO_TOML="marine-js/Cargo.toml"
+          CARGO_TOML="marine-js/Cargo.toml"
+          PACKAGE_JSON="marine-js/npm-package/package.json"
 
           # get package name from Cargo.toml
           RS_PKG_NAME="$(toml get "$CARGO_TOML" package.name | tr -d \")"
@@ -96,25 +79,25 @@ jobs:
         continue-on-error: true
 
       - name: Build npm package
-        working-directory: web-runtime
+        working-directory: marine-js
         run: |
           ./build.sh
           cd npm-package
           npm i
           npm run build
 
-      ### Set version
       - name: Set version to ${{ env.FINAL_VERSION }}
         run: yarn version --new-version ${{ env.FINAL_VERSION }} --no-git-tag-version
-        working-directory: web-runtime/npm-package
+        working-directory: marine-js/npm-package
 
-      ### Publish to NPM registry
-      - uses: actions/setup-node@v1
+      - name: Setup Node
+        uses: actions/setup-node@v1
         with:
           node-version: "16"
           registry-url: "https://registry.npmjs.org"
 
-      - run: npm publish --access public
-        working-directory: web-runtime/npm-package
+      - name: Publish to NPM registry
+        run: npm publish --access public
+        working-directory: marine-js/npm-package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

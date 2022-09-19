@@ -17,54 +17,55 @@
 use crate::CLIResult;
 use crate::errors::CLIError;
 
-use std::process::Command;
+use semver::Version;
 
-const RUST_SDK_VERSION: &str = "0.6.0";
+use std::path::PathBuf;
+use std::process::Command;
 
 #[derive(serde::Deserialize)]
 #[serde(tag = "reason", rename_all = "kebab-case")]
 enum DiagnosticMessage {
     BuildScriptExecuted,
     BuildFinished,
-    CompilerArtifact { filenames: Vec<String> },
+    CompilerArtifact {
+        filenames: Vec<String>,
+        manifest_path: PathBuf,
+    },
     RunWithArgs,
 }
 
 pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
-    use std::io::Read;
-    use std::str::FromStr;
-
     let mut cargo = Command::new("cargo");
     cargo.arg("build").arg("--target").arg("wasm32-wasi");
     cargo.arg("--message-format").arg("json-render-diagnostics");
     cargo.args(trailing_args);
 
-    let mut process = cargo.stdout(std::process::Stdio::piped()).spawn()?;
-
-    let mut output = String::new();
-    process
-        .stdout
-        .take()
-        .ok_or_else(|| CLIError::WasmCompilationError("Compilation failed: no output".to_string()))?
-        .read_to_string(&mut output)?;
-
-    let status = process.wait()?;
-    if !status.success() {
-        return Err(CLIError::WasmCompilationError(format!(
-            "Compilation failed with status {}",
-            status
-        )));
-    }
-
-    let mut wasms: Vec<String> = Vec::new();
+    // the piped mode is used here because cargo build prints all necessary for user
+    // compilation progress into stderr, while stdout is used for deep compiler-specific messages
+    // that DiagnosticMessage represents
+    let output = crate::utils::run_command_piped(cargo)
+        .map_err(|e| CLIError::WasmCompilationError(e.to_string()))?;
+    let mut wasms: Vec<(String, Version)> = Vec::new();
     for line in output.lines() {
-        if let Ok(DiagnosticMessage::CompilerArtifact { filenames }) = serde_json::from_str(line) {
-            wasms.extend(
-                filenames
-                    .into_iter()
-                    .filter(|name| name.ends_with(".wasm"))
-                    .collect::<Vec<_>>(),
-            )
+        if let Ok(DiagnosticMessage::CompilerArtifact {
+            filenames,
+            manifest_path,
+        }) = serde_json::from_str(line)
+        {
+            use crate::cargo_manifest::extract_sdk_version;
+
+            let new_wasms = filenames
+                .into_iter()
+                .filter(|name| name.ends_with(".wasm"))
+                .collect::<Vec<_>>();
+            if !new_wasms.is_empty() {
+                let sdk_version = extract_sdk_version(&manifest_path)?;
+                wasms.extend(
+                    new_wasms
+                        .into_iter()
+                        .map(|name| (name, sdk_version.clone())),
+                )
+            }
         }
     }
 
@@ -73,11 +74,14 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
         return Ok(());
     }
 
-    let version = semver::Version::from_str(RUST_SDK_VERSION).unwrap();
-    for wasm in wasms {
+    for (wasm, sdk_version) in wasms {
         let wasm_path = std::path::PathBuf::from(wasm);
         marine_it_generator::embed_it(&wasm_path)?;
-        marine_module_info_parser::sdk_version::embed_from_path(&wasm_path, &wasm_path, &version)?;
+        marine_module_info_parser::sdk_version::embed_from_path(
+            &wasm_path,
+            &wasm_path,
+            &sdk_version,
+        )?;
     }
 
     Ok(())

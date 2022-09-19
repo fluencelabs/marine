@@ -1,0 +1,14 @@
+[package]
+name = "lilo-after-2gb-test"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+edition = "2018"
+publish = false
+
+[[bin]]
+name = "lilo_after_2gb"
+path = "src/pure.rs"
+
+[dependencies]
+marine-rs-sdk ="0.7.0"
+safe-transmute = "0.11.0"

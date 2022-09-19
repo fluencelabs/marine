@@ -1,0 +1,19 @@
+[package]
+name = "wasm-greeting-record"
+version = "0.1.0"
+authors = ["Fluence Labs"]
+description = "The greeting module with records for the Fluence network"
+repository = "https://github.com/fluencelabs/marine/tree/master/examples/greeting_record"
+edition = "2018"
+publish = false
+
+[[bin]]
+name = "greeting-record"
+path = "src/main.rs"
+
+[dependencies]
+marine-rs-sdk = {version = "0.7.0", features = ["logger"]}
+log = "0.4.8"
+
+[dev-dependencies]
+marine-rs-sdk-test = "0.8.1"

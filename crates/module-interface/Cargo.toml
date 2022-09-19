@@ -1,7 +1,7 @@
 [package]
 name = "marine-module-interface"
 description = "Fluence Marine module interface"
-version = "0.2.0"
+version = "0.6.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 edition = "2018"
@@ -11,14 +11,14 @@ name = "marine_module_interface"
 path = "src/lib.rs"
 
 [dependencies]
-marine-it-interfaces = { path = "../it-interfaces", version = "0.5.0" }
+marine-it-interfaces = { path = "../it-interfaces", version = "0.7.3" }
 
-anyhow = "1.0.31"
-walrus = "0.18.0"
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.1"}
+anyhow = "1.0.64"
+walrus = "0.19.0"
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.24.1" }
 nom = "5.1"
 
-itertools = "0.10.0"
-semver = "0.11.0"
-serde = "1.0.118"
-thiserror = "1.0.24"
+itertools = "0.10.3"
+semver = "1.0.13"
+serde = "1.0.144"
+thiserror = "1.0.34"
