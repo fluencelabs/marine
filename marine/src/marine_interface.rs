@@ -64,7 +64,7 @@ fn print_record_types<'r>(
         }
     }
 
-    if printed_record_types.len() == 0 {
+    if printed_record_types.is_empty() {
         writeln!(f, "<no exported data types>")?;
     }
 
@@ -79,7 +79,7 @@ fn print_functions_sign<'r>(
     writeln!(f, "exported functions:")?;
     for (name, module_interface) in modules {
         writeln!(f, "{}:", *name)?;
-        if module_interface.function_signatures.len() == 0 {
+        if module_interface.function_signatures.is_empty() {
             writeln!(f, "<no exported functions>")?;
             continue;
         }

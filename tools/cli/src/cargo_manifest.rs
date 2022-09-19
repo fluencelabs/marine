@@ -24,7 +24,7 @@ pub enum ManifestError {
 
 pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError> {
     let path = Path::new(&path);
-    let manifest = Manifest::from_path(&path).map_err(|e| -> ManifestError {
+    let manifest = Manifest::from_path(path).map_err(|e| -> ManifestError {
         match e {
             CargoTomlError::Parse(e) => e.into(),
             CargoTomlError::Io(e) => e.into(),
@@ -44,5 +44,5 @@ pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError>
             .ok_or(ManifestError::NoSdkVersionError)?,
     };
 
-    Version::from_str(&version).map_err(Into::into)
+    Version::from_str(version).map_err(Into::into)
 }

@@ -32,9 +32,9 @@ pub struct WithContext<'c, T> {
 }
 
 impl ConfigContext {
-    pub fn wrapped<'c, T>(&'c self, data: T) -> WithContext<'c, T> {
+    pub fn wrapped<T>(&self, data: T) -> WithContext<'_, T> {
         WithContext {
-            context: &self,
+            context: self,
             data,
         }
     }
@@ -171,7 +171,7 @@ impl TryFrom<TomlMarineConfig> for MarineConfig {
     type Error = MarineError;
 
     fn try_from(toml_config: TomlMarineConfig) -> Result<Self, Self::Error> {
-        let base_path = PathBuf::from(toml_config.base_path);
+        let base_path = toml_config.base_path;
         let context = ConfigContext {
             base_path: Some(base_path),
         };
