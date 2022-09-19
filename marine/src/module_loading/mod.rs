@@ -27,7 +27,7 @@ pub(crate) fn load_modules_from_fs(
     let loaded = modules
         .iter()
         .try_fold(HashMap::new(), |mut hash_map, (import_name, path)| {
-            let module_bytes = std::fs::read(&path).map_err(|e| {
+            let module_bytes = std::fs::read(path).map_err(|e| {
                 MarineError::IOError(format!("failed to load {}: {}", path.display(), e))
             })?;
 
