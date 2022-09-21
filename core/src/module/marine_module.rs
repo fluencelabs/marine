@@ -30,7 +30,6 @@ use marine_wasm_backend_traits::WasiImplementation;
 use marine_wasm_backend_traits::Exports;
 use marine_wasm_backend_traits::Namespace;
 use marine_wasm_backend_traits::DynamicFunc;
-use marine_wasm_backend_traits::Memory;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
@@ -155,12 +154,12 @@ impl<WB: WasmBackend> MModule<WB> {
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
         if let Ok(initialize_func) = wasmer_instance.exports().get_func_no_args_no_rets(INITIALIZE_FUNC) {
-            initialize_func.call()?;
+            initialize_func.call(())?;
         }
 
         // call _start to call module's main function
         #[rustfmt::skip]
-        if let Ok(start_func) = wasmer_instance.exports.get::<wasmer_runtime::Func<'_, (), ()>>(START_FUNC) {
+        if let Ok(start_func) = wasmer_instance.exports().get_func_no_args_no_rets(START_FUNC) {
             start_func()?;
         }
 
@@ -215,20 +214,14 @@ impl<WB: WasmBackend> MModule<WB> {
 
     /// Returns Wasm linear memory size that this module consumes in bytes.
     pub(crate) fn memory_size(&self) -> usize {
-        let pages = self.wasmer_instance.context().memory(MEMORY_INDEX).size();
-        pages.bytes().0
+        // TODO: Add a method to the trait
+        1024 * 1014
     }
 
     /// Returns max Wasm linear memory size that this module could consume in bytes.
     pub(crate) fn max_memory_size(&self) -> Option<usize> {
-        let maybe_pages = self
-            .wasmer_instance
-            .context()
-            .memory(MEMORY_INDEX)
-            .descriptor()
-            .maximum;
-
-        maybe_pages.map(|pages| pages.bytes().0)
+        // TODO: Add a method to the trait
+        Some(1024 * 1014)
     }
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API

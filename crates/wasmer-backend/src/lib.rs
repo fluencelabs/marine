@@ -35,14 +35,13 @@ use wasmer_core::types::FuncSig as WasmerFuncSig;
 use wasmer_core::typed_func::WasmTypeList as WasmerWasmTypeList;
 use wasmer_it::IValue;
 
-mod memory_access;
 mod memory;
 mod type_converters;
 
 //use wasmer_it::interpreter::wasm::structures::{SequentialMemoryView, SequentialReader, SequentialWriter};
 use crate::memory::WITMemoryView;
 use crate::memory::WITMemory;
-use crate::memory_access::{WasmerSequentialReader, WasmerSequentialWriter};
+//use crate::memory_access::{WasmerSequentialReader, WasmerSequentialWriter};
 use crate::type_converters::{general_wval_to_wval, wval_to_general_wval};
 
 #[derive(Clone)]

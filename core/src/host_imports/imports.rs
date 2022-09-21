@@ -109,14 +109,12 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
                 }
             }*/
 
-        let memory_index = 0;
-        let memory = ctx.memory(memory_index);
-        let memory_view = WITMemoryView(memory.view::<u8>());
-        let lo_helper = LoHelper::new(&allocate_func, ctx);
-        let t = ILowerer::new(memory_view, &lo_helper)
-            .map_err(HostImportError::LowererError)
-            .and_then(|lowerer| ivalue_to_wvalues(&lowerer, result));
-
+            let memory_index = 0;
+            let memory_view = ctx.memory(memory_index).view();
+            let lo_helper = LoHelper::new(&allocate_func);
+            let t = ILowerer::new(memory_view, &lo_helper)
+                .map_err(HostImportError::LowererError)
+                .and_then(|lowerer| ivalue_to_wvalues(&lowerer, result));
             let wvalues = match t {
                 Ok(wvalues) => wvalues,
                 Err(e) => {

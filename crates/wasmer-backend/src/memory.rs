@@ -23,10 +23,10 @@ use wasmer_core::vm::LocalMemory;
 
 use std::iter::zip;
 
-pub(crate) struct WITMemoryView<'a>(pub(crate) WasmerMemoryView<'a, u8>);
+pub struct WITMemoryView<'a>(pub(crate) WasmerMemoryView<'a, u8>);
 
 #[derive(Clone)]
-pub(crate) struct WITMemory(pub(super) Memory);
+pub struct WITMemory(pub(super) Memory);
 impl std::ops::Deref for WITMemory {
     type Target = Memory;
 

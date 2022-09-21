@@ -19,10 +19,11 @@ marine-module-interface = { path = "../crates/module-interface", version = "0.6.
 marine-utils = { path = "../crates/utils", version = "0.4.0" }
 marine-min-it-version =  { path = "../crates/min-it-version", version = "0.2.0" }
 marine-wasmer-backend = { path = "../crates/wasmer-backend", version = "0.1.0"}
+marine-wasm-backend-traits = {path = "../crates/wasm-backend-traits", version = "0.1.0"}
 
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.24.1" }
-it-lilo = "0.2.0"
-it-memory-traits = "0.1.0"
+it-lilo = "0.4.0"
+it-memory-traits = "0.3.1"
 bytesize = "1.1.0"
 
 multimap = "0.8.3"

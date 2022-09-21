@@ -99,7 +99,7 @@ impl<WB: WasmBackend> MarineCore<WB> {
             .ok_or_else(|| MError::NoSuchModule(name.as_ref().to_string()))
     }
 
-    pub fn module_wasi_state<'s>>(
+    pub fn module_wasi_state<'s>(
         &'s mut self,
         module_name: impl AsRef<str>,
     ) -> Option<Box<dyn WasiState + 's>> {

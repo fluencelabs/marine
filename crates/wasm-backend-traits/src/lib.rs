@@ -7,7 +7,7 @@ use std::borrow::Cow;
 use std::fmt::Display;
 use std::path::PathBuf;
 
-use it_memory_traits::{SequentialMemoryView};
+use it_memory_traits::{MemoryView};
 
 pub use errors::*;
 pub use exports::*;
@@ -22,7 +22,7 @@ pub trait WasmBackend: Clone + 'static {
     //type SR: SequentialReader;
     //type SW: SequentialWriter;
     type DynamicFunc: DynamicFunc<'static, Self>;
-    type WITMemoryView: for<'a> SequentialMemoryView<'a /* SR = Self::SR, SW = Self::SW*/> + 'static;
+    type WITMemoryView: MemoryView + 'static;
     type FunctionExport: FunctionExport;
     type M: Module<Self>;
     type I: Instance<Self>;

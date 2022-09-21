@@ -8,9 +8,9 @@ edition = "2021"
 [dependencies]
 thiserror = "1.0.24"
 
-it-memory-traits = "0.1.0"
+it-memory-traits = "0.3.1"
 
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.21.1" }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.24.1" }
 #wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 
 tuple_list = "0.1.0"
