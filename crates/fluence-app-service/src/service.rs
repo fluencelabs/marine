@@ -20,7 +20,7 @@ use crate::MemoryStats;
 use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
-use marine_wasm_backend_traits::{WasiState, WasmBackend};
+use marine_wasm_backend_traits::WasmBackend;
 
 use marine::Marine;
 use marine::IValue;
