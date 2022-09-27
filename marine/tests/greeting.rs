@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
+use std::path::PathBuf;
 use marine::Marine;
 use marine::MarineModuleInterface;
 use marine::IValue;
-
-use fluence_faas::FaaSModuleInterface;
-use fluence_faas::IValue;
+use marine_wasmer_backend::WasmerBackend;
 
 use pretty_assertions::assert_eq;
 
@@ -34,9 +33,9 @@ pub fn greeting() {
 
     let mut greeting_config: marine::TomlMarineConfig =
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
-    greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
+    greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
-    let mut faas = Marine::with_raw_config(greeting_config)
+    let mut faas = Marine::<WasmerBackend>::with_raw_config(greeting_config)
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
     let result1 = faas
@@ -70,9 +69,9 @@ pub fn get_interfaces() {
 
     let mut greeting_config: marine::TomlMarineConfig =
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
-    greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
+    greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
-    let faas = Marine::with_raw_config(greeting_config)
+    let faas = Marine::<WasmerBackend>::with_raw_config(greeting_config)
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
     let interface = faas.get_interface();

@@ -18,6 +18,7 @@ mod utils;
 
 use marine::Marine;
 use marine::IType;
+use marine_wasmer_backend::WasmerBackend;
 
 use once_cell::sync::Lazy;
 use serde_json::json;
@@ -33,10 +34,10 @@ static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
 pub fn get_interfaces() {
     use std::collections::HashSet;
 
-    let faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let interface = faas.get_interface();
+    let interface = marine.get_interface();
 
     let byte_type_arguments = vec![marine::IFunctionArg {
         name: String::from("arg"),
@@ -239,12 +240,12 @@ pub fn get_interfaces() {
 
 #[test]
 pub fn i32_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let expected_result = json!([0, 1, 2, 3, 4, 0, 2]);
 
-    let result1 = faas
+    let result1 = marine
         .call_with_json(
             "arrays_passing_pure",
             "i32_type",
@@ -254,7 +255,7 @@ pub fn i32_type() {
         .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
     assert_eq!(result1, expected_result);
 
-    let result2 = faas
+    let result2 = marine
         .call_with_json(
             "arrays_passing_pure",
             "i32_type",
@@ -265,7 +266,7 @@ pub fn i32_type() {
     assert_eq!(result2, expected_result);
 
     let expected_result = json!([1, 0, 1, 2, 3, 4, 0, 2]);
-    let result3 = faas
+    let result3 = marine
         .call_with_json(
             "arrays_passing_pure",
             "i32_type",
@@ -278,18 +279,18 @@ pub fn i32_type() {
 
 #[test]
 pub fn i64_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = faas.call_with_json("arrays_passing_pure", "i64_type", json!({}), <_>::default());
+    let result1 = marine.call_with_json("arrays_passing_pure", "i64_type", json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json("arrays_passing_pure", "i64_type", json!([]), <_>::default());
+    let result2 = marine.call_with_json("arrays_passing_pure", "i64_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 1, 2, 3, 4, 1, 1]);
 
-    let result3 = faas
+    let result3 = marine
         .call_with_json(
             "arrays_passing_pure",
             "i64_type",
@@ -299,7 +300,7 @@ pub fn i64_type() {
         .unwrap_or_else(|e| panic!("can't invoke i64_type: {:?}", e));
     assert_eq!(result3, expected_result);
 
-    let result4 = faas
+    let result4 = marine
         .call_with_json(
             "arrays_passing_pure",
             "i64_type",
@@ -312,85 +313,85 @@ pub fn i64_type() {
 
 #[test]
 pub fn u32_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = faas.call_with_json("arrays_passing_pure", "u32_type", json!({}), <_>::default());
+    let result1 = marine.call_with_json("arrays_passing_pure", "u32_type", json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json("arrays_passing_pure", "u32_type", json!([]), <_>::default());
+    let result2 = marine.call_with_json("arrays_passing_pure", "u32_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 13, 37, 2]);
 
     let result3 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "u32_type",
         json!({ "arg": [1] })
     );
     assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arrays_passing_pure", "u32_type", json!([[1]]));
+    let result4 = call_faas!(marine, "arrays_passing_pure", "u32_type", json!([[1]]));
     assert_eq!(result4, expected_result);
 }
 
 #[test]
 pub fn u64_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = faas.call_with_json("arrays_passing_pure", "u64_type", json!({}), <_>::default());
+    let result1 = marine.call_with_json("arrays_passing_pure", "u64_type", json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json("arrays_passing_pure", "u64_type", json!([]), <_>::default());
+    let result2 = marine.call_with_json("arrays_passing_pure", "u64_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 1, 2, 3, 4, 2]);
 
     let result3 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "u64_type",
         json!({ "arg": [1] })
     );
     assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arrays_passing_pure", "u64_type", json!([[1]]));
+    let result4 = call_faas!(marine, "arrays_passing_pure", "u64_type", json!([[1]]));
     assert_eq!(result4, expected_result);
 }
 
 #[test]
 pub fn f64_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = faas.call_with_json("arrays_passing_pure", "f32_type", json!({}), <_>::default());
+    let result1 = marine.call_with_json("arrays_passing_pure", "f32_type", json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json("arrays_passing_pure", "f32_type", json!([]), <_>::default());
+    let result2 = marine.call_with_json("arrays_passing_pure", "f32_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
     let expected_result = json!([1.0, 0.0, 13.37, 1.0]);
 
     let result3 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "f64_type",
         json!({ "arg": [1.0] })
     );
     assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arrays_passing_pure", "f64_type", json!([[1.0]]));
+    let result4 = call_faas!(marine, "arrays_passing_pure", "f64_type", json!([[1.0]]));
     assert_eq!(result4, expected_result);
 }
 
 #[test]
 pub fn string_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = faas.call_with_json(
+    let result1 = marine.call_with_json(
         "arrays_passing_pure",
         "string_type",
         json!({}),
@@ -398,7 +399,7 @@ pub fn string_type() {
     );
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
+    let result2 = marine.call_with_json(
         "arrays_passing_pure",
         "string_type",
         json!([]),
@@ -409,7 +410,7 @@ pub fn string_type() {
     let expected_result = json!(["Fluence", "marine", "from effector", "test"]);
 
     let result3 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "string_type",
         json!({ "arg": ["Fluence"] })
@@ -417,7 +418,7 @@ pub fn string_type() {
     assert_eq!(result3, expected_result);
 
     let result4 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "string_type",
         json!([["Fluence"]])
@@ -427,10 +428,10 @@ pub fn string_type() {
 
 #[test]
 pub fn byte_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = faas.call_with_json(
+    let result1 = marine.call_with_json(
         "arrays_passing_pure",
         "byte_type",
         json!({}),
@@ -438,7 +439,7 @@ pub fn byte_type() {
     );
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
+    let result2 = marine.call_with_json(
         "arrays_passing_pure",
         "byte_type",
         json!([]),
@@ -448,7 +449,7 @@ pub fn byte_type() {
 
     let expected_result = json!([0x13, 0x37, 0, 1, 2]);
     let result3 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "byte_type",
         json!({ "arg": [0x13, 0x37] })
@@ -456,7 +457,7 @@ pub fn byte_type() {
     assert_eq!(result3, expected_result);
 
     let result4 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "byte_type",
         json!([[0x13, 0x37]])
@@ -466,10 +467,10 @@ pub fn byte_type() {
 
 #[test]
 pub fn inner_arrays_1_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = faas.call_with_json(
+    let result1 = marine.call_with_json(
         "arrays_passing_pure",
         "inner_arrays_1",
         json!({}),
@@ -477,7 +478,7 @@ pub fn inner_arrays_1_type() {
     );
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
+    let result2 = marine.call_with_json(
         "arrays_passing_pure",
         "inner_arrays_1",
         json!([]),
@@ -495,7 +496,7 @@ pub fn inner_arrays_1_type() {
         [[[2]]]
     ]);
     let result3 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "inner_arrays_1",
         json!({ "arg": [[[[0x13, 0x37]]]] })
@@ -503,7 +504,7 @@ pub fn inner_arrays_1_type() {
     assert_eq!(result3, expected_result);
 
     let result4 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "inner_arrays_1",
         json!([[[[[0x13, 0x37]]]]])
@@ -513,10 +514,10 @@ pub fn inner_arrays_1_type() {
 
 #[test]
 pub fn inner_arrays_2_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = faas.call_with_json(
+    let result1 = marine.call_with_json(
         "arrays_passing_pure",
         "inner_arrays_2",
         json!({}),
@@ -524,7 +525,7 @@ pub fn inner_arrays_2_type() {
     );
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
+    let result2 = marine.call_with_json(
         "arrays_passing_pure",
         "inner_arrays_2",
         json!([]),
@@ -567,7 +568,7 @@ pub fn inner_arrays_2_type() {
      ]);
 
     let result3 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "inner_arrays_2",
         json!({ "arg": [[[[[0, [[1]]]]]]] })
@@ -575,7 +576,7 @@ pub fn inner_arrays_2_type() {
     assert_eq!(result3, expected_result);
 
     let result4 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "inner_arrays_2",
         json!([[[[[{"field_0": 0, "field_1": [[1]]}]]]]])
@@ -585,10 +586,10 @@ pub fn inner_arrays_2_type() {
 
 #[test]
 pub fn bool_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = faas.call_with_json(
+    let result1 = marine.call_with_json(
         "arrays_passing_pure",
         "bool_type",
         json!({}),
@@ -596,7 +597,7 @@ pub fn bool_type() {
     );
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(
+    let result2 = marine.call_with_json(
         "arrays_passing_pure",
         "bool_type",
         json!([]),
@@ -607,33 +608,33 @@ pub fn bool_type() {
     let expected_result = json!([true, true, false, true, false, true]);
 
     let result3 = call_faas!(
-        faas,
+        marine,
         "arrays_passing_pure",
         "bool_type",
         json!({ "arg": [false] })
     );
     assert_eq!(result3, expected_result);
 
-    let result4 = call_faas!(faas, "arrays_passing_pure", "bool_type", json!([[false]]));
+    let result4 = call_faas!(marine, "arrays_passing_pure", "bool_type", json!([[false]]));
     assert_eq!(result4, expected_result);
 }
 
 #[test]
 pub fn empty_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let expected_result = json!(["from effector"]);
-    let result1 = call_faas!(faas, "arrays_passing_pure", "empty_type", json!({}));
+    let result1 = call_faas!(marine, "arrays_passing_pure", "empty_type", json!({}));
     assert_eq!(result1, expected_result);
 
-    let result2 = call_faas!(faas, "arrays_passing_pure", "empty_type", json!([]));
+    let result2 = call_faas!(marine, "arrays_passing_pure", "empty_type", json!([]));
     assert_eq!(result2, expected_result);
 
-    let result3 = call_faas!(faas, "arrays_passing_pure", "empty_type", json!([]));
+    let result3 = call_faas!(marine, "arrays_passing_pure", "empty_type", json!([]));
     assert_eq!(result3, expected_result);
 
-    let result4 = faas.call_with_json(
+    let result4 = marine.call_with_json(
         "arrays_passing_pure",
         "empty_type",
         json!([1]),

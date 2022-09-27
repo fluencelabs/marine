@@ -21,6 +21,8 @@ use pretty_assertions::assert_eq;
 use serde_json::json;
 
 use std::collections::HashMap;
+use std::path::PathBuf;
+use marine_wasmer_backend::WasmerBackend;
 
 #[test]
 pub fn records() {
@@ -31,12 +33,12 @@ pub fn records() {
 
     let mut records_config: marine::TomlMarineConfig =
         toml::from_slice(&records_config_raw).expect("records config should be well-formed");
-    records_config.modules_dir = Some(String::from("../examples/records/artifacts/"));
+    records_config.modules_dir = Some(PathBuf::from("../examples/records/artifacts/"));
 
-    let mut faas = Marine::with_raw_config(records_config)
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(records_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let result1 = faas
+    let result1 = marine
         .call_with_ivalues("records_pure", "invoke", &[], <_>::default())
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
@@ -78,7 +80,7 @@ pub fn records() {
         )]
     );
 
-    let result2 = faas
+    let result2 = marine
         .call_with_json(
             "records_effector",
             "mutate_struct",
@@ -106,7 +108,7 @@ pub fn records() {
 
     assert_eq!(result2, expected_result);
 
-    let result3 = faas
+    let result3 = marine
         .call_with_json(
             "records_effector",
             "mutate_struct",
@@ -120,7 +122,7 @@ pub fn records() {
 
     assert_eq!(result3, expected_result);
 
-    let result4 = faas
+    let result4 = marine
         .call_with_json(
             "records_effector",
             "mutate_struct",
@@ -146,7 +148,7 @@ pub fn records() {
 
     assert_eq!(result4, expected_result);
 
-    let result5 = faas
+    let result5 = marine
         .call_with_json(
             "records_effector",
             "mutate_struct",
@@ -168,13 +170,13 @@ fn records_passing() {
             .expect("argument passing test config should be well-formed");
 
     records_passing_config.modules_dir =
-        Some(String::from("./tests/wasm_tests/records_passing/artifacts"));
+        Some(PathBuf::from("./tests/wasm_tests/records_passing/artifacts"));
 
-    let mut faas = Marine::with_raw_config(records_passing_config)
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
-        let result = faas
+        let result = marine
             .call_with_json(
                 "records_passing_pure",
                 func_name,
@@ -228,9 +230,9 @@ fn records_destruction() {
             .expect("argument passing test config should be well-formed");
 
     records_passing_config.modules_dir =
-        Some(String::from("./tests/wasm_tests/records_passing/artifacts"));
+        Some(PathBuf::from("./tests/wasm_tests/records_passing/artifacts"));
 
-    let mut faas = Marine::with_raw_config(records_passing_config)
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let record_array = json!([
@@ -246,7 +248,7 @@ fn records_destruction() {
             ]
     ]);
 
-    let result = faas
+    let result = marine
         .call_with_json(
             "records_passing_pure",
             "pass_droppable_record",
@@ -255,7 +257,7 @@ fn records_destruction() {
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    let result = faas
+    let result = marine
         .call_with_json(
             "records_passing_pure",
             "get_drop_count",
@@ -282,12 +284,12 @@ fn records_return_frees() {
             .expect("argument passing test config should be well-formed");
 
     records_passing_config.modules_dir =
-        Some(String::from("./tests/wasm_tests/records_passing/artifacts"));
+        Some(PathBuf::from("./tests/wasm_tests/records_passing/artifacts"));
 
-    let mut faas = Marine::with_raw_config(records_passing_config)
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let _result = faas
+    let _result = marine
         .call_with_json(
             "records_passing_pure",
             "return_256kb_struct",
@@ -296,7 +298,7 @@ fn records_return_frees() {
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    let stats_after_first_call = faas
+    let stats_after_first_call = marine
         .module_memory_stats()
         .0
         .iter()
@@ -304,7 +306,7 @@ fn records_return_frees() {
         .collect::<HashMap<String, usize>>();
 
     for i in 0..128 {
-        let result = faas
+        let result = marine
             .call_with_json(
                 "records_passing_pure",
                 "return_256kb_struct",
@@ -313,7 +315,7 @@ fn records_return_frees() {
             )
             .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-        for stat in faas.module_memory_stats().0 {
+        for stat in marine.module_memory_stats().0 {
             let memory_size = stats_after_first_call.get(stat.name).unwrap();
             assert_eq!(*memory_size, stat.memory_size)
         }
@@ -405,10 +407,10 @@ fn records_pass_frees() {
         "field18": struct_16kb.clone(),
     });
 
-    let mut faas = Marine::with_raw_config(records_passing_config)
+    let mut marine = Marine::<WasmerBackend>::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let result = faas
+    let result = marine
         .call_with_json(
             "records_passing_pure",
             "pass_256kb_struct",
@@ -417,7 +419,7 @@ fn records_pass_frees() {
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    let stats_after_first_call = faas
+    let stats_after_first_call = marine
         .module_memory_stats()
         .0
         .iter()
@@ -425,7 +427,7 @@ fn records_pass_frees() {
         .collect::<HashMap<String, usize>>();
 
     for i in 0..128 {
-        let result = faas
+        let result = marine
             .call_with_json(
                 "records_passing_pure",
                 "pass_256kb_struct",
@@ -434,7 +436,7 @@ fn records_pass_frees() {
             )
             .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-        for stat in faas.module_memory_stats().0 {
+        for stat in marine.module_memory_stats().0 {
             let memory_size = stats_after_first_call.get(stat.name).unwrap();
             assert_eq!(*memory_size, stat.memory_size)
         }
