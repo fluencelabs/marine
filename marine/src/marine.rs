@@ -253,6 +253,9 @@ impl<WB: WasmBackend> Marine<WB> {
     }
 }
 
+#[cfg(feature = "raw-module-api")]
+use marine_wasm_backend_traits::WasiState;
+
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl<WB: WasmBackend> Marine<WB> {

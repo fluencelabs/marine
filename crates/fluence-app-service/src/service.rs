@@ -186,6 +186,8 @@ impl<WB: WasmBackend> AppService<WB> {
         self.marine.module_memory_stats()
     }
 }
+#[cfg(feature = "raw-module-api")]
+use marine_wasm_backend_traits::WasiState;
 
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
