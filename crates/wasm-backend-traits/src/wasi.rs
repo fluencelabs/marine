@@ -1,4 +1,3 @@
-use crate::errors::*;
 use crate::WasmBackend;
 
 use std::path::PathBuf;

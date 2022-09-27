@@ -4,8 +4,6 @@ pub mod wasi;
 pub mod wtype;
 
 use std::borrow::Cow;
-use std::fmt::Display;
-use std::path::PathBuf;
 
 use it_memory_traits::{MemoryView};
 
