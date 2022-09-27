@@ -154,7 +154,7 @@ impl<WB: WasmBackend> MModule<WB> {
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
         if let Ok(initialize_func) = wasmer_instance.exports().get_func_no_args_no_rets(INITIALIZE_FUNC) {
-            initialize_func.call(())?;
+            initialize_func()?;
         }
 
         // call _start to call module's main function
