@@ -169,8 +169,9 @@ fn records_passing() {
         toml::from_slice(&inner_records_config_raw)
             .expect("argument passing test config should be well-formed");
 
-    records_passing_config.modules_dir =
-        Some(PathBuf::from("./tests/wasm_tests/records_passing/artifacts"));
+    records_passing_config.modules_dir = Some(PathBuf::from(
+        "./tests/wasm_tests/records_passing/artifacts",
+    ));
 
     let mut marine = Marine::<WasmerBackend>::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
@@ -229,8 +230,9 @@ fn records_destruction() {
         toml::from_slice(&inner_records_config_raw)
             .expect("argument passing test config should be well-formed");
 
-    records_passing_config.modules_dir =
-        Some(PathBuf::from("./tests/wasm_tests/records_passing/artifacts"));
+    records_passing_config.modules_dir = Some(PathBuf::from(
+        "./tests/wasm_tests/records_passing/artifacts",
+    ));
 
     let mut marine = Marine::<WasmerBackend>::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
@@ -283,8 +285,9 @@ fn records_return_frees() {
         toml::from_slice(&inner_records_config_raw)
             .expect("argument passing test config should be well-formed");
 
-    records_passing_config.modules_dir =
-        Some(PathBuf::from("./tests/wasm_tests/records_passing/artifacts"));
+    records_passing_config.modules_dir = Some(PathBuf::from(
+        "./tests/wasm_tests/records_passing/artifacts",
+    ));
 
     let mut marine = Marine::<WasmerBackend>::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));

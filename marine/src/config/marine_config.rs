@@ -201,7 +201,9 @@ impl<WB: WasmBackend> TryFrom<TomlMarineConfig> for MarineConfig<WB> {
     }
 }
 
-impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineNamedModuleConfig>> for ModuleDescriptor<WB> {
+impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineNamedModuleConfig>>
+    for ModuleDescriptor<WB>
+{
     type Error = MarineError;
 
     fn try_from(config: WithContext<'c, TomlMarineNamedModuleConfig>) -> Result<Self, Self::Error> {
@@ -225,7 +227,9 @@ impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineNamedModuleConfig>> 
     }
 }
 
-impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>> for MarineModuleConfig<WB> {
+impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>>
+    for MarineModuleConfig<WB>
+{
     type Error = MarineError;
 
     fn try_from(toml_config: WithContext<'c, TomlMarineModuleConfig>) -> Result<Self, Self::Error> {

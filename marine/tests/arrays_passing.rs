@@ -282,10 +282,12 @@ pub fn i64_type() {
     let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = marine.call_with_json("arrays_passing_pure", "i64_type", json!({}), <_>::default());
+    let result1 =
+        marine.call_with_json("arrays_passing_pure", "i64_type", json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = marine.call_with_json("arrays_passing_pure", "i64_type", json!([]), <_>::default());
+    let result2 =
+        marine.call_with_json("arrays_passing_pure", "i64_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 1, 2, 3, 4, 1, 1]);
@@ -316,10 +318,12 @@ pub fn u32_type() {
     let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = marine.call_with_json("arrays_passing_pure", "u32_type", json!({}), <_>::default());
+    let result1 =
+        marine.call_with_json("arrays_passing_pure", "u32_type", json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = marine.call_with_json("arrays_passing_pure", "u32_type", json!([]), <_>::default());
+    let result2 =
+        marine.call_with_json("arrays_passing_pure", "u32_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 13, 37, 2]);
@@ -341,10 +345,12 @@ pub fn u64_type() {
     let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = marine.call_with_json("arrays_passing_pure", "u64_type", json!({}), <_>::default());
+    let result1 =
+        marine.call_with_json("arrays_passing_pure", "u64_type", json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = marine.call_with_json("arrays_passing_pure", "u64_type", json!([]), <_>::default());
+    let result2 =
+        marine.call_with_json("arrays_passing_pure", "u64_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 1, 2, 3, 4, 2]);
@@ -366,10 +372,12 @@ pub fn f64_type() {
     let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = marine.call_with_json("arrays_passing_pure", "f32_type", json!({}), <_>::default());
+    let result1 =
+        marine.call_with_json("arrays_passing_pure", "f32_type", json!({}), <_>::default());
     assert!(result1.is_err());
 
-    let result2 = marine.call_with_json("arrays_passing_pure", "f32_type", json!([]), <_>::default());
+    let result2 =
+        marine.call_with_json("arrays_passing_pure", "f32_type", json!([]), <_>::default());
     assert!(result2.is_err());
 
     let expected_result = json!([1.0, 0.0, 13.37, 1.0]);

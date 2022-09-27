@@ -31,7 +31,11 @@ pub(crate) struct LoHelper<'c, MV: MemoryView, M: Memory<MV>> {
 
 impl<'c, MV: MemoryView, M: Memory<MV>> LoHelper<'c, MV, M> {
     pub(crate) fn new(allocate_func: &'c AllocateFunc, memory: M) -> Self {
-        Self { allocate_func, memory, _memory_view_phantom: <_>::default() }
+        Self {
+            allocate_func,
+            memory,
+            _memory_view_phantom: <_>::default(),
+        }
     }
 }
 

@@ -34,7 +34,7 @@ pub struct MModuleInterface<'a> {
 }
 
 /// The base struct of Marine, the Fluence compute runtime.
-pub struct MarineCore<WB: WasmBackend>  {
+pub struct MarineCore<WB: WasmBackend> {
     // set of modules registered inside Marine
     modules: HashMap<String, MModule<WB>>,
 }

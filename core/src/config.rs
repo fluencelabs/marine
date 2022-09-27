@@ -30,8 +30,8 @@ use std::collections::HashSet;
 const DEFAULT_HEAP_PAGES_COUNT: u32 = 1600;
 
 pub type ErrorHandler = Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + 'static>>;
-    pub type HostExportedFunc<WB> =
-        Box<dyn Fn(&mut <WB as WasmBackend>::ExportContext, Vec<IValue>) -> Option<IValue> + 'static>;
+pub type HostExportedFunc<WB> =
+    Box<dyn Fn(&mut <WB as WasmBackend>::ExportContext, Vec<IValue>) -> Option<IValue> + 'static>;
 
 pub struct HostImportDescriptor<WB: WasmBackend> {
     /// This closure will be invoked for corresponding import.

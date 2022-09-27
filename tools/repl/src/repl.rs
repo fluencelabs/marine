@@ -116,11 +116,11 @@ impl REPL {
         let start = Instant::now();
         let config = MarineModuleConfig::<WasmerBackend> {
             logger_enabled: true,
-            mem_pages_count:  Default::default(),
-            max_heap_size:  Default::default(),
+            mem_pages_count: Default::default(),
+            max_heap_size: Default::default(),
             host_imports: Default::default(),
-            wasi:  Default::default(),
-            logging_mask:  Default::default()
+            wasi: Default::default(),
+            logging_mask: Default::default(),
         };
         let result_msg = match self
             .app_service
