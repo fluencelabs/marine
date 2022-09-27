@@ -48,7 +48,6 @@ use std::rc::Rc;
 //use wasmer_core::types::FuncSig;
 use marine_wasm_backend_traits::FuncSig;
 
-const MEMORY_INDEX: u32 = 0;
 const START_FUNC: &str = "_start";
 const INITIALIZE_FUNC: &str = "_initialize";
 

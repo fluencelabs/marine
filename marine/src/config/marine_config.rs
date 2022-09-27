@@ -50,7 +50,7 @@ pub struct ModuleDescriptor<WB: WasmBackend> {
     pub config: MarineModuleConfig<WB>,
 }
 
-impl ModuleDescriptor {
+impl<WB: WasmBackend> ModuleDescriptor<WB> {
     pub fn get_path(&self, modules_dir: &Option<PathBuf>) -> Result<PathBuf, MarineError> {
         match &self.load_from {
             None => match modules_dir {
@@ -201,7 +201,7 @@ impl<WB: WasmBackend> TryFrom<TomlMarineConfig> for MarineConfig<WB> {
     }
 }
 
-impl<'c, <WB: WasmBackend>> TryFrom<WithContext<'c, TomlMarineNamedModuleConfig>> for ModuleDescriptor<WB> {
+impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineNamedModuleConfig>> for ModuleDescriptor<WB> {
     type Error = MarineError;
 
     fn try_from(config: WithContext<'c, TomlMarineNamedModuleConfig>) -> Result<Self, Self::Error> {
@@ -225,7 +225,7 @@ impl<'c, <WB: WasmBackend>> TryFrom<WithContext<'c, TomlMarineNamedModuleConfig>
     }
 }
 
-impl<'c, <WB: WasmBackend>> TryFrom<WithContext<'c, TomlMarineModuleConfig>> for MarineModuleConfig<WB> {
+impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>> for MarineModuleConfig<WB> {
     type Error = MarineError;
 
     fn try_from(toml_config: WithContext<'c, TomlMarineModuleConfig>) -> Result<Self, Self::Error> {

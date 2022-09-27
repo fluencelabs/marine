@@ -26,7 +26,7 @@ use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use crate::json_to_marine_err;
 
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::{WasiState, WasmBackend};
 
 use marine_core::MarineCore;
 use marine_core::IFunctionArg;
@@ -66,7 +66,7 @@ pub struct Marine<WB: WasmBackend> {
 
 impl<WB: WasmBackend> Marine<WB> {
     /// Creates Marine from config deserialized from TOML.
-    pub fn with_raw_config<C>(config: C) -> FaaSResult<Self>
+    pub fn with_raw_config<C>(config: C) -> MarineResult<Self>
     where
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
@@ -255,7 +255,7 @@ impl<WB: WasmBackend> Marine<WB> {
 
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
-impl Marine {
+impl<WB: WasmBackend> Marine<WB>{
     pub fn load_module<C, S>(
         &mut self,
         name: S,
@@ -264,7 +264,7 @@ impl Marine {
     ) -> MarineResult<()>
     where
         S: Into<String>,
-        C: TryInto<crate::MarineModuleConfig>,
+        C: TryInto<crate::MarineModuleConfig<WB>>,
         MarineError: From<C::Error>,
     {
         let config = config.map(|c| c.try_into()).transpose()?;
@@ -292,7 +292,7 @@ impl Marine {
     pub fn module_wasi_state(
         &mut self,
         module_name: impl AsRef<str>,
-    ) -> MarineResult<&wasmer_wasi::state::WasiState> {
+    ) -> MarineResult<Box<dyn WasiState + '_>> {
         let module_name = module_name.as_ref();
 
         self.core

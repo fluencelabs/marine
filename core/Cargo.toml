@@ -18,7 +18,6 @@ marine-it-generator = { path = "../crates/it-generator", version = "0.9.4" }
 marine-module-interface = { path = "../crates/module-interface", version = "0.6.0" }
 marine-utils = { path = "../crates/utils", version = "0.4.0" }
 marine-min-it-version =  { path = "../crates/min-it-version", version = "0.2.0" }
-marine-wasmer-backend = { path = "../crates/wasmer-backend", version = "0.1.0"}
 marine-wasm-backend-traits = {path = "../crates/wasm-backend-traits", version = "0.1.0"}
 
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.24.1" }

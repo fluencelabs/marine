@@ -23,6 +23,7 @@ use crate::ReplResult;
 use fluence_app_service::{AppService, CallParameters, SecurityTetraplet};
 use fluence_app_service::MarineModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
+use marine_wasmer_backend::WasmerBackend;
 
 use serde::Deserialize;
 use serde_json::Value as JValue;
@@ -63,7 +64,7 @@ struct CallModuleArguments<'args> {
 
 #[allow(clippy::upper_case_acronyms)]
 pub(super) struct REPL {
-    app_service: AppService,
+    app_service: AppService<WasmerBackend>,
 }
 
 impl REPL {
@@ -113,13 +114,17 @@ impl REPL {
         }
 
         let start = Instant::now();
-        let config = MarineModuleConfig {
+        let config = MarineModuleConfig::<WasmerBackend> {
             logger_enabled: true,
-            ..<_>::default()
+            mem_pages_count:  Default::default(),
+            max_heap_size:  Default::default(),
+            host_imports: Default::default(),
+            wasi:  Default::default(),
+            logging_mask:  Default::default()
         };
         let result_msg = match self
             .app_service
-            .load_module::<fluence_app_service::MarineModuleConfig, String>(
+            .load_module::<MarineModuleConfig<WasmerBackend>, String>(
                 module_name.into(),
                 &wasm_bytes.unwrap(),
                 Some(config),
@@ -191,7 +196,7 @@ impl REPL {
     fn show_envs<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
         next_argument!(module_name, args, "Module name should be specified");
         match self.app_service.get_wasi_state(module_name) {
-            Ok(wasi_state) => print_envs(module_name, wasi_state),
+            Ok(wasi_state) => print_envs(module_name, wasi_state.as_ref()),
             Err(e) => println!("{}", e),
         };
     }
@@ -199,7 +204,7 @@ impl REPL {
     fn show_fs<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
         next_argument!(module_name, args, "Module name should be specified");
         match self.app_service.get_wasi_state(module_name) {
-            Ok(wasi_state) => print_fs_state(wasi_state),
+            Ok(wasi_state) => print_fs_state(wasi_state.as_ref()),
             Err(e) => println!("{}", e),
         };
     }
@@ -219,7 +224,7 @@ impl REPL {
     fn create_app_service<S: Into<PathBuf>>(
         config_file_path: Option<S>,
         quiet: bool,
-    ) -> ReplResult<AppService> {
+    ) -> ReplResult<AppService<WasmerBackend>> {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
         let config_file_path: Option<PathBuf> = config_file_path.map(Into::into);

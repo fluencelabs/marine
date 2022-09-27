@@ -20,7 +20,7 @@ use crate::MemoryStats;
 use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::{WasiState, WasmBackend};
 
 use marine::Marine;
 use marine::IValue;
@@ -37,7 +37,7 @@ const SERVICE_LOCAL_DIR_NAME: &str = "local";
 const SERVICE_TMP_DIR_NAME: &str = "tmp";
 
 pub struct AppService<WB: WasmBackend> {
-    faas: Marine<WB>,
+    marine: Marine<WB>,
     facade_module_name: String,
 }
 
@@ -189,7 +189,7 @@ impl<WB: WasmBackend> AppService<WB> {
 
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
-impl AppService {
+impl<WB: WasmBackend> AppService<WB> {
     pub fn new_with_empty_facade<C, S>(
         config: C,
         service_id: S,
@@ -197,10 +197,10 @@ impl AppService {
     ) -> Result<Self>
     where
         S: Into<String>,
-        C: TryInto<AppServiceConfig>,
+        C: TryInto<AppServiceConfig<WB>>,
         AppServiceError: From<C::Error>,
     {
-        let mut config: AppServiceConfig = config.try_into()?;
+        let mut config: AppServiceConfig<WB> = config.try_into()?;
         let service_id = service_id.into();
         Self::set_env_and_dirs(&mut config, service_id, envs)?;
 
@@ -227,7 +227,7 @@ impl AppService {
     pub fn load_module<C, S>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
     where
         S: Into<String>,
-        C: TryInto<crate::MarineModuleConfig>,
+        C: TryInto<crate::MarineModuleConfig<WB>>,
         marine::MarineError: From<C::Error>,
     {
         self.marine
@@ -248,7 +248,7 @@ impl AppService {
     pub fn get_wasi_state(
         &mut self,
         module_name: impl AsRef<str>,
-    ) -> Result<&wasmer_wasi::state::WasiState> {
+    ) -> Result<Box<dyn WasiState + '_>> {
         self.marine
             .module_wasi_state(module_name)
             .map_err(Into::into)

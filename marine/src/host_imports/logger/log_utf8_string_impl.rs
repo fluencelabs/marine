@@ -17,8 +17,7 @@
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::ExportContext;
 use it_memory_traits::Memory;
-use it_memory_traits::SequentialMemoryView;
-use it_memory_traits::SequentialReader;
+use it_memory_traits::MemoryReadable;
 //use wasmer_core::vm::Ctx;
 //use wasmer_core::memory::ptr::{Array, WasmPtr};
 //use crate::IType::String;
@@ -64,10 +63,7 @@ fn read_string<WB: WasmBackend>(
     size: i32,
 ) -> Option<String> {
     let view = ctx.memory(0).view();
-    let reader = view
-        .sequential_reader(offset as u32 as usize, size as u32 as usize)
-        .unwrap();
-    let bytes = (0..size).map(|_| reader.read_byte()).collect();
+    let bytes = view.read_vec(offset as u32, size as u32);
     String::from_utf8(bytes).ok()
 }
 

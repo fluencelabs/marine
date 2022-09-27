@@ -111,7 +111,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
 
             let memory_index = 0;
             let memory_view = ctx.memory(memory_index).view();
-            let lo_helper = LoHelper::new(&allocate_func);
+            let lo_helper = LoHelper::new(&allocate_func, ctx.memory(memory_index));
             let t = ILowerer::new(memory_view, &lo_helper)
                 .map_err(HostImportError::LowererError)
                 .and_then(|lowerer| ivalue_to_wvalues(&lowerer, result));

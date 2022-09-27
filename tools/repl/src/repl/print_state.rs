@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use wasmer_wasi::state::WasiState;
+use marine_wasm_backend_traits::WasiState;
 
-pub(super) fn print_envs(module_name: &str, wasi_state: &WasiState) {
-    let envs = &wasi_state.envs;
+pub(super) fn print_envs(module_name: &str, wasi_state: &dyn WasiState) {
+    let envs = wasi_state.envs();
     if envs.is_empty() {
         println!("{} don't have environment variables", module_name);
         return;
@@ -32,7 +32,9 @@ pub(super) fn print_envs(module_name: &str, wasi_state: &WasiState) {
     }
 }
 
-pub(super) fn print_fs_state(wasi_state: &WasiState) {
+pub(super) fn print_fs_state(_wasi_state: &dyn WasiState) {
+    println!("Printing WASI filesystem state is not supported now.");
+    /*
     let wasi_fs = &wasi_state.fs;
 
     println!("preopened file descriptors:\n{:?}\n", wasi_fs.preopen_fds);
@@ -56,4 +58,5 @@ pub(super) fn print_fs_state(wasi_state: &WasiState) {
     for (id, inode) in wasi_fs.inodes.iter().enumerate() {
         println!("{}: {:?}", id, inode);
     }
+    */
 }
