@@ -54,7 +54,7 @@ pub struct MModuleConfig<WB: WasmBackend> {
     pub max_heap_pages_count: u32,
 
     /// Import object that will be used in module instantiation process.
-    pub raw_imports: <WB as WasmBackend>::IO,
+    pub raw_imports: ImportObject<WB>,
 
     /// Imports from the host side that will be used in module instantiation process.
     pub host_imports: HashMap<String, HostImportDescriptor<WB>>,
@@ -77,7 +77,7 @@ impl<WB: WasmBackend> Default for MModuleConfig<WB> {
         // some reasonable defaults
         Self {
             max_heap_pages_count: DEFAULT_HEAP_PAGES_COUNT,
-            raw_imports: <WB as WasmBackend>::IO::new(),
+            raw_imports: ImportObject::<WB>::default(),
             host_imports: HashMap::new(),
             wasi_version: WasiVersion::Latest,
             wasi_envs: HashMap::new(),

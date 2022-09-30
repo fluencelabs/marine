@@ -22,6 +22,8 @@ pub enum Export<M: MemoryExport, F: FunctionExport> {
     Other,
 }
 
+pub type ExportShort<WB: WasmBackend> = Export<<WB as WasmBackend>::MemoryExport, <WB as WasmBackend>::FunctionExport>;
+
 pub trait ExportedDynFunc<WB: WasmBackend> {
     fn signature(&self) -> &FuncSig;
 
