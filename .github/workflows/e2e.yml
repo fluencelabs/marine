@@ -37,6 +37,7 @@ jobs:
 
     uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
     with:
+      image-name: "docker.fluence.dev/marine"
       fluence-app-service-version: |
         {
           "git": "https://github.com/fluencelabs/marine",
@@ -45,5 +46,10 @@ jobs:
       avm-server-version: |
         {
           "version": "=${{ needs.aquavm.outputs.avm-server-version }}",
+          "registry": "fluence"
+        }
+      air-interpreter-wasm-version: |
+        {
+          "version": "=${{ needs.aquavm.outputs.air-interpreter-wasm-version }}",
           "registry": "fluence"
         }
