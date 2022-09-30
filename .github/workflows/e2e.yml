@@ -21,3 +21,29 @@ jobs:
           "git": "https://github.com/fluencelabs/marine",
           "branch": "${{ github.head_ref }}"
         }
+
+  aquavm:
+    uses: fluencelabs/aquavm/.github/workflows/snapshot@marine-e2e
+    with:
+      marine-runtime-version: |
+        {
+          "git": "https://github.com/fluencelabs/marine",
+          "branch": "${{ github.head_ref }}"
+        }
+
+  rust-peer:
+    needs:
+      - aquavm
+
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot@master
+    with:
+      fluence-app-service-version: |
+        {
+          "git": "https://github.com/fluencelabs/marine",
+          "branch": "${{ github.head_ref }}"
+        }
+      avm-server-version: |
+        {
+          "version": "=${{ needs.aquavm.outputs.avm-server-version }}",
+          "registry": "fluence"
+        }
