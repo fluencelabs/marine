@@ -23,7 +23,7 @@ jobs:
         }
 
   aquavm:
-    uses: fluencelabs/aquavm/.github/workflows/snapshot@marine-e2e
+    uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@marine-e2e
     with:
       marine-runtime-version: |
         {
@@ -35,7 +35,7 @@ jobs:
     needs:
       - aquavm
 
-    uses: fluencelabs/rust-peer/.github/workflows/snapshot@master
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
     with:
       fluence-app-service-version: |
         {
