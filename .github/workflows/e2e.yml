@@ -14,8 +14,6 @@ env:
 
 jobs:
   marine-rs-sdk-test:
-    runs-on: builder
-
     uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@marine-e2e
     with:
       fluence-app-service-version: |
