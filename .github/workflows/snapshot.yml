@@ -64,7 +64,7 @@ jobs:
           echo "::set-output name=version::9.9.9-${{ env.VERSION }}"
 
       - name: Publish to self-hosted cargo registry
-        run: cargo publish -p marine-runtime -p fluence-app-service --registry fluence --allow-dirty
+        run: cargo publish --workspace --registry fluence --allow-dirty
 
       - name: Print results to check summary
         env:
