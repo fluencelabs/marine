@@ -65,6 +65,7 @@ jobs:
             --no-tag \
             --workspace \
             --allow-branch '*' \
+            --no-confirm \
             -x "9.9.9-${{ env.VERSION }}"
 
           echo "::set-output name=version::9.9.9-${{ env.VERSION }}"
