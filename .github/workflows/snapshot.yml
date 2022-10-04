@@ -1,0 +1,140 @@
+name: Publish snapshots
+
+on:
+  workflow_call:
+    outputs:
+      marine-runtime-version:
+        description: "marine-runtime version"
+        value: ${{ jobs.publish-marine-runtime.outputs.version }}
+      fluence-app-service-version:
+        description: "fluence-app-servie version"
+        value: ${{ jobs.publish-fluence-app-servie.outputs.version }}
+
+jobs:
+  publish-interpreter:
+    name: "Publish marine-runtime snapshot"
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: "${{ steps.build.outputs.version }}"
+
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout Marine
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/marine
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.2
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install cargo-edit
+        uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cargo-edit
+
+      - name: Generate package version
+        id: version
+        run: |
+          SHA=${{ github.event.pull_request.head.sha }}
+          echo "::set-output name=sha::${SHA::7}"
+          echo "::set-output name=branch::${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
+
+      - name: Set package version
+        id: build
+        env:
+          BRANCH: ${{ steps.version.outputs.branch }}
+          SHA: ${{ steps.version.outputs.sha }}
+          RUN: ${{ github.run_number }}
+          ATTEMPT: ${{ github.run_attempt }}
+        working-directory: marine
+        run: |
+          cargo set-version --bump alpha
+          cargo set-version "$(cargo read-manifest | jq -r .version)-${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }}"
+
+          echo "::set-output name=version::$(cargo read-manifest | jq -r .version)"
+
+      - name: Publish to self-hosted cargo registry
+        working-directory: marine
+        run: cargo publish --registry fluence --allow-dirty
+
+  publish-fluence-app-service:
+    name: "Publish fluence-app-service snapshot"
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: "${{ steps.build.outputs.version }}"
+
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout Marine
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/marine
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.2
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install cargo-edit
+        uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cargo-edit
+
+      - name: Generate package version
+        id: version
+        run: |
+          SHA=${{ github.event.pull_request.head.sha }}
+          echo "::set-output name=sha::${SHA::7}"
+          echo "::set-output name=branch::${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
+
+      - name: Set package version
+        id: build
+        env:
+          BRANCH: ${{ steps.version.outputs.branch }}
+          SHA: ${{ steps.version.outputs.sha }}
+          RUN: ${{ github.run_number }}
+          ATTEMPT: ${{ github.run_attempt }}
+        working-directory: crates/fluence-app-service
+        run: |
+          cargo set-version --bump alpha
+          cargo set-version "$(cargo read-manifest | jq -r .version)-${{ env.BRANCH }}-${{ env.SHA }}-${{ env.RUN }}-${{ env.ATTEMPT }}"
+
+          echo "::set-output name=version::$(cargo read-manifest | jq -r .version)"
+
+      - name: Publish to self-hosted cargo registry
+        working-directory: crates/fluence-app-service
+        run: cargo publish --registry fluence --allow-dirty

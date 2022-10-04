@@ -13,31 +13,42 @@ env:
   FORCE_COLOR: true
 
 jobs:
+  snapshot:
+    name: "marine"
+    uses: ./.github/workflows/snapshot.yml
+
   marine-rs-sdk-test:
+    needs:
+      - snapshot
+
     uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@marine-e2e
     with:
       fluence-app-service-version: |
         {
-          "git": "https://github.com/fluencelabs/marine",
-          "branch": "${{ github.head_ref }}"
+          "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
+          "registry": "fluence"
         }
 
   aquavm:
+    needs:
+      - snapshot
+
     uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@marine-e2e
     with:
       marine-runtime-version: |
         {
-          "git": "https://github.com/fluencelabs/marine",
-          "branch": "${{ github.head_ref }}"
+          "version": "=${{ needs.snapshot.outputs.marine-runtime-version }}",
+          "registry": "fluence"
         }
       fluence-app-service-version: |
         {
-          "git": "https://github.com/fluencelabs/marine",
-          "branch": "${{ github.head_ref }}"
+          "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
+          "registry": "fluence"
         }
 
   rust-peer:
     needs:
+      - snapshot
       - aquavm
 
     uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
@@ -45,8 +56,8 @@ jobs:
       image-name: "docker.fluence.dev/marine"
       fluence-app-service-version: |
         {
-          "git": "https://github.com/fluencelabs/marine",
-          "branch": "${{ github.head_ref }}"
+          "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
+          "registry": "fluence"
         }
       avm-server-version: |
         {

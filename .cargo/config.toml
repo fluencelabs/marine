@@ -1,0 +1,2 @@
+[registries]
+fluence = { index = "git://crates.fluence.dev/index" }
