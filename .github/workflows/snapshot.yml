@@ -11,7 +11,7 @@ on:
         value: ${{ jobs.publish-fluence-app-service.outputs.version }}
 
 jobs:
-  publish-interpreter:
+  publish-marine-runtime:
     name: "Publish marine-runtime snapshot"
     runs-on: ubuntu-latest
 
