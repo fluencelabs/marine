@@ -58,8 +58,9 @@ jobs:
         id: build
         env:
           VERSION: "${{ steps.version.outputs.branch }}-${{ steps.version.outputs.sha }}-${{ github.run_number }}.${{ github.run_attempt }}"
+          CLICOLOR: "1"
         run: |
-          cargo set-version -Z color --workspace "9.9.9-${{ env.VERSION }}"
+          cargo set-version --workspace "9.9.9-${{ env.VERSION }}"
 
           echo "::set-output name=version::9.9.9-${{ env.VERSION }}"
 
