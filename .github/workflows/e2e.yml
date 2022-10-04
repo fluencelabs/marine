@@ -35,16 +35,15 @@ jobs:
 
     uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@marine-e2e
     with:
-      marine-runtime-version: |
-        {
-          "version": "=${{ needs.snapshot.outputs.marine-runtime-version }}",
-          "registry": "fluence"
-        }
-      fluence-app-service-version: |
-        {
-          "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
-          "registry": "fluence"
-        }
+      cargo-version-override: |
+        [patch.crates-io]
+          [patch.crates-io.avm-server]
+            version = "=${{ needs.snapshot.outputs.marine-runtime-version }}"
+            registry = "fluence"
+
+          [patch.crates-io.fluence-app-service]
+            version = "=${{ needs.snapshot.outputs.fluence-app-service-version }}"
+            registry = "fluence"
 
   rust-peer:
     needs:

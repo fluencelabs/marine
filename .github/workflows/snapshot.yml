@@ -3,7 +3,7 @@ name: Publish snapshots
 on:
   workflow_call:
     outputs:
-      marine-runtime-version:
+      version:
         description: "marine-runtime version"
         value: ${{ jobs.publish-marine-runtime.outputs.version }}
       fluence-app-service-version:
@@ -75,7 +75,7 @@ jobs:
         working-directory: marine
         run: cargo publish --registry fluence --allow-dirty
 
-  publish-fluence-app-service:
+  publish-snapshots:
     name: "Publish fluence-app-service snapshot"
     runs-on: ubuntu-latest
 
