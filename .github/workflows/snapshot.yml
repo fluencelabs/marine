@@ -8,7 +8,7 @@ on:
         value: ${{ jobs.publish-marine-runtime.outputs.version }}
       fluence-app-service-version:
         description: "fluence-app-servie version"
-        value: ${{ jobs.publish-fluence-app-servie.outputs.version }}
+        value: ${{ jobs.publish-fluence-app-service.outputs.version }}
 
 jobs:
   publish-interpreter:
