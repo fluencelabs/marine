@@ -63,9 +63,9 @@ jobs:
             --registry fluence \
             --no-push \
             --no-tag \
-            --workspace \
             --allow-branch '*' \
             --no-confirm \
+            -p marine-runtime -p fluence-app-service \
             -x "9.9.9-${{ env.VERSION }}"
 
           echo "::set-output name=version::9.9.9-${{ env.VERSION }}"
