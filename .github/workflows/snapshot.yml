@@ -63,9 +63,8 @@ jobs:
             --registry fluence \
             --no-push \
             --no-tag \
-            --allow-dirty \
             --workspace \
-            "9.9.9-${{ env.VERSION }}"
+            -x "9.9.9-${{ env.VERSION }}"
 
           echo "::set-output name=version::9.9.9-${{ env.VERSION }}"
 
