@@ -86,19 +86,29 @@ impl Module<WasmerBackend> for WasmerModule {
     }
 
     fn instantiate(&self, imports: &WasmerImportObject) -> WasmBackendResult<WasmerInstance> {
+        let mut import_object = wasmer_runtime::ImportObject::new();
+        for (name, exports) in imports.iter() {
+            let mut namespace = wasmer_core::import::Namespace::new();
+            for (name, func) in exports {
+                namespace.insert(name, func.func).unwrap();
+            }
+
+            import_object.register(name, namespace);
+        }
+
         self.module
-            .instantiate(&imports.import_object)
+            .instantiate(&import_object)
             .map_err(|e| WasmBackendError::InstantiationError(e.to_string()))
             .map(|instance| WasmerInstance {
                 instance,
-                import_object: imports.clone(),
+                import_object: import_object.clone(),
             })
     }
 }
 
 pub struct WasmerInstance {
     pub instance: wasmer_core::Instance,
-    pub import_object: WasmerImportObject,
+    pub import_object: wasmer_runtime::ImportObject,
 }
 
 impl Instance<WasmerBackend> for WasmerInstance {

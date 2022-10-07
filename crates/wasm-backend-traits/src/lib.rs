@@ -48,7 +48,7 @@ pub trait WasmBackend: Clone + 'static {
     fn compile(wasm: &[u8]) -> WasmBackendResult<Self::M>;
 }
 
-pub type ImportObject<WB: WasmBackend> = HashMap<String, Vec<(String, ExportShort<WB>)>>;
+pub type ImportObject<WB: WasmBackend> = HashMap<String, Vec<(String, <WB as WasmBackend>::DynamicFunc)>>;
 
 pub trait Module<WB: WasmBackend> {
     fn custom_sections(&self, key: &str) -> Option<&[Vec<u8>]>;

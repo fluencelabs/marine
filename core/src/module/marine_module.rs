@@ -456,7 +456,3 @@ impl<WB: WasmBackend> MModule<WB> {
         Ok(import_object)
     }
 }
-
-
-mut: [x:; @x];
-mut: [isConst] [0 .ERROR_CAN_ONLY_HANDLE_MUTABLE_OBJECTS] pfunc;
