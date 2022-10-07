@@ -94,5 +94,5 @@ jobs:
         working-directory: marine-js/tests/nodejs
 
       - name: Run marine-js web tests
-        run: ./run_rest.sh
+        run: ./run_test.sh
         working-directory: marine-js/tests/web
