@@ -1,6 +1,5 @@
 import { FluenceAppService, loadDefaults, defaultNames } from '@fluencelabs/marine-js';
-import { callAvm } from '@fluencelabs/avm';
-import {JSONArray, JSONObject} from "../../../../../../aquavm/avm/client/src";
+import { callAvm, JSONArray, JSONObject } from '@fluencelabs/avm';
 
 const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
 
