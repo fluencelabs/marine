@@ -30,6 +30,9 @@ jobs:
         }
 
   aquavm:
+    needs:
+      - snapshot
+
     uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@marine-e2e
     with:
       marine-runtime-version: |
