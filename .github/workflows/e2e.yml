@@ -17,54 +17,52 @@ jobs:
     name: "marine"
     uses: ./.github/workflows/snapshot.yml
 
-  # marine-rs-sdk-test:
-  #   needs:
-  #     - snapshot
-
-  #   uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@marine-e2e
-  #   with:
-  #     fluence-app-service-version: |
-  #       {
-  #         "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
-  #         "registry": "fluence"
-  #       }
-
-  aquavm:
+  marine-rs-sdk-test:
     needs:
       - snapshot
 
+    uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@marine-e2e
+    with:
+      fluence-app-service-version: |
+        {
+          "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
+          "registry": "fluence"
+        }
+
+  aquavm:
     uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@marine-e2e
     with:
-      cargo-version-override: |
-        [patch.crates-io]
-          [patch.crates-io.marine-runtime]
-            version = "=${{ needs.snapshot.outputs.version }}"
-            registry = "fluence"
+      marine-runtime-version: |
+        {
+          "version": "=${{ needs.snapshot.outputs.marine-runtime-version }}",
+          "registry": "fluence"
+        }
+      fluence-app-service-version: |
+        {
+          "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
+          "registry": "fluence"
+        }
 
-          [patch.crates-io.fluence-app-service]
-            version = "=${{ needs.snapshot.outputs.version }}"
-            registry = "fluence"
+  rust-peer:
+    needs:
+      - snapshot
+      - aquavm
 
-  # rust-peer:
-  #   needs:
-  #     - snapshot
-  #     - aquavm
-
-  #   uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
-  #   with:
-  #     image-name: "docker.fluence.dev/marine"
-  #     fluence-app-service-version: |
-  #       {
-  #         "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
-  #         "registry": "fluence"
-  #       }
-  #     avm-server-version: |
-  #       {
-  #         "version": "=${{ needs.aquavm.outputs.avm-server-version }}",
-  #         "registry": "fluence"
-  #       }
-  #     air-interpreter-wasm-version: |
-  #       {
-  #         "version": "=${{ needs.aquavm.outputs.air-interpreter-wasm-version }}",
-  #         "registry": "fluence"
-  #       }
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@marine-e2e
+    with:
+      image-name: "docker.fluence.dev/marine"
+      fluence-app-service-version: |
+        {
+          "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
+          "registry": "fluence"
+        }
+      avm-server-version: |
+        {
+          "version": "=${{ needs.aquavm.outputs.avm-server-version }}",
+          "registry": "fluence"
+        }
+      air-interpreter-wasm-version: |
+        {
+          "version": "=${{ needs.aquavm.outputs.air-interpreter-wasm-version }}",
+          "registry": "fluence"
+        }
