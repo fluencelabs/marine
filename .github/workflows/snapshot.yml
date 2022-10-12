@@ -66,9 +66,6 @@ jobs:
             --exact \
             -y prerelease
 
-      - name: Run cargo update
-        run: cargo update -w
-
       - name: Publish to self-hosted cargo registry
         id: publish
         run: |
@@ -83,6 +80,7 @@ jobs:
             --no-git-commit \
             --from-git \
             --allow-dirty \
+            --no-verify \
             -y prerelease
 
       - name: Get package version
