@@ -62,10 +62,8 @@ jobs:
         run: |
           # set registry to "fluence"
           # workaround for https://github.com/pksunkara/cargo-workspaces/issues/79
-          cargo workspaces exec \
-            if ! grep "publish = false" Cargo.toml; then \
-              sed -i '/\[package\]/a publish = ["fluence"]' Cargo.toml \
-            fi
+          cargo workspaces exec bash -c \
+          'grep -q "publish = false" Cargo.toml || sed -i "/\[package\]/a publish = [\"fluence\"]" Cargo.toml'
 
           cargo workspaces publish \
             --registry fluence \
