@@ -65,11 +65,22 @@ jobs:
           cargo workspaces exec bash -c \
           'grep -q "publish = false" Cargo.toml || sed -i "/\[package\]/a publish = [\"fluence\"]" Cargo.toml'
 
-          cargo workspaces publish \
-            --registry fluence \
+          # set version to snapshot version
+          cargo workspaces version \
             --pre-id "${VERSION}" \
             --force '*' \
             --no-git-commit \
+            --exact \
+            -y prerelease
+
+          # run cargo update because it fails in the previous step
+          cargo update -w
+
+          # publish snapshot
+          cargo workspaces publish \
+            --registry fluence \
+            --no-git-commit \
+            --from-git \
             --allow-dirty \
             -y prerelease
 
