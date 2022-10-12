@@ -57,15 +57,8 @@ jobs:
 
           echo "VERSION=${BRANCH}-${SHA}-${{ github.run_number }}-${{ github.run_attempt }}" >> $GITHUB_ENV
 
-      - name: Publish to self-hosted cargo registry
-        id: publish
+      - name: Set version to snapshot version
         run: |
-          # set registry to "fluence"
-          # workaround for https://github.com/pksunkara/cargo-workspaces/issues/79
-          cargo workspaces exec bash -c \
-          'grep -q "publish = false" Cargo.toml || sed -i "/\[package\]/a publish = [\"fluence\"]" Cargo.toml'
-
-          # set version to snapshot version
           cargo workspaces version \
             --pre-id "${VERSION}" \
             --force '*' \
@@ -73,8 +66,16 @@ jobs:
             --exact \
             -y prerelease
 
-          # run cargo update because it fails in the previous step
-          cargo update -w
+      - name: Run cargo update
+        run: cargo update -w
+
+      - name: Publish to self-hosted cargo registry
+        id: publish
+        run: |
+          # set registry to "fluence"
+          # workaround for https://github.com/pksunkara/cargo-workspaces/issues/79
+          cargo workspaces exec bash -c \
+          'grep -q "publish = false" Cargo.toml || sed -i "/\[package\]/a publish = [\"fluence\"]" Cargo.toml'
 
           # publish snapshot
           cargo workspaces publish \
