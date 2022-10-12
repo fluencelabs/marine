@@ -60,6 +60,13 @@ jobs:
       - name: Publish to self-hosted cargo registry
         id: publish
         run: |
+          # set registry to "fluence"
+          # workaround for https://github.com/pksunkara/cargo-workspaces/issues/79
+          cargo workspaces exec \
+            if ! grep "publish = false" Cargo.toml; then \
+              sed -i '/\[package\]/a publish = ["fluence"]' Cargo.toml \
+            fi
+
           cargo workspaces publish \
             --registry fluence \
             --pre-id "${VERSION}" \
