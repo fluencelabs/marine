@@ -55,7 +55,7 @@ impl WasmBackend for WasmerBackend /*<'b>*/ {
     type FunctionExport = WasmerFunctionExport;
     type M = WasmerModule;
     type I = WasmerInstance;
-    //type IO = WasmerImportObject;
+    type IO = WasmerImportObject;
     //type SR = WasmerSequentialReader<'b>;
     //type SW = WasmerSequentialWriter<'b>;
     type WITMemory = WITMemory;
@@ -123,8 +123,6 @@ impl Instance<WasmerBackend> for WasmerInstance {
     }
 }
 
-pub type WasmerImportObject = ImportObject<WasmerBackend>;
-/*
 #[derive(Clone)]
 pub struct WasmerImportObject {
     pub import_object: wasmer_runtime::ImportObject,
@@ -205,7 +203,6 @@ impl ImportObject<WasmerBackend> for WasmerImportObject {
         self.import_object.maybe_with_namespace(namespace, f)
     }*/
 }
-*/
 
 pub struct WasmerFunctionExport {
     func: wasmer_core::export::FuncPointer,

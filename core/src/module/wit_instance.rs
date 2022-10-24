@@ -22,7 +22,7 @@ use crate::MResult;
 use marine_wasm_backend_traits::WasmBackend;
 //use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
-//use marine_wasm_backend_traits::ImportObject;
+use marine_wasm_backend_traits::ImportObject;
 use marine_wasm_backend_traits::Exports;
 use marine_wasm_backend_traits::Memory as WBMemory;
 

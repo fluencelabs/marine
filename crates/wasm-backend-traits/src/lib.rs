@@ -4,7 +4,6 @@ pub mod wasi;
 pub mod wtype;
 
 use std::borrow::Cow;
-use std::collections::HashMap;
 
 use it_memory_traits::{MemoryView};
 
@@ -13,22 +12,8 @@ pub use exports::*;
 pub use wasi::*;
 pub use wtype::*;
 
-
-/*
-pub trait WasmBackendNew: Clone {
-    type Module: ModuleNew;
-    type Store: StoreNew;
-    type Instance: InstanceNew;
-    type Func: FuncNew;
-    type Memory: MemoryNew;
-    type Table: TableNew;
-    type Global: GlobalNew;
-    type Engine: EngineNew;
-    type Exporty: ExportNew;
-}
-*/
 pub trait WasmBackend: Clone + 'static {
-    //type IO: ImportObject<Self>;
+    type IO: ImportObject<Self>;
     type Exports: Exports<Self>;
     type MemoryExport: MemoryExport;
     type WITMemory: Memory<Self> + it_memory_traits::Memory<Self::WITMemoryView> + Clone + 'static;
@@ -48,13 +33,11 @@ pub trait WasmBackend: Clone + 'static {
     fn compile(wasm: &[u8]) -> WasmBackendResult<Self::M>;
 }
 
-pub type ImportObject<WB: WasmBackend> = HashMap<String, Vec<(String, ExportShort<WB>)>>;
-
 pub trait Module<WB: WasmBackend> {
     fn custom_sections(&self, key: &str) -> Option<&[Vec<u8>]>;
     fn instantiate(
         &self,
-        imports: &ImportObject<WB>,
+        imports: &<WB as WasmBackend>::IO,
     ) -> WasmBackendResult<<WB as WasmBackend>::I>;
 }
 
@@ -70,10 +53,10 @@ pub trait Instance<WB: WasmBackend> {
             > + 'a,
     >;
     fn exports(&self) -> &<WB as WasmBackend>::Exports;
-    fn import_object(&self) -> &ImportObject<WB>;
+    fn import_object(&self) -> &<WB as WasmBackend>::IO;
     fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
 }
-/*
+
 pub trait ImportObject<WB: WasmBackend>:
     Clone
     + Extend<(
@@ -97,7 +80,7 @@ pub trait ImportObject<WB: WasmBackend>:
         &self,
     ) -> Option<Export<<WB as WasmBackend>::MemoryExport, <WB as WasmBackend>::FunctionExport>>;
 }
-*/
+
 pub trait DynamicFunc<'a, WB: WasmBackend> {
     fn new<'c, F>(sig: FuncSig, func: F) -> Self
     where
