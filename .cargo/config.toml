@@ -4,5 +4,5 @@ fluence = { index = "git://crates.fluence.dev/index" }
 [source.crates-io]
 replace-with = "fluence"
 
-[source.kellnr-cratesio]
+[source.fluence]
 registry = "git://crates.fluence.dev:9418/cratesio"
