@@ -27,7 +27,7 @@ use marine_wasm_backend_traits::WasmBackend;
 
 pub(crate) fn check_sdk_version<WB: WasmBackend>(
     name: String,
-    wasmer_module: &<WB as WasmBackend>::M,
+    wasmer_module: &<WB as WasmBackend>::Module,
 ) -> PrepareResult<()> {
     let module_version = sdk_version::extract_from_wasmer_module::<WB>(wasmer_module)?;
     let module_version = match module_version {

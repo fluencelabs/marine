@@ -184,7 +184,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             log_utf8_string_closure::<WB>(logging_mask, module_name),
         );
 
-        let mut raw_host_imports = <WB as WasmBackend>::IO::new();
+        let mut raw_host_imports = <WB as WasmBackend>::ImportObject::new();
         raw_host_imports.register("host", namespace);
         self.config.raw_imports = raw_host_imports;
 

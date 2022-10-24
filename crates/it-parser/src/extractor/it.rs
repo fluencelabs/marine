@@ -45,7 +45,7 @@ where
 
 /// Extracts IT section of provided Wasm binary and converts it to a MITInterfaces.
 pub fn extract_it_from_module<WB: WasmBackend>(
-    wasmer_module: &<WB as WasmBackend>::M,
+    wasmer_module: &<WB as WasmBackend>::Module,
 ) -> ParserResult<Interfaces<'_>> {
     let wit_sections = wasmer_module
         .custom_sections(IT_SECTION_NAME)

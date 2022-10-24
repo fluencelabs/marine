@@ -12,33 +12,38 @@ pub use exports::*;
 pub use wasi::*;
 pub use wtype::*;
 
+
 pub trait WasmBackend: Clone + 'static {
-    type IO: ImportObject<Self>;
+    // general
+    type Module: Module<Self>;
+    type Instance: Instance<Self>;
+    // imports/exports -- subject to improvement
+    type ImportObject: ImportObject<Self>;
     type Exports: Exports<Self>;
-    type MemoryExport: MemoryExport;
-    type WITMemory: Memory<Self> + it_memory_traits::Memory<Self::WITMemoryView> + Clone + 'static;
-    //type SR: SequentialReader;
-    //type SW: SequentialWriter;
     type DynamicFunc: DynamicFunc<'static, Self>;
-    type WITMemoryView: MemoryView + 'static;
+    type MemoryExport: MemoryExport;
     type FunctionExport: FunctionExport;
-    type M: Module<Self>;
-    type I: Instance<Self>;
-    type Wasi: WasiImplementation<Self>;
-    //type WasiState: WasiState;
     type Namespace: Namespace<Self>;
     type ExportContext: for<'c> ExportContext<'c, Self>;
     type ExportedDynFunc: ExportedDynFunc<Self>;
 
-    fn compile(wasm: &[u8]) -> WasmBackendResult<Self::M>;
+    // interface types
+    type WITMemory: Memory<Self> + it_memory_traits::Memory<Self::WITMemoryView> + Clone + 'static;
+    type WITMemoryView: MemoryView + 'static;
+    // wasi
+    type Wasi: WasiImplementation<Self>;
+
+    fn compile(wasm: &[u8]) -> WasmBackendResult<Self::Module>;
 }
+
+
 
 pub trait Module<WB: WasmBackend> {
     fn custom_sections(&self, key: &str) -> Option<&[Vec<u8>]>;
     fn instantiate(
         &self,
-        imports: &<WB as WasmBackend>::IO,
-    ) -> WasmBackendResult<<WB as WasmBackend>::I>;
+        imports: &<WB as WasmBackend>::ImportObject,
+    ) -> WasmBackendResult<<WB as WasmBackend>::Instance>;
 }
 
 pub trait Instance<WB: WasmBackend> {
@@ -53,7 +58,7 @@ pub trait Instance<WB: WasmBackend> {
             > + 'a,
     >;
     fn exports(&self) -> &<WB as WasmBackend>::Exports;
-    fn import_object(&self) -> &<WB as WasmBackend>::IO;
+    fn import_object(&self) -> &<WB as WasmBackend>::ImportObject;
     fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
 }
 

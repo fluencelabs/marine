@@ -60,7 +60,7 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<semv
 }
 
 pub fn extract_from_wasmer_module<WB: WasmBackend>(
-    wasmer_module: &<WB as WasmBackend>::M,
+    wasmer_module: &<WB as WasmBackend>::Module,
 ) -> ModuleInfoResult<Option<semver::Version>> {
     let sections = wasmer_module.custom_sections(VERSION_SECTION_NAME);
 

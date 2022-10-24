@@ -53,7 +53,7 @@ pub(super) struct ITInstance<WB: WasmBackend> {
 
 impl<WB: WasmBackend> ITInstance<WB> {
     pub(super) fn new(
-        wasmer_instance: &<WB as WasmBackend>::I,
+        wasmer_instance: &<WB as WasmBackend>::Instance,
         module_name: &str,
         wit: &MITInterfaces<'_>,
         modules: &HashMap<String, MModule<WB>>,
@@ -75,7 +75,7 @@ impl<WB: WasmBackend> ITInstance<WB> {
     }
 
     fn extract_raw_exports(
-        wasmer_instance: &<WB as WasmBackend>::I,
+        wasmer_instance: &<WB as WasmBackend>::Instance,
         it: &MITInterfaces<'_>,
     ) -> MResult<HashMap<usize, WITFunction<WB>>> {
         let module_exports = &wasmer_instance.exports();
@@ -137,7 +137,7 @@ impl<WB: WasmBackend> ITInstance<WB> {
     }
 
     fn extract_memories(
-        wasmer_instance: &<WB as WasmBackend>::I,
+        wasmer_instance: &<WB as WasmBackend>::Instance,
     ) -> Vec<<WB as WasmBackend>::WITMemory> {
         use marine_wasm_backend_traits::Export::Memory;
 

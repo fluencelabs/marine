@@ -53,9 +53,9 @@ impl WasmBackend for WasmerBackend /*<'b>*/ {
     type Exports = WasmerInstance;
     type MemoryExport = WasmerMemoryExport;
     type FunctionExport = WasmerFunctionExport;
-    type M = WasmerModule;
-    type I = WasmerInstance;
-    type IO = WasmerImportObject;
+    type Module = WasmerModule;
+    type Instance = WasmerInstance;
+    type ImportObject = WasmerImportObject;
     //type SR = WasmerSequentialReader<'b>;
     //type SW = WasmerSequentialWriter<'b>;
     type WITMemory = WITMemory;
