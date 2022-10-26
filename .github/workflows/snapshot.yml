@@ -86,6 +86,7 @@ jobs:
             --no-git-commit \
             --from-git \
             --allow-dirty \
+            --no-verify \
             -y prerelease
 
       - name: Get package version
