@@ -25,7 +25,7 @@ jobs:
     with:
       fluence-app-service-version: |
         {
-          "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
+          "version": "=${{ needs.snapshot.outputs.version }}",
           "registry": "fluence"
         }
 
@@ -37,12 +37,12 @@ jobs:
     with:
       marine-runtime-version: |
         {
-          "version": "=${{ needs.snapshot.outputs.marine-runtime-version }}",
+          "version": "=${{ needs.snapshot.outputs.version }}",
           "registry": "fluence"
         }
       fluence-app-service-version: |
         {
-          "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
+          "version": "=${{ needs.snapshot.outputs.version }}",
           "registry": "fluence"
         }
 
@@ -56,7 +56,7 @@ jobs:
       image-name: "docker.fluence.dev/marine"
       fluence-app-service-version: |
         {
-          "version": "=${{ needs.snapshot.outputs.fluence-app-service-version }}",
+          "version": "=${{ needs.snapshot.outputs.version }}",
           "registry": "fluence"
         }
       avm-server-version: |

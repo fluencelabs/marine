@@ -17,7 +17,7 @@ marine-it-parser = { path = "../crates/it-parser", version = "0.11.0" }
 marine-it-generator = { path = "../crates/it-generator", version = "0.9.4" }
 marine-module-interface = { path = "../crates/module-interface", version = "0.6.0" }
 marine-utils = { path = "../crates/utils", version = "0.4.0" }
-marine-min-it-version =  { path = "../crates/min-it-version", version = "0.2.0" }
+marine-min-it-version = { path = "../crates/min-it-version", version = "0.2.0" }
 
 wasmer-runtime = { package = "wasmer-runtime-fl", version = "=0.17.1" }
 # dynamicfunc-fat-closures allows using state inside DynamicFunc
