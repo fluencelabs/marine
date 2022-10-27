@@ -54,7 +54,7 @@ pub fn greeting(name: &str) -> String {
 In summary, our example is comprised of two independent Wasm modules, `shrek` and `donkey`, and illustrates how to link one module into another one, i.e., use the `donkey` module in the `shrek` module. Please note that the `shrek` module is called a *facade* module following the [facade pattern]((https://en.wikipedia.org/wiki/Facade_pattern)) and there can only be one *facade* module per service. 
 
 
-Make sure you have the Marine tools [installed](https://doc.fluence.dev/docs/tutorials_tutorials/recipes_setting_up#marine-tools) and compile the `donkey` and `shrek`, respectively, which we can do with the `build.sh` script:
+Make sure you have the Marine tools [installed](https://fluence.dev/docs/marine-book/quick-start/setting-up-the-development-environment) and compile the `donkey` and `shrek`, respectively, which we can do with the `build.sh` script:
 
 ```bash
 $> ./build.sh
@@ -91,7 +91,7 @@ result: String("Donkey: hi, facade with link module")
 4> q
 ```
 
-Looks like everything is in order and the modules are ready for [deployment to the network](https://doc.fluence.dev/docs/quick-start/2.-hosted-services#deploying-a-wasm-module-to-the-network) and [composition with Aqua](https://doc.fluence.dev/docs/quick-start/4.-service-composition-and-reuse-with-aqua).
+Looks like everything is in order and the modules are ready for [deployment to the network](https://fluence.dev/docs/build/quick-start/hosted-services/#deploying-a-wasm-module-to-the-network) and [composition with Aqua](https://fluence.dev/docs/build/quick-start/service-composition-and-reuse/).
 
 ## Repository structure
 
@@ -112,6 +112,6 @@ Looks like everything is in order and the modules are ready for [deployment to t
 
 ## References
 
-- [Documentation](https://doc.fluence.dev/docs/knowledge_aquamarine/marine)
+- [Documentation](https://fluence.dev/docs/marine-book/introduction)
 - [Examples](https://github.com/fluencelabs/examples/tree/main/marine-examples)
-- [Quickstart](https://doc.fluence.dev/docs/quick-start/2.-hosted-services)
+- [Quickstart](https://fluence.dev/docs/marine-book/quick-start/)

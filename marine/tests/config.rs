@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+extern crate core;
+
 use serde_json::{json, Value};
-use marine::{Marine, TomlMarineConfig};
+use marine::{Marine, MarineError, TomlMarineConfig};
 
 #[test]
 fn load_from_modules_dir() {
@@ -68,4 +70,18 @@ fn wasi_mapped_dirs() {
     } else {
         panic!("test is wrong: function returned invalid data type");
     }
+}
+
+#[test]
+fn wasi_mapped_dirs_conflicts_with_preopens() {
+    let config_path = "tests/wasm_tests/wasi/InvalidConfig.toml";
+    let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
+    let result = Marine::with_raw_config(raw_config);
+    match result {
+        Err(MarineError::InvalidConfig(_)) => (),
+        Err(_) => panic!(
+            "Expected InvalidConfig error telling about conflict with preopens and mapped dirs"
+        ),
+        Ok(_) => panic!("Expected error while loading this config"),
+    };
 }

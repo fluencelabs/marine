@@ -838,10 +838,12 @@ dependencies = [
 [[package]]
 name = "fluence-app-service"
 version = "0.22.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a4c8f3b177149f19682f5c1498e61bdb914f79529d3301d971027cd2470617c"
 dependencies = [
  "log",
  "maplit",
- "marine-min-it-version 0.2.0",
+ "marine-min-it-version 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "marine-runtime 0.23.0",
  "serde",
  "serde_derive",
@@ -852,14 +854,12 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.22.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a4c8f3b177149f19682f5c1498e61bdb914f79529d3301d971027cd2470617c"
+version = "0.22.2"
 dependencies = [
  "log",
  "maplit",
- "marine-min-it-version 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "marine-runtime 0.23.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-min-it-version 0.2.0",
+ "marine-runtime 0.23.1",
  "serde",
  "serde_derive",
  "serde_json",
@@ -1771,41 +1771,12 @@ version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f83cec3d030da1e06b72d241f76e7ff0b701aafe942ddf4ea8a9e053352d9935"
 dependencies = [
- "fluence-app-service 0.22.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-app-service 0.22.1",
  "marine-build-rs-generator",
  "marine-test-macro",
  "serde",
  "serde_json",
  "uuid",
-]
-
-[[package]]
-name = "marine-runtime"
-version = "0.23.0"
-dependencies = [
- "bytesize",
- "env_logger 0.9.0",
- "it-json-serde 0.3.4",
- "itertools",
- "log",
- "marine-core 0.18.0",
- "marine-module-interface 0.6.0",
- "marine-rs-sdk",
- "marine-rs-sdk-main",
- "marine-utils 0.4.0",
- "once_cell",
- "pretty_assertions",
- "safe-transmute",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_with",
- "thiserror",
- "toml",
- "wasmer-interface-types-fl",
- "wasmer-runtime-core-fl",
- "wasmer-runtime-fl",
- "wasmer-wasi-fl",
 ]
 
 [[package]]
@@ -1823,6 +1794,35 @@ dependencies = [
  "marine-rs-sdk",
  "marine-rs-sdk-main",
  "marine-utils 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "safe-transmute",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "serde_with",
+ "thiserror",
+ "toml",
+ "wasmer-interface-types-fl",
+ "wasmer-runtime-core-fl",
+ "wasmer-runtime-fl",
+ "wasmer-wasi-fl",
+]
+
+[[package]]
+name = "marine-runtime"
+version = "0.23.1"
+dependencies = [
+ "bytesize",
+ "env_logger 0.9.0",
+ "it-json-serde 0.3.4",
+ "itertools",
+ "log",
+ "marine-core 0.18.0",
+ "marine-module-interface 0.6.0",
+ "marine-rs-sdk",
+ "marine-rs-sdk-main",
+ "marine-utils 0.4.0",
+ "once_cell",
+ "pretty_assertions",
  "safe-transmute",
  "serde",
  "serde_derive",
@@ -1865,7 +1865,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "50aa0bc3097682e7a8c90bd19b7d7dac13392b910865008fe27848de62ade756"
 dependencies = [
  "darling 0.14.1",
- "fluence-app-service 0.22.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fluence-app-service 0.22.1",
  "itertools",
  "marine-it-parser 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro-error",
@@ -1962,7 +1962,7 @@ dependencies = [
  "check-latest",
  "clap",
  "env_logger 0.9.0",
- "fluence-app-service 0.22.1",
+ "fluence-app-service 0.22.2",
  "itertools",
  "log",
  "marine-rs-sdk-main",
