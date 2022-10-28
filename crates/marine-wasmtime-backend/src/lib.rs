@@ -111,27 +111,6 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
         todo!()
     }
 
-    fn exports(&self) -> &<WasmtimeWasmBackend as WasmBackend>::Exports {
-        let exports = self
-            .instance
-            .exports(self.store.deref().borrow_mut())
-            .map(|export| {
-                let name = export.name().to_string();
-                let export = match export.into_extern() {
-                    wasmtime::Extern::Memory(memory) => {
-                        Export::Memory(WasmtimeMemoryExport{memory})
-                    },
-                    wasmtime::Extern::Func(func) => {
-                        Export::Function(WasmtimeFunctionExport{func})
-                    },
-                    _ => Export::Other
-                };
-                (name, export)
-            })
-            .collect::<Vec<_>>();
-        WasmtimeExports {exports}
-    }
-
     fn memory(&self, memory_index: u32) -> <WasmtimeWasmBackend as WasmBackend>::WITMemory {
         let memory = self
             .instance
