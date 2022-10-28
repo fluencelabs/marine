@@ -19,7 +19,6 @@ pub trait WasmBackend: Clone + 'static {
     type Instance: Instance<Self>;
     // imports/exports -- subject to improvement
     type ImportObject: ImportObject<Self>;
-    type Exports: Exports<Self>;
     type DynamicFunc: DynamicFunc<'static, Self>;
     type MemoryExport: MemoryExport;
     type FunctionExport: FunctionExport;
@@ -55,7 +54,18 @@ pub trait Instance<WB: WasmBackend> {
                 ),
             > + 'a,
     >;
-    fn exports(&self) -> &<WB as WasmBackend>::Exports;
-    fn import_object(&self) -> &<WB as WasmBackend>::ImportObject;
+
     fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
+
+    fn memory_by_name(&self, memory_name: &str) -> Option<<WB as WasmBackend>::WITMemory>;
+
+    fn get_func_no_args_no_rets<'a>(
+        &'a self,
+        name: &str,
+    ) -> ResolveResult<Box<dyn Fn() -> RuntimeResult<()> + 'a>>;
+
+    fn get_dyn_func<'a>(
+        &'a self,
+        name: &str,
+    ) -> ResolveResult<<WB as WasmBackend>::ExportedDynFunc>;
 }

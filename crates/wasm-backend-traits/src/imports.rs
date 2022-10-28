@@ -6,16 +6,8 @@ use crate::Export;
 
 use std::borrow::Cow;
 
-pub trait ImportObject<WB: WasmBackend>:
-Clone
-+ Extend<(
-    String,
-    String,
-    Export<<WB as WasmBackend>::MemoryExport, <WB as WasmBackend>::FunctionExport>,
-)>
-{
+pub trait ImportObject<WB: WasmBackend>: Clone {
     fn new() -> Self;
-    fn extend_with_self(&mut self, other: Self);
 
     fn register<S>(
         &mut self,
@@ -24,10 +16,6 @@ Clone
     ) -> Option<Box<dyn LikeNamespace<WB>>>
         where
             S: Into<String>;
-
-    fn get_memory_env(
-        &self,
-    ) -> Option<Export<<WB as WasmBackend>::MemoryExport, <WB as WasmBackend>::FunctionExport>>;
 }
 
 pub trait DynamicFunc<'a, WB: WasmBackend> {

@@ -27,7 +27,7 @@ use marine_core::HostImportDescriptor;
 use marine_core::MModuleConfig;
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::Namespace;
-use marine_wasm_backend_traits::ImportObject;
+//use marine_wasm_backend_traits::ImportObject;
 use marine_wasm_backend_traits::InsertFn;
 use marine_wasm_backend_traits::WasiVersion;
 use marine_rs_sdk::CallParameters;
@@ -184,9 +184,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             log_utf8_string_closure::<WB>(logging_mask, module_name),
         );
 
-        let mut raw_host_imports = <WB as WasmBackend>::ImportObject::new();
-        raw_host_imports.register("host", namespace);
-        self.config.raw_imports = raw_host_imports;
+        self.config.raw_imports = namespace;
 
         self
     }

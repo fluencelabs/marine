@@ -56,11 +56,12 @@ impl Instance<JsWasmBackend> for JsInstance {
         todo!()
     }
 
-    fn import_object(&self) -> &<JsWasmBackend as WasmBackend>::ImportObject {
+
+    fn memory(&self, memory_index: u32) -> <JsWasmBackend as WasmBackend>::WITMemory {
         todo!()
     }
 
-    fn memory(&self, memory_index: u32) -> <JsWasmBackend as WasmBackend>::WITMemory {
+    fn memory_by_name(&self, memory_name: &str) -> Option<<JsWasmBackend as WasmBackend>::WITMemory> {
         todo!()
     }
 }

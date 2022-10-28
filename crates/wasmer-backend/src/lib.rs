@@ -11,7 +11,6 @@ use marine_wasm_backend_traits::Instance;
 use marine_wasm_backend_traits::ImportObject;
 use marine_wasm_backend_traits::FunctionExport;
 use marine_wasm_backend_traits::MemoryExport;
-use marine_wasm_backend_traits::Exports;
 use marine_wasm_backend_traits::WasiImplementation;
 use marine_wasm_backend_traits::FuncSig;
 use marine_wasm_backend_traits::FuncGetter;
@@ -50,7 +49,6 @@ pub struct WasmerBackend /*<'a>*/ {
 }
 
 impl WasmBackend for WasmerBackend /*<'b>*/ {
-    type Exports = WasmerInstance;
     type MemoryExport = WasmerMemoryExport;
     type FunctionExport = WasmerFunctionExport;
     type Module = WasmerModule;
@@ -110,16 +108,57 @@ impl Instance<WasmerBackend> for WasmerInstance {
         Box::new(export_iter.map(|(name, export)| (name, export_from_wasmer_export(export))))
     }
 
-    fn exports(&self) -> &Self {
-        self
-    }
-
-    fn import_object(&self) -> &WasmerImportObject {
-        &self.import_object
-    }
-
     fn memory(&self, memory_index: u32) -> <WasmerBackend as WasmBackend>::WITMemory {
         WITMemory(self.instance.context().memory(memory_index).clone())
+    }
+
+    // todo check if right
+    fn memory_by_name(&self, memory_name: &str) -> Option<<WasmerBackend as WasmBackend>::WITMemory> {
+        self
+            .import_object
+            .import_object
+            .maybe_with_namespace("env", |env| env.get_export(memory_name))
+            .map(|export| match export {
+                wasmer_runtime::Export::Memory(memory) => {
+                    Some(WITMemory::new( WasmerMemoryExport {memory} ))
+                }
+                _ => None
+            })
+            .flatten()
+    }
+
+    fn get_func_no_args_no_rets<'a>(
+        &'a self,
+        name: &str,
+    ) -> ResolveResult<Box<dyn Fn() -> RuntimeResult<()> + 'a>> {
+        self.instance
+            .exports
+            .get::<Func<'a>>(name)
+            .map(|func| {
+                let func: Box<dyn Fn() -> RuntimeResult<()> + 'a> =
+                    Box::new(move || -> RuntimeResult<()> {
+                        func.call()
+                            .map_err(|e| RuntimeError::Message(e.to_string()))
+                    });
+                func
+            })
+            .map_err(|e| ResolveError::Message(e.to_string()))
+    }
+
+    fn get_dyn_func<'a>(
+        &'a self,
+        name: &str,
+    ) -> ResolveResult<<WasmerBackend as WasmBackend>::ExportedDynFunc> {
+        self.instance
+            .exports
+            .get::<DynFunc<'_>>(name)
+            .map(|func| unsafe {
+                WasmerExportedDynFunc {
+                    sig: FuncSigConverter(func.signature()).into(),
+                    func: std::mem::transmute::<DynFunc<'_>, DynFunc<'static>>(func),
+                }
+            })
+            .map_err(|e| ResolveError::Message(e.to_string()))
     }
 }
 
@@ -128,41 +167,11 @@ pub struct WasmerImportObject {
     pub import_object: wasmer_runtime::ImportObject,
 }
 
-impl
-    Extend<(
-        String,
-        String,
-        Export<WasmerMemoryExport, WasmerFunctionExport>,
-    )> for WasmerImportObject
-{
-    fn extend<T>(&mut self, iter: T)
-    where
-        T: IntoIterator<
-            Item = (
-                String,
-                String,
-                Export<WasmerMemoryExport, WasmerFunctionExport>,
-            ),
-        >,
-    {
-        self.import_object
-            .extend(iter.into_iter().map(|(s1, s2, export)| match export {
-                Export::Memory(memory) => (s1, s2, memory.into()),
-                Export::Function(func) => (s1, s2, func.into()),
-                _ => unreachable!(),
-            }))
-    }
-}
-
 impl ImportObject<WasmerBackend> for WasmerImportObject {
     fn new() -> Self {
         WasmerImportObject {
             import_object: wasmer_runtime::ImportObject::new(),
         }
-    }
-
-    fn extend_with_self(&mut self, other: Self) {
-        self.import_object.extend(other.import_object);
     }
 
     fn register<S>(
@@ -182,26 +191,6 @@ impl ImportObject<WasmerBackend> for WasmerImportObject {
                 boxed
             })
     }
-
-    fn get_memory_env(&self) -> Option<Export<WasmerMemoryExport, WasmerFunctionExport>> {
-        self.import_object
-            .maybe_with_namespace("env", |env| env.get_export("memory"))
-            .map(|export| match export {
-                wasmer_runtime::Export::Memory(memory) => {
-                    Export::Memory(WasmerMemoryExport { memory })
-                }
-                _ => Export::Other,
-            })
-    }
-
-    /*
-    fn maybe_with_namespace<Func, InnerRet>(&self, namespace: &str, f: Func) -> Option<InnerRet>
-    where
-        Func: FnOnce(&(dyn wasmer_runtime::LikeNamespace + Send)) -> Option<InnerRet>,
-        InnerRet: Sized,
-    {
-        self.import_object.maybe_with_namespace(namespace, f)
-    }*/
 }
 
 pub struct WasmerFunctionExport {
@@ -260,42 +249,6 @@ pub struct WasmerWasiState<'a> {
 impl<'a> WasiState for WasmerWasiState<'a> {
     fn envs(&self) -> &[Vec<u8>] {
         &self.wasi_state.envs
-    }
-}
-
-impl Exports<WasmerBackend> for WasmerInstance {
-    fn get_func_no_args_no_rets<'a>(
-        &'a self,
-        name: &str,
-    ) -> ResolveResult<Box<dyn Fn() -> RuntimeResult<()> + 'a>> {
-        self.instance
-            .exports
-            .get::<Func<'a>>(name)
-            .map(|func| {
-                let func: Box<dyn Fn() -> RuntimeResult<()> + 'a> =
-                    Box::new(move || -> RuntimeResult<()> {
-                        func.call()
-                            .map_err(|e| RuntimeError::Message(e.to_string()))
-                    });
-                func
-            })
-            .map_err(|e| ResolveError::Message(e.to_string()))
-    }
-
-    fn get_dyn_func<'a>(
-        &'a self,
-        name: &str,
-    ) -> ResolveResult<<WasmerBackend as WasmBackend>::ExportedDynFunc> {
-        self.instance
-            .exports
-            .get::<DynFunc<'_>>(name)
-            .map(|func| unsafe {
-                WasmerExportedDynFunc {
-                    sig: FuncSigConverter(func.signature()).into(),
-                    func: std::mem::transmute::<DynFunc<'_>, DynFunc<'static>>(func),
-                }
-            })
-            .map_err(|e| ResolveError::Message(e.to_string()))
     }
 }
 

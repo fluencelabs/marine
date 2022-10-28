@@ -22,8 +22,7 @@ use crate::MResult;
 use marine_wasm_backend_traits::WasmBackend;
 //use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
-use marine_wasm_backend_traits::ImportObject;
-use marine_wasm_backend_traits::Exports;
+//use marine_wasm_backend_traits::ImportObject;
 use marine_wasm_backend_traits::Memory as WBMemory;
 
 use marine_it_interfaces::MITInterfaces;
@@ -78,12 +77,10 @@ impl<WB: WasmBackend> ITInstance<WB> {
         wasmer_instance: &<WB as WasmBackend>::Instance,
         it: &MITInterfaces<'_>,
     ) -> MResult<HashMap<usize, WITFunction<WB>>> {
-        let module_exports = &wasmer_instance.exports();
-
         it.exports()
             .enumerate()
             .map(|(export_id, export)| {
-                let export_func = module_exports.get_dyn_func(export.name)?;
+                let export_func = wasmer_instance.get_dyn_func(export.name)?;
                 Ok((
                     export_id,
                     WITFunction::from_export(export_func, export.name.to_string())?,
@@ -149,10 +146,9 @@ impl<WB: WasmBackend> ITInstance<WB> {
             })
             .collect::<Vec<_>>();
 
-        if let Some(Memory(memory)) = wasmer_instance.import_object().get_memory_env()
-        //.maybe_with_namespace("env", |env| env.get_export("memory"))
+        if let Some(memory) = wasmer_instance.memory_by_name("memory")
         {
-            memories.push(<WB as WasmBackend>::WITMemory::new(memory));
+            memories.push(memory);
         }
 
         memories

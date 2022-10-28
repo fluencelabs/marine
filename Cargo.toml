@@ -13,6 +13,7 @@ members = [
     "crates/module-interface",
     "crates/wasm-backend-traits",
     "crates/wasmer-backend",
+    "crates/marine-wasmtime-backend",
     "crates/utils",
     "examples/call_parameters",
     "examples/failing",
