@@ -29,6 +29,7 @@ use marine_wasm_backend_traits::ImportObject;
 use marine_wasm_backend_traits::WasiImplementation;
 use marine_wasm_backend_traits::Namespace;
 use marine_wasm_backend_traits::DynamicFunc;
+use marine_wasm_backend_traits::Store;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
@@ -115,16 +116,23 @@ pub(crate) struct MModule<WB: WasmBackend> {
     // TODO: save refs instead copying of a record types HashMap.
     /// Record types used in exported functions as arguments or return values.
     export_record_types: MRecordTypes,
+
+    // stores wasm module and instance
+    #[allow(unused)]
+    store: <WB as WasmBackend>::Store,
 }
 
 impl<WB: WasmBackend> MModule<WB> {
     pub(crate) fn new(
         name: &str,
+        backend: &WB,
         wasm_bytes: &[u8],
         config: MModuleConfig<WB>,
         modules: &HashMap<String, MModule<WB>>,
     ) -> MResult<Self> {
-        let wasmer_module = WB::compile(wasm_bytes)?;
+        let mut store = <WB as WasmBackend>::Store::new(backend);
+
+        let wasmer_module = WB::compile(&mut store, wasm_bytes)?;
         crate::misc::check_sdk_version::<WB>(name.to_string(), &wasmer_module)?;
 
         let it = extract_it_from_module::<WB>(&wasmer_module)?;
@@ -138,12 +146,12 @@ impl<WB: WasmBackend> MModule<WB> {
         let wasi_import_object =
             Self::create_import_objects(config, &mit, wit_import_object)?;
 
-        let wasmer_instance = wasmer_module.instantiate(&wasi_import_object)?;
+        let wasmer_instance = wasmer_module.instantiate(&mut store, &wasi_import_object)?;
         let it_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
-                MaybeUninit::new(ITInstance::new(&wasmer_instance, name, &mit, modules)?);
+                MaybeUninit::new(ITInstance::new(&wasmer_instance, &mut store,name, &mit, modules)?);
             std::mem::transmute::<_, Arc<ITInstance<WB>>>(wit_instance)
         };
 
@@ -151,13 +159,13 @@ impl<WB: WasmBackend> MModule<WB> {
 
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
-        if let Ok(initialize_func) = wasmer_instance.get_func_no_args_no_rets(INITIALIZE_FUNC) {
+        if let Ok(initialize_func) = wasmer_instance.get_func_no_args_no_rets(&mut store, INITIALIZE_FUNC) {
             initialize_func()?;
         }
 
         // call _start to call module's main function
         #[rustfmt::skip]
-        if let Ok(start_func) = wasmer_instance.get_func_no_args_no_rets(START_FUNC) {
+        if let Ok(start_func) = wasmer_instance.get_func_no_args_no_rets(&mut store, START_FUNC) {
             start_func()?;
         }
 
@@ -168,6 +176,7 @@ impl<WB: WasmBackend> MModule<WB> {
             //host_closures_import_object,
             export_funcs,
             export_record_types,
+            store
         })
     }
 

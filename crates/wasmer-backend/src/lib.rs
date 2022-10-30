@@ -1,9 +1,6 @@
 use std::marker::PhantomData;
 //use std::marker::PhantomData;
-use marine_wasm_backend_traits::{
-    DynamicFunc, Export, ExportContext, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue,
-    WasmBackend, CompilationError, InsertFn, WasiVersion,
-};
+use marine_wasm_backend_traits::{DynamicFunc, Export, ExportContext, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue, WasmBackend, CompilationError, InsertFn, WasiVersion, Store};
 use marine_wasm_backend_traits::WasmBackendResult;
 use marine_wasm_backend_traits::WasmBackendError;
 use marine_wasm_backend_traits::Module;
@@ -43,12 +40,12 @@ use crate::memory::WITMemory;
 //use crate::memory_access::{WasmerSequentialReader, WasmerSequentialWriter};
 use crate::type_converters::{general_wval_to_wval, wval_to_general_wval};
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct WasmerBackend /*<'a>*/ {
-    //    _data: &'a PhantomData<i32>,
 }
 
 impl WasmBackend for WasmerBackend /*<'b>*/ {
+    type Store = WasmerStore;
     type MemoryExport = WasmerMemoryExport;
     type FunctionExport = WasmerFunctionExport;
     type Module = WasmerModule;
@@ -65,12 +62,22 @@ impl WasmBackend for WasmerBackend /*<'b>*/ {
     type ExportContext = WasmerExportContext<'static>;
     type ExportedDynFunc = WasmerExportedDynFunc<'static>;
 
-    fn compile(wasm: &[u8]) -> WasmBackendResult<WasmerModule> {
+    fn compile(store: &mut WasmerStore, wasm: &[u8]) -> WasmBackendResult<WasmerModule> {
         wasmer_runtime::compile(wasm)
             .map_err(|e| {
                 WasmBackendError::CompilationError(CompilationError::Message(e.to_string()))
             })
             .map(|module| WasmerModule { module })
+    }
+}
+
+pub struct WasmerStore {
+
+}
+
+impl Store<WasmerBackend> for WasmerStore {
+    fn new(_backend: &WasmerBackend) -> Self {
+        Self {}
     }
 }
 
@@ -83,7 +90,7 @@ impl Module<WasmerBackend> for WasmerModule {
         self.module.custom_sections(name)
     }
 
-    fn instantiate(&self, imports: &WasmerImportObject) -> WasmBackendResult<WasmerInstance> {
+    fn instantiate(&self, _store: &mut WasmerStore, imports: &WasmerImportObject) -> WasmBackendResult<WasmerInstance> {
         self.module
             .instantiate(&imports.import_object)
             .map_err(|e| WasmBackendError::InstantiationError(e.to_string()))
@@ -102,18 +109,19 @@ pub struct WasmerInstance {
 impl Instance<WasmerBackend> for WasmerInstance {
     fn export_iter<'a>(
         &'a self,
+        _store: &mut WasmerStore,
     ) -> Box<dyn Iterator<Item = (String, Export<WasmerMemoryExport, WasmerFunctionExport>)> + 'a>
     {
         let export_iter = self.instance.exports();
         Box::new(export_iter.map(|(name, export)| (name, export_from_wasmer_export(export))))
     }
 
-    fn memory(&self, memory_index: u32) -> <WasmerBackend as WasmBackend>::WITMemory {
+    fn memory(&self, _store: &mut WasmerStore, memory_index: u32, ) -> <WasmerBackend as WasmBackend>::WITMemory {
         WITMemory(self.instance.context().memory(memory_index).clone())
     }
 
     // todo check if right
-    fn memory_by_name(&self, memory_name: &str) -> Option<<WasmerBackend as WasmBackend>::WITMemory> {
+    fn memory_by_name(&self, _store: &mut WasmerStore, memory_name: &str) -> Option<<WasmerBackend as WasmBackend>::WITMemory> {
         self
             .import_object
             .import_object
@@ -129,6 +137,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
 
     fn get_func_no_args_no_rets<'a>(
         &'a self,
+        _store: &mut WasmerStore,
         name: &str,
     ) -> ResolveResult<Box<dyn Fn() -> RuntimeResult<()> + 'a>> {
         self.instance
@@ -147,6 +156,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
 
     fn get_dyn_func<'a>(
         &'a self,
+        _store: &mut WasmerStore,
         name: &str,
     ) -> ResolveResult<<WasmerBackend as WasmBackend>::ExportedDynFunc> {
         self.instance

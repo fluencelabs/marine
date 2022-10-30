@@ -37,12 +37,14 @@ pub struct MModuleInterface<'a> {
 pub struct MarineCore<WB: WasmBackend> {
     // set of modules registered inside Marine
     modules: HashMap<String, MModule<WB>>,
+    wasm_backend: WB
 }
 
 impl<WB: WasmBackend> MarineCore<WB> {
     pub fn new() -> Self {
         Self {
             modules: HashMap::new(),
+            wasm_backend: WB::default()
         }
     }
 
@@ -79,7 +81,7 @@ impl<WB: WasmBackend> MarineCore<WB> {
     ) -> MResult<()> {
         let _prepared_wasm_bytes =
             crate::misc::prepare_module(wasm_bytes, config.max_heap_pages_count)?;
-        let module = MModule::new(&name, wasm_bytes, config, &self.modules)?;
+        let module = MModule::new(&name, &self.wasm_backend, wasm_bytes, config, &self.modules)?;
 
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {
