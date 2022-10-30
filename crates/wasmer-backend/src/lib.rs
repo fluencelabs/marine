@@ -59,7 +59,6 @@ impl WasmBackend for WasmerBackend /*<'b>*/ {
     //type WasiState = WasmerWasiState;
     type DynamicFunc = WasmerDynamicFunc;
     type Namespace = WasmerNamespace;
-    type ExportContext = WasmerExportContext<'static>;
     type ExportedDynFunc = WasmerExportedDynFunc<'static>;
 
     fn compile(store: &mut WasmerStore, wasm: &[u8]) -> WasmBackendResult<WasmerModule> {
@@ -139,13 +138,13 @@ impl Instance<WasmerBackend> for WasmerInstance {
         &'a self,
         _store: &mut WasmerStore,
         name: &str,
-    ) -> ResolveResult<Box<dyn Fn() -> RuntimeResult<()> + 'a>> {
+    ) -> ResolveResult<Box<dyn Fn(&mut WasmerStore) -> RuntimeResult<()> + 'a>> {
         self.instance
             .exports
             .get::<Func<'a>>(name)
             .map(|func| {
-                let func: Box<dyn Fn() -> RuntimeResult<()> + 'a> =
-                    Box::new(move || -> RuntimeResult<()> {
+                let func: Box<dyn Fn(&mut WasmerStore) -> RuntimeResult<()> + 'a> =
+                    Box::new(move |_store| -> RuntimeResult<()> {
                         func.call()
                             .map_err(|e| RuntimeError::Message(e.to_string()))
                     });
@@ -178,7 +177,7 @@ pub struct WasmerImportObject {
 }
 
 impl ImportObject<WasmerBackend> for WasmerImportObject {
-    fn new() -> Self {
+    fn new(_store: &mut WasmerStore) -> Self {
         WasmerImportObject {
             import_object: wasmer_runtime::ImportObject::new(),
         }
@@ -325,16 +324,17 @@ pub struct WasmerDynamicFunc {
 impl<'a> DynamicFunc<'a, WasmerBackend> for WasmerDynamicFunc {
     fn new<F>(sig: FuncSig, func: F) -> Self
     where
-        F: Fn(&mut WasmerExportContext<'static>, &[WValue]) -> Vec<WValue> + 'static,
+        F: Fn(&mut dyn ExportContext<WasmerBackend>, &[WValue]) -> Vec<WValue> + 'static,
     {
         let func = wasmer_core::typed_func::DynamicFunc::new(
             std::sync::Arc::new(FuncSigConverter(&sig).into()),
             move |ctx: &mut wasmer_core::vm::Ctx, args: &[wasmer_core::prelude::Value]| unsafe {
                 let mut ctx = WasmerExportContext {
-                    ctx: std::mem::transmute::<
+                    ctx
+                    /*ctx: std::mem::transmute::<
                         &'_ mut wasmer_core::vm::Ctx,
                         &'static mut wasmer_core::vm::Ctx,
-                    >(ctx),
+                    >(ctx),*/
                 };
 
                 let args = args.iter().map(wval_to_general_wval).collect::<Vec<_>>();
@@ -382,7 +382,7 @@ macro_rules! impl_insert_fn {
     ($($name:ident: $arg:ty),* => $rets:ty) => {
         impl InsertFn<WasmerBackend, ($($arg,)*), $rets> for WasmerNamespace {
             fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
-            where F:'static + Fn(&mut WasmerExportContext<'static>, ($($arg,)*)) -> $rets + std::marker::Send {
+            where F:'static + Fn(&mut dyn ExportContext<WasmerBackend>, ($($arg,)*)) -> $rets + std::marker::Send {
                 let func = move |ctx: &mut wasmer_core::vm::Ctx, $($name: $arg),*| {
                     unsafe {
                         let mut ctx = WasmerExportContext {
@@ -522,8 +522,8 @@ impl<'c> WasmerExportContext<'c> {
 
 macro_rules! impl_func_getter {
     ($args:ty, $rets:ty) => {
-        impl<'c> FuncGetter<'c, $args, $rets> for WasmerExportContext<'static> {
-            unsafe fn get_func(
+        impl<'r> FuncGetter<$args, $rets> for WasmerExportContext<'r> {
+            unsafe fn get_func<'c>(
                 &'c mut self,
                 name: &str,
             ) -> Result<Box<dyn FnMut($args) -> Result<$rets, RuntimeError> + 'c>, ResolveError>
@@ -541,7 +541,7 @@ impl_func_getter!(i32, ());
 impl_func_getter!((), i32);
 impl_func_getter!((), ());
 
-impl<'c> ExportContext<'c, WasmerBackend> for WasmerExportContext<'static> {
+impl<'c, 'r> ExportContext<'c, WasmerBackend> for WasmerExportContext<'r> {
     fn memory(&self, memory_index: u32) -> <WasmerBackend as WasmBackend>::WITMemory {
         WITMemory(self.ctx.memory(memory_index).clone())
     }

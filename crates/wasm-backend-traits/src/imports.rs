@@ -7,7 +7,7 @@ use crate::Export;
 use std::borrow::Cow;
 
 pub trait ImportObject<WB: WasmBackend>: Clone {
-    fn new() -> Self;
+    fn new(store: &mut <WB as WasmBackend>::Store) -> Self;
 
     fn register<S>(
         &mut self,
@@ -21,13 +21,13 @@ pub trait ImportObject<WB: WasmBackend>: Clone {
 pub trait DynamicFunc<'a, WB: WasmBackend> {
     fn new<'c, F>(sig: FuncSig, func: F) -> Self
         where
-            F: Fn(&mut <WB as WasmBackend>::ExportContext, &[WValue]) -> Vec<WValue> + 'static;
+            F: Fn(&mut dyn ExportContext<WB>, &[WValue]) -> Vec<WValue> + 'static;
 }
 
 pub trait InsertFn<WB: WasmBackend, Args, Rets> {
     fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
         where
-            F: 'static + Fn(&mut <WB as WasmBackend>::ExportContext, Args) -> Rets + std::marker::Send;
+            F: 'static + Fn(&mut dyn ExportContext<WB>, Args) -> Rets + std::marker::Send;
 }
 
 pub trait Namespace<WB: WasmBackend>:
@@ -46,12 +46,12 @@ LikeNamespace<WB>
 pub trait LikeNamespace<WB: WasmBackend> {}
 
 pub trait ExportContext<'c, WB: WasmBackend>:
-FuncGetter<'c, (i32, i32), i32>
-+ FuncGetter<'c, (i32, i32), ()>
-+ FuncGetter<'c, i32, i32>
-+ FuncGetter<'c, i32, ()>
-+ FuncGetter<'c, (), i32>
-+ FuncGetter<'c, (), ()>
+FuncGetter<(i32, i32), i32>
++ FuncGetter< (i32, i32), ()>
++ FuncGetter< i32, i32>
++ FuncGetter< i32, ()>
++ FuncGetter<(), i32>
++ FuncGetter< (), ()>
 {
     fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
 }
@@ -82,8 +82,8 @@ impl FuncSig {
     }
 }
 
-pub trait FuncGetter<'c, Args, Rets> {
-    unsafe fn get_func(
+pub trait FuncGetter<Args, Rets> {
+    unsafe fn get_func<'c>(
         &'c mut self,
         name: &str,
     ) -> ResolveResult<Box<dyn FnMut(Args) -> RuntimeResult<Rets> + 'c>>;

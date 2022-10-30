@@ -22,7 +22,7 @@ use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
 use crate::MResult;
 use crate::MModuleConfig;
 
-use marine_wasm_backend_traits::{WasiState, WasmBackend};
+use marine_wasm_backend_traits::{ExportContext, WasiState, WasmBackend};
 use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
 use marine_wasm_backend_traits::ImportObject;
@@ -160,13 +160,13 @@ impl<WB: WasmBackend> MModule<WB> {
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
         if let Ok(initialize_func) = wasmer_instance.get_func_no_args_no_rets(&mut store, INITIALIZE_FUNC) {
-            initialize_func()?;
+            initialize_func(&mut store)?;
         }
 
         // call _start to call module's main function
         #[rustfmt::skip]
         if let Ok(start_func) = wasmer_instance.get_func_no_args_no_rets(&mut store, START_FUNC) {
-            start_func()?;
+            start_func(&mut store)?;
         }
 
         Ok(Self {
@@ -346,7 +346,7 @@ impl<WB: WasmBackend> MModule<WB> {
             raw_import: F,
         ) -> <WB as WasmBackend>::DynamicFunc
         where
-            F: Fn(&mut <WB as WasmBackend>::ExportContext, &[WValue]) -> Vec<WValue> + 'static,
+            F: Fn(&mut dyn ExportContext<WB>, &[WValue]) -> Vec<WValue> + 'static,
             WB: WasmBackend,
             I1: Iterator<Item = &'a IType>,
             I2: Iterator<Item = &'b IType>,
@@ -365,9 +365,9 @@ impl<WB: WasmBackend> MModule<WB> {
             interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
-        ) -> impl Fn(&mut <WB as WasmBackend>::ExportContext, &[WValue]) -> Vec<WValue> + 'static
+        ) -> impl Fn(&mut dyn ExportContext<WB>, &[WValue]) -> Vec<WValue> + 'static
         {
-            move |_: &mut <WB as WasmBackend>::ExportContext, inputs: &[WValue]| -> Vec<WValue> {
+            move |_: &mut dyn ExportContext<WB>, inputs: &[WValue]| -> Vec<WValue> {
                 use wasmer_it::interpreter::stack::Stackable;
 
                 use super::type_converters::wval_to_ival;

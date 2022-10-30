@@ -35,15 +35,16 @@ use crate::HostImportDescriptor;
 //use wasmer_core::types::FuncSig;
 use it_lilo::lifter::ILifter;
 use it_lilo::lowerer::ILowerer;
-use it_memory_traits::Memory as ITMemory;
+//use it_memory_traits::Memory as ITMemory;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use it_memory_traits::Memory;
 
 use marine_wasm_backend_traits::{FuncSig, WasmBackend};
 use marine_wasm_backend_traits::DynamicFunc;
 use marine_wasm_backend_traits::ExportContext;
-use marine_wasm_backend_traits::FuncGetter;
+//use marine_wasm_backend_traits::FuncGetter;
 use marine_wasm_backend_traits::errors::*;
 
 pub(crate) fn create_host_import_func<WB: WasmBackend>(
@@ -70,7 +71,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     let raw_output = itypes_output_to_wtypes(&output_type_to_types(output_type));
 
     let func =
-        move |ctx: &mut <WB as WasmBackend>::ExportContext, inputs: &[WValue]| -> Vec<WValue> {
+        move |ctx: &mut dyn ExportContext<WB>, inputs: &[WValue]| -> Vec<WValue> {
             let result = {
                 let memory_index = 0;
                 let memory_view = ctx.memory(memory_index).view();

@@ -19,12 +19,12 @@ pub trait WasmBackend: Clone + Default + 'static {
     type Instance: Instance<Self>;
     type Store: Store<Self>;
     // imports/exports -- subject to improvement
-    type ImportObject: ImportObject<Self>;
+    type ImportObject: ImportObject<Self>; // to be replaced with somethink like Linker or Resolver
     type DynamicFunc: DynamicFunc<'static, Self>;
     type MemoryExport: MemoryExport;
     type FunctionExport: FunctionExport;
     type Namespace: Namespace<Self>;
-    type ExportContext: for<'c> ExportContext<'c, Self>;
+    //type ExportContext: for<'c> ExportContext<'c, Self>;
     type ExportedDynFunc: ExportedDynFunc<Self>;
 
     // interface types
@@ -52,7 +52,7 @@ pub trait Module<WB: WasmBackend> {
 pub trait Instance<WB: WasmBackend> {
     fn export_iter<'a>(
         &'a self,
-        store: &mut <WB as WasmBackend>::Store,
+        store: &'a mut <WB as WasmBackend>::Store,
     ) -> Box<
         dyn Iterator<
                 Item = (
@@ -70,7 +70,7 @@ pub trait Instance<WB: WasmBackend> {
         &'a self,
         store: &mut <WB as WasmBackend>::Store,
         name: &str,
-    ) -> ResolveResult<Box<dyn Fn() -> RuntimeResult<()> + 'a>>;
+    ) -> ResolveResult<Box<dyn Fn(&mut <WB as WasmBackend>::Store) -> RuntimeResult<()> + 'a>>;
 
     fn get_dyn_func<'a>(
         &'a self,
