@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use std::cell::RefCell;
 use super::wit_prelude::*;
 use super::marine_module::MModule;
 use super::IRecordType;
@@ -33,6 +34,7 @@ use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, TypedIn
 //use wasmer_core::Instance as WasmerInstance;
 
 use std::collections::HashMap;
+use std::ops::Deref;
 use std::rc::Rc;
 
 pub type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
@@ -53,14 +55,14 @@ pub(super) struct ITInstance<WB: WasmBackend> {
 impl<WB: WasmBackend> ITInstance<WB> {
     pub(super) fn new(
         wasmer_instance: &<WB as WasmBackend>::Instance,
-        store: &mut <WB as WasmBackend>::Store,
+        store: Rc<RefCell<<WB as WasmBackend>::Store>>,
         module_name: &str,
         wit: &MITInterfaces<'_>,
         modules: &HashMap<String, MModule<WB>>,
     ) -> MResult<Self> {
-        let mut exports = Self::extract_raw_exports(wasmer_instance, store, wit)?;
-        let imports = Self::extract_imports(module_name, modules, wit,exports.len())?;
-        let memories = Self::extract_memories(wasmer_instance, store);
+        let mut exports = Self::extract_raw_exports(wasmer_instance, store.clone(), wit)?;
+        let imports = Self::extract_imports(store.clone(), module_name, modules, wit,exports.len())?;
+        let memories = Self::extract_memories(wasmer_instance, &mut store.deref().borrow_mut());
 
         exports.extend(imports);
         let funcs = exports;
@@ -76,17 +78,17 @@ impl<WB: WasmBackend> ITInstance<WB> {
 
     fn extract_raw_exports(
         wasmer_instance: &<WB as WasmBackend>::Instance,
-        store: &mut <WB as WasmBackend>::Store,
+        store: Rc<RefCell<<WB as WasmBackend>::Store>>,
         it: &MITInterfaces<'_>,
     ) -> MResult<HashMap<usize, WITFunction<WB>>> {
         it.exports()
             .enumerate()
             .map(|(export_id, export)| {
                 let export_func = wasmer_instance
-                    .get_dyn_func(store, export.name)?;
+                    .get_dyn_func(&mut store.deref().borrow_mut(), export.name)?;
                 Ok((
                     export_id,
-                    WITFunction::from_export(export_func, export.name.to_string())?,
+                    WITFunction::from_export(store.clone(), export_func, export.name.to_string())?,
                 ))
             })
             .collect()
@@ -94,6 +96,7 @@ impl<WB: WasmBackend> ITInstance<WB> {
 
     /// Extracts only those imports that don't have implementations.
     fn extract_imports(
+        store: Rc<RefCell<<WB as WasmBackend>::Store>>,
         module_name: &str,
         modules: &HashMap<String, MModule<WB>>,
         wit: &MITInterfaces<'_>,
@@ -122,6 +125,7 @@ impl<WB: WasmBackend> ITInstance<WB> {
                         };
 
                     let func = WITFunction::from_import(
+                        store.clone(),
                         module,
                         module_name,
                         import.name,

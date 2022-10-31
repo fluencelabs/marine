@@ -58,7 +58,7 @@ pub(crate) fn log_utf8_string<WB: WasmBackend>(
 
 #[inline]
 fn read_string<WB: WasmBackend>(
-    ctx: &dyn ExportContext<WB>,
+    ctx: &mut dyn ExportContext<WB>,
     offset: i32,
     size: i32,
 ) -> Option<String> {

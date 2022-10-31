@@ -48,6 +48,7 @@ use marine_wasm_backend_traits::ExportContext;
 use marine_wasm_backend_traits::errors::*;
 
 pub(crate) fn create_host_import_func<WB: WasmBackend>(
+    store: &mut <WB as WasmBackend>::Store,
     descriptor: HostImportDescriptor<WB>,
     record_types: Rc<MRecordTypes>,
 ) -> <WB as WasmBackend>::DynamicFunc {
@@ -161,7 +162,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             }
         };
 
-    <WB as WasmBackend>::DynamicFunc::new(&mut store, FuncSig::new(raw_args, raw_output), func)
+    <WB as WasmBackend>::DynamicFunc::new(store, FuncSig::new(raw_args, raw_output), func)
 }
 
 fn default_error_handler(err: &HostImportError) -> Option<crate::IValue> {
