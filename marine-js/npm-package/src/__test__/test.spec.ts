@@ -119,6 +119,7 @@ describe('Fluence app service tests', () => {
     });
 
     it('Testing sqlite wasm', async () => {
+        jest.setTimeout(30000);
         const control = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const buf = await download(sqliteDownloadUrl);
         const sqlite = await WebAssembly.compile(buf);
