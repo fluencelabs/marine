@@ -19,7 +19,7 @@ pub trait ImportObject<WB: WasmBackend>: Clone {
 }
 
 pub trait DynamicFunc<'a, WB: WasmBackend> {
-    fn new<'c, F>(sig: FuncSig, func: F) -> Self
+    fn new<'c, F>(store: &mut <WB as WasmBackend>::Store, sig: FuncSig, func: F) -> Self
         where
             F: Fn(&mut dyn ExportContext<WB>, &[WValue]) -> Vec<WValue> + 'static;
 }
@@ -27,7 +27,7 @@ pub trait DynamicFunc<'a, WB: WasmBackend> {
 pub trait InsertFn<WB: WasmBackend, Args, Rets> {
     fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
         where
-            F: 'static + Fn(&mut dyn ExportContext<WB>, Args) -> Rets + std::marker::Send;
+            F: 'static + Fn(&mut dyn ExportContext<WB>, Args) -> Rets + std::marker::Send + std::marker::Sync;
 }
 
 pub trait Namespace<WB: WasmBackend>:
@@ -53,7 +53,7 @@ FuncGetter<(i32, i32), i32>
 + FuncGetter<(), i32>
 + FuncGetter< (), ()>
 {
-    fn memory(&self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
+    fn memory(&mut self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
 }
 
 pub struct FuncSig {

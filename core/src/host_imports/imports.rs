@@ -161,7 +161,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             }
         };
 
-    <WB as WasmBackend>::DynamicFunc::new(FuncSig::new(raw_args, raw_output), func)
+    <WB as WasmBackend>::DynamicFunc::new(&mut store, FuncSig::new(raw_args, raw_output), func)
 }
 
 fn default_error_handler(err: &HostImportError) -> Option<crate::IValue> {

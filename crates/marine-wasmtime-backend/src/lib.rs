@@ -7,7 +7,10 @@ use marine_wasm_backend_traits::*;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use multimap::MultiMap;
-use wasmtime::{AsContextMut, Caller};
+use wasmtime::{AsContextMut, Caller, Val};
+use crate::utils::{val_to_wvalue, val_type_to_wtype, wvalue_to_val};
+
+mod utils;
 
 #[derive(Clone, Default)]
 pub struct WasmtimeWasmBackend {
@@ -34,7 +37,6 @@ impl WasmtimeWasmBackend {
                 }
             })
             .collect()
-
     }
 }
 
@@ -47,7 +49,6 @@ impl WasmBackend for WasmtimeWasmBackend {
     type MemoryExport = WasmtimeMemoryExport;
     type FunctionExport = WasmtimeFunctionExport;
     type Namespace = WasmtimeNamespace;
-    type ExportContext = WasmtimeExportContext<'static>;
     type ExportedDynFunc = WasmtimeExportedDynFunc;
     type WITMemory = WasmtimeWITMemory;
     type WITMemoryView = WasmtimeWITMemoryView;
@@ -149,7 +150,16 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
 
     fn get_dyn_func<'a>(&'a self, store: &mut WasmtimeStore, name: &str) -> ResolveResult<<WasmtimeWasmBackend as WasmBackend>::ExportedDynFunc> {
         let func = self.instance.get_func(&mut store.store, name).unwrap(); // todo handle None
-        Ok(WasmtimeExportedDynFunc { func })
+        let ty = func.ty(&store.store);
+        let params = ty.params().map(|ty| {
+            val_type_to_wtype(&ty).unwrap() // todo handle error
+        }).collect::<Vec<_>>();
+        let rets = ty.results().map(|ty|{
+            val_type_to_wtype(&ty).unwrap() // todo handle error
+        }).collect::<Vec<_>>();
+
+        let sig = FuncSig::new(params, rets);
+        Ok(WasmtimeExportedDynFunc { func, signature: sig })
     }
 }
 
@@ -162,13 +172,14 @@ pub struct WasmtimeImportObject {
 impl ImportObject<WasmtimeWasmBackend> for WasmtimeImportObject {
     fn new(store: &mut WasmtimeStore) -> Self {
         Self {
-            linker: wasmtime::Linker::new(store.engine())
+            linker: wasmtime::Linker::new(store.store.engine())
         }
     }
 
     fn register<S>(&mut self, module: S, namespace: WasmtimeNamespace) -> Option<Box<dyn LikeNamespace<WasmtimeWasmBackend>>> where S: Into<String> {
+        let module: String = module.into();
         for (name, func) in namespace.functions {
-            func(self, &module, &name)
+            func(self, &module, &name).unwrap(); // todo handle error
         }
 
         None // todo handle collisions
@@ -176,14 +187,14 @@ impl ImportObject<WasmtimeWasmBackend> for WasmtimeImportObject {
 }
 
 pub struct WasmtimeNamespace {
-    functions: Vec<(String, Box<dyn Fn(&mut WasmtimeImportObject, &str) -> Result<(), String> + 'static>)>
+    functions: Vec<(String, Box<dyn FnOnce(&mut WasmtimeImportObject, &str, &str) -> Result<(), String> + 'static>)>
 }
 
 macro_rules! impl_insert_fn {
     ($($name:ident: $arg:ty),* => $rets:ty) => {
         impl InsertFn<WasmtimeWasmBackend, ($($arg,)*), $rets> for WasmtimeNamespace {
             fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
-            where F:'static + Fn(&mut WasmtimeExportContext, ($($arg,)*)) -> $rets + std::marker::Send {
+            where F:'static + Fn(&mut dyn ExportContext<WasmtimeWasmBackend>, ($($arg,)*)) -> $rets + std::marker::Send + std::marker::Sync {
                 let inserter = move |linker: &mut WasmtimeImportObject, module: &str, name: &str| {
                     let func = move |caller: Caller<'_, ()>, $($name: $arg),*| {
                         unsafe {
@@ -193,7 +204,8 @@ macro_rules! impl_insert_fn {
                         }
                     };
 
-                    linker.func_wrap(module, name, func)
+                    linker.linker.func_wrap(module, name, func).unwrap(); // todo handle error
+                    Ok(())
                 };
 
                 self.functions.push((name.into(), Box::new(inserter)))
@@ -213,11 +225,13 @@ impl LikeNamespace<WasmtimeWasmBackend> for WasmtimeNamespace {}
 
 impl Namespace<WasmtimeWasmBackend> for WasmtimeNamespace {
     fn new() -> Self {
-        todo!()
+        Self {
+            functions: Vec::new()
+        }
     }
 
-    fn insert(&mut self, name: impl Into<String>, func: <WasmtimeWasmBackend as WasmBackend>::DynamicFunc) {
-        todo!()
+    fn insert(&mut self, name: impl Into<String>, func: WasmtimeDynamicFunc) {
+
     }
 }
 
@@ -225,7 +239,8 @@ pub struct WasmtimeDynamicFunc {
 }
 
 impl<'a> DynamicFunc<'a, WasmtimeWasmBackend> for WasmtimeDynamicFunc {
-    fn new<'c, F>(sig: FuncSig, func: F) -> Self where F: Fn(&mut <WasmtimeWasmBackend as WasmBackend>::ExportContext, &[WValue]) -> Vec<WValue> + 'static {
+    fn new<'c, F>(store: &mut WasmtimeStore, sig: FuncSig, func: F) -> Self
+        where F: Fn(&mut dyn ExportContext<WasmtimeWasmBackend>, &[WValue]) -> Vec<WValue> + 'static {
         todo!()
     }
 }
@@ -254,11 +269,11 @@ pub struct WasmtimeExportContext<'a> {
 
 macro_rules! impl_func_getter {
     ($args:ty, $rets:ty) => {
-        impl<'c> FuncGetter<'c, $args, $rets> for WasmtimeExportContext {
-            unsafe fn get_func(
-                &'c mut self,
+        impl<'c> FuncGetter<$args, $rets> for WasmtimeExportContext<'c> {
+            unsafe fn get_func<'s>(
+                &'s mut self,
                 name: &str,
-            ) -> Result<Box<dyn FnMut($args) -> Result<$rets, RuntimeError> + 'c>, ResolveError>
+            ) -> Result<Box<dyn FnMut($args) -> Result<$rets, RuntimeError> + 's>, ResolveError>
             {
                 todo!()
             }
@@ -273,23 +288,38 @@ impl_func_getter!(i32, ());
 impl_func_getter!((), i32);
 impl_func_getter!((), ());
 
-impl<'a> ExportContext<'a, WasmtimeWasmBackend> for WasmtimeExportContext {
-    fn memory(&self, memory_index: u32) -> <WasmtimeWasmBackend as WasmBackend>::WITMemory {
-        todo!()
+impl<'a, 'r> ExportContext<'a, WasmtimeWasmBackend> for WasmtimeExportContext<'r> {
+    fn memory(&mut self, memory_index: u32) -> <WasmtimeWasmBackend as WasmBackend>::WITMemory {
+        let memory = self.caller.get_export("memory").unwrap();
+        WasmtimeWITMemory::new(memory.into_memory().unwrap()) // handle error
     }
 }
 
 pub struct WasmtimeExportedDynFunc {
-    func: wasmtime::Func
+    func: wasmtime::Func,
+    signature: FuncSig,
 }
 
 impl ExportedDynFunc<WasmtimeWasmBackend> for WasmtimeExportedDynFunc {
-    fn signature(&self) -> &FuncSig {
-        todo!()
+    fn signature(&self, store: &WasmtimeStore) -> &FuncSig {
+        &self.signature
     }
 
-    fn call(&self, args: &[WValue]) -> CallResult<Vec<WValue>> {
-        todo!()
+    fn call(&self, store: &mut WasmtimeStore, args: &[WValue]) -> CallResult<Vec<WValue>> {
+        let args = args
+            .iter()
+            .map(wvalue_to_val)
+            .collect::<Vec<_>>();
+
+        let mut rets = Vec::new();
+        rets.resize(self.signature.returns().collect::<Vec<_>>().len(), Val::null()); // todo make O(1), not O(n)
+        self.func.call(&mut store.store, &args, &mut rets).unwrap(); // todo handle error
+        let rets = rets
+            .iter()
+            .map(val_to_wvalue)
+            .collect::<Result<Vec<_>, ()>>()
+            .unwrap(); // todo handle error
+        Ok(rets)
     }
 }
 
@@ -368,6 +398,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         todo!()
     }
 }
+
 
 // tests
 #[cfg(test)]

@@ -322,7 +322,7 @@ pub struct WasmerDynamicFunc {
 }
 
 impl<'a> DynamicFunc<'a, WasmerBackend> for WasmerDynamicFunc {
-    fn new<F>(sig: FuncSig, func: F) -> Self
+    fn new<F>(_store: &mut WasmerStore, sig: FuncSig, func: F) -> Self
     where
         F: Fn(&mut dyn ExportContext<WasmerBackend>, &[WValue]) -> Vec<WValue> + 'static,
     {
@@ -542,7 +542,7 @@ impl_func_getter!((), i32);
 impl_func_getter!((), ());
 
 impl<'c, 'r> ExportContext<'c, WasmerBackend> for WasmerExportContext<'r> {
-    fn memory(&self, memory_index: u32) -> <WasmerBackend as WasmBackend>::WITMemory {
+    fn memory(&mut self, memory_index: u32) -> <WasmerBackend as WasmBackend>::WITMemory {
         WITMemory(self.ctx.memory(memory_index).clone())
     }
 }
@@ -553,11 +553,11 @@ pub struct WasmerExportedDynFunc<'a> {
 }
 
 impl<'a> ExportedDynFunc<WasmerBackend> for WasmerExportedDynFunc<'a> {
-    fn signature(&self) -> &FuncSig {
+    fn signature(&self, _store: &WasmerStore) -> &FuncSig {
         &self.sig
     }
 
-    fn call(&self, args: &[WValue]) -> CallResult<Vec<WValue>> {
+    fn call(&self, _store: &mut WasmerStore, args: &[WValue]) -> CallResult<Vec<WValue>> {
         use crate::type_converters::general_wval_to_wval;
         use crate::type_converters::wval_to_general_wval;
         self.func

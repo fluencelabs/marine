@@ -11,9 +11,9 @@ pub enum Export<M: MemoryExport, F: FunctionExport> {
 }
 
 pub trait ExportedDynFunc<WB: WasmBackend> {
-    fn signature(&self) -> &FuncSig;
+    fn signature(&self, store: &<WB as WasmBackend>::Store) -> &FuncSig;
 
-    fn call(&self, args: &[WValue]) -> CallResult<Vec<WValue>>;
+    fn call(&self, store: &mut <WB as WasmBackend>::Store, args: &[WValue]) -> CallResult<Vec<WValue>>;
 }
 
 pub trait MemoryExport {}
