@@ -108,6 +108,13 @@ export class FaaS {
 
                     const message = getStringFromWasm0(wasm, offset, size);
                     const str = `[marine service "${this._serviceId}"]: ${message}`;
+
+                    const nodeProcess = (globalThis as any).process ? (globalThis as any).process : undefined;
+                    if (nodeProcess && nodeProcess.stderr) {
+                        nodeProcess.stderr.write(str);
+                        return;
+                    }
+
                     if (level <= LEVEL_ERROR) {
                         console.error(str);
                     } else if (level === LEVEL_WARN) {
