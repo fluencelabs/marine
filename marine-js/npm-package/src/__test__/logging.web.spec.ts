@@ -11,6 +11,8 @@ const loadWasmModule = async (waspPath: string) => {
     return module;
 };
 
+(globalThis as any).process = undefined;
+
 describe.each([
     // force column layout
     ['error', 'error'],
@@ -18,7 +20,7 @@ describe.each([
     ['info', 'info'],
     ['debug', 'log'],
     ['trace', 'log'],
-])('WASM logging tests', (level, fn) => {
+])('WASM logging tests in web', (level, fn) => {
     it('Testing logging level', async () => {
         // arrange
         // @ts-ignore
