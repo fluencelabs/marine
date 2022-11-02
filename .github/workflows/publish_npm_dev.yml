@@ -127,3 +127,6 @@ jobs:
         working-directory: marine-js/npm-package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
