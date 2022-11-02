@@ -43,6 +43,9 @@ jobs:
         run: ./build.sh
         working-directory: marine-js
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        -
       - name: Install marine-js npm dependencies
         uses: bahmutov/npm-install@v1
         with:
