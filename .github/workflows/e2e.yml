@@ -23,7 +23,7 @@ jobs:
 
     uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@marine-e2e
     with:
-      dependencies: |
+      cargo-dependencies: |
         [
           {
             "package": "marine-runtime",
