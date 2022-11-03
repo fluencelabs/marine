@@ -28,11 +28,13 @@ jobs:
         [
           {
             "package": "marine-runtime",
+            "manifest": "avm/server/Cargo.toml",
             "version": "=${{ needs.snapshot.outputs.cargo-version }}",
             "registry": "fluence"
           },
           {
             "package": "fluence-app-service",
+            "manifest": "air/Cargo.toml",
             "version": "=${{ needs.snapshot.outputs.cargo-version }}",
             "registry": "fluence"
           }
