@@ -23,6 +23,7 @@ jobs:
 
     uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@marine-e2e
     with:
+      ref: marine-e2e
       cargo-dependencies: |
         [
           {
