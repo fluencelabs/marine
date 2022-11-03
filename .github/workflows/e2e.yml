@@ -17,55 +17,22 @@ jobs:
     name: "marine"
     uses: ./.github/workflows/snapshot.yml
 
-  marine-rs-sdk-test:
-    needs:
-      - snapshot
-
-    uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@marine-e2e
-    with:
-      fluence-app-service-version: |
-        {
-          "version": "=${{ needs.snapshot.outputs.version }}",
-          "registry": "fluence"
-        }
-
   aquavm:
     needs:
       - snapshot
 
     uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@marine-e2e
     with:
-      marine-runtime-version: |
-        {
-          "version": "=${{ needs.snapshot.outputs.version }}",
-          "registry": "fluence"
-        }
-      fluence-app-service-version: |
-        {
-          "version": "=${{ needs.snapshot.outputs.version }}",
-          "registry": "fluence"
-        }
-
-  rust-peer:
-    needs:
-      - snapshot
-      - aquavm
-
-    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@marine-e2e
-    with:
-      image-name: "docker.fluence.dev/marine"
-      fluence-app-service-version: |
-        {
-          "version": "=${{ needs.snapshot.outputs.version }}",
-          "registry": "fluence"
-        }
-      avm-server-version: |
-        {
-          "version": "=${{ needs.aquavm.outputs.avm-server-version }}",
-          "registry": "fluence"
-        }
-      air-interpreter-wasm-version: |
-        {
-          "version": "=${{ needs.aquavm.outputs.air-interpreter-wasm-version }}",
-          "registry": "fluence"
-        }
+      dependencies: |
+        [
+          {
+            "package": "marine-runtime",
+            "version": "=${{ needs.snapshot.outputs.version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-app-service",
+            "version": "=${{ needs.snapshot.outputs.version }}",
+            "registry": "fluence"
+          }
+        ]
