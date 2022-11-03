@@ -3,21 +3,20 @@ name: Publish snapshots
 on:
   workflow_call:
     outputs:
-      version:
-        description: "Snapshot version"
-        value: ${{ jobs.publish.outputs.version }}
+      cargo-version:
+        description: "cargo snapshot version"
+        value: ${{ jobs.cargo-snapshot.outputs.version }}
 
 jobs:
-  publish:
-    name: "Publish snapshots"
+  cargo-snapshot:
+    name: "Publish cargo snapshots"
     runs-on: builder
 
     outputs:
-      version: "${{ steps.version.outputs.version }}"
+      version: "${{ steps.snapshot.outputs.version }}"
 
     permissions:
       contents: read
-      pull-requests: write
       id-token: write
 
     steps:
@@ -42,68 +41,6 @@ jobs:
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Install cargo-workspaces
-        uses: baptiste0928/cargo-install@v1.3.0
-        with:
-          crate: cargo-workspaces
-
-      - name: Generate package version
-        run: |
-          SHA=${{ github.event.pull_request.head.sha }}
-          SHA="${SHA::7}"
-          BRANCH="${GITHUB_HEAD_REF//[^a-zA-Z0-9-]/-}"
-          echo "sha=${SHA}" >> $GITHUB_OUTPUT
-          echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
-
-          echo "VERSION=${BRANCH}-${SHA}-${{ github.run_number }}-${{ github.run_attempt }}" >> $GITHUB_ENV
-
-      - name: Set version to snapshot version
-        run: |
-          cargo workspaces version \
-            --pre-id "${VERSION}" \
-            --force '*' \
-            --no-git-commit \
-            --exact \
-            -y prerelease
-
-      - name: Prepare for publishing
-        run: |
-          # set registry to "fluence"
-          # workaround for https://github.com/pksunkara/cargo-workspaces/issues/79
-          cargo workspaces exec bash -c \
-          'grep -q "publish = false" Cargo.toml || sed -i "/\[package\]/a publish = [\"fluence\"]" Cargo.toml'
-
-          # set workspace dependencies registry to "fluence"
-          while read -r crate; do
-            cargo workspaces exec sed -i "s/$crate =\s{\s\(.*\)\s}/$crate = { \1, registry = \"fluence\" }/g" Cargo.toml
-          done < <(cargo workspaces list)
-
-      - name: Publish snapshot to selfhosted registry
-        run: |
-          # publish snapshot
-          cargo workspaces publish \
-            --registry fluence \
-            --no-git-commit \
-            --from-git \
-            --allow-dirty \
-            -y prerelease
-
-      - name: Get package version
-        id: version
-        working-directory: marine
-        run: |
-          echo "version=$(cargo read-manifest | jq -r .version)" >> $GITHUB_OUTPUT
-
-      - name: Print results to check summary
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          echo "# Rust" >> $GITHUB_STEP_SUMMARY
-          while read -r crate; do
-          cat <<SNAPSHOT >> $GITHUB_STEP_SUMMARY
-          ## $crate version is [${{ env.VERSION }}](https://crates.fluence.dev/#/crate?name=$crate&version=${{ env.VERSION }})
-          \`\`\`shell
-          cargo add $crate@${{ env.VERSION }} --registry fluence
-          \`\`\`
-          SNAPSHOT
-          done < <(cargo workspaces list)
+      - name: Publish cargo snapshots
+        id: snapshot
+        uses: fluencelabs/github-actions/cargo-publish-snapshot@FLU-119-cargo-publish-snapshot

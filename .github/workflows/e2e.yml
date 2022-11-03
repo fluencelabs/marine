@@ -27,12 +27,12 @@ jobs:
         [
           {
             "package": "marine-runtime",
-            "version": "=${{ needs.snapshot.outputs.version }}",
+            "version": "=${{ needs.snapshot.outputs.cargo-version }}",
             "registry": "fluence"
           },
           {
             "package": "fluence-app-service",
-            "version": "=${{ needs.snapshot.outputs.version }}",
+            "version": "=${{ needs.snapshot.outputs.cargo-version }}",
             "registry": "fluence"
           }
         ]
