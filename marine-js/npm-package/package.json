@@ -29,7 +29,7 @@
         "ts-jest": "^27.1.4"
     },
     "devDependencies": {
-        "@fluencelabs/avm": "0.29.1",
+        "@fluencelabs/avm": "0.30.5",
         "@types/download": "8.0.1",
         "@types/jest": "27.5.2",
         "@types/node": "16.11.59",

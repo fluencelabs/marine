@@ -20,8 +20,6 @@ jobs:
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - run: cargo update --aggressive
-
       - name: Install cargo-workspaces
         run: cargo install cargo-workspaces
 
