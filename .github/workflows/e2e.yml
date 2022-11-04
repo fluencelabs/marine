@@ -21,9 +21,9 @@ jobs:
     needs:
       - snapshot
 
-    uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@marine-e2e
+    uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@update-e2e
     with:
-      ref: marine-e2e
+      ref: update-e2e
       cargo-dependencies: |
         [
           {
@@ -45,9 +45,9 @@ jobs:
       - snapshot
       - aquavm
 
-    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@add-marine-e2e
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@update-e2e
     with:
-      ref: marine-e2e
+      ref: update-e2e
       cargo-dependencies: |
         [
           {
