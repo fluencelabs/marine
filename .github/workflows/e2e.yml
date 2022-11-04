@@ -39,3 +39,30 @@ jobs:
             "registry": "fluence"
           }
         ]
+
+  rust-peer:
+    needs:
+      - snapshot
+      - aquavm
+
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@add-marine-e2e
+    with:
+      ref: marine-e2e
+      cargo-dependencies: |
+        [
+          {
+            "package": "fluence-app-service",
+            "version": "=${{ needs.snapshot.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "avm-server",
+            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "air-interpreter-wasm",
+            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "registry": "fluence"
+          }
+        ]
