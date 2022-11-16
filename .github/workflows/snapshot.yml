@@ -43,4 +43,4 @@ jobs:
 
       - name: Publish cargo snapshots
         id: snapshot
-        uses: fluencelabs/github-actions/cargo-publish-snapshot@FLU-119-cargo-publish-snapshot
+        uses: fluencelabs/github-actions/cargo-publish-snapshot@main
