@@ -1,0 +1,46 @@
+name: Publish snapshots
+
+on:
+  workflow_call:
+    outputs:
+      cargo-version:
+        description: "cargo snapshot version"
+        value: ${{ jobs.cargo-snapshot.outputs.version }}
+
+jobs:
+  cargo-snapshot:
+    name: "Publish cargo snapshots"
+    runs-on: builder
+
+    outputs:
+      version: "${{ steps.snapshot.outputs.version }}"
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Marine
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/marine
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.2
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Publish cargo snapshots
+        id: snapshot
+        uses: fluencelabs/github-actions/cargo-publish-snapshot@main
