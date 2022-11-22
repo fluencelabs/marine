@@ -5,6 +5,7 @@ use thiserror::Error as ThisError;
 
 use std::path::Path;
 use std::str::FromStr;
+use crate::cargo_manifest::ManifestError::CannotProcessManifest;
 
 const SKD_CRATE_NAME: &str = "marine-rs-sdk";
 
@@ -20,6 +21,10 @@ pub enum ManifestError {
     NoSdkVersionError,
     #[error("Cannot parse marine-rs-sdk version: {0}")]
     VersionParseError(#[from] semver::Error),
+    #[error("Inherited dependencies are not supported yet")]
+    InheritedDependencyUnsupported,
+    #[error("Cannot process cargo manifest because of: {0}")]
+    CannotProcessManifest(String)
 }
 
 pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError> {
@@ -28,6 +33,10 @@ pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError>
         match e {
             CargoTomlError::Parse(e) => e.into(),
             CargoTomlError::Io(e) => e.into(),
+            CargoTomlError::InheritedUnknownValue => CannotProcessManifest("inherited unknown value".to_string()),
+            CargoTomlError::WorkspaceIntegrity(reason) => CannotProcessManifest(reason),
+            CargoTomlError::Other(reason) => CannotProcessManifest(reason.to_string()),
+            _ => CannotProcessManifest("Unknown".to_string())
         }
     })?;
 
@@ -42,6 +51,7 @@ pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError>
             .version
             .as_ref()
             .ok_or(ManifestError::NoSdkVersionError)?,
+        Dependency::Inherited(_) => return Err(ManifestError::InheritedDependencyUnsupported)
     };
 
     Version::from_str(version).map_err(Into::into)
