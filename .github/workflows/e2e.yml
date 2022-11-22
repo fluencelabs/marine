@@ -13,13 +13,12 @@ env:
   FORCE_COLOR: true
 
 jobs:
-  snapshot:
-    name: "marine"
+  marine:
     uses: ./.github/workflows/snapshot.yml
 
   aquavm:
     needs:
-      - snapshot
+      - marine
 
     uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@master
     with:
@@ -28,20 +27,20 @@ jobs:
           {
             "package": "marine-runtime",
             "manifest": "avm/server/Cargo.toml",
-            "version": "=${{ needs.snapshot.outputs.cargo-version }}",
+            "version": "=${{ needs.marine.outputs.cargo-version }}",
             "registry": "fluence"
           },
           {
             "package": "fluence-app-service",
             "manifest": "air/Cargo.toml",
-            "version": "=${{ needs.snapshot.outputs.cargo-version }}",
+            "version": "=${{ needs.marine.outputs.cargo-version }}",
             "registry": "fluence"
           }
         ]
 
   rust-peer:
     needs:
-      - snapshot
+      - marine
       - aquavm
 
     uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
@@ -50,7 +49,7 @@ jobs:
         [
           {
             "package": "fluence-app-service",
-            "version": "=${{ needs.snapshot.outputs.cargo-version }}",
+            "version": "=${{ needs.marine.outputs.cargo-version }}",
             "registry": "fluence"
           },
           {
@@ -76,8 +75,7 @@ jobs:
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
-  fluence-js-snapshot:
-    name: "fluence-js"
+  fluence-js:
     needs:
       - aquavm
 
@@ -85,33 +83,32 @@ jobs:
     with:
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
 
-  aqua-snapshot:
-    name: "aqua"
+  aqua:
     needs:
-      - fluence-js-snapshot
+      - fluence-js
 
     uses: fluencelabs/aqua/.github/workflows/snapshot.yml@main
     with:
-      fluence-js-version: "${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}"
+      fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
 
   aqua-playground:
     needs:
-      - fluence-js-snapshot
-      - aqua-snapshot
+      - fluence-js
+      - aqua
       - rust-peer
 
     uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
     with:
-      fluence-js-version: "${{ needs.fluence-js-snapshot.outputs.fluence-js-version }}"
-      aqua-version: "${{ needs.aqua-snapshot.outputs.aqua-version }}"
+      fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
+      aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
   registry:
     needs:
-      - aqua-snapshot
+      - aqua
       - rust-peer
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
-      aqua-version: "${{ needs.aqua-snapshot.outputs.aqua-version }}"
+      aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
