@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { FaaS } from '../FaaS';
+import { LogLevel } from '../types';
 
 const examplesDir = path.join(__dirname, '../../../../examples');
 
@@ -15,22 +16,22 @@ const loadWasmModule = async (waspPath: string) => {
 
 describe.each([
     // force column layout
-    ['error', 'error'],
-    ['warn', 'warn'],
-    ['info', 'info'],
-    ['debug', 'log'],
-    ['trace', 'log'],
-])('WASM logging tests in web', (level, fn) => {
+    ['error', LogLevel.Error],
+    ['warn', LogLevel.Warn],
+    ['info', LogLevel.Info],
+    ['debug', LogLevel.Debug],
+    ['trace', LogLevel.Trace],
+])('WASM logging tests', (level, resLevel) => {
     it('Testing logging level', async () => {
         // arrange
-        // @ts-ignore
-        console[fn] = jest.fn();
+        const logger = jest.fn();
+
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmModule(
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
-        const faas = new FaaS(marine, greeting, 'srv', undefined, { WASM_LOG: level });
+        const faas = new FaaS(marine, greeting, 'srv', logger, undefined, { WASM_LOG: level });
         await faas.init();
 
         // act
@@ -38,10 +39,8 @@ describe.each([
 
         // assert
         expect(res).toBe(null);
-        // @ts-ignore
-        expect(console[fn]).toBeCalledTimes(1);
-        // @ts-ignore
-        expect(console[fn]).toHaveBeenNthCalledWith(1, '[marine service "srv"]: ' + level);
+        expect(logger).toBeCalledTimes(1);
+        expect(logger).toHaveBeenNthCalledWith(1, 'srv', level, resLevel);
     });
 });
 
@@ -52,19 +51,14 @@ describe.each([
 ])('WASM logging tests for level "off"', (env) => {
     it('Testing logging level by passing env: %0', async () => {
         // arrange
-        console.error = jest.fn();
-        console.warn = jest.fn();
-        console.debug = jest.fn();
-        console.trace = jest.fn();
-        console.info = jest.fn();
-        console.log = jest.fn();
+        const logger = jest.fn();
 
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmModule(
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
-        const faas = new FaaS(marine, greeting, 'srv', undefined, env);
+        const faas = new FaaS(marine, greeting, 'srv', logger, undefined, env);
         await faas.init();
 
         // act
@@ -81,11 +75,6 @@ describe.each([
         expect(res4).toBe(null);
         expect(res5).toBe(null);
 
-        expect(console.error).toBeCalledTimes(0);
-        expect(console.warn).toBeCalledTimes(0);
-        expect(console.debug).toBeCalledTimes(0);
-        expect(console.trace).toBeCalledTimes(0);
-        expect(console.info).toBeCalledTimes(0);
-        expect(console.log).toBeCalledTimes(0);
+        expect(logger).toBeCalledTimes(0);
     });
 });

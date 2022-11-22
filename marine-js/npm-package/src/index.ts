@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-export * from './IFluenceAppService';
-export * from './config';
 export * from './FluenceAppService';
-export * from './loadWasmHelpers';
+export * from './config';

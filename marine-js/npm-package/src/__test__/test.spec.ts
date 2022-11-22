@@ -25,13 +25,15 @@ const sqliteDownloadUrl = 'https://github.com/fluencelabs/sqlite/releases/downlo
 
 const examplesDir = path.join(__dirname, '../../../../examples');
 
+const dontLog = () => {};
+
 describe('Fluence app service tests', () => {
     it('Testing greeting service', async () => {
         // arrange
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmModule(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
 
-        const faas = new FaaS(marine, greeting, 'srv');
+        const faas = new FaaS(marine, greeting, 'srv', dontLog);
         await faas.init();
 
         // act
@@ -46,7 +48,7 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmModule(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
 
-        const faas = new FaaS(marine, greeting, 'srv');
+        const faas = new FaaS(marine, greeting, 'srv', dontLog);
         await faas.init();
 
         // act
@@ -63,7 +65,7 @@ describe('Fluence app service tests', () => {
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
-        const faas = new FaaS(marine, greeting, 'srv');
+        const faas = new FaaS(marine, greeting, 'srv', dontLog);
         await faas.init();
 
         // act
@@ -84,7 +86,7 @@ describe('Fluence app service tests', () => {
         const avm = await loadWasmModule(path.join(path.dirname(avmPackagePath), 'avm.wasm'));
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
 
-        const testAvmFaaS = new FaaS(marine, avm, 'avm');
+        const testAvmFaaS = new FaaS(marine, avm, 'avm', dontLog);
         await testAvmFaaS.init();
 
         const s = `(seq
@@ -124,7 +126,7 @@ describe('Fluence app service tests', () => {
         const buf = await download(sqliteDownloadUrl);
         const sqlite = await WebAssembly.compile(buf);
 
-        const marine = new FaaS(control, sqlite, 'sqlite');
+        const marine = new FaaS(control, sqlite, 'sqlite', dontLog);
         await marine.init();
 
         let result: any;
@@ -161,7 +163,7 @@ describe('Fluence app service tests', () => {
         const buf = await download(redisDownloadUrl);
         const redis = await WebAssembly.compile(buf);
 
-        const marine = new FaaS(control, redis, 'redis');
+        const marine = new FaaS(control, redis, 'redis', dontLog);
         await marine.init();
 
         const result1 = marine.call('invoke', ['SET A 10'], undefined);
@@ -186,7 +188,7 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const failing = await loadWasmModule(path.join(examplesDir, './failing/artifacts/failing.wasm'));
 
-        const faas = new FaaS(marine, failing, 'srv');
+        const faas = new FaaS(marine, failing, 'srv', dontLog);
         await await faas.init();
 
         // act
@@ -207,7 +209,7 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmModule(path.join(examplesDir, './failing/artifacts/failing.wasm'));
 
-        const faas = new FaaS(marine, greeting, 'srv');
+        const faas = new FaaS(marine, greeting, 'srv', dontLog);
         await await faas.init();
 
         // act

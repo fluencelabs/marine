@@ -14,88 +14,57 @@
  * limitations under the License.
  */
 
-import { FaaSConfig, Env } from './config';
-import { IFluenceAppService } from './IFluenceAppService';
-import { isBrowser, isNode } from 'browser-or-node';
-import { Thread, ModuleThread, spawn, Worker } from 'threads';
-import { JSONArray, JSONObject, JSONValue } from './types';
+import { Env, FaaSConfig } from './config';
+import { FaaS } from './FaaS';
+import { JSONArray, JSONObject, LogFunction } from './types';
 
-export const defaultNames = {
-    avm: {
-        file: 'avm.wasm',
-        package: '@fluencelabs/avm',
-    },
-    marine: {
-        file: 'marine-js.wasm',
-        package: '@fluencelabs/marine-js',
-    },
-    workerScriptPath: {
-        web: './marine-js.web.js',
-        node: './marine-js.node.js',
-    },
+const asArray = (buf: SharedArrayBuffer | Buffer) => {
+    return new Uint8Array(buf);
 };
 
-export class FluenceAppService implements IFluenceAppService {
-    private _worker?: ModuleThread<IFluenceAppService>;
-    private _workerPath: string;
+export class FluenceAppService {
+    private faasInstances = new Map<string, FaaS>();
+    private controlModule?: WebAssembly.Module;
 
-    constructor(workerScriptPath?: string) {
-        if (workerScriptPath) {
-            this._workerPath = workerScriptPath;
-        }
-        // check if we are running inside the browser and instantiate worker with the corresponding script
-        else if (isBrowser) {
-            this._workerPath = defaultNames.workerScriptPath.web;
-        }
-        // check if we are running inside nodejs and instantiate worker with the corresponding script
-        else if (isNode) {
-            this._workerPath = defaultNames.workerScriptPath.node;
-        } else {
-            throw new Error('Unknown environment');
-        }
+    constructor(private logFunction: LogFunction) {}
+
+    async init(controlModuleWasm: SharedArrayBuffer | Buffer): Promise<void> {
+        this.controlModule = await WebAssembly.compile(asArray(controlModuleWasm));
     }
 
-    async init(controlModule: SharedArrayBuffer | Buffer): Promise<void> {
-        if (this._worker) {
-            return;
-        }
-
-        this._worker = await spawn<IFluenceAppService>(new Worker(this._workerPath));
-        await this._worker.init(controlModule);
-    }
-
-    createService(
-        serviceModule: SharedArrayBuffer | Buffer,
+    async createService(
+        wasm: SharedArrayBuffer | Buffer,
         serviceId: string,
         faaSConfig?: FaaSConfig,
         envs?: Env,
     ): Promise<void> {
-        if (!this._worker) {
-            throw 'Worker is not initialized';
+        if (!this.controlModule) {
+            throw new Error('MarineJS is not initialized. To initialize call `init` function');
         }
 
-        return this._worker.createService(serviceModule, serviceId, faaSConfig, envs);
+        const service = await WebAssembly.compile(asArray(wasm));
+        const faas = new FaaS(this.controlModule, service, serviceId, this.logFunction, faaSConfig, envs);
+        await faas.init();
+        this.faasInstances.set(serviceId, faas);
     }
 
-    callService(
+    async terminate(): Promise<void> {
+        this.faasInstances.forEach((val, key) => {
+            val.terminate();
+        });
+    }
+
+    async callService(
         serviceId: string,
         functionName: string,
         args: JSONArray | JSONObject,
         callParams: any,
     ): Promise<unknown> {
-        if (!this._worker) {
-            throw 'Worker is not initialized';
+        const faas = this.faasInstances.get(serviceId);
+        if (!faas) {
+            throw new Error(`service with id=${serviceId} not found`);
         }
 
-        return this._worker.callService(serviceId, functionName, args, callParams);
-    }
-
-    async terminate(): Promise<void> {
-        if (!this._worker) {
-            return;
-        }
-
-        await this._worker.terminate();
-        await Thread.terminate(this._worker);
+        return faas.call(functionName, args, callParams);
     }
 }
