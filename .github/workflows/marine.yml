@@ -88,11 +88,3 @@ jobs:
       - name: Run marine-js smoke tests
         run: npm run test
         working-directory: marine-js/npm-package
-
-      - name: Run marine-js nodejs tests
-        run: ./run_test.sh
-        working-directory: marine-js/tests/nodejs
-
-      - name: Run marine-js web tests
-        run: ./run_test.sh
-        working-directory: marine-js/tests/web
