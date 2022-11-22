@@ -12,9 +12,9 @@ marine-min-it-version = { path = "../../crates/min-it-version", version = "0.2.0
 
 maplit = "1.0.2"
 log = "0.4.17"
-serde = "1.0.144"
-serde_derive = "1.0.144"
-serde_json = "1.0.85"
+serde = "1.0.147"
+serde_derive = "1.0.147"
+serde_json = "1.0.89"
 toml = "0.5.9"
 wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 
