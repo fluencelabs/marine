@@ -74,8 +74,7 @@ jobs:
       - aquavm
       - rust-peer
 
-    # uses: fluencelabs/fluence-js/.github/workflows/tests.yml@master
-    uses: fluencelabs/fluence-js/.github/workflows/tests.yml@FLU-38-add-marine-js
+    uses: fluencelabs/fluence-js/.github/workflows/tests.yml@master
     with:
       marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
@@ -86,8 +85,7 @@ jobs:
       - marine
       - aquavm
 
-    # uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@master
-    uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@FLU-38-add-marine-js
+    uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@master
     with:
       marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
