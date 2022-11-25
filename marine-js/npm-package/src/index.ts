@@ -16,3 +16,4 @@
 
 export * from './FluenceAppService';
 export * from './config';
+export * from './types';

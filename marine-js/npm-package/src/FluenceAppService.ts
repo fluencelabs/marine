@@ -16,13 +16,13 @@
 
 import { Env, FaaSConfig } from './config';
 import { FaaS } from './FaaS';
-import { JSONArray, JSONObject, LogFunction } from './types';
+import { IFluenceAppService, JSONArray, JSONObject, LogFunction } from './types';
 
 const asArray = (buf: SharedArrayBuffer | Buffer) => {
     return new Uint8Array(buf);
 };
 
-export class FluenceAppService {
+export class FluenceAppService implements IFluenceAppService {
     private faasInstances = new Map<string, FaaS>();
     private controlModule?: WebAssembly.Module;
 
