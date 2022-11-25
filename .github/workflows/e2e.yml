@@ -23,7 +23,7 @@ jobs:
     needs:
       - marine
 
-    uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@master
+    uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@FLU-122
     with:
       cargo-dependencies: |
         [
@@ -46,7 +46,7 @@ jobs:
       - marine
       - aquavm
 
-    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@FLU-122
     with:
       cargo-dependencies: |
         [
