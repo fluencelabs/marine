@@ -18,7 +18,7 @@ anyhow = "1.0.66"
 walrus = "0.19.0"
 wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1"}
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.24.1" }
-nom = "5.1"
+nom = "7.1"
 
 itertools = "0.10.5"
 semver = "1.0.14"

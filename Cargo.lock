@@ -873,7 +873,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4e11b54c84babd376e0844d4973fdf7313799c4b9531757015ea6736ef14b70"
 dependencies = [
  "it-to-bytes",
- "nom",
+ "nom 5.1.2",
  "serde",
  "variant_count",
  "wast",
@@ -1577,7 +1577,7 @@ dependencies = [
  "itertools",
  "marine-it-interfaces 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "marine-module-interface 0.6.0",
- "nom",
+ "nom 5.1.2",
  "semver 1.0.14",
  "serde",
  "thiserror",
@@ -1594,7 +1594,7 @@ dependencies = [
  "itertools",
  "marine-it-interfaces 0.7.3",
  "marine-module-interface 0.6.1",
- "nom",
+ "nom 7.1.1",
  "semver 1.0.14",
  "serde",
  "thiserror",
@@ -1624,7 +1624,7 @@ dependencies = [
  "marine-rs-sdk",
  "marine-utils 0.4.0",
  "multimap",
- "nom",
+ "nom 7.1.1",
  "once_cell",
  "paste",
  "semver 1.0.14",
@@ -1718,7 +1718,7 @@ dependencies = [
  "anyhow",
  "itertools",
  "marine-it-interfaces 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "nom",
+ "nom 5.1.2",
  "semver 1.0.14",
  "serde",
  "thiserror",
@@ -1733,7 +1733,7 @@ dependencies = [
  "anyhow",
  "itertools",
  "marine-it-interfaces 0.7.3",
- "nom",
+ "nom 7.1.1",
  "semver 1.0.14",
  "serde",
  "thiserror",
@@ -1933,6 +1933,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
 
 [[package]]
+name = "minimal-lexical"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
+
+[[package]]
 name = "miniz_oxide"
 version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2064,6 +2070,16 @@ dependencies = [
  "lexical-core",
  "memchr",
  "version_check",
+]
+
+[[package]]
+name = "nom"
+version = "7.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8903e5a29a317527874d0402f867152a3d21c908bb0b933e416c65e301d4c36"
+dependencies = [
+ "memchr",
+ "minimal-lexical",
 ]
 
 [[package]]
@@ -3632,7 +3648,7 @@ dependencies = [
  "it-to-bytes",
  "itertools",
  "log",
- "nom",
+ "nom 5.1.2",
  "safe-transmute",
  "semver 1.0.14",
  "serde",

@@ -23,7 +23,7 @@ it-lilo = "0.4.1"
 it-memory-traits = "0.3.1"
 
 wasm-bindgen = "0.2"
-nom = "5.1"
+nom = "7.1"
 itertools = "0.10.5"
 multimap = "0.8.3"
 boolinator = "2.4.0"
