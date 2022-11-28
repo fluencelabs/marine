@@ -40,6 +40,9 @@ members = [
     "tools/repl",
 ]
 
+[patch.crates-io]
+fluence-it-types = {version = "0.3.2", git = "https://github.com/fluencelabs/interface-types", branch = "renovate/wast-50.x"}
+
 [profile.release]
 opt-level = 3
 debug = false
