@@ -20,7 +20,13 @@ export type JSONValue = string | number | boolean | { [x: string]: JSONValue } |
 export type JSONArray = Array<JSONValue>;
 export type JSONObject = { [x: string]: JSONValue };
 
-export type LogFunction = (service: string, message: string, level: LogLevel) => void;
+export type LogFunction = (message: LogMessage) => void;
+
+export interface LogMessage {
+    service: string;
+    message: string;
+    level: LogLevel;
+}
 
 export enum LogLevel {
     Error = 1,

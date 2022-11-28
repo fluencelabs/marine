@@ -19,11 +19,7 @@ import bindings from '@wasmer/wasi/lib/bindings/browser';
 import { WasmFs } from '@wasmer/wasmfs';
 import { init } from './marine_js';
 import type { FaaSConfig, Env } from './config';
-import type { JSONArray, JSONObject, JSONValue, LogFunction } from './types';
-
-type LogImport = {
-    log_utf8_string: (level: any, target: any, offset: any, size: any) => void;
-};
+import type { JSONArray, JSONObject, LogFunction } from './types';
 
 let cachegetUint8Memory0: any = null;
 
@@ -86,7 +82,11 @@ export class FaaS {
                 log_utf8_string: (level: any, target: any, offset: any, size: any) => {
                     let wasm = cfg.exports;
                     const message = getStringFromWasm0(wasm, offset, size);
-                    this.logFunction(this.serviceId, message, level);
+                    this.logFunction({
+                        service: this.serviceId,
+                        message,
+                        level,
+                    });
                 },
             },
         });
