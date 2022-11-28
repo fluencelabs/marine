@@ -19,6 +19,22 @@ jobs:
   marine:
     uses: ./.github/workflows/snapshot.yml
 
+  marine-rs-sdk-test:
+    needs:
+      - marine
+
+    uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@FLU-127-add-marine-rs-sdk-test
+    with:
+      ref: FLU-127-add-marine-rs-sdk-test
+      cargo-dependencies: |
+        [
+          {
+            "package": "fluence-app-service",
+            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "registry": "fluence"
+          }
+        ]
+
   aquavm:
     needs:
       - marine
