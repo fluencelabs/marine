@@ -32,6 +32,12 @@ jobs:
             "package": "fluence-app-service",
             "version": "=${{ needs.marine.outputs.cargo-version }}",
             "registry": "fluence"
+          },
+          {
+            "package": "fluence-app-service",
+            "manifest": "crates/marine-test-macro-impl/Cargo.toml",
+            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "registry": "fluence"
           }
         ]
 
