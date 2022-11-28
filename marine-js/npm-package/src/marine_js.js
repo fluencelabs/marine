@@ -223,18 +223,32 @@ export async function init(module) {
     function getImports() {
         const imports = {};
         imports.wbg = {};
-        imports.wbg.__wbg_new_693216e109162396 = function() {
+        imports.wbg.__wbg_writebyterange_0c59aabc2aad1210 = function(arg0, arg1, arg2, arg3) {
+            write_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
+        };
+        imports.wbg.__wbg_readbyte_0b96cd62e4c1af25 = function(arg0, arg1) {
+            const ret = read_byte(getObject(arg0), arg1 >>> 0);
+            return ret;
+        };
+        imports.wbg.__wbg_readbyterange_6def5970b1aebf61 = function(arg0, arg1, arg2, arg3) {
+            read_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
+        };
+        imports.wbg.__wbg_getmemorysize_16d792c547469ba4 = function(arg0) {
+            const ret = get_memory_size(getObject(arg0));
+            return ret;
+        };
+        imports.wbg.__wbg_new_abda76e883ba8a5f = function() {
             const ret = new Error();
             return addHeapObject(ret);
         };
-        imports.wbg.__wbg_stack_0ddaca5d1abfb52f = function(arg0, arg1) {
+        imports.wbg.__wbg_stack_658279fe44541cf6 = function(arg0, arg1) {
             const ret = getObject(arg1).stack;
             const ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len0 = WASM_VECTOR_LEN;
             getInt32Memory0()[arg0 / 4 + 1] = len0;
             getInt32Memory0()[arg0 / 4 + 0] = ptr0;
         };
-        imports.wbg.__wbg_error_09919627ac0992f5 = function(arg0, arg1) {
+        imports.wbg.__wbg_error_f851667af71bcfc6 = function(arg0, arg1) {
             try {
                 console.error(getStringFromWasm0(arg0, arg1));
             } finally {
@@ -244,24 +258,10 @@ export async function init(module) {
         imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
             takeObject(arg0);
         };
-        imports.wbg.__wbg_writebyte_e07e58ec23d965ab = function(arg0, arg1, arg2) {
+        imports.wbg.__wbg_writebyte_111fe93c2b0126fe = function(arg0, arg1, arg2) {
             write_byte(getObject(arg0), arg1 >>> 0, arg2);
         };
-        imports.wbg.__wbg_writebyterange_783b310f6d87c4b8 = function(arg0, arg1, arg2, arg3) {
-            write_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
-        };
-        imports.wbg.__wbg_readbyte_fb03559551e0b655 = function(arg0, arg1) {
-            const ret = read_byte(getObject(arg0), arg1 >>> 0);
-            return ret;
-        };
-        imports.wbg.__wbg_readbyterange_0aaccd59853091e1 = function(arg0, arg1, arg2, arg3) {
-            read_byte_range(getObject(arg0), arg1 >>> 0, getArrayU8FromWasm0(arg2, arg3));
-        };
-        imports.wbg.__wbg_getmemorysize_0d0685486c307a71 = function(arg0) {
-            const ret = get_memory_size(getObject(arg0));
-            return ret;
-        };
-        imports.wbg.__wbg_callexport_5fee3906368c5b71 = function(arg0, arg1, arg2, arg3, arg4, arg5) {
+        imports.wbg.__wbg_callexport_633630b9132e20a4 = function(arg0, arg1, arg2, arg3, arg4, arg5) {
             const ret = call_export(getObject(arg1), getStringFromWasm0(arg2, arg3), getStringFromWasm0(arg4, arg5));
             const ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len0 = WASM_VECTOR_LEN;
