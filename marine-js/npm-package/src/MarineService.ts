@@ -18,8 +18,8 @@ import { WASI } from '@wasmer/wasi';
 import bindings from '@wasmer/wasi/lib/bindings/browser';
 import { WasmFs } from '@wasmer/wasmfs';
 import { init } from './marine_js';
-import type { FaaSConfig, Env } from './config';
-import type { JSONArray, JSONObject, LogFunction } from './types';
+import type { MarineServiceConfig, Env } from './config';
+import { JSONArray, JSONObject, LogFunction, LogLevel, logLevels } from './types';
 
 let cachegetUint8Memory0: any = null;
 
@@ -50,7 +50,7 @@ export class MarineService {
         private readonly serviceModule: WebAssembly.Module,
         private readonly serviceId: string,
         private logFunction: LogFunction,
-        faaSConfig?: FaaSConfig,
+        faaSConfig?: MarineServiceConfig,
         env?: Env,
     ) {
         this.env = {
@@ -79,8 +79,14 @@ export class MarineService {
         const serviceInstance = await WebAssembly.instantiate(this.serviceModule, {
             ...wasiImports,
             host: {
-                log_utf8_string: (level: any, target: any, offset: any, size: any) => {
+                log_utf8_string: (levelRaw: any, target: any, offset: any, size: any) => {
                     let wasm = cfg.exports;
+
+                    const level = rawLevelToTypes(levelRaw);
+                    if (level === null) {
+                        return;
+                    }
+
                     const message = getStringFromWasm0(wasm, offset, size);
                     this.logFunction({
                         service: this.serviceId,
@@ -140,3 +146,20 @@ function hasWasiImports(module: WebAssembly.Module): boolean {
     });
     return firstWasiImport !== undefined;
 }
+
+const rawLevelToTypes = (rawLevel: any): LogLevel | null => {
+    switch (rawLevel) {
+        case 1:
+            return 'error';
+        case 2:
+            return 'warn';
+        case 3:
+            return 'info';
+        case 4:
+            return 'debug';
+        case 5:
+            return 'trace';
+    }
+
+    return null;
+};

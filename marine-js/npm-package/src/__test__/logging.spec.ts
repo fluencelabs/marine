@@ -14,12 +14,12 @@ const loadWasmModule = async (waspPath: string) => {
 
 describe.each([
     // force column layout
-    ['error', LogLevel.Error],
-    ['warn', LogLevel.Warn],
-    ['info', LogLevel.Info],
-    ['debug', LogLevel.Debug],
-    ['trace', LogLevel.Trace],
-])('WASM logging tests', (level, resLevel) => {
+    ['error' as const],
+    ['warn' as const],
+    ['info' as const],
+    ['debug' as const],
+    ['trace' as const],
+])('WASM logging tests', (level: LogLevel) => {
     it('Testing logging level', async () => {
         // arrange
         const logger = jest.fn();
@@ -38,7 +38,7 @@ describe.each([
         // assert
         expect(res).toBe(null);
         expect(logger).toBeCalledTimes(1);
-        expect(logger).toHaveBeenNthCalledWith(1, { level: resLevel, message: level, service: 'srv' });
+        expect(logger).toHaveBeenNthCalledWith(1, { level, message: level, service: 'srv' });
     });
 });
 

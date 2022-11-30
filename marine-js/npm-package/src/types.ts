@@ -26,10 +26,14 @@ export interface LogMessage {
     level: LogLevel;
 }
 
-export enum LogLevel {
-    Error = 1,
-    Warn = 2,
-    Info = 3,
-    Debug = 4,
-    Trace = 5,
-}
+export const logLevels = ['trace', 'debug', 'info', 'warn', 'error'] as const;
+
+export type LogLevel = typeof logLevels[number];
+
+export const isLogLevel = (unknown: unknown): unknown is LogLevel => logLevels.some((val): boolean => unknown === val);
+
+export const logLevelToEnv = (level: LogLevel): { WASM_LOG: LogLevel } => {
+    return {
+        WASM_LOG: level,
+    };
+};

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Env, FaaSConfig } from './config';
+import { Env, MarineServiceConfig } from './config';
 import { MarineService } from './MarineService';
 import { JSONArray, JSONObject, LogFunction } from './types';
 
@@ -35,7 +35,7 @@ export class Marine {
     async createService(
         wasm: SharedArrayBuffer | Buffer,
         serviceId: string,
-        faaSConfig?: FaaSConfig,
+        faaSConfig?: MarineServiceConfig,
         envs?: Env,
     ): Promise<void> {
         if (!this.controlModule) {
