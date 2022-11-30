@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export * from './FluenceAppService';
+export * from './Marine';
 export * from './config';
 export * from './types';

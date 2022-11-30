@@ -36,14 +36,14 @@ function getStringFromWasm0(wasm: any, ptr: any, len: any) {
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
-type MarineInstance = Awaited<ReturnType<typeof init>> | 'not-set' | 'terminated';
+type ControlModuleInstance = Awaited<ReturnType<typeof init>> | 'not-set' | 'terminated';
 
 const decoder = new TextDecoder();
 
-export class FaaS {
+export class MarineService {
     private env: Env = {};
 
-    private _marineInstance: MarineInstance = 'not-set';
+    private _controlModuleInstance: ControlModuleInstance = 'not-set';
 
     constructor(
         private readonly controlModule: WebAssembly.Module,
@@ -102,7 +102,7 @@ export class FaaS {
         let result: any;
         try {
             result = JSON.parse(rawResult);
-            this._marineInstance = controlModuleInstance;
+            this._controlModuleInstance = controlModuleInstance;
             return result;
         } catch (ex) {
             throw 'register_module result parsing error: ' + ex + ', original text: ' + rawResult;
@@ -110,20 +110,20 @@ export class FaaS {
     }
 
     terminate(): void {
-        this._marineInstance = 'not-set';
+        this._controlModuleInstance = 'not-set';
     }
 
     call(function_name: string, args: JSONArray | JSONObject, callParams: any): unknown {
-        if (this._marineInstance === 'not-set') {
+        if (this._controlModuleInstance === 'not-set') {
             throw new Error('Not initialized');
         }
 
-        if (this._marineInstance === 'terminated') {
+        if (this._controlModuleInstance === 'terminated') {
             throw new Error('Terminated');
         }
 
         const argsString = JSON.stringify(args);
-        const rawRes = this._marineInstance.call_module(this.serviceId, function_name, argsString);
+        const rawRes = this._controlModuleInstance.call_module(this.serviceId, function_name, argsString);
         const jsonRes: { result: unknown; error: string } = JSON.parse(rawRes);
         if (jsonRes.error) {
             throw new Error(`marine-js failed with: ${jsonRes.error}`);

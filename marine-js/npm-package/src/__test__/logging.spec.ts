@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { FaaS } from '../FaaS';
+import { MarineService } from '../MarineService';
 import { LogLevel } from '../types';
 
 const examplesDir = path.join(__dirname, '../../../../examples');
@@ -11,8 +11,6 @@ const loadWasmModule = async (waspPath: string) => {
     const module = await WebAssembly.compile(buffer);
     return module;
 };
-
-(globalThis as any).process = undefined;
 
 describe.each([
     // force column layout
@@ -31,16 +29,16 @@ describe.each([
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
-        const faas = new FaaS(marine, greeting, 'srv', logger, undefined, { WASM_LOG: level });
-        await faas.init();
+        const marineService = new MarineService(marine, greeting, 'srv', logger, undefined, { WASM_LOG: level });
+        await marineService.init();
 
         // act
-        const res = faas.call('log_' + level, [], undefined);
+        const res = marineService.call('log_' + level, [], undefined);
 
         // assert
         expect(res).toBe(null);
         expect(logger).toBeCalledTimes(1);
-        expect(logger).toHaveBeenNthCalledWith(1, 'srv', level, resLevel);
+        expect(logger).toHaveBeenNthCalledWith(1, { level: resLevel, message: level, service: 'srv' });
     });
 });
 
@@ -58,15 +56,15 @@ describe.each([
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
-        const faas = new FaaS(marine, greeting, 'srv', logger, undefined, env);
-        await faas.init();
+        const marineService = new MarineService(marine, greeting, 'srv', logger, undefined, env);
+        await marineService.init();
 
         // act
-        const res1 = faas.call('log_error', [], undefined);
-        const res2 = faas.call('log_warn', [], undefined);
-        const res3 = faas.call('log_info', [], undefined);
-        const res4 = faas.call('log_debug', [], undefined);
-        const res5 = faas.call('log_trace', [], undefined);
+        const res1 = marineService.call('log_error', [], undefined);
+        const res2 = marineService.call('log_warn', [], undefined);
+        const res3 = marineService.call('log_info', [], undefined);
+        const res4 = marineService.call('log_debug', [], undefined);
+        const res5 = marineService.call('log_trace', [], undefined);
 
         // assert
         expect(res1).toBe(null);

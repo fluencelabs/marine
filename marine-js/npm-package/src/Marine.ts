@@ -15,15 +15,15 @@
  */
 
 import { Env, FaaSConfig } from './config';
-import { FaaS } from './FaaS';
-import { IFluenceAppService, JSONArray, JSONObject, LogFunction } from './types';
+import { MarineService } from './MarineService';
+import { JSONArray, JSONObject, LogFunction } from './types';
 
 const asArray = (buf: SharedArrayBuffer | Buffer) => {
     return new Uint8Array(buf);
 };
 
-export class FluenceAppService implements IFluenceAppService {
-    private faasInstances = new Map<string, FaaS>();
+export class Marine {
+    private marineServices = new Map<string, MarineService>();
     private controlModule?: WebAssembly.Module;
 
     constructor(private logFunction: LogFunction) {}
@@ -43,13 +43,13 @@ export class FluenceAppService implements IFluenceAppService {
         }
 
         const service = await WebAssembly.compile(asArray(wasm));
-        const faas = new FaaS(this.controlModule, service, serviceId, this.logFunction, faaSConfig, envs);
+        const faas = new MarineService(this.controlModule, service, serviceId, this.logFunction, faaSConfig, envs);
         await faas.init();
-        this.faasInstances.set(serviceId, faas);
+        this.marineServices.set(serviceId, faas);
     }
 
     async terminate(): Promise<void> {
-        this.faasInstances.forEach((val, key) => {
+        this.marineServices.forEach((val, key) => {
             val.terminate();
         });
     }
@@ -60,7 +60,7 @@ export class FluenceAppService implements IFluenceAppService {
         args: JSONArray | JSONObject,
         callParams: any,
     ): Promise<unknown> {
-        const faas = this.faasInstances.get(serviceId);
+        const faas = this.marineServices.get(serviceId);
         if (!faas) {
             throw new Error(`service with id=${serviceId} not found`);
         }

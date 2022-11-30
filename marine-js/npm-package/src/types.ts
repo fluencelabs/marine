@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { Env, FaaSConfig } from './config';
-
 export type JSONValue = string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;
 export type JSONArray = Array<JSONValue>;
 export type JSONObject = { [x: string]: JSONValue };
@@ -32,23 +30,6 @@ export enum LogLevel {
     Error = 1,
     Warn = 2,
     Info = 3,
-    Trace = 4,
-    Debug = 5,
+    Debug = 4,
+    Trace = 5,
 }
-
-export type IFluenceAppService = {
-    init: (controlModuleWasm: SharedArrayBuffer | Buffer) => Promise<void>;
-    createService: (
-        serviceModule: SharedArrayBuffer | Buffer,
-        serviceId: string,
-        faaSConfig?: FaaSConfig,
-        envs?: Env,
-    ) => Promise<void>;
-    terminate: () => Promise<void>;
-    callService: (
-        serviceId: string,
-        functionName: string,
-        args: JSONArray | JSONObject,
-        callParams: any,
-    ) => Promise<unknown>;
-};

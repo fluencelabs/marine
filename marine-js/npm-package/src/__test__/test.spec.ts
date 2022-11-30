@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import download from 'download';
-import { FaaS } from '../FaaS';
+import { MarineService } from '../MarineService';
 import { callAvm } from '@fluencelabs/avm';
 import { JSONArray, JSONObject } from '../types';
 
@@ -33,11 +33,11 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmModule(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
 
-        const faas = new FaaS(marine, greeting, 'srv', dontLog);
-        await faas.init();
+        const marineService = new MarineService(marine, greeting, 'srv', dontLog);
+        await marineService.init();
 
         // act
-        const res = faas.call('greeting', ['test'], undefined);
+        const res = marineService.call('greeting', ['test'], undefined);
 
         // assert
         expect(res).toBe('Hi, test');
@@ -48,11 +48,11 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmModule(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
 
-        const faas = new FaaS(marine, greeting, 'srv', dontLog);
-        await faas.init();
+        const marineService = new MarineService(marine, greeting, 'srv', dontLog);
+        await marineService.init();
 
         // act
-        const res = faas.call('greeting', { name: 'test' }, undefined);
+        const res = marineService.call('greeting', { name: 'test' }, undefined);
 
         // assert
         expect(res).toBe('Hi, test');
@@ -65,12 +65,12 @@ describe('Fluence app service tests', () => {
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
-        const faas = new FaaS(marine, greeting, 'srv', dontLog);
-        await faas.init();
+        const marineService = new MarineService(marine, greeting, 'srv', dontLog);
+        await marineService.init();
 
         // act
-        const greetingRecordResult = faas.call('greeting_record', [], undefined);
-        const voidResult: any = faas.call('void_fn', [], undefined);
+        const greetingRecordResult = marineService.call('greeting_record', [], undefined);
+        const voidResult: any = marineService.call('void_fn', [], undefined);
 
         // assert
         expect(greetingRecordResult).toMatchObject({
@@ -86,7 +86,7 @@ describe('Fluence app service tests', () => {
         const avm = await loadWasmModule(path.join(path.dirname(avmPackagePath), 'avm.wasm'));
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
 
-        const testAvmFaaS = new FaaS(marine, avm, 'avm', dontLog);
+        const testAvmFaaS = new MarineService(marine, avm, 'avm', dontLog);
         await testAvmFaaS.init();
 
         const s = `(seq
@@ -113,7 +113,7 @@ describe('Fluence app service tests', () => {
         );
         await testAvmFaaS.terminate();
 
-        // assert
+        // assertMarine
         expect(res).toMatchObject({
             retCode: 0,
             errorMessage: '',
@@ -126,7 +126,7 @@ describe('Fluence app service tests', () => {
         const buf = await download(sqliteDownloadUrl);
         const sqlite = await WebAssembly.compile(buf);
 
-        const marine = new FaaS(control, sqlite, 'sqlite', dontLog);
+        const marine = new MarineService(control, sqlite, 'sqlite', dontLog);
         await marine.init();
 
         let result: any;
@@ -163,7 +163,7 @@ describe('Fluence app service tests', () => {
         const buf = await download(redisDownloadUrl);
         const redis = await WebAssembly.compile(buf);
 
-        const marine = new FaaS(control, redis, 'redis', dontLog);
+        const marine = new MarineService(control, redis, 'redis', dontLog);
         await marine.init();
 
         const result1 = marine.call('invoke', ['SET A 10'], undefined);
@@ -188,12 +188,12 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const failing = await loadWasmModule(path.join(examplesDir, './failing/artifacts/failing.wasm'));
 
-        const faas = new FaaS(marine, failing, 'srv', dontLog);
-        await await faas.init();
+        const marineService = new MarineService(marine, failing, 'srv', dontLog);
+        await await marineService.init();
 
         // act
         try {
-            await faas.call('failing', [], undefined);
+            await marineService.call('failing', [], undefined);
             // should never succeed
             expect(true).toBe(false);
         } catch (e) {
@@ -209,12 +209,12 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmModule(path.join(examplesDir, './failing/artifacts/failing.wasm'));
 
-        const faas = new FaaS(marine, greeting, 'srv', dontLog);
-        await await faas.init();
+        const marineService = new MarineService(marine, greeting, 'srv', dontLog);
+        await await marineService.init();
 
         // act
         try {
-            await faas.call('do_not_exist', [], undefined);
+            await marineService.call('do_not_exist', [], undefined);
             // should never succeed
             expect(true).toBe(false);
         } catch (e) {
