@@ -23,7 +23,7 @@
     "dependencies": {
         "@wasmer/wasi": "^0.12.0",
         "@wasmer/wasmfs": "^0.12.0",
-        "browser-or-node": "^2.0.0",
+        "browser-or-node": "2.0.0",
         "buffer": "^6.0.3",
         "threads": "^1.7.0",
         "ts-jest": "^27.1.4"
