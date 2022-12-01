@@ -50,7 +50,7 @@ export class MarineService {
         private readonly serviceModule: WebAssembly.Module,
         private readonly serviceId: string,
         private logFunction: LogFunction,
-        faaSConfig?: MarineServiceConfig,
+        marineServiceConfig?: MarineServiceConfig,
         env?: Env,
     ) {
         this.env = {
@@ -119,7 +119,7 @@ export class MarineService {
         this._controlModuleInstance = 'not-set';
     }
 
-    call(function_name: string, args: JSONArray | JSONObject, callParams: any): unknown {
+    call(functionName: string, args: JSONArray | JSONObject, callParams: any): unknown {
         if (this._controlModuleInstance === 'not-set') {
             throw new Error('Not initialized');
         }
@@ -129,7 +129,7 @@ export class MarineService {
         }
 
         const argsString = JSON.stringify(args);
-        const rawRes = this._controlModuleInstance.call_module(this.serviceId, function_name, argsString);
+        const rawRes = this._controlModuleInstance.call_module(this.serviceId, functionName, argsString);
         const jsonRes: { result: unknown; error: string } = JSON.parse(rawRes);
         if (jsonRes.error) {
             throw new Error(`marine-js failed with: ${jsonRes.error}`);

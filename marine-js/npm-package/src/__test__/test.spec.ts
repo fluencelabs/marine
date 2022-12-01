@@ -80,14 +80,14 @@ describe('Fluence app service tests', () => {
         expect(voidResult).toStrictEqual(null);
     });
 
-    it('Running avm through FaaS infrastructure', async () => {
+    it('Running avm through Marine infrastructure', async () => {
         // arrange
         const avmPackagePath = require.resolve('@fluencelabs/avm');
         const avm = await loadWasmModule(path.join(path.dirname(avmPackagePath), 'avm.wasm'));
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
 
-        const testAvmFaaS = new MarineService(marine, avm, 'avm', dontLog);
-        await testAvmFaaS.init();
+        const testAvmInMarine = new MarineService(marine, avm, 'avm', dontLog);
+        await testAvmInMarine.init();
 
         const s = `(seq
             (par 
@@ -99,7 +99,7 @@ describe('Fluence app service tests', () => {
 
         // act
         const res = await callAvm(
-            (args: JSONArray | JSONObject): unknown => testAvmFaaS.call('invoke', args, undefined),
+            (args: JSONArray | JSONObject): unknown => testAvmInMarine.call('invoke', args, undefined),
             {
                 currentPeerId: vmPeerId,
                 initPeerId: vmPeerId,
@@ -111,7 +111,7 @@ describe('Fluence app service tests', () => {
             b(''),
             [],
         );
-        await testAvmFaaS.terminate();
+        await testAvmInMarine.terminate();
 
         // assertMarine
         expect(res).toMatchObject({
