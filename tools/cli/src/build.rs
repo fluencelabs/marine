@@ -59,12 +59,13 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
                 .filter(|name| name.ends_with(".wasm"))
                 .collect::<Vec<_>>();
             if !new_wasms.is_empty() {
-                let sdk_version = extract_sdk_version(&manifest_path)?;
-                wasms.extend(
-                    new_wasms
-                        .into_iter()
-                        .map(|name| (name, sdk_version.clone())),
-                )
+                if let Ok(sdk_version) = extract_sdk_version(&manifest_path) {
+                    wasms.extend(
+                        new_wasms
+                            .into_iter()
+                            .map(|name| (name, sdk_version.clone())),
+                    )
+                }
             }
         }
     }

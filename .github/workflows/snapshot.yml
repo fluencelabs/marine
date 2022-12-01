@@ -1,0 +1,120 @@
+name: Publish snapshots
+
+on:
+  workflow_call:
+    outputs:
+      cargo-version:
+        description: "cargo snapshot version"
+        value: ${{ jobs.cargo-snapshot.outputs.version }}
+      marine-js-version:
+        description: "@fluencelabs/marine-js version"
+        value: ${{ jobs.publish-marine-js.outputs.version }}
+
+jobs:
+  cargo-snapshot:
+    name: "Publish cargo snapshots"
+    runs-on: builder
+
+    outputs:
+      version: "${{ steps.snapshot.outputs.version }}"
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Marine
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/marine
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Generate snapshot version
+        id: version
+        uses: fluencelabs/github-actions/generate-snapshot-id@main
+
+      - name: Publish crate snapshots
+        id: snapshot
+        uses: fluencelabs/github-actions/cargo-publish-snapshot@main
+        with:
+          id: ${{ steps.version.outputs.id }}
+
+  publish-marine-js:
+    name: "Publish @fluencelabs/marine-js snapshot"
+    runs-on: builder
+
+    outputs:
+      version: "${{ steps.snapshot.outputs.version }}"
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Marine
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/marine
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Setup wasm-pack
+        uses: jetli/wasm-pack-action@v0.3.0
+
+      - name: Setup node with self-hosted npm registry
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          registry-url: "https://npm.fluence.dev"
+
+      - name: Build with wasm-pack
+        run: ./build.sh
+        working-directory: marine-js
+
+      - name: Run npm install
+        working-directory: marine-js/npm-package
+        run: npm i
+
+      - name: Run npm build
+        working-directory: marine-js/npm-package
+        run: npm run build
+
+      - name: Generate snapshot version
+        id: version
+        uses: fluencelabs/github-actions/generate-snapshot-id@main
+
+      - name: Publish snapshot
+        id: snapshot
+        uses: fluencelabs/github-actions/npm-publish-snapshot@main
+        with:
+          working-directory: marine-js/npm-package
+          id: ${{ steps.version.outputs.id }}

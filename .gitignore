@@ -1,6 +1,7 @@
 target/
 **/*.rs.bk
 .idea
+node_modules/
 
 # MacOS misc file
 *.DS_Store
@@ -11,6 +12,9 @@ target/
 
 # REPL history files
 *.repl_history
+
+# marine-js tmp files
+/marine-js/marine-js-pkg
 
 # local storage of the url-downloader service
 /examples/url-downloader/sites/*
