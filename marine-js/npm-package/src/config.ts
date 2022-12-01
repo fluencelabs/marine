@@ -71,11 +71,6 @@ export interface MarineModuleConfig {
     logging_mask: number;
 }
 
-export interface MarineConfig {
-    service_base_dir: string;
-    faas_config: MarineServiceConfig;
-}
-
 export type Env = WASIEnv;
 
 export type Args = WASIArgs;

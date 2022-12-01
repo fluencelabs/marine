@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export * from './Marine';
+export { MarineService } from './MarineService';
 export * from './config';
 export * from './types';
