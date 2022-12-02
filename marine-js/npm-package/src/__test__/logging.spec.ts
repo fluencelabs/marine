@@ -8,8 +8,7 @@ const examplesDir = path.join(__dirname, '../../../../examples');
 const loadWasmModule = async (waspPath: string) => {
     const fullPath = path.join(waspPath);
     const buffer = await fs.promises.readFile(fullPath);
-    const module = await WebAssembly.compile(buffer);
-    return module;
+    return WebAssembly.compile(buffer);
 };
 
 describe.each([

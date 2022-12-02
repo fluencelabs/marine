@@ -1,9 +1,6 @@
 {
     "compilerOptions": {
-        "lib": [
-            "es2015",
-            "dom"
-        ],
+        "lib": ["es2015", "dom"],
         "outDir": "./dist/",
         "target": "es5",
         "module": "commonjs",
@@ -14,13 +11,8 @@
         "forceConsistentCasingInFileNames": true,
         "declaration": true,
         "declarationMap": false,
-        "sourceMap": true,
+        "sourceMap": true
     },
-    "exclude": [
-        "node_modules",
-        "dist"
-    ],
-    "include": [
-        "src"
-, "src/.ts"    ],
+    "exclude": ["node_modules", "dist"],
+    "include": ["src"]
 }
