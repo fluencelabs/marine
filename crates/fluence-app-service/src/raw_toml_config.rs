@@ -48,12 +48,13 @@ impl TryInto<AppServiceConfig> for TomlAppServiceConfig {
     type Error = AppServiceError;
 
     fn try_into(self) -> Result<AppServiceConfig> {
-        let marine_config = self.toml_marine_config.try_into()?;
         let service_base_dir = match self.service_base_dir {
             Some(service_base_dir) => PathBuf::from(service_base_dir),
             // use tmp dir for service base dir if it isn't defined
             None => std::env::temp_dir(),
         };
+
+        let marine_config = self.toml_marine_config.try_into()?;
 
         Ok(AppServiceConfig {
             service_base_dir,

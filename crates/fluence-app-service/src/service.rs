@@ -26,7 +26,6 @@ use serde_json::Value as JValue;
 
 use std::convert::TryInto;
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::path::PathBuf;
 use std::io::ErrorKind;
 
@@ -144,23 +143,12 @@ impl AppService {
         let base_dir = &config.service_base_dir;
         let service_dir = base_dir.join(&service_id);
         create(&service_dir)?;
-
-        let local_dir = service_dir.join(SERVICE_LOCAL_DIR_NAME);
-        create(&local_dir)?;
-
-        let tmp_dir = service_dir.join(SERVICE_TMP_DIR_NAME);
-        create(&tmp_dir)?;
-
-        let local_dir = local_dir.to_string_lossy().to_string();
-        let tmp_dir = tmp_dir.to_string_lossy().to_string();
-
-        let mut preopened_files = HashSet::new();
-        preopened_files.insert(PathBuf::from(local_dir.clone()));
-        preopened_files.insert(PathBuf::from(tmp_dir.clone()));
+        create(&service_dir.join(SERVICE_LOCAL_DIR_NAME))?;
+        create(&service_dir.join(SERVICE_TMP_DIR_NAME))?;
 
         let mapped_dirs = hashmap! {
-            String::from(SERVICE_LOCAL_DIR_NAME) => PathBuf::from(local_dir),
-            String::from(SERVICE_TMP_DIR_NAME) => PathBuf::from(tmp_dir),
+            SERVICE_LOCAL_DIR_NAME.to_string() => PathBuf::from(SERVICE_LOCAL_DIR_NAME),
+            SERVICE_TMP_DIR_NAME.to_string() => PathBuf::from(SERVICE_TMP_DIR_NAME),
         };
 
         envs.insert(
@@ -172,7 +160,9 @@ impl AppService {
             module.config.extend_wasi_envs(envs.clone());
             module
                 .config
-                .extend_wasi_files(preopened_files.clone(), mapped_dirs.clone());
+                .extend_wasi_files(<_>::default(), mapped_dirs.clone());
+
+            module.config.set_service_base_dir(&service_dir)
         }
 
         Ok(())
