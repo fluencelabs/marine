@@ -97,7 +97,7 @@ jobs:
 
     uses: fluencelabs/fluence-js/.github/workflows/tests.yml@master
     with:
-      marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
+      # marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
@@ -108,7 +108,7 @@ jobs:
 
     uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@master
     with:
-      marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
+      # marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
 
   aqua:
