@@ -87,8 +87,27 @@ fn wasi_mapped_dirs_conflicts_with_preopens() {
 }
 
 #[test]
-fn absolute_paths_in_wasi_prohibited() {
-    let config_path = "tests/wasm_tests/wasi/AbsolutePaths.toml";
+fn mapping_to_absolute_path_in_wasi_prohibited() {
+    let config_path = "tests/wasm_tests/wasi/MapToAbsolutePath.toml";
+    let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
+    let result = Marine::with_raw_config(raw_config);
+    match result {
+        Err(MarineError::InvalidConfig(_)) => (),
+        Err(_) => panic!("Expected InvalidConfig error telling about absolute paths"),
+        Ok(_) => panic!("Expected error while loading this config"),
+    };
+}
+
+#[test]
+fn mapping_from_absolute_path_in_wasi_allowed() {
+    let config_path = "tests/wasm_tests/wasi/MapFromAbsolutePath.toml";
+    let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
+    let result = Marine::with_raw_config(raw_config).expect("Module should be loaded successfully");
+}
+
+#[test]
+fn preopening_absolute_path_in_wasi_prohibited() {
+    let config_path = "tests/wasm_tests/wasi/PreopenAbsolutePath.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
     let result = Marine::with_raw_config(raw_config);
     match result {

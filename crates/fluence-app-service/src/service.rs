@@ -23,12 +23,12 @@ use super::AppServiceError;
 use marine::Marine;
 use marine::IValue;
 use serde_json::Value as JValue;
+use maplit::hashset;
 
 use std::convert::TryInto;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::io::ErrorKind;
-use maplit::hashset;
 
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
@@ -131,8 +131,6 @@ impl AppService {
         service_id: String,
         mut envs: HashMap<Vec<u8>, Vec<u8>>,
     ) -> Result<()> {
-        use maplit::hashset;
-
         let create = |dir: &PathBuf| match std::fs::create_dir(dir) {
             Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
             Err(err) => Err(AppServiceError::CreateDir {

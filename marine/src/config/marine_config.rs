@@ -18,7 +18,8 @@ use marine_core::HostImportDescriptor;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::path::{Component, Path};
+use std::path::Component;
+use std::path::Path;
 use std::path::PathBuf;
 
 #[derive(Clone, Default, Debug)]
