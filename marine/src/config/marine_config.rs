@@ -143,23 +143,26 @@ impl MarineModuleConfig {
         };
     }
 
-    pub fn set_service_base_dir(&mut self, service_base_dir: &Path) {
+    pub fn set_wasi_fs_root(&mut self, root: &Path) {
+        // TODO: make all the security rules for paths configurable from outside
         match &mut self.wasi {
             Some(MarineWASIConfig {
                 preopened_files,
                 mapped_dirs,
                 ..
             }) => {
-                *preopened_files = preopened_files
-                    .iter()
-                    .map(|path| service_base_dir.join(path))
-                    .collect();
-
                 mapped_dirs
                     .values_mut()
-                    .map(|path| *path = service_base_dir.join(&path))
+                    .map(|path| *path = root.join(&path))
                     .for_each(drop);
 
+                let mapped_preopens = preopened_files
+                    .iter()
+                    .map(|path| (path.to_string_lossy().into(), root.join(&path)));
+
+                preopened_files.clear();
+
+                mapped_dirs.extend(mapped_preopens)
             }
             None => {}
         }
@@ -276,10 +279,7 @@ impl<'c> TryFrom<WithContext<'c, TomlMarineModuleConfig>> for MarineModuleConfig
             );
         }
 
-        let wasi = toml_config
-            .wasi
-            .map(|w| w.try_into())
-            .transpose()?;
+        let wasi = toml_config.wasi.map(|w| w.try_into()).transpose()?;
 
         Ok(MarineModuleConfig {
             mem_pages_count: toml_config.mem_pages_count,
@@ -304,13 +304,21 @@ impl TryFrom<TomlWASIConfig> for MarineWASIConfig {
             Ok((elem.0.into_bytes(), to.into_bytes()))
         };
 
+        // Makes sure that no user-defined paths can be safely placed in an isolated directory
+        // TODO: make all the security rules for paths configurable from outside
         let check_path = |path: PathBuf| -> Result<PathBuf, Self::Error> {
             if path.is_absolute() {
-                return Err(MarineError::InvalidConfig(format!("Absolute paths are not supported in WASI section: {}", path.display())));
+                return Err(MarineError::InvalidConfig(format!(
+                    "Absolute paths are not supported in WASI section: {}",
+                    path.display()
+                )));
             }
 
             if path.components().contains(&Component::ParentDir) {
-                return Err(MarineError::InvalidConfig(format!("Paths containing \"..\" are not supported in WASI section: {}", path.display())));
+                return Err(MarineError::InvalidConfig(format!(
+                    "Paths containing \"..\" are not supported in WASI section: {}",
+                    path.display()
+                )));
             }
 
             Ok(path)

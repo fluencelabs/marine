@@ -28,6 +28,7 @@ use std::convert::TryInto;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::io::ErrorKind;
+use maplit::hashset;
 
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
@@ -124,12 +125,13 @@ impl AppService {
     ///     - service_base_dir/service_id/SERVICE_LOCAL_DIR_NAME
     ///     - service_base_dir/service_id/SERVICE_TMP_DIR_NAME
     ///  2. adding service_id to environment variables
+    ///  3. moving all the user defined mapped dirs to service_base_dir/service_id/
     fn set_env_and_dirs(
         config: &mut AppServiceConfig,
         service_id: String,
         mut envs: HashMap<Vec<u8>, Vec<u8>>,
     ) -> Result<()> {
-        use maplit::hashmap;
+        use maplit::hashset;
 
         let create = |dir: &PathBuf| match std::fs::create_dir(dir) {
             Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
@@ -146,9 +148,10 @@ impl AppService {
         create(&service_dir.join(SERVICE_LOCAL_DIR_NAME))?;
         create(&service_dir.join(SERVICE_TMP_DIR_NAME))?;
 
-        let mapped_dirs = hashmap! {
-            SERVICE_LOCAL_DIR_NAME.to_string() => PathBuf::from(SERVICE_LOCAL_DIR_NAME),
-            SERVICE_TMP_DIR_NAME.to_string() => PathBuf::from(SERVICE_TMP_DIR_NAME),
+        // files will be mapped to service_dir later, along with user-defined ones
+        let preopened_files = hashset! {
+            PathBuf::from(SERVICE_LOCAL_DIR_NAME),
+            PathBuf::from(SERVICE_TMP_DIR_NAME)
         };
 
         envs.insert(
@@ -160,13 +163,16 @@ impl AppService {
             module.config.extend_wasi_envs(envs.clone());
             module
                 .config
-                .extend_wasi_files(<_>::default(), mapped_dirs.clone());
-
-            module.config.set_service_base_dir(&service_dir)
+                .extend_wasi_files(preopened_files.clone(), <_>::default());
+            // Must be the last modification of the module.config.
+            // Moves app preopened files and mapped dirs to the &service dir, keeping old aliases.
+            module.config.set_wasi_fs_root(&service_dir)
         }
 
         Ok(())
     }
+
+    fn create_default_dirs() -> Result<()> {}
 
     /// Return statistics of Wasm modules heap footprint.
     /// This operation is cheap.

@@ -138,6 +138,7 @@ pub struct TomlWASIConfig {
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
     use bytesize::ByteSize;
     use super::{TomlMarineNamedModuleConfig, TomlMarineModuleConfig, TomlWASIConfig};
 
@@ -159,7 +160,7 @@ mod tests {
                 logger_enabled: Some(false),
                 logging_mask: Some(1),
                 wasi: Some(TomlWASIConfig {
-                    preopened_files: Some(vec!["a".to_string()]),
+                    preopened_files: Some(vec![PathBuf::from("a")]),
                     envs: None,
                     mapped_dirs: None,
                 }),
