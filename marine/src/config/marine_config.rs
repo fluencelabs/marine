@@ -316,7 +316,8 @@ impl TryFrom<TomlWASIConfig> for MarineWASIConfig {
 
             if path.components().contains(&Component::ParentDir) {
                 return Err(MarineError::InvalidConfig(format!(
-                    "Paths containing \"..\" are not supported in WASI section: {}",
+                    "Paths containing {} are not supported in WASI section: {}",
+                    Component::ParentDir,
                     path.display()
                 )));
             }
