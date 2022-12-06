@@ -125,7 +125,7 @@ impl AppService {
     ///     - service_base_dir/service_id/SERVICE_LOCAL_DIR_NAME
     ///     - service_base_dir/service_id/SERVICE_TMP_DIR_NAME
     ///  2. adding service_id to environment variables
-    ///  3. moving all the user defined mapped dirs to service_base_dir/service_id/
+    ///  3. moving all the user defined mapped dirs and preopened files to service_base_dir/service_id/
     fn set_env_and_dirs(
         config: &mut AppServiceConfig,
         service_id: String,
