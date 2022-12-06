@@ -172,8 +172,6 @@ impl AppService {
         Ok(())
     }
 
-    fn create_default_dirs() -> Result<()> {}
-
     /// Return statistics of Wasm modules heap footprint.
     /// This operation is cheap.
     pub fn module_memory_stats(&self) -> MemoryStats<'_> {
