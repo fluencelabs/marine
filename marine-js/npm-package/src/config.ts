@@ -16,7 +16,7 @@
 
 import { WASIArgs, WASIEnv } from '@wasmer/wasi';
 
-export interface FaaSConfig {
+export interface MarineServiceConfig {
     /**
      * Path to a dir where compiled Wasm modules are located.
      */
@@ -30,16 +30,16 @@ export interface FaaSConfig {
     /**
      * Settings for a module that name's not been found in modules_config.
      */
-    default_modules_config: FaaSModuleConfig;
+    default_modules_config: MarineModuleConfig;
 }
 
 export interface ModuleDescriptor {
     file_name: String;
     import_name: String;
-    config: FaaSModuleConfig;
+    config: MarineModuleConfig;
 }
 
-export interface FaaSModuleConfig {
+export interface MarineModuleConfig {
     /**
      * Maximum memory size accessible by a module in Wasm pages (64 Kb).
      */
@@ -63,7 +63,7 @@ export interface FaaSModuleConfig {
     /**
      * A WASI config.
      */
-    wasi: FaaSWASIConfig;
+    wasi: MarineWASIConfig;
 
     /**
      * Mask used to filter logs, for details see `log_utf8_string`
@@ -71,16 +71,11 @@ export interface FaaSModuleConfig {
     logging_mask: number;
 }
 
-export interface MarineConfig {
-    service_base_dir: string;
-    faas_config: FaaSConfig;
-}
-
 export type Env = WASIEnv;
 
 export type Args = WASIArgs;
 
-export interface FaaSWASIConfig {
+export interface MarineWASIConfig {
     /**
      * A list of environment variables available for this module.
      */
