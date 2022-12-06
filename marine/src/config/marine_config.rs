@@ -18,6 +18,7 @@ use marine_core::HostImportDescriptor;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -142,6 +143,31 @@ impl MarineModuleConfig {
             }
         };
     }
+
+    pub fn set_wasi_fs_root(&mut self, root: &Path) {
+        // TODO: make all the security rules for paths configurable from outside
+        match &mut self.wasi {
+            Some(MarineWASIConfig {
+                preopened_files,
+                mapped_dirs,
+                ..
+            }) => {
+                mapped_dirs
+                    .values_mut()
+                    .map(|path| *path = root.join(&path))
+                    .for_each(drop);
+
+                let mapped_preopens = preopened_files
+                    .iter()
+                    .map(|path| (path.to_string_lossy().into(), root.join(path)));
+
+                mapped_dirs.extend(mapped_preopens);
+
+                preopened_files.clear();
+            }
+            None => {}
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default)]
@@ -164,6 +190,8 @@ use super::TomlMarineNamedModuleConfig;
 use crate::MarineError;
 use crate::MarineResult;
 use crate::config::as_relative_to_base;
+
+use itertools::Itertools;
 
 use std::convert::{TryFrom, TryInto};
 
@@ -252,10 +280,7 @@ impl<'c> TryFrom<WithContext<'c, TomlMarineModuleConfig>> for MarineModuleConfig
             );
         }
 
-        let wasi = toml_config
-            .wasi
-            .map(|w| context.wrapped(w).try_into())
-            .transpose()?;
+        let wasi = toml_config.wasi.map(|w| w.try_into()).transpose()?;
 
         Ok(MarineModuleConfig {
             mem_pages_count: toml_config.mem_pages_count,
@@ -268,15 +293,10 @@ impl<'c> TryFrom<WithContext<'c, TomlMarineModuleConfig>> for MarineModuleConfig
     }
 }
 
-impl<'c> TryFrom<WithContext<'c, TomlWASIConfig>> for MarineWASIConfig {
+impl TryFrom<TomlWASIConfig> for MarineWASIConfig {
     type Error = MarineError;
 
-    fn try_from(toml_config: WithContext<'c, TomlWASIConfig>) -> Result<Self, Self::Error> {
-        let WithContext {
-            context,
-            data: toml_config,
-        } = toml_config;
-
+    fn try_from(toml_config: TomlWASIConfig) -> Result<Self, Self::Error> {
         let to_vec = |elem: (String, toml::Value)| -> Result<(Vec<u8>, Vec<u8>), Self::Error> {
             let to = elem
                 .1
@@ -285,12 +305,33 @@ impl<'c> TryFrom<WithContext<'c, TomlWASIConfig>> for MarineWASIConfig {
             Ok((elem.0.into_bytes(), to.into_bytes()))
         };
 
+        // Makes sure that no user-defined paths can be safely placed in an isolated directory
+        // TODO: make all the security rules for paths configurable from outside
+        let check_path = |path: PathBuf| -> Result<PathBuf, Self::Error> {
+            if path.is_absolute() {
+                return Err(MarineError::InvalidConfig(format!(
+                    "Absolute paths are not supported in WASI section: {}",
+                    path.display()
+                )));
+            }
+
+            if path.components().contains(&Component::ParentDir) {
+                return Err(MarineError::InvalidConfig(format!(
+                    "Paths containing \"..\" are not supported in WASI section: {}",
+                    path.display()
+                )));
+            }
+
+            Ok(path)
+        };
+
         let to_path = |elem: (String, toml::Value)| -> Result<(String, PathBuf), Self::Error> {
             let to = elem
                 .1
                 .try_into::<PathBuf>()
                 .map_err(MarineError::ParseConfigError)?;
-            let to = as_relative_to_base(context.base_path.as_deref(), &to)?;
+
+            let to = check_path(to)?;
             Ok((elem.0, to))
         };
 
@@ -303,7 +344,7 @@ impl<'c> TryFrom<WithContext<'c, TomlWASIConfig>> for MarineWASIConfig {
         let preopened_files = toml_config.preopened_files.unwrap_or_default();
         let preopened_files = preopened_files
             .into_iter()
-            .map(|path| as_relative_to_base(context.base_path.as_deref(), &path))
+            .map(check_path)
             .collect::<Result<HashSet<_>, _>>()?;
 
         let mapped_dirs = toml_config.mapped_dirs.unwrap_or_default();

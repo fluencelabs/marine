@@ -21,6 +21,7 @@ use pretty_assertions::assert_eq;
 use serde_json::json;
 
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 #[test]
 pub fn records() {
@@ -31,7 +32,7 @@ pub fn records() {
 
     let mut records_config: marine::TomlMarineConfig =
         toml::from_slice(&records_config_raw).expect("records config should be well-formed");
-    records_config.modules_dir = Some(String::from("../examples/records/artifacts/"));
+    records_config.modules_dir = Some(PathBuf::from("../examples/records/artifacts/"));
 
     let mut faas = Marine::with_raw_config(records_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
@@ -167,8 +168,9 @@ fn records_passing() {
         toml::from_slice(&inner_records_config_raw)
             .expect("argument passing test config should be well-formed");
 
-    records_passing_config.modules_dir =
-        Some(String::from("./tests/wasm_tests/records_passing/artifacts"));
+    records_passing_config.modules_dir = Some(PathBuf::from(
+        "./tests/wasm_tests/records_passing/artifacts",
+    ));
 
     let mut faas = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
@@ -227,8 +229,9 @@ fn records_destruction() {
         toml::from_slice(&inner_records_config_raw)
             .expect("argument passing test config should be well-formed");
 
-    records_passing_config.modules_dir =
-        Some(String::from("./tests/wasm_tests/records_passing/artifacts"));
+    records_passing_config.modules_dir = Some(PathBuf::from(
+        "./tests/wasm_tests/records_passing/artifacts",
+    ));
 
     let mut faas = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
@@ -281,8 +284,9 @@ fn records_return_frees() {
         toml::from_slice(&inner_records_config_raw)
             .expect("argument passing test config should be well-formed");
 
-    records_passing_config.modules_dir =
-        Some(String::from("./tests/wasm_tests/records_passing/artifacts"));
+    records_passing_config.modules_dir = Some(PathBuf::from(
+        "./tests/wasm_tests/records_passing/artifacts",
+    ));
 
     let mut faas = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
