@@ -159,7 +159,7 @@ impl MarineModuleConfig {
 
                 let mapped_preopens = preopened_files
                     .iter()
-                    .map(|path| (path.to_string_lossy().into(), root.join(&path)));
+                    .map(|path| (path.to_string_lossy().into(), root.join(path)));
 
                 mapped_dirs.extend(mapped_preopens);
 
