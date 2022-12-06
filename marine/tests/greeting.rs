@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use std::path::PathBuf;
 use marine::Marine;
 use marine::MarineModuleInterface;
 use marine::IValue;
@@ -31,7 +32,7 @@ pub fn greeting() {
 
     let mut greeting_config: marine::TomlMarineConfig =
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
-    greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
+    greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
     let mut faas = Marine::with_raw_config(greeting_config)
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
@@ -67,7 +68,7 @@ pub fn get_interfaces() {
 
     let mut greeting_config: marine::TomlMarineConfig =
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
-    greeting_config.modules_dir = Some(String::from("../examples/greeting/artifacts"));
+    greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
     let faas = Marine::with_raw_config(greeting_config)
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));

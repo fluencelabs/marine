@@ -160,9 +160,9 @@ impl MarineModuleConfig {
                     .iter()
                     .map(|path| (path.to_string_lossy().into(), root.join(&path)));
 
-                preopened_files.clear();
+                mapped_dirs.extend(mapped_preopens);
 
-                mapped_dirs.extend(mapped_preopens)
+                preopened_files.clear();
             }
             None => {}
         }
@@ -316,8 +316,7 @@ impl TryFrom<TomlWASIConfig> for MarineWASIConfig {
 
             if path.components().contains(&Component::ParentDir) {
                 return Err(MarineError::InvalidConfig(format!(
-                    "Paths containing {} are not supported in WASI section: {}",
-                    Component::ParentDir,
+                    "Paths containing \"..\" are not supported in WASI section: {}",
                     path.display()
                 )));
             }
