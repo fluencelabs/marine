@@ -23,7 +23,7 @@ use it_lilo::traits::Allocatable;
 use it_memory_traits::MemoryView;
 
 pub(crate) fn ivalue_to_wvalues<A: Allocatable<MV>, MV: MemoryView>(
-    lowerer: &ILowerer<'_, A, MV>,
+    lowerer: &mut ILowerer<'_, A, MV>,
     ivalue: Option<IValue>,
 ) -> HostImportResult<Vec<WValue>> {
     let result = match ivalue {

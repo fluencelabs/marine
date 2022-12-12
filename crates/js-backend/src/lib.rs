@@ -1,11 +1,14 @@
 use std::path::PathBuf;
 use it_memory_traits::MemoryAccessError;
-use marine_wasm_backend_traits::{CallResult, DynamicFunc, Export, ExportContext, ExportedDynFunc, Exports, FuncSig, FunctionExport, ImportObject, Instance, LikeNamespace, Memory, MemoryExport, Module, Namespace, ResolveResult, RuntimeResult, WasiImplementation, WasiState, WasiVersion, WasmBackend, WasmBackendResult, WValue};
+use marine_wasm_backend_traits::{
+    CallResult, DynamicFunc, Export, ExportContext, ExportedDynFunc, Exports, FuncSig,
+    FunctionExport, ImportObject, Instance, LikeNamespace, Memory, MemoryExport, Module, Namespace,
+    ResolveResult, RuntimeResult, WasiImplementation, WasiState, WasiVersion, WasmBackend,
+    WasmBackendResult, WValue,
+};
 use marine_wasm_backend_traits::*;
 #[derive(Clone)]
-pub struct JsWasmBackend {
-
-}
+pub struct JsWasmBackend {}
 
 impl WasmBackend for JsWasmBackend {
     type Module = JsModule;
@@ -28,27 +31,37 @@ impl WasmBackend for JsWasmBackend {
 }
 
 // general
-pub struct JsModule {
-
-}
+pub struct JsModule {}
 
 impl Module<JsWasmBackend> for JsModule {
     fn custom_sections(&self, key: &str) -> Option<&[Vec<u8>]> {
         todo!()
     }
 
-    fn instantiate(&self, imports: &<JsWasmBackend as WasmBackend>::ImportObject) -> WasmBackendResult<<JsWasmBackend as WasmBackend>::Instance> {
+    fn instantiate(
+        &self,
+        imports: &<JsWasmBackend as WasmBackend>::ImportObject,
+    ) -> WasmBackendResult<<JsWasmBackend as WasmBackend>::Instance> {
         todo!()
     }
 }
 
-
-pub struct JsInstance {
-
-}
+pub struct JsInstance {}
 
 impl Instance<JsWasmBackend> for JsInstance {
-    fn export_iter<'a>(&'a self) -> Box<dyn Iterator<Item=(String, Export<<JsWasmBackend as WasmBackend>::MemoryExport, <JsWasmBackend as WasmBackend>::FunctionExport>)> + 'a> {
+    fn export_iter<'a>(
+        &'a self,
+    ) -> Box<
+        dyn Iterator<
+                Item = (
+                    String,
+                    Export<
+                        <JsWasmBackend as WasmBackend>::MemoryExport,
+                        <JsWasmBackend as WasmBackend>::FunctionExport,
+                    >,
+                ),
+            > + 'a,
+    > {
         todo!()
     }
 
@@ -56,24 +69,29 @@ impl Instance<JsWasmBackend> for JsInstance {
         todo!()
     }
 
-
     fn memory(&self, memory_index: u32) -> <JsWasmBackend as WasmBackend>::WITMemory {
         todo!()
     }
 
-    fn memory_by_name(&self, memory_name: &str) -> Option<<JsWasmBackend as WasmBackend>::WITMemory> {
+    fn memory_by_name(
+        &self,
+        memory_name: &str,
+    ) -> Option<<JsWasmBackend as WasmBackend>::WITMemory> {
         todo!()
     }
 }
 
 // imports
 #[derive(Clone)]
-pub struct JsImportObject {
-
-}
+pub struct JsImportObject {}
 
 impl Extend<(String, String, Export<JsMemoryExport, JsFunctionExport>)> for JsImportObject {
-    fn extend<T: IntoIterator<Item=(String, String, Export<JsMemoryExport, JsFunctionExport>)>>(&mut self, iter: T) {
+    fn extend<
+        T: IntoIterator<Item = (String, String, Export<JsMemoryExport, JsFunctionExport>)>,
+    >(
+        &mut self,
+        iter: T,
+    ) {
         todo!()
     }
 }
@@ -87,18 +105,30 @@ impl ImportObject<JsWasmBackend> for JsImportObject {
         todo!()
     }
 
-    fn register<S>(&mut self, name: S, namespace: <JsWasmBackend as WasmBackend>::Namespace) -> Option<Box<dyn LikeNamespace<JsWasmBackend>>> where S: Into<String> {
+    fn register<S>(
+        &mut self,
+        name: S,
+        namespace: <JsWasmBackend as WasmBackend>::Namespace,
+    ) -> Option<Box<dyn LikeNamespace<JsWasmBackend>>>
+    where
+        S: Into<String>,
+    {
         todo!()
     }
 
-    fn get_memory_env(&self) -> Option<Export<<JsWasmBackend as WasmBackend>::MemoryExport, <JsWasmBackend as WasmBackend>::FunctionExport>> {
+    fn get_memory_env(
+        &self,
+    ) -> Option<
+        Export<
+            <JsWasmBackend as WasmBackend>::MemoryExport,
+            <JsWasmBackend as WasmBackend>::FunctionExport,
+        >,
+    > {
         todo!()
     }
 }
 
-pub struct JsNamespace {
-
-}
+pub struct JsNamespace {}
 
 macro_rules! impl_insert_fn {
     ($($name:ident: $arg:ty),* => $rets:ty) => {
@@ -125,7 +155,6 @@ impl_insert_fn!(A: i32, B: i32 => ());
 impl_insert_fn!(A: i32, B: i32, C: i32 => ());
 impl_insert_fn!(A: i32, B: i32, C: i32, D: i32 => ());
 
-
 impl LikeNamespace<JsWasmBackend> for JsNamespace {}
 
 impl Namespace<JsWasmBackend> for JsNamespace {
@@ -133,55 +162,56 @@ impl Namespace<JsWasmBackend> for JsNamespace {
         todo!()
     }
 
-    fn insert(&mut self, name: impl Into<String>, func: <JsWasmBackend as WasmBackend>::DynamicFunc) {
+    fn insert(
+        &mut self,
+        name: impl Into<String>,
+        func: <JsWasmBackend as WasmBackend>::DynamicFunc,
+    ) {
         todo!()
     }
 }
 
-pub struct JsDynamicFunc {
-}
+pub struct JsDynamicFunc {}
 
 impl<'a> DynamicFunc<'a, JsWasmBackend> for JsDynamicFunc {
-    fn new<'c, F>(sig: FuncSig, func: F) -> Self where F: Fn(&mut <JsWasmBackend as WasmBackend>::ExportContext, &[WValue]) -> Vec<WValue> + 'static {
+    fn new<'c, F>(sig: FuncSig, func: F) -> Self
+    where
+        F: Fn(&mut <JsWasmBackend as WasmBackend>::ExportContext, &[WValue]) -> Vec<WValue>
+            + 'static,
+    {
         todo!()
     }
 }
 
 //exports
 
-pub struct JsExports {
-
-}
+pub struct JsExports {}
 
 impl Exports<JsWasmBackend> for JsExports {
-    fn get_func_no_args_no_rets<'a>(&'a self, name: &str) -> ResolveResult<Box<dyn Fn() -> RuntimeResult<()> + 'a>> {
+    fn get_func_no_args_no_rets<'a>(
+        &'a self,
+        name: &str,
+    ) -> ResolveResult<Box<dyn Fn() -> RuntimeResult<()> + 'a>> {
         todo!()
     }
 
-    fn get_dyn_func<'a>(&'a self, name: &str) -> ResolveResult<<JsWasmBackend as WasmBackend>::ExportedDynFunc> {
+    fn get_dyn_func<'a>(
+        &'a self,
+        name: &str,
+    ) -> ResolveResult<<JsWasmBackend as WasmBackend>::ExportedDynFunc> {
         todo!()
     }
 }
 
-pub struct JsMemoryExport {
+pub struct JsMemoryExport {}
 
-}
+impl MemoryExport for JsMemoryExport {}
 
-impl MemoryExport for JsMemoryExport {
+pub struct JsFunctionExport {}
 
-}
+impl FunctionExport for JsFunctionExport {}
 
-pub struct JsFunctionExport {
-
-}
-
-impl FunctionExport for JsFunctionExport {
-
-}
-
-pub struct JsExportContext {
-
-}
+pub struct JsExportContext {}
 
 macro_rules! impl_func_getter {
     ($args:ty, $rets:ty) => {
@@ -210,9 +240,7 @@ impl<'a> ExportContext<'a, JsWasmBackend> for JsExportContext {
     }
 }
 
-pub struct JsExportedDynFunc {
-
-}
+pub struct JsExportedDynFunc {}
 
 impl ExportedDynFunc<JsWasmBackend> for JsExportedDynFunc {
     fn signature(&self) -> &FuncSig {
@@ -226,9 +254,7 @@ impl ExportedDynFunc<JsWasmBackend> for JsExportedDynFunc {
 
 // Interface types
 #[derive(Clone)]
-pub struct JsWITMemory {
-
-}
+pub struct JsWITMemory {}
 
 impl it_memory_traits::Memory<JsWITMemoryView> for JsWITMemory {
     fn view(&self) -> JsWITMemoryView {
@@ -246,9 +272,7 @@ impl Memory<JsWasmBackend> for JsWITMemory {
     }
 }
 
-pub struct JsWITMemoryView {
-
-}
+pub struct JsWITMemoryView {}
 
 impl it_memory_traits::MemoryReadable for JsWITMemoryView {
     fn read_byte(&self, offset: u32) -> u8 {
@@ -285,11 +309,19 @@ impl it_memory_traits::MemoryView for JsWITMemoryView {
 pub struct JsWasi {}
 
 impl WasiImplementation<JsWasmBackend> for JsWasi {
-    fn generate_import_object_for_version(version: WasiVersion, args: Vec<Vec<u8>>, envs: Vec<Vec<u8>>, preopened_files: Vec<PathBuf>, mapped_dirs: Vec<(String, PathBuf)>) -> Result<<JsWasmBackend as WasmBackend>::ImportObject, String> {
+    fn generate_import_object_for_version(
+        version: WasiVersion,
+        args: Vec<Vec<u8>>,
+        envs: Vec<Vec<u8>>,
+        preopened_files: Vec<PathBuf>,
+        mapped_dirs: Vec<(String, PathBuf)>,
+    ) -> Result<<JsWasmBackend as WasmBackend>::ImportObject, String> {
         todo!()
     }
 
-    fn get_wasi_state<'s>(instance: &'s mut <JsWasmBackend as WasmBackend>::Instance) -> Box<dyn WasiState + 's> {
+    fn get_wasi_state<'s>(
+        instance: &'s mut <JsWasmBackend as WasmBackend>::Instance,
+    ) -> Box<dyn WasiState + 's> {
         todo!()
     }
 }
@@ -305,4 +337,3 @@ mod tests {
         assert_eq!(result, 4);
     }
 }
-

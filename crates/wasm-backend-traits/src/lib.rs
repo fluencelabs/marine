@@ -12,12 +12,11 @@ pub use imports::*;
 pub use wasi::*;
 pub use wtype::*;
 
-
 pub trait WasmBackend: Clone + Default + 'static {
     // general
     type Module: Module<Self>;
     type Instance: Instance<Self>;
-    type Store: Store<Self>;
+    type Store: Store<Self> + wasmer_it::interpreter::wasm::structures::Store;
     // imports/exports -- subject to improvement
     type ImportObject: ImportObject<Self>; // to be replaced with somethink like Linker or Resolver
     type DynamicFunc: DynamicFunc<'static, Self>;
@@ -62,9 +61,17 @@ pub trait Instance<WB: WasmBackend> {
             > + 'a,
     >;
 
-    fn memory(&self, store: &mut <WB as WasmBackend>::Store, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
+    fn memory(
+        &self,
+        store: &mut <WB as WasmBackend>::Store,
+        memory_index: u32,
+    ) -> <WB as WasmBackend>::WITMemory;
 
-    fn memory_by_name(&self, store: &mut <WB as WasmBackend>::Store, memory_name: &str) -> Option<<WB as WasmBackend>::WITMemory>;
+    fn memory_by_name(
+        &self,
+        store: &mut <WB as WasmBackend>::Store,
+        memory_name: &str,
+    ) -> Option<<WB as WasmBackend>::WITMemory>;
 
     fn get_func_no_args_no_rets<'a>(
         &'a self,

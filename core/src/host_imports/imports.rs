@@ -71,96 +71,95 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     let raw_args = itypes_args_to_wtypes(&argument_types);
     let raw_output = itypes_output_to_wtypes(&output_type_to_types(output_type));
 
-    let func =
-        move |ctx: &mut dyn ExportContext<WB>, inputs: &[WValue]| -> Vec<WValue> {
-            let result = {
-                let memory_index = 0;
-                let memory_view = ctx.memory(memory_index).view();
-                let li_helper = LiHelper::new(record_types.clone());
-                let lifter = ILifter::new(memory_view, &li_helper);
-
-                match wvalues_to_ivalues(&lifter, inputs, &argument_types) {
-                    Ok(ivalues) => host_exported_func(ctx, ivalues),
-                    Err(e) => {
-                        log::error!("error occurred while lifting values in host import: {}", e);
-                        error_handler
-                            .as_ref()
-                            .map_or_else(|| default_error_handler(&e), |h| h(&e))
-                    }
-                }
-            };
-
-            let ctx = ctx;
-            init_wasm_func_once!(allocate_func, ctx, (i32, i32), i32, ALLOCATE_FUNC_NAME, 2);
-            /*if allocate_func.borrow().is_none() {
-                let raw_func = match unsafe {
-                    ctx.get_export_func_by_name::<(i32, i32), i32>(ALLOCATE_FUNC_NAME)
-                } {
-                    Ok(func) => func,
-                    Err(_) => return vec![WValue::I32(2)],
-                };
-
-                unsafe {
-                    // assumed that this function will be used only in the context of closure
-                    // linked to a corresponding Wasm import, so it is safe to make is static
-                    // because all Wasm imports live in the Wasmer instances, which
-                    // is itself static (i.e., lives until the end of the program)
-                    let raw_func = std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_func);
-
-                    *allocate_func.borrow_mut() = Some(raw_func);
-                }
-            }*/
-
+    let func = move |ctx: &mut dyn ExportContext<WB>, inputs: &[WValue]| -> Vec<WValue> {
+        let result = {
             let memory_index = 0;
             let memory_view = ctx.memory(memory_index).view();
-            let lo_helper = LoHelper::new(&allocate_func, ctx.memory(memory_index));
-            let t = ILowerer::new(memory_view, &lo_helper)
-                .map_err(HostImportError::LowererError)
-                .and_then(|lowerer| ivalue_to_wvalues(&lowerer, result));
-            let wvalues = match t {
-                Ok(wvalues) => wvalues,
+            let li_helper = LiHelper::new(record_types.clone());
+            let lifter = ILifter::new(memory_view, &li_helper);
+
+            match wvalues_to_ivalues(&lifter, inputs, &argument_types) {
+                Ok(ivalues) => host_exported_func(ctx, ivalues),
                 Err(e) => {
-                    log::error!("host closure failed: {}", e);
-
-                    // returns 0 to a Wasm module in case of errors
-                    init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 4);
-                    init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
-
-                    call_wasm_func!(set_result_ptr_func, 0);
-                    call_wasm_func!(set_result_size_func, 0);
-                    return vec![WValue::I32(0)];
+                    log::error!("error occurred while lifting values in host import: {}", e);
+                    error_handler
+                        .as_ref()
+                        .map_or_else(|| default_error_handler(&e), |h| h(&e))
                 }
-            };
-
-            // TODO: refactor this when multi-value is supported
-            match wvalues.len() {
-                // strings and arrays are passed back to the Wasm module by pointer and size
-                2 => {
-                    init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 4);
-                    init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
-
-                    call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
-                    call_wasm_func!(set_result_size_func, wvalues[1].to_u128() as _);
-                    vec![]
-                }
-
-                // records and primitive types are passed to the Wasm module by pointer
-                // and value on the stack
-                1 => {
-                    init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 3);
-
-                    call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
-                    vec![wvalues[0].clone()]
-                }
-
-                // when None is passed
-                0 => vec![],
-
-                // at now while multi-values aren't supported ivalue_to_wvalues returns only Vec with
-                // 0, 1, 2 values
-                _ => unimplemented!(),
             }
         };
+
+        let ctx = ctx;
+        init_wasm_func_once!(allocate_func, ctx, (i32, i32), i32, ALLOCATE_FUNC_NAME, 2);
+        /*if allocate_func.borrow().is_none() {
+            let raw_func = match unsafe {
+                ctx.get_export_func_by_name::<(i32, i32), i32>(ALLOCATE_FUNC_NAME)
+            } {
+                Ok(func) => func,
+                Err(_) => return vec![WValue::I32(2)],
+            };
+
+            unsafe {
+                // assumed that this function will be used only in the context of closure
+                // linked to a corresponding Wasm import, so it is safe to make is static
+                // because all Wasm imports live in the Wasmer instances, which
+                // is itself static (i.e., lives until the end of the program)
+                let raw_func = std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_func);
+
+                *allocate_func.borrow_mut() = Some(raw_func);
+            }
+        }*/
+
+        let memory_index = 0;
+        let memory_view = ctx.memory(memory_index).view();
+        let mut lo_helper = LoHelper::new(&allocate_func, ctx.memory(memory_index));
+        let t = ILowerer::new(memory_view, &mut lo_helper)
+            .map_err(HostImportError::LowererError)
+            .and_then(|mut lowerer| ivalue_to_wvalues(&mut lowerer, result));
+        let wvalues = match t {
+            Ok(wvalues) => wvalues,
+            Err(e) => {
+                log::error!("host closure failed: {}", e);
+
+                // returns 0 to a Wasm module in case of errors
+                init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 4);
+                init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
+
+                call_wasm_func!(set_result_ptr_func, 0);
+                call_wasm_func!(set_result_size_func, 0);
+                return vec![WValue::I32(0)];
+            }
+        };
+
+        // TODO: refactor this when multi-value is supported
+        match wvalues.len() {
+            // strings and arrays are passed back to the Wasm module by pointer and size
+            2 => {
+                init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 4);
+                init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
+
+                call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
+                call_wasm_func!(set_result_size_func, wvalues[1].to_u128() as _);
+                vec![]
+            }
+
+            // records and primitive types are passed to the Wasm module by pointer
+            // and value on the stack
+            1 => {
+                init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 3);
+
+                call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
+                vec![wvalues[0].clone()]
+            }
+
+            // when None is passed
+            0 => vec![],
+
+            // at now while multi-values aren't supported ivalue_to_wvalues returns only Vec with
+            // 0, 1, 2 values
+            _ => unimplemented!(),
+        }
+    };
 
     <WB as WasmBackend>::DynamicFunc::new(store, FuncSig::new(raw_args, raw_output), func)
 }

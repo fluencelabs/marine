@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use std::cell::{RefCell};
-use std::ops::Deref;
 use super::marine_module::MModule;
 use super::{IType, IFunctionArg, IValue};
 use super::marine_module::Callable;
@@ -47,18 +45,17 @@ pub(super) struct WITFunction<WB: WasmBackend> {
     arguments: Rc<Vec<IFunctionArg>>,
     outputs: Rc<Vec<IType>>,
     inner: WITFunctionInner<WB>,
-    store: Rc<RefCell<<WB as WasmBackend>::Store>>,
 }
 
 impl<WB: WasmBackend> WITFunction<WB> {
     /// Creates functions from a "usual" (not IT) module export.
     pub(super) fn from_export(
-        store: Rc<RefCell<<WB as WasmBackend>::Store>>,
+        store: &mut <WB as WasmBackend>::Store,
         dyn_func: <WB as WasmBackend>::ExportedDynFunc,
         name: String,
     ) -> MResult<Self> {
         use super::type_converters::wtype_to_itype;
-        let signature = dyn_func.signature(&store.deref().borrow().deref());
+        let signature = dyn_func.signature(store);
         let arguments = signature
             .params()
             .map(|wtype| IFunctionArg {
@@ -81,13 +78,11 @@ impl<WB: WasmBackend> WITFunction<WB> {
             arguments,
             outputs,
             inner,
-            store
         })
     }
 
     /// Creates function from a module import.
     pub(super) fn from_import(
-        store_container: Rc<RefCell<<WB as WasmBackend>::Store>>,
         wit_module: &MModule<WB>,
         module_name: &str,
         function_name: &str,
@@ -105,12 +100,13 @@ impl<WB: WasmBackend> WITFunction<WB> {
             arguments,
             outputs,
             inner,
-            store: store_container
         })
     }
 }
 
-impl<WB: WasmBackend> wasm::structures::LocalImport for WITFunction<WB> {
+impl<WB: WasmBackend> wasm::structures::LocalImport<<WB as WasmBackend>::Store>
+    for WITFunction<WB>
+{
     fn name(&self) -> &str {
         self.name.as_str()
     }
@@ -131,14 +127,18 @@ impl<WB: WasmBackend> wasm::structures::LocalImport for WITFunction<WB> {
         &self.outputs
     }
 
-    fn call(&self, arguments: &[IValue]) -> std::result::Result<Vec<IValue>, ()> {
+    fn call(
+        &self,
+        store: &mut <WB as WasmBackend>::Store,
+        arguments: &[IValue],
+    ) -> std::result::Result<Vec<IValue>, ()> {
         use super::type_converters::wval_to_ival;
         use super::type_converters::ival_to_wval;
         match &self.inner {
             WITFunctionInner::Export { func, .. } => func
                 .as_ref()
                 .call(
-                    &mut self.store.deref().borrow_mut(),
+                    store,
                     arguments
                         .iter()
                         .map(ival_to_wval)
@@ -148,7 +148,7 @@ impl<WB: WasmBackend> wasm::structures::LocalImport for WITFunction<WB> {
                 .map_err(|_| ())
                 .map(|results| results.iter().map(wval_to_ival).collect()),
             WITFunctionInner::Import { callable, .. } => Rc::make_mut(&mut callable.clone())
-                .call(arguments)
+                .call(store, arguments)
                 .map_err(|_| ()),
         }
     }

@@ -9,7 +9,7 @@ pub(crate) fn val_type_to_wtype(ty: &wasmtime::ValType) -> Option<WType> {
         ValType::F64 => Some(WType::F64),
         ValType::V128 => None,
         ValType::FuncRef => None,
-        ValType::ExternRef => None
+        ValType::ExternRef => None,
     }
 }
 
@@ -18,7 +18,7 @@ pub(crate) fn wtype_to_val_type(ty: &WType) -> wasmtime::ValType {
         WType::I32 => wasmtime::ValType::I32,
         WType::I64 => wasmtime::ValType::I64,
         WType::F32 => wasmtime::ValType::F32,
-        WType::F64 => wasmtime:: ValType::F64,
+        WType::F64 => wasmtime::ValType::F64,
     }
 }
 

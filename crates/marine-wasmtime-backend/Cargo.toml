@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.1.0"}
-it-memory-traits = "0.3.1"
+wasmer-it = { workspace = true }
 
 wasmtime = "2.0.1"
 wasmtime-wasi = "2.0.1"

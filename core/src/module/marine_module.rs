@@ -15,7 +15,6 @@
  */
 
 use std::borrow::{BorrowMut};
-use std::cell::RefCell;
 use super::wit_prelude::*;
 use super::MFunctionSignature;
 use super::MRecordTypes;
@@ -30,7 +29,6 @@ use marine_wasm_backend_traits::ImportObject;
 use marine_wasm_backend_traits::WasiImplementation;
 use marine_wasm_backend_traits::Namespace;
 use marine_wasm_backend_traits::DynamicFunc;
-use marine_wasm_backend_traits::Store;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
@@ -44,7 +42,6 @@ use wasmer_it::interpreter::Interpreter;
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
-use std::ops::{Deref};
 use std::sync::Arc;
 use std::rc::Rc;
 //use wasmer_core::types::FuncSig;
@@ -59,6 +56,7 @@ type ITInterpreter<WB> = Interpreter<
     WITFunction<WB>,
     <WB as WasmBackend>::WITMemory,
     <WB as WasmBackend>::WITMemoryView,
+    <WB as WasmBackend>::Store,
 >;
 
 #[derive(Clone)]
@@ -75,13 +73,17 @@ pub(super) struct Callable<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> Callable<WB> {
-    pub fn call(&mut self, args: &[IValue]) -> MResult<Vec<IValue>> {
+    pub fn call(
+        &mut self,
+        store: &mut <WB as WasmBackend>::Store,
+        args: &[IValue],
+    ) -> MResult<Vec<IValue>> {
         use wasmer_it::interpreter::stack::Stackable;
 
         let result = self
             .it_module_func
             .interpreter
-            .run(args, Arc::make_mut(&mut self.it_instance))?
+            .run(args, Arc::make_mut(&mut self.it_instance), store)?
             .as_slice()
             .to_owned();
 
@@ -104,7 +106,7 @@ pub(crate) struct MModule<WB: WasmBackend> {
 
     // host_import_object is needed because ImportObject::extend doesn't really deep copy
     // imports, so we need to store imports of this module to prevent their removing.
-   // #[allow(unused)]
+    // #[allow(unused)]
     //host_import_object: <WB as WasmBackend>::ImportObject,
 
     // host_closures_import_object is needed because ImportObject::extend doesn't really deep copy
@@ -118,24 +120,20 @@ pub(crate) struct MModule<WB: WasmBackend> {
     // TODO: save refs instead copying of a record types HashMap.
     /// Record types used in exported functions as arguments or return values.
     export_record_types: MRecordTypes,
-
-    // stores wasm module and instance
-    #[allow(unused)]
-    store: Rc<RefCell<<WB as WasmBackend>::Store>>,
 }
 
 impl<WB: WasmBackend> MModule<WB> {
     pub(crate) fn new(
         name: &str,
-        backend: &WB,
+        store: &mut <WB as WasmBackend>::Store,
         wasm_bytes: &[u8],
         config: MModuleConfig<WB>,
         modules: &HashMap<String, MModule<WB>>,
     ) -> MResult<Self> {
-        let store = Rc::new(RefCell::new(<WB as WasmBackend>::Store::new(backend)));
+        //let store = Rc::new(RefCell::new(<WB as WasmBackend>::Store::new(backend)));
         //let mut store = store_container.deref().borrow_mut();
 
-        let wasmer_module = WB::compile(&mut store.deref().borrow_mut(), wasm_bytes)?;
+        let wasmer_module = WB::compile(store, wasm_bytes)?;
         crate::misc::check_sdk_version::<WB>(name.to_string(), &wasmer_module)?;
 
         let it = extract_it_from_module::<WB>(&wasmer_module)?;
@@ -144,17 +142,22 @@ impl<WB: WasmBackend> MModule<WB> {
         let mit = MITInterfaces::new(it);
 
         let mut wit_instance = Arc::new_uninit();
-        let wit_import_object = Self::adjust_wit_imports(&mut store.deref().borrow_mut(), &mit, wit_instance.clone())?;
+        let wit_import_object = Self::adjust_wit_imports(store, &mit, wit_instance.clone())?;
         //let raw_imports = config.raw_imports.clone();
         let wasi_import_object =
-            Self::create_import_objects(config, &mut store.deref().borrow_mut(), &mit, wit_import_object)?;
+            Self::create_import_objects(config, store, &mit, wit_import_object)?;
 
-        let wasmer_instance = wasmer_module.instantiate(&mut store.deref().borrow_mut(), &wasi_import_object)?;
+        let wasmer_instance = wasmer_module.instantiate(store, &wasi_import_object)?;
         let it_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
-            *Arc::get_mut_unchecked(&mut wit_instance) =
-                MaybeUninit::new(ITInstance::new(&wasmer_instance, store.clone(),name, &mit, modules)?); // todo why is deref_mut needed instead of &mut?
+            *Arc::get_mut_unchecked(&mut wit_instance) = MaybeUninit::new(ITInstance::new(
+                &wasmer_instance,
+                store,
+                name,
+                &mit,
+                modules,
+            )?); // todo why is deref_mut needed instead of &mut?
             std::mem::transmute::<_, Arc<ITInstance<WB>>>(wit_instance)
         };
 
@@ -162,17 +165,14 @@ impl<WB: WasmBackend> MModule<WB> {
 
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
-        if let Ok(initialize_func) = wasmer_instance.get_func_no_args_no_rets(&mut store.deref().borrow_mut(), INITIALIZE_FUNC) {
-            initialize_func(&mut store.deref().borrow_mut())?;
+        if let Ok(initialize_func) = wasmer_instance.get_func_no_args_no_rets(store, INITIALIZE_FUNC) {
+            initialize_func(store)?;
         }
 
         // call _start to call module's main function
-        {
-            let mut store_ref = store.deref().borrow_mut();
-            #[rustfmt::skip]
-            if let Ok(start_func) = wasmer_instance.get_func_no_args_no_rets(&mut store_ref, START_FUNC) {
-                start_func(&mut store_ref)?;
-            }
+        #[rustfmt::skip]
+        if let Ok(start_func) = wasmer_instance.get_func_no_args_no_rets(store, START_FUNC) {
+            start_func(store)?;
         }
 
         Ok(Self {
@@ -182,12 +182,12 @@ impl<WB: WasmBackend> MModule<WB> {
             //host_closures_import_object,
             export_funcs,
             export_record_types,
-            store,
         })
     }
 
     pub(crate) fn call(
         &mut self,
+        store: &mut <WB as WasmBackend>::Store,
         module_name: &str,
         function_name: &str,
         args: &[IValue],
@@ -199,7 +199,7 @@ impl<WB: WasmBackend> MModule<WB> {
                     function_name.to_string(),
                 ))
             },
-            |func| Rc::make_mut(func).call(args),
+            |func| Rc::make_mut(func).call(store, args),
         )
     }
 
@@ -289,7 +289,8 @@ impl<WB: WasmBackend> MModule<WB> {
         let record_types = Rc::new(record_types);
 
         for (import_name, descriptor) in config.host_imports {
-            let host_import = create_host_import_func::<WB>(store, descriptor, record_types.clone());
+            let host_import =
+                create_host_import_func::<WB>(store, descriptor, record_types.clone());
             config.raw_imports.insert(import_name, host_import);
         }
         //let mut host_closures_import_object = <WB as WasmBackend>::ImportObject::new();
@@ -374,9 +375,8 @@ impl<WB: WasmBackend> MModule<WB> {
             interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
-        ) -> impl Fn(&mut dyn ExportContext<WB>, &[WValue]) -> Vec<WValue> + 'static
-        {
-            move |_: &mut dyn ExportContext<WB>, inputs: &[WValue]| -> Vec<WValue> {
+        ) -> impl Fn(&mut dyn ExportContext<WB>, &[WValue]) -> Vec<WValue> + 'static {
+            move |ctx: &mut dyn ExportContext<WB>, inputs: &[WValue]| -> Vec<WValue> {
                 use wasmer_it::interpreter::stack::Stackable;
 
                 use super::type_converters::wval_to_ival;
@@ -397,6 +397,7 @@ impl<WB: WasmBackend> MModule<WB> {
                     interpreter.run(
                         &wit_inputs,
                         Arc::make_mut(&mut wit_instance_callable.assume_init()),
+                        ctx.store(),
                     )
                 };
 

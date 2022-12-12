@@ -14,29 +14,32 @@ pub trait ImportObject<WB: WasmBackend>: Clone {
         name: S,
         namespace: <WB as WasmBackend>::Namespace,
     ) -> Option<Box<dyn LikeNamespace<WB>>>
-        where
-            S: Into<String>;
+    where
+        S: Into<String>;
 }
 
 pub trait DynamicFunc<'a, WB: WasmBackend> {
     fn new<'c, F>(store: &mut <WB as WasmBackend>::Store, sig: FuncSig, func: F) -> Self
-        where
-            F: Fn(&mut dyn ExportContext<WB>, &[WValue]) -> Vec<WValue> + 'static;
+    where
+        F: Fn(&mut dyn ExportContext<WB>, &[WValue]) -> Vec<WValue> + 'static;
 }
 
 pub trait InsertFn<WB: WasmBackend, Args, Rets> {
     fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
-        where
-            F: 'static + Fn(&mut dyn ExportContext<WB>, Args) -> Rets + std::marker::Send + std::marker::Sync;
+    where
+        F: 'static
+            + Fn(&mut dyn ExportContext<WB>, Args) -> Rets
+            + std::marker::Send
+            + std::marker::Sync;
 }
 
 pub trait Namespace<WB: WasmBackend>:
-LikeNamespace<WB>
-+ InsertFn<WB, (), ()>
-+ InsertFn<WB, (i32,), ()>
-+ InsertFn<WB, (i32, i32), ()>
-+ InsertFn<WB, (i32, i32, i32), ()>
-+ InsertFn<WB, (i32, i32, i32, i32), ()>
+    LikeNamespace<WB>
+    + InsertFn<WB, (), ()>
+    + InsertFn<WB, (i32,), ()>
+    + InsertFn<WB, (i32, i32), ()>
+    + InsertFn<WB, (i32, i32, i32), ()>
+    + InsertFn<WB, (i32, i32, i32, i32), ()>
 {
     fn new() -> Self;
 
@@ -46,14 +49,16 @@ LikeNamespace<WB>
 pub trait LikeNamespace<WB: WasmBackend> {}
 
 pub trait ExportContext<'c, WB: WasmBackend>:
-FuncGetter<(i32, i32), i32>
-+ FuncGetter< (i32, i32), ()>
-+ FuncGetter< i32, i32>
-+ FuncGetter< i32, ()>
-+ FuncGetter<(), i32>
-+ FuncGetter< (), ()>
+    FuncGetter<(i32, i32), i32>
+    + FuncGetter<(i32, i32), ()>
+    + FuncGetter<i32, i32>
+    + FuncGetter<i32, ()>
+    + FuncGetter<(), i32>
+    + FuncGetter<(), ()>
 {
     fn memory(&mut self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
+
+    fn store(&mut self) -> &mut <WB as WasmBackend>::Store;
 }
 
 pub struct FuncSig {
@@ -63,9 +68,9 @@ pub struct FuncSig {
 
 impl FuncSig {
     pub fn new<Params, Returns>(params: Params, returns: Returns) -> Self
-        where
-            Params: Into<Cow<'static, [WType]>>,
-            Returns: Into<Cow<'static, [WType]>>,
+    where
+        Params: Into<Cow<'static, [WType]>>,
+        Returns: Into<Cow<'static, [WType]>>,
     {
         Self {
             params: params.into(),

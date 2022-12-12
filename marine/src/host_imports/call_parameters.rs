@@ -28,8 +28,7 @@ use std::ops::Deref;
 pub(crate) fn create_call_parameters_import<WB: WasmBackend>(
     call_parameters: Rc<RefCell<marine_rs_sdk::CallParameters>>,
 ) -> HostImportDescriptor<WB> {
-    let call_parameters_closure = move |_ctx: &mut dyn ExportContext<WB>,
-                                        _args: Vec<IValue>| {
+    let call_parameters_closure = move |_ctx: &mut dyn ExportContext<WB>, _args: Vec<IValue>| {
         let result = crate::to_interface_value(call_parameters.borrow().deref()).unwrap();
         Some(result)
     };

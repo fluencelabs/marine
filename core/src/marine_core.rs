@@ -18,7 +18,7 @@ use super::*;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
 
-use marine_wasm_backend_traits::{WasiState, WasmBackend};
+use marine_wasm_backend_traits::{Store, WasiState, WasmBackend};
 
 use serde::Serialize;
 
@@ -37,14 +37,20 @@ pub struct MModuleInterface<'a> {
 pub struct MarineCore<WB: WasmBackend> {
     // set of modules registered inside Marine
     modules: HashMap<String, MModule<WB>>,
-    wasm_backend: WB
+    // Wasm backend may have state in the future
+    #[allow(unused)]
+    wasm_backend: WB,
+    store: <WB as WasmBackend>::Store,
 }
 
 impl<WB: WasmBackend> MarineCore<WB> {
     pub fn new() -> Self {
+        let wasm_backend = WB::default();
+        let store = <WB as WasmBackend>::Store::new(&wasm_backend);
         Self {
             modules: HashMap::new(),
-            wasm_backend: WB::default()
+            wasm_backend,
+            store,
         }
     }
 
@@ -56,10 +62,10 @@ impl<WB: WasmBackend> MarineCore<WB> {
         arguments: &[IValue],
     ) -> MResult<Vec<IValue>> {
         let module_name = module_name.as_ref();
-
+        let store = &mut self.store;
         self.modules.get_mut(module_name).map_or_else(
             || Err(MError::NoSuchModule(module_name.to_string())),
-            |module| module.call(module_name, func_name.as_ref(), arguments),
+            |module| module.call(store, module_name, func_name.as_ref(), arguments),
         )
     }
 
@@ -81,7 +87,7 @@ impl<WB: WasmBackend> MarineCore<WB> {
     ) -> MResult<()> {
         let _prepared_wasm_bytes =
             crate::misc::prepare_module(wasm_bytes, config.max_heap_pages_count)?;
-        let module = MModule::new(&name, &self.wasm_backend, wasm_bytes, config, &self.modules)?;
+        let module = MModule::new(&name, &mut self.store, wasm_bytes, config, &self.modules)?;
 
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {

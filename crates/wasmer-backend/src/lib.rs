@@ -1,6 +1,9 @@
 use std::marker::PhantomData;
 //use std::marker::PhantomData;
-use marine_wasm_backend_traits::{DynamicFunc, Export, ExportContext, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue, WasmBackend, CompilationError, InsertFn, WasiVersion, Store};
+use marine_wasm_backend_traits::{
+    DynamicFunc, Export, ExportContext, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue,
+    WasmBackend, CompilationError, InsertFn, WasiVersion, Store,
+};
 use marine_wasm_backend_traits::WasmBackendResult;
 use marine_wasm_backend_traits::WasmBackendError;
 use marine_wasm_backend_traits::Module;
@@ -41,8 +44,7 @@ use crate::memory::WITMemory;
 use crate::type_converters::{general_wval_to_wval, wval_to_general_wval};
 
 #[derive(Clone, Default)]
-pub struct WasmerBackend /*<'a>*/ {
-}
+pub struct WasmerBackend /*<'a>*/ {}
 
 impl WasmBackend for WasmerBackend /*<'b>*/ {
     type Store = WasmerStore;
@@ -70,9 +72,9 @@ impl WasmBackend for WasmerBackend /*<'b>*/ {
     }
 }
 
-pub struct WasmerStore {
+pub struct WasmerStore {}
 
-}
+impl wasmer_it::interpreter::wasm::structures::Store for WasmerStore {}
 
 impl Store<WasmerBackend> for WasmerStore {
     fn new(_backend: &WasmerBackend) -> Self {
@@ -89,7 +91,11 @@ impl Module<WasmerBackend> for WasmerModule {
         self.module.custom_sections(name)
     }
 
-    fn instantiate(&self, _store: &mut WasmerStore, imports: &WasmerImportObject) -> WasmBackendResult<WasmerInstance> {
+    fn instantiate(
+        &self,
+        _store: &mut WasmerStore,
+        imports: &WasmerImportObject,
+    ) -> WasmBackendResult<WasmerInstance> {
         self.module
             .instantiate(&imports.import_object)
             .map_err(|e| WasmBackendError::InstantiationError(e.to_string()))
@@ -115,21 +121,28 @@ impl Instance<WasmerBackend> for WasmerInstance {
         Box::new(export_iter.map(|(name, export)| (name, export_from_wasmer_export(export))))
     }
 
-    fn memory(&self, _store: &mut WasmerStore, memory_index: u32, ) -> <WasmerBackend as WasmBackend>::WITMemory {
+    fn memory(
+        &self,
+        _store: &mut WasmerStore,
+        memory_index: u32,
+    ) -> <WasmerBackend as WasmBackend>::WITMemory {
         WITMemory(self.instance.context().memory(memory_index).clone())
     }
 
     // todo check if right
-    fn memory_by_name(&self, _store: &mut WasmerStore, memory_name: &str) -> Option<<WasmerBackend as WasmBackend>::WITMemory> {
-        self
-            .import_object
+    fn memory_by_name(
+        &self,
+        _store: &mut WasmerStore,
+        memory_name: &str,
+    ) -> Option<<WasmerBackend as WasmBackend>::WITMemory> {
+        self.import_object
             .import_object
             .maybe_with_namespace("env", |env| env.get_export(memory_name))
             .map(|export| match export {
                 wasmer_runtime::Export::Memory(memory) => {
-                    Some(WITMemory::new( WasmerMemoryExport {memory} ))
+                    Some(WITMemory::new(WasmerMemoryExport { memory }))
                 }
-                _ => None
+                _ => None,
             })
             .flatten()
     }
@@ -330,11 +343,11 @@ impl<'a> DynamicFunc<'a, WasmerBackend> for WasmerDynamicFunc {
             std::sync::Arc::new(FuncSigConverter(&sig).into()),
             move |ctx: &mut wasmer_core::vm::Ctx, args: &[wasmer_core::prelude::Value]| unsafe {
                 let mut ctx = WasmerExportContext {
-                    ctx
-                    /*ctx: std::mem::transmute::<
-                        &'_ mut wasmer_core::vm::Ctx,
-                        &'static mut wasmer_core::vm::Ctx,
-                    >(ctx),*/
+                    ctx,
+                    store: WasmerStore {}, /*ctx: std::mem::transmute::<
+                                               &'_ mut wasmer_core::vm::Ctx,
+                                               &'static mut wasmer_core::vm::Ctx,
+                                           >(ctx),*/
                 };
 
                 let args = args.iter().map(wval_to_general_wval).collect::<Vec<_>>();
@@ -390,6 +403,7 @@ macro_rules! impl_insert_fn {
                                 &'_ mut wasmer_core::vm::Ctx,
                                 &'static mut wasmer_core::vm::Ctx,
                             >(ctx),
+                            store: WasmerStore {},
                         };
 
                         func(&mut ctx, ($($name,)*))
@@ -428,6 +442,7 @@ impl LikeNamespace<WasmerBackend> for WasmerLikeNamespace {}
 
 pub struct WasmerExportContext<'c> {
     ctx: &'c mut wasmer_core::vm::Ctx,
+    store: WasmerStore,
 }
 
 impl<'c> WasmerExportContext<'c> {
@@ -544,6 +559,10 @@ impl_func_getter!((), ());
 impl<'c, 'r> ExportContext<'c, WasmerBackend> for WasmerExportContext<'r> {
     fn memory(&mut self, memory_index: u32) -> <WasmerBackend as WasmBackend>::WITMemory {
         WITMemory(self.ctx.memory(memory_index).clone())
+    }
+
+    fn store(&mut self) -> &mut <WasmerBackend as WasmBackend>::Store {
+        &mut self.store
     }
 }
 
