@@ -21,6 +21,8 @@ jobs:
 
   marine-rs-sdk:
     uses: fluencelabs/marine-rs-sdk/.github/workflows/snapshot.yml@FLU-135-publish-snapshot
+    with:
+      ref: FLU-135-publish-snapshot
 
   marine-rs-sdk-test:
     needs:
@@ -28,6 +30,7 @@ jobs:
 
     uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@FLU-135-publish-snapshot
     with:
+      ref: FLU-135-publish-snapshot
       cargo-dependencies: |
         [
           {
@@ -152,7 +155,7 @@ jobs:
       - marine-rs-sdk
       - rust-peer
 
-    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@FLU-135-add-e2e
+    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
     with:
       aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
       fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
