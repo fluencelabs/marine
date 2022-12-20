@@ -1,6 +1,6 @@
 use crate::errors::*;
 
-use crate::WasmBackend;
+use crate::{ContextMut, WasmBackend};
 use crate::FuncSig;
 use crate::WValue;
 
@@ -10,12 +10,13 @@ pub enum Export<M: MemoryExport, F: FunctionExport> {
     Other,
 }
 
-pub trait ExportedDynFunc<WB: WasmBackend> {
-    fn signature(&self, store: &<WB as WasmBackend>::Store) -> &FuncSig;
+pub trait ExportedDynFunc<WB: WasmBackend>
+{
+    fn signature<'c>(&self, store: <WB as WasmBackend>::ContextMut<'c>) -> &FuncSig;
 
-    fn call(
+    fn call<'c>(
         &self,
-        store: &mut <WB as WasmBackend>::Store,
+        store: <WB as WasmBackend>::ContextMut<'c>, // <- Store or ExportContext. Need to be able to extract wasmtime::StoreContextMut from them. Same for many methods.
         args: &[WValue],
     ) -> CallResult<Vec<WValue>>;
 }

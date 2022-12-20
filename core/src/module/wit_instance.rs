@@ -180,7 +180,7 @@ impl<'v, WB: WasmBackend>
         WITFunction<WB>,
         <WB as WasmBackend>::WITMemory,
         <WB as WasmBackend>::WITMemoryView,
-        <WB as WasmBackend>::Store,
+        <WB as WasmBackend>::ContextMut<'v>,
     > for ITInstance<WB>
 {
     fn export(&self, _export_name: &str) -> Option<&ITExport> {

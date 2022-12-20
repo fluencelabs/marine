@@ -19,7 +19,7 @@ use super::{IType, IFunctionArg, IValue};
 use super::marine_module::Callable;
 use crate::MResult;
 
-use marine_wasm_backend_traits::{WasmBackend, WValue};
+use marine_wasm_backend_traits::{AsContextMut, WasmBackend, WValue};
 use marine_wasm_backend_traits::ExportedDynFunc;
 
 use wasmer_it::interpreter::wasm;
@@ -55,7 +55,7 @@ impl<WB: WasmBackend> WITFunction<WB> {
         name: String,
     ) -> MResult<Self> {
         use super::type_converters::wtype_to_itype;
-        let signature = dyn_func.signature(store);
+        let signature = dyn_func.signature(store.as_context_mut());
         let arguments = signature
             .params()
             .map(|wtype| IFunctionArg {
@@ -104,7 +104,7 @@ impl<WB: WasmBackend> WITFunction<WB> {
     }
 }
 
-impl<WB: WasmBackend> wasm::structures::LocalImport<<WB as WasmBackend>::Store>
+impl<'c, WB: WasmBackend> wasm::structures::LocalImport<<WB as WasmBackend>::ContextMut<'c>>
     for WITFunction<WB>
 {
     fn name(&self) -> &str {
@@ -129,7 +129,7 @@ impl<WB: WasmBackend> wasm::structures::LocalImport<<WB as WasmBackend>::Store>
 
     fn call(
         &self,
-        store: &mut <WB as WasmBackend>::Store,
+        store: &mut <WB as WasmBackend>::ContextMut<'_>,
         arguments: &[IValue],
     ) -> std::result::Result<Vec<IValue>, ()> {
         use super::type_converters::wval_to_ival;
@@ -138,7 +138,7 @@ impl<WB: WasmBackend> wasm::structures::LocalImport<<WB as WasmBackend>::Store>
             WITFunctionInner::Export { func, .. } => func
                 .as_ref()
                 .call(
-                    store,
+                    store.as_context_mut(),
                     arguments
                         .iter()
                         .map(ival_to_wval)

@@ -26,6 +26,7 @@ use crate::MRecordTypes;
 use crate::init_wasm_func_once;
 use crate::call_wasm_func;
 use crate::HostImportDescriptor;
+
 //use crate::module::wit_prelude::WITMemoryView;
 
 //use wasmer_core::Func;
@@ -41,11 +42,12 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use it_memory_traits::Memory;
 
-use marine_wasm_backend_traits::{FuncSig, WasmBackend};
+use marine_wasm_backend_traits::{AsContextMut, FuncSig, WasmBackend};
 use marine_wasm_backend_traits::DynamicFunc;
-use marine_wasm_backend_traits::ExportContext;
 //use marine_wasm_backend_traits::FuncGetter;
 use marine_wasm_backend_traits::errors::*;
+use marine_wasm_backend_traits::FuncGetter;
+use marine_wasm_backend_traits::ContextMut;
 
 pub(crate) fn create_host_import_func<WB: WasmBackend>(
     store: &mut <WB as WasmBackend>::Store,
@@ -71,7 +73,8 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     let raw_args = itypes_args_to_wtypes(&argument_types);
     let raw_output = itypes_output_to_wtypes(&output_type_to_types(output_type));
 
-    let func = move |ctx: &mut dyn ExportContext<WB>, inputs: &[WValue]| -> Vec<WValue> {
+    let func = move |mut caller: <WB as WasmBackend>::Caller<'_>, inputs: &[WValue]| -> Vec<WValue> {
+        let ctx = caller.as_context_mut();
         let result = {
             let memory_index = 0;
             let memory_view = ctx.memory(memory_index).view();
@@ -79,7 +82,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             let lifter = ILifter::new(memory_view, &li_helper);
 
             match wvalues_to_ivalues(&lifter, inputs, &argument_types) {
-                Ok(ivalues) => host_exported_func(ctx, ivalues),
+                Ok(ivalues) => host_exported_func(caller, ivalues),
                 Err(e) => {
                     log::error!("error occurred while lifting values in host import: {}", e);
                     error_handler

@@ -1,9 +1,6 @@
 use std::marker::PhantomData;
 //use std::marker::PhantomData;
-use marine_wasm_backend_traits::{
-    DynamicFunc, Export, ExportContext, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue,
-    WasmBackend, CompilationError, InsertFn, WasiVersion, Store,
-};
+use marine_wasm_backend_traits::{DynamicFunc, Export, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue, WasmBackend, CompilationError, InsertFn, WasiVersion, Store, ContextMut};
 use marine_wasm_backend_traits::WasmBackendResult;
 use marine_wasm_backend_traits::WasmBackendError;
 use marine_wasm_backend_traits::Module;
@@ -16,6 +13,7 @@ use marine_wasm_backend_traits::FuncSig;
 use marine_wasm_backend_traits::FuncGetter;
 use marine_wasm_backend_traits::WasiState;
 use marine_wasm_backend_traits::errors::*;
+use marine_wasm_backend_traits::AsContextMut;
 
 use std::path::PathBuf;
 use std::ptr::NonNull;
@@ -48,6 +46,9 @@ pub struct WasmerBackend /*<'a>*/ {}
 
 impl WasmBackend for WasmerBackend /*<'b>*/ {
     type Store = WasmerStore;
+    type ContextMut<'c> = WasmerStoreContextMut<'c>;
+    type Caller<'c> = WasmerExportContext<'c>;
+    //type ExportContext<'c> = WasmerExportContext<'c>;
     type MemoryExport = WasmerMemoryExport;
     type FunctionExport = WasmerFunctionExport;
     type Module = WasmerModule;
@@ -72,15 +73,153 @@ impl WasmBackend for WasmerBackend /*<'b>*/ {
     }
 }
 
-pub struct WasmerStore {}
 
-impl wasmer_it::interpreter::wasm::structures::Store for WasmerStore {}
+pub struct WasmerStore {
+}
+
+impl AsContextMut<WasmerBackend> for WasmerStore {
+    fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
+        todo!();
+        //WasmerStoreContextMut {}
+    }
+}
 
 impl Store<WasmerBackend> for WasmerStore {
     fn new(_backend: &WasmerBackend) -> Self {
         Self {}
     }
 }
+
+pub struct WasmerStoreContextMut<'c> {
+    ctx: &'c mut wasmer_core::vm::Ctx,
+}
+
+impl<'c> WasmerStoreContextMut<'c> {
+    unsafe fn get_func_impl<'s, Args, Rets>(
+        &'s mut self,
+        name: &str,
+    ) -> Result<Box<dyn FnMut(Args) -> Result<Rets, RuntimeError> + 's>, ResolveError>
+        where
+            Args: WasmTypeList,
+            Rets: WasmTypeList,
+    {
+        let ctx = &mut self.ctx;
+        let module_inner = &(*ctx.module);
+
+        let export_index = module_inner.info.exports.get(name).ok_or_else(|| {
+            ResolveError::Message(
+                wasmer_core::error::ResolveError::ExportNotFound {
+                    name: name.to_string(),
+                }
+                    .to_string(),
+            )
+        })?;
+
+        let export_func_index = match export_index {
+            ExportIndex::Func(func_index) => func_index,
+            _ => {
+                return Err(ResolveError::Message(
+                    wasmer_core::error::ResolveError::ExportWrongType {
+                        name: name.to_string(),
+                    }
+                        .to_string(),
+                ))
+            }
+        };
+
+        let export_func_signature_idx = *module_inner
+            .info
+            .func_assoc
+            .get(*export_func_index)
+            .expect("broken invariant, incorrect func index");
+
+        let export_func_signature = &module_inner.info.signatures[export_func_signature_idx];
+        let export_func_signature_ref = SigRegistry.lookup_signature_ref(export_func_signature);
+
+        let arg_types = Args::types();
+        let ret_types = Rets::types();
+        if export_func_signature_ref.params() != arg_types
+            || export_func_signature_ref.returns() != ret_types
+        {
+            return Err(ResolveError::Message(
+                wasmer_core::error::ResolveError::Signature {
+                    expected: (*export_func_signature).clone(),
+                    found: ret_types.to_vec(),
+                }
+                    .to_string(),
+            ));
+        }
+
+        let func_wasm_inner = module_inner
+            .runnable_module
+            .get_trampoline(&module_inner.info, export_func_signature_idx)
+            .unwrap();
+
+        let export_func_ptr = match export_func_index.local_or_import(&module_inner.info) {
+            LocalOrImport::Local(local_func_index) => module_inner
+                .runnable_module
+                .get_func(&module_inner.info, local_func_index)
+                .unwrap(),
+            _ => {
+                return Err(ResolveError::Message(
+                    wasmer_core::error::ResolveError::ExportNotFound {
+                        name: name.to_string(),
+                    }
+                        .to_string(),
+                ))
+            }
+        };
+
+        let typed_func: Func<'_, Args, Rets, wasmer_core::typed_func::Wasm> =
+            Func::from_raw_parts(func_wasm_inner, export_func_ptr, None, (*ctx) as _);
+
+        let result = Box::new(move |args: Args| -> Result<Rets, RuntimeError> {
+            unsafe {
+                args.call::<Rets>(export_func_ptr, func_wasm_inner, *ctx)
+                    .map_err(|e| RuntimeError::Message(e.to_string()))
+            }
+        });
+
+        Ok(result)
+    }
+}
+
+
+impl AsContextMut<WasmerBackend> for WasmerStoreContextMut<'_> {
+    fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
+        WasmerStoreContextMut {ctx: self.ctx}
+    }
+}
+
+impl ContextMut<WasmerBackend> for WasmerStoreContextMut<'_> {
+    fn memory(&mut self, memory_index: u32) -> <WasmerBackend as WasmBackend>::WITMemory {
+        WITMemory(self.ctx.memory(memory_index).clone())
+    }
+}
+
+macro_rules! impl_func_getter {
+    ($args:ty, $rets:ty) => {
+        impl<'r> FuncGetter<$args, $rets> for WasmerStoreContextMut<'r> {
+            unsafe fn get_func<'c>(
+                &'c mut self,
+                name: &str,
+            ) -> Result<Box<dyn FnMut($args) -> Result<$rets, RuntimeError> + 'c>, ResolveError>
+            {
+                self.get_func_impl(name)
+            }
+        }
+    };
+}
+
+impl_func_getter!((i32, i32), i32);
+impl_func_getter!((i32, i32), ());
+impl_func_getter!(i32, i32);
+impl_func_getter!(i32, ());
+impl_func_getter!((), i32);
+impl_func_getter!((), ());
+
+
+impl wasmer_it::interpreter::wasm::structures::Store for WasmerStoreContextMut<'_> {}
 
 pub struct WasmerModule {
     module: wasmer_core::Module,
@@ -335,9 +474,9 @@ pub struct WasmerDynamicFunc {
 }
 
 impl<'a> DynamicFunc<'a, WasmerBackend> for WasmerDynamicFunc {
-    fn new<F>(_store: &mut WasmerStore, sig: FuncSig, func: F) -> Self
+    fn new<F, T: AsContextMut<WasmerBackend>>(_store: T, sig: FuncSig, func: F) -> Self
     where
-        F: Fn(&mut dyn ExportContext<WasmerBackend>, &[WValue]) -> Vec<WValue> + 'static,
+        F: for<'ctx> Fn(WasmerExportContext<'ctx>, &[WValue]) -> Vec<WValue> + 'static,
     {
         let func = wasmer_core::typed_func::DynamicFunc::new(
             std::sync::Arc::new(FuncSigConverter(&sig).into()),
@@ -351,7 +490,7 @@ impl<'a> DynamicFunc<'a, WasmerBackend> for WasmerDynamicFunc {
                 };
 
                 let args = args.iter().map(wval_to_general_wval).collect::<Vec<_>>();
-                func(&mut ctx, &args)
+                func(ctx, &args)
                     .iter()
                     .map(general_wval_to_wval)
                     .collect()
@@ -395,7 +534,7 @@ macro_rules! impl_insert_fn {
     ($($name:ident: $arg:ty),* => $rets:ty) => {
         impl InsertFn<WasmerBackend, ($($arg,)*), $rets> for WasmerNamespace {
             fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
-            where F:'static + Fn(&mut dyn ExportContext<WasmerBackend>, ($($arg,)*)) -> $rets + std::marker::Send {
+            where F:'static + Fn(&mut dyn AsContextMut<WasmerBackend>, ($($arg,)*)) -> $rets + std::marker::Send {
                 let func = move |ctx: &mut wasmer_core::vm::Ctx, $($name: $arg),*| {
                     unsafe {
                         let mut ctx = WasmerExportContext {
@@ -535,36 +674,14 @@ impl<'c> WasmerExportContext<'c> {
     }
 }
 
-macro_rules! impl_func_getter {
-    ($args:ty, $rets:ty) => {
-        impl<'r> FuncGetter<$args, $rets> for WasmerExportContext<'r> {
-            unsafe fn get_func<'c>(
-                &'c mut self,
-                name: &str,
-            ) -> Result<Box<dyn FnMut($args) -> Result<$rets, RuntimeError> + 'c>, ResolveError>
-            {
-                self.get_func_impl(name)
-            }
+impl<'c> AsContextMut<WasmerBackend> for WasmerExportContext<'c> {
+    fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
+        WasmerStoreContextMut {
+            ctx: self.ctx
         }
-    };
-}
-
-impl_func_getter!((i32, i32), i32);
-impl_func_getter!((i32, i32), ());
-impl_func_getter!(i32, i32);
-impl_func_getter!(i32, ());
-impl_func_getter!((), i32);
-impl_func_getter!((), ());
-
-impl<'c, 'r> ExportContext<'c, WasmerBackend> for WasmerExportContext<'r> {
-    fn memory(&mut self, memory_index: u32) -> <WasmerBackend as WasmBackend>::WITMemory {
-        WITMemory(self.ctx.memory(memory_index).clone())
-    }
-
-    fn store(&mut self) -> &mut <WasmerBackend as WasmBackend>::Store {
-        &mut self.store
     }
 }
+
 
 pub struct WasmerExportedDynFunc<'a> {
     func: DynFunc<'a>,
@@ -572,11 +689,11 @@ pub struct WasmerExportedDynFunc<'a> {
 }
 
 impl<'a> ExportedDynFunc<WasmerBackend> for WasmerExportedDynFunc<'a> {
-    fn signature(&self, _store: &WasmerStore) -> &FuncSig {
+    fn signature(&self, _store: WasmerStoreContextMut) -> &FuncSig {
         &self.sig
     }
 
-    fn call(&self, _store: &mut WasmerStore, args: &[WValue]) -> CallResult<Vec<WValue>> {
+    fn call(&self, _store: WasmerStoreContextMut, args: &[WValue]) -> CallResult<Vec<WValue>> {
         use crate::type_converters::general_wval_to_wval;
         use crate::type_converters::wval_to_general_wval;
         self.func

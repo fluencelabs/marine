@@ -22,7 +22,7 @@ use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
 use crate::MResult;
 use crate::MModuleConfig;
 
-use marine_wasm_backend_traits::{ExportContext, WasiState, WasmBackend};
+use marine_wasm_backend_traits::{AsContextMut, WasiState, WasmBackend};
 use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
 use marine_wasm_backend_traits::ImportObject;
@@ -56,7 +56,7 @@ type ITInterpreter<WB> = Interpreter<
     WITFunction<WB>,
     <WB as WasmBackend>::WITMemory,
     <WB as WasmBackend>::WITMemoryView,
-    <WB as WasmBackend>::Store,
+    <WB as WasmBackend>::ContextMut<'static>,
 >;
 
 #[derive(Clone)]
@@ -75,7 +75,7 @@ pub(super) struct Callable<WB: WasmBackend> {
 impl<WB: WasmBackend> Callable<WB> {
     pub fn call(
         &mut self,
-        store: &mut <WB as WasmBackend>::Store,
+        store: impl AsContextMut<WB>,
         args: &[IValue],
     ) -> MResult<Vec<IValue>> {
         use wasmer_it::interpreter::stack::Stackable;
@@ -83,7 +83,7 @@ impl<WB: WasmBackend> Callable<WB> {
         let result = self
             .it_module_func
             .interpreter
-            .run(args, Arc::make_mut(&mut self.it_instance), store)?
+            .run(args, Arc::make_mut(&mut self.it_instance), store.as_context_mut())?
             .as_slice()
             .to_owned();
 
@@ -187,7 +187,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
     pub(crate) fn call(
         &mut self,
-        store: &mut <WB as WasmBackend>::Store,
+        store: impl AsContextMut<WB>,
         module_name: &str,
         function_name: &str,
         args: &[IValue],
@@ -356,7 +356,7 @@ impl<WB: WasmBackend> MModule<WB> {
             raw_import: F,
         ) -> <WB as WasmBackend>::DynamicFunc
         where
-            F: Fn(&mut dyn ExportContext<WB>, &[WValue]) -> Vec<WValue> + 'static,
+            F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + 'static,
             WB: WasmBackend,
             I1: Iterator<Item = &'a IType>,
             I2: Iterator<Item = &'b IType>,
@@ -375,8 +375,8 @@ impl<WB: WasmBackend> MModule<WB> {
             interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
-        ) -> impl Fn(&mut dyn ExportContext<WB>, &[WValue]) -> Vec<WValue> + 'static {
-            move |ctx: &mut dyn ExportContext<WB>, inputs: &[WValue]| -> Vec<WValue> {
+        ) -> impl for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + 'static {
+            move |mut ctx: <WB as WasmBackend>::Caller<'_>, inputs: &[WValue]| -> Vec<WValue> {
                 use wasmer_it::interpreter::stack::Stackable;
 
                 use super::type_converters::wval_to_ival;
@@ -397,7 +397,7 @@ impl<WB: WasmBackend> MModule<WB> {
                     interpreter.run(
                         &wit_inputs,
                         Arc::make_mut(&mut wit_instance_callable.assume_init()),
-                        ctx.store(),
+                        ctx.as_context_mut(),
                     )
                 };
 
@@ -437,8 +437,7 @@ impl<WB: WasmBackend> MModule<WB> {
                         arguments,
                         output_types,
                     } => {
-                        let interpreter: ITInterpreter<WB> =
-                            adapter_instructions.clone().try_into()?;
+                        let interpreter: ITInterpreter<WB> = adapter_instructions.clone().try_into()?;
 
                         let raw_import = create_raw_import(
                             wit_instance.clone(),

@@ -18,7 +18,7 @@ use super::*;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
 
-use marine_wasm_backend_traits::{Store, WasiState, WasmBackend};
+use marine_wasm_backend_traits::{AsContextMut, Store, WasiState, WasmBackend};
 
 use serde::Serialize;
 
@@ -65,7 +65,7 @@ impl<WB: WasmBackend> MarineCore<WB> {
         let store = &mut self.store;
         self.modules.get_mut(module_name).map_or_else(
             || Err(MError::NoSuchModule(module_name.to_string())),
-            |module| module.call(store, module_name, func_name.as_ref(), arguments),
+            |module| module.call(store.as_context_mut(), module_name, func_name.as_ref(), arguments),
         )
     }
 

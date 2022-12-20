@@ -18,7 +18,7 @@ use super::IValue;
 use super::IType;
 use crate::HostImportError;
 
-use marine_wasm_backend_traits::{ExportContext, WasmBackend};
+use marine_wasm_backend_traits::{WasmBackend};
 use marine_wasm_backend_traits::Namespace;
 use marine_wasm_backend_traits::WasiVersion;
 
@@ -31,7 +31,7 @@ const DEFAULT_HEAP_PAGES_COUNT: u32 = 1600;
 
 pub type ErrorHandler = Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + 'static>>;
 pub type HostExportedFunc<WB> =
-    Box<dyn Fn(&mut dyn ExportContext<WB>, Vec<IValue>) -> Option<IValue> + 'static>;
+    Box<dyn for<'c> Fn(<WB as WasmBackend>::Caller<'c>, Vec<IValue>) -> Option<IValue> + 'static>;
 
 pub struct HostImportDescriptor<WB: WasmBackend> {
     /// This closure will be invoked for corresponding import.

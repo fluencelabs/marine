@@ -18,6 +18,7 @@ it-json-serde = { path = "../crates/it-json-serde", version = "0.3.4" }
 
 marine-rs-sdk = "0.7.1"
 wasmer-it = { workspace = true}
+it-memory-traits = { workspace = true}
 fluence-it-types = { workspace = true }
 it-lilo = { workspace = true }
 
