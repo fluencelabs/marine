@@ -22,7 +22,7 @@ use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
 use crate::MResult;
 use crate::MModuleConfig;
 
-use marine_wasm_backend_traits::{AsContextMut, WasiState, WasmBackend};
+use marine_wasm_backend_traits::{AsContextMut, DelayedContextLifetime, WasiState, WasmBackend};
 use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
 use marine_wasm_backend_traits::ImportObject;
@@ -56,7 +56,7 @@ type ITInterpreter<WB> = Interpreter<
     WITFunction<WB>,
     <WB as WasmBackend>::WITMemory,
     <WB as WasmBackend>::WITMemoryView,
-    <WB as WasmBackend>::ContextMut<'static>,
+    DelayedContextLifetime<WB>,
 >;
 
 #[derive(Clone)]
@@ -75,7 +75,7 @@ pub(super) struct Callable<WB: WasmBackend> {
 impl<WB: WasmBackend> Callable<WB> {
     pub fn call(
         &mut self,
-        store: impl AsContextMut<WB>,
+        store: &mut <WB as WasmBackend>::ContextMut<'_>,
         args: &[IValue],
     ) -> MResult<Vec<IValue>> {
         use wasmer_it::interpreter::stack::Stackable;
@@ -83,7 +83,7 @@ impl<WB: WasmBackend> Callable<WB> {
         let result = self
             .it_module_func
             .interpreter
-            .run(args, Arc::make_mut(&mut self.it_instance), store.as_context_mut())?
+            .run(args, Arc::make_mut(&mut self.it_instance),  store)?
             .as_slice()
             .to_owned();
 
@@ -187,7 +187,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
     pub(crate) fn call(
         &mut self,
-        store: impl AsContextMut<WB>,
+        store: &mut <WB as WasmBackend>::ContextMut<'_>,
         module_name: &str,
         function_name: &str,
         args: &[IValue],
@@ -366,7 +366,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
             let inputs = inputs.map(itype_to_wtype).collect::<Vec<_>>();
             let outputs = outputs.map(itype_to_wtype).collect::<Vec<_>>();
-            <WB as WasmBackend>::DynamicFunc::new(store, FuncSig::new(inputs, outputs), raw_import)
+            <WB as WasmBackend>::DynamicFunc::new(&mut store.as_context_mut(), FuncSig::new(inputs, outputs), raw_import)
         }
 
         // creates a closure that is represent a IT module import
@@ -397,7 +397,7 @@ impl<WB: WasmBackend> MModule<WB> {
                     interpreter.run(
                         &wit_inputs,
                         Arc::make_mut(&mut wit_instance_callable.assume_init()),
-                        ctx.as_context_mut(),
+                        &mut ctx.as_context_mut(),
                     )
                 };
 

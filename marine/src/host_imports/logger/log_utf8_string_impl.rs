@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use marine_wasm_backend_traits::WasmBackend;
-use marine_wasm_backend_traits::ExportContext;
+use marine_wasm_backend_traits::{Caller, WasmBackend};
 use it_memory_traits::Memory;
 use it_memory_traits::MemoryReadable;
 //use wasmer_core::vm::Ctx;
@@ -25,7 +24,7 @@ use it_memory_traits::MemoryReadable;
 pub(crate) fn log_utf8_string_closure<WB: WasmBackend>(
     logging_mask: i32,
     module: String,
-) -> impl Fn(&mut dyn ExportContext<WB>, (i32, i32, i32, i32)) {
+) -> impl Fn(&mut <WB as WasmBackend>::Caller<'_>, (i32, i32, i32, i32)) {
     move |ctx, (level, target, msg_offset, msg_size)| {
         if target == 0 || target & logging_mask != 0 {
             log_utf8_string::<WB>(&module, ctx, level, msg_offset, msg_size)
@@ -35,7 +34,7 @@ pub(crate) fn log_utf8_string_closure<WB: WasmBackend>(
 
 pub(crate) fn log_utf8_string<WB: WasmBackend>(
     module: &str,
-    ctx: &mut dyn ExportContext<WB>,
+    ctx: &mut <WB as WasmBackend>::Caller<'_>,
     level: i32,
     msg_offset: i32,
     msg_size: i32,
@@ -58,7 +57,7 @@ pub(crate) fn log_utf8_string<WB: WasmBackend>(
 
 #[inline]
 fn read_string<WB: WasmBackend>(
-    ctx: &mut dyn ExportContext<WB>,
+    ctx: &mut <WB as WasmBackend>::Caller<'_>,
     offset: i32,
     size: i32,
 ) -> Option<String> {

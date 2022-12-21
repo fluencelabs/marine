@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 //use std::marker::PhantomData;
-use marine_wasm_backend_traits::{DynamicFunc, Export, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue, WasmBackend, CompilationError, InsertFn, WasiVersion, Store, ContextMut};
+use marine_wasm_backend_traits::{DynamicFunc, Export, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue, WasmBackend, CompilationError, InsertFn, WasiVersion, Store, ContextMut, Caller};
 use marine_wasm_backend_traits::WasmBackendResult;
 use marine_wasm_backend_traits::WasmBackendError;
 use marine_wasm_backend_traits::Module;
@@ -79,8 +79,7 @@ pub struct WasmerStore {
 
 impl AsContextMut<WasmerBackend> for WasmerStore {
     fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
-        todo!();
-        //WasmerStoreContextMut {}
+        WasmerStoreContextMut {ctx: PhantomData}
     }
 }
 
@@ -91,9 +90,10 @@ impl Store<WasmerBackend> for WasmerStore {
 }
 
 pub struct WasmerStoreContextMut<'c> {
-    ctx: &'c mut wasmer_core::vm::Ctx,
+    ctx: PhantomData<&'c i32>
+    //ctx: &'c mut wasmer_core::vm::Ctx,
 }
-
+/*
 impl<'c> WasmerStoreContextMut<'c> {
     unsafe fn get_func_impl<'s, Args, Rets>(
         &'s mut self,
@@ -182,24 +182,28 @@ impl<'c> WasmerStoreContextMut<'c> {
 
         Ok(result)
     }
-}
-
+}*/
 
 impl AsContextMut<WasmerBackend> for WasmerStoreContextMut<'_> {
     fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
-        WasmerStoreContextMut {ctx: self.ctx}
+        WasmerStoreContextMut {
+            ctx: PhantomData
+            /*ctx: self.ctx*/
+        }
     }
 }
 
-impl ContextMut<WasmerBackend> for WasmerStoreContextMut<'_> {
+impl<'c> Caller<WasmerBackend> for WasmerExportContext<'c> {
     fn memory(&mut self, memory_index: u32) -> <WasmerBackend as WasmBackend>::WITMemory {
         WITMemory(self.ctx.memory(memory_index).clone())
     }
 }
 
+impl<'c> ContextMut<WasmerBackend> for WasmerStoreContextMut<'c> {}
+
 macro_rules! impl_func_getter {
     ($args:ty, $rets:ty) => {
-        impl<'r> FuncGetter<$args, $rets> for WasmerStoreContextMut<'r> {
+        impl<'r> FuncGetter<$args, $rets> for WasmerExportContext<'r> {
             unsafe fn get_func<'c>(
                 &'c mut self,
                 name: &str,
@@ -219,7 +223,9 @@ impl_func_getter!((), i32);
 impl_func_getter!((), ());
 
 
-impl wasmer_it::interpreter::wasm::structures::Store for WasmerStoreContextMut<'_> {}
+impl wasmer_it::interpreter::wasm::structures::Store for WasmerStoreContextMut<'_> {
+    type ActualStore<'c> = WasmerStoreContextMut<'c>;
+}
 
 pub struct WasmerModule {
     module: wasmer_core::Module,
@@ -474,7 +480,7 @@ pub struct WasmerDynamicFunc {
 }
 
 impl<'a> DynamicFunc<'a, WasmerBackend> for WasmerDynamicFunc {
-    fn new<F, T: AsContextMut<WasmerBackend>>(_store: T, sig: FuncSig, func: F) -> Self
+    fn new<F>(_store: &mut WasmerStoreContextMut, sig: FuncSig, func: F) -> Self
     where
         F: for<'ctx> Fn(WasmerExportContext<'ctx>, &[WValue]) -> Vec<WValue> + 'static,
     {
@@ -483,10 +489,6 @@ impl<'a> DynamicFunc<'a, WasmerBackend> for WasmerDynamicFunc {
             move |ctx: &mut wasmer_core::vm::Ctx, args: &[wasmer_core::prelude::Value]| unsafe {
                 let mut ctx = WasmerExportContext {
                     ctx,
-                    store: WasmerStore {}, /*ctx: std::mem::transmute::<
-                                               &'_ mut wasmer_core::vm::Ctx,
-                                               &'static mut wasmer_core::vm::Ctx,
-                                           >(ctx),*/
                 };
 
                 let args = args.iter().map(wval_to_general_wval).collect::<Vec<_>>();
@@ -534,15 +536,11 @@ macro_rules! impl_insert_fn {
     ($($name:ident: $arg:ty),* => $rets:ty) => {
         impl InsertFn<WasmerBackend, ($($arg,)*), $rets> for WasmerNamespace {
             fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
-            where F:'static + Fn(&mut dyn AsContextMut<WasmerBackend>, ($($arg,)*)) -> $rets + std::marker::Send {
+            where F:'static + Fn(&mut WasmerExportContext<'_>, ($($arg,)*)) -> $rets + std::marker::Send {
                 let func = move |ctx: &mut wasmer_core::vm::Ctx, $($name: $arg),*| {
                     unsafe {
                         let mut ctx = WasmerExportContext {
-                            ctx: std::mem::transmute::<
-                                &'_ mut wasmer_core::vm::Ctx,
-                                &'static mut wasmer_core::vm::Ctx,
-                            >(ctx),
-                            store: WasmerStore {},
+                            ctx
                         };
 
                         func(&mut ctx, ($($name,)*))
@@ -581,7 +579,6 @@ impl LikeNamespace<WasmerBackend> for WasmerLikeNamespace {}
 
 pub struct WasmerExportContext<'c> {
     ctx: &'c mut wasmer_core::vm::Ctx,
-    store: WasmerStore,
 }
 
 impl<'c> WasmerExportContext<'c> {
@@ -677,7 +674,8 @@ impl<'c> WasmerExportContext<'c> {
 impl<'c> AsContextMut<WasmerBackend> for WasmerExportContext<'c> {
     fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
         WasmerStoreContextMut {
-            ctx: self.ctx
+            ctx: PhantomData
+            //ctx: self.ctx
         }
     }
 }

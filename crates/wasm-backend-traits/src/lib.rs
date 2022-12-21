@@ -5,6 +5,7 @@ pub mod imports;
 pub mod wasi;
 pub mod wtype;
 
+use std::marker::PhantomData;
 use it_memory_traits::{MemoryView};
 use wasmer_it::interpreter::wasm;
 
@@ -19,8 +20,8 @@ pub trait WasmBackend: Clone + Default + 'static {
     type Module: Module<Self>;
     type Instance: Instance<Self>;
     type Store: Store<Self> + AsContextMut<Self>;
-    type ContextMut<'c>: ContextMut<Self> + AsContextMut<Self> + wasm::structures::Store;
-    type Caller<'c>: AsContextMut<Self>;
+    type ContextMut<'c>: ContextMut<Self> + AsContextMut<Self>;
+    type Caller<'c>: Caller<Self> + AsContextMut<Self>;
     // + AsStoreContextMut<Self>;
    // type StoreContextMut: /*AsStoreContextMut<Self> + */wasmer_it::interpreter::wasm::structures::Store;
     // imports/exports -- subject to improvement
@@ -42,19 +43,38 @@ pub trait WasmBackend: Clone + Default + 'static {
     fn compile(store: &mut Self::Store, wasm: &[u8]) -> WasmBackendResult<Self::Module>;
 }
 
+pub struct DelayedContextLifetime<WB: WasmBackend> {
+    _data: PhantomData<WB>
+}
+
+impl<WB: WasmBackend> it_memory_traits::Store for DelayedContextLifetime<WB> {
+    type ActualStore<'c> = <WB as WasmBackend>::ContextMut<'c>;
+}
+
 pub trait Store<WB: WasmBackend> {
     fn new(backend: &WB) -> Self;
+}
+
+pub trait Caller<WB: WasmBackend>:
+    FuncGetter<(i32, i32), i32>
+    + FuncGetter<(i32, i32), ()>
+    + FuncGetter<i32, i32>
+    + FuncGetter<i32, ()>
+    + FuncGetter<(), i32>
+    + FuncGetter<(), ()>
+{
+    fn memory(&mut self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
 }
 
 pub trait AsContextMut<WB: WasmBackend> {
     fn as_context_mut(&mut self) -> <WB as WasmBackend>::ContextMut<'_>;
 }
 
-impl<WB: WasmBackend, T: AsContextMut<WB>> AsContextMut<WB> for &mut T {
+/*impl<WB: WasmBackend, T: AsContextMut<WB>> AsContextMut<WB> for &mut T {
     fn as_context_mut(&mut self) -> <WB as WasmBackend>::ContextMut<'_> {
         self.as_context_mut()
     }
-}
+}*/
 
 pub trait Module<WB: WasmBackend> {
     fn custom_sections(&self, key: &str) -> Option<&[Vec<u8>]>;

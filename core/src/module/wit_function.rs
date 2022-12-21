@@ -19,7 +19,7 @@ use super::{IType, IFunctionArg, IValue};
 use super::marine_module::Callable;
 use crate::MResult;
 
-use marine_wasm_backend_traits::{AsContextMut, WasmBackend, WValue};
+use marine_wasm_backend_traits::{AsContextMut, DelayedContextLifetime, WasmBackend, WValue};
 use marine_wasm_backend_traits::ExportedDynFunc;
 
 use wasmer_it::interpreter::wasm;
@@ -104,7 +104,7 @@ impl<WB: WasmBackend> WITFunction<WB> {
     }
 }
 
-impl<'c, WB: WasmBackend> wasm::structures::LocalImport<<WB as WasmBackend>::ContextMut<'c>>
+impl<'c, WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
     for WITFunction<WB>
 {
     fn name(&self) -> &str {

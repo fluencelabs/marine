@@ -19,17 +19,16 @@ pub trait ImportObject<WB: WasmBackend>: Clone {
 }
 
 pub trait DynamicFunc<'a, WB: WasmBackend> {
-    fn new<F, T>(store: T, sig: FuncSig, func: F) -> Self
+    fn new<F>(store: &mut <WB as WasmBackend>::ContextMut<'_>, sig: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + 'static,
-        T: AsContextMut<WB>;
+        F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + 'static;
 }
 
 pub trait InsertFn<WB: WasmBackend, Args, Rets> {
     fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
     where
         F: 'static
-            + Fn(&mut dyn AsContextMut<WB>, Args) -> Rets
+            + Fn(&mut <WB as WasmBackend>::Caller<'_>, Args) -> Rets
             + std::marker::Send
             + std::marker::Sync;
 }
@@ -50,15 +49,14 @@ pub trait Namespace<WB: WasmBackend>:
 pub trait LikeNamespace<WB: WasmBackend> {}
 
 pub trait ContextMut<WB: WasmBackend>:
-    FuncGetter<(i32, i32), i32>
-    + FuncGetter<(i32, i32), ()>
-    + FuncGetter<i32, i32>
-    + FuncGetter<i32, ()>
-    + FuncGetter<(), i32>
-    + FuncGetter<(), ()>
+    //FuncGetter<(i32, i32), i32>
+    //+ FuncGetter<(i32, i32), ()>
+    //+ FuncGetter<i32, i32>
+    //+ FuncGetter<i32, ()>
+    //+ FuncGetter<(), i32>
+    //+ FuncGetter<(), ()>
     //+ AsStoreContextMut<WB>
 {
-    fn memory(&mut self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
 }
 
 pub struct FuncSig {

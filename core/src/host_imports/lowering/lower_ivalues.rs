@@ -22,8 +22,9 @@ use it_lilo::lowerer::*;
 use it_lilo::traits::Allocatable;
 use it_memory_traits::MemoryView;
 
-pub(crate) fn ivalue_to_wvalues<A: Allocatable<MV>, MV: MemoryView>(
-    lowerer: &mut ILowerer<'_, A, MV>,
+pub(crate) fn ivalue_to_wvalues<A: Allocatable<MV, Store>, MV: MemoryView, Store: it_memory_traits::Store>(
+    store: &mut <Store as it_memory_traits::Store>::ActualStore<'_>,
+    lowerer: &mut ILowerer<'_, A, MV, Store>,
     ivalue: Option<IValue>,
 ) -> HostImportResult<Vec<WValue>> {
     let result = match ivalue {
@@ -41,21 +42,21 @@ pub(crate) fn ivalue_to_wvalues<A: Allocatable<MV>, MV: MemoryView>(
         Some(IValue::F32(v)) => vec![WValue::F32(v)],
         Some(IValue::F64(v)) => vec![WValue::F64(v)],
         Some(IValue::String(str)) => {
-            let offset = lowerer.writer.write_bytes(str.as_bytes())?;
+            let offset = lowerer.writer.write_bytes(store,str.as_bytes())?;
 
             vec![WValue::I32(offset as _), WValue::I32(str.len() as _)]
         }
         Some(IValue::ByteArray(array)) => {
-            let offset = lowerer.writer.write_bytes(&array)?;
+            let offset = lowerer.writer.write_bytes(store,&array)?;
 
             vec![WValue::I32(offset as _), WValue::I32(array.len() as _)]
         }
         Some(IValue::Array(values)) => {
-            let LoweredArray { offset, size } = array_lower_memory(lowerer, values)?;
+            let LoweredArray { offset, size } = array_lower_memory(store,lowerer, values)?;
             vec![WValue::I32(offset as _), WValue::I32(size as _)]
         }
         Some(IValue::Record(values)) => {
-            let offset = record_lower_memory(lowerer, values)?;
+            let offset = record_lower_memory(store,lowerer, values)?;
             vec![WValue::I32(offset as i32)]
         }
         None => vec![],

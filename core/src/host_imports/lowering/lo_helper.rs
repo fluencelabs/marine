@@ -39,8 +39,8 @@ impl<'c, MV: MemoryView, M: Memory<MV>> LoHelper<'c, MV, M> {
     }
 }
 
-impl<'s, MV: MemoryView, M: Memory<MV>> Allocatable<MV> for LoHelper<'s, MV, M> {
-    fn allocate(&mut self, size: u32, type_tag: u32) -> Result<(u32, MV), AllocatableError> {
+impl<'s, MV: MemoryView, M: Memory<MV>, Store: it_memory_traits::Store> Allocatable<MV, Store> for LoHelper<'s, MV, M> {
+    fn allocate(&mut self, _store: &mut <Store as it_memory_traits::Store>::ActualStore<'_>, size: u32, type_tag: u32) -> Result<(u32, MV), AllocatableError> {
         let offset = call_wasm_func!(self.allocate_func, size as _, type_tag as _);
         Ok((offset as u32, self.memory.view()))
     }

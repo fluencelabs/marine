@@ -19,7 +19,7 @@ use super::marine_module::MModule;
 use super::IRecordType;
 use crate::MResult;
 
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::{DelayedContextLifetime, WasmBackend};
 //use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
 //use marine_wasm_backend_traits::ImportObject;
@@ -180,7 +180,7 @@ impl<'v, WB: WasmBackend>
         WITFunction<WB>,
         <WB as WasmBackend>::WITMemory,
         <WB as WasmBackend>::WITMemoryView,
-        <WB as WasmBackend>::ContextMut<'v>,
+        DelayedContextLifetime<WB>,
     > for ITInstance<WB>
 {
     fn export(&self, _export_name: &str) -> Option<&ITExport> {
