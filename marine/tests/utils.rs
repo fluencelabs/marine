@@ -22,4 +22,3 @@ macro_rules! call_faas {
             .unwrap_or_else(|e| panic!("faas failed with {:?}", e))
     };
 }
-

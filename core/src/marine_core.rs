@@ -65,7 +65,14 @@ impl<WB: WasmBackend> MarineCore<WB> {
         let store = &mut self.store;
         self.modules.get_mut(module_name).map_or_else(
             || Err(MError::NoSuchModule(module_name.to_string())),
-            |module| module.call(&mut store.as_context_mut(), module_name, func_name.as_ref(), arguments),
+            |module| {
+                module.call(
+                    &mut store.as_context_mut(),
+                    module_name,
+                    func_name.as_ref(),
+                    arguments,
+                )
+            },
         )
     }
 

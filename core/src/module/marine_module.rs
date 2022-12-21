@@ -83,7 +83,7 @@ impl<WB: WasmBackend> Callable<WB> {
         let result = self
             .it_module_func
             .interpreter
-            .run(args, Arc::make_mut(&mut self.it_instance),  store)?
+            .run(args, Arc::make_mut(&mut self.it_instance), store)?
             .as_slice()
             .to_owned();
 
@@ -366,7 +366,11 @@ impl<WB: WasmBackend> MModule<WB> {
 
             let inputs = inputs.map(itype_to_wtype).collect::<Vec<_>>();
             let outputs = outputs.map(itype_to_wtype).collect::<Vec<_>>();
-            <WB as WasmBackend>::DynamicFunc::new(&mut store.as_context_mut(), FuncSig::new(inputs, outputs), raw_import)
+            <WB as WasmBackend>::DynamicFunc::new(
+                &mut store.as_context_mut(),
+                FuncSig::new(inputs, outputs),
+                raw_import,
+            )
         }
 
         // creates a closure that is represent a IT module import
@@ -375,7 +379,8 @@ impl<WB: WasmBackend> MModule<WB> {
             interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
-        ) -> impl for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + 'static {
+        ) -> impl for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + 'static
+        {
             move |mut ctx: <WB as WasmBackend>::Caller<'_>, inputs: &[WValue]| -> Vec<WValue> {
                 use wasmer_it::interpreter::stack::Stackable;
 
@@ -437,7 +442,8 @@ impl<WB: WasmBackend> MModule<WB> {
                         arguments,
                         output_types,
                     } => {
-                        let interpreter: ITInterpreter<WB> = adapter_instructions.clone().try_into()?;
+                        let interpreter: ITInterpreter<WB> =
+                            adapter_instructions.clone().try_into()?;
 
                         let raw_import = create_raw_import(
                             wit_instance.clone(),

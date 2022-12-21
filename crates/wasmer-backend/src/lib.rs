@@ -1,6 +1,9 @@
 use std::marker::PhantomData;
 //use std::marker::PhantomData;
-use marine_wasm_backend_traits::{DynamicFunc, Export, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue, WasmBackend, CompilationError, InsertFn, WasiVersion, Store, ContextMut, Caller};
+use marine_wasm_backend_traits::{
+    DynamicFunc, Export, ExportedDynFunc, LikeNamespace, Memory, Namespace, WValue, WasmBackend,
+    CompilationError, InsertFn, WasiVersion, Store, ContextMut, Caller,
+};
 use marine_wasm_backend_traits::WasmBackendResult;
 use marine_wasm_backend_traits::WasmBackendError;
 use marine_wasm_backend_traits::Module;
@@ -73,13 +76,11 @@ impl WasmBackend for WasmerBackend /*<'b>*/ {
     }
 }
 
-
-pub struct WasmerStore {
-}
+pub struct WasmerStore {}
 
 impl AsContextMut<WasmerBackend> for WasmerStore {
     fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
-        WasmerStoreContextMut {ctx: PhantomData}
+        WasmerStoreContextMut { ctx: PhantomData }
     }
 }
 
@@ -90,8 +91,7 @@ impl Store<WasmerBackend> for WasmerStore {
 }
 
 pub struct WasmerStoreContextMut<'c> {
-    ctx: PhantomData<&'c i32>
-    //ctx: &'c mut wasmer_core::vm::Ctx,
+    ctx: PhantomData<&'c i32>, //ctx: &'c mut wasmer_core::vm::Ctx,
 }
 /*
 impl<'c> WasmerStoreContextMut<'c> {
@@ -187,8 +187,7 @@ impl<'c> WasmerStoreContextMut<'c> {
 impl AsContextMut<WasmerBackend> for WasmerStoreContextMut<'_> {
     fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
         WasmerStoreContextMut {
-            ctx: PhantomData
-            /*ctx: self.ctx*/
+            ctx: PhantomData, /*ctx: self.ctx*/
         }
     }
 }
@@ -221,7 +220,6 @@ impl_func_getter!(i32, i32);
 impl_func_getter!(i32, ());
 impl_func_getter!((), i32);
 impl_func_getter!((), ());
-
 
 impl wasmer_it::interpreter::wasm::structures::Store for WasmerStoreContextMut<'_> {
     type ActualStore<'c> = WasmerStoreContextMut<'c>;
@@ -487,15 +485,10 @@ impl<'a> DynamicFunc<'a, WasmerBackend> for WasmerDynamicFunc {
         let func = wasmer_core::typed_func::DynamicFunc::new(
             std::sync::Arc::new(FuncSigConverter(&sig).into()),
             move |ctx: &mut wasmer_core::vm::Ctx, args: &[wasmer_core::prelude::Value]| unsafe {
-                let mut ctx = WasmerExportContext {
-                    ctx,
-                };
+                let mut ctx = WasmerExportContext { ctx };
 
                 let args = args.iter().map(wval_to_general_wval).collect::<Vec<_>>();
-                func(ctx, &args)
-                    .iter()
-                    .map(general_wval_to_wval)
-                    .collect()
+                func(ctx, &args).iter().map(general_wval_to_wval).collect()
             },
         );
 
@@ -674,12 +667,10 @@ impl<'c> WasmerExportContext<'c> {
 impl<'c> AsContextMut<WasmerBackend> for WasmerExportContext<'c> {
     fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
         WasmerStoreContextMut {
-            ctx: PhantomData
-            //ctx: self.ctx
+            ctx: PhantomData, //ctx: self.ctx
         }
     }
 }
-
 
 pub struct WasmerExportedDynFunc<'a> {
     func: DynFunc<'a>,

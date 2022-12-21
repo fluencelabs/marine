@@ -30,7 +30,6 @@ type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
 #[cfg(feature = "wasmtime")]
 type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
 
-
 static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
     marine::TomlMarineConfig::load("./tests/wasm_tests/arrays_passing/Config.toml")
         .expect("toml marine config should be created")

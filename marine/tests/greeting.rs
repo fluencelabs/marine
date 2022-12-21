@@ -29,7 +29,6 @@ type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
 #[cfg(feature = "wasmtime")]
 type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
 
-
 #[test]
 pub fn greeting() {
     let greeting_config_path = "../examples/greeting/Config.toml";

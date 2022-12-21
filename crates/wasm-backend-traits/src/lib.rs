@@ -1,4 +1,3 @@
-
 pub mod errors;
 pub mod exports;
 pub mod imports;
@@ -23,7 +22,7 @@ pub trait WasmBackend: Clone + Default + 'static {
     type ContextMut<'c>: ContextMut<Self> + AsContextMut<Self>;
     type Caller<'c>: Caller<Self> + AsContextMut<Self>;
     // + AsStoreContextMut<Self>;
-   // type StoreContextMut: /*AsStoreContextMut<Self> + */wasmer_it::interpreter::wasm::structures::Store;
+    // type StoreContextMut: /*AsStoreContextMut<Self> + */wasmer_it::interpreter::wasm::structures::Store;
     // imports/exports -- subject to improvement
     type ImportObject: ImportObject<Self>; // to be replaced with somethink like Linker or Resolver
     type DynamicFunc: DynamicFunc<'static, Self>;
@@ -44,7 +43,7 @@ pub trait WasmBackend: Clone + Default + 'static {
 }
 
 pub struct DelayedContextLifetime<WB: WasmBackend> {
-    _data: PhantomData<WB>
+    _data: PhantomData<WB>,
 }
 
 impl<WB: WasmBackend> it_memory_traits::Store for DelayedContextLifetime<WB> {
@@ -122,4 +121,3 @@ pub trait Instance<WB: WasmBackend> {
         name: &str,
     ) -> ResolveResult<<WB as WasmBackend>::ExportedDynFunc>;
 }
-

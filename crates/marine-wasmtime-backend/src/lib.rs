@@ -87,11 +87,10 @@ impl AsStoreContextMut<WasmtimeWasmBackend> for WasmtimeStore {
     }
 }*/
 
-
 impl marine_wasm_backend_traits::AsContextMut<WasmtimeWasmBackend> for WasmtimeStore {
     fn as_context_mut(&mut self) -> WasmtimeStoreContextMut<'_> {
         WasmtimeStoreContextMut {
-            ctx: self.store.as_context_mut()
+            ctx: self.store.as_context_mut(),
         }
     }
 }
@@ -100,14 +99,15 @@ pub struct WasmtimeStoreContextMut<'c> {
     ctx: wasmtime::StoreContextMut<'c, ()>,
 }
 
-
 impl<'c> ContextMut<WasmtimeWasmBackend> for WasmtimeStoreContextMut<'c> {}
 //impl StoreContextMut<WasmtimeWasmBackend> for WasmtimeStoreContextMut {}
 
-impl<'c> marine_wasm_backend_traits::AsContextMut<WasmtimeWasmBackend> for WasmtimeStoreContextMut<'c> {
+impl<'c> marine_wasm_backend_traits::AsContextMut<WasmtimeWasmBackend>
+    for WasmtimeStoreContextMut<'c>
+{
     fn as_context_mut(&mut self) -> WasmtimeStoreContextMut<'_> {
         WasmtimeStoreContextMut {
-            ctx: self.ctx.as_context_mut()
+            ctx: self.ctx.as_context_mut(),
         }
     }
 }
@@ -115,13 +115,12 @@ pub struct WasmtimeCaller<'c> {
     caller: wasmtime::Caller<'c, ()>,
 }
 
-
 impl<'c> Caller<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
     fn memory(&mut self, memory_index: u32) -> <WasmtimeWasmBackend as WasmBackend>::WITMemory {
         let memory = self.caller.get_export("memory").unwrap(); // todo: handle error
 
         WasmtimeWITMemory {
-            memory: memory.into_memory().unwrap() // todo: handle error
+            memory: memory.into_memory().unwrap(), // todo: handle error
         }
     }
 }
@@ -129,9 +128,8 @@ impl<'c> Caller<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
 impl<'c> marine_wasm_backend_traits::AsContextMut<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
     fn as_context_mut(&mut self) -> <WasmtimeWasmBackend as WasmBackend>::ContextMut<'_> {
         WasmtimeStoreContextMut {
-            ctx: wasmtime::AsContextMut::as_context_mut(&mut self.caller)
+            ctx: wasmtime::AsContextMut::as_context_mut(&mut self.caller),
         }
-
     }
 }
 
@@ -328,7 +326,15 @@ impl Namespace<WasmtimeWasmBackend> for WasmtimeNamespace {
 pub struct WasmtimeDynamicFunc {}
 
 impl<'a> DynamicFunc<'a, WasmtimeWasmBackend> for WasmtimeDynamicFunc {
-    fn new<F>(store: &mut <WasmtimeWasmBackend as WasmBackend>::ContextMut<'_>, sig: FuncSig, func: F) -> Self where F: for<'c> Fn(<WasmtimeWasmBackend as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + 'static {
+    fn new<F>(
+        store: &mut <WasmtimeWasmBackend as WasmBackend>::ContextMut<'_>,
+        sig: FuncSig,
+        func: F,
+    ) -> Self
+    where
+        F: for<'c> Fn(<WasmtimeWasmBackend as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+            + 'static,
+    {
         todo!()
     }
 }
@@ -411,7 +417,6 @@ pub struct WasmtimeExportedDynFunc {
     func: wasmtime::Func,
     signature: FuncSig,
 }
-
 
 impl ExportedDynFunc<WasmtimeWasmBackend> for WasmtimeExportedDynFunc {
     fn signature<'c>(&self, store: WasmtimeStoreContextMut) -> &FuncSig {

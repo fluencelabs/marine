@@ -48,14 +48,14 @@ pub trait Namespace<WB: WasmBackend>:
 
 pub trait LikeNamespace<WB: WasmBackend> {}
 
-pub trait ContextMut<WB: WasmBackend>:
-    //FuncGetter<(i32, i32), i32>
-    //+ FuncGetter<(i32, i32), ()>
-    //+ FuncGetter<i32, i32>
-    //+ FuncGetter<i32, ()>
-    //+ FuncGetter<(), i32>
-    //+ FuncGetter<(), ()>
-    //+ AsStoreContextMut<WB>
+pub trait ContextMut<WB: WasmBackend>
+//FuncGetter<(i32, i32), i32>
+//+ FuncGetter<(i32, i32), ()>
+//+ FuncGetter<i32, i32>
+//+ FuncGetter<i32, ()>
+//+ FuncGetter<(), i32>
+//+ FuncGetter<(), ()>
+//+ AsStoreContextMut<WB>
 {
 }
 

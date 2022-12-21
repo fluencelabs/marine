@@ -10,8 +10,7 @@ pub enum Export<M: MemoryExport, F: FunctionExport> {
     Other,
 }
 
-pub trait ExportedDynFunc<WB: WasmBackend>
-{
+pub trait ExportedDynFunc<WB: WasmBackend> {
     fn signature<'c>(&self, store: <WB as WasmBackend>::ContextMut<'c>) -> &FuncSig;
 
     fn call<'c>(

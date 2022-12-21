@@ -73,7 +73,9 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     let raw_args = itypes_args_to_wtypes(&argument_types);
     let raw_output = itypes_output_to_wtypes(&output_type_to_types(output_type));
 
-    let func = move |mut caller: <WB as WasmBackend>::Caller<'_>, inputs: &[WValue]| -> Vec<WValue> {
+    let func = move |mut caller: <WB as WasmBackend>::Caller<'_>,
+                     inputs: &[WValue]|
+          -> Vec<WValue> {
         //let store = &mut caller.as_context_mut();
         let result = {
             let memory_index = 0;
@@ -92,7 +94,14 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             }
         };
 
-        init_wasm_func_once!(allocate_func, caller, (i32, i32), i32, ALLOCATE_FUNC_NAME, 2);
+        init_wasm_func_once!(
+            allocate_func,
+            caller,
+            (i32, i32),
+            i32,
+            ALLOCATE_FUNC_NAME,
+            2
+        );
         /*if allocate_func.borrow().is_none() {
             let raw_func = match unsafe {
                 ctx.get_export_func_by_name::<(i32, i32), i32>(ALLOCATE_FUNC_NAME)
@@ -117,7 +126,9 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
         let mut lo_helper = LoHelper::new(&allocate_func, caller.memory(memory_index));
         let t = ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
             .map_err(HostImportError::LowererError)
-            .and_then(|mut lowerer| ivalue_to_wvalues(&mut caller.as_context_mut(), &mut lowerer, result));
+            .and_then(|mut lowerer| {
+                ivalue_to_wvalues(&mut caller.as_context_mut(), &mut lowerer, result)
+            });
         let wvalues = match t {
             Ok(wvalues) => wvalues,
             Err(e) => {
@@ -163,7 +174,11 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
         }
     };
 
-    <WB as WasmBackend>::DynamicFunc::new(&mut store.as_context_mut(), FuncSig::new(raw_args, raw_output), func)
+    <WB as WasmBackend>::DynamicFunc::new(
+        &mut store.as_context_mut(),
+        FuncSig::new(raw_args, raw_output),
+        func,
+    )
 }
 
 fn default_error_handler(err: &HostImportError) -> Option<crate::IValue> {

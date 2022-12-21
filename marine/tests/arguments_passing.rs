@@ -38,7 +38,6 @@ type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
 #[cfg(feature = "wasmtime")]
 type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
 
-
 #[test]
 pub fn get_interfaces() {
     use std::collections::HashSet;

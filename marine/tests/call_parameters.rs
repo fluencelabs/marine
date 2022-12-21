@@ -26,7 +26,6 @@ type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
 #[cfg(feature = "wasmtime")]
 type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
 
-
 #[test]
 pub fn call_parameters() {
     let call_parameters_config_path = "../examples/call_parameters/Config.toml";
