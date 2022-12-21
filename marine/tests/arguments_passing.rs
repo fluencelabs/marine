@@ -18,7 +18,6 @@ mod utils;
 
 use marine::Marine;
 use marine::IType;
-use marine_wasmer_backend::WasmerBackend;
 
 use pretty_assertions::assert_eq;
 use once_cell::sync::Lazy;
@@ -33,11 +32,18 @@ static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
 
 const MODULE_NAME: &str = "arguments_passing_pure";
 
+#[cfg(feature = "wasmer")]
+type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
+
+#[cfg(feature = "wasmtime")]
+type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
+
+
 #[test]
 pub fn get_interfaces() {
     use std::collections::HashSet;
 
-    let faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let interface = faas.get_interface();
@@ -345,7 +351,7 @@ pub fn get_interfaces() {
 
 #[test]
 pub fn all_types() {
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -405,7 +411,7 @@ pub fn all_types() {
 #[test]
 pub fn i32_type() {
     let test = |func_name: &str| {
-        let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+        let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
             .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
         let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default());
@@ -439,7 +445,7 @@ pub fn i32_type() {
 
 #[test]
 pub fn i64_type() {
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -474,7 +480,7 @@ pub fn i64_type() {
 
 #[test]
 pub fn u32_type() {
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -498,7 +504,7 @@ pub fn u32_type() {
 
 #[test]
 pub fn u64_type() {
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -522,7 +528,7 @@ pub fn u64_type() {
 
 #[test]
 pub fn f32_type() {
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -554,7 +560,7 @@ pub fn f32_type() {
 
 #[test]
 pub fn f64_type() {
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -586,7 +592,7 @@ pub fn f64_type() {
 
 #[test]
 pub fn string_type() {
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -612,7 +618,7 @@ pub fn string_type() {
 pub fn str_type() {
     const FUNC_NAME: &'static str = "str_type";
 
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default());
@@ -631,7 +637,7 @@ pub fn str_type() {
 
 #[test]
 pub fn bytearray_type() {
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -658,7 +664,7 @@ pub fn bytearray_type() {
 
 #[test]
 pub fn bool_type() {
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -684,7 +690,7 @@ pub fn bool_type() {
 pub fn empty_type() {
     const FUNC_NAME: &'static str = "empty_type";
 
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let expected_result = json!("success");

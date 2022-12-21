@@ -7,7 +7,7 @@ use marine_wasm_backend_traits::*;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use multimap::MultiMap;
-use wasmtime::{AsContext, AsContextMut, Caller, StoreContext, StoreContextMut, Val};
+use wasmtime::AsContextMut;
 use crate::utils::{val_to_wvalue, val_type_to_wtype, wvalue_to_val};
 
 mod utils;
@@ -45,6 +45,7 @@ impl WasmBackend for WasmtimeWasmBackend {
     type Instance = WasmtimeInstance;
     type Store = WasmtimeStore;
     type ContextMut<'c> = WasmtimeStoreContextMut<'c>;
+    type Caller<'c> = WasmtimeCaller<'c>;
     //type StoreContextMut = WasmtimeStoreContextMut;
     //type StoreContextMut = WasmtimeStoreContextMut;
     type ImportObject = WasmtimeImportObject;
@@ -86,14 +87,53 @@ impl AsStoreContextMut<WasmtimeWasmBackend> for WasmtimeStore {
     }
 }*/
 
-pub struct WasmtimeStoreContextMut<'c> {
-    ctx: StoreContextMut<'c, ()>,
+
+impl marine_wasm_backend_traits::AsContextMut<WasmtimeWasmBackend> for WasmtimeStore {
+    fn as_context_mut(&mut self) -> WasmtimeStoreContextMut<'_> {
+        WasmtimeStoreContextMut {
+            ctx: self.store.as_context_mut()
+        }
+    }
 }
-impl<'c> ContextMut for WasmtimeStoreContextMut<'c> {}
+
+pub struct WasmtimeStoreContextMut<'c> {
+    ctx: wasmtime::StoreContextMut<'c, ()>,
+}
+
+
+impl<'c> ContextMut<WasmtimeWasmBackend> for WasmtimeStoreContextMut<'c> {}
 //impl StoreContextMut<WasmtimeWasmBackend> for WasmtimeStoreContextMut {}
 
-impl<'c> wasmer_it::interpreter::wasm::structures::Store for WasmtimeStoreContextMut<'c> {}
+impl<'c> marine_wasm_backend_traits::AsContextMut<WasmtimeWasmBackend> for WasmtimeStoreContextMut<'c> {
+    fn as_context_mut(&mut self) -> WasmtimeStoreContextMut<'_> {
+        WasmtimeStoreContextMut {
+            ctx: self.ctx.as_context_mut()
+        }
+    }
+}
+pub struct WasmtimeCaller<'c> {
+    caller: wasmtime::Caller<'c, ()>,
+}
 
+
+impl<'c> Caller<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
+    fn memory(&mut self, memory_index: u32) -> <WasmtimeWasmBackend as WasmBackend>::WITMemory {
+        let memory = self.caller.get_export("memory").unwrap(); // todo: handle error
+
+        WasmtimeWITMemory {
+            memory: memory.into_memory().unwrap() // todo: handle error
+        }
+    }
+}
+
+impl<'c> marine_wasm_backend_traits::AsContextMut<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
+    fn as_context_mut(&mut self) -> <WasmtimeWasmBackend as WasmBackend>::ContextMut<'_> {
+        WasmtimeStoreContextMut {
+            ctx: wasmtime::AsContextMut::as_context_mut(&mut self.caller)
+        }
+
+    }
+}
 
 pub struct WasmtimeModule {
     custom_sections: MultiMap<String, Vec<u8>>,
@@ -249,14 +289,12 @@ macro_rules! impl_insert_fn {
     ($($name:ident: $arg:ty),* => $rets:ty) => {
         impl InsertFn<WasmtimeWasmBackend, ($($arg,)*), $rets> for WasmtimeNamespace {
             fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
-            where F:'static + Fn(&mut dyn ExportContext<WasmtimeWasmBackend>, ($($arg,)*)) -> $rets + std::marker::Send + std::marker::Sync {
+            where F:'static + Fn(&mut WasmtimeCaller, ($($arg,)*)) -> $rets + std::marker::Send + std::marker::Sync {
                 let inserter = move |linker: &mut WasmtimeImportObject, module: &str, name: &str| {
-                    let func = move |caller: Caller<'_, ()>, $($name: $arg),*| {
-                        unsafe {
-                            let mut ctx = WasmtimeExportContext {caller};
+                    let func = move |caller: wasmtime::Caller<'_, ()>, $($name: $arg),*| {
+                            let mut ctx = WasmtimeCaller {caller};
 
                             func(&mut ctx, ($($name,)*))
-                        }
                     };
 
                     linker.linker.func_wrap(module, name, func).unwrap(); // todo handle error
@@ -290,10 +328,7 @@ impl Namespace<WasmtimeWasmBackend> for WasmtimeNamespace {
 pub struct WasmtimeDynamicFunc {}
 
 impl<'a> DynamicFunc<'a, WasmtimeWasmBackend> for WasmtimeDynamicFunc {
-    fn new<'c, F>(store: &mut WasmtimeStore, sig: FuncSig, func: F) -> Self
-    where
-        F: Fn(&mut dyn ExportContext<WasmtimeWasmBackend>, &[WValue]) -> Vec<WValue> + 'static,
-    {
+    fn new<F>(store: &mut <WasmtimeWasmBackend as WasmBackend>::ContextMut<'_>, sig: FuncSig, func: F) -> Self where F: for<'c> Fn(<WasmtimeWasmBackend as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + 'static {
         todo!()
     }
 }
@@ -315,14 +350,14 @@ pub struct WasmtimeFunctionExport {
 }
 
 impl FunctionExport for WasmtimeFunctionExport {}
-
+/*
 pub struct WasmtimeExportContext<'a> {
     caller: Caller<'a, ()>,
 }
-
+*/
 macro_rules! impl_func_getter {
     ($args:ty, $rets:ty) => {
-        impl<'c> FuncGetter<$args, $rets> for WasmtimeExportContext<'c> {
+        impl<'c> FuncGetter<$args, $rets> for WasmtimeCaller<'c> {
             unsafe fn get_func<'s>(
                 &'s mut self,
                 name: &str,
@@ -340,7 +375,7 @@ impl_func_getter!(i32, i32);
 impl_func_getter!(i32, ());
 impl_func_getter!((), i32);
 impl_func_getter!((), ());
-
+/*
 impl<'a, 'r> ExportContext<'a, WasmtimeWasmBackend> for WasmtimeExportContext<'r> {
     fn memory(&mut self, memory_index: u32) -> <WasmtimeWasmBackend as WasmBackend>::WITMemory {
         let memory = self.caller.get_export("memory").unwrap();
@@ -350,7 +385,7 @@ impl<'a, 'r> ExportContext<'a, WasmtimeWasmBackend> for WasmtimeExportContext<'r
     fn store(&mut self) -> &mut <WasmtimeWasmBackend as WasmBackend>::Store {
         todo!()
     }
-}
+}*/
 /*
 impl<'r> AsStoreContextMut<WasmtimeWasmBackend> for WasmtimeExportContext<'r> {
     fn store_context_mut<'c, CTX: ExportContext<'c, WasmtimeWasmBackend>>(&mut self) -> ContextMut<'c, WasmtimeWasmBackend, WasmtimeExportContext<'c>>{
@@ -359,14 +394,14 @@ impl<'r> AsStoreContextMut<WasmtimeWasmBackend> for WasmtimeExportContext<'r> {
 }
 */
 
-impl<'c> AsContext for WasmtimeStoreContextMut<'c> {
+impl<'c> wasmtime::AsContext for WasmtimeStoreContextMut<'c> {
     type Data = ();
 
-    fn as_context(&self) -> StoreContext<'_, Self::Data> {
+    fn as_context(&self) -> wasmtime::StoreContext<'_, Self::Data> {
         self.ctx.as_context()
     }
 }
-impl<'c> AsContextMut for WasmtimeStoreContextMut<'c> {
+impl<'c> wasmtime::AsContextMut for WasmtimeStoreContextMut<'c> {
     fn as_context_mut(&mut self) -> wasmtime::StoreContextMut<'_, Self::Data> {
         self.ctx.as_context_mut()
     }
@@ -389,7 +424,7 @@ impl ExportedDynFunc<WasmtimeWasmBackend> for WasmtimeExportedDynFunc {
         let mut rets = Vec::new();
         rets.resize(
             self.signature.returns().collect::<Vec<_>>().len(),
-            Val::null(),
+            wasmtime::Val::null(),
         ); // todo make O(1), not O(n)
         self.func.call(store, &args, &mut rets).unwrap(); // todo handle error
         let rets = rets

@@ -17,9 +17,15 @@
 use std::path::PathBuf;
 use marine::Marine;
 use marine::IValue;
-use marine_wasmer_backend::WasmerBackend;
 
 use pretty_assertions::assert_eq;
+
+#[cfg(feature = "wasmer")]
+type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
+
+#[cfg(feature = "wasmtime")]
+type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
+
 
 #[test]
 pub fn call_parameters() {
@@ -34,7 +40,7 @@ pub fn call_parameters() {
     call_parameters_config.modules_dir =
         Some(PathBuf::from("../examples/call_parameters/artifacts"));
 
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(call_parameters_config)
+    let mut faas = MarineImpl::with_raw_config(call_parameters_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let init_peer_id = "init_peer_id";

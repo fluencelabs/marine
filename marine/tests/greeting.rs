@@ -18,11 +18,17 @@ use std::path::PathBuf;
 use marine::Marine;
 use marine::MarineModuleInterface;
 use marine::IValue;
-use marine_wasmer_backend::WasmerBackend;
 
 use pretty_assertions::assert_eq;
 
 use std::rc::Rc;
+
+#[cfg(feature = "wasmer")]
+type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
+
+#[cfg(feature = "wasmtime")]
+type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
+
 
 #[test]
 pub fn greeting() {
@@ -35,7 +41,7 @@ pub fn greeting() {
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
     greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
-    let mut faas = Marine::<WasmerBackend>::with_raw_config(greeting_config)
+    let mut faas = MarineImpl::with_raw_config(greeting_config)
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
     let result1 = faas
@@ -71,7 +77,7 @@ pub fn get_interfaces() {
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
     greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
-    let faas = Marine::<WasmerBackend>::with_raw_config(greeting_config)
+    let faas = MarineImpl::with_raw_config(greeting_config)
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
     let interface = faas.get_interface();

@@ -18,12 +18,18 @@ mod utils;
 
 use marine::Marine;
 use marine::IType;
-use marine_wasmer_backend::WasmerBackend;
 
 use once_cell::sync::Lazy;
 use serde_json::json;
 
 use std::rc::Rc;
+
+#[cfg(feature = "wasmer")]
+type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
+
+#[cfg(feature = "wasmtime")]
+type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
+
 
 static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
     marine::TomlMarineConfig::load("./tests/wasm_tests/arrays_passing/Config.toml")
@@ -34,7 +40,7 @@ static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
 pub fn get_interfaces() {
     use std::collections::HashSet;
 
-    let marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let interface = marine.get_interface();
@@ -240,7 +246,7 @@ pub fn get_interfaces() {
 
 #[test]
 pub fn i32_type() {
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let expected_result = json!([0, 1, 2, 3, 4, 0, 2]);
@@ -279,7 +285,7 @@ pub fn i32_type() {
 
 #[test]
 pub fn i64_type() {
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 =
@@ -315,7 +321,7 @@ pub fn i64_type() {
 
 #[test]
 pub fn u32_type() {
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 =
@@ -342,7 +348,7 @@ pub fn u32_type() {
 
 #[test]
 pub fn u64_type() {
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 =
@@ -369,7 +375,7 @@ pub fn u64_type() {
 
 #[test]
 pub fn f64_type() {
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 =
@@ -396,7 +402,7 @@ pub fn f64_type() {
 
 #[test]
 pub fn string_type() {
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine.call_with_json(
@@ -436,7 +442,7 @@ pub fn string_type() {
 
 #[test]
 pub fn byte_type() {
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine.call_with_json(
@@ -475,7 +481,7 @@ pub fn byte_type() {
 
 #[test]
 pub fn inner_arrays_1_type() {
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine.call_with_json(
@@ -522,7 +528,7 @@ pub fn inner_arrays_1_type() {
 
 #[test]
 pub fn inner_arrays_2_type() {
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine.call_with_json(
@@ -594,7 +600,7 @@ pub fn inner_arrays_2_type() {
 
 #[test]
 pub fn bool_type() {
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine.call_with_json(
@@ -629,7 +635,7 @@ pub fn bool_type() {
 
 #[test]
 pub fn empty_type() {
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(ARG_CONFIG.clone())
+    let mut marine = MarineImpl::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let expected_result = json!(["from effector"]);

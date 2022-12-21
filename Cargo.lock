@@ -2228,6 +2228,7 @@ dependencies = [
  "marine-utils 0.4.0",
  "marine-wasm-backend-traits",
  "marine-wasmer-backend",
+ "marine-wasmtime-backend",
  "once_cell",
  "pretty_assertions",
  "safe-transmute",

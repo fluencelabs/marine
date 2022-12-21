@@ -22,7 +22,12 @@ use serde_json::json;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
-use marine_wasmer_backend::WasmerBackend;
+
+#[cfg(feature = "wasmer")]
+type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
+
+#[cfg(feature = "wasmtime")]
+type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
 
 #[test]
 pub fn records() {
@@ -35,7 +40,7 @@ pub fn records() {
         toml::from_slice(&records_config_raw).expect("records config should be well-formed");
     records_config.modules_dir = Some(PathBuf::from("../examples/records/artifacts/"));
 
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(records_config)
+    let mut marine = MarineImpl::with_raw_config(records_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = marine
@@ -173,7 +178,7 @@ fn records_passing() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(records_passing_config)
+    let mut marine = MarineImpl::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -234,7 +239,7 @@ fn records_destruction() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(records_passing_config)
+    let mut marine = MarineImpl::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let record_array = json!([
@@ -289,7 +294,7 @@ fn records_return_frees() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(records_passing_config)
+    let mut marine = MarineImpl::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let _result = marine
@@ -410,7 +415,7 @@ fn records_pass_frees() {
         "field18": struct_16kb.clone(),
     });
 
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(records_passing_config)
+    let mut marine = MarineImpl::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result = marine

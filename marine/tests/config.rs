@@ -16,38 +16,46 @@
 
 use serde_json::{json, Value};
 use marine::{Marine, TomlMarineConfig};
-use marine_wasmer_backend::WasmerBackend;
+//use marine_wasmer_backend::WasmerBackend;
+
+
+#[cfg(feature = "wasmer")]
+type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
+
+#[cfg(feature = "wasmtime")]
+type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
+
 
 #[test]
 fn load_from_modules_dir() {
     let config_path = "tests/config_tests/ModulesDirConfig.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let _marine = Marine::<WasmerBackend>::with_raw_config(raw_config)
-        .expect("Marine::<WasmerBackend> should load all modules");
+    let _marine = MarineImpl::with_raw_config(raw_config)
+        .expect("MarineImpl should load all modules");
 }
 
 #[test]
 fn load_from_specified_dir() {
     let config_path = "tests/config_tests/SpecifiedDirConfig.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let _marine = Marine::<WasmerBackend>::with_raw_config(raw_config)
-        .expect("Marine::<WasmerBackend> should load all modules");
+    let _marine = MarineImpl::with_raw_config(raw_config)
+        .expect("MarineImpl should load all modules");
 }
 
 #[test]
 fn load_from_specified_path() {
     let config_path = "tests/config_tests/SpecifiedPathConfig.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let _marine = Marine::<WasmerBackend>::with_raw_config(raw_config)
-        .expect("Marine::<WasmerBackend> should load all modules");
+    let _marine = MarineImpl::with_raw_config(raw_config)
+        .expect("MarineImpl should load all modules");
 }
 
 #[test]
 fn wasi_mapped_dirs() {
     let config_path = "tests/wasm_tests/wasi/Config.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let mut marine = Marine::<WasmerBackend>::with_raw_config(raw_config)
-        .expect("Marine::<WasmerBackend> should load all modules");
+    let mut marine = MarineImpl::with_raw_config(raw_config)
+        .expect("MarineImpl should load all modules");
     let file_data = std::fs::read("tests/wasm_tests/wasi/some_dir/some_file")
         .expect("file must exist for test to work");
     let result = marine
