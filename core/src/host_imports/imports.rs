@@ -54,9 +54,9 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     descriptor: HostImportDescriptor<WB>,
     record_types: Rc<MRecordTypes>,
 ) -> <WB as WasmBackend>::DynamicFunc {
-    let allocate_func: AllocateFunc = Box::new(RefCell::new(None));
-    let set_result_ptr_func: SetResultPtrFunc = Box::new(RefCell::new(None));
-    let set_result_size_func: SetResultSizeFunc = Box::new(RefCell::new(None));
+    let allocate_func: AllocateFunc<WB> = Box::new(RefCell::new(None));
+    let set_result_ptr_func: SetResultPtrFunc<WB> = Box::new(RefCell::new(None));
+    let set_result_size_func: SetResultSizeFunc<WB> = Box::new(RefCell::new(None));
 
     let HostImportDescriptor {
         host_exported_func,
@@ -82,8 +82,8 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             let memory_view = caller.memory(memory_index).view();
             let li_helper = LiHelper::new(record_types.clone());
             let lifter = ILifter::new(memory_view, &li_helper);
-
-            match wvalues_to_ivalues(&lifter, inputs, &argument_types) {
+            let rets = wvalues_to_ivalues(&mut caller.as_context_mut(), &lifter, inputs, &argument_types);
+            match rets {
                 Ok(ivalues) => host_exported_func(&mut caller, ivalues),
                 Err(e) => {
                     log::error!("error occurred while lifting values in host import: {}", e);
@@ -138,8 +138,8 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
                 init_wasm_func_once!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
                 init_wasm_func_once!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
 
-                call_wasm_func!(set_result_ptr_func, 0);
-                call_wasm_func!(set_result_size_func, 0);
+                call_wasm_func!(set_result_ptr_func, &mut caller.as_context_mut(), 0);
+                call_wasm_func!(set_result_size_func, &mut caller.as_context_mut(), 0);
                 return vec![WValue::I32(0)];
             }
         };
@@ -151,8 +151,8 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
                 init_wasm_func_once!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
                 init_wasm_func_once!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
 
-                call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
-                call_wasm_func!(set_result_size_func, wvalues[1].to_u128() as _);
+                call_wasm_func!(set_result_ptr_func, &mut caller.as_context_mut(), wvalues[0].to_u128() as _);
+                call_wasm_func!(set_result_size_func, &mut caller.as_context_mut(), wvalues[1].to_u128() as _);
                 vec![]
             }
 
@@ -161,7 +161,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             1 => {
                 init_wasm_func_once!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 3);
 
-                call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
+                call_wasm_func!(set_result_ptr_func, &mut caller.as_context_mut(), wvalues[0].to_u128() as _);
                 vec![wvalues[0].clone()]
             }
 

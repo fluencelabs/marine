@@ -43,8 +43,9 @@ macro_rules! simple_wvalue_to_ivalue {
     }};
 }
 
-pub(crate) fn wvalues_to_ivalues<R: RecordResolvable, MV: MemoryView>(
-    lifter: &ILifter<'_, R, MV>,
+pub(crate) fn wvalues_to_ivalues<R: RecordResolvable, MV: MemoryView<S>, S: it_memory_traits::Store>(
+    store: &mut <S as it_memory_traits::Store>::ActualStore<'_>,
+    lifter: &ILifter<'_, R, MV, S>,
     wvalues: &[WValue],
     itypes: &[IType],
 ) -> HostImportResult<Vec<IValue>> {
@@ -73,7 +74,7 @@ pub(crate) fn wvalues_to_ivalues<R: RecordResolvable, MV: MemoryView>(
                 let offset = next_wvalue!(wvalue, I32);
                 let size = next_wvalue!(wvalue, I32);
 
-                let raw_str = lifter.reader.read_raw_u8_array(offset as _, size as _)?;
+                let raw_str = lifter.reader.read_raw_u8_array(store, offset as _, size as _)?;
                 let str = String::from_utf8(raw_str)?;
                 result.push(IValue::String(str));
             }
@@ -81,21 +82,21 @@ pub(crate) fn wvalues_to_ivalues<R: RecordResolvable, MV: MemoryView>(
                 let offset = next_wvalue!(wvalue, I32);
                 let size = next_wvalue!(wvalue, I32);
 
-                let array = lifter.reader.read_raw_u8_array(offset as _, size as _)?;
+                let array = lifter.reader.read_raw_u8_array(store, offset as _, size as _)?;
                 result.push(IValue::ByteArray(array));
             }
             IType::Array(ty) => {
                 let offset = next_wvalue!(wvalue, I32);
                 let size = next_wvalue!(wvalue, I32);
 
-                let array = array_lift_memory(lifter, ty, offset as _, size as _)?;
+                let array = array_lift_memory(store, lifter, ty, offset as _, size as _)?;
                 result.push(array);
             }
             IType::Record(record_type_id) => {
                 let record_type = lifter.resolver.resolve_record(*record_type_id)?;
                 let offset = next_wvalue!(wvalue, I32);
 
-                let record = record_lift_memory(lifter, record_type, offset as _)?;
+                let record = record_lift_memory(store, lifter, record_type, offset as _)?;
                 result.push(record);
             }
         }

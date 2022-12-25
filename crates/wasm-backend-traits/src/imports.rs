@@ -21,7 +21,7 @@ pub trait ImportObject<WB: WasmBackend>: Clone {
 pub trait DynamicFunc<'a, WB: WasmBackend> {
     fn new<F>(store: &mut <WB as WasmBackend>::ContextMut<'_>, sig: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + 'static;
+        F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + Send + Sync + 'static;
 }
 
 pub trait InsertFn<WB: WasmBackend, Args, Rets> {
@@ -85,9 +85,11 @@ impl FuncSig {
     }
 }
 
-pub trait FuncGetter<Args, Rets> {
+pub trait FuncGetter<WB: WasmBackend, Args, Rets> {
     unsafe fn get_func<'c>(
         &'c mut self,
         name: &str,
-    ) -> ResolveResult<Box<dyn FnMut(Args) -> RuntimeResult<Rets> + 'c>>;
+    ) -> ResolveResult<
+        Box<dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets> + 'c>,
+    >;
 }

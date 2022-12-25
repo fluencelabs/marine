@@ -273,6 +273,7 @@ impl<WB: WasmBackend> MModule<WB> {
         let wasi_mapped_dirs = config.wasi_mapped_dirs.into_iter().collect::<Vec<_>>();
 
         let mut wasi_import_object = <WB as WasmBackend>::Wasi::generate_import_object_for_version(
+            &mut store.as_context_mut(),
             config.wasi_version,
             vec![],
             wasi_envs,

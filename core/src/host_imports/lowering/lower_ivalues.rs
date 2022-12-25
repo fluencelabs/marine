@@ -24,7 +24,7 @@ use it_memory_traits::MemoryView;
 
 pub(crate) fn ivalue_to_wvalues<
     A: Allocatable<MV, Store>,
-    MV: MemoryView,
+    MV: MemoryView<Store>,
     Store: it_memory_traits::Store,
 >(
     store: &mut <Store as it_memory_traits::Store>::ActualStore<'_>,

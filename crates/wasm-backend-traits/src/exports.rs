@@ -27,5 +27,5 @@ pub trait FunctionExport {}
 pub trait Memory<WB: WasmBackend> {
     fn new(export: <WB as WasmBackend>::MemoryExport) -> Self;
 
-    fn size(&self) -> usize;
+    fn size(&self, store: &mut <WB as WasmBackend>::ContextMut<'_>) -> usize;
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine_wasm_backend_traits::{Caller, WasmBackend};
+use marine_wasm_backend_traits::{AsContextMut, Caller, WasmBackend};
 use it_memory_traits::Memory;
 use it_memory_traits::MemoryReadable;
 //use wasmer_core::vm::Ctx;
@@ -62,7 +62,7 @@ fn read_string<WB: WasmBackend>(
     size: i32,
 ) -> Option<String> {
     let view = ctx.memory(0).view();
-    let bytes = view.read_vec(offset as u32, size as u32);
+    let bytes = view.read_vec(&mut ctx.as_context_mut(), offset as u32, size as u32);
     String::from_utf8(bytes).ok()
 }
 

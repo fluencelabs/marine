@@ -10,7 +10,7 @@ marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.1.0"
 wasmer-it = { workspace = true }
 it-memory-traits = { workspace = true }
 
-wasmtime = "2.0.1"
-wasmtime-wasi = "2.0.1"
+wasmtime = "3.0.1"
+wasmtime-wasi = "3.0.1"
 wasmparser = "0.93.0"
 multimap = "0.8.3"

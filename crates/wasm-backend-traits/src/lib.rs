@@ -34,8 +34,8 @@ pub trait WasmBackend: Clone + Default + 'static {
     type ExportedDynFunc: ExportedDynFunc<Self>;
 
     // interface types
-    type WITMemory: Memory<Self> + it_memory_traits::Memory<Self::WITMemoryView> + Clone + 'static;
-    type WITMemoryView: MemoryView + 'static;
+    type WITMemory: Memory<Self> + it_memory_traits::Memory<Self::WITMemoryView, DelayedContextLifetime<Self>> + Clone + 'static;
+    type WITMemoryView: MemoryView<DelayedContextLifetime<Self>> + 'static;
     // wasi
     type Wasi: WasiImplementation<Self>;
 
@@ -55,12 +55,12 @@ pub trait Store<WB: WasmBackend> {
 }
 
 pub trait Caller<WB: WasmBackend>:
-    FuncGetter<(i32, i32), i32>
-    + FuncGetter<(i32, i32), ()>
-    + FuncGetter<i32, i32>
-    + FuncGetter<i32, ()>
-    + FuncGetter<(), i32>
-    + FuncGetter<(), ()>
+    FuncGetter<WB, (i32, i32), i32>
+    + FuncGetter<WB, (i32, i32), ()>
+    + FuncGetter<WB, i32, i32>
+    + FuncGetter<WB, i32, ()>
+    + FuncGetter<WB, (), i32>
+    + FuncGetter<WB, (), ()>
 {
     fn memory(&mut self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
 }

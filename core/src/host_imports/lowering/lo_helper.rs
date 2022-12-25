@@ -22,15 +22,16 @@ use it_lilo::traits::Allocatable;
 use it_lilo::traits::AllocatableError;
 use it_memory_traits::MemoryView;
 use it_memory_traits::Memory;
+use marine_wasm_backend_traits::{DelayedContextLifetime, WasmBackend};
 
-pub(crate) struct LoHelper<'c, MV: MemoryView, M: Memory<MV>> {
-    allocate_func: &'c AllocateFunc,
+pub(crate) struct LoHelper<'c, WB: WasmBackend, MV: MemoryView<DelayedContextLifetime<WB>>, M: Memory<MV, DelayedContextLifetime<WB>>> {
+    allocate_func: &'c AllocateFunc<WB>,
     memory: M,
     _memory_view_phantom: PhantomData<MV>,
 }
 
-impl<'c, MV: MemoryView, M: Memory<MV>> LoHelper<'c, MV, M> {
-    pub(crate) fn new(allocate_func: &'c AllocateFunc, memory: M) -> Self {
+impl<'c, WB: WasmBackend, MV: MemoryView<DelayedContextLifetime<WB>>, M: Memory<MV, DelayedContextLifetime<WB>>> LoHelper<'c, WB, MV, M> {
+    pub(crate) fn new(allocate_func: &'c AllocateFunc<WB>, memory: M) -> Self {
         Self {
             allocate_func,
             memory,
@@ -39,16 +40,16 @@ impl<'c, MV: MemoryView, M: Memory<MV>> LoHelper<'c, MV, M> {
     }
 }
 
-impl<'s, MV: MemoryView, M: Memory<MV>, Store: it_memory_traits::Store> Allocatable<MV, Store>
-    for LoHelper<'s, MV, M>
+impl<'s, WB: WasmBackend, MV: MemoryView<DelayedContextLifetime<WB>>, M: Memory<MV, DelayedContextLifetime<WB>>> Allocatable<MV, DelayedContextLifetime<WB>>
+    for LoHelper<'s, WB, MV, M>
 {
     fn allocate(
         &mut self,
-        _store: &mut <Store as it_memory_traits::Store>::ActualStore<'_>,
+        store: &mut <WB as WasmBackend>::ContextMut<'_>,
         size: u32,
         type_tag: u32,
     ) -> Result<(u32, MV), AllocatableError> {
-        let offset = call_wasm_func!(self.allocate_func, size as _, type_tag as _);
+        let offset = call_wasm_func!(self.allocate_func, store, size as _, type_tag as _);
         Ok((offset as u32, self.memory.view()))
     }
 }

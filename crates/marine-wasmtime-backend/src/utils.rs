@@ -1,5 +1,5 @@
 use wasmtime::{Val, ValType};
-use marine_wasm_backend_traits::{WType, WValue};
+use marine_wasm_backend_traits::{FuncSig, WType, WValue};
 
 pub(crate) fn val_type_to_wtype(ty: &wasmtime::ValType) -> Option<WType> {
     match ty {
@@ -41,4 +41,15 @@ pub(crate) fn val_to_wvalue(value: &wasmtime::Val) -> Result<WValue, ()> {
         Val::FuncRef(_) => Err(()),
         Val::ExternRef(_) => Err(()),
     }
+}
+
+pub(crate) fn sig_to_fn_ty(sig: &FuncSig) -> wasmtime::FuncType {
+    let params = sig
+        .params()
+        .map(wtype_to_val_type);
+    let rets = sig
+        .returns()
+        .map(wtype_to_val_type);
+
+    wasmtime::FuncType::new(params, rets)
 }
