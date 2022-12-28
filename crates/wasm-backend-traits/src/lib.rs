@@ -31,10 +31,10 @@ pub trait WasmBackend: Clone + Default + 'static {
     type Namespace: Namespace<Self>;
 
     //type ExportContext: for<'c> ExportContext<'c, Self>;
-    type ExportedDynFunc: ExportedDynFunc<Self>;
+    type ExportedDynFunc: ExportedDynFunc<Self> + Sync + Send;
 
     // interface types
-    type WITMemory: Memory<Self> + it_memory_traits::Memory<Self::WITMemoryView, DelayedContextLifetime<Self>> + Clone + 'static;
+    type WITMemory: Memory<Self> + it_memory_traits::Memory<Self::WITMemoryView, DelayedContextLifetime<Self>> + Clone + Send + Sync + 'static;
     type WITMemoryView: MemoryView<DelayedContextLifetime<Self>> + 'static;
     // wasi
     type Wasi: WasiImplementation<Self>;
@@ -113,7 +113,7 @@ pub trait Instance<WB: WasmBackend> {
         &'a self,
         store: &mut <WB as WasmBackend>::Store,
         name: &str,
-    ) -> ResolveResult<Box<dyn Fn(&mut <WB as WasmBackend>::Store) -> RuntimeResult<()> + 'a>>;
+    ) -> ResolveResult<Box<dyn Fn(&mut <WB as WasmBackend>::Store) -> RuntimeResult<()> + Sync + Send + 'a>>;
 
     fn get_dyn_func<'a>(
         &'a self,

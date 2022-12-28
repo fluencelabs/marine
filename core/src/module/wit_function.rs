@@ -24,17 +24,16 @@ use marine_wasm_backend_traits::ExportedDynFunc;
 
 use wasmer_it::interpreter::wasm;
 
-// use std::sync::Arc;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Clone)]
 enum WITFunctionInner<WB: WasmBackend> {
     Export {
-        func: Rc<<WB as WasmBackend>::ExportedDynFunc>,
+        func: Arc<<WB as WasmBackend>::ExportedDynFunc>,
     },
     Import {
         // TODO: use dyn Callable here
-        callable: Rc<Callable<WB>>,
+        callable: Arc<Callable<WB>>,
     },
 }
 
@@ -42,8 +41,8 @@ enum WITFunctionInner<WB: WasmBackend> {
 #[derive(Clone)]
 pub(super) struct WITFunction<WB: WasmBackend> {
     name: String,
-    arguments: Rc<Vec<IFunctionArg>>,
-    outputs: Rc<Vec<IType>>,
+    arguments: Arc<Vec<IFunctionArg>>,
+    outputs: Arc<Vec<IType>>,
     inner: WITFunctionInner<WB>,
 }
 
@@ -67,11 +66,11 @@ impl<WB: WasmBackend> WITFunction<WB> {
         let outputs = signature.returns().map(wtype_to_itype).collect::<Vec<_>>();
 
         let inner = WITFunctionInner::Export {
-            func: Rc::new(dyn_func),
+            func: Arc::new(dyn_func),
         };
 
-        let arguments = Rc::new(arguments);
-        let outputs = Rc::new(outputs);
+        let arguments = Arc::new(arguments);
+        let outputs = Arc::new(outputs);
 
         Ok(Self {
             name,
@@ -86,8 +85,8 @@ impl<WB: WasmBackend> WITFunction<WB> {
         wit_module: &MModule<WB>,
         module_name: &str,
         function_name: &str,
-        arguments: Rc<Vec<IFunctionArg>>,
-        outputs: Rc<Vec<IType>>,
+        arguments: Arc<Vec<IFunctionArg>>,
+        outputs: Arc<Vec<IType>>,
     ) -> MResult<Self> {
         let callable = wit_module.get_callable(module_name, function_name)?;
 
@@ -147,7 +146,7 @@ impl<'c, WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<W
                 )
                 .map_err(|_| ())
                 .map(|results| results.iter().map(wval_to_ival).collect()),
-            WITFunctionInner::Import { callable, .. } => Rc::make_mut(&mut callable.clone())
+            WITFunctionInner::Import { callable, .. } => Arc::make_mut(&mut callable.clone())
                 .call(store, arguments)
                 .map_err(|_| ()),
         }

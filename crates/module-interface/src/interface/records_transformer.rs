@@ -24,7 +24,7 @@ use wasmer_it::IRecordType;
 use wasmer_it::IType;
 
 use std::collections::HashSet;
-use std::rc::Rc;
+use std::sync::Arc;
 use itertools::Itertools;
 
 pub(crate) struct RecordsTransformer {
@@ -60,7 +60,7 @@ impl RecordsTransformer {
     fn dfs(
         &mut self,
         record_id: u64,
-        record: &Rc<IRecordType>,
+        record: &Arc<IRecordType>,
         exported_records: &IRecordTypes,
     ) -> InterfaceResult<()> {
         if !self.used.insert(record_id) {
@@ -107,7 +107,7 @@ impl RecordsTransformer {
 
     fn convert_record(
         id: u64,
-        record: &Rc<IRecordType>,
+        record: &Arc<IRecordType>,
         record_types: &IRecordTypes,
     ) -> RecordType {
         use super::itype_text_view;

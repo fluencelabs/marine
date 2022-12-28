@@ -38,8 +38,8 @@ use it_lilo::lifter::ILifter;
 use it_lilo::lowerer::ILowerer;
 use it_memory_traits::Memory as ITMemory;
 
-use std::cell::RefCell;
-use std::rc::Rc;
+//use std::cell::RefCell;
+use std::sync::Arc;
 //use it_memory_traits::Memory;
 
 use marine_wasm_backend_traits::{AsContextMut, Caller, DelayedContextLifetime, FuncSig, WasmBackend};
@@ -52,11 +52,11 @@ use marine_wasm_backend_traits::FuncGetter;
 pub(crate) fn create_host_import_func<WB: WasmBackend>(
     store: &mut <WB as WasmBackend>::Store,
     descriptor: HostImportDescriptor<WB>,
-    record_types: Rc<MRecordTypes>,
+    record_types: Arc<MRecordTypes>,
 ) -> <WB as WasmBackend>::DynamicFunc {
-    let allocate_func: AllocateFunc<WB> = Box::new(RefCell::new(None));
-    let set_result_ptr_func: SetResultPtrFunc<WB> = Box::new(RefCell::new(None));
-    let set_result_size_func: SetResultSizeFunc<WB> = Box::new(RefCell::new(None));
+    //let allocate_func: AllocateFunc<WB> = Box::new((None));
+    //let set_result_ptr_func: SetResultPtrFunc<WB> = Box::new(RefCell::new(None));
+    //let set_result_size_func: SetResultSizeFunc<WB> = Box::new(RefCell::new(None));
 
     let HostImportDescriptor {
         host_exported_func,
@@ -123,7 +123,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
 
         let memory_index = 0;
         let memory_view = caller.memory(memory_index).view();
-        let mut lo_helper = LoHelper::new(&allocate_func, caller.memory(memory_index));
+        let mut lo_helper = LoHelper::new(&mut allocate_func, caller.memory(memory_index));
         let t = ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
             .map_err(HostImportError::LowererError)
             .and_then(|mut lowerer| {

@@ -29,9 +29,9 @@ use std::collections::HashSet;
 // 65536*1600 ~ 100 Mb (Wasm page size is 64 Kb)
 const DEFAULT_HEAP_PAGES_COUNT: u32 = 1600;
 
-pub type ErrorHandler = Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + 'static>>;
+pub type ErrorHandler = Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + Sync + Send + 'static>>;
 pub type HostExportedFunc<WB> = Box<
-    dyn for<'c> Fn(&mut <WB as WasmBackend>::Caller<'c>, Vec<IValue>) -> Option<IValue> + 'static,
+    dyn for<'c> Fn(&mut <WB as WasmBackend>::Caller<'c>, Vec<IValue>) -> Option<IValue> + Sync + Send + 'static,
 >;
 
 pub struct HostImportDescriptor<WB: WasmBackend> {

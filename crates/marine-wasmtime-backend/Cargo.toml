@@ -10,7 +10,8 @@ marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.1.0"
 wasmer-it = { workspace = true }
 it-memory-traits = { workspace = true }
 
-wasmtime = "3.0.1"
+# all default features except async
+wasmtime = {version = "3.0.1", default-features = false, features = ["cache", "wat", "jitdump", "parallel-compilation", "cranelift", "pooling-allocator", "vtune"]}
 wasmtime-wasi = "3.0.1"
 wasmparser = "0.93.0"
 multimap = "0.8.3"

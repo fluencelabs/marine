@@ -33,13 +33,14 @@ pub use wasmer_it::to_interface_value;
 use serde::Serialize;
 use serde::Deserialize;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// Represent a function type inside Marine module.
 #[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
 pub struct MFunctionSignature {
     pub name: Rc<String>,
-    pub arguments: Rc<Vec<IFunctionArg>>,
-    pub outputs: Rc<Vec<IType>>,
+    pub arguments: Arc<Vec<IFunctionArg>>,
+    pub outputs: Arc<Vec<IType>>,
 }
 
 pub(crate) use marine_module::MModule;

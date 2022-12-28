@@ -22,6 +22,8 @@ use wasmer_core::memory::MemoryView as WasmerMemoryView;
 use wasmer_core::vm::LocalMemory;
 
 use std::iter::zip;
+use marine_wasm_backend_traits::DelayedContextLifetime;
+use crate::WasmerBackend;
 
 pub struct WITMemoryView<'a>(pub(crate) WasmerMemoryView<'a, u8>);
 
@@ -35,7 +37,7 @@ impl std::ops::Deref for WITMemory {
     }
 }
 
-impl<'s> MemoryReadable for WITMemoryView<'s> {
+impl<'s> MemoryReadable<DelayedContextLifetime<WasmerBackend>> for WITMemoryView<'s> {
     fn read_byte(&self, offset: u32) -> u8 {
         self.0[offset as usize].get()
     }
@@ -60,7 +62,7 @@ impl<'s> MemoryReadable for WITMemoryView<'s> {
     }
 }
 
-impl<'s> MemoryWritable for WITMemoryView<'s> {
+impl<'s> MemoryWritable<DelayedContextLifetime<WasmerBackend>> for WITMemoryView<'s> {
     fn write_byte(&self, offset: u32, value: u8) {
         self.0[offset as usize].set(value);
     }
@@ -75,7 +77,7 @@ impl<'s> MemoryWritable for WITMemoryView<'s> {
     }
 }
 
-impl<'s> MemoryView for WITMemoryView<'s> {
+impl<'s> MemoryView<DelayedContextLifetime<WasmerBackend>> for WITMemoryView<'s> {
     fn check_bounds(&self, offset: u32, size: u32) -> Result<(), MemoryAccessError> {
         let memory_size = self.0.len() as u32;
         if offset + size >= memory_size {
@@ -90,7 +92,7 @@ impl<'s> MemoryView for WITMemoryView<'s> {
     }
 }
 
-impl<'a> wasm::structures::Memory<WITMemoryView<'a>> for WITMemory {
+impl<'a> wasm::structures::Memory<WITMemoryView<'a>, DelayedContextLifetime<WasmerBackend>> for WITMemory {
     fn view(&self) -> WITMemoryView<'a> {
         let LocalMemory { base, .. } = unsafe { *self.0.vm_local_memory() };
         let length = self.0.size().bytes().0 / std::mem::size_of::<u8>();

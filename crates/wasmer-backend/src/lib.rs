@@ -202,11 +202,11 @@ impl<'c> ContextMut<WasmerBackend> for WasmerStoreContextMut<'c> {}
 
 macro_rules! impl_func_getter {
     ($args:ty, $rets:ty) => {
-        impl<'r> FuncGetter<$args, $rets> for WasmerExportContext<'r> {
+        impl<'r> FuncGetter<WasmerBackend, $args, $rets> for WasmerExportContext<'r> {
             unsafe fn get_func<'c>(
                 &'c mut self,
                 name: &str,
-            ) -> Result<Box<dyn FnMut($args) -> Result<$rets, RuntimeError> + 'c>, ResolveError>
+            ) -> Result<Box<dyn FnMut($args) -> Result<$rets, RuntimeError> + Send + Sync + 'c>, ResolveError>
             {
                 self.get_func_impl(name)
             }
@@ -299,7 +299,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
             .exports
             .get::<Func<'a>>(name)
             .map(|func| {
-                let func: Box<dyn Fn(&mut WasmerStore) -> RuntimeResult<()> + 'a> =
+                let func: Box<dyn Fn(&mut WasmerStore) -> RuntimeResult<()> + Send + Sync + 'a> =
                     Box::new(move |_store| -> RuntimeResult<()> {
                         func.call()
                             .map_err(|e| RuntimeError::Message(e.to_string()))

@@ -223,7 +223,7 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
         &'a self,
         store: &mut WasmtimeStore,
         name: &str,
-    ) -> ResolveResult<Box<dyn Fn(&mut WasmtimeStore) -> RuntimeResult<()> + 'a>> {
+    ) -> ResolveResult<Box<dyn Fn(&mut WasmtimeStore) -> RuntimeResult<()> + Sync + Send + 'a>> {
         let func = match self.instance.get_func(&mut store.store, name) {
             None => return Err(ResolveError::Message(format!("no such function {}", name))),
             Some(func) => func,
@@ -304,7 +304,11 @@ macro_rules! impl_insert_fn {
     ($($name:ident: $arg:ty),* => $rets:ty) => {
         impl InsertFn<WasmtimeWasmBackend, ($($arg,)*), $rets> for WasmtimeNamespace {
             fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
-            where F:'static + Fn(&mut WasmtimeCaller, ($($arg,)*)) -> $rets + std::marker::Send + std::marker::Sync {
+            where F:
+                Fn(&mut WasmtimeCaller, ($($arg,)*)) -> $rets
+                + Sync
+                + Send
+                + 'static {
                 let name: String = name.into();
                 println!("calling insert_fn with {}", &name);
                 let inserter = move |linker: &mut WasmtimeImportObject, module: &str, name: &str| {
@@ -342,7 +346,7 @@ impl Namespace<WasmtimeWasmBackend> for WasmtimeNamespace {
 
     fn insert(&mut self, name: impl Into<String>, func: WasmtimeDynamicFunc) {
         let inserter = move |linker: &mut WasmtimeImportObject, module: &str, name: &str| {
-            let sig = &func.sig;
+            let sig = func.sig.clone();
             let wrapper = move |
                 caller: wasmtime::Caller<'_, StoreState>,
                 args: &[wasmtime::Val],
@@ -362,9 +366,8 @@ impl Namespace<WasmtimeWasmBackend> for WasmtimeNamespace {
 
                 Ok(())
             };
-            let ty = sig_to_fn_ty(sig);
-            //println!("adding function {} {}", module, name);
-            linker.linker.func_new(module, name, ty,wrapper).unwrap(); // todo handle error
+            let ty = sig_to_fn_ty(&sig);
+            linker.linker.func_new(module, name, ty, wrapper).unwrap(); // todo handle error
             Ok(())
         };
         self.functions.push((name.into(), Box::new(inserter)));
@@ -373,8 +376,7 @@ impl Namespace<WasmtimeWasmBackend> for WasmtimeNamespace {
 
 pub struct WasmtimeDynamicFunc {
     data: Box<
-        dyn for<'c> Fn(<WasmtimeWasmBackend as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
-            + Send + Sync + 'static,
+        dyn for<'c> Fn(<WasmtimeWasmBackend as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
     >,
     sig: FuncSig,
 }
@@ -387,8 +389,8 @@ impl<'a> DynamicFunc<'a, WasmtimeWasmBackend> for WasmtimeDynamicFunc {
     ) -> Self
     where
         F: for<'c> Fn(<WasmtimeWasmBackend as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
-            + Send
             + Sync
+            + Send
             + 'static,
     {
         WasmtimeDynamicFunc {
@@ -423,8 +425,8 @@ pub struct WasmtimeExportContext<'a> {
 macro_rules! impl_func_getter {
     ($args:ty, $rets:ty) => {
         impl<'c> FuncGetter<WasmtimeWasmBackend, $args, $rets> for WasmtimeCaller<'c> {
-            unsafe fn get_func<'s>(
-                &'s mut self,
+            unsafe fn get_func(
+                &mut self,
                 name: &str,
             ) -> Result<
                 Box<
@@ -432,7 +434,9 @@ macro_rules! impl_func_getter {
                             &mut WasmtimeStoreContextMut<'_>,
                             $args,
                         ) -> Result<$rets, RuntimeError>
-                        + 's,
+                        + Sync
+                        + Send
+                        + 'static,
                 >,
                 ResolveError,
             > {

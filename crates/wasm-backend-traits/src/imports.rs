@@ -21,16 +21,13 @@ pub trait ImportObject<WB: WasmBackend>: Clone {
 pub trait DynamicFunc<'a, WB: WasmBackend> {
     fn new<F>(store: &mut <WB as WasmBackend>::ContextMut<'_>, sig: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + Send + Sync + 'static;
+        F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + Sync + Send + 'static;
 }
 
 pub trait InsertFn<WB: WasmBackend, Args, Rets> {
     fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
     where
-        F: 'static
-            + Fn(&mut <WB as WasmBackend>::Caller<'_>, Args) -> Rets
-            + std::marker::Send
-            + std::marker::Sync;
+        F: Fn(&mut <WB as WasmBackend>::Caller<'_>, Args) -> Rets + Sync + Send + 'static;
 }
 
 pub trait Namespace<WB: WasmBackend>:
@@ -59,6 +56,7 @@ pub trait ContextMut<WB: WasmBackend>
 {
 }
 
+#[derive(Clone)]
 pub struct FuncSig {
     params: Cow<'static, [WType]>,
     returns: Cow<'static, [WType]>,
@@ -86,10 +84,10 @@ impl FuncSig {
 }
 
 pub trait FuncGetter<WB: WasmBackend, Args, Rets> {
-    unsafe fn get_func<'c>(
-        &'c mut self,
+    unsafe fn get_func(
+        &mut self,
         name: &str,
     ) -> ResolveResult<
-        Box<dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets> + 'c>,
+        Box<dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets> + Sync + Send + 'static>,
     >;
 }

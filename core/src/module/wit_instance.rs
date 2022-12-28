@@ -33,9 +33,9 @@ use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, TypedIn
 //use wasmer_core::Instance as WasmerInstance;
 
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
-pub type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
+pub type MRecordTypes = HashMap<u64, Arc<IRecordType>>;
 
 /// Contains all import and export functions that could be called from IT context by call-core.
 #[derive(Clone)]
@@ -213,7 +213,7 @@ impl<'v, WB: WasmBackend>
         Some(view)
     }
 
-    fn wit_record_by_id(&self, index: u64) -> Option<&Rc<IRecordType>> {
+    fn wit_record_by_id(&self, index: u64) -> Option<&Arc<IRecordType>> {
         self.record_types_by_id.get(&index)
     }
 }

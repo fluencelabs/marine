@@ -23,7 +23,7 @@ use multimap::MultiMap;
 
 use std::iter::Iterator;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub type CoreFunctionType = u32;
 pub type AdapterFunctionType = u32;
@@ -111,7 +111,7 @@ impl<'a> MITInterfaces<'a> {
         self.types.iter()
     }
 
-    pub fn record_types(&self) -> impl Iterator<Item = (u64, &Rc<IRecordType>)> {
+    pub fn record_types(&self) -> impl Iterator<Item = (u64, &Arc<IRecordType>)> {
         self.types.iter().enumerate().filter_map(|(id, t)| match t {
             ITAstType::Record(r) => Some((id as u64, r)),
             _ => None,

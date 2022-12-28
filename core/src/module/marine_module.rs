@@ -43,7 +43,6 @@ use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
-use std::rc::Rc;
 //use wasmer_core::types::FuncSig;
 use marine_wasm_backend_traits::FuncSig;
 
@@ -62,8 +61,8 @@ type ITInterpreter<WB> = Interpreter<
 #[derive(Clone)]
 pub(super) struct ITModuleFunc<WB: WasmBackend> {
     interpreter: Arc<ITInterpreter<WB>>,
-    pub(super) arguments: Rc<Vec<IFunctionArg>>,
-    pub(super) output_types: Rc<Vec<IType>>,
+    pub(super) arguments: Arc<Vec<IFunctionArg>>,
+    pub(super) output_types: Arc<Vec<IType>>,
 }
 
 #[derive(Clone)]
@@ -91,7 +90,7 @@ impl<WB: WasmBackend> Callable<WB> {
     }
 }
 
-type ExportFunctions<WB> = HashMap<SharedString, Rc<Callable<WB>>>;
+type ExportFunctions<WB> = HashMap<SharedString, Arc<Callable<WB>>>;
 
 pub(crate) struct MModule<WB: WasmBackend> {
     // wasmer_instance is needed because WITInstance contains dynamic functions
@@ -199,7 +198,7 @@ impl<WB: WasmBackend> MModule<WB> {
                     function_name.to_string(),
                 ))
             },
-            |func| Rc::make_mut(func).call(store, args),
+            |func| Arc::make_mut(func).call(store, args),
         )
     }
 
@@ -217,7 +216,7 @@ impl<WB: WasmBackend> MModule<WB> {
         &self.export_record_types
     }
 
-    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&Rc<IRecordType>> {
+    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&Arc<IRecordType>> {
         self.export_record_types.get(&record_type)
     }
 
@@ -242,7 +241,7 @@ impl<WB: WasmBackend> MModule<WB> {
         &self,
         module_name: &str,
         function_name: &str,
-    ) -> MResult<Rc<Callable<WB>>> {
+    ) -> MResult<Arc<Callable<WB>>> {
         match self.export_funcs.get(function_name) {
             Some(func) => Ok(func.clone()),
             None => Err(MError::NoSuchFunction(
@@ -287,7 +286,7 @@ impl<WB: WasmBackend> MModule<WB> {
             .record_types()
             .map(|(id, r)| (id, r.clone()))
             .collect::<HashMap<_, _>>();
-        let record_types = Rc::new(record_types);
+        let record_types = Arc::new(record_types);
 
         for (import_name, descriptor) in config.host_imports {
             let host_import =
@@ -327,7 +326,7 @@ impl<WB: WasmBackend> MModule<WB> {
                 };
 
                 let shared_string = SharedString(sign.name);
-                let callable = Rc::new(Callable {
+                let callable = Arc::new(Callable {
                     it_instance: it_instance.clone(),
                     it_module_func,
                 });
@@ -357,7 +356,7 @@ impl<WB: WasmBackend> MModule<WB> {
             raw_import: F,
         ) -> <WB as WasmBackend>::DynamicFunc
         where
-            F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + 'static,
+            F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
             WB: WasmBackend,
             I1: Iterator<Item = &'a IType>,
             I2: Iterator<Item = &'b IType>,
@@ -380,7 +379,7 @@ impl<WB: WasmBackend> MModule<WB> {
             interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
-        ) -> impl for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + 'static
+        ) -> impl for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + Sync + Send + 'static
         {
             move |mut ctx: <WB as WasmBackend>::Caller<'_>, inputs: &[WValue]| -> Vec<WValue> {
                 use wasmer_it::interpreter::stack::Stackable;

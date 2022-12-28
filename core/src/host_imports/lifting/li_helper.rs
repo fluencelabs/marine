@@ -19,14 +19,14 @@ use crate::IRecordType;
 use it_lilo::traits::RecordResolvable;
 use it_lilo::traits::RecordResolvableError;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub(crate) struct LiHelper {
-    record_types: Rc<MRecordTypes>,
+    record_types: Arc<MRecordTypes>,
 }
 
 impl LiHelper {
-    pub(crate) fn new(record_types: Rc<MRecordTypes>) -> Self {
+    pub(crate) fn new(record_types: Arc<MRecordTypes>) -> Self {
         Self { record_types }
     }
 }

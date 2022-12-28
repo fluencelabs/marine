@@ -24,7 +24,7 @@ use serde::Serialize;
 
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Represent Marine module interface.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
@@ -149,7 +149,7 @@ impl<WB: WasmBackend> MarineCore<WB> {
         &self,
         module_name: impl AsRef<str>,
         record_id: u64,
-    ) -> Option<&Rc<IRecordType>> {
+    ) -> Option<&Arc<IRecordType>> {
         self.modules
             .get(module_name.as_ref())
             .and_then(|module| module.export_record_type_by_id(record_id))

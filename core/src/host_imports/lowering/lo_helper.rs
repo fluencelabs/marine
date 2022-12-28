@@ -25,13 +25,13 @@ use it_memory_traits::Memory;
 use marine_wasm_backend_traits::{DelayedContextLifetime, WasmBackend};
 
 pub(crate) struct LoHelper<'c, WB: WasmBackend, MV: MemoryView<DelayedContextLifetime<WB>>, M: Memory<MV, DelayedContextLifetime<WB>>> {
-    allocate_func: &'c AllocateFunc<WB>,
+    allocate_func: &'c mut AllocateFunc<WB>,
     memory: M,
     _memory_view_phantom: PhantomData<MV>,
 }
 
 impl<'c, WB: WasmBackend, MV: MemoryView<DelayedContextLifetime<WB>>, M: Memory<MV, DelayedContextLifetime<WB>>> LoHelper<'c, WB, MV, M> {
-    pub(crate) fn new(allocate_func: &'c AllocateFunc<WB>, memory: M) -> Self {
+    pub(crate) fn new(allocate_func: &'c mut AllocateFunc<WB>, memory: M) -> Self {
         Self {
             allocate_func,
             memory,

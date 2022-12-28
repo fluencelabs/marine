@@ -2418,15 +2418,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
-name = "memfd"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "480b5a5de855d11ff13195950bdc8b98b5e942ef47afc447f6615cdcc4e15d80"
-dependencies = [
- "rustix",
-]
-
-[[package]]
 name = "memmap"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4517,7 +4508,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d18265705b1c49218776577d9f301d79ab06888c7f4a32e2ed24e68a55738ce7"
 dependencies = [
  "anyhow",
- "async-trait",
  "bincode",
  "cfg-if 1.0.0",
  "indexmap",
@@ -4534,7 +4524,6 @@ dependencies = [
  "wasmtime-cache",
  "wasmtime-cranelift",
  "wasmtime-environ",
- "wasmtime-fiber",
  "wasmtime-jit",
  "wasmtime-runtime",
  "wat",
@@ -4611,19 +4600,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "wasmtime-fiber"
-version = "3.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5f54abc960b4a055ba16b942cbbd1da641e0ad44cc97a7608f3d43c069b120e"
-dependencies = [
- "cc",
- "cfg-if 1.0.0",
- "rustix",
- "wasmtime-asm-macros",
- "windows-sys",
-]
-
-[[package]]
 name = "wasmtime-jit"
 version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4684,7 +4660,6 @@ dependencies = [
  "libc",
  "log",
  "mach",
- "memfd",
  "memoffset",
  "paste",
  "rand",
@@ -4692,7 +4667,6 @@ dependencies = [
  "thiserror",
  "wasmtime-asm-macros",
  "wasmtime-environ",
- "wasmtime-fiber",
  "wasmtime-jit-debug",
  "windows-sys",
 ]
