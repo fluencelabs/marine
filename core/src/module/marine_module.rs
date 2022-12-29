@@ -356,7 +356,10 @@ impl<WB: WasmBackend> MModule<WB> {
             raw_import: F,
         ) -> <WB as WasmBackend>::DynamicFunc
         where
-            F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
+            F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+                + Sync
+                + Send
+                + 'static,
             WB: WasmBackend,
             I1: Iterator<Item = &'a IType>,
             I2: Iterator<Item = &'b IType>,
@@ -379,8 +382,10 @@ impl<WB: WasmBackend> MModule<WB> {
             interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
-        ) -> impl for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + Sync + Send + 'static
-        {
+        ) -> impl for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+               + Sync
+               + Send
+               + 'static {
             move |mut ctx: <WB as WasmBackend>::Caller<'_>, inputs: &[WValue]| -> Vec<WValue> {
                 use wasmer_it::interpreter::stack::Stackable;
 

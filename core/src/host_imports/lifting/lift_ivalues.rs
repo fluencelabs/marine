@@ -43,7 +43,11 @@ macro_rules! simple_wvalue_to_ivalue {
     }};
 }
 
-pub(crate) fn wvalues_to_ivalues<R: RecordResolvable, MV: MemoryView<S>, S: it_memory_traits::Store>(
+pub(crate) fn wvalues_to_ivalues<
+    R: RecordResolvable,
+    MV: MemoryView<S>,
+    S: it_memory_traits::Store,
+>(
     store: &mut <S as it_memory_traits::Store>::ActualStore<'_>,
     lifter: &ILifter<'_, R, MV, S>,
     wvalues: &[WValue],
@@ -74,7 +78,9 @@ pub(crate) fn wvalues_to_ivalues<R: RecordResolvable, MV: MemoryView<S>, S: it_m
                 let offset = next_wvalue!(wvalue, I32);
                 let size = next_wvalue!(wvalue, I32);
 
-                let raw_str = lifter.reader.read_raw_u8_array(store, offset as _, size as _)?;
+                let raw_str = lifter
+                    .reader
+                    .read_raw_u8_array(store, offset as _, size as _)?;
                 let str = String::from_utf8(raw_str)?;
                 result.push(IValue::String(str));
             }
@@ -82,7 +88,9 @@ pub(crate) fn wvalues_to_ivalues<R: RecordResolvable, MV: MemoryView<S>, S: it_m
                 let offset = next_wvalue!(wvalue, I32);
                 let size = next_wvalue!(wvalue, I32);
 
-                let array = lifter.reader.read_raw_u8_array(store, offset as _, size as _)?;
+                let array = lifter
+                    .reader
+                    .read_raw_u8_array(store, offset as _, size as _)?;
                 result.push(IValue::ByteArray(array));
             }
             IType::Array(ty) => {

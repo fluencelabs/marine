@@ -19,9 +19,9 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         let mut linker = wasmtime::Linker::<StoreState>::new(store.inner.engine());
         wasmtime_wasi::add_to_linker(&mut linker, move |s: &mut StoreState| &mut s.wasi[id])
             .unwrap(); // todo handle error
-        // Create a WASI context and put it in a Store; all instances in the storex
-        // share this context. `WasiCtxBuilder` provides a number of ways to
-        // configure what the target program will have access to.
+                       // Create a WASI context and put it in a Store; all instances in the storex
+                       // share this context. `WasiCtxBuilder` provides a number of ways to
+                       // configure what the target program will have access to.
         let args = args
             .into_iter()
             .map(|arg| unsafe { String::from_utf8_unchecked(arg) })

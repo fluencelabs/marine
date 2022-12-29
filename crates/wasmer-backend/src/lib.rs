@@ -1,6 +1,5 @@
 use marine_wasm_backend_traits::*;
 
-
 mod module;
 mod store;
 mod instance;
@@ -18,8 +17,7 @@ use memory::*;
 pub(crate) use utils::*;
 
 #[derive(Clone, Default)]
-pub struct WasmerBackend {
-}
+pub struct WasmerBackend {}
 
 impl WasmBackend for WasmerBackend {
     type Store = WasmerStore;
@@ -39,12 +37,11 @@ impl WasmBackend for WasmerBackend {
     fn compile(store: &mut Self::Store, wasm: &[u8]) -> WasmBackendResult<Self::Module> {
         wasmer::Module::new(store.inner.engine(), wasm)
             .map_err(|e| {
-               WasmBackendError::CompilationError(CompilationError::Message(format!("Wasmer module compilation failed: {}", e)))
+                WasmBackendError::CompilationError(CompilationError::Message(format!(
+                    "Wasmer module compilation failed: {}",
+                    e
+                )))
             })
-            .map(|module| {
-                WasmerModule {
-                    inner: module
-                }
-            })
+            .map(|module| WasmerModule { inner: module })
     }
 }

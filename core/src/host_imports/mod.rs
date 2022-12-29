@@ -34,8 +34,9 @@ use marine_wasm_backend_traits::{RuntimeResult, WasmBackend};
 
 pub(self) type HostImportResult<T> = std::result::Result<T, HostImportError>;
 //pub(self) type WasmModuleFunc<Args, Rets> = Box<RefCell<Option<Func<'static, Args, Rets>>>>;
-pub(self) type WasmModuleFunc<WB: WasmBackend, Args, Rets> =
-    Box<dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets> + Sync + Send>;
+pub(self) type WasmModuleFunc<WB: WasmBackend, Args, Rets> = Box<
+    dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets> + Sync + Send,
+>;
 pub(self) type AllocateFunc<WB> = WasmModuleFunc<WB, (i32, i32), i32>;
 //pub(self) type SetResultPtrFunc<WB> = WasmModuleFunc<WB, i32, ()>;
 //pub(self) type SetResultSizeFunc<WB> = WasmModuleFunc<WB, i32, ()>;

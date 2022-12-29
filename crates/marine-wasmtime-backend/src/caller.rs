@@ -22,15 +22,15 @@ impl<'c> Caller<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
 impl<'c> AsContext<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
     fn as_context(&self) -> WasmtimeContext<'_> {
         WasmtimeContext {
-            inner: self.inner.as_context()
+            inner: self.inner.as_context(),
         }
     }
 }
 
 impl<'c> AsContextMut<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
-    fn as_context_mut(&mut self) -> <WasmtimeWasmBackend as WasmBackend>::ContextMut<'_,> {
+    fn as_context_mut(&mut self) -> <WasmtimeWasmBackend as WasmBackend>::ContextMut<'_> {
         WasmtimeContextMut {
-            inner: self.inner.as_context_mut()
+            inner: self.inner.as_context_mut(),
         }
     }
 }

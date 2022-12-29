@@ -152,8 +152,6 @@ macro_rules! init_wasm_func_once{
     };
 }
 
-
-
 #[macro_export]
 /// Call Wasm function that have Box<RefCell<Option<Func<'static, args, rets>>>> type.
 macro_rules! call_wasm_func {

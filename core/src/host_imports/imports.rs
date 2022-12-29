@@ -82,7 +82,12 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             let memory_view = caller.memory(memory_index).view();
             let li_helper = LiHelper::new(record_types.clone());
             let lifter = ILifter::new(memory_view, &li_helper);
-            let rets = wvalues_to_ivalues(&mut caller.as_context_mut(), &lifter, inputs, &argument_types);
+            let rets = wvalues_to_ivalues(
+                &mut caller.as_context_mut(),
+                &lifter,
+                inputs,
+                &argument_types,
+            );
             match rets {
                 Ok(ivalues) => host_exported_func(&mut caller, ivalues),
                 Err(e) => {
@@ -151,8 +156,16 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
                 init_wasm_func_once!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
                 init_wasm_func_once!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
 
-                call_wasm_func!(set_result_ptr_func, &mut caller.as_context_mut(), wvalues[0].to_u128() as _);
-                call_wasm_func!(set_result_size_func, &mut caller.as_context_mut(), wvalues[1].to_u128() as _);
+                call_wasm_func!(
+                    set_result_ptr_func,
+                    &mut caller.as_context_mut(),
+                    wvalues[0].to_u128() as _
+                );
+                call_wasm_func!(
+                    set_result_size_func,
+                    &mut caller.as_context_mut(),
+                    wvalues[1].to_u128() as _
+                );
                 vec![]
             }
 
@@ -161,7 +174,11 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             1 => {
                 init_wasm_func_once!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 3);
 
-                call_wasm_func!(set_result_ptr_func, &mut caller.as_context_mut(), wvalues[0].to_u128() as _);
+                call_wasm_func!(
+                    set_result_ptr_func,
+                    &mut caller.as_context_mut(),
+                    wvalues[0].to_u128() as _
+                );
                 vec![wvalues[0].clone()]
             }
 

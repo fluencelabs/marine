@@ -4,14 +4,7 @@ pub trait Instance<WB: WasmBackend> {
     fn export_iter<'a>(
         &'a self,
         store: &'a mut <WB as WasmBackend>::Store,
-    ) -> Box<
-        dyn Iterator<
-            Item = (
-                String,
-                Export<WB>,
-            ),
-        > + 'a,
-    >;
+    ) -> Box<dyn Iterator<Item = (String, Export<WB>)> + 'a>;
 
     fn memory(
         &self,
@@ -29,7 +22,9 @@ pub trait Instance<WB: WasmBackend> {
         &'a self,
         store: &mut <WB as WasmBackend>::Store,
         name: &str,
-    ) -> ResolveResult<Box<dyn Fn(&mut <WB as WasmBackend>::Store) -> RuntimeResult<()> + Sync + Send + 'a>>;
+    ) -> ResolveResult<
+        Box<dyn Fn(&mut <WB as WasmBackend>::Store) -> RuntimeResult<()> + Sync + Send + 'a>,
+    >;
 
     fn get_dyn_func<'a>(
         &'a self,

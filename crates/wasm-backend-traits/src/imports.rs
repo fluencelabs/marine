@@ -21,7 +21,10 @@ pub trait Imports<WB: WasmBackend>: Clone {
 pub trait DynamicFunc<'a, WB: WasmBackend> {
     fn new<F>(store: &mut <WB as WasmBackend>::ContextMut<'_>, sig: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + Sync + Send + 'static;
+        F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+            + Sync
+            + Send
+            + 'static;
 }
 
 pub trait InsertFn<WB: WasmBackend, Args, Rets> {
@@ -44,7 +47,6 @@ pub trait Namespace<WB: WasmBackend>:
 }
 
 pub trait LikeNamespace<WB: WasmBackend> {}
-
 
 #[derive(Clone)]
 pub struct FuncSig {
@@ -78,6 +80,11 @@ pub trait FuncGetter<WB: WasmBackend, Args, Rets> {
         &mut self,
         name: &str,
     ) -> ResolveResult<
-        Box<dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets> + Sync + Send + 'static>,
+        Box<
+            dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets>
+                + Sync
+                + Send
+                + 'static,
+        >,
     >;
 }

@@ -24,13 +24,24 @@ use it_memory_traits::MemoryView;
 use it_memory_traits::Memory;
 use marine_wasm_backend_traits::{DelayedContextLifetime, WasmBackend};
 
-pub(crate) struct LoHelper<'c, WB: WasmBackend, MV: MemoryView<DelayedContextLifetime<WB>>, M: Memory<MV, DelayedContextLifetime<WB>>> {
+pub(crate) struct LoHelper<
+    'c,
+    WB: WasmBackend,
+    MV: MemoryView<DelayedContextLifetime<WB>>,
+    M: Memory<MV, DelayedContextLifetime<WB>>,
+> {
     allocate_func: &'c mut AllocateFunc<WB>,
     memory: M,
     _memory_view_phantom: PhantomData<MV>,
 }
 
-impl<'c, WB: WasmBackend, MV: MemoryView<DelayedContextLifetime<WB>>, M: Memory<MV, DelayedContextLifetime<WB>>> LoHelper<'c, WB, MV, M> {
+impl<
+        'c,
+        WB: WasmBackend,
+        MV: MemoryView<DelayedContextLifetime<WB>>,
+        M: Memory<MV, DelayedContextLifetime<WB>>,
+    > LoHelper<'c, WB, MV, M>
+{
     pub(crate) fn new(allocate_func: &'c mut AllocateFunc<WB>, memory: M) -> Self {
         Self {
             allocate_func,
@@ -40,8 +51,12 @@ impl<'c, WB: WasmBackend, MV: MemoryView<DelayedContextLifetime<WB>>, M: Memory<
     }
 }
 
-impl<'s, WB: WasmBackend, MV: MemoryView<DelayedContextLifetime<WB>>, M: Memory<MV, DelayedContextLifetime<WB>>> Allocatable<MV, DelayedContextLifetime<WB>>
-    for LoHelper<'s, WB, MV, M>
+impl<
+        's,
+        WB: WasmBackend,
+        MV: MemoryView<DelayedContextLifetime<WB>>,
+        M: Memory<MV, DelayedContextLifetime<WB>>,
+    > Allocatable<MV, DelayedContextLifetime<WB>> for LoHelper<'s, WB, MV, M>
 {
     fn allocate(
         &mut self,

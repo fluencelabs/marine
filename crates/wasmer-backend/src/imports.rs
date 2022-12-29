@@ -4,7 +4,7 @@ use marine_wasm_backend_traits::*;
 
 #[derive(Clone)]
 pub struct WasmerImports {
-    inner: wasmer::Imports
+    inner: wasmer::Imports,
 }
 
 impl Imports<WasmerBackend> for WasmerImports {
@@ -12,7 +12,14 @@ impl Imports<WasmerBackend> for WasmerImports {
         todo!()
     }
 
-    fn register<S>(&mut self, name: S, namespace: <WasmerBackend as WasmBackend>::Namespace) -> Option<Box<dyn LikeNamespace<WasmerBackend>>> where S: Into<String> {
+    fn register<S>(
+        &mut self,
+        name: S,
+        namespace: <WasmerBackend as WasmBackend>::Namespace,
+    ) -> Option<Box<dyn LikeNamespace<WasmerBackend>>>
+    where
+        S: Into<String>,
+    {
         todo!()
     }
 }

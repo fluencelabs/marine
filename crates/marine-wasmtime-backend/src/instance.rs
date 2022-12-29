@@ -1,4 +1,7 @@
-use crate::{StoreState, val_type_to_wtype, WasmtimeExportedDynFunc, WasmtimeFunctionExport, WasmtimeMemoryExport, WasmtimeStore, WasmtimeWasmBackend, WasmtimeWITMemory};
+use crate::{
+    StoreState, val_type_to_wtype, WasmtimeExportedDynFunc, WasmtimeFunctionExport,
+    WasmtimeMemoryExport, WasmtimeStore, WasmtimeWasmBackend, WasmtimeWITMemory,
+};
 
 use marine_wasm_backend_traits::*;
 
@@ -54,7 +57,8 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
         &'a self,
         store: &mut WasmtimeStore,
         name: &str,
-    ) -> ResolveResult<Box<dyn Fn(&mut WasmtimeStore) -> RuntimeResult<()> + Sync + Send + 'a>> {
+    ) -> ResolveResult<Box<dyn Fn(&mut WasmtimeStore) -> RuntimeResult<()> + Sync + Send + 'a>>
+    {
         let func = match self.inner.get_func(&mut store.inner, name) {
             None => return Err(ResolveError::Message(format!("no such function {}", name))),
             Some(func) => func,

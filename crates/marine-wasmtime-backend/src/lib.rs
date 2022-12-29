@@ -29,7 +29,6 @@ use wasmtime_wasi::WasiCtx;
 use marine_wasm_backend_traits::WasmBackendError;
 use marine_wasm_backend_traits::ResolveError;
 
-
 #[derive(Clone, Default)]
 pub struct WasmtimeWasmBackend {
     engine: wasmtime::Engine,
@@ -84,7 +83,6 @@ impl WasmBackend for WasmtimeWasmBackend {
         })
     }
 }
-
 
 #[derive(Default)]
 pub struct StoreState {
@@ -175,14 +173,10 @@ impl Namespace<WasmtimeWasmBackend> for WasmtimeNamespace {
     fn insert(&mut self, name: impl Into<String>, func: WasmtimeDynamicFunc) {
         let inserter = move |linker: &mut WasmtimeImportObject, module: &str, name: &str| {
             let sig = func.sig.clone();
-            let wrapper = move |
-                caller: wasmtime::Caller<'_, StoreState>,
-                args: &[wasmtime::Val],
-                rets: &mut [wasmtime::Val]
-            | {
-                let mut ctx = WasmtimeCaller {
-                    inner: caller
-                };
+            let wrapper = move |caller: wasmtime::Caller<'_, StoreState>,
+                                args: &[wasmtime::Val],
+                                rets: &mut [wasmtime::Val]| {
+                let mut ctx = WasmtimeCaller { inner: caller };
                 let args = args
                     .iter()
                     .map(|val| {
@@ -206,7 +200,10 @@ impl Namespace<WasmtimeWasmBackend> for WasmtimeNamespace {
 
 pub struct WasmtimeDynamicFunc {
     data: Box<
-        dyn for<'c> Fn(<WasmtimeWasmBackend as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
+        dyn for<'c> Fn(<WasmtimeWasmBackend as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+            + Sync
+            + Send
+            + 'static,
     >,
     sig: FuncSig,
 }
@@ -225,7 +222,7 @@ impl<'a> DynamicFunc<'a, WasmtimeWasmBackend> for WasmtimeDynamicFunc {
     {
         WasmtimeDynamicFunc {
             data: Box::new(func),
-            sig
+            sig,
         }
     }
 }
@@ -260,10 +257,7 @@ macro_rules! impl_func_getter {
                 name: &str,
             ) -> Result<
                 Box<
-                    dyn FnMut(
-                            &mut WasmtimeContextMut<'_>,
-                            $args,
-                        ) -> Result<$rets, RuntimeError>
+                    dyn FnMut(&mut WasmtimeContextMut<'_>, $args) -> Result<$rets, RuntimeError>
                         + Sync
                         + Send
                         + 'static,
@@ -275,11 +269,9 @@ macro_rules! impl_func_getter {
                     Extern::Func(f) => {
                         let f = f.typed(&mut self.inner).unwrap(); //todo handle error
                         let closure = move |store: &mut WasmtimeContextMut<'_>, args| {
-
                             let rets = f.call(&mut store.inner, args).unwrap(); //todo handle error
-                            return Ok(rets)
+                            return Ok(rets);
                         };
-
 
                         Ok(Box::new(closure))
                     }
@@ -294,7 +286,7 @@ macro_rules! impl_func_getter {
         }
     };
 }
-    /*
+/*
 impl<'c> FuncGetter<WasmtimeWasmBackend, (), ()> for WasmtimeCaller<'c> {
     unsafe fn get_func<'s>(
         &'s mut self,
@@ -331,7 +323,6 @@ impl_func_getter!(i32, i32);
 impl_func_getter!(i32, ());
 impl_func_getter!((), i32);
 impl_func_getter!((), ());
-
 
 pub struct WasmtimeExportedDynFunc {
     func: wasmtime::Func,
@@ -373,10 +364,12 @@ impl WasmtimeWITMemory {
     }
 }
 
-impl it_memory_traits::Memory<WasmtimeWITMemoryView, DelayedContextLifetime<WasmtimeWasmBackend>> for WasmtimeWITMemory {
+impl it_memory_traits::Memory<WasmtimeWITMemoryView, DelayedContextLifetime<WasmtimeWasmBackend>>
+    for WasmtimeWITMemory
+{
     fn view(&self) -> WasmtimeWITMemoryView {
         WasmtimeWITMemoryView {
-            view: self.memory.clone()
+            view: self.memory.clone(),
         }
     }
 }
@@ -394,48 +387,73 @@ impl Memory<WasmtimeWasmBackend> for WasmtimeWITMemory {
 }
 
 pub struct WasmtimeWITMemoryView {
-    view: wasmtime::Memory
+    view: wasmtime::Memory,
 }
 
-impl it_memory_traits::MemoryReadable<DelayedContextLifetime<WasmtimeWasmBackend>> for WasmtimeWITMemoryView {
+impl it_memory_traits::MemoryReadable<DelayedContextLifetime<WasmtimeWasmBackend>>
+    for WasmtimeWITMemoryView
+{
     fn read_byte(&self, store: &mut WasmtimeContextMut<'_>, offset: u32) -> u8 {
         let mut value = [0u8];
-        self.view.read(&mut store.inner, offset as usize, &mut value).unwrap(); // todo handle error;
+        self.view
+            .read(&mut store.inner, offset as usize, &mut value)
+            .unwrap(); // todo handle error;
         value[0]
     }
 
-    fn read_array<const COUNT: usize>(&self, store: &mut WasmtimeContextMut<'_>, offset: u32) -> [u8; COUNT] {
+    fn read_array<const COUNT: usize>(
+        &self,
+        store: &mut WasmtimeContextMut<'_>,
+        offset: u32,
+    ) -> [u8; COUNT] {
         let mut value = [0u8; COUNT];
-        self.view.read(&mut store.inner, offset as usize, &mut value).unwrap(); // todo handle error;
+        self.view
+            .read(&mut store.inner, offset as usize, &mut value)
+            .unwrap(); // todo handle error;
         value
     }
 
     fn read_vec(&self, store: &mut WasmtimeContextMut<'_>, offset: u32, size: u32) -> Vec<u8> {
         let mut value = vec![0u8; size as usize];
-        self.view.read(&mut store.inner, offset as usize, &mut value).unwrap(); // todo handle error;
+        self.view
+            .read(&mut store.inner, offset as usize, &mut value)
+            .unwrap(); // todo handle error;
         value
     }
 }
 
-impl it_memory_traits::MemoryWritable<DelayedContextLifetime<WasmtimeWasmBackend>> for WasmtimeWITMemoryView {
+impl it_memory_traits::MemoryWritable<DelayedContextLifetime<WasmtimeWasmBackend>>
+    for WasmtimeWITMemoryView
+{
     fn write_byte(&self, store: &mut WasmtimeContextMut<'_>, offset: u32, value: u8) {
         let buffer = [value];
-        self.view.write(&mut store.inner, offset as usize, &buffer).unwrap() // todo handle error
+        self.view
+            .write(&mut store.inner, offset as usize, &buffer)
+            .unwrap() // todo handle error
     }
 
     fn write_bytes(&self, store: &mut WasmtimeContextMut<'_>, offset: u32, bytes: &[u8]) {
-        self.view.write(&mut store.inner, offset as usize, bytes).unwrap() // todo handle error
+        self.view
+            .write(&mut store.inner, offset as usize, bytes)
+            .unwrap() // todo handle error
     }
 }
 
-impl it_memory_traits::MemoryView<DelayedContextLifetime<WasmtimeWasmBackend>> for WasmtimeWITMemoryView {
-    fn check_bounds(&self, store: &mut WasmtimeContextMut<'_>, offset: u32, size: u32) -> Result<(), MemoryAccessError> {
+impl it_memory_traits::MemoryView<DelayedContextLifetime<WasmtimeWasmBackend>>
+    for WasmtimeWITMemoryView
+{
+    fn check_bounds(
+        &self,
+        store: &mut WasmtimeContextMut<'_>,
+        offset: u32,
+        size: u32,
+    ) -> Result<(), MemoryAccessError> {
         let memory_size = self.view.size(&mut store.inner);
         if memory_size <= (offset + size) as u64 {
             Err(MemoryAccessError::OutOfBounds {
                 offset,
                 size,
-                memory_size: memory_size as u32 // todo rewrite api when memory64 arrives
+                memory_size: memory_size as u32, // todo rewrite api when memory64 arrives
             })
         } else {
             Ok(())

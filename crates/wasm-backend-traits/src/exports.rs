@@ -10,17 +10,16 @@ pub enum Export<WB: WasmBackend> {
     Other,
 }
 
-
-
 pub trait MemoryExport {}
 
 pub trait FunctionExport {}
 
-pub trait Memory<WB: WasmBackend>
-    : it_memory_traits::Memory<<WB as WasmBackend>::MemoryView, DelayedContextLifetime<WB>>
+pub trait Memory<WB: WasmBackend>:
+    it_memory_traits::Memory<<WB as WasmBackend>::MemoryView, DelayedContextLifetime<WB>>
     + Clone
     + Send
     + Sync
-    + 'static {
+    + 'static
+{
     fn size(&self, store: &mut <WB as WasmBackend>::ContextMut<'_>) -> usize;
 }

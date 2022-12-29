@@ -24,7 +24,6 @@ use std::marker::PhantomData;
 use it_memory_traits::{MemoryView};
 use wasmer_it::interpreter::wasm;
 
-
 pub trait WasmBackend: Clone + Default + 'static {
     // general
     type Module: Module<Self>;
@@ -56,4 +55,3 @@ pub struct DelayedContextLifetime<WB: WasmBackend> {
 impl<WB: WasmBackend> it_memory_traits::Store for DelayedContextLifetime<WB> {
     type ActualStore<'c> = <WB as WasmBackend>::ContextMut<'c>;
 }
-

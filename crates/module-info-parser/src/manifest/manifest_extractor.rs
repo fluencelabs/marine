@@ -66,7 +66,7 @@ pub fn extract_from_wasmer_module(
         .collect::<Vec<_>>();
 
     if sections.is_empty() {
-        return Ok(None)
+        return Ok(None);
     }
 
     let section = try_as_one_section(&sections, MANIFEST_SECTION_NAME)?;
