@@ -20,7 +20,7 @@ use crate::ModuleInfoError;
 use crate::extract_custom_sections_by_name;
 use crate::try_as_one_section;
 
-use wasmer_core::Module as WasmerModule;
+use wasmer::Module as WasmerModule;
 use marine_rs_sdk_main::MANIFEST_SECTION_NAME;
 use walrus::ModuleConfig;
 use walrus::Module;
@@ -28,6 +28,7 @@ use walrus::Module;
 use std::borrow::Cow;
 use std::path::Path;
 use std::convert::TryInto;
+use std::ops::Deref;
 
 pub fn extract_from_path<P>(wasm_module_path: P) -> ModuleInfoResult<Option<ModuleManifest>>
 where
@@ -59,13 +60,16 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<Modu
 pub fn extract_from_wasmer_module(
     wasmer_module: &WasmerModule,
 ) -> ModuleInfoResult<Option<ModuleManifest>> {
-    let sections = wasmer_module.custom_sections(MANIFEST_SECTION_NAME);
-    let sections = match sections {
-        Some(sections) => sections,
-        None => return Ok(None),
-    };
+    let sections = wasmer_module
+        .custom_sections(MANIFEST_SECTION_NAME)
+        .map(|section: Box<[u8]>| section.deref().to_vec())
+        .collect::<Vec<_>>();
 
-    let section = try_as_one_section(sections, MANIFEST_SECTION_NAME)?;
+    if sections.is_empty() {
+        return Ok(None)
+    }
+
+    let section = try_as_one_section(&sections, MANIFEST_SECTION_NAME)?;
     let manifest = section.as_slice().try_into()?;
 
     Ok(Some(manifest))

@@ -17,7 +17,7 @@ serde = "1.0.144"
 serde_derive = "1.0.144"
 serde_json = "1.0.85"
 toml = "0.5.9"
-wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
+#wasmer-wasi = { workspace = true }
 
 [dev-dependencies]
 marine-wasmer-backend = { path = "../wasmer-backend", version = "0.1.0"}

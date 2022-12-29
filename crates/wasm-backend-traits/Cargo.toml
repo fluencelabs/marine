@@ -10,6 +10,5 @@ thiserror = "1.0.24"
 
 wasmer-it = { workspace = true }
 it-memory-traits = { workspace = true }
-#wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 
 tuple_list = "0.1.0"

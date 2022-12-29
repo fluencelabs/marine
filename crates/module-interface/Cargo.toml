@@ -15,7 +15,7 @@ marine-it-interfaces = { path = "../it-interfaces", version = "0.7.3" }
 
 anyhow = "1.0.64"
 walrus = "0.19.0"
-wasmer-it = { workspace = true }
+wasmer-it = { workspace = true, default-features = false }
 nom = "5.1"
 
 itertools = "0.10.3"

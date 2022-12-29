@@ -1,41 +1,48 @@
 pub mod errors;
 pub mod exports;
 pub mod imports;
+pub mod store;
 pub mod wasi;
 pub mod wtype;
+pub mod module;
+pub mod instance;
+pub mod caller;
+pub mod function;
+
+pub use errors::*;
+pub use exports::*;
+pub use imports::*;
+pub use store::*;
+pub use wasi::*;
+pub use wtype::*;
+pub use module::*;
+pub use instance::*;
+pub use caller::*;
+pub use function::*;
 
 use std::marker::PhantomData;
 use it_memory_traits::{MemoryView};
 use wasmer_it::interpreter::wasm;
 
-pub use errors::*;
-pub use exports::*;
-pub use imports::*;
-pub use wasi::*;
-pub use wtype::*;
 
 pub trait WasmBackend: Clone + Default + 'static {
     // general
     type Module: Module<Self>;
     type Instance: Instance<Self>;
-    type Store: Store<Self> + AsContextMut<Self>;
-    type ContextMut<'c>: ContextMut<Self> + AsContextMut<Self>;
-    type Caller<'c>: Caller<Self> + AsContextMut<Self>;
-    // + AsStoreContextMut<Self>;
-    // type StoreContextMut: /*AsStoreContextMut<Self> + */wasmer_it::interpreter::wasm::structures::Store;
+    type Store: Store<Self>;
+    type Context<'c>: Context<Self>;
+    type ContextMut<'c>: ContextMut<Self>;
+    type Caller<'c>: Caller<Self>;
+
     // imports/exports -- subject to improvement
-    type ImportObject: ImportObject<Self>; // to be replaced with somethink like Linker or Resolver
+    type Imports: Imports<Self>; // to be replaced with somethink like Linker or Resolver
     type DynamicFunc: DynamicFunc<'static, Self>;
-    type MemoryExport: MemoryExport;
-    type FunctionExport: FunctionExport;
     type Namespace: Namespace<Self>;
 
-    //type ExportContext: for<'c> ExportContext<'c, Self>;
-    type ExportedDynFunc: ExportedDynFunc<Self> + Sync + Send;
+    type Function: Function<Self>;
+    type Memory: Memory<Self>;
+    type MemoryView: MemoryView<DelayedContextLifetime<Self>> + 'static;
 
-    // interface types
-    type WITMemory: Memory<Self> + it_memory_traits::Memory<Self::WITMemoryView, DelayedContextLifetime<Self>> + Clone + Send + Sync + 'static;
-    type WITMemoryView: MemoryView<DelayedContextLifetime<Self>> + 'static;
     // wasi
     type Wasi: WasiImplementation<Self>;
 
@@ -50,74 +57,3 @@ impl<WB: WasmBackend> it_memory_traits::Store for DelayedContextLifetime<WB> {
     type ActualStore<'c> = <WB as WasmBackend>::ContextMut<'c>;
 }
 
-pub trait Store<WB: WasmBackend> {
-    fn new(backend: &WB) -> Self;
-}
-
-pub trait Caller<WB: WasmBackend>:
-    FuncGetter<WB, (i32, i32), i32>
-    + FuncGetter<WB, (i32, i32), ()>
-    + FuncGetter<WB, i32, i32>
-    + FuncGetter<WB, i32, ()>
-    + FuncGetter<WB, (), i32>
-    + FuncGetter<WB, (), ()>
-{
-    fn memory(&mut self, memory_index: u32) -> <WB as WasmBackend>::WITMemory;
-}
-
-pub trait AsContextMut<WB: WasmBackend> {
-    fn as_context_mut(&mut self) -> <WB as WasmBackend>::ContextMut<'_>;
-}
-
-/*impl<WB: WasmBackend, T: AsContextMut<WB>> AsContextMut<WB> for &mut T {
-    fn as_context_mut(&mut self) -> <WB as WasmBackend>::ContextMut<'_> {
-        self.as_context_mut()
-    }
-}*/
-
-pub trait Module<WB: WasmBackend> {
-    fn custom_sections(&self, key: &str) -> Option<&[Vec<u8>]>;
-    fn instantiate(
-        &self,
-        store: &mut <WB as WasmBackend>::Store,
-        imports: &<WB as WasmBackend>::ImportObject,
-    ) -> WasmBackendResult<<WB as WasmBackend>::Instance>;
-}
-
-pub trait Instance<WB: WasmBackend> {
-    fn export_iter<'a>(
-        &'a self,
-        store: &'a mut <WB as WasmBackend>::Store,
-    ) -> Box<
-        dyn Iterator<
-                Item = (
-                    String,
-                    Export<<WB as WasmBackend>::MemoryExport, <WB as WasmBackend>::FunctionExport>,
-                ),
-            > + 'a,
-    >;
-
-    fn memory(
-        &self,
-        store: &mut <WB as WasmBackend>::Store,
-        memory_index: u32,
-    ) -> <WB as WasmBackend>::WITMemory;
-
-    fn memory_by_name(
-        &self,
-        store: &mut <WB as WasmBackend>::Store,
-        memory_name: &str,
-    ) -> Option<<WB as WasmBackend>::WITMemory>;
-
-    fn get_func_no_args_no_rets<'a>(
-        &'a self,
-        store: &mut <WB as WasmBackend>::Store,
-        name: &str,
-    ) -> ResolveResult<Box<dyn Fn(&mut <WB as WasmBackend>::Store) -> RuntimeResult<()> + Sync + Send + 'a>>;
-
-    fn get_dyn_func<'a>(
-        &'a self,
-        store: &mut <WB as WasmBackend>::Store,
-        name: &str,
-    ) -> ResolveResult<<WB as WasmBackend>::ExportedDynFunc>;
-}

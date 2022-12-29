@@ -6,7 +6,7 @@ use crate::Export;
 
 use std::borrow::Cow;
 
-pub trait ImportObject<WB: WasmBackend>: Clone {
+pub trait Imports<WB: WasmBackend>: Clone {
     fn new(store: &mut <WB as WasmBackend>::Store) -> Self;
 
     fn register<S>(
@@ -45,16 +45,6 @@ pub trait Namespace<WB: WasmBackend>:
 
 pub trait LikeNamespace<WB: WasmBackend> {}
 
-pub trait ContextMut<WB: WasmBackend>
-//FuncGetter<(i32, i32), i32>
-//+ FuncGetter<(i32, i32), ()>
-//+ FuncGetter<i32, i32>
-//+ FuncGetter<i32, ()>
-//+ FuncGetter<(), i32>
-//+ FuncGetter<(), ()>
-//+ AsStoreContextMut<WB>
-{
-}
 
 #[derive(Clone)]
 pub struct FuncSig {

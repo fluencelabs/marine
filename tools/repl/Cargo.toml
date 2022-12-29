@@ -21,7 +21,7 @@ anyhow = "1.0.64"
 clap = "2.34.0"
 serde = "1.0.144"
 serde_json = "1.0.85"
-wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1"}
+#wasmer-wasi = { workspace = true }
 
 env_logger = "0.9.0"
 check-latest = "1.0.1"

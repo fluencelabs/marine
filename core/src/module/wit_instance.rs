@@ -20,10 +20,7 @@ use super::IRecordType;
 use crate::MResult;
 
 use marine_wasm_backend_traits::{DelayedContextLifetime, WasmBackend};
-//use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
-//use marine_wasm_backend_traits::ImportObject;
-use marine_wasm_backend_traits::Memory as WBMemory;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
@@ -44,7 +41,7 @@ pub(super) struct ITInstance<WB: WasmBackend> {
     funcs: HashMap<usize, WITFunction<WB>>,
 
     /// IT memories.
-    memories: Vec<<WB as WasmBackend>::WITMemory>,
+    memories: Vec<<WB as WasmBackend>::Memory>,
 
     /// All record types that instance contains.
     record_types_by_id: MRecordTypes,
@@ -138,13 +135,13 @@ impl<WB: WasmBackend> ITInstance<WB> {
     fn extract_memories(
         wasmer_instance: &<WB as WasmBackend>::Instance,
         store: &mut <WB as WasmBackend>::Store,
-    ) -> Vec<<WB as WasmBackend>::WITMemory> {
+    ) -> Vec<<WB as WasmBackend>::Memory> {
         use marine_wasm_backend_traits::Export::Memory;
 
         let mut memories = wasmer_instance
             .export_iter(store)
             .filter_map(|(_, export)| match export {
-                Memory(memory) => Some(<WB as WasmBackend>::WITMemory::new(memory)),
+                Memory(memory) => Some(memory),
                 _ => None,
             })
             .collect::<Vec<_>>();
@@ -178,8 +175,8 @@ impl<'v, WB: WasmBackend>
     wasm::structures::Instance<
         ITExport,
         WITFunction<WB>,
-        <WB as WasmBackend>::WITMemory,
-        <WB as WasmBackend>::WITMemoryView,
+        <WB as WasmBackend>::Memory,
+        <WB as WasmBackend>::MemoryView,
         DelayedContextLifetime<WB>,
     > for ITInstance<WB>
 {
@@ -195,7 +192,7 @@ impl<'v, WB: WasmBackend>
         self.funcs.get(&index.index())
     }
 
-    fn memory(&self, index: usize) -> Option<&<WB as WasmBackend>::WITMemory> {
+    fn memory(&self, index: usize) -> Option<&<WB as WasmBackend>::Memory> {
         if index >= self.memories.len() {
             None
         } else {
@@ -203,13 +200,13 @@ impl<'v, WB: WasmBackend>
         }
     }
 
-    fn memory_view(&self, index: usize) -> Option<<WB as WasmBackend>::WITMemoryView> {
+    fn memory_view(&self, index: usize) -> Option<<WB as WasmBackend>::MemoryView> {
         if index >= self.memories.len() {
             return None;
         }
 
         let memory = &self.memories[index];
-        let view: <WB as WasmBackend>::WITMemoryView = memory.view();
+        let view: <WB as WasmBackend>::MemoryView = memory.view();
         Some(view)
     }
 

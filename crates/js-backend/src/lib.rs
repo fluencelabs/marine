@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use it_memory_traits::MemoryAccessError;
 use marine_wasm_backend_traits::{
     CallResult, DynamicFunc, Export, ExportContext, ExportedDynFunc, Exports, FuncSig,
-    FunctionExport, ImportObject, Instance, LikeNamespace, Memory, MemoryExport, Module, Namespace,
+    FunctionExport, Imports, Instance, LikeNamespace, Memory, MemoryExport, Module, Namespace,
     ResolveResult, RuntimeResult, WasiImplementation, WasiState, WasiVersion, WasmBackend,
     WasmBackendResult, WValue,
 };
@@ -13,14 +13,14 @@ pub struct JsWasmBackend {}
 impl WasmBackend for JsWasmBackend {
     type Module = JsModule;
     type Instance = JsInstance;
-    type ImportObject = JsImportObject;
+    type Imports = JsImportObject;
     type Exports = JsExports;
     type DynamicFunc = JsDynamicFunc;
     type MemoryExport = JsMemoryExport;
     type FunctionExport = JsFunctionExport;
     type Namespace = JsNamespace;
     type ExportContext = JsExportContext;
-    type ExportedDynFunc = JsExportedDynFunc;
+    type Function = JsExportedDynFunc;
     type WITMemory = JsWITMemory;
     type WITMemoryView = JsWITMemoryView;
     type Wasi = JsWasi;
@@ -40,7 +40,7 @@ impl Module<JsWasmBackend> for JsModule {
 
     fn instantiate(
         &self,
-        imports: &<JsWasmBackend as WasmBackend>::ImportObject,
+        imports: &<JsWasmBackend as WasmBackend>::Imports,
     ) -> WasmBackendResult<<JsWasmBackend as WasmBackend>::Instance> {
         todo!()
     }
@@ -96,7 +96,7 @@ impl Extend<(String, String, Export<JsMemoryExport, JsFunctionExport>)> for JsIm
     }
 }
 
-impl ImportObject<JsWasmBackend> for JsImportObject {
+impl Imports<JsWasmBackend> for JsImportObject {
     fn new() -> Self {
         todo!()
     }
@@ -198,7 +198,7 @@ impl Exports<JsWasmBackend> for JsExports {
     fn get_dyn_func<'a>(
         &'a self,
         name: &str,
-    ) -> ResolveResult<<JsWasmBackend as WasmBackend>::ExportedDynFunc> {
+    ) -> ResolveResult<<JsWasmBackend as WasmBackend>::Function> {
         todo!()
     }
 }
@@ -315,7 +315,7 @@ impl WasiImplementation<JsWasmBackend> for JsWasi {
         envs: Vec<Vec<u8>>,
         preopened_files: Vec<PathBuf>,
         mapped_dirs: Vec<(String, PathBuf)>,
-    ) -> Result<<JsWasmBackend as WasmBackend>::ImportObject, String> {
+    ) -> Result<<JsWasmBackend as WasmBackend>::Imports, String> {
         todo!()
     }
 

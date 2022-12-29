@@ -15,8 +15,8 @@
  */
 
 /// Contains converters of types and values between Wasmer and wasmer_interface_types.
-use wasmer_runtime::Value as WValue;
-use wasmer_runtime::types::Type as WType;
+use wasmer::{Value as WValue};
+use wasmer::Type as WType;
 
 use marine_wasm_backend_traits::WValue as GeneralWValue;
 use marine_wasm_backend_traits::WType as GeneralWType;
@@ -28,6 +28,7 @@ pub(super) fn wtype_to_general_wtype(ty: &WType) -> GeneralWType {
         WType::F32 => GeneralWType::F32,
         WType::F64 => GeneralWType::F64,
         WType::V128 => unimplemented!(),
+        _ => unimplemented!()
     }
 }
 

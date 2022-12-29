@@ -25,7 +25,7 @@ use crate::MModuleConfig;
 use marine_wasm_backend_traits::{AsContextMut, DelayedContextLifetime, WasiState, WasmBackend};
 use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
-use marine_wasm_backend_traits::ImportObject;
+use marine_wasm_backend_traits::Imports;
 use marine_wasm_backend_traits::WasiImplementation;
 use marine_wasm_backend_traits::Namespace;
 use marine_wasm_backend_traits::DynamicFunc;
@@ -53,8 +53,8 @@ type ITInterpreter<WB> = Interpreter<
     ITInstance<WB>,
     ITExport,
     WITFunction<WB>,
-    <WB as WasmBackend>::WITMemory,
-    <WB as WasmBackend>::WITMemoryView,
+    <WB as WasmBackend>::Memory,
+    <WB as WasmBackend>::MemoryView,
     DelayedContextLifetime<WB>,
 >;
 
@@ -256,7 +256,7 @@ impl<WB: WasmBackend> MModule<WB> {
         store: &mut <WB as WasmBackend>::Store,
         mit: &MITInterfaces<'_>,
         wit_import_object: Vec<(String, <WB as WasmBackend>::Namespace)>,
-    ) -> MResult<<WB as WasmBackend>::ImportObject> {
+    ) -> MResult<<WB as WasmBackend>::Imports> {
         use crate::host_imports::create_host_import_func;
 
         let wasi_envs = config
