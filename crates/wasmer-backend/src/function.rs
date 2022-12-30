@@ -14,12 +14,12 @@ impl Function<WasmerBackend> for WasmerFunction {
 
     fn call<'c>(
         &self,
-        mut store: WasmerContextMut<'c>,
+        mut ctx: WasmerContextMut<'c>,
         args: &[WValue],
     ) -> CallResult<Vec<WValue>> {
         let params = generic_val_to_wasmer_val(args);
         self.inner
-            .call(&mut store, &params)
+            .call(&mut ctx, &params)
             .map_err(|e| CallError::Message(format!("Wasmer failed to call function: {}", e)))
             .map(|rets| wasmer_val_to_generic_val(rets.as_ref()))
     }
@@ -27,6 +27,6 @@ impl Function<WasmerBackend> for WasmerFunction {
 
 impl From<wasmer::Function> for WasmerFunction {
     fn from(value: wasmer::Function) -> Self {
-        todo!()
+        value.
     }
 }

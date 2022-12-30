@@ -64,11 +64,6 @@ pub fn extract_from_wasmer_module<WB: WasmBackend>(
 ) -> ModuleInfoResult<Option<semver::Version>> {
     let sections = wasmer_module.custom_sections(VERSION_SECTION_NAME);
 
-    let sections = match sections {
-        Some(sections) => sections,
-        None => return Ok(None),
-    };
-
     let section = try_as_one_section(&sections, VERSION_SECTION_NAME)?;
     let version = as_semver(section)?;
 

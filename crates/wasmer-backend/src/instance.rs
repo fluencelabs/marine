@@ -1,3 +1,4 @@
+use wasmer::Extern;
 use crate::{WasmerBackend, WasmerFunction, WasmerMemory, WasmerStore};
 
 use marine_wasm_backend_traits::*;
@@ -18,15 +19,14 @@ impl Instance<WasmerBackend> for WasmerInstance {
         self.inner
             .exports
             .iter()
-            .filter(|(name, export)| {
-                if let wasmer::Extern::Memory(_) = export {
-                    true
-                } else {
-                    false
+            .filter_map(|(name, export)| {
+                match export {
+                    Extern::Memory(memory) => Some(memory),
+                    _ => None
                 }
             }) // todo is there a way to make it better?
             .nth(memory_index as usize)
-            .map(|memory| WasmerMemory { inner: memory })
+            .map(|memory| WasmerMemory { inner: memory.clone() })
             .unwrap() // todo handle error
     }
 
@@ -39,7 +39,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
             .exports
             .get_memory(name)
             .ok()
-            .map(|memory| WasmerMemory { inner: memory })
+            .map(|memory| WasmerMemory { inner: memory.clone()})
     }
 
     fn get_func_no_args_no_rets<'a>(
@@ -58,7 +58,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
         self.inner
             .exports
             .get_function(name)
-            .map_err(|e| ResolveError::Message(format!("wasmer cannot find function {}", e)))?
-            .map(Into::into)
+            .map_err(|e| ResolveError::Message(format!("wasmer cannot find function {}", e)))
+            .map(|func| func.clone().into())
     }
 }

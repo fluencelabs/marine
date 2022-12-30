@@ -7,9 +7,13 @@ pub struct WasmerImports {
     inner: wasmer::Imports,
 }
 
+pub struct WasmerNamespace {}
+
 impl Imports<WasmerBackend> for WasmerImports {
     fn new(store: &mut <WasmerBackend as WasmBackend>::Store) -> Self {
-        todo!()
+        Self {
+            inner: wasmer::Imports::new()
+        }
     }
 
     fn register<S>(
@@ -20,6 +24,6 @@ impl Imports<WasmerBackend> for WasmerImports {
     where
         S: Into<String>,
     {
-        todo!()
+        self.inner.define()
     }
 }

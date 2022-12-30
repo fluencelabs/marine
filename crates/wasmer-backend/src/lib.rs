@@ -7,6 +7,7 @@ mod function;
 mod imports;
 mod utils;
 mod memory;
+mod caller;
 
 use module::*;
 use store::*;
@@ -14,6 +15,8 @@ use instance::*;
 use function::*;
 use imports::*;
 use memory::*;
+use caller::*;
+
 pub(crate) use utils::*;
 
 #[derive(Clone, Default)]
@@ -26,12 +29,12 @@ impl WasmBackend for WasmerBackend {
     type ContextMut<'c> = WasmerContextMut<'c>;
     type Instance = WasmerInstance;
     type Caller<'c> = ();
-    type Imports = ();
-    type DynamicFunc = ();
+    type Imports = WasmerImports;
+    type DynamicFunc = WasmerFunction;
     type Namespace = ();
-    type Function = ();
-    type Memory = ();
-    type MemoryView = ();
+    type Function = WasmerFunction;
+    type Memory = WasmerMemory;
+    type MemoryView = WasmerMemory;
     type Wasi = ();
 
     fn compile(store: &mut Self::Store, wasm: &[u8]) -> WasmBackendResult<Self::Module> {

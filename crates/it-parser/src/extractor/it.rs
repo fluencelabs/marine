@@ -48,12 +48,13 @@ pub fn extract_it_from_module<WB: WasmBackend>(
     wasmer_module: &<WB as WasmBackend>::Module,
 ) -> ParserResult<Interfaces<'_>> {
     let wit_sections = wasmer_module
-        .custom_sections(IT_SECTION_NAME)
-        .ok_or(ITParserError::NoITSection)?;
+        .custom_sections(IT_SECTION_NAME);
 
-    if wit_sections.len() > 1 {
-        return Err(ITParserError::MultipleITSections);
-    }
+    match wit_sections.len() {
+        0 => Err(ITParserError::NoITSection),
+        1 => Ok(()),
+        _ => Err(ITParserError::MultipleITSections)
+    }?;
 
     extract_it_from_bytes(&wit_sections[0])
 }
