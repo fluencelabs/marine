@@ -1,7 +1,7 @@
 use crate::{Store, WasmBackend, WasmBackendResult};
 
 pub trait Module<WB: WasmBackend> {
-    fn custom_sections(&self, key: &str) -> Vec<&[u8]>;
+    fn custom_sections(&self, key: &str) -> Option<&[Vec<u8>]>;
     fn instantiate(
         &self,
         store: &mut <WB as WasmBackend>::Store,

@@ -14,3 +14,5 @@ it-memory-traits = { workspace = true }
 #wasmer-wasi = "3.1.0"
 #wasmer = { workspace = true, default-features = false }
 wasmer = { version = "3.1.0", default-features = false, features = ["sys-default"] }
+wasmparser = "0.96.0"
+multimap = "0.8.3"

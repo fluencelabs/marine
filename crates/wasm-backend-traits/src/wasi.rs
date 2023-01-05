@@ -3,8 +3,9 @@ use crate::WasmBackend;
 use std::path::PathBuf;
 
 pub trait WasiImplementation<WB: WasmBackend> {
-    fn generate_import_object_for_version(
+    fn register_in_linker(
         store: &mut <WB as WasmBackend>::ContextMut<'_>,
+        linker: &mut <WB as WasmBackend>::Imports,
         version: WasiVersion,
         args: Vec<Vec<u8>>,
         envs: Vec<Vec<u8>>,

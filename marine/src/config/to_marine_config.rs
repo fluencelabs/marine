@@ -26,9 +26,7 @@ use crate::host_imports::create_call_parameters_import;
 use marine_core::HostImportDescriptor;
 use marine_core::MModuleConfig;
 use marine_wasm_backend_traits::WasmBackend;
-use marine_wasm_backend_traits::Namespace;
 //use marine_wasm_backend_traits::ImportObject;
-use marine_wasm_backend_traits::InsertFn;
 use marine_wasm_backend_traits::WasiVersion;
 use marine_rs_sdk::CallParameters;
 use marine_utils::bytes_to_wasm_pages_ceil;
@@ -178,7 +176,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         }
 
         let logging_mask = logging_mask;
-        let mut namespace = <WB as WasmBackend>::Namespace::new();
+        let func = <WB as WasmBackend>::Function::new()
         namespace.insert_fn(
             "log_utf8_string",
             log_utf8_string_closure::<WB>(logging_mask, module_name),

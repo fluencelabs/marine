@@ -1,4 +1,4 @@
-use wasmer::{AsStoreMut, AsStoreRef, StoreMut, StoreRef};
+use wasmer::{AsStoreMut, AsStoreRef, Engine, EngineBuilder, StoreMut, StoreRef};
 use crate::WasmerBackend;
 
 use marine_wasm_backend_traits::*;
@@ -12,13 +12,13 @@ pub struct WasmerContext<'s> {
 }
 
 pub struct WasmerContextMut<'s> {
-    inner: wasmer::StoreMut<'s>,
+    pub(crate) inner: wasmer::StoreMut<'s>,
 }
 
 impl Store<WasmerBackend> for WasmerStore {
-    fn new(backend: &WasmerBackend) -> Self {
+    fn new(_backend: &WasmerBackend) -> Self {
         Self {
-            inner: wasmer::Store::new(&backend.engine),
+            inner: wasmer::Store::default(),
         }
     }
 }
@@ -73,16 +73,6 @@ impl AsStoreRef for WasmerStore {
     }
 }
 
-impl AsStoreMut for WasmerStore {
-    fn as_store_mut(&mut self) -> StoreMut<'_> {
-        self.inner.as_store_mut()
-    }
-
-    fn objects_mut(&mut self) -> &mut wasmer_vm::store::StoreObjects {
-        self.inner.objects_mut()
-    }
-}
-
 impl<'c> AsStoreRef for WasmerContext<'c> {
     fn as_store_ref(&self) -> StoreRef<'_> {
         self.inner.as_store_ref()
@@ -92,15 +82,5 @@ impl<'c> AsStoreRef for WasmerContext<'c> {
 impl<'c> AsStoreRef for WasmerContextMut<'c> {
     fn as_store_ref(&self) -> StoreRef<'_> {
         self.inner.as_store_ref()
-    }
-}
-
-impl<'c> AsStoreMut for WasmerContextMut<'c> {
-    fn as_store_mut(&mut self) -> StoreMut<'_> {
-        self.inner.as_store_mut()
-    }
-
-    fn objects_mut(&mut self) -> &mut wasmer_vm::store::StoreObjects {
-        self.inner.objects_mut()
     }
 }

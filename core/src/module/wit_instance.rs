@@ -79,7 +79,7 @@ impl<WB: WasmBackend> ITInstance<WB> {
         it.exports()
             .enumerate()
             .map(|(export_id, export)| {
-                let export_func = wasmer_instance.get_dyn_func(store, export.name)?;
+                let export_func = wasmer_instance.get_function(store, export.name)?;
                 Ok((
                     export_id,
                     WITFunction::from_export(store, export_func, export.name.to_string())?,

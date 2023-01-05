@@ -9,24 +9,19 @@ use std::borrow::Cow;
 pub trait Imports<WB: WasmBackend>: Clone {
     fn new(store: &mut <WB as WasmBackend>::Store) -> Self;
 
-    fn register<S>(
+    fn insert(
         &mut self,
-        name: S,
-        namespace: <WB as WasmBackend>::Namespace,
-    ) -> Option<Box<dyn LikeNamespace<WB>>>
-    where
-        S: Into<String>;
-}
+        module: impl Into<String>,
+        name: impl Into<String>,
+        func: <WB as WasmBackend>::Function,
+    );
 
-pub trait DynamicFunc<'a, WB: WasmBackend> {
-    fn new<F>(store: &mut <WB as WasmBackend>::ContextMut<'_>, sig: FuncSig, func: F) -> Self
+    fn register<S, I>(&mut self, name: S, namespace: I)
     where
-        F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
-            + Sync
-            + Send
-            + 'static;
+        S: Into<String>,
+        I: IntoIterator<Item = (String, <WB as WasmBackend>::Function)>;
 }
-
+/*
 pub trait InsertFn<WB: WasmBackend, Args, Rets> {
     fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
     where
@@ -43,11 +38,11 @@ pub trait Namespace<WB: WasmBackend>:
 {
     fn new() -> Self;
 
-    fn insert(&mut self, name: impl Into<String>, func: <WB as WasmBackend>::DynamicFunc);
+    fn insert(&mut self, name: impl Into<String>, func: <WB as WasmBackend>::Function);
 }
 
 pub trait LikeNamespace<WB: WasmBackend> {}
-
+*/
 #[derive(Clone)]
 pub struct FuncSig {
     params: Cow<'static, [WType]>,

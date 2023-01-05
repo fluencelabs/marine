@@ -47,16 +47,15 @@ where
 pub fn extract_it_from_module<WB: WasmBackend>(
     wasmer_module: &<WB as WasmBackend>::Module,
 ) -> ParserResult<Interfaces<'_>> {
-    let wit_sections = wasmer_module
-        .custom_sections(IT_SECTION_NAME);
+    let wit_sections = wasmer_module.custom_sections(IT_SECTION_NAME);
 
-    match wit_sections.len() {
-        0 => Err(ITParserError::NoITSection),
-        1 => Ok(()),
-        _ => Err(ITParserError::MultipleITSections)
+    let it_section = match wit_sections {
+        None => Err(ITParserError::NoITSection),
+        Some(sections) if sections.len() == 1 => Ok(&sections[0]),
+        _ => Err(ITParserError::MultipleITSections),
     }?;
 
-    extract_it_from_bytes(&wit_sections[0])
+    extract_it_from_bytes(it_section)
 }
 
 pub fn extract_version_from_module(module: &walrus::Module) -> ParserResult<semver::Version> {

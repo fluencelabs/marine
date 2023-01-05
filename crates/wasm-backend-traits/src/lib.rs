@@ -35,8 +35,6 @@ pub trait WasmBackend: Clone + Default + 'static {
 
     // imports/exports -- subject to improvement
     type Imports: Imports<Self>; // to be replaced with somethink like Linker or Resolver
-    type DynamicFunc: DynamicFunc<'static, Self>;
-    type Namespace: Namespace<Self>;
 
     type Function: Function<Self>;
     type Memory: Memory<Self>;

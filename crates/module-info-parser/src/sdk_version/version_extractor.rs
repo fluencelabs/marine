@@ -61,13 +61,15 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<semv
 
 pub fn extract_from_wasmer_module<WB: WasmBackend>(
     wasmer_module: &<WB as WasmBackend>::Module,
-) -> ModuleInfoResult<Option<semver::Version>> {
-    let sections = wasmer_module.custom_sections(VERSION_SECTION_NAME);
+) -> ModuleInfoResult<semver::Version> {
+    let sections = wasmer_module
+        .custom_sections(VERSION_SECTION_NAME)
+        .ok_or(ModuleInfoError::NoCustomSection(VERSION_SECTION_NAME))?;
 
     let section = try_as_one_section(&sections, VERSION_SECTION_NAME)?;
     let version = as_semver(section)?;
 
-    Ok(Some(version))
+    Ok(version)
 }
 
 fn as_semver(version_as_bytes: &[u8]) -> Result<semver::Version, super::SDKVersionError> {

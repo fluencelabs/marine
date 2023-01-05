@@ -19,7 +19,7 @@ use super::{IType, IFunctionArg, IValue};
 use super::marine_module::Callable;
 use crate::MResult;
 
-use marine_wasm_backend_traits::{AsContextMut, DelayedContextLifetime, WasmBackend, WValue};
+use marine_wasm_backend_traits::{DelayedContextLifetime, WasmBackend, WValue};
 use marine_wasm_backend_traits::Function;
 
 use wasmer_it::interpreter::wasm;
@@ -54,7 +54,7 @@ impl<WB: WasmBackend> WITFunction<WB> {
         name: String,
     ) -> MResult<Self> {
         use super::type_converters::wtype_to_itype;
-        let signature = dyn_func.signature(store.as_context_mut());
+        let signature = dyn_func.signature(store);
         let arguments = signature
             .params()
             .map(|wtype| IFunctionArg {
@@ -137,7 +137,7 @@ impl<'c, WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<W
             WITFunctionInner::Export { func, .. } => func
                 .as_ref()
                 .call(
-                    store.as_context_mut(),
+                    store,
                     arguments
                         .iter()
                         .map(ival_to_wval)

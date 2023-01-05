@@ -70,7 +70,7 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
         }))
     }
 
-    fn get_dyn_func<'a>(
+    fn get_function<'a>(
         &'a self,
         store: &mut WasmtimeStore,
         name: &str,

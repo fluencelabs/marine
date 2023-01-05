@@ -30,10 +30,6 @@ pub(crate) fn check_sdk_version<WB: WasmBackend>(
     wasmer_module: &<WB as WasmBackend>::Module,
 ) -> PrepareResult<()> {
     let module_version = sdk_version::extract_from_wasmer_module::<WB>(wasmer_module)?;
-    let module_version = match module_version {
-        Some(module_version) => module_version,
-        None => return Err(PrepareError::ModuleWithoutVersion(name.into())),
-    };
 
     let required_version = min_sdk_version();
     if module_version < *required_version {

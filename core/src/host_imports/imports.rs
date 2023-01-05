@@ -31,7 +31,7 @@ use crate::HostImportDescriptor;
 
 //use wasmer_core::Func;
 //use wasmer_core::vm::Ctx;
-//use wasmer_core::typed_func::DynamicFunc;
+//use wasmer_core::typed_func::Function;
 //use wasmer_core::types::Value as WValue;
 //use wasmer_core::types::FuncSig;
 use it_lilo::lifter::ILifter;
@@ -43,7 +43,7 @@ use std::sync::Arc;
 //use it_memory_traits::Memory;
 
 use marine_wasm_backend_traits::{AsContextMut, Caller, DelayedContextLifetime, FuncSig, WasmBackend};
-use marine_wasm_backend_traits::DynamicFunc;
+use marine_wasm_backend_traits::Function;
 //use marine_wasm_backend_traits::FuncGetter;
 use marine_wasm_backend_traits::errors::*;
 use marine_wasm_backend_traits::FuncGetter;
@@ -53,7 +53,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     store: &mut <WB as WasmBackend>::Store,
     descriptor: HostImportDescriptor<WB>,
     record_types: Arc<MRecordTypes>,
-) -> <WB as WasmBackend>::DynamicFunc {
+) -> <WB as WasmBackend>::Function {
     //let allocate_func: AllocateFunc<WB> = Box::new((None));
     //let set_result_ptr_func: SetResultPtrFunc<WB> = Box::new(RefCell::new(None));
     //let set_result_size_func: SetResultSizeFunc<WB> = Box::new(RefCell::new(None));
@@ -191,7 +191,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
         }
     };
 
-    <WB as WasmBackend>::DynamicFunc::new(
+    <WB as WasmBackend>::Function::new_with_ctx(
         &mut store.as_context_mut(),
         FuncSig::new(raw_args, raw_output),
         func,

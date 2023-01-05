@@ -2520,8 +2520,10 @@ version = "0.1.0"
 dependencies = [
  "it-memory-traits 0.3.1",
  "marine-wasm-backend-traits",
+ "multimap",
  "wasmer",
  "wasmer-interface-types-fl 0.25.0",
+ "wasmparser 0.96.0",
 ]
 
 [[package]]
@@ -2532,7 +2534,7 @@ dependencies = [
  "marine-wasm-backend-traits",
  "multimap",
  "wasmer-interface-types-fl 0.25.0",
- "wasmparser 0.93.0",
+ "wasmparser 0.96.0",
  "wasmtime",
  "wasmtime-wasi",
 ]
@@ -4897,6 +4899,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c5a4460aa3e271fa180b6a5d003e728f3963fb30e3ba0fa7c9634caa06049328"
 dependencies = [
  "indexmap",
+]
+
+[[package]]
+name = "wasmparser"
+version = "0.96.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "adde01ade41ab9a5d10ec8ed0bb954238cf8625b5cd5a13093d6de2ad9c2be1a"
+dependencies = [
+ "indexmap",
+ "url",
 ]
 
 [[package]]

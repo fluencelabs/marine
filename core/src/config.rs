@@ -19,7 +19,6 @@ use super::IType;
 use crate::HostImportError;
 
 use marine_wasm_backend_traits::{WasmBackend};
-use marine_wasm_backend_traits::Namespace;
 use marine_wasm_backend_traits::WasiVersion;
 
 use std::path::PathBuf;
@@ -59,7 +58,7 @@ pub struct MModuleConfig<WB: WasmBackend> {
     pub max_heap_pages_count: u32,
 
     /// Import object that will be used in module instantiation process.
-    pub raw_imports: <WB as WasmBackend>::Namespace,
+    pub raw_imports: HashMap<String, <WB as WasmBackend>::Function>,
 
     /// Imports from the host side that will be used in module instantiation process.
     pub host_imports: HashMap<String, HostImportDescriptor<WB>>,
@@ -82,7 +81,7 @@ impl<WB: WasmBackend> Default for MModuleConfig<WB> {
         // some reasonable defaults
         Self {
             max_heap_pages_count: DEFAULT_HEAP_PAGES_COUNT,
-            raw_imports: <WB as WasmBackend>::Namespace::new(),
+            raw_imports: HashMap::new(),
             host_imports: HashMap::new(),
             wasi_version: WasiVersion::Latest,
             wasi_envs: HashMap::new(),

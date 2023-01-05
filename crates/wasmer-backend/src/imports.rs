@@ -12,18 +12,24 @@ pub struct WasmerNamespace {}
 impl Imports<WasmerBackend> for WasmerImports {
     fn new(store: &mut <WasmerBackend as WasmBackend>::Store) -> Self {
         Self {
-            inner: wasmer::Imports::new()
+            inner: wasmer::Imports::new(),
         }
     }
 
-    fn register<S>(
+    fn insert(
         &mut self,
-        name: S,
-        namespace: <WasmerBackend as WasmBackend>::Namespace,
-    ) -> Option<Box<dyn LikeNamespace<WasmerBackend>>>
+        module: impl Into<String>,
+        name: impl Into<String>,
+        func: <WasmerBackend as WasmBackend>::Function,
+    ) {
+        todo!()
+    }
+
+    fn register<S, I>(&mut self, name: S, namespace: I)
     where
         S: Into<String>,
+        I: IntoIterator<Item = (String, <WasmerBackend as WasmBackend>::Function)>,
     {
-        self.inner.define()
+        todo!()
     }
 }
