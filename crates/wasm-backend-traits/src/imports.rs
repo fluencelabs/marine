@@ -6,7 +6,13 @@ use crate::Export;
 
 use std::borrow::Cow;
 
-pub trait Imports<WB: WasmBackend>: Clone {
+pub trait Imports<WB: WasmBackend>:
+    Clone
+   /* + InsertFn<WB, (), ()>
+    + InsertFn<WB, (i32,), ()>
+    + InsertFn<WB, (i32, i32), ()>
+    + InsertFn<WB, (i32, i32, i32), ()>
+    + InsertFn<WB, (i32, i32, i32, i32), ()>*/ {
     fn new(store: &mut <WB as WasmBackend>::Store) -> Self;
 
     fn insert(
@@ -21,13 +27,13 @@ pub trait Imports<WB: WasmBackend>: Clone {
         S: Into<String>,
         I: IntoIterator<Item = (String, <WB as WasmBackend>::Function)>;
 }
-/*
+
 pub trait InsertFn<WB: WasmBackend, Args, Rets> {
     fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
     where
         F: Fn(&mut <WB as WasmBackend>::Caller<'_>, Args) -> Rets + Sync + Send + 'static;
 }
-
+/*
 pub trait Namespace<WB: WasmBackend>:
     LikeNamespace<WB>
     + InsertFn<WB, (), ()>

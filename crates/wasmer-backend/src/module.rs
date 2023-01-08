@@ -1,5 +1,5 @@
 use multimap::MultiMap;
-use crate::{WasmerBackend, WasmerImports, WasmerStore};
+use crate::{WasmerBackend, WasmerImports, WasmerInstance, WasmerStore};
 
 use marine_wasm_backend_traits::*;
 
@@ -19,6 +19,12 @@ impl Module<WasmerBackend> for WasmerModule {
         store: &mut WasmerStore,
         imports: &WasmerImports,
     ) -> WasmBackendResult<<WasmerBackend as WasmBackend>::Instance> {
-        todo!()
+        wasmer::Instance::new(&mut store.inner, &self.inner, &imports.inner)
+            .map_err(|e| WasmBackendError::InstantiationError(format!("{}", e)))
+            .map(|instance| {
+                WasmerInstance {
+                    inner: instance,
+                }
+            })
     }
 }

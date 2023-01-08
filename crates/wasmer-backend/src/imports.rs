@@ -4,7 +4,7 @@ use marine_wasm_backend_traits::*;
 
 #[derive(Clone)]
 pub struct WasmerImports {
-    inner: wasmer::Imports,
+    pub(crate) inner: wasmer::Imports,
 }
 
 pub struct WasmerNamespace {}
@@ -22,7 +22,7 @@ impl Imports<WasmerBackend> for WasmerImports {
         name: impl Into<String>,
         func: <WasmerBackend as WasmBackend>::Function,
     ) {
-        todo!()
+        self.inner.define(&module, &name, func.inner);
     }
 
     fn register<S, I>(&mut self, name: S, namespace: I)
@@ -30,6 +30,13 @@ impl Imports<WasmerBackend> for WasmerImports {
         S: Into<String>,
         I: IntoIterator<Item = (String, <WasmerBackend as WasmBackend>::Function)>,
     {
-        todo!()
+        self.inner.register_namespace(name, namespace);
     }
 }
+/*
+impl InsertFn<WasmerBackend, (i32, i32), i32> for WasmerImports {
+    fn insert_fn<F>(func: F)
+        where F: Fn(&mut <WasmerBackend as WasmBackend>::Caller<'_>, (i32, i32)) -> i32 + Sync + Send + 'static {
+
+    }
+}*/
