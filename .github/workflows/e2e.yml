@@ -50,19 +50,19 @@ jobs:
     needs:
       - marine
 
-    uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@debug-e2e
+    uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@master
     with:
       cargo-dependencies: |
         [
           {
-            "package": "fluence-app-service",
-            "manifest": "air/Cargo.toml",
+            "package": "marine-runtime",
+            "manifest": "avm/server/Cargo.toml",
             "version": "=${{ needs.marine.outputs.cargo-version }}",
             "registry": "fluence"
           },
           {
-            "package": "marine-runtime",
-            "manifest": "avm/server/Cargo.toml",
+            "package": "fluence-app-service",
+            "manifest": "air/Cargo.toml",
             "version": "=${{ needs.marine.outputs.cargo-version }}",
             "registry": "fluence"
           }
