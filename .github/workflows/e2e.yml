@@ -159,8 +159,8 @@ jobs:
     with:
       aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
       fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
-      marine-version: "=${{ needs.marine.outputs.cargo-version }}"
-      mrepl-version: "=${{ needs.marine.outputs.cargo-version }}"
-      marine-rs-sdk-version: "=${{ needs.marine-rs-sdk.outputs.cargo-version }}"
-      marine-rs-sdk-test-version: "=${{ needs.marine-rs-sdk-test.outputs.cargo-version }}"
+      marine-version: "${{ needs.marine.outputs.cargo-version }}"
+      mrepl-version: "${{ needs.marine.outputs.cargo-version }}"
+      marine-rs-sdk-version: "${{ needs.marine-rs-sdk.outputs.cargo-version }}"
+      marine-rs-sdk-test-version: "${{ needs.marine-rs-sdk-test.outputs.cargo-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
