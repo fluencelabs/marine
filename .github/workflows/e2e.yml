@@ -150,6 +150,7 @@ jobs:
   fluence-cli:
     needs:
       - aqua
+      - marine
       - fluence-js
       - marine-rs-sdk-test
       - marine-rs-sdk
