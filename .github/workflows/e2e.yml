@@ -19,33 +19,6 @@ jobs:
   marine:
     uses: ./.github/workflows/snapshot.yml
 
-  marine-rs-sdk:
-    uses: fluencelabs/marine-rs-sdk/.github/workflows/snapshot.yml@FLU-135-publish-snapshot
-    with:
-      ref: FLU-135-publish-snapshot
-
-  marine-rs-sdk-test:
-    needs:
-      - marine
-
-    uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@FLU-135-publish-snapshot
-    with:
-      ref: FLU-135-publish-snapshot
-      cargo-dependencies: |
-        [
-          {
-            "package": "fluence-app-service",
-            "version": "=${{ needs.marine.outputs.cargo-version }}",
-            "registry": "fluence"
-          },
-          {
-            "package": "fluence-app-service",
-            "manifest": "crates/marine-test-macro-impl/Cargo.toml",
-            "version": "=${{ needs.marine.outputs.cargo-version }}",
-            "registry": "fluence"
-          }
-        ]
-
   aquavm:
     needs:
       - marine
@@ -152,8 +125,6 @@ jobs:
       - aqua
       - marine
       - fluence-js
-      - marine-rs-sdk-test
-      - marine-rs-sdk
       - rust-peer
 
     uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@FLU-135-fluence-cli
@@ -162,6 +133,4 @@ jobs:
       fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
       marine-version: "${{ needs.marine.outputs.cargo-version }}"
       mrepl-version: "${{ needs.marine.outputs.cargo-version }}"
-      marine-rs-sdk-version: "${{ needs.marine-rs-sdk.outputs.cargo-version }}"
-      marine-rs-sdk-test-version: "${{ needs.marine-rs-sdk-test.outputs.cargo-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
