@@ -50,7 +50,7 @@ jobs:
     needs:
       - marine
 
-    uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@master
+    uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@debug-e2e
     with:
       cargo-dependencies: |
         [
