@@ -55,14 +55,14 @@ jobs:
       cargo-dependencies: |
         [
           {
-            "package": "marine-runtime",
-            "manifest": "avm/server/Cargo.toml",
+            "package": "fluence-app-service",
+            "manifest": "air/Cargo.toml",
             "version": "=${{ needs.marine.outputs.cargo-version }}",
             "registry": "fluence"
           },
           {
-            "package": "fluence-app-service",
-            "manifest": "air/Cargo.toml",
+            "package": "marine-runtime",
+            "manifest": "avm/server/Cargo.toml",
             "version": "=${{ needs.marine.outputs.cargo-version }}",
             "registry": "fluence"
           }
