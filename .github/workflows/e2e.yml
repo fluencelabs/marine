@@ -23,9 +23,8 @@ jobs:
     needs:
       - marine
 
-    uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@FLU-135-publish-snapshot
+    uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml
     with:
-      ref: FLU-135-publish-snapshot
       cargo-dependencies: |
         [
           {
