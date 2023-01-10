@@ -140,3 +140,18 @@ jobs:
     with:
       aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
+
+  fluence-cli:
+    needs:
+      - aqua
+      - marine
+      - fluence-js
+      - rust-peer
+
+    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
+    with:
+      aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
+      fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
+      marine-version: "${{ needs.marine.outputs.cargo-version }}"
+      mrepl-version: "${{ needs.marine.outputs.cargo-version }}"
+      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
