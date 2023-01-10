@@ -58,7 +58,7 @@ jobs:
 
       - name: Build packages link list
         id: link_list
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           result-encoding: string
