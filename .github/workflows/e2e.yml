@@ -148,7 +148,7 @@ jobs:
       - fluence-js
       - rust-peer
 
-    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@FLU-135-fluence-cli
+    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
     with:
       aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
       fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
