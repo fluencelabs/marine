@@ -71,6 +71,16 @@ impl Function<WasmerBackend> for WasmerFunction {
     }
 }
 
+impl WasmerFunction {
+    pub(crate) fn from_func(ctx: &mut impl AsContextMut<WasmerBackend>, func: wasmer::Function) -> Self {
+        let ty = func.ty(&mut ctx.as_context_mut().inner);
+        let sig = function_type_to_func_sig(&ty);
+        WasmerFunction {
+            sig,
+            inner: func,
+        }
+    }
+}
 macro_rules! impl_func_construction {
     ($num:tt $($args:ident)*) => (paste::paste!{
         fn [< new_typed_with_env_ $num >] <F>(mut ctx: WasmerContextMut<'_>, func: F) -> WasmerFunction

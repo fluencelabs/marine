@@ -8,7 +8,7 @@ pub struct WasmerStore {
 }
 
 pub struct WasmerContext<'s> {
-    inner: wasmer::StoreRef<'s>,
+    pub(crate) inner: wasmer::StoreRef<'s>,
 }
 
 pub struct WasmerContextMut<'s> {

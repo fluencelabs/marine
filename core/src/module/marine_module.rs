@@ -280,11 +280,11 @@ impl<WB: WasmBackend> MModule<WB> {
     ) -> MResult<()> {
         let wasi_envs = wasi_envs
             .into_iter()
-            .map(|(mut left, right)| {
+            /*.map(|(mut left, right)| {
                 left.push(61); // 61 is ASCII code of '=' // todo remove or move to backend impl
                 left.extend(right);
                 left
-            })
+            })*/
             .collect::<Vec<_>>();
         let wasi_preopened_files = wasi_preopened_files.into_iter().collect::<Vec<_>>();
         let wasi_mapped_dirs = wasi_mapped_dirs.into_iter().collect::<Vec<_>>();

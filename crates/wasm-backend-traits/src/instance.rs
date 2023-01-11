@@ -3,8 +3,8 @@ use crate::{AsContextMut, Export, ResolveResult, RuntimeResult, WasmBackend};
 pub trait Instance<WB: WasmBackend> {
     fn export_iter<'a>(
         &'a self,
-        store: &mut impl AsContextMut<WB>,
-    ) -> Box<dyn Iterator<Item = (String, Export<WB>)> + 'a>;
+        store: &'a mut impl AsContextMut<WB>,
+    ) -> Box<dyn Iterator<Item = (&'a String, Export<WB>)> + 'a>;
 
     fn memory(
         &self,

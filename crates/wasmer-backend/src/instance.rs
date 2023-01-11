@@ -13,9 +13,23 @@ pub struct WasmerInstance {
 impl Instance<WasmerBackend> for WasmerInstance {
     fn export_iter<'a>(
         &'a self,
-        store: &mut impl AsContextMut<WasmerBackend>,
-    ) -> Box<dyn Iterator<Item = (String, Export<WasmerBackend>)> + 'a> {
-        todo!()
+        store: &'a mut impl AsContextMut<WasmerBackend>,
+    ) -> Box<dyn Iterator<Item = (&'a String, Export<WasmerBackend>)> + 'a> {
+        let iter = self
+            .inner
+            .exports
+            .iter()
+            .map(|(name, export): (&String, &wasmer::Extern)| {
+                let export = match export {
+                    wasmer::Extern::Function(function) => Export::Function(
+                        WasmerFunction::from_func(store, function.clone())),
+                    wasmer::Extern::Memory(memory) => Export::Memory(memory.clone().into()),
+                    _ => Export::Other,
+                };
+
+                (name, export)
+            });
+        Box::new(iter)
     }
 
     fn memory(

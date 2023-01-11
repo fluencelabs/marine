@@ -8,10 +8,10 @@ pub trait WasiImplementation<WB: WasmBackend> {
         linker: &mut <WB as WasmBackend>::Imports,
         version: WasiVersion,
         args: Vec<Vec<u8>>,
-        envs: Vec<Vec<u8>>,
+        envs: Vec<(Vec<u8>, Vec<u8>)>,
         preopened_files: Vec<PathBuf>,
         mapped_dirs: Vec<(String, PathBuf)>,
-    ) -> Result<<WB as WasmBackend>::Imports, String>;
+    ) -> Result<(), String>;
 
     fn get_wasi_state<'s>(
         instance: &'s mut <WB as WasmBackend>::Instance,

@@ -6,7 +6,7 @@ use crate::WValue;
 
 pub enum Export<WB: WasmBackend> {
     Memory(<WB as WasmBackend>::Memory),
-    Function(<WB as WasmBackend>::Memory),
+    Function(<WB as WasmBackend>::Function),
     Other,
 }
 

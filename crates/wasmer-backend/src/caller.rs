@@ -1,6 +1,6 @@
-use wasmer::{AsStoreMut, FunctionEnv, FunctionEnvMut};
+use wasmer::{AsStoreRef, AsStoreMut, FunctionEnv, FunctionEnvMut};
 use marine_wasm_backend_traits::*;
-use crate::{WasmerBackend, WasmerContextMut};
+use crate::{WasmerBackend, WasmerContext, WasmerContextMut};
 
 pub struct WasmerCaller<'c> {
     pub(crate) inner: FunctionEnvMut<'c, ()>,
@@ -14,13 +14,17 @@ impl Caller<WasmerBackend> for WasmerCaller<'_> {
 
 impl AsContext<WasmerBackend> for WasmerCaller<'_> {
     fn as_context(&self) -> <WasmerBackend as WasmBackend>::Context<'_> {
-        todo!()
+        WasmerContext {
+            inner: self.inner.as_store_ref()
+        }
     }
 }
 
 impl AsContextMut<WasmerBackend> for WasmerCaller<'_> {
     fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
-        todo!()
+        WasmerContextMut {
+            inner: self.inner.as_store_mut()
+        }
     }
 }
 

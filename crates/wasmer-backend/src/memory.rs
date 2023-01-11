@@ -10,6 +10,14 @@ pub struct WasmerMemory {
     pub(crate) inner: wasmer::Memory,
 }
 
+impl From<wasmer::Memory> for WasmerMemory {
+    fn from(memory: wasmer::Memory) -> Self {
+        WasmerMemory {
+            inner: memory
+        }
+    }
+}
+
 impl Memory<WasmerBackend> for WasmerMemory {
     fn size(&self, store: &mut <WasmerBackend as WasmBackend>::ContextMut<'_>) -> usize {
         self.inner.view(store).size().bytes().0
