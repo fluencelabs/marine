@@ -1,4 +1,5 @@
 [workspace]
+resolver = "2" # required by wasmer-wasi to work, see https://github.com/wasmerio/wasmer/issues/3377
 members = [
     "core",
     "core/tests/wasm_tests/lilo_after_2gb",
@@ -43,6 +44,9 @@ members = [
     "tools/cli",
     "tools/repl",
 ]
+
+[workspace.package]
+edition = "2021"
 
 [workspace.dependencies]
 #wasmer-it = { git = "https://github.com/fluencelabs/interface-types", branch = "feat/add-store", package = "wasmer-interface-types-fl", version = "0.25.0" }

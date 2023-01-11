@@ -4,7 +4,7 @@ description = "Fluence Marine utils crate"
 version = "0.4.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
-edition = "2018"
+edition = { workspace = true }
 
 [lib]
 name = "marine_utils"

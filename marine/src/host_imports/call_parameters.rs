@@ -20,17 +20,21 @@ use marine_core::HostImportDescriptor;
 use wasmer_it::IValue;
 use wasmer_it::IType;
 
-use std::rc::Rc;
-use std::cell::RefCell;
+//use std::rc::Rc;
+//use std::cell::RefCell;
 use std::ops::Deref;
+use std::sync::{Arc, Mutex};
 
 /// Create the import intended for handling get_call_parameters SDK api.
+
 pub(crate) fn create_call_parameters_import<WB: WasmBackend>(
-    call_parameters: Rc<RefCell<marine_rs_sdk::CallParameters>>,
+    call_parameters: Arc<Mutex<marine_rs_sdk::CallParameters>>, // todo show mike // todo try to move inside caller's state
 ) -> HostImportDescriptor<WB> {
     let call_parameters_closure = move |_ctx: &mut <WB as WasmBackend>::Caller<'_>,
                                         _args: Vec<IValue>| {
-        let result = crate::to_interface_value(call_parameters.borrow().deref()).unwrap();
+
+        // TODO: BE EXTREMELY CAUTIOUS ABOUT .lock().unwrap(), INVESTIGATE IT/DISCUSS WITH MIKE
+        let result = crate::to_interface_value(call_parameters.lock().unwrap().deref()).unwrap();
         Some(result)
     };
 

@@ -1,4 +1,4 @@
-edition = "2018"
+edition = { workspace = true }
 
 reorder_imports = false
 reorder_modules = false

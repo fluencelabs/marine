@@ -33,9 +33,9 @@ pub use ivalues_to_json::ivalues_to_json;
 pub use json_to_ivalues::json_to_ivalues;
 
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub(crate) use wasmer_it::IValue;
 pub(crate) use wasmer_it::IType;
 pub(crate) use wasmer_it::IRecordType;
-pub(crate) type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
+pub(crate) type MRecordTypes = HashMap<u64, Arc<IRecordType>>;

@@ -35,8 +35,9 @@ use marine_utils::bytes_to_wasm_pages_ceil;
 //use wasmer_runtime::func;
 
 use std::collections::HashMap;
-use std::cell::RefCell;
-use std::rc::Rc;
+//use std::cell::RefCell;
+//use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 const WASM_MAX_HEAP_SIZE: u64 = 4 * 1024 * 1024 * 1024 - 1; // 4 GiB - 1
 
@@ -55,7 +56,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         self,
         module_name: String,
         marine_module_config: Option<MarineModuleConfig<WB>>,
-        call_parameters: Rc<RefCell<CallParameters>>,
+        call_parameters: Arc<Mutex<CallParameters>>,
         logger_filter: &LoggerFilter<'_>,
     ) -> MarineResult<MModuleConfig<WB>> {
         let marine_module_config = match marine_module_config {
@@ -114,7 +115,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
     fn populate_host_imports(
         mut self,
         host_imports: HashMap<String, HostImportDescriptor<WB>>,
-        call_parameters: Rc<RefCell<CallParameters>>,
+        call_parameters: Arc<Mutex<CallParameters>>, // todo show mike
     ) -> Self {
         self.config.host_imports = host_imports;
         self.config.host_imports.insert(
@@ -200,7 +201,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
 pub(crate) fn make_marine_config<WB: WasmBackend>(
     module_name: String,
     marine_module_config: Option<MarineModuleConfig<WB>>,
-    call_parameters: Rc<RefCell<marine_rs_sdk::CallParameters>>,
+    call_parameters: Arc<Mutex<marine_rs_sdk::CallParameters>>,
     logger_filter: &LoggerFilter<'_>,
 ) -> MarineResult<MModuleConfig<WB>> {
     MModuleConfigBuilder::new().build(

@@ -35,18 +35,17 @@ use marine_utils::SharedString;
 use marine_rs_sdk::CallParameters;
 
 use serde_json::Value as JValue;
-use std::cell::RefCell;
 use std::convert::TryInto;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
-type MFunctionSignature = (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>);
-type MModuleInterface = (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>, Rc<MRecordTypes>);
+type MFunctionSignature = (Arc<Vec<IFunctionArg>>, Arc<Vec<IType>>);
+type MModuleInterface = (Arc<Vec<IFunctionArg>>, Arc<Vec<IType>>, Arc<MRecordTypes>);
 
 struct ModuleInterface {
     function_signatures: HashMap<SharedString, MFunctionSignature>,
-    record_types: Rc<MRecordTypes>,
+    record_types: Arc<MRecordTypes>,
 }
 
 // TODO: remove and use mutex instead
@@ -58,7 +57,7 @@ pub struct Marine<WB: WasmBackend> {
     core: MarineCore<WB>,
 
     /// Parameters of call accessible by Wasm modules.
-    call_parameters: Rc<RefCell<CallParameters>>,
+    call_parameters: Arc<Mutex<CallParameters>>,
 
     /// Cached module interfaces by names.
     module_interfaces_cache: HashMap<String, ModuleInterface>,
@@ -91,7 +90,7 @@ impl<WB: WasmBackend> Marine<WB> {
     {
         let mut marine = MarineCore::new();
         let config = config.try_into()?;
-        let call_parameters = Rc::new(RefCell::new(<_>::default()));
+        let call_parameters = Arc::new(Mutex::new(<_>::default()));
 
         let modules_dir = config.modules_dir;
 
@@ -144,7 +143,8 @@ impl<WB: WasmBackend> Marine<WB> {
         args: &[IValue],
         call_parameters: marine_rs_sdk::CallParameters,
     ) -> MarineResult<Vec<IValue>> {
-        self.call_parameters.replace(call_parameters);
+        let mut cp = self.call_parameters.lock().unwrap(); // TODO MAKE SURE ITS OK
+        *cp = call_parameters;
 
         self.core
             .call(module_name, func_name, args)
@@ -177,7 +177,9 @@ impl<WB: WasmBackend> Marine<WB> {
             func_name.to_string()
         )?;
 
-        self.call_parameters.replace(call_parameters);
+        let mut cp = self.call_parameters.lock().unwrap(); // TODO MAKE SURE ITS OK
+        *cp = call_parameters;
+
         let result = self.core.call(module_name, func_name, &iargs)?;
 
         json_to_marine_err!(
@@ -239,7 +241,7 @@ impl<WB: WasmBackend> Marine<WB> {
 
         let arg_types = arg_types.clone();
         let output_types = output_types.clone();
-        let record_types = Rc::new(module_interface.record_types.clone());
+        let record_types = Arc::new(module_interface.record_types.clone());
 
         let module_interface = ModuleInterface {
             function_signatures,

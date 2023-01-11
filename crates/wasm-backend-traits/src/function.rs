@@ -27,8 +27,8 @@ pub trait IntoFunc<WB: WasmBackend, Params, Results, Env> {
     fn into_func(self, ctx: &mut impl AsContextMut<WB>) -> <WB as WasmBackend>::Function;
 }
 
-struct WithEnv {}
-struct WithoutEnv {}
+pub struct WithEnv {}
+pub struct WithoutEnv {}
 
 #[macro_export]
 macro_rules! replace_with {

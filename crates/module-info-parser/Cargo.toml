@@ -4,7 +4,7 @@ description = "Fluence Marine Wasm module info (manifest and version) parser"
 version = "0.5.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
-edition = "2018"
+edition = { workspace = true }
 
 [lib]
 name = "marine_module_info_parser"

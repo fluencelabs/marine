@@ -2,7 +2,7 @@
 name = "wasm-sqlite-test"
 version = "0.1.0"
 authors = ["Fluence Labs"]
-edition = "2018"
+edition = { workspace = true }
 publish = false
 
 [[bin]]

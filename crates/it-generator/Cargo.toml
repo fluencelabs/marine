@@ -4,7 +4,7 @@ description = "Fluence Marine interface types generator"
 version = "0.9.4"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
-edition = "2018"
+edition = { workspace = true }
 
 [lib]
 name = "marine_it_generator"

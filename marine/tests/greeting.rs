@@ -22,6 +22,7 @@ use marine::IValue;
 use pretty_assertions::assert_eq;
 
 use std::rc::Rc;
+use std::sync::Arc;
 
 #[cfg(feature = "wasmer")]
 type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
@@ -88,9 +89,9 @@ pub fn get_interfaces() {
     let output_types = vec![marine::IType::String];
 
     let greeting_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("greeting")),
-        arguments: Rc::new(arguments),
-        outputs: Rc::new(output_types),
+        name: Arc::new(String::from("greeting")),
+        arguments: Arc::new(arguments),
+        outputs: Arc::new(output_types),
     };
 
     let record_types = std::collections::HashMap::new();
