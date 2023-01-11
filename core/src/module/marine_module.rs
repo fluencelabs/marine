@@ -46,6 +46,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 //use wasmer_core::types::FuncSig;
 use marine_wasm_backend_traits::FuncSig;
+use crate::config::RawImportCreator;
 
 const START_FUNC: &str = "_start";
 const INITIALIZE_FUNC: &str = "_initialize";
@@ -305,7 +306,7 @@ impl<WB: WasmBackend> MModule<WB> {
     fn add_host_imports(
         store: &mut <WB as WasmBackend>::Store,
         linker: &mut <WB as WasmBackend>::Imports,
-        raw_imports: HashMap<String, <WB as WasmBackend>::Function>,
+        raw_imports: HashMap<String, RawImportCreator<WB>>,
         host_imports: HashMap<String, HostImportDescriptor<WB>>,
         mit: &MITInterfaces<'_>,
     ) -> MResult<()> {
@@ -317,12 +318,20 @@ impl<WB: WasmBackend> MModule<WB> {
             .collect::<HashMap<_, _>>();
         let record_types = Arc::new(record_types);
 
-        let host_imports = host_imports.into_iter().map(|(import_name, descriptor)| {
-            let func = create_host_import_func::<WB>(store, descriptor, record_types.clone());
-            (import_name, func)
-        });
+        let host_imports = host_imports
+            .into_iter()
+            .map(|(import_name, descriptor)| {
+                let func = create_host_import_func::<WB>(store, descriptor, record_types.clone());
+                (import_name, func)
+            })
+            .collect::<Vec<_>>();
 
-        linker.register("host", raw_imports.into_iter().chain(host_imports));
+        let all_imports = raw_imports
+            .into_iter()
+            .map(|(name, creator)| (name, creator(store.as_context_mut())))
+            .chain(host_imports.into_iter());
+
+        linker.register("host", all_imports);
 
         Ok(())
     }

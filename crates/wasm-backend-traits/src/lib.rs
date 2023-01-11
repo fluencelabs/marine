@@ -8,6 +8,7 @@ pub mod module;
 pub mod instance;
 pub mod caller;
 pub mod function;
+pub mod macros;
 
 pub use errors::*;
 pub use exports::*;
@@ -19,6 +20,7 @@ pub use module::*;
 pub use instance::*;
 pub use caller::*;
 pub use function::*;
+pub use macros::*;
 
 use std::marker::PhantomData;
 use it_memory_traits::{MemoryView};
@@ -36,7 +38,7 @@ pub trait WasmBackend: Clone + Default + 'static {
     // imports/exports -- subject to improvement
     type Imports: Imports<Self>; // to be replaced with somethink like Linker or Resolver
 
-    type Function: Function<Self>;
+    type Function: Function<Self> + FuncConstructor<Self>;
     type Memory: Memory<Self>;
     type MemoryView: MemoryView<DelayedContextLifetime<Self>> + 'static;
 
@@ -44,6 +46,20 @@ pub trait WasmBackend: Clone + Default + 'static {
     type Wasi: WasiImplementation<Self>;
 
     fn compile(store: &mut Self::Store, wasm: &[u8]) -> WasmBackendResult<Self::Module>;
+}
+
+pub trait WasmType {
+    type Type: Copy;
+
+    fn into_type(self) -> Self::Type;
+}
+
+impl WasmType for i32 {
+    type Type = i32;
+
+    fn into_type(self) -> Self::Type {
+        self
+    }
 }
 
 pub struct DelayedContextLifetime<WB: WasmBackend> {

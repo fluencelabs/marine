@@ -25,7 +25,7 @@ use crate::host_imports::create_call_parameters_import;
 
 use marine_core::HostImportDescriptor;
 use marine_core::MModuleConfig;
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::{Function, WasmBackend};
 //use marine_wasm_backend_traits::ImportObject;
 use marine_wasm_backend_traits::WasiVersion;
 use marine_rs_sdk::CallParameters;
@@ -175,14 +175,13 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             );
         }
 
-        let logging_mask = logging_mask;
-        let func = <WB as WasmBackend>::Function::new()
-        namespace.insert_fn(
-            "log_utf8_string",
-            log_utf8_string_closure::<WB>(logging_mask, module_name),
-        );
+        let creator = move |mut store: <WB as WasmBackend>::ContextMut<'_>| {
+            let logging_mask = logging_mask;
+            let func = <WB as WasmBackend>::Function::new_typed(&mut store, log_utf8_string_closure::<WB>(logging_mask, module_name));
+            func
+        };
 
-        self.config.raw_imports = namespace;
+        self.config.raw_imports.insert("log_utf8_string".to_string(), Box::new(creator));
 
         self
     }

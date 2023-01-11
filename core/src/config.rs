@@ -37,6 +37,8 @@ pub type HostExportedFunc<WB> = Box<
         + 'static,
 >;
 
+pub type RawImportCreator<WB: WasmBackend> = Box<dyn FnOnce(<WB as WasmBackend>::ContextMut<'_>) -> <WB as WasmBackend>::Function>;
+
 pub struct HostImportDescriptor<WB: WasmBackend> {
     /// This closure will be invoked for corresponding import.
     pub host_exported_func: HostExportedFunc<WB>,
@@ -58,7 +60,7 @@ pub struct MModuleConfig<WB: WasmBackend> {
     pub max_heap_pages_count: u32,
 
     /// Import object that will be used in module instantiation process.
-    pub raw_imports: HashMap<String, <WB as WasmBackend>::Function>,
+    pub raw_imports: HashMap<String, RawImportCreator<WB>>,
 
     /// Imports from the host side that will be used in module instantiation process.
     pub host_imports: HashMap<String, HostImportDescriptor<WB>>,

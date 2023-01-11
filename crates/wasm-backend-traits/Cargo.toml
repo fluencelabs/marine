@@ -12,3 +12,4 @@ wasmer-it = { workspace = true }
 it-memory-traits = { workspace = true }
 
 tuple_list = "0.1.0"
+paste = "1.0.11"

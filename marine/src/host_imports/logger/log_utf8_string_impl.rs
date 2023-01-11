@@ -24,8 +24,8 @@ use it_memory_traits::MemoryReadable;
 pub(crate) fn log_utf8_string_closure<WB: WasmBackend>(
     logging_mask: i32,
     module: String,
-) -> impl Fn(&mut <WB as WasmBackend>::Caller<'_>, (i32, i32, i32, i32)) {
-    move |ctx, (level, target, msg_offset, msg_size)| {
+) -> impl Fn(<WB as WasmBackend>::Caller<'_>, i32, i32, i32, i32) {
+    move |ctx, level, target, msg_offset, msg_size| {
         if target == 0 || target & logging_mask != 0 {
             log_utf8_string::<WB>(&module, ctx, level, msg_offset, msg_size)
         }
@@ -34,13 +34,13 @@ pub(crate) fn log_utf8_string_closure<WB: WasmBackend>(
 
 pub(crate) fn log_utf8_string<WB: WasmBackend>(
     module: &str,
-    ctx: &mut <WB as WasmBackend>::Caller<'_>,
+    mut ctx: <WB as WasmBackend>::Caller<'_>,
     level: i32,
     msg_offset: i32,
     msg_size: i32,
 ) {
     let level = level_from_i32(level);
-    let msg = read_string::<WB>(ctx, msg_offset, msg_size);
+    let msg = read_string::<WB>(&mut ctx, msg_offset, msg_size);
 
     match msg {
         Some(msg) => log::logger().log(

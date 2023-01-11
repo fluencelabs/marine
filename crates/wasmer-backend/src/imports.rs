@@ -1,3 +1,4 @@
+use wasmer::Extern;
 use crate::WasmerBackend;
 
 use marine_wasm_backend_traits::*;
@@ -22,7 +23,7 @@ impl Imports<WasmerBackend> for WasmerImports {
         name: impl Into<String>,
         func: <WasmerBackend as WasmBackend>::Function,
     ) {
-        self.inner.define(&module, &name, func.inner);
+        self.inner.define(&module.into(), &name.into(), func.inner);
     }
 
     fn register<S, I>(&mut self, name: S, namespace: I)
@@ -30,7 +31,11 @@ impl Imports<WasmerBackend> for WasmerImports {
         S: Into<String>,
         I: IntoIterator<Item = (String, <WasmerBackend as WasmBackend>::Function)>,
     {
-        self.inner.register_namespace(name, namespace);
+        let namespace = namespace
+            .into_iter()
+            .map(|(name, func)| (name, Extern::Function(func.inner)));
+
+        self.inner.register_namespace(&name.into(),namespace);
     }
 }
 /*
