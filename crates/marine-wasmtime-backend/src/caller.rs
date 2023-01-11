@@ -1,4 +1,4 @@
-use crate::{StoreState, WasmtimeContext, WasmtimeContextMut, WasmtimeWasmBackend, WasmtimeWITMemory};
+use crate::{StoreState, WasmtimeContext, WasmtimeContextMut, WasmtimeWasmBackend, WasmtimeMemory};
 
 use marine_wasm_backend_traits::*;
 
@@ -10,12 +10,10 @@ pub struct WasmtimeCaller<'c> {
 }
 
 impl<'c> Caller<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
-    fn memory(&mut self, memory_index: u32) -> <WasmtimeWasmBackend as WasmBackend>::WITMemory {
+    fn memory(&mut self, memory_index: u32) -> WasmtimeMemory {
         let memory = self.inner.get_export("memory").unwrap(); // todo: handle error
 
-        WasmtimeWITMemory {
-            memory: memory.into_memory().unwrap(), // todo: handle error
-        }
+        WasmtimeMemory::new(memory.into_memory().unwrap()) // todo: handle error
     }
 }
 

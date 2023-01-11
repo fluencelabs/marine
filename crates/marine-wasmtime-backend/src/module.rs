@@ -1,4 +1,4 @@
-use crate::{StoreState, WasmtimeImportObject, WasmtimeInstance, WasmtimeStore, WasmtimeWasmBackend};
+use crate::{StoreState, WasmtimeImports, WasmtimeInstance, WasmtimeStore, WasmtimeWasmBackend};
 
 use marine_wasm_backend_traits::*;
 
@@ -19,7 +19,7 @@ impl Module<WasmtimeWasmBackend> for WasmtimeModule {
     fn instantiate(
         &self,
         store: &mut WasmtimeStore,
-        imports: &WasmtimeImportObject,
+        imports: &WasmtimeImports,
     ) -> WasmBackendResult<<WasmtimeWasmBackend as WasmBackend>::Instance> {
         let instance = imports
             .linker

@@ -1,4 +1,4 @@
-use crate::{StoreState, WasmtimeContextMut, WasmtimeImportObject, WasmtimeWasmBackend};
+use crate::{StoreState, WasmtimeContextMut, WasmtimeImports, WasmtimeWasmBackend};
 
 use marine_wasm_backend_traits::*;
 
@@ -7,17 +7,17 @@ use std::path::PathBuf;
 pub struct WasmtimeWasi {}
 
 impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
-    fn generate_import_object_for_version(
+    fn register_in_linker(
         store: &mut WasmtimeContextMut<'_>,
+        linker: &mut WasmtimeImports,
         version: WasiVersion,
         args: Vec<Vec<u8>>,
-        envs: Vec<Vec<u8>>,
+        envs: Vec<(Vec<u8>, Vec<u8>)>,
         preopened_files: Vec<PathBuf>,
         mapped_dirs: Vec<(String, PathBuf)>,
-    ) -> Result<<WasmtimeWasmBackend as WasmBackend>::Imports, String> {
+    ) -> Result<(), String> {
         let id = store.inner.data().wasi.len();
-        let mut linker = wasmtime::Linker::<StoreState>::new(store.inner.engine());
-        wasmtime_wasi::add_to_linker(&mut linker, move |s: &mut StoreState| &mut s.wasi[id])
+        wasmtime_wasi::add_to_linker(&mut linker.linker, move |s: &mut StoreState| &mut s.wasi[id])
             .unwrap(); // todo handle error
                        // Create a WASI context and put it in a Store; all instances in the storex
                        // share this context. `WasiCtxBuilder` provides a number of ways to
@@ -34,7 +34,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
             .build();
         let state = store.inner.data_mut();
         state.wasi.push(wasi_ctx); //todo handle duplicate
-        Ok(WasmtimeImportObject { linker })
+        Ok(())
     }
 
     fn get_wasi_state<'s>(
