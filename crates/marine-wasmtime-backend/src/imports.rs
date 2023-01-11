@@ -1,3 +1,4 @@
+use std::net::ToSocketAddrs;
 use marine_wasm_backend_traits::*;
 use crate::{StoreState, WasmtimeFunction, WasmtimeStore, WasmtimeWasmBackend};
 
@@ -15,7 +16,7 @@ impl Imports<WasmtimeWasmBackend> for WasmtimeImports {
     }
 
     fn insert(&mut self, module: impl Into<String>, name: impl Into<String>, func: <WasmtimeWasmBackend as WasmBackend>::Function) {
-        self.linker.define(&module, &name, func.inner).unwrap(); //todo handle error
+        self.linker.define(&module.into(), &name.into(), func.inner).unwrap(); //todo handle error
     }
 
     fn register<S, I>(&mut self, name: S, namespace: I)

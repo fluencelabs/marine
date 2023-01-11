@@ -2547,6 +2547,7 @@ dependencies = [
  "it-memory-traits 0.3.1",
  "marine-wasm-backend-traits",
  "multimap",
+ "paste",
  "wasmer-interface-types-fl 0.25.0",
  "wasmparser 0.96.0",
  "wasmtime",

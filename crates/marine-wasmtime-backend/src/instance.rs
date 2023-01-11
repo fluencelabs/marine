@@ -1,9 +1,7 @@
-use crate::{
-    StoreState, val_type_to_wtype, WasmtimeFunction, WasmtimeFunctionExport,
-    WasmtimeMemory, WasmtimeStore, WasmtimeWasmBackend,
-};
+use crate::{sig_to_fn_ty, StoreState, val_type_to_wtype, WasmtimeFunction, WasmtimeFunctionExport, WasmtimeMemory, WasmtimeStore, WasmtimeWasmBackend};
 
 use marine_wasm_backend_traits::*;
+use crate::utils::fn_ty_to_sig;
 
 pub struct WasmtimeInstance {
     pub(crate) inner: wasmtime::Instance,
@@ -12,17 +10,21 @@ pub struct WasmtimeInstance {
 impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
     fn export_iter<'a>(
         &'a self,
-        store: &'a mut WasmtimeStore,
+        store: &'a mut impl AsContextMut<WasmtimeWasmBackend>,
     ) -> Box<dyn Iterator<Item = (&'a String, Export<WasmtimeWasmBackend>)> + 'a>
     {
         let iter = self
             .inner
-            .exports(&mut store.inner)
+            .exports(&mut store.as_context_mut())
             .map(|export| {
                 let name = export.name();
                 let export = match export.into_extern() {
-                    wasmtime::Extern::Memory(memory) => Export::Memory(WasmtimeMemory { memory }),
-                    wasmtime::Extern::Func(func) => Export::Function(WasmtimeFunction { func, signature: () }),
+                    wasmtime::Extern::Memory(memory) => Export::Memory(WasmtimeMemory::new(memory)),
+                    wasmtime::Extern::Func(func) => {
+                        let ty = func.ty(&store.as_context());
+                        let sig = fn_ty_to_sig(&ty);
+                        Export::Function(WasmtimeFunction { inner: func, signature: sig })
+                    },
                     _ => Export::Other,
                 };
                 (name, export)
@@ -33,12 +35,12 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
 
     fn memory(
         &self,
-        store: &mut WasmtimeStore,
+        store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         memory_index: u32,
     ) -> <WasmtimeWasmBackend as WasmBackend>::Memory {
         let memory = self
             .inner
-            .exports(&mut store.inner)
+            .exports(&mut store.as_context_mut().inner)
             .filter_map(wasmtime::Export::into_memory)
             .nth(memory_index as usize)
             .unwrap(); // todo change api to handle error
@@ -48,38 +50,21 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
 
     fn memory_by_name(
         &self,
-        store: &mut WasmtimeStore,
+        store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         memory_name: &str,
     ) -> Option<<WasmtimeWasmBackend as WasmBackend>::Memory> {
-        let memory = self.inner.get_memory(&mut store.inner, memory_name);
+        let memory = self.inner.get_memory(&mut store.as_context_mut().inner, memory_name);
 
         memory.map(WasmtimeMemory::new)
     }
-/*
-    fn get_func_no_args_no_rets<'a>(
-        &'a self,
-        store: &mut WasmtimeStore,
-        name: &str,
-    ) -> ResolveResult<Box<dyn Fn(&mut WasmtimeStore) -> RuntimeResult<()> + Sync + Send + 'a>>
-    {
-        let func = match self.inner.get_func(&mut store.inner, name) {
-            None => return Err(ResolveError::Message(format!("no such function {}", name))),
-            Some(func) => func,
-        };
-
-        let typed = func.typed::<(), (), _>(&store.inner).unwrap(); // todo handle error
-        Ok(Box::new(move |store: &mut WasmtimeStore| {
-            Ok(typed.call(&mut store.inner, ()).unwrap()) //todo handle error
-        }))
-    }*/
 
     fn get_function<'a>(
         &'a self,
-        store: &mut WasmtimeStore,
+        store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         name: &str,
     ) -> ResolveResult<<WasmtimeWasmBackend as WasmBackend>::Function> {
-        let func = self.inner.get_func(&mut store.inner, name).unwrap(); // todo handle None
-        let ty = func.ty(&store.inner);
+        let func = self.inner.get_func(&mut store.as_context_mut().inner, name).unwrap(); // todo handle None
+        let ty = func.ty(&store.as_context().inner);
         let params = ty
             .params()
             .map(|ty| {
@@ -95,7 +80,7 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
 
         let sig = FuncSig::new(params, rets);
         Ok(WasmtimeFunction {
-            func,
+            inner: func,
             signature: sig,
         })
     }

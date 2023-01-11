@@ -49,3 +49,17 @@ pub(crate) fn sig_to_fn_ty(sig: &FuncSig) -> wasmtime::FuncType {
 
     wasmtime::FuncType::new(params, rets)
 }
+
+pub(crate) fn fn_ty_to_sig(ty: &wasmtime::FuncType) -> FuncSig {
+    let params = ty
+        .params()
+        .map(|ty| val_type_to_wtype(&ty).unwrap()) // todo handle error
+        .collect::<Vec<_>>();
+
+    let rets = ty
+        .results()
+        .map(|ty| val_type_to_wtype(&ty).unwrap()) // todo handle error
+        .collect::<Vec<_>>();
+
+    FuncSig::new(params, rets)
+}
