@@ -69,6 +69,33 @@ jobs:
 
     uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
     with:
+      image-name: "docker.fluence.dev/marine"
+      cargo-dependencies: |
+        [
+          {
+            "package": "fluence-app-service",
+            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "avm-server",
+            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "air-interpreter-wasm",
+            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "registry": "fluence"
+          }
+        ]
+
+  rust-peer-tests:
+    needs:
+      - marine
+      - aquavm
+
+    uses: fluencelabs/rust-peer/.github/workflows/tests.yml@master
+    with:
       cargo-dependencies: |
         [
           {
