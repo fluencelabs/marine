@@ -4,7 +4,7 @@ use marine_wasm_backend_traits::{FuncSig, WType, WValue};
 pub(crate) fn val_type_to_wtype(ty: &wasmtime::ValType) -> Option<WType> {
     match ty {
         ValType::I32 => Some(WType::I32),
-        ValType::I64 => Some(WType::I32),
+        ValType::I64 => Some(WType::I64),
         ValType::F32 => Some(WType::F32),
         ValType::F64 => Some(WType::F64),
         ValType::V128 => None,

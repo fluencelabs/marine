@@ -19,7 +19,7 @@ use super::marine_module::MModule;
 use super::IRecordType;
 use crate::MResult;
 
-use marine_wasm_backend_traits::{DelayedContextLifetime, WasmBackend};
+use marine_wasm_backend_traits::{AsContextMut, DelayedContextLifetime, WasmBackend};
 use marine_wasm_backend_traits::Instance;
 
 use marine_it_interfaces::MITInterfaces;
@@ -138,8 +138,9 @@ impl<WB: WasmBackend> ITInstance<WB> {
     ) -> Vec<<WB as WasmBackend>::Memory> {
         use marine_wasm_backend_traits::Export::Memory;
 
+        //let mut ctx = ;
         let mut memories = wasmer_instance
-            .export_iter(store)
+            .export_iter(store.as_context_mut())
             .filter_map(|(_, export)| match export {
                 Memory(memory) => Some(memory),
                 _ => None,

@@ -1,36 +1,35 @@
-use crate::{sig_to_fn_ty, StoreState, val_type_to_wtype, WasmtimeFunction, WasmtimeFunctionExport, WasmtimeMemory, WasmtimeStore, WasmtimeWasmBackend};
+use wasmtime::AsContextMut as WasmtimeAsContextMut;
+use crate::{sig_to_fn_ty, StoreState, val_type_to_wtype, WasmtimeContextMut, WasmtimeFunction, WasmtimeFunctionExport, WasmtimeMemory, WasmtimeStore, WasmtimeWasmBackend};
 
 use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::WasmBackendError;
 use crate::utils::fn_ty_to_sig;
 
 pub struct WasmtimeInstance {
     pub(crate) inner: wasmtime::Instance,
+    //pub(crate) exports: Vec<String, Export<WasmtimeWasmBackend>>
 }
 
 impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
     fn export_iter<'a>(
         &'a self,
-        store: &'a mut impl AsContextMut<WasmtimeWasmBackend>,
-    ) -> Box<dyn Iterator<Item = (&'a String, Export<WasmtimeWasmBackend>)> + 'a>
+        store: WasmtimeContextMut<'a>,
+    ) -> Box<dyn Iterator<Item = (&'a str, Export<WasmtimeWasmBackend>)> + 'a>
     {
-        let iter = self
+        let exports = self
             .inner
-            .exports(&mut store.as_context_mut())
+            .exports(store.inner)
             .map(|export| {
                 let name = export.name();
                 let export = match export.into_extern() {
                     wasmtime::Extern::Memory(memory) => Export::Memory(WasmtimeMemory::new(memory)),
-                    wasmtime::Extern::Func(func) => {
-                        let ty = func.ty(&store.as_context());
-                        let sig = fn_ty_to_sig(&ty);
-                        Export::Function(WasmtimeFunction { inner: func, signature: sig })
+                    wasmtime::Extern::Func(func) => { Export::Function(WasmtimeFunction { inner: func })
                     },
                     _ => Export::Other,
                 };
                 (name, export)
             });
-
-        Box::new(iter)
+        Box::new(exports)
     }
 
     fn memory(
@@ -63,7 +62,11 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
         store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         name: &str,
     ) -> ResolveResult<<WasmtimeWasmBackend as WasmBackend>::Function> {
-        let func = self.inner.get_func(&mut store.as_context_mut().inner, name).unwrap(); // todo handle None
+        let func = self
+            .inner
+            .get_func(&mut store.as_context_mut().inner, name)
+            .ok_or(ResolveError::Message(format!("cannot find {}", name)))?;
+
         let ty = func.ty(&store.as_context().inner);
         let params = ty
             .params()
@@ -81,7 +84,7 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
         let sig = FuncSig::new(params, rets);
         Ok(WasmtimeFunction {
             inner: func,
-            signature: sig,
+            //signature: sig,
         })
     }
 }

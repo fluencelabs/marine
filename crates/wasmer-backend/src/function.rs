@@ -54,8 +54,8 @@ impl Function<WasmerBackend> for WasmerFunction {
         func.into_func(store)
     }
 
-    fn signature<'c>(&self, _ctx: &mut impl AsContextMut<WasmerBackend>) -> &FuncSig {
-        &self.sig
+    fn signature<'c>(&self, _ctx: &mut impl AsContextMut<WasmerBackend>) -> FuncSig {
+        self.sig.clone()
     }
 
     fn call<'c>(
@@ -72,7 +72,7 @@ impl Function<WasmerBackend> for WasmerFunction {
 }
 
 impl WasmerFunction {
-    pub(crate) fn from_func(ctx: &mut impl AsContextMut<WasmerBackend>, func: wasmer::Function) -> Self {
+    pub(crate) fn from_func(mut ctx: impl AsContextMut<WasmerBackend>, func: wasmer::Function) -> Self {
         let ty = func.ty(&mut ctx.as_context_mut().inner);
         let sig = function_type_to_func_sig(&ty);
         WasmerFunction {

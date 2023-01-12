@@ -67,6 +67,24 @@ impl<'c> AsContextMut<WasmerBackend> for WasmerContextMut<'c> {
     }
 }
 
+
+impl<'c> AsContext<WasmerBackend> for &mut WasmerContextMut<'c> {
+    fn as_context(&self) -> <WasmerBackend as WasmBackend>::Context<'_> {
+        WasmerContext {
+            inner: self.inner.as_store_ref(),
+        }
+    }
+}
+
+impl<'c> AsContextMut<WasmerBackend> for &mut WasmerContextMut<'c> {
+    fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
+        WasmerContextMut {
+            inner: self.inner.as_store_mut(),
+        }
+    }
+}
+
+
 impl AsStoreRef for WasmerStore {
     fn as_store_ref(&self) -> StoreRef<'_> {
         self.inner.as_store_ref()

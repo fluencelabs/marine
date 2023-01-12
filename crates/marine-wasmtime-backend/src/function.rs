@@ -5,25 +5,55 @@ use crate::utils::fn_ty_to_sig;
 
 pub struct WasmtimeFunction {
     pub(crate) inner: wasmtime::Func,
-    pub(crate) signature: FuncSig,
+    //pub(crate) signature: FuncSig,
 }
 
 impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
     fn new<F>(store: &mut impl AsContextMut<WasmtimeWasmBackend>, sig: FuncSig, func: F) -> Self where F: for<'c> Fn(&[WValue]) -> Vec<WValue> + Sync + Send + 'static {
         let ty = sig_to_fn_ty(&sig);
+        let func = move |_: wasmtime::Caller<'_, StoreState>, args: &[wasmtime::Val], results: &mut [wasmtime::Val]| {
+            let args = args
+                .iter()
+                .map(val_to_wvalue)
+                .collect::<Result<Vec<_>, ()>>()
+                .unwrap(); // todo handle error
+            let rets = func(&args);
+            for i in 0..results.len() {
+                results[i] = wvalue_to_val(&rets[i]);
+            }
+
+            Ok(())
+        };
+
         let func = wasmtime::Func::new(store.as_context_mut().inner, ty, func);
         WasmtimeFunction {
             inner: func,
-            signature: sig
+            //signature: sig
         }
     }
 
     fn new_with_ctx<F>(store: &mut impl AsContextMut<WasmtimeWasmBackend>, sig: FuncSig, func: F) -> Self where F: for<'c> Fn(<WasmtimeWasmBackend as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue> + Sync + Send + 'static {
         let ty = sig_to_fn_ty(&sig);
+
+        let func = move |caller: wasmtime::Caller<'_, StoreState>, args: &[wasmtime::Val], results: &mut [wasmtime::Val]| {
+            let caller = WasmtimeCaller { inner: caller};
+            let args = args
+                .iter()
+                .map(val_to_wvalue)
+                .collect::<Result<Vec<_>, ()>>()
+                .unwrap(); // todo handle error
+            let rets = func(caller, &args);
+            for i in 0..results.len() {
+                results[i] = wvalue_to_val(&rets[i]);
+            }
+
+            Ok(())
+        };
+
         let func = wasmtime::Func::new(store.as_context_mut().inner, ty, func);
         WasmtimeFunction {
             inner: func,
-            signature: sig
+            //signature: sig
         }
     }
 
@@ -31,8 +61,9 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
         func.into_func(store)
     }
 
-    fn signature<'c>(&self, store: &mut impl AsContextMut<WasmtimeWasmBackend>) -> &FuncSig {
-        &self.signature
+    fn signature<'c>(&self, store: &mut impl AsContextMut<WasmtimeWasmBackend>) -> FuncSig {
+        let ty = self.inner.ty(store.as_context_mut());
+        fn_ty_to_sig(&ty)
     }
 
     fn call<'c>(&self, store: &mut impl AsContextMut<WasmtimeWasmBackend>, args: &[WValue]) -> CallResult<Vec<WValue>> {
@@ -40,7 +71,7 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
 
         let mut rets = Vec::new();
         rets.resize(
-            self.signature.returns().collect::<Vec<_>>().len(),
+            self.inner.ty(store.as_context_mut()).results().len(),
             wasmtime::Val::null(),
         ); // todo make O(1), not O(n)
         self.inner.call(store.as_context_mut().inner, &args, &mut rets).unwrap(); // todo handle error
@@ -65,13 +96,13 @@ macro_rules! impl_func_construction {
             };
 
             let func = wasmtime::Func::wrap(&mut ctx.inner, func);
-            use WType::I32;
+            /*use WType::I32;
             let params = vec![$(replace_with!($args -> I32),)*];
             let rets = vec![I32,];
             let sig = FuncSig::new(params, rets);
-
+            */
             WasmtimeFunction {
-                signature: sig,
+                //signature: sig,
                 inner: func
             }
         }
@@ -85,13 +116,13 @@ macro_rules! impl_func_construction {
             };
 
             let func = wasmtime::Func::wrap(&mut ctx.inner, func);
-            use WType::I32;
+           /* use WType::I32;
             let params = vec![$(replace_with!($args -> I32),)*];
             let rets = vec![I32,];
             let sig = FuncSig::new(params, rets);
-
+            */
             WasmtimeFunction {
-                signature: sig,
+               // signature: sig,
                 inner: func
             }
         }
@@ -113,7 +144,7 @@ impl FuncConstructor<WasmtimeWasmBackend> for WasmtimeFunction {
         let sig = FuncSig::new(params, rets);
 
         WasmtimeFunction {
-            signature: sig,
+            //signature: sig,
             inner: func
         }
     }

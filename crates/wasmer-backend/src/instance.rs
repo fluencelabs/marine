@@ -1,8 +1,5 @@
 use wasmer::{AsStoreMut, Extern};
-use crate::{
-    func_sig_to_function_type, function_type_to_func_sig, wasmer_ty_to_generic_ty, WasmerBackend,
-    WasmerFunction, WasmerMemory, WasmerStore,
-};
+use crate::{func_sig_to_function_type, function_type_to_func_sig, wasmer_ty_to_generic_ty, WasmerBackend, WasmerContextMut, WasmerFunction, WasmerMemory, WasmerStore};
 
 use marine_wasm_backend_traits::*;
 
@@ -13,21 +10,21 @@ pub struct WasmerInstance {
 impl Instance<WasmerBackend> for WasmerInstance {
     fn export_iter<'a>(
         &'a self,
-        store: &'a mut impl AsContextMut<WasmerBackend>,
-    ) -> Box<dyn Iterator<Item = (&'a String, Export<WasmerBackend>)> + 'a> {
+        mut store: WasmerContextMut<'a>,
+    ) -> Box<dyn Iterator<Item = (&'a str, Export<WasmerBackend>)> + 'a> {
         let iter = self
             .inner
             .exports
             .iter()
-            .map(|(name, export): (&String, &wasmer::Extern)| {
+            .map(move |(name, export): (&String, &wasmer::Extern)| {
                 let export = match export {
                     wasmer::Extern::Function(function) => Export::Function(
-                        WasmerFunction::from_func(store, function.clone())),
+                        WasmerFunction::from_func(&mut store, function.clone())),
                     wasmer::Extern::Memory(memory) => Export::Memory(memory.clone().into()),
                     _ => Export::Other,
                 };
 
-                (name, export)
+                (name.as_str(), export)
             });
         Box::new(iter)
     }

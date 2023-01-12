@@ -14,7 +14,7 @@ pub trait Function<WB: WasmBackend>: Send + Sync {
 
     fn new_typed<Params, Results, Env>(store: &mut impl AsContextMut<WB>, func: impl IntoFunc<WB, Params, Results, Env>) -> Self;
 
-    fn signature<'c>(&self, store: &mut impl AsContextMut<WB>) -> &FuncSig;
+    fn signature<'c>(&self, store: &mut impl AsContextMut<WB>) -> FuncSig;
 
     fn call<'c>(
         &self,
