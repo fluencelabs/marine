@@ -143,8 +143,10 @@ impl<WB: WasmBackend> Marine<WB> {
         args: &[IValue],
         call_parameters: marine_rs_sdk::CallParameters,
     ) -> MarineResult<Vec<IValue>> {
-        let mut cp = self.call_parameters.lock().unwrap(); // TODO MAKE SURE ITS OK
-        *cp = call_parameters;
+        {
+            let mut cp = self.call_parameters.lock().unwrap(); // TODO MAKE SURE ITS OK
+            *cp = call_parameters;
+        }
 
         self.core
             .call(module_name, func_name, args)

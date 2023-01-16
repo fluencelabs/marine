@@ -2088,6 +2088,7 @@ dependencies = [
  "marine-utils 0.4.0",
  "marine-wasm-backend-traits",
  "marine-wasmer-backend",
+ "marine-wasmtime-backend",
  "multimap",
  "once_cell",
  "parity-wasm 0.45.0",

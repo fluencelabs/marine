@@ -17,6 +17,12 @@
 use marine_core::MarineCore;
 use marine_core::IValue;
 
+#[cfg(feature = "wasmer")]
+type MarineCoreImpl = MarineCore<marine_wasmer_backend::WasmerBackend>;
+
+#[cfg(feature = "wasmtime")]
+type MarineCoreImpl = MarineCore<marine_wasmtime_backend::WasmtimeWasmBackend>;
+
 use once_cell::sync::Lazy;
 
 static GREETING_WASM_BYTES: Lazy<Vec<u8>> = Lazy::new(|| {
@@ -24,11 +30,10 @@ static GREETING_WASM_BYTES: Lazy<Vec<u8>> = Lazy::new(|| {
         .expect("../examples/greeting/artifacts/greeting.wasm should presence")
 });
 
-use marine_wasmer_backend::WasmerBackend;
 
 #[test]
 pub fn greeting_basic() {
-    let mut marine_core = MarineCore::<WasmerBackend>::new();
+    let mut marine_core = MarineCoreImpl::new();
     marine_core
         .load_module("greeting", &*GREETING_WASM_BYTES, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
@@ -52,7 +57,7 @@ pub fn greeting_basic() {
 #[test]
 // test loading module with the same name twice
 pub fn non_unique_module_name() {
-    let mut marine_core = MarineCore::<WasmerBackend>::new();
+    let mut marine_core = MarineCoreImpl::new();
     let module_name = String::from("greeting");
     marine_core
         .load_module(&module_name, &*GREETING_WASM_BYTES, <_>::default())
@@ -70,7 +75,7 @@ pub fn non_unique_module_name() {
 #[allow(unused_variables)]
 // test calling Marine with non-exist module and function names
 pub fn non_exist_module_func() {
-    let mut marine_core = MarineCore::<WasmerBackend>::new();
+    let mut marine_core = MarineCoreImpl::new();
     marine_core
         .load_module("greeting", &*GREETING_WASM_BYTES, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));

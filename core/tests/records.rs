@@ -17,7 +17,11 @@
 use marine_core::MarineCore;
 use marine_core::IValue;
 
-use marine_wasmer_backend::WasmerBackend;
+#[cfg(feature = "wasmer")]
+type MarineCoreImpl = MarineCore<marine_wasmer_backend::WasmerBackend>;
+
+#[cfg(feature = "wasmtime")]
+type MarineCoreImpl = MarineCore<marine_wasmtime_backend::WasmtimeWasmBackend>;
 
 #[test]
 pub fn records() {
@@ -27,7 +31,7 @@ pub fn records() {
     let pure_wasm_bytes = std::fs::read("../examples/records/artifacts/records_pure.wasm")
         .expect("../examples/records/artifacts/records_pure.wasm should presence");
 
-    let mut marine_core = MarineCore::<WasmerBackend>::new();
+    let mut marine_core = MarineCoreImpl::new();
     let load_result = marine_core.load_module("pure", &pure_wasm_bytes, <_>::default());
     assert!(load_result.is_err());
 
