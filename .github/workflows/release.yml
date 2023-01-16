@@ -15,6 +15,12 @@ jobs:
     outputs:
       releases-created: ${{ steps.release.outputs.releases_created }}
 
+      marine-release-created: ${{ steps.release.outputs['tools/cli--release_created'] }}
+      marine-tag-name: ${{ steps.release.outputs['tools/cli--tag_name'] }}
+
+      mrepl-release-created: ${{ steps.release.outputs['tools/repl--release_created'] }}
+      mrepl-tag-name: ${{ steps.release.outputs['tools/repl--tag_name'] }}
+
       marine-js-release-created: ${{ steps.release.outputs['marine-js--release_created'] }}
       marine-js-tag-name: ${{ steps.release.outputs['marine-js--tag_name'] }}
 
@@ -77,6 +83,22 @@ jobs:
             --from-git \
             --skip-published \
             --yes
+
+      - name: Upload marine binary
+        if: needs.release-please.outputs.marine-release-created
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./target/release/marine
+          tag_name: ${{ needs.release-please.outputs.marine-tag-name }}
+
+      - name: Upload mrepl binary
+        if: needs.release-please.outputs.mrepl-release-created
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./target/release/mrepl
+          tag_name: ${{ needs.release-please.outputs.mrepl-tag-name }}
 
   marine-js:
     if: needs.release-please.outputs.marine-js-release-created
