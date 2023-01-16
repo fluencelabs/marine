@@ -5,7 +5,7 @@ version = "0.12.4"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine/tools/cli"
 license = "Apache-2.0"
-edition = { workspace = true }
+edition = "2021"
 
 [[bin]]
 name = "marine"

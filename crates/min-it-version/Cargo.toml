@@ -4,7 +4,7 @@ version = "0.2.0"
 description = "Fluence Marine interface types minimum supported version checker"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
-edition = { workspace = true }
+edition = "2021"
 
 [lib]
 name = "marine_min_it_version"

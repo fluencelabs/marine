@@ -2,7 +2,7 @@
 name = "call_parameters"
 version = "0.1.0"
 authors = ["Fluence Labs"]
-edition = { workspace = true }
+edition = "2021"
 publish = false
 
 [[bin]]

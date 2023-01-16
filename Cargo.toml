@@ -45,9 +45,6 @@ members = [
     "tools/repl",
 ]
 
-[workspace.package]
-edition = "2021"
-
 [workspace.dependencies]
 #wasmer-it = { git = "https://github.com/fluencelabs/interface-types", branch = "feat/add-store", package = "wasmer-interface-types-fl", version = "0.25.0" }
 #it-memory-traits = {  git = "https://github.com/fluencelabs/interface-types", branch = "feat/add-store", package = "it-memory-traits", version = "0.3.1" }
