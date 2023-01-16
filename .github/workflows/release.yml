@@ -1,0 +1,129 @@
+name: "release-please"
+
+on:
+  push:
+    branches:
+      - "master"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    outputs:
+      releases-created: ${{ steps.release.outputs.releases_created }}
+
+      marine-js-release-created: ${{ steps.release.outputs['marine-js--release_created'] }}
+      marine-js-tag-name: ${{ steps.release.outputs['marine-js--tag_name'] }}
+
+    steps:
+      - name: Run release-please
+        id: release
+        uses: google-github-actions/release-please-action@v3
+        with:
+          token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
+          command: manifest
+          config-file: .github/release-please/config.json
+          manifest-file: .github/release-please/manifest.json
+
+      - name: Show output from release-please
+        if: steps.release.outputs.releases_created
+        env:
+          RELEASE_PLEASE_OUTPUT: ${{ toJSON(steps.release.outputs) }}
+        run: echo "${RELEASE_PLEASE_OUTPUT}" | jq
+
+  crates:
+    if: needs.release-please.outputs.releases-created
+    runs-on: builder
+    needs:
+      - release-please
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/crates.io/fluencebot token | CARGO_REGISTRY_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install cargo-workspaces
+        uses: baptiste0928/cargo-install@v1.3.0
+        with:
+          crate: cargo-workspaces
+
+      - name: Publish to crates.io
+        run: |
+          cargo ws publish \
+            --no-git-commit \
+            --allow-dirty \
+            --from-git \
+            --skip-published \
+            --yes
+
+  marine-js:
+    if: needs.release-please.outputs.marine-js-release-created
+    runs-on: builder
+    needs:
+      - release-please
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Build marine-js package for node
+        working-directory: marine-js
+        run: wasm-pack build --release -m force
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/npmjs/fluencebot token | NODE_AUTH_TOKEN
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+
+      - name: Publish to npm registry
+        run: npm publish --access public
+        working-directory: marine-js/npm-package
