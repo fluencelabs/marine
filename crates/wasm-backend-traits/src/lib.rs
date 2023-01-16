@@ -35,12 +35,11 @@ pub trait WasmBackend: Clone + Default + 'static {
     type ContextMut<'c>: ContextMut<Self>;
     type Caller<'c>: Caller<Self>;
 
-    // imports/exports -- subject to improvement
-    type Imports: Imports<Self>; // to be replaced with somethink like Linker or Resolver
+    type Imports: Imports<Self>; // maybe rename to Linker?
 
     type Function: Function<Self> + FuncConstructor<Self>;
     type Memory: Memory<Self>;
-    type MemoryView: MemoryView<DelayedContextLifetime<Self>> + 'static;
+    type MemoryView: MemoryView<DelayedContextLifetime<Self>>;
 
     // wasi
     type Wasi: WasiImplementation<Self>;
