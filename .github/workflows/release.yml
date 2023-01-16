@@ -12,10 +12,6 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-      pull-requests: write
-
     outputs:
       releases-created: ${{ steps.release.outputs.releases_created }}
 
