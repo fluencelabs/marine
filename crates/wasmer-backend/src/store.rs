@@ -67,7 +67,6 @@ impl<'c> AsContextMut<WasmerBackend> for WasmerContextMut<'c> {
     }
 }
 
-
 impl<'c> AsContext<WasmerBackend> for &mut WasmerContextMut<'c> {
     fn as_context(&self) -> <WasmerBackend as WasmBackend>::Context<'_> {
         WasmerContext {
@@ -83,7 +82,6 @@ impl<'c> AsContextMut<WasmerBackend> for &mut WasmerContextMut<'c> {
         }
     }
 }
-
 
 impl AsStoreRef for WasmerStore {
     fn as_store_ref(&self) -> StoreRef<'_> {

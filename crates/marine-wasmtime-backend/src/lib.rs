@@ -178,7 +178,6 @@ impl_func_getter!(i32, ());
 impl_func_getter!((), i32);
 impl_func_getter!((), ());
 
-
 // tests
 #[cfg(test)]
 mod tests {

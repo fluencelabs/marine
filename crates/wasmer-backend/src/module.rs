@@ -21,10 +21,6 @@ impl Module<WasmerBackend> for WasmerModule {
     ) -> WasmBackendResult<<WasmerBackend as WasmBackend>::Instance> {
         wasmer::Instance::new(&mut store.inner, &self.inner, &imports.inner)
             .map_err(|e| WasmBackendError::InstantiationError(format!("{}", e)))
-            .map(|instance| {
-                WasmerInstance {
-                    inner: instance,
-                }
-            })
+            .map(|instance| WasmerInstance { inner: instance })
     }
 }

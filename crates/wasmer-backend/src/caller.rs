@@ -15,7 +15,7 @@ impl Caller<WasmerBackend> for WasmerCaller<'_> {
 impl AsContext<WasmerBackend> for WasmerCaller<'_> {
     fn as_context(&self) -> <WasmerBackend as WasmBackend>::Context<'_> {
         WasmerContext {
-            inner: self.inner.as_store_ref()
+            inner: self.inner.as_store_ref(),
         }
     }
 }
@@ -23,7 +23,7 @@ impl AsContext<WasmerBackend> for WasmerCaller<'_> {
 impl AsContextMut<WasmerBackend> for WasmerCaller<'_> {
     fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
         WasmerContextMut {
-            inner: self.inner.as_store_mut()
+            inner: self.inner.as_store_mut(),
         }
     }
 }

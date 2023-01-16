@@ -14,7 +14,7 @@ impl WasmtimeMemory {
 }
 
 impl it_memory_traits::Memory<WasmtimeMemory, DelayedContextLifetime<WasmtimeWasmBackend>>
-for WasmtimeMemory
+    for WasmtimeMemory
 {
     fn view(&self) -> WasmtimeMemory {
         self.clone()
@@ -22,14 +22,13 @@ for WasmtimeMemory
 }
 
 impl Memory<WasmtimeWasmBackend> for WasmtimeMemory {
-
     fn size(&self, store: &mut WasmtimeContextMut<'_>) -> usize {
         self.memory.data_size(store) as usize
     }
 }
 
 impl it_memory_traits::MemoryReadable<DelayedContextLifetime<WasmtimeWasmBackend>>
-for WasmtimeMemory
+    for WasmtimeMemory
 {
     fn read_byte(&self, store: &mut WasmtimeContextMut<'_>, offset: u32) -> u8 {
         let mut value = [0u8];
@@ -61,7 +60,7 @@ for WasmtimeMemory
 }
 
 impl it_memory_traits::MemoryWritable<DelayedContextLifetime<WasmtimeWasmBackend>>
-for WasmtimeMemory
+    for WasmtimeMemory
 {
     fn write_byte(&self, store: &mut WasmtimeContextMut<'_>, offset: u32, value: u8) {
         let buffer = [value];
@@ -77,9 +76,7 @@ for WasmtimeMemory
     }
 }
 
-impl it_memory_traits::MemoryView<DelayedContextLifetime<WasmtimeWasmBackend>>
-for WasmtimeMemory
-{
+impl it_memory_traits::MemoryView<DelayedContextLifetime<WasmtimeWasmBackend>> for WasmtimeMemory {
     fn check_bounds(
         &self,
         store: &mut WasmtimeContextMut<'_>,
@@ -98,4 +95,3 @@ for WasmtimeMemory
         }
     }
 }
-

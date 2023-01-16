@@ -30,7 +30,6 @@ static GREETING_WASM_BYTES: Lazy<Vec<u8>> = Lazy::new(|| {
         .expect("../examples/greeting/artifacts/greeting.wasm should presence")
 });
 
-
 #[test]
 pub fn greeting_basic() {
     let mut marine_core = MarineCoreImpl::new();

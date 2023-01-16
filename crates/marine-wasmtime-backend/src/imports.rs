@@ -15,14 +15,21 @@ impl Imports<WasmtimeWasmBackend> for WasmtimeImports {
         }
     }
 
-    fn insert(&mut self, module: impl Into<String>, name: impl Into<String>, func: <WasmtimeWasmBackend as WasmBackend>::Function) {
-        self.linker.define(&module.into(), &name.into(), func.inner).unwrap(); //todo handle error
+    fn insert(
+        &mut self,
+        module: impl Into<String>,
+        name: impl Into<String>,
+        func: <WasmtimeWasmBackend as WasmBackend>::Function,
+    ) {
+        self.linker
+            .define(&module.into(), &name.into(), func.inner)
+            .unwrap(); //todo handle error
     }
 
     fn register<S, I>(&mut self, name: S, namespace: I)
-        where
-            S: Into<String>,
-            I: IntoIterator<Item = (String, WasmtimeFunction)>
+    where
+        S: Into<String>,
+        I: IntoIterator<Item = (String, WasmtimeFunction)>,
     {
         let module: String = name.into();
         for (name, func) in namespace {

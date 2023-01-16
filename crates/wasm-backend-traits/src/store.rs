@@ -16,8 +16,6 @@ pub trait AsContextMut<WB: WasmBackend>: AsContext<WB> {
     fn as_context_mut(&mut self) -> <WB as WasmBackend>::ContextMut<'_>;
 }
 
-
-
 /*
 impl<T: AsContext<WB>, WB: WasmBackend> AsContext<WB> for &T {
     fn as_context(&self) -> <WB as WasmBackend>::Context<'_> {

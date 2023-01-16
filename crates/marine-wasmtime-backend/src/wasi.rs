@@ -17,11 +17,13 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         mapped_dirs: Vec<(String, PathBuf)>,
     ) -> Result<(), String> {
         let id = store.inner.data().wasi.len();
-        wasmtime_wasi::add_to_linker(&mut linker.linker, move |s: &mut StoreState| &mut s.wasi[id])
-            .unwrap(); // todo handle error
-                       // Create a WASI context and put it in a Store; all instances in the storex
-                       // share this context. `WasiCtxBuilder` provides a number of ways to
-                       // configure what the target program will have access to.
+        wasmtime_wasi::add_to_linker(&mut linker.linker, move |s: &mut StoreState| {
+            &mut s.wasi[id]
+        })
+        .unwrap(); // todo handle error
+                   // Create a WASI context and put it in a Store; all instances in the storex
+                   // share this context. `WasiCtxBuilder` provides a number of ways to
+                   // configure what the target program will have access to.
         let args = args
             .into_iter()
             .map(|arg| unsafe { String::from_utf8_unchecked(arg) })
@@ -29,8 +31,12 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         let envs = envs
             .into_iter()
             .map(|(key, value)| {
-                unsafe { // todo maybe use strings in signature?
-                    (String::from_utf8_unchecked(key), String::from_utf8_unchecked(value))
+                unsafe {
+                    // todo maybe use strings in signature?
+                    (
+                        String::from_utf8_unchecked(key),
+                        String::from_utf8_unchecked(value),
+                    )
                 }
             })
             .collect::<Vec<_>>();
@@ -44,17 +50,18 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
             .iter()
             .fold(wasi_ctx_builder, |builder, path| {
                 let file = std::fs::File::open(&path).unwrap(); // todo handle error
-                let dir  = wasmtime_wasi::Dir::from_std_file(file);
+                let dir = wasmtime_wasi::Dir::from_std_file(file);
                 builder.preopened_dir(dir, &path).unwrap() // todo handle errpr
             });
-        let wasi_ctx_builder = mapped_dirs
-            .iter()
-            .fold(wasi_ctx_builder, |builder, (guest_name, dir)| {
-                let file = std::fs::File::open(&dir).unwrap(); // todo handle error
-                let dir  = wasmtime_wasi::Dir::from_std_file(file);
-                let path = Path::new(&guest_name);
-                builder.preopened_dir(dir, path).unwrap() // todo handle error
-            });
+        let wasi_ctx_builder =
+            mapped_dirs
+                .iter()
+                .fold(wasi_ctx_builder, |builder, (guest_name, dir)| {
+                    let file = std::fs::File::open(&dir).unwrap(); // todo handle error
+                    let dir = wasmtime_wasi::Dir::from_std_file(file);
+                    let path = Path::new(&guest_name);
+                    builder.preopened_dir(dir, path).unwrap() // todo handle error
+                });
         let wasi_ctx = wasi_ctx_builder.build();
         let state = store.inner.data_mut();
         state.wasi.push(wasi_ctx); //todo handle duplicate
@@ -64,6 +71,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
     fn get_wasi_state<'s>(
         instance: &'s mut <WasmtimeWasmBackend as WasmBackend>::Instance,
     ) -> Box<dyn WasiState + 's> {
+        // todo give actual state
         Box::new(WasmtimeWasiState {})
     }
 }

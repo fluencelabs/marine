@@ -1,5 +1,8 @@
 use wasmer::{AsStoreMut, AsStoreRef, FunctionEnv, FunctionEnvMut};
-use crate::{WasmerBackend, WasmerContextMut, generic_val_to_wasmer_val, wasmer_val_to_generic_val, generic_ty_to_wasmer_ty, function_type_to_func_sig, func_sig_to_function_type, WasmerCaller};
+use crate::{
+    WasmerBackend, WasmerContextMut, generic_val_to_wasmer_val, wasmer_val_to_generic_val,
+    generic_ty_to_wasmer_ty, function_type_to_func_sig, func_sig_to_function_type, WasmerCaller,
+};
 
 use marine_wasm_backend_traits::*;
 
@@ -50,7 +53,10 @@ impl Function<WasmerBackend> for WasmerFunction {
         Self { sig, inner: func }
     }
 
-    fn new_typed<Params, Results, Env>(store: &mut impl AsContextMut<WasmerBackend>, func: impl IntoFunc<WasmerBackend, Params, Results, Env>) -> Self {
+    fn new_typed<Params, Results, Env>(
+        store: &mut impl AsContextMut<WasmerBackend>,
+        func: impl IntoFunc<WasmerBackend, Params, Results, Env>,
+    ) -> Self {
         func.into_func(store)
     }
 
@@ -72,13 +78,13 @@ impl Function<WasmerBackend> for WasmerFunction {
 }
 
 impl WasmerFunction {
-    pub(crate) fn from_func(mut ctx: impl AsContextMut<WasmerBackend>, func: wasmer::Function) -> Self {
+    pub(crate) fn from_func(
+        mut ctx: impl AsContextMut<WasmerBackend>,
+        func: wasmer::Function,
+    ) -> Self {
         let ty = func.ty(&mut ctx.as_context_mut().inner);
         let sig = function_type_to_func_sig(&ty);
-        WasmerFunction {
-            sig,
-            inner: func,
-        }
+        WasmerFunction { sig, inner: func }
     }
 }
 macro_rules! impl_func_construction {
@@ -126,26 +132,25 @@ macro_rules! impl_func_construction {
 }
 
 impl FuncConstructor<WasmerBackend> for WasmerFunction {
-        fn new_typed_with_env_0_test<F>(mut ctx: WasmerContextMut<'_>, func: F) -> WasmerFunction
-            where F: Fn(WasmerCaller<'_>) -> () + Send + Sync + 'static {
-            let func = move |env: FunctionEnvMut<()>| {
-                let caller = WasmerCaller {inner: env};
-                func(caller)
-            };
-            let f2 = |env2: FunctionEnvMut<()>| {};
+    fn new_typed_with_env_0_test<F>(mut ctx: WasmerContextMut<'_>, func: F) -> WasmerFunction
+    where
+        F: Fn(WasmerCaller<'_>) -> () + Send + Sync + 'static,
+    {
+        let func = move |env: FunctionEnvMut<()>| {
+            let caller = WasmerCaller { inner: env };
+            func(caller)
+        };
+        let f2 = |env2: FunctionEnvMut<()>| {};
 
-            let env = wasmer::FunctionEnv::new(&mut ctx.inner, ());
-            let func = wasmer::Function::new_typed_with_env(&mut ctx.inner, &env, f2);
-            use WType::I32;
-            let params = vec![];
-            let rets = vec![];
-            let sig = FuncSig::new(params, rets);
+        let env = wasmer::FunctionEnv::new(&mut ctx.inner, ());
+        let func = wasmer::Function::new_typed_with_env(&mut ctx.inner, &env, f2);
+        use WType::I32;
+        let params = vec![];
+        let rets = vec![];
+        let sig = FuncSig::new(params, rets);
 
-            WasmerFunction {
-                sig,
-                inner: func
-            }
-        }
+        WasmerFunction { sig, inner: func }
+    }
 
     impl_for_each_function_signature!(impl_func_construction);
 }

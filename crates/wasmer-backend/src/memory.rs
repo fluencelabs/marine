@@ -12,9 +12,7 @@ pub struct WasmerMemory {
 
 impl From<wasmer::Memory> for WasmerMemory {
     fn from(memory: wasmer::Memory) -> Self {
-        WasmerMemory {
-            inner: memory
-        }
+        WasmerMemory { inner: memory }
     }
 }
 

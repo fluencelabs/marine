@@ -35,7 +35,7 @@ impl Imports<WasmerBackend> for WasmerImports {
             .into_iter()
             .map(|(name, func)| (name, Extern::Function(func.inner)));
 
-        self.inner.register_namespace(&name.into(),namespace);
+        self.inner.register_namespace(&name.into(), namespace);
     }
 }
 /*

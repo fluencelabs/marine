@@ -1,5 +1,8 @@
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
-use crate::{sig_to_fn_ty, StoreState, val_type_to_wtype, WasmtimeContextMut, WasmtimeFunction, WasmtimeFunctionExport, WasmtimeMemory, WasmtimeStore, WasmtimeWasmBackend};
+use crate::{
+    sig_to_fn_ty, StoreState, val_type_to_wtype, WasmtimeContextMut, WasmtimeFunction,
+    WasmtimeFunctionExport, WasmtimeMemory, WasmtimeStore, WasmtimeWasmBackend,
+};
 
 use marine_wasm_backend_traits::*;
 use marine_wasm_backend_traits::WasmBackendError;
@@ -14,21 +17,16 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
     fn export_iter<'a>(
         &'a self,
         store: WasmtimeContextMut<'a>,
-    ) -> Box<dyn Iterator<Item = (&'a str, Export<WasmtimeWasmBackend>)> + 'a>
-    {
-        let exports = self
-            .inner
-            .exports(store.inner)
-            .map(|export| {
-                let name = export.name();
-                let export = match export.into_extern() {
-                    wasmtime::Extern::Memory(memory) => Export::Memory(WasmtimeMemory::new(memory)),
-                    wasmtime::Extern::Func(func) => { Export::Function(WasmtimeFunction { inner: func })
-                    },
-                    _ => Export::Other,
-                };
-                (name, export)
-            });
+    ) -> Box<dyn Iterator<Item = (&'a str, Export<WasmtimeWasmBackend>)> + 'a> {
+        let exports = self.inner.exports(store.inner).map(|export| {
+            let name = export.name();
+            let export = match export.into_extern() {
+                wasmtime::Extern::Memory(memory) => Export::Memory(WasmtimeMemory::new(memory)),
+                wasmtime::Extern::Func(func) => Export::Function(WasmtimeFunction { inner: func }),
+                _ => Export::Other,
+            };
+            (name, export)
+        });
         Box::new(exports)
     }
 
@@ -52,7 +50,9 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
         store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         memory_name: &str,
     ) -> Option<<WasmtimeWasmBackend as WasmBackend>::Memory> {
-        let memory = self.inner.get_memory(&mut store.as_context_mut().inner, memory_name);
+        let memory = self
+            .inner
+            .get_memory(&mut store.as_context_mut().inner, memory_name);
 
         memory.map(WasmtimeMemory::new)
     }
