@@ -71,6 +71,17 @@ impl Instance<WasmerBackend> for WasmerInstance {
         store: &mut impl AsContextMut<WasmerBackend>,
         name: &str,
     ) -> ResolveResult<<WasmerBackend as WasmBackend>::Function> {
+        let owner_memory = self
+            .inner
+            .exports
+            .iter()
+            .filter_map(|(name, export)| match export {
+                Extern::Memory(memory) => Some(memory),
+                _ => None,
+            }) // todo is there a way to make it better?
+            .nth(0)
+            .map(Clone::clone); // todo cache memories and export in the instance
+
         self.inner
             .exports
             .get_function(name)
@@ -81,6 +92,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
                 WasmerFunction {
                     sig: function_type_to_func_sig(&ty),
                     inner: func.clone(),
+                    owner_memory
                 }
             })
     }
