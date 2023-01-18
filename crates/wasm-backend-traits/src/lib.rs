@@ -44,7 +44,7 @@ pub trait WasmBackend: Clone + Default + 'static {
     // wasi
     type Wasi: WasiImplementation<Self>;
 
-    fn compile(store: &mut Self::Store, wasm: &[u8]) -> WasmBackendResult<Self::Module>;
+    fn compile(store: &mut Self::Store, wasm: &[u8]) -> CompilationResult<Self::Module>;
 }
 
 pub trait WasmType {

@@ -1,4 +1,4 @@
-use crate::{Store, WasmBackend, WasmBackendResult};
+use crate::{InstantiationResult, Store, WasmBackend, WasmBackendResult};
 
 pub trait Module<WB: WasmBackend> {
     fn custom_sections(&self, key: &str) -> Option<&[Vec<u8>]>;
@@ -6,5 +6,5 @@ pub trait Module<WB: WasmBackend> {
         &self,
         store: &mut <WB as WasmBackend>::Store,
         imports: &<WB as WasmBackend>::Imports,
-    ) -> WasmBackendResult<<WB as WasmBackend>::Instance>;
+    ) -> InstantiationResult<<WB as WasmBackend>::Instance>;
 }

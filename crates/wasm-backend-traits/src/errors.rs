@@ -1,18 +1,17 @@
+use std::path::Path;
 use thiserror::Error;
-
+use crate::WType;
 
 /*
-    General error design goals:
-        * expose as much detail as possible
-        * make as much domain-specific errors as possible implmentation-independent
+   General error design goals:
+       * expose as much detail as possible
+       * make as much domain-specific errors as possible implmentation-independent
 
-    So, Error enums should follow this principle:
-        * errors fully expressible without implementation info should have implementation-independent view
-        * errors not fully expressible without implementation info should have some common view and a way to get implmententation-specific details
-        * "Other" type for all errors not suited for listed options
- */
-
-
+   So, Error enums should follow this principle:
+       * errors fully expressible without implementation info should have implementation-independent view
+       * errors not fully expressible without implementation info should have some common view and a way to get implmententation-specific details
+       * "Other" type for all errors not suited for listed options
+*/
 
 #[derive(Debug, Error)]
 pub enum WasmBackendError {
@@ -29,13 +28,17 @@ pub enum WasmBackendError {
     ImportError(#[from] ImportError),
 
     #[error("{0}")]
-    InstantiationError(String),
+    InstantiationError(#[from] InstantiationError),
 }
 
 pub type WasmBackendResult<T> = Result<T, WasmBackendError>;
 
 #[derive(Debug, Error)]
 pub enum ResolveError {
+    #[error("export not found: {0}")]
+    ExportNotFound(String),
+    #[error("export type mismatch: expected {0}, found {1}")]
+    ExportTypeMismatch(String, String),
     #[error("{0}")]
     Other(#[from] anyhow::Error),
 }
@@ -45,7 +48,11 @@ pub type ResolveResult<T> = Result<T, ResolveError>;
 #[derive(Debug, Error)]
 pub enum RuntimeError {
     #[error("{0}")]
-    Other(#[from] anyhow::Error),
+    UnsupportedType(WType),
+    #[error("{0}")]
+    Trap(anyhow::Error),
+    #[error("{0}")]
+    Other(anyhow::Error),
 }
 
 pub type RuntimeResult<T> = Result<T, RuntimeError>;
@@ -63,17 +70,9 @@ pub enum CompilationError {
 pub type CompilationResult<T> = Result<T, CompilationError>;
 
 #[derive(Debug, Error)]
-pub enum CallError {
-    #[error("{0}")]
-    Other(#[from] anyhow::Error),
-}
-
-pub type CallResult<T> = Result<T, CallError>;
-
-#[derive(Debug, Error)]
 pub enum ImportError {
-    #[error("Duplcae import")]
-    DuplicateImport,
+    #[error("Duplicate import")]
+    DuplicateImport(String, String),
 
     #[error("{0}")]
     Other(#[from] anyhow::Error),
@@ -88,3 +87,13 @@ pub enum InstantiationError {
 }
 
 pub type InstantiationResult<T> = Result<T, InstantiationError>;
+
+#[derive(Debug, Error)]
+pub enum WasiError {
+    #[error("{0}")]
+    IOError(#[from] std::io::Error),
+    #[error("{0}")]
+    Other(#[from] anyhow::Error),
+}
+
+pub type WasiResult<T> = Result<T, WasiError>;

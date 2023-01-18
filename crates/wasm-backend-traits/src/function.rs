@@ -1,5 +1,5 @@
 use crate::{
-    AsContextMut, CallResult, FuncSig, impl_for_each_function_signature, WasmBackend, WasmType,
+    AsContextMut, FuncSig, impl_for_each_function_signature, RuntimeResult, WasmBackend, WasmType,
     WValue,
 };
 
@@ -26,7 +26,7 @@ pub trait Function<WB: WasmBackend>: Send + Sync {
         &self,
         store: &mut impl AsContextMut<WB>, // <- Store or ExportContext. Need to be able to extract wasmtime::StoreContextMut from them. Same for many methods.
         args: &[WValue],
-    ) -> CallResult<Vec<WValue>>;
+    ) -> RuntimeResult<Vec<WValue>>;
 }
 
 pub trait IntoFunc<WB: WasmBackend, Params, Results, Env> {

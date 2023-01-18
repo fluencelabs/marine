@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use marine_wasm_backend_traits::*;
 
 use crate::{
@@ -23,8 +24,9 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
             let args = args
                 .iter()
                 .map(val_to_wvalue)
-                .collect::<Result<Vec<_>, ()>>()
-                .unwrap(); // todo handle error
+                .collect::<Result<Vec<_>, RuntimeError>>()
+                .map_err(|e| anyhow::Error::new(e))?; // todo move earlier
+
             let rets = func(&args);
             for i in 0..results.len() {
                 results[i] = wvalue_to_val(&rets[i]);
@@ -60,8 +62,8 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
             let args = args
                 .iter()
                 .map(val_to_wvalue)
-                .collect::<Result<Vec<_>, ()>>()
-                .unwrap(); // todo handle error
+                .collect::<RuntimeResult<Vec<_>>>()
+                .map_err(|e| anyhow!(e))?;
             let rets = func(caller, &args);
             for i in 0..results.len() {
                 results[i] = wvalue_to_val(&rets[i]);
@@ -93,23 +95,22 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
         &self,
         store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         args: &[WValue],
-    ) -> CallResult<Vec<WValue>> {
+    ) -> RuntimeResult<Vec<WValue>> {
         let args = args.iter().map(wvalue_to_val).collect::<Vec<_>>();
 
         let mut rets = Vec::new();
         rets.resize(
             self.inner.ty(store.as_context_mut()).results().len(),
             wasmtime::Val::null(),
-        ); // todo make O(1), not O(n)
+        );
+
         self.inner
             .call(store.as_context_mut().inner, &args, &mut rets)
-            .unwrap(); // todo handle error
-        let rets = rets
-            .iter()
+            .map_err(|e| RuntimeError::Other(e))?; // todo add detail
+
+        rets.iter()
             .map(val_to_wvalue)
-            .collect::<Result<Vec<_>, ()>>()
-            .unwrap(); // todo handle error
-        Ok(rets)
+            .collect::<Result<Vec<_>, _>>()
     }
 }
 
@@ -167,9 +168,7 @@ impl FuncConstructor<WasmtimeWasmBackend> for WasmtimeFunction {
         let rets = vec![];
         let sig = FuncSig::new(params, rets);
 
-        WasmtimeFunction {
-            inner: func,
-        }
+        WasmtimeFunction { inner: func }
     }
 
     impl_for_each_function_signature!(impl_func_construction);

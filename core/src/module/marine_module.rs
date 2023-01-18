@@ -297,8 +297,7 @@ impl<WB: WasmBackend> MModule<WB> {
             wasi_envs,
             wasi_preopened_files,
             wasi_mapped_dirs,
-        )
-        .map_err(MError::WASIPrepareError)?;
+        )?;
 
         Ok(())
     }

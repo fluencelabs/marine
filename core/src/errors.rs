@@ -20,7 +20,7 @@ use crate::misc::PrepareError;
 use marine_it_interfaces::MITInterfacesError;
 use marine_it_parser::ITParserError;
 use marine_module_interface::it_interface::ITInterfaceError;
-use marine_wasm_backend_traits::{CallError, ResolveError, RuntimeError, WasmBackendError};
+use marine_wasm_backend_traits::{CompilationError, ImportError, InstantiationError, ResolveError, RuntimeError, WasiError, WasmBackendError};
 //use wasmer_runtime::error as wasmer_error;
 
 use thiserror::Error as ThisError;
@@ -31,42 +31,13 @@ use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
 pub enum MError {
-    /// This error type is produced by Wasmer during resolving a Wasm function.
-    #[error("Wasmer resolve error: {0}")]
-    ResolveError(#[from] ResolveError),
-
-    /// Error related to calling a main Wasm module.
-    #[error("Wasmer invoke error: {0}")]
-    WasmerInvokeError(String),
-    /*
-        /// Error that raises during compilation Wasm code by Wasmer.
-        #[error("Wasmer creation error: {0}")]
-        WasmerCreationError(#[from] wasmer_error::CreationError),
-
-        /// Error that raises during creation of some Wasm objects (like table and memory) by Wasmer.
-        #[error("Wasmer compile error: {0}")]
-        WasmerCompileError(#[from] wasmer_error::CompileError),
-    */
-    /// Errors arisen during execution of a Wasm module.
-    #[error("Wasmer runtime error: {0}")]
-    WasmerRuntimeError(String),
-
-    /*
-        /// Errors arisen during linking Wasm modules with already loaded into Marine modules.
-        #[error("Wasmer link error: {0}")]
-        WasmerLinkError(#[from] wasmer_error::LinkError),
-    */
-    /// Errors from the temporary class of amalgamation errors from the Wasmer side.
-    #[error("Wasmer error: {0}")]
-    WasmerError(String),
-
     /// Errors related to failed resolving of records.
     #[error("{0}")]
     RecordResolveError(String),
 
     /// Errors arisen during creation of a WASI context.
     #[error("{0}")]
-    WASIPrepareError(String),
+    WASIPrepareError(#[from] WasiError),
 
     /// Errors occurred inside marine-module-interface crate.
     #[error(transparent)]
@@ -114,30 +85,6 @@ impl From<MITInterfacesError> for MError {
     }
 }
 
-impl From<RuntimeError> for MError {
-    fn from(err: RuntimeError) -> Self {
-        Self::WasmerRuntimeError(err.to_string())
-    }
-}
-
-impl From<CallError> for MError {
-    fn from(err: CallError) -> Self {
-        Self::WasmerInvokeError(err.to_string())
-    }
-}
-/*
-impl From<wasmer_error::Error> for MError {
-    fn from(err: wasmer_error::Error) -> Self {
-        Self::WasmerError(err.to_string())
-    }
-}
-
-impl From<wasmer_error::InvokeError> for MError {
-    fn from(err: wasmer_error::InvokeError) -> Self {
-        Self::WasmerInvokeError(err.to_string())
-    }
-}
-*/
 impl From<()> for MError {
     fn from(_err: ()) -> Self {
         MError::IncorrectWIT("failed to parse instructions for adapter type".to_string())
@@ -147,5 +94,35 @@ impl From<()> for MError {
 impl From<WasmBackendError> for MError {
     fn from(err: WasmBackendError) -> Self {
         MError::WasmBackendError(err)
+    }
+}
+
+impl From<CompilationError> for MError {
+    fn from(value: CompilationError) -> Self {
+        Into::<WasmBackendError>::into(value).into()
+    }
+}
+
+impl From<ResolveError> for MError {
+    fn from(value: ResolveError) -> Self {
+        Into::<WasmBackendError>::into(value).into()
+    }
+}
+
+impl From<ImportError> for MError {
+    fn from(value: ImportError) -> Self {
+        Into::<WasmBackendError>::into(value).into()
+    }
+}
+
+impl From<InstantiationError> for MError {
+    fn from(value: InstantiationError) -> Self {
+        Into::<WasmBackendError>::into(value).into()
+    }
+}
+
+impl From<RuntimeError> for MError {
+    fn from(value: RuntimeError) -> Self {
+        Into::<WasmBackendError>::into(value).into()
     }
 }

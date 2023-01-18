@@ -9,5 +9,5 @@ pub trait Caller<WB: WasmBackend>:
     + FuncGetter<WB, (), ()>
     + AsContextMut<WB>
 {
-    fn memory(&mut self, memory_index: u32) -> <WB as WasmBackend>::Memory;
+    fn memory(&mut self, memory_index: u32) -> Option<<WB as WasmBackend>::Memory>;
 }

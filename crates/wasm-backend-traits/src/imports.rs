@@ -20,9 +20,9 @@ pub trait Imports<WB: WasmBackend>: Clone
         module: impl Into<String>,
         name: impl Into<String>,
         func: <WB as WasmBackend>::Function,
-    );
+    ) -> Result<(), ImportError>;
 
-    fn register<S, I>(&mut self, name: S, namespace: I)
+    fn register<S, I>(&mut self, name: S, namespace: I) -> Result<(), ImportError>
     where
         S: Into<String>,
         I: IntoIterator<Item = (String, <WB as WasmBackend>::Function)>;

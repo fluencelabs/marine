@@ -15,15 +15,13 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         envs: Vec<(Vec<u8>, Vec<u8>)>,
         preopened_files: Vec<PathBuf>,
         mapped_dirs: Vec<(String, PathBuf)>,
-    ) -> Result<(), String> {
+    ) -> Result<(), WasiError> {
         let id = store.inner.data().wasi.len();
         wasmtime_wasi::add_to_linker(&mut linker.linker, move |s: &mut StoreState| {
             &mut s.wasi[id]
         })
-        .unwrap(); // todo handle error
-                   // Create a WASI context and put it in a Store; all instances in the storex
-                   // share this context. `WasiCtxBuilder` provides a number of ways to
-                   // configure what the target program will have access to.
+        .map_err(|e| WasiError::Other(e))?; // todo add detail
+
         let args = args
             .into_iter()
             .map(|arg| unsafe { String::from_utf8_unchecked(arg) })
@@ -40,7 +38,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
                 }
             })
             .collect::<Vec<_>>();
-        // todo pass all data to ctx
+
         let wasi_ctx_builder = wasmtime_wasi::WasiCtxBuilder::new()
             .inherit_stdio()
             .args(&args).unwrap() // todo handle error

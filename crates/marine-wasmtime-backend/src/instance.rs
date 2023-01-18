@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
 use crate::{
     sig_to_fn_ty, StoreState, val_type_to_wtype, WasmtimeContextMut, WasmtimeFunction,
@@ -64,27 +65,26 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
     ) -> ResolveResult<<WasmtimeWasmBackend as WasmBackend>::Function> {
         let func = self
             .inner
-            .get_func(&mut store.as_context_mut().inner, name)
-            .ok_or(ResolveError::Message(format!("cannot find {}", name)))?;
+            .get_export(&mut store.as_context_mut().inner, name)
+            .ok_or(ResolveError::ExportNotFound(name.to_owned()))
+            .and_then(|e| {
+                e.into_func().ok_or(ResolveError::ExportTypeMismatch(
+                    "function".to_string(),
+                    "other".to_string(),
+                ))
+            })?;
 
         let ty = func.ty(&store.as_context().inner);
         let params = ty
             .params()
-            .map(|ty| {
-                val_type_to_wtype(&ty).unwrap() // todo handle error
-            })
+            .map(|ty| val_type_to_wtype(&ty))
             .collect::<Vec<_>>();
         let rets = ty
             .results()
-            .map(|ty| {
-                val_type_to_wtype(&ty).unwrap() // todo handle error
-            })
+            .map(|ty| val_type_to_wtype(&ty))
             .collect::<Vec<_>>();
 
         let sig = FuncSig::new(params, rets);
-        Ok(WasmtimeFunction {
-            inner: func,
-            //signature: sig,
-        })
+        Ok(WasmtimeFunction { inner: func })
     }
 }

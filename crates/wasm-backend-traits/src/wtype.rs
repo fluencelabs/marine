@@ -46,8 +46,21 @@ pub enum WType {
     F32,
     /// The `f64` type.
     F64,
-    // /// The `v128` type.
-    // V128,
+    /// The `v128` type, unsupported.
+    V128,
+    /// ExternRef type, unsupported.
+    ExternRef,
+    /// FuncRef type, unsupported.
+    FuncRef,
+}
+
+impl WType {
+    pub fn is_supported(&self) -> bool {
+        match self {
+            Self::ExternRef | Self::FuncRef | Self::V128 => false,
+            _ => true,
+        }
+    }
 }
 
 impl WValue {

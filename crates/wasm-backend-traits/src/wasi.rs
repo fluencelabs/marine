@@ -1,4 +1,4 @@
-use crate::WasmBackend;
+use crate::{WasiError, WasmBackend};
 
 use std::path::PathBuf;
 
@@ -11,7 +11,7 @@ pub trait WasiImplementation<WB: WasmBackend> {
         envs: Vec<(Vec<u8>, Vec<u8>)>,
         preopened_files: Vec<PathBuf>,
         mapped_dirs: Vec<(String, PathBuf)>,
-    ) -> Result<(), String>;
+    ) -> Result<(), WasiError>;
 
     fn get_wasi_state<'s>(
         instance: &'s mut <WB as WasmBackend>::Instance,

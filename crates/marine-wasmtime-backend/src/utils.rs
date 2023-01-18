@@ -1,24 +1,29 @@
 use wasmtime::{Val, ValType};
-use marine_wasm_backend_traits::{FuncSig, WasmBackendError, WType, WValue};
+use marine_wasm_backend_traits::{
+    FuncSig, RuntimeError, RuntimeResult, WasmBackendError, WType, WValue,
+};
 
-pub(crate) fn val_type_to_wtype(ty: &wasmtime::ValType) -> Option<WType> {
+pub(crate) fn val_type_to_wtype(ty: &wasmtime::ValType) -> WType {
     match ty {
-        ValType::I32 => Some(WType::I32),
-        ValType::I64 => Some(WType::I64),
-        ValType::F32 => Some(WType::F32),
-        ValType::F64 => Some(WType::F64),
-        ValType::V128 => None,
-        ValType::FuncRef => None,
-        ValType::ExternRef => None,
+        ValType::I32 => WType::I32,
+        ValType::I64 => WType::I64,
+        ValType::F32 => WType::F32,
+        ValType::F64 => WType::F64,
+        ValType::V128 => WType::V128,
+        ValType::FuncRef => WType::FuncRef,
+        ValType::ExternRef => WType::ExternRef,
     }
 }
 
 pub(crate) fn wtype_to_val_type(ty: &WType) -> wasmtime::ValType {
     match ty {
-        WType::I32 => wasmtime::ValType::I32,
-        WType::I64 => wasmtime::ValType::I64,
-        WType::F32 => wasmtime::ValType::F32,
-        WType::F64 => wasmtime::ValType::F64,
+        WType::I32 => ValType::I32,
+        WType::I64 => ValType::I64,
+        WType::F32 => ValType::F32,
+        WType::F64 => ValType::F64,
+        WType::V128 => ValType::V128,
+        WType::FuncRef => ValType::FuncRef,
+        WType::ExternRef => ValType::ExternRef,
     }
 }
 
@@ -31,15 +36,15 @@ pub(crate) fn wvalue_to_val(value: &WValue) -> wasmtime::Val {
     }
 }
 
-pub(crate) fn val_to_wvalue(value: &wasmtime::Val) -> Result<WValue, ()> {
+pub(crate) fn val_to_wvalue(value: &wasmtime::Val) -> RuntimeResult<WValue> {
     match value {
         Val::I32(value) => Ok(WValue::I32(value.clone())),
         Val::I64(value) => Ok(WValue::I64(value.clone())),
         Val::F32(value) => Ok(WValue::F32(f32::from_bits(value.clone()))),
         Val::F64(value) => Ok(WValue::F64(f64::from_bits(value.clone()))),
-        Val::V128(_) => Err(()),
-        Val::FuncRef(_) => Err(()),
-        Val::ExternRef(_) => Err(()),
+        Val::V128(_) => Err(RuntimeError::UnsupportedType(WType::V128)),
+        Val::FuncRef(_) => Err(RuntimeError::UnsupportedType(WType::V128)),
+        Val::ExternRef(_) => Err(RuntimeError::UnsupportedType(WType::V128)),
     }
 }
 
@@ -53,12 +58,12 @@ pub(crate) fn sig_to_fn_ty(sig: &FuncSig) -> wasmtime::FuncType {
 pub(crate) fn fn_ty_to_sig(ty: &wasmtime::FuncType) -> FuncSig {
     let params = ty
         .params()
-        .map(|ty| val_type_to_wtype(&ty).unwrap()) // todo handle error
+        .map(|ty| val_type_to_wtype(&ty))
         .collect::<Vec<_>>();
 
     let rets = ty
         .results()
-        .map(|ty| val_type_to_wtype(&ty).unwrap()) // todo handle error
+        .map(|ty| val_type_to_wtype(&ty))
         .collect::<Vec<_>>();
 
     FuncSig::new(params, rets)

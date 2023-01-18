@@ -26,7 +26,10 @@ pub(super) fn wtype_to_itype(ty: &WType) -> IType {
         WType::I64 => IType::I64,
         WType::F32 => IType::F32,
         WType::F64 => IType::F64,
-        //WType::V128 => unimplemented!(),
+        ty => {
+            eprintln!("trying to convert {:?}", ty);
+            unimplemented!()
+        }
     }
 }
 

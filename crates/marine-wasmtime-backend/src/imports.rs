@@ -1,4 +1,5 @@
 use std::net::ToSocketAddrs;
+use std::ops::Deref;
 use marine_wasm_backend_traits::*;
 use crate::{StoreState, WasmtimeFunction, WasmtimeStore, WasmtimeWasmBackend};
 
@@ -20,21 +21,25 @@ impl Imports<WasmtimeWasmBackend> for WasmtimeImports {
         module: impl Into<String>,
         name: impl Into<String>,
         func: <WasmtimeWasmBackend as WasmBackend>::Function,
-    ) -> Result<(), LinkerError> {
-        self
-            .linker
-            .define(&module.into(), &name.into(), func.inner)
-            .unwrap(); //todo handle error
+    ) -> Result<(), ImportError> {
+        let module = module.into();
+        let name = name.into();
+        self.linker
+            .define(&module, &name, func.inner)
+            .map_err(|_| ImportError::DuplicateImport(module, name))
+            .map(|_| ())
     }
 
-    fn register<S, I>(&mut self, name: S, namespace: I)
+    fn register<S, I>(&mut self, name: S, namespace: I) -> Result<(), ImportError>
     where
         S: Into<String>,
         I: IntoIterator<Item = (String, WasmtimeFunction)>,
     {
         let module: String = name.into();
         for (name, func) in namespace {
-            self.linker.define(&module, &name, func.inner).unwrap(); // todo handle error
+            self.insert(&module, name, func)?;
         }
+
+        Ok(())
     }
 }

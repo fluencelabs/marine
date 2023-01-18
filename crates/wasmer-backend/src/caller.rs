@@ -9,7 +9,12 @@ pub struct WasmerCaller<'c> {
 
 impl Caller<WasmerBackend> for WasmerCaller<'_> {
     fn memory(&mut self, memory_index: u32) -> <WasmerBackend as WasmBackend>::Memory {
-        self.env.as_mut(&mut self.inner).current_memory.clone().unwrap().into()
+        self.env
+            .as_mut(&mut self.inner)
+            .current_memory
+            .clone()
+            .unwrap()
+            .into()
     }
 }
 
@@ -17,7 +22,7 @@ impl AsContext<WasmerBackend> for WasmerCaller<'_> {
     fn as_context(&self) -> <WasmerBackend as WasmBackend>::Context<'_> {
         WasmerContext {
             inner: self.inner.as_store_ref(),
-            env: self.env.clone()
+            env: self.env.clone(),
         }
     }
 }
@@ -26,7 +31,7 @@ impl AsContextMut<WasmerBackend> for WasmerCaller<'_> {
     fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
         WasmerContextMut {
             inner: self.inner.as_store_mut(),
-            env: self.env.clone()
+            env: self.env.clone(),
         }
     }
 }

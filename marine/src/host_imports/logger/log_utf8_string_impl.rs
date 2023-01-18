@@ -61,7 +61,7 @@ fn read_string<WB: WasmBackend>(
     offset: i32,
     size: i32,
 ) -> Option<String> {
-    let view = ctx.memory(0).view();
+    let view = ctx.memory(0).unwrap().view(); // todo handle error
     let bytes = view.read_vec(&mut ctx.as_context_mut(), offset as u32, size as u32);
     String::from_utf8(bytes).ok()
 }

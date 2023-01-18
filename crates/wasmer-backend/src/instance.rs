@@ -92,7 +92,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
                 WasmerFunction {
                     sig: function_type_to_func_sig(&ty),
                     inner: func.clone(),
-                    owner_memory
+                    owner_memory,
                 }
             })
     }

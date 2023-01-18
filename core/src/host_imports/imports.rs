@@ -79,7 +79,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
         //let store = &mut caller.as_context_mut();
         let result = {
             let memory_index = 0;
-            let memory_view = caller.memory(memory_index).view();
+            let memory_view = caller.memory(memory_index).unwrap().view(); // todo handle error
             let li_helper = LiHelper::new(record_types.clone());
             let lifter = ILifter::new(memory_view, &li_helper);
             let rets = wvalues_to_ivalues(
@@ -127,8 +127,8 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
         }*/
 
         let memory_index = 0;
-        let memory_view = caller.memory(memory_index).view();
-        let mut lo_helper = LoHelper::new(&mut allocate_func, caller.memory(memory_index));
+        let memory_view = caller.memory(memory_index).unwrap().view(); // todo handle error
+        let mut lo_helper = LoHelper::new(&mut allocate_func, caller.memory(memory_index).unwrap()); // todo handle error
         let t = ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
             .map_err(HostImportError::LowererError)
             .and_then(|mut lowerer| {

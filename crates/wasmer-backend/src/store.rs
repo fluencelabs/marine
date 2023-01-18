@@ -25,11 +25,13 @@ pub struct WasmerContextMut<'s> {
 impl Store<WasmerBackend> for WasmerStore {
     fn new(_backend: &WasmerBackend) -> Self {
         let mut store = wasmer::Store::default();
-        let env = wasmer::FunctionEnv::new(&mut store, StoreState { current_memory: None});
-        Self {
-            inner: store,
-            env,
-        }
+        let env = wasmer::FunctionEnv::new(
+            &mut store,
+            StoreState {
+                current_memory: None,
+            },
+        );
+        Self { inner: store, env }
     }
 }
 
@@ -41,7 +43,7 @@ impl AsContext<WasmerBackend> for WasmerStore {
     fn as_context(&self) -> WasmerContext<'_> {
         WasmerContext {
             inner: self.inner.as_store_ref(),
-            env: self.env.clone()
+            env: self.env.clone(),
         }
     }
 }
@@ -50,7 +52,7 @@ impl AsContextMut<WasmerBackend> for WasmerStore {
     fn as_context_mut(&mut self) -> WasmerContextMut<'_> {
         WasmerContextMut {
             inner: self.inner.as_store_mut(),
-            env: self.env.clone()
+            env: self.env.clone(),
         }
     }
 }
@@ -59,7 +61,7 @@ impl<'c> AsContext<WasmerBackend> for WasmerContext<'c> {
     fn as_context(&self) -> WasmerContext<'_> {
         WasmerContext {
             inner: self.inner.as_store_ref(),
-            env: self.env.clone()
+            env: self.env.clone(),
         }
     }
 }
@@ -68,7 +70,7 @@ impl<'c> AsContext<WasmerBackend> for WasmerContextMut<'c> {
     fn as_context(&self) -> WasmerContext<'_> {
         WasmerContext {
             inner: self.inner.as_store_ref(),
-            env: self.env.clone()
+            env: self.env.clone(),
         }
     }
 }
@@ -77,7 +79,7 @@ impl<'c> AsContextMut<WasmerBackend> for WasmerContextMut<'c> {
     fn as_context_mut(&mut self) -> WasmerContextMut<'_> {
         WasmerContextMut {
             inner: self.inner.as_store_mut(),
-            env: self.env.clone()
+            env: self.env.clone(),
         }
     }
 }
@@ -86,7 +88,7 @@ impl<'c> AsContext<WasmerBackend> for &mut WasmerContextMut<'c> {
     fn as_context(&self) -> <WasmerBackend as WasmBackend>::Context<'_> {
         WasmerContext {
             inner: self.inner.as_store_ref(),
-            env: self.env.clone()
+            env: self.env.clone(),
         }
     }
 }
@@ -95,7 +97,7 @@ impl<'c> AsContextMut<WasmerBackend> for &mut WasmerContextMut<'c> {
     fn as_context_mut(&mut self) -> <WasmerBackend as WasmBackend>::ContextMut<'_> {
         WasmerContextMut {
             inner: self.inner.as_store_mut(),
-            env: self.env.clone()
+            env: self.env.clone(),
         }
     }
 }

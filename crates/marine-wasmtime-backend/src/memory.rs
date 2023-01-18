@@ -2,6 +2,9 @@ use it_memory_traits::MemoryAccessError;
 use marine_wasm_backend_traits::{DelayedContextLifetime, Memory};
 use crate::{WasmtimeContextMut, WasmtimeWasmBackend};
 
+static MEMORY_ACCESS_EXPECTATION: &str =
+    "api requires checking memory bounds before accessing memory";
+
 #[derive(Clone)]
 pub struct WasmtimeMemory {
     memory: wasmtime::Memory,
@@ -34,7 +37,8 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<WasmtimeWasmBackend
         let mut value = [0u8];
         self.memory
             .read(&mut store.inner, offset as usize, &mut value)
-            .unwrap(); // todo handle error;
+            .expect(MEMORY_ACCESS_EXPECTATION);
+
         value[0]
     }
 
@@ -46,7 +50,7 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<WasmtimeWasmBackend
         let mut value = [0u8; COUNT];
         self.memory
             .read(&mut store.inner, offset as usize, &mut value)
-            .unwrap(); // todo handle error;
+            .expect(MEMORY_ACCESS_EXPECTATION);
         value
     }
 
@@ -54,7 +58,7 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<WasmtimeWasmBackend
         let mut value = vec![0u8; size as usize];
         self.memory
             .read(&mut store.inner, offset as usize, &mut value)
-            .unwrap(); // todo handle error;
+            .expect(MEMORY_ACCESS_EXPECTATION);
         value
     }
 }

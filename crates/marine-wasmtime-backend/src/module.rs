@@ -20,11 +20,11 @@ impl Module<WasmtimeWasmBackend> for WasmtimeModule {
         &self,
         store: &mut WasmtimeStore,
         imports: &WasmtimeImports,
-    ) -> WasmBackendResult<<WasmtimeWasmBackend as WasmBackend>::Instance> {
+    ) -> InstantiationResult<<WasmtimeWasmBackend as WasmBackend>::Instance> {
         let instance = imports
             .linker
             .instantiate(&mut store.inner, &self.inner)
-            .unwrap(); // todo handle error
+            .map_err(|e| InstantiationError::Other(e))?; // todo add detail
         Ok(WasmtimeInstance { inner: instance })
     }
 }

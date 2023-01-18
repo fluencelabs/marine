@@ -11,10 +11,7 @@ pub struct WasmtimeCaller<'c> {
 
 impl<'c> Caller<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
     fn memory(&mut self, memory_index: u32) -> Option<WasmtimeMemory> {
-        let memory = self
-            .inner
-            .get_export("memory")?
-            .into_memory()?;
+        let memory = self.inner.get_export("memory")?.into_memory()?;
 
         Some(WasmtimeMemory::new(memory))
     }
@@ -51,23 +48,37 @@ macro_rules! impl_func_getter {
                 >,
                 ResolveError,
             > {
-                let export = self.inner.get_export(name).unwrap(); //todo handle error
+                let export = self
+                    .inner
+                    .get_export(name)
+                    .ok_or(ResolveError::ExportNotFound(name.to_string()))?;
+
                 match export {
-                   wasmtime::Extern::Func(f) => {
-                        let f = f.typed(&mut self.inner).unwrap(); //todo handle error
+                    wasmtime::Extern::Func(f) => {
+                        let f = f
+                            .typed(&mut self.inner)
+                            .map_err(|e| ResolveError::Other(e))?;
+
                         let closure = move |store: &mut WasmtimeContextMut<'_>, args| {
-                            let rets = f.call(&mut store.inner, args).unwrap(); //todo handle error
-                            return Ok(rets);
+                            f.call(&mut store.inner, args).map_err(|e| {
+                                if let Some(trap) = e.downcast_ref::<wasmtime::Trap>() {
+                                    RuntimeError::Trap(e)
+                                } else {
+                                    RuntimeError::Other(e)
+                                }
+                            })
                         };
 
                         Ok(Box::new(closure))
                     }
-                    wasmtime::Extern::Memory(m) => {
-                        panic!("caller.get_export returned memory");
-                    }
-                    _ => {
-                        panic!("caller.get_export returned neither memory nor func")
-                    }
+                    wasmtime::Extern::Memory(m) => Err(ResolveError::ExportTypeMismatch(
+                        "function".to_string(),
+                        "memory".to_string(),
+                    )),
+                    _ => Err(ResolveError::ExportTypeMismatch(
+                        "function".to_string(),
+                        "neither memory nor function".to_string(),
+                    )),
                 }
             }
         }
