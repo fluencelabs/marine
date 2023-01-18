@@ -76,9 +76,12 @@ impl WasmBackend for WasmtimeWasmBackend {
     type MemoryView = WasmtimeMemory;
     type Wasi = WasmtimeWasi;
 
-    fn compile(store: &mut WasmtimeStore, wasm: &[u8]) -> WasmBackendResult<Self::Module> {
-        let module = wasmtime::Module::new(store.inner.engine(), wasm).unwrap(); //todo convert error;
-        let custom_sections = WasmtimeWasmBackend::custom_sections(wasm).unwrap(); //todo convert error;
+    fn compile(store: &mut WasmtimeStore, wasm: &[u8]) -> CompilationResult<Self::Module> {
+        let module = wasmtime::Module::new(store.inner.engine(), wasm)
+            .map_err(|e| CompilationError::FailedToCompileWasm(e))?; // todo make mode detailed
+        let custom_sections = WasmtimeWasmBackend::custom_sections(wasm)
+            .map_err(|e| CompilationError::FailedToExtractCustomSections(e))?; // todo make more deatailed
+
         Ok(WasmtimeModule {
             custom_sections,
             inner: module,
@@ -89,103 +92,4 @@ impl WasmBackend for WasmtimeWasmBackend {
 #[derive(Default)]
 pub struct StoreState {
     wasi: Vec<WasiCtx>, //todo switch to Pool or something
-}
-
-impl MemoryExport for WasmtimeMemory {}
-
-pub struct WasmtimeFunctionExport {
-    func: wasmtime::Func,
-}
-
-impl FunctionExport for WasmtimeFunctionExport {}
-/*
-pub struct WasmtimeExportContext<'a> {
-    caller: Caller<'a, ()>,
-}
-*/
-macro_rules! impl_func_getter {
-    ($args:ty, $rets:ty) => {
-        impl<'c> FuncGetter<WasmtimeWasmBackend, $args, $rets> for WasmtimeCaller<'c> {
-            unsafe fn get_func(
-                &mut self,
-                name: &str,
-            ) -> Result<
-                Box<
-                    dyn FnMut(&mut WasmtimeContextMut<'_>, $args) -> Result<$rets, RuntimeError>
-                        + Sync
-                        + Send
-                        + 'static,
-                >,
-                ResolveError,
-            > {
-                let export = self.inner.get_export(name).unwrap(); //todo handle error
-                match export {
-                    Extern::Func(f) => {
-                        let f = f.typed(&mut self.inner).unwrap(); //todo handle error
-                        let closure = move |store: &mut WasmtimeContextMut<'_>, args| {
-                            let rets = f.call(&mut store.inner, args).unwrap(); //todo handle error
-                            return Ok(rets);
-                        };
-
-                        Ok(Box::new(closure))
-                    }
-                    Extern::Memory(m) => {
-                        panic!("caller.get_export returned memory");
-                    }
-                    _ => {
-                        panic!("caller.get_export returned neither memory nor func")
-                    }
-                }
-            }
-        }
-    };
-}
-/*
-impl<'c> FuncGetter<WasmtimeWasmBackend, (), ()> for WasmtimeCaller<'c> {
-    unsafe fn get_func<'s>(
-        &'s mut self,
-        name: &str,
-    ) -> Result<
-        Box<dyn FnMut(&mut WasmtimeContextMut<'_>, ()) -> Result<(), RuntimeError> + 's>,
-        ResolveError,
-    > {
-        let export = self.inner.get_export(name).unwrap(); //todo handle error
-        match export {
-            Extern::Func(f) => {
-                let f = f.typed(&mut self.inner).unwrap(); //todo handle error
-                let closure = move |store, $args| {
-
-                    f.call(store.inner, $args) //todo handle error
-                    return Ok(())
-                };
-
-
-                Ok(Box::new(closure))
-            }
-            Extern::Memory(m) => {
-                panic!("caller.get_export returned memoryn");
-            }
-            _ => {
-                panic!("caller.get_export returned neither memory nor func")
-            }
-        }
-    }
-}*/
-impl_func_getter!((i32, i32), i32);
-impl_func_getter!((i32, i32), ());
-impl_func_getter!(i32, i32);
-impl_func_getter!(i32, ());
-impl_func_getter!((), i32);
-impl_func_getter!((), ());
-
-// tests
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
 }

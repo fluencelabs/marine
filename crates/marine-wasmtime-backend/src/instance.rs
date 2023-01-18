@@ -1,7 +1,7 @@
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
 use crate::{
     sig_to_fn_ty, StoreState, val_type_to_wtype, WasmtimeContextMut, WasmtimeFunction,
-    WasmtimeFunctionExport, WasmtimeMemory, WasmtimeStore, WasmtimeWasmBackend,
+    WasmtimeMemory, WasmtimeStore, WasmtimeWasmBackend,
 };
 
 use marine_wasm_backend_traits::*;

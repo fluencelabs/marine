@@ -130,7 +130,6 @@ macro_rules! impl_func_construction {
             let sig = FuncSig::new(params, rets);
             */
             WasmtimeFunction {
-                //signature: sig,
                 inner: func
             }
         }
@@ -144,13 +143,8 @@ macro_rules! impl_func_construction {
             };
 
             let func = wasmtime::Func::wrap(&mut ctx.inner, func);
-           /* use WType::I32;
-            let params = vec![$(replace_with!($args -> I32),)*];
-            let rets = vec![I32,];
-            let sig = FuncSig::new(params, rets);
-            */
+
             WasmtimeFunction {
-               // signature: sig,
                 inner: func
             }
         }
@@ -174,7 +168,6 @@ impl FuncConstructor<WasmtimeWasmBackend> for WasmtimeFunction {
         let sig = FuncSig::new(params, rets);
 
         WasmtimeFunction {
-            //signature: sig,
             inner: func,
         }
     }

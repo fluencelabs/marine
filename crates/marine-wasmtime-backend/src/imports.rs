@@ -20,8 +20,9 @@ impl Imports<WasmtimeWasmBackend> for WasmtimeImports {
         module: impl Into<String>,
         name: impl Into<String>,
         func: <WasmtimeWasmBackend as WasmBackend>::Function,
-    ) {
-        self.linker
+    ) -> Result<(), LinkerError> {
+        self
+            .linker
             .define(&module.into(), &name.into(), func.inner)
             .unwrap(); //todo handle error
     }
