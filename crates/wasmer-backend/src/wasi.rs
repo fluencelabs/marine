@@ -1,4 +1,4 @@
-use crate::{WasmerBackend, WasmerCaller};
+use crate::WasmerBackend;
 
 use marine_wasm_backend_traits::*;
 
@@ -39,7 +39,7 @@ impl WasiImplementation<WasmerBackend> for WasmerWasi {
     }
 
     fn get_wasi_state<'s>(
-        instance: &'s mut <WasmerBackend as WasmBackend>::Instance,
+        _instance: &'s mut <WasmerBackend as WasmBackend>::Instance,
     ) -> Box<dyn WasiState + 's> {
         todo!()
     }

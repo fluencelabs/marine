@@ -121,12 +121,5 @@ macro_rules! declare_func_construction {
 }
 
 pub trait FuncConstructor<WB: WasmBackend> {
-    fn new_typed_with_env_0_test<F>(
-        ctx: <WB as WasmBackend>::ContextMut<'_>,
-        func: F,
-    ) -> <WB as WasmBackend>::Function
-    where
-        F: Fn(<WB as WasmBackend>::Caller<'_>) -> () + Send + Sync + 'static;
-
     impl_for_each_function_signature!(declare_func_construction);
 }

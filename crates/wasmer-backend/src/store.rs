@@ -1,4 +1,4 @@
-use wasmer::{AsStoreMut, AsStoreRef, Engine, EngineBuilder, StoreMut, StoreRef};
+use wasmer::{AsStoreMut, AsStoreRef, StoreRef};
 use crate::WasmerBackend;
 
 use marine_wasm_backend_traits::*;

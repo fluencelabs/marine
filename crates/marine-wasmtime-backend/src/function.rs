@@ -153,23 +153,5 @@ macro_rules! impl_func_construction {
 }
 
 impl FuncConstructor<WasmtimeWasmBackend> for WasmtimeFunction {
-    fn new_typed_with_env_0_test<F>(mut ctx: WasmtimeContextMut<'_>, func: F) -> WasmtimeFunction
-    where
-        F: Fn(WasmtimeCaller<'_>) -> () + Send + Sync + 'static,
-    {
-        let func = move |caller: wasmtime::Caller<'_, StoreState>| {
-            let caller = WasmtimeCaller { inner: caller };
-            func(caller)
-        };
-
-        let func = wasmtime::Func::wrap(&mut ctx.inner, func);
-        /*
-        let params = vec![];
-        let rets = vec![];
-        let _sig = FuncSig::new(params, rets);
-        */
-        WasmtimeFunction { inner: func }
-    }
-
     impl_for_each_function_signature!(impl_func_construction);
 }

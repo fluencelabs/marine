@@ -8,7 +8,7 @@ pub struct WasmerCaller<'c> {
 }
 
 impl Caller<WasmerBackend> for WasmerCaller<'_> {
-    fn memory(&mut self, memory_index: u32) -> Option<<WasmerBackend as WasmBackend>::Memory> {
+    fn memory(&mut self, _memory_index: u32) -> Option<<WasmerBackend as WasmBackend>::Memory> {
         self.env
             .as_mut(&mut self.inner)
             .current_memory
@@ -40,7 +40,7 @@ macro_rules! impl_func_getter {
         impl FuncGetter<WasmerBackend, $args, $rets> for WasmerCaller<'_> {
             unsafe fn get_func(
                 &mut self,
-                name: &str,
+                _name: &str,
             ) -> ResolveResult<
                 Box<
                     dyn FnMut(

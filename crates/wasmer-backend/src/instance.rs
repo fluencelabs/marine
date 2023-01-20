@@ -1,9 +1,6 @@
 use anyhow::anyhow;
-use wasmer::{AsStoreMut, Extern};
-use crate::{
-    func_sig_to_function_type, function_type_to_func_sig, wasmer_ty_to_generic_ty, WasmerBackend,
-    WasmerContextMut, WasmerFunction, WasmerMemory, WasmerStore,
-};
+use wasmer::Extern;
+use crate::{function_type_to_func_sig, WasmerBackend, WasmerContextMut, WasmerFunction, WasmerMemory};
 
 use marine_wasm_backend_traits::*;
 
@@ -42,7 +39,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
         self.inner
             .exports
             .iter()
-            .filter_map(|(name, export)| match export {
+            .filter_map(|(_name, export)| match export {
                 Extern::Memory(memory) => Some(memory),
                 _ => None,
             }) // todo is there a way to make it better?
@@ -75,7 +72,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
             .inner
             .exports
             .iter()
-            .filter_map(|(name, export)| match export {
+            .filter_map(|(_name, export)| match export {
                 Extern::Memory(memory) => Some(memory),
                 _ => None,
             }) // todo is there a way to make it better?

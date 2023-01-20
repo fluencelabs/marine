@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-use std::collections::HashMap;
 use anyhow::anyhow;
 use multimap::MultiMap;
 use marine_wasm_backend_traits::*;
@@ -61,7 +59,7 @@ impl WasmBackend for WasmerBackend {
 
 impl WasmerBackend {
     fn custom_sections(bytes: &[u8]) -> Result<MultiMap<String, Vec<u8>>, String> {
-        use wasmparser::{Parser, Payload, Result};
+        use wasmparser::{Parser, Payload};
         Parser::new(0)
             .parse_all(bytes)
             .filter_map(|payload| {

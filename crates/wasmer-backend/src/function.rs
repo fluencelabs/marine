@@ -1,9 +1,8 @@
 use anyhow::anyhow;
-use wasmer::{AsStoreMut, AsStoreRef, FunctionEnv, FunctionEnvMut};
+use wasmer::{FunctionEnv, FunctionEnvMut};
 use crate::{
     WasmerBackend, WasmerContextMut, generic_val_to_wasmer_val, wasmer_val_to_generic_val,
-    generic_ty_to_wasmer_ty, function_type_to_func_sig, func_sig_to_function_type, WasmerCaller,
-    StoreState,
+    function_type_to_func_sig, func_sig_to_function_type, WasmerCaller,
 };
 
 use marine_wasm_backend_traits::*;
@@ -126,6 +125,7 @@ macro_rules! impl_func_construction {
 
             let env = wasmer::FunctionEnv::new(&mut ctx.inner, ());
             let func = wasmer::Function::new_typed_with_env(&mut ctx.inner, &env, func);
+            #[allow(unused)]
             use WType::I32;
             let params = vec![$(replace_with!($args -> I32),)*];
             let rets = vec![];
@@ -148,6 +148,7 @@ macro_rules! impl_func_construction {
 
             let env = wasmer::FunctionEnv::new(&mut ctx.inner, ());
             let func = wasmer::Function::new_typed_with_env(&mut ctx.inner, &env, func);
+            #[allow(unused)]
             use WType::I32;
             let params = vec![$(replace_with!($args -> I32),)*];
             let rets = vec![I32,];
@@ -163,33 +164,5 @@ macro_rules! impl_func_construction {
 }
 
 impl FuncConstructor<WasmerBackend> for WasmerFunction {
-    fn new_typed_with_env_0_test<F>(mut ctx: WasmerContextMut<'_>, func: F) -> WasmerFunction
-    where
-        F: Fn(WasmerCaller<'_>) -> () + Send + Sync + 'static,
-    {
-        let global_env = ctx.env.clone();
-        let func = move |env: FunctionEnvMut<()>| {
-            let caller = WasmerCaller {
-                inner: env,
-                env: global_env.clone(),
-            };
-            func(caller)
-        };
-        let f2 = |env2: FunctionEnvMut<()>| {};
-
-        let env = wasmer::FunctionEnv::new(&mut ctx.inner, ());
-        let func = wasmer::Function::new_typed_with_env(&mut ctx.inner, &env, f2);
-        use WType::I32;
-        let params = vec![];
-        let rets = vec![];
-        let sig = FuncSig::new(params, rets);
-
-        WasmerFunction {
-            sig,
-            inner: func,
-            owner_memory: None,
-        }
-    }
-
     impl_for_each_function_signature!(impl_func_construction);
 }

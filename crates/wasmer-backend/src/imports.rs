@@ -11,7 +11,7 @@ pub struct WasmerImports {
 pub struct WasmerNamespace {}
 
 impl Imports<WasmerBackend> for WasmerImports {
-    fn new(store: &mut <WasmerBackend as WasmBackend>::Store) -> Self {
+    fn new(_store: &mut <WasmerBackend as WasmBackend>::Store) -> Self {
         Self {
             inner: wasmer::Imports::new(),
         }
