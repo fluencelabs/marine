@@ -21,6 +21,7 @@ use crate::marine_js::DynFunc;
 use wasmer_it::interpreter::wasm;
 
 use std::rc::Rc;
+use crate::module::wit_store::WITStore;
 
 #[derive(Clone)]
 enum WITFunctionInner {
@@ -73,7 +74,7 @@ impl WITFunction {
     }
 }
 
-impl wasm::structures::LocalImport for WITFunction {
+impl wasm::structures::LocalImport<WITStore> for WITFunction {
     fn name(&self) -> &str {
         self.name.as_str()
     }
@@ -94,7 +95,7 @@ impl wasm::structures::LocalImport for WITFunction {
         &self.outputs
     }
 
-    fn call(&self, arguments: &[IValue]) -> std::result::Result<Vec<IValue>, ()> {
+    fn call(&self, _store: &mut (), arguments: &[IValue]) -> std::result::Result<Vec<IValue>, ()> {
         use super::type_converters::{ival_to_wval, wval_to_ival};
 
         match &self.inner {

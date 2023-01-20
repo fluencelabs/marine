@@ -8,7 +8,6 @@ members = [
     "crates/it-interfaces",
     "crates/it-parser",
     "crates/it-json-serde",
-    "crates/js-backend",
     "crates/min-it-version",
     "crates/module-info-parser",
     "crates/module-interface",

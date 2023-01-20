@@ -31,16 +31,17 @@ use std::collections::HashMap;
 use std::convert::TryInto;
 use std::sync::Arc;
 use std::rc::Rc;
+use crate::module::wit_store::WITStore;
 
 const INITIALIZE_FUNC: &str = "_initialize";
 
-type ITInterpreter = Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView>;
+type ITInterpreter = Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView, WITStore>;
 
 #[derive(Clone)]
 pub(super) struct ITModuleFunc {
     interpreter: Arc<ITInterpreter>,
-    pub(super) arguments: Rc<Vec<IFunctionArg>>,
-    pub(super) output_types: Rc<Vec<IType>>,
+    pub(super) arguments: Arc<Vec<IFunctionArg>>,
+    pub(super) output_types: Arc<Vec<IType>>,
 }
 
 #[derive(Clone)]
@@ -55,7 +56,7 @@ impl Callable {
         let result = self
             .it_module_func
             .interpreter
-            .run(args, Arc::make_mut(&mut self.it_instance))?
+            .run(args, Arc::make_mut(&mut self.it_instance), &mut ())?
             .as_slice()
             .to_owned();
         Ok(result)
@@ -141,7 +142,7 @@ impl MModule {
         &self.export_record_types
     }
 
-    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&Rc<IRecordType>> {
+    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&Arc<IRecordType>> {
         self.export_record_types.get(&record_type)
     }
 

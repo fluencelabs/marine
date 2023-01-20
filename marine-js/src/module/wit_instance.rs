@@ -25,9 +25,11 @@ use wasmer_it::interpreter::wasm;
 use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, TypedIndex};
 
 use std::collections::HashMap;
-use std::rc::Rc;
+use crate::module::wit_store::WITStore;
 
-pub type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
+use std::sync::Arc;
+
+pub type MRecordTypes = HashMap<u64, Arc<IRecordType>>;
 
 /// Contains all import and export functions that could be called from IT context by call-core.
 #[derive(Clone)]
@@ -109,7 +111,7 @@ impl ITInstance {
     }
 }
 
-impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView> for ITInstance {
+impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView, WITStore> for ITInstance {
     fn export(&self, _export_name: &str) -> Option<&ITExport> {
         // exports aren't used in this version of IT
         None
@@ -137,7 +139,7 @@ impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView>
         Some(memory.view())
     }
 
-    fn wit_record_by_id(&self, index: u64) -> Option<&Rc<IRecordType>> {
+    fn wit_record_by_id(&self, index: u64) -> Option<&Arc<IRecordType>> {
         self.record_types_by_id.get(&index)
     }
 }
