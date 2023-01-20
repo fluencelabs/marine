@@ -23,7 +23,6 @@ use pretty_assertions::assert_eq;
 use once_cell::sync::Lazy;
 use serde_json::json;
 
-use std::rc::Rc;
 use std::sync::Arc;
 
 static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {

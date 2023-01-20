@@ -21,7 +21,7 @@ use marine_wasm_backend_traits::*;
 
 use multimap::MultiMap;
 
-use crate::utils::{sig_to_fn_ty, val_to_wvalue, val_type_to_wtype, wvalue_to_val};
+use crate::utils::{sig_to_fn_ty, val_to_wvalue, wvalue_to_val};
 
 use wasmtime_wasi::WasiCtx;
 

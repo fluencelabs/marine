@@ -21,7 +21,6 @@ use marine::IValue;
 
 use pretty_assertions::assert_eq;
 
-use std::rc::Rc;
 use std::sync::Arc;
 
 #[cfg(feature = "wasmer")]

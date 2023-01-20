@@ -1,11 +1,9 @@
-use wasmtime::AsContextMut as WasmtimeAsContextMut;
 use crate::{
-    val_type_to_wtype, WasmtimeContextMut, WasmtimeFunction,
+    WasmtimeContextMut, WasmtimeFunction,
     WasmtimeMemory, WasmtimeWasmBackend,
 };
 
 use marine_wasm_backend_traits::*;
-use crate::utils::fn_ty_to_sig;
 
 pub struct WasmtimeInstance {
     pub(crate) inner: wasmtime::Instance,

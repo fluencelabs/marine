@@ -22,7 +22,6 @@ use marine::IType;
 use once_cell::sync::Lazy;
 use serde_json::json;
 
-use std::rc::Rc;
 use std::sync::Arc;
 
 #[cfg(feature = "wasmer")]

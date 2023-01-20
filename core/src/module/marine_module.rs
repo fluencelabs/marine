@@ -330,7 +330,7 @@ impl<WB: WasmBackend> MModule<WB> {
             .map(|(name, creator)| (name, creator(store.as_context_mut())))
             .chain(host_imports.into_iter());
 
-        linker.register("host", all_imports);
+        linker.register("host", all_imports)?;
 
         Ok(())
     }
@@ -472,7 +472,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
         for (namespace_name, funcs) in wit_import_funcs.into_iter() {
             let funcs = funcs.into_iter().map(|(name, f)| (name.to_string(), f));
-            linker.register(namespace_name, funcs);
+            linker.register(namespace_name, funcs)?;
         }
 
         Ok(())

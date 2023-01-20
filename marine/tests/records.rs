@@ -255,7 +255,7 @@ fn records_destruction() {
             ]
     ]);
 
-    let result = marine
+    let _result = marine
         .call_with_json(
             "records_passing_pure",
             "pass_droppable_record",
@@ -313,8 +313,8 @@ fn records_return_frees() {
         .map(|stat| (stat.name.to_string(), stat.memory_size))
         .collect::<HashMap<String, usize>>();
 
-    for i in 0..128 {
-        let result = marine
+    for _ in 0..128 {
+        let _result = marine
             .call_with_json(
                 "records_passing_pure",
                 "return_256kb_struct",
@@ -332,10 +332,7 @@ fn records_return_frees() {
 
 #[test]
 fn records_pass_frees() {
-    let inner_records_config_raw = std::fs::read("./tests/wasm_tests/records_passing/Config.toml")
-        .expect("./tests/wasm_tests/records_passing/Config.toml should presence");
-
-    let mut records_passing_config =
+    let records_passing_config =
         marine::TomlMarineConfig::load("./tests/wasm_tests/records_passing/Config.toml")
             .expect("argument passing test config should be well-formed");
 
@@ -418,7 +415,7 @@ fn records_pass_frees() {
     let mut marine = MarineImpl::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let result = marine
+    let _result = marine
         .call_with_json(
             "records_passing_pure",
             "pass_256kb_struct",
@@ -434,8 +431,8 @@ fn records_pass_frees() {
         .map(|stat| (stat.name.to_string(), stat.memory_size))
         .collect::<HashMap<String, usize>>();
 
-    for i in 0..128 {
-        let result = marine
+    for _ in 0..128 {
+        let _result = marine
             .call_with_json(
                 "records_passing_pure",
                 "pass_256kb_struct",
