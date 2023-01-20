@@ -51,7 +51,9 @@ pub(crate) fn generic_ty_to_wasmer_ty<'t>(
         WType::I64 => Type::I64,
         WType::F32 => Type::F32,
         WType::F64 => Type::F64,
-        _ => {todo!()}
+        _ => {
+            todo!()
+        }
     })
     .collect()
 }

@@ -8,7 +8,7 @@ pub struct WasmerCaller<'c> {
 }
 
 impl Caller<WasmerBackend> for WasmerCaller<'_> {
-    fn memory(&mut self, memory_index: u32) -> Option<<WasmerBackend as WasmBackend>::Memory>{
+    fn memory(&mut self, memory_index: u32) -> Option<<WasmerBackend as WasmBackend>::Memory> {
         self.env
             .as_mut(&mut self.inner)
             .current_memory

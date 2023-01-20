@@ -241,7 +241,8 @@ impl REPL {
             .and_then(|path| path.parent().map(PathBuf::from))
             .unwrap_or_default();
 
-        let app_service = DefaultAppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
+        let app_service =
+            DefaultAppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
 
         let duration = start.elapsed();
 
