@@ -15,14 +15,7 @@
  */
 
 use serde_json::{json, Value};
-use marine::{Marine, TomlMarineConfig};
-//use marine_wasmer_backend::WasmerBackend;
-
-#[cfg(feature = "wasmer")]
-type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
-
-#[cfg(feature = "wasmtime")]
-type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
+use marine::{DefaultMarine, TomlMarineConfig};
 
 #[test]
 fn load_from_modules_dir() {

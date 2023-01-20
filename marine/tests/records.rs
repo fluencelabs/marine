@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine::Marine;
+use marine::DefaultMarine;
 use marine::IValue;
 
 use pretty_assertions::assert_eq;
@@ -22,12 +22,6 @@ use serde_json::json;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
-
-#[cfg(feature = "wasmer")]
-type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
-
-#[cfg(feature = "wasmtime")]
-type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
 
 #[test]
 pub fn records() {

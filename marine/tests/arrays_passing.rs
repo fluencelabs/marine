@@ -16,19 +16,13 @@
 
 mod utils;
 
-use marine::Marine;
+use marine::DefaultMarine;
 use marine::IType;
 
 use once_cell::sync::Lazy;
 use serde_json::json;
 
 use std::sync::Arc;
-
-#[cfg(feature = "wasmer")]
-type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
-
-#[cfg(feature = "wasmtime")]
-type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
 
 static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
     marine::TomlMarineConfig::load("./tests/wasm_tests/arrays_passing/Config.toml")

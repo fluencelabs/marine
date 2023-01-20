@@ -48,10 +48,6 @@ struct ModuleInterface {
     record_types: Arc<MRecordTypes>,
 }
 
-// TODO: remove and use mutex instead
-#[allow(clippy::non_send_fields_in_send_ty)]
-unsafe impl<WB: WasmBackend> Send for Marine<WB> {}
-
 pub struct Marine<WB: WasmBackend> {
     /// Marine instance.
     core: MarineCore<WB>,
@@ -307,3 +303,5 @@ impl<WB: WasmBackend> Marine<WB> {
             .ok_or_else(|| MarineError::NoSuchModule(module_name.to_string()))
     }
 }
+
+pub type DefaultMarine = MarineCore<marine_core::DefaultWasmBackend>;

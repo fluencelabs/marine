@@ -43,6 +43,7 @@ env_logger = "0.9.0"
 pretty_assertions = "1.3.0"
 
 [features]
+default = ["wasmtime"]
 raw-module-api = []
-wasmer = ["marine-wasmer-backend"]
-wasmtime = ["marine-wasmtime-backend"]
+wasmer = ["marine-wasmer-backend", "marine-core/wasmer"]
+wasmtime = ["marine-wasmtime-backend", "marine-core/wasmtime"]

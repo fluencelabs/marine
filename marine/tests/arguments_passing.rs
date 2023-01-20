@@ -16,7 +16,7 @@
 
 mod utils;
 
-use marine::Marine;
+use marine::DefaultMarine;
 use marine::IType;
 
 use pretty_assertions::assert_eq;
@@ -31,12 +31,6 @@ static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
 });
 
 const MODULE_NAME: &str = "arguments_passing_pure";
-
-#[cfg(feature = "wasmer")]
-type MarineImpl = Marine<marine_wasmer_backend::WasmerBackend>;
-
-#[cfg(feature = "wasmtime")]
-type MarineImpl = Marine<marine_wasmtime_backend::WasmtimeWasmBackend>;
 
 #[test]
 pub fn get_interfaces() {

@@ -59,3 +59,11 @@ pub mod ne_vec {
 }
 
 pub(crate) type MResult<T> = std::result::Result<T, MError>;
+
+#[cfg(feature = "wasmtime")]
+pub type DefaultWasmBackend = marine_wasmtime_backend::WasmtimeWasmBackend;
+
+#[cfg(feature = "wasmer")]
+pub type DefaultWasmBackend = marine_wasmer_backend::WasmerBackend;
+
+pub type DefaultMarineCore = MarineCore<DefaultWasmBackend>;
