@@ -10,7 +10,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
     fn register_in_linker(
         store: &mut WasmtimeContextMut<'_>,
         linker: &mut WasmtimeImports,
-        version: WasiVersion,
+        _version: WasiVersion, // todo user version
         args: Vec<Vec<u8>>,
         envs: Vec<(Vec<u8>, Vec<u8>)>,
         preopened_files: Vec<PathBuf>,

@@ -1,5 +1,3 @@
-use std::net::ToSocketAddrs;
-use std::ops::Deref;
 use marine_wasm_backend_traits::*;
 use crate::{StoreState, WasmtimeFunction, WasmtimeStore, WasmtimeWasmBackend};
 

@@ -17,23 +17,13 @@ use function::*;
 use memory::*;
 use imports::*;
 
-use std::borrow::BorrowMut;
-use std::path::PathBuf;
-use std::rc::Rc;
-use std::cell::{RefCell, RefMut};
-use it_memory_traits::MemoryAccessError;
 use marine_wasm_backend_traits::*;
-use std::collections::HashMap;
-use std::fmt::format;
-use std::ops::{Deref, DerefMut};
+
 use multimap::MultiMap;
-use wasmtime::{Extern, Func, Linker};
+
 use crate::utils::{sig_to_fn_ty, val_to_wvalue, val_type_to_wtype, wvalue_to_val};
 
-use wasmtime_wasi::sync::WasiCtxBuilder;
 use wasmtime_wasi::WasiCtx;
-use marine_wasm_backend_traits::WasmBackendError;
-use marine_wasm_backend_traits::ResolveError;
 
 #[derive(Clone, Default)]
 pub struct WasmtimeWasmBackend {
@@ -42,7 +32,7 @@ pub struct WasmtimeWasmBackend {
 
 impl WasmtimeWasmBackend {
     fn custom_sections(bytes: &[u8]) -> Result<MultiMap<String, Vec<u8>>, String> {
-        use wasmparser::{Parser, Payload, Result};
+        use wasmparser::{Parser, Payload};
         Parser::new(0)
             .parse_all(bytes)
             .filter_map(|payload| {

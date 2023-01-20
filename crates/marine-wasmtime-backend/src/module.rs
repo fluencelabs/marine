@@ -1,4 +1,4 @@
-use crate::{StoreState, WasmtimeImports, WasmtimeInstance, WasmtimeStore, WasmtimeWasmBackend};
+use crate::{WasmtimeImports, WasmtimeInstance, WasmtimeStore, WasmtimeWasmBackend};
 
 use marine_wasm_backend_traits::*;
 

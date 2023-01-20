@@ -1,12 +1,10 @@
-use anyhow::anyhow;
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
 use crate::{
-    sig_to_fn_ty, StoreState, val_type_to_wtype, WasmtimeContextMut, WasmtimeFunction,
-    WasmtimeMemory, WasmtimeStore, WasmtimeWasmBackend,
+    val_type_to_wtype, WasmtimeContextMut, WasmtimeFunction,
+    WasmtimeMemory, WasmtimeWasmBackend,
 };
 
 use marine_wasm_backend_traits::*;
-use marine_wasm_backend_traits::WasmBackendError;
 use crate::utils::fn_ty_to_sig;
 
 pub struct WasmtimeInstance {
@@ -76,17 +74,10 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
                 ))
             })?;
 
+        /*
         let ty = func.ty(&store.as_context().inner);
-        let params = ty
-            .params()
-            .map(|ty| val_type_to_wtype(&ty))
-            .collect::<Vec<_>>();
-        let rets = ty
-            .results()
-            .map(|ty| val_type_to_wtype(&ty))
-            .collect::<Vec<_>>();
-
-        let sig = FuncSig::new(params, rets);
+        let sig = fn_ty_to_sig(&ty);
+         */
         Ok(WasmtimeFunction { inner: func })
     }
 }

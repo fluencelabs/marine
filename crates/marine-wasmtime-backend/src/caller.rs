@@ -10,7 +10,7 @@ pub struct WasmtimeCaller<'c> {
 }
 
 impl<'c> Caller<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
-    fn memory(&mut self, memory_index: u32) -> Option<WasmtimeMemory> {
+    fn memory(&mut self, _memory_index: u32) -> Option<WasmtimeMemory> {
         let memory = self.inner.get_export("memory")?.into_memory()?;
 
         Some(WasmtimeMemory::new(memory))
@@ -61,7 +61,7 @@ macro_rules! impl_func_getter {
 
                         let closure = move |store: &mut WasmtimeContextMut<'_>, args| {
                             f.call(&mut store.inner, args).map_err(|e| {
-                                if let Some(trap) = e.downcast_ref::<wasmtime::Trap>() {
+                                if let Some(_) = e.downcast_ref::<wasmtime::Trap>() {
                                     RuntimeError::Trap(e)
                                 } else {
                                     RuntimeError::Other(e)
@@ -71,7 +71,7 @@ macro_rules! impl_func_getter {
 
                         Ok(Box::new(closure))
                     }
-                    wasmtime::Extern::Memory(m) => Err(ResolveError::ExportTypeMismatch(
+                    wasmtime::Extern::Memory(_) => Err(ResolveError::ExportTypeMismatch(
                         "function".to_string(),
                         "memory".to_string(),
                     )),

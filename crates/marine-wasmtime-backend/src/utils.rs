@@ -1,5 +1,5 @@
 use wasmtime::{Val, ValType};
-use marine_wasm_backend_traits::{FuncSig, InstantiationError, RuntimeError, RuntimeResult, UserError, WasmBackendError, WType, WValue};
+use marine_wasm_backend_traits::{FuncSig, InstantiationError, RuntimeError, RuntimeResult, UserError, WType, WValue};
 
 pub(crate) fn val_type_to_wtype(ty: &wasmtime::ValType) -> WType {
     match ty {
@@ -67,8 +67,8 @@ pub(crate) fn fn_ty_to_sig(ty: &wasmtime::FuncType) -> FuncSig {
     FuncSig::new(params, rets)
 }
 
-pub(crate) fn inspect_call_error(mut e: anyhow::Error) -> RuntimeError {
-    if let Some(trap) = e.downcast_ref::<wasmtime::Trap>() {
+pub(crate) fn inspect_call_error(e: anyhow::Error) -> RuntimeError {
+    if let Some(_) = e.downcast_ref::<wasmtime::Trap>() {
         RuntimeError::Trap(e)
     } else {
         match e.downcast::<UserError>() {
@@ -79,7 +79,7 @@ pub(crate) fn inspect_call_error(mut e: anyhow::Error) -> RuntimeError {
 }
 
 pub(crate) fn inspect_instantiation_error(e: anyhow::Error) -> InstantiationError {
-    if let Some(trap) = e.downcast_ref::<wasmtime::Trap>() {
+    if let Some(_) = e.downcast_ref::<wasmtime::Trap>() {
         InstantiationError::RuntimeError(RuntimeError::Trap(e))
     } else {
         match e.downcast::<UserError>() {

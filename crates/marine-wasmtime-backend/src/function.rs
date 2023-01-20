@@ -163,11 +163,11 @@ impl FuncConstructor<WasmtimeWasmBackend> for WasmtimeFunction {
         };
 
         let func = wasmtime::Func::wrap(&mut ctx.inner, func);
-        use WType::I32;
+        /*
         let params = vec![];
         let rets = vec![];
-        let sig = FuncSig::new(params, rets);
-
+        let _sig = FuncSig::new(params, rets);
+        */
         WasmtimeFunction { inner: func }
     }
 
