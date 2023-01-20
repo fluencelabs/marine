@@ -85,6 +85,6 @@ jobs:
       - name: Run cargo clippy
         run: cargo clippy -v
 
-      - name: Run marine-js Node tests
+      - name: Run marine-js smoke tests
         run: npm run test
         working-directory: marine-js/npm-package

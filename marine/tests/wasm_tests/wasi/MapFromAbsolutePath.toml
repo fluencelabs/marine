@@ -5,5 +5,5 @@ modules_dir = "./artifacts/"
     max_heap_size = "10 KiB"
     logger_enabled = true
     [module.wasi]
-        preopened_files = ["tests/wasm_tests/wasi/some_dir"]
-        mapped_dirs = { "some_dir" = "tests/wasm_tests/wasi/some_dir" }
+        mapped_dirs = { "/tmp" = "tests/wasm_tests/wasi/some_dir" }
+

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-use std::path::PathBuf;
 use marine::DefaultMarine;
 use marine::IValue;
 
 use pretty_assertions::assert_eq;
+
+use std::path::PathBuf;
 
 #[test]
 pub fn call_parameters() {

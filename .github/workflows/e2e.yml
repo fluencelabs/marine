@@ -1,0 +1,157 @@
+name: "e2e"
+
+on:
+  pull_request:
+    paths-ignore:
+      - "!**.md"
+  push:
+    branches:
+      - "master"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: true
+
+jobs:
+  marine:
+    uses: ./.github/workflows/snapshot.yml
+
+  marine-rs-sdk-test:
+    needs:
+      - marine
+
+    uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@master
+    with:
+      cargo-dependencies: |
+        [
+          {
+            "package": "fluence-app-service",
+            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-app-service",
+            "manifest": "crates/marine-test-macro-impl/Cargo.toml",
+            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "registry": "fluence"
+          }
+        ]
+
+  aquavm:
+    needs:
+      - marine
+
+    uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@master
+    with:
+      cargo-dependencies: |
+        [
+          {
+            "package": "marine-runtime",
+            "manifest": "avm/server/Cargo.toml",
+            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-app-service",
+            "manifest": "air/Cargo.toml",
+            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "registry": "fluence"
+          }
+        ]
+
+  rust-peer:
+    needs:
+      - marine
+      - aquavm
+
+    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
+    with:
+      cargo-dependencies: |
+        [
+          {
+            "package": "fluence-app-service",
+            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "avm-server",
+            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "air-interpreter-wasm",
+            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "registry": "fluence"
+          }
+        ]
+
+  fluence-js-tests:
+    name: "fluence-js"
+    needs:
+      - marine
+      - aquavm
+      - rust-peer
+
+    uses: fluencelabs/fluence-js/.github/workflows/tests.yml@master
+    with:
+      # marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
+      avm-version: "${{ needs.aquavm.outputs.avm-version }}"
+      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
+
+  fluence-js:
+    needs:
+      - marine
+      - aquavm
+
+    uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@master
+    with:
+      # marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
+      avm-version: "${{ needs.aquavm.outputs.avm-version }}"
+
+  aqua:
+    needs:
+      - fluence-js
+
+    uses: fluencelabs/aqua/.github/workflows/snapshot.yml@main
+    with:
+      fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
+
+  aqua-playground:
+    needs:
+      - fluence-js
+      - aqua
+      - rust-peer
+
+    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
+    with:
+      fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
+      aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
+      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
+
+  registry:
+    needs:
+      - aqua
+      - rust-peer
+
+    uses: fluencelabs/registry/.github/workflows/tests.yml@main
+    with:
+      aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
+      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
+
+  fluence-cli:
+    needs:
+      - aqua
+      - marine
+      - fluence-js
+      - rust-peer
+
+    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
+    with:
+      aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
+      fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
+      marine-version: "${{ needs.marine.outputs.cargo-version }}"
+      mrepl-version: "${{ needs.marine.outputs.cargo-version }}"
+      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"

@@ -25,10 +25,10 @@ use marine_wasm_backend_traits::WasmBackend;
 use marine::Marine;
 use marine::IValue;
 use serde_json::Value as JValue;
+use maplit::hashset;
 
 use std::convert::TryInto;
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::path::PathBuf;
 use std::io::ErrorKind;
 
@@ -127,13 +127,12 @@ impl<WB: WasmBackend> AppService<WB> {
     ///     - service_base_dir/service_id/SERVICE_LOCAL_DIR_NAME
     ///     - service_base_dir/service_id/SERVICE_TMP_DIR_NAME
     ///  2. adding service_id to environment variables
+    ///  3. moving all the user defined mapped dirs and preopened files to service_base_dir/service_id/
     fn set_env_and_dirs(
         config: &mut AppServiceConfig<WB>,
         service_id: String,
         mut envs: HashMap<Vec<u8>, Vec<u8>>,
     ) -> Result<()> {
-        use maplit::hashmap;
-
         let create = |dir: &PathBuf| match std::fs::create_dir(dir) {
             Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
             Err(err) => Err(AppServiceError::CreateDir {
@@ -146,23 +145,13 @@ impl<WB: WasmBackend> AppService<WB> {
         let base_dir = &config.service_base_dir;
         let service_dir = base_dir.join(&service_id);
         create(&service_dir)?;
+        create(&service_dir.join(SERVICE_LOCAL_DIR_NAME))?;
+        create(&service_dir.join(SERVICE_TMP_DIR_NAME))?;
 
-        let local_dir = service_dir.join(SERVICE_LOCAL_DIR_NAME);
-        create(&local_dir)?;
-
-        let tmp_dir = service_dir.join(SERVICE_TMP_DIR_NAME);
-        create(&tmp_dir)?;
-
-        let local_dir = local_dir.to_string_lossy().to_string();
-        let tmp_dir = tmp_dir.to_string_lossy().to_string();
-
-        let mut preopened_files = HashSet::new();
-        preopened_files.insert(PathBuf::from(local_dir.clone()));
-        preopened_files.insert(PathBuf::from(tmp_dir.clone()));
-
-        let mapped_dirs = hashmap! {
-            String::from(SERVICE_LOCAL_DIR_NAME) => PathBuf::from(local_dir),
-            String::from(SERVICE_TMP_DIR_NAME) => PathBuf::from(tmp_dir),
+        // files will be mapped to service_dir later, along with user-defined ones
+        let preopened_files = hashset! {
+            PathBuf::from(SERVICE_LOCAL_DIR_NAME),
+            PathBuf::from(SERVICE_TMP_DIR_NAME)
         };
 
         envs.insert(
@@ -174,7 +163,10 @@ impl<WB: WasmBackend> AppService<WB> {
             module.config.extend_wasi_envs(envs.clone());
             module
                 .config
-                .extend_wasi_files(preopened_files.clone(), mapped_dirs.clone());
+                .extend_wasi_files(preopened_files.clone(), <_>::default());
+            // Must be the last modification of the module.config.
+            // Moves app preopened files and mapped dirs to the &service dir, keeping old aliases.
+            module.config.set_wasi_fs_root(&service_dir)
         }
 
         Ok(())

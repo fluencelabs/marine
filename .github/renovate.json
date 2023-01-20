@@ -1,28 +1,29 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:base",
+    ":semanticCommitTypeAll(chore)"
   ],
-  "enabledManagers": ["cargo", "npm"],
+  "enabledManagers": ["cargo", "npm", "github-actions"],
+  "schedule": "every weekend",
+  "rangeStrategy": "pin",
   "packageRules": [
     {
-      "matchLanguages": ["rust"],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "all non-major Rust dependencies"
+      "matchDepTypes": ["devDependencies"],
+      "prPriority": -1
     },
     {
-      "matchLanguages": ["js"],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "all non-major JS dependencies"
+      "matchUpdateTypes": ["major"],
+      "prConcurrentLimit": 1
     },
     {
-      "matchPackagePatterns": ["^@wasmer", "^wasmer"],
+      "matchManagers": [ "github-actions" ],
+      "automerge": true,
+      "automergeType": "branch",
+      "prPriority": 1
+    },
+    {
+      "matchPackagePatterns": ["^@wasmer", "^wasmer", "^wasm-bindgen"],
       "enabled": false
     }
   ]

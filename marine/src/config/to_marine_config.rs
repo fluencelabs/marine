@@ -35,8 +35,7 @@ use marine_utils::bytes_to_wasm_pages_ceil;
 //use wasmer_runtime::func;
 
 use std::collections::HashMap;
-//use std::cell::RefCell;
-//use std::rc::Rc;
+use std::collections::hash_map::Entry;
 use std::sync::{Arc, Mutex};
 
 const WASM_MAX_HEAP_SIZE: u64 = 4 * 1024 * 1024 * 1024 - 1; // 4 GiB - 1
@@ -77,22 +76,42 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             .populate_max_heap_size(mem_pages_count, max_heap_size)?
             .populate_logger(logger_enabled, logging_mask, logger_filter, module_name)
             .populate_host_imports(host_imports, call_parameters)
-            .populate_wasi(wasi)
+            .populate_wasi(wasi)?
             .add_version()
             .into_config();
 
         Ok(config)
     }
 
-    fn populate_wasi(mut self, wasi: Option<MarineWASIConfig>) -> Self {
+    fn populate_wasi(mut self, wasi: Option<MarineWASIConfig>) -> MarineResult<Self> {
         let wasi = match wasi {
             Some(wasi) => wasi,
-            None => return self,
+            None => return Ok(self),
         };
 
         self.config.wasi_envs = wasi.envs;
-        self.config.wasi_preopened_files = wasi.preopened_files;
+
         self.config.wasi_mapped_dirs = wasi.mapped_dirs;
+
+        // Preopened files and mapped dirs are treated in the same way by the wasmer-wasi.
+        // The only difference is that for preopened files the alias and the value are the same,
+        // while for mapped dirs user defines the alias. So it may happen that some preooened file
+        // and mapped directory will have the same alias, which will cause wasmer to panic.
+        // So here preopened files are moved directly to the mapped dirs to catch errors beforehand.
+        for path in wasi.preopened_files {
+            let alias = path.to_string_lossy();
+            match self.config.wasi_mapped_dirs.entry(alias.to_string()) {
+                Entry::Occupied(entry) => {
+                    return Err(MarineError::InvalidConfig(format!(
+                        "WASI preopened files conflict with WASI mapped dirs: preopen {} is also mapped to: {}. Remove one of the entries to fix this error.", entry.key(), entry.get().display())
+                    ))
+                },
+
+                Entry::Vacant(entry) => {
+                    entry.insert(path);
+                }
+            }
+        }
 
         // create environment variables for all mapped directories
         let mapped_dirs = self
@@ -109,7 +128,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
 
         self.config.wasi_envs.extend(mapped_dirs);
 
-        self
+        Ok(self)
     }
 
     fn populate_host_imports(
