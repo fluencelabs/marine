@@ -35,7 +35,8 @@ use crate::module::wit_store::WITStore;
 
 const INITIALIZE_FUNC: &str = "_initialize";
 
-type ITInterpreter = Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView, WITStore>;
+type ITInterpreter =
+    Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView, WITStore>;
 
 #[derive(Clone)]
 pub(super) struct ITModuleFunc {

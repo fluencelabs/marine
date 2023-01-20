@@ -62,7 +62,12 @@ impl MemoryReadable<WITStore> for WITMemoryView {
 }
 
 impl MemoryView<WITStore> for WITMemoryView {
-    fn check_bounds(&self, _store: &mut (), offset: u32, size: u32) -> Result<(), MemoryAccessError> {
+    fn check_bounds(
+        &self,
+        _store: &mut (),
+        offset: u32,
+        size: u32,
+    ) -> Result<(), MemoryAccessError> {
         let memory_size = self.memory.len();
         if offset + size >= memory_size {
             Err(MemoryAccessError::OutOfBounds {

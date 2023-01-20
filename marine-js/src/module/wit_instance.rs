@@ -111,7 +111,9 @@ impl ITInstance {
     }
 }
 
-impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView, WITStore> for ITInstance {
+impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView, WITStore>
+    for ITInstance
+{
     fn export(&self, _export_name: &str) -> Option<&ITExport> {
         // exports aren't used in this version of IT
         None

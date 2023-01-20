@@ -106,7 +106,8 @@ fn mapping_to_absolute_path_in_wasi_prohibited() {
 fn mapping_from_absolute_path_in_wasi_allowed() {
     let config_path = "tests/wasm_tests/wasi/MapFromAbsolutePath.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let _result = DefaultMarine::with_raw_config(raw_config).expect("Module should be loaded successfully");
+    let _result =
+        DefaultMarine::with_raw_config(raw_config).expect("Module should be loaded successfully");
 }
 
 #[test]

@@ -49,7 +49,7 @@ pub struct FluenceFaaS {
     marine: Marine,
 
     /// Parameters of call accessible by Wasm modules.
-    call_parameters:  Arc<RefCell<CallParameters>>,
+    call_parameters: Arc<RefCell<CallParameters>>,
 
     /// Cached module interfaces by names.
     module_interfaces_cache: HashMap<String, ModuleInterface>,
