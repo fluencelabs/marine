@@ -1,4 +1,3 @@
-use std::path::Path;
 use thiserror::Error;
 use crate::WType;
 

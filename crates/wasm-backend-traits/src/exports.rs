@@ -1,8 +1,5 @@
-use crate::errors::*;
+use crate::{DelayedContextLifetime, WasmBackend};
 
-use crate::{ContextMut, DelayedContextLifetime, WasmBackend};
-use crate::FuncSig;
-use crate::WValue;
 
 pub enum Export<WB: WasmBackend> {
     Memory(<WB as WasmBackend>::Memory),

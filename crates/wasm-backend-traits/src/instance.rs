@@ -1,4 +1,4 @@
-use crate::{AsContextMut, Export, ResolveResult, RuntimeResult, WasmBackend};
+use crate::{AsContextMut, Export, ResolveResult, WasmBackend};
 
 pub trait Instance<WB: WasmBackend> {
     fn export_iter<'a>(

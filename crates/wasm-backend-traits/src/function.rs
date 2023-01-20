@@ -1,5 +1,5 @@
 use crate::{
-    AsContextMut, FuncSig, impl_for_each_function_signature, RuntimeResult, WasmBackend, WasmType,
+    AsContextMut, FuncSig, impl_for_each_function_signature, RuntimeResult, WasmBackend,
     WValue,
 };
 

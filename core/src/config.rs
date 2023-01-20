@@ -37,7 +37,7 @@ pub type HostExportedFunc<WB> = Box<
         + 'static,
 >;
 
-pub type RawImportCreator<WB: WasmBackend> =
+pub type RawImportCreator<WB> =
     Box<dyn FnOnce(<WB as WasmBackend>::ContextMut<'_>) -> <WB as WasmBackend>::Function>;
 
 pub struct HostImportDescriptor<WB: WasmBackend> {

@@ -1,8 +1,6 @@
 use crate::errors::*;
 
-use crate::{AsContextMut, WasmBackend, WType};
-use crate::WValue;
-use crate::Export;
+use crate::{WasmBackend, WType};
 
 use std::borrow::Cow;
 

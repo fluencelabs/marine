@@ -24,7 +24,6 @@ pub use macros::*;
 
 use std::marker::PhantomData;
 use it_memory_traits::{MemoryView};
-use wasmer_it::interpreter::wasm;
 
 pub trait WasmBackend: Clone + Default + 'static {
     // general
