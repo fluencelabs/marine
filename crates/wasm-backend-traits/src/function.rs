@@ -45,6 +45,7 @@ macro_rules! replace_with {
 
 macro_rules! impl_into_func {
     ($num:tt $($args:ident)*) => (paste::paste!{
+        #[allow(non_snake_case)]
         impl<WB, F> IntoFunc<WB, ($(replace_with!($args -> i32),)*), (), WithoutEnv> for F
         where
             WB: WasmBackend,
@@ -55,6 +56,7 @@ macro_rules! impl_into_func {
             }
         }
 
+        #[allow(non_snake_case)]
         impl<WB, F> IntoFunc<WB, ($(replace_with!($args -> i32),)*), (), WithEnv> for F
         where
             WB: WasmBackend,
@@ -65,6 +67,7 @@ macro_rules! impl_into_func {
             }
         }
 
+        #[allow(non_snake_case)]
         impl<WB, F> IntoFunc<WB, ($(replace_with!($args -> i32),)*), i32, WithoutEnv> for F
         where
             WB: WasmBackend,
@@ -75,6 +78,7 @@ macro_rules! impl_into_func {
             }
         }
 
+        #[allow(non_snake_case)]
         impl<WB, F> IntoFunc<WB, ($(replace_with!($args -> i32),)*), i32, WithEnv> for F
         where
             WB: WasmBackend,
@@ -91,6 +95,7 @@ impl_for_each_function_signature!(impl_into_func);
 
 macro_rules! declare_func_construction {
     ($num:tt $($args:ident)*) => (paste::paste!{
+        #[allow(non_snake_case)]
         fn [< new_typed_ $num >]<F>(ctx: <WB as WasmBackend>::ContextMut<'_>, func: F) -> <WB as WasmBackend>::Function
             where F: Fn($(replace_with!($args -> i32),)*) -> () + Send + Sync + 'static
         {
@@ -98,9 +103,11 @@ macro_rules! declare_func_construction {
             Self:: [< new_typed_with_env_ $num >] (ctx, func)
         }
 
+        #[allow(non_snake_case)]
         fn [< new_typed_with_env_ $num >]<F>(ctx: <WB as WasmBackend>::ContextMut<'_>, func: F) -> <WB as WasmBackend>::Function
             where F: Fn(<WB as WasmBackend>::Caller<'_>, $(replace_with!($args -> i32),)*) -> () + Send + Sync + 'static;
 
+        #[allow(non_snake_case)]
         fn [< new_typed_ $num _r>]<F>(ctx: <WB as WasmBackend>::ContextMut<'_>, func: F) -> <WB as WasmBackend>::Function
             where F: Fn($(replace_with!($args -> i32),)*) -> i32 + Send + Sync + 'static
         {
@@ -108,6 +115,7 @@ macro_rules! declare_func_construction {
             Self:: [< new_typed_with_env_ $num _r >] (ctx, func)
         }
 
+        #[allow(non_snake_case)]
         fn [< new_typed_with_env_ $num _r>]<F>(ctx: <WB as WasmBackend>::ContextMut<'_>, func: F) -> <WB as WasmBackend>::Function
             where F: Fn(<WB as WasmBackend>::Caller<'_>, $(replace_with!($args -> i32),)*) -> i32 + Send + Sync + 'static;
     });
