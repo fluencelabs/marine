@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use wasmer::{AsStoreMut, Extern};
 use crate::{
     func_sig_to_function_type, function_type_to_func_sig, wasmer_ty_to_generic_ty, WasmerBackend,
@@ -33,11 +34,11 @@ impl Instance<WasmerBackend> for WasmerInstance {
         Box::new(iter)
     }
 
-    fn memory(
+    fn get_nth_memory(
         &self,
         _store: &mut impl AsContextMut<WasmerBackend>,
         memory_index: u32,
-    ) -> WasmerMemory {
+    ) -> Option<WasmerMemory> {
         self.inner
             .exports
             .iter()
@@ -49,18 +50,17 @@ impl Instance<WasmerBackend> for WasmerInstance {
             .map(|memory| WasmerMemory {
                 inner: memory.clone(),
             })
-            .unwrap() // todo handle error
     }
 
-    fn memory_by_name(
+    fn get_memory(
         &self,
         _store: &mut impl AsContextMut<WasmerBackend>,
         name: &str,
-    ) -> Option<WasmerMemory> {
+    ) -> ResolveResult<WasmerMemory> {
         self.inner
             .exports
             .get_memory(name)
-            .ok()
+            .map_err(|e| ResolveError::Other(anyhow!(e))) // todo make detailed
             .map(|memory| WasmerMemory {
                 inner: memory.clone(),
             })
@@ -85,7 +85,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
         self.inner
             .exports
             .get_function(name)
-            .map_err(|e| ResolveError::Message(format!("wasmer cannot find function {}", e)))
+            .map_err(|e| ResolveError::Other(anyhow!("wasmer cannot find function {}", e))) // todo make detailed
             .map(|func| {
                 let ty = func.ty(&store.as_context());
 

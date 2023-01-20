@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use multimap::MultiMap;
 use crate::{WasmerBackend, WasmerImports, WasmerInstance, WasmerStore};
 
@@ -18,9 +19,9 @@ impl Module<WasmerBackend> for WasmerModule {
         &self,
         store: &mut WasmerStore,
         imports: &WasmerImports,
-    ) -> WasmBackendResult<<WasmerBackend as WasmBackend>::Instance> {
+    ) -> InstantiationResult<<WasmerBackend as WasmBackend>::Instance> {
         wasmer::Instance::new(&mut store.inner, &self.inner, &imports.inner)
-            .map_err(|e| WasmBackendError::InstantiationError(format!("{}", e)))
+            .map_err(|e| InstantiationError::Other(anyhow!(e))) // todo make detailed
             .map(|instance| WasmerInstance { inner: instance })
     }
 }

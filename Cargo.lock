@@ -2532,6 +2532,7 @@ dependencies = [
 name = "marine-wasmer-backend"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "it-memory-traits 0.3.1 (git+https://github.com/fluencelabs/interface-types?branch=feat/add-store)",
  "marine-wasm-backend-traits",
  "multimap",
@@ -2664,7 +2665,6 @@ dependencies = [
  "log",
  "marine-rs-sdk-main",
  "marine-wasm-backend-traits",
- "marine-wasmer-backend",
  "rustop",
  "rustyline",
  "rustyline-derive",

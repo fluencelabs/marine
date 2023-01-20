@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use wasmer::{AsStoreMut, AsStoreRef, FunctionEnv, FunctionEnvMut};
 use crate::{
     WasmerBackend, WasmerContextMut, generic_val_to_wasmer_val, wasmer_val_to_generic_val,
@@ -82,7 +83,7 @@ impl Function<WasmerBackend> for WasmerFunction {
         &self,
         ctx: &mut impl AsContextMut<WasmerBackend>,
         args: &[WValue],
-    ) -> CallResult<Vec<WValue>> {
+    ) -> RuntimeResult<Vec<WValue>> {
         let mut ctx = ctx.as_context_mut();
         let prev_memory = ctx.env.as_mut(&mut ctx.inner).current_memory.clone();
         ctx.env.as_mut(&mut ctx.inner).current_memory = self.owner_memory.clone();
@@ -91,7 +92,7 @@ impl Function<WasmerBackend> for WasmerFunction {
         let result = self
             .inner
             .call(&mut ctx.inner, &params)
-            .map_err(|e| CallError::Message(format!("Wasmer failed to call function: {}", e)))
+            .map_err(|e| RuntimeError::Other(anyhow!("Wasmer failed to call function: {}", e))) // todo make detailed
             .map(|rets| wasmer_val_to_generic_val(rets.as_ref()));
 
         ctx.env.as_mut(&mut ctx.inner).current_memory = prev_memory;

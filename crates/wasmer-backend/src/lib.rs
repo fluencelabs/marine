@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use anyhow::anyhow;
 use multimap::MultiMap;
 use marine_wasm_backend_traits::*;
 
@@ -40,17 +41,17 @@ impl WasmBackend for WasmerBackend {
     type MemoryView = WasmerMemory;
     type Wasi = WasmerWasi;
 
-    fn compile(store: &mut Self::Store, wasm: &[u8]) -> WasmBackendResult<Self::Module> {
+    fn compile(store: &mut Self::Store, wasm: &[u8]) -> CompilationResult<Self::Module> {
         wasmer::Module::new(store.inner.engine(), wasm)
             .map_err(|e| {
-                WasmBackendError::CompilationError(CompilationError::Message(format!(
+                CompilationError::Other(anyhow!(
                     "Wasmer module compilation failed: {}",
                     e
-                )))
+                )) // todo make detailed
             })
             .and_then(|module| {
                 let custom_sections = Self::custom_sections(wasm).map_err(|e| {
-                    WasmBackendError::CompilationError(CompilationError::Message(format!("{}", e)))
+                    CompilationError::Other(anyhow!("{}", e)) // todo make detailed
                 })?;
                 Ok(WasmerModule {
                     inner: module,

@@ -22,7 +22,7 @@ use marine::itype_text_view;
 
 use serde::Serialize;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Serialize)]
 pub struct FunctionSignature {
@@ -91,7 +91,7 @@ fn serialize_function_signature(
 
 fn serialize_record_type(
     id: u64,
-    record: Rc<IRecordType>,
+    record: Arc<IRecordType>,
     record_types: &MRecordTypes,
 ) -> RecordType {
     let fields = record

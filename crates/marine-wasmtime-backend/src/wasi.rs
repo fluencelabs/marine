@@ -67,7 +67,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
     }
 
     fn get_wasi_state<'s>(
-        instance: &'s mut <WasmtimeWasmBackend as WasmBackend>::Instance,
+        _instance: &'s mut <WasmtimeWasmBackend as WasmBackend>::Instance,
     ) -> Box<dyn WasiState + 's> {
         // todo give actual state
         Box::new(WasmtimeWasiState {})

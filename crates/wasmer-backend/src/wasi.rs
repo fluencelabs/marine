@@ -3,6 +3,7 @@ use crate::{WasmerBackend, WasmerCaller};
 use marine_wasm_backend_traits::*;
 
 use std::path::PathBuf;
+use anyhow::anyhow;
 
 pub struct WasmerWasi {}
 
@@ -15,16 +16,16 @@ impl WasiImplementation<WasmerBackend> for WasmerWasi {
         envs: Vec<(Vec<u8>, Vec<u8>)>,
         preopened_files: Vec<PathBuf>,
         mapped_dirs: Vec<(String, PathBuf)>,
-    ) -> Result<(), String> {
+    ) -> WasiResult<()> {
         let state = wasmer_wasi::WasiStateBuilder::default()
             .args(args.iter())
             .envs(envs.into_iter())
             .preopen_dirs(preopened_files.iter())
-            .map_err(|e| format!("{}", e))?
+            .map_err(|e| anyhow!("{}", e))?
             .map_dirs(mapped_dirs.into_iter())
-            .map_err(|e| format!("{}", e))?
+            .map_err(|e| anyhow!("{}", e))?
             .build()
-            .map_err(|e| format!("{}", e))?;
+            .map_err(|e| anyhow!("{}", e))?;
         let wasi_env = wasmer_wasi::WasiEnv::new(state);
         let func_env = wasmer::FunctionEnv::new(&mut store.inner, wasi_env);
         let wasi_imports = wasmer_wasi::generate_import_object_from_env(

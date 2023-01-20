@@ -20,10 +20,9 @@ use print_state::print_envs;
 use print_state::print_fs_state;
 use crate::ReplResult;
 
-use fluence_app_service::{AppService, CallParameters, SecurityTetraplet};
+use fluence_app_service::{DefaultAppService, DefaultWasmBackend, CallParameters, SecurityTetraplet};
 use fluence_app_service::MarineModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
-use marine_wasmer_backend::WasmerBackend;
 
 use serde::Deserialize;
 use serde_json::Value as JValue;
@@ -64,7 +63,7 @@ struct CallModuleArguments<'args> {
 
 #[allow(clippy::upper_case_acronyms)]
 pub(super) struct REPL {
-    app_service: AppService<WasmerBackend>,
+    app_service: DefaultAppService,
 }
 
 impl REPL {
@@ -114,7 +113,7 @@ impl REPL {
         }
 
         let start = Instant::now();
-        let config = MarineModuleConfig::<WasmerBackend> {
+        let config = MarineModuleConfig {
             logger_enabled: true,
             mem_pages_count: Default::default(),
             max_heap_size: Default::default(),
@@ -124,7 +123,7 @@ impl REPL {
         };
         let result_msg = match self
             .app_service
-            .load_module::<MarineModuleConfig<WasmerBackend>, String>(
+            .load_module::<MarineModuleConfig<DefaultWasmBackend>, String>(
                 module_name.into(),
                 &wasm_bytes.unwrap(),
                 Some(config),
@@ -224,7 +223,7 @@ impl REPL {
     fn create_app_service<S: Into<PathBuf>>(
         config_file_path: Option<S>,
         quiet: bool,
-    ) -> ReplResult<AppService<WasmerBackend>> {
+    ) -> ReplResult<DefaultAppService> {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
         let config_file_path: Option<PathBuf> = config_file_path.map(Into::into);
@@ -242,7 +241,7 @@ impl REPL {
             .and_then(|path| path.parent().map(PathBuf::from))
             .unwrap_or_default();
 
-        let app_service = AppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
+        let app_service = DefaultAppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
 
         let duration = start.elapsed();
 
