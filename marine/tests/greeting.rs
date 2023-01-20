@@ -34,7 +34,7 @@ pub fn greeting() {
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
     greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
-    let mut faas = MarineImpl::with_raw_config(greeting_config)
+    let mut faas = DefaultMarine::with_raw_config(greeting_config)
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
     let result1 = faas
@@ -70,7 +70,7 @@ pub fn get_interfaces() {
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
     greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
-    let faas = MarineImpl::with_raw_config(greeting_config)
+    let faas = DefaultMarine::with_raw_config(greeting_config)
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
     let interface = faas.get_interface();

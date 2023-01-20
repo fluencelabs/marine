@@ -1,6 +1,5 @@
 use crate::{
-    AsContextMut, FuncSig, impl_for_each_function_signature, RuntimeResult, WasmBackend,
-    WValue,
+    AsContextMut, FuncSig, impl_for_each_function_signature, RuntimeResult, WasmBackend, WValue,
 };
 
 pub trait Function<WB: WasmBackend>: Send + Sync {

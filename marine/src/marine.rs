@@ -303,5 +303,3 @@ impl<WB: WasmBackend> Marine<WB> {
             .ok_or_else(|| MarineError::NoSuchModule(module_name.to_string()))
     }
 }
-
-pub type DefaultMarine = MarineCore<marine_core::DefaultWasmBackend>;

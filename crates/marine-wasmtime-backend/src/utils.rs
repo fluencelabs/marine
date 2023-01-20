@@ -1,5 +1,7 @@
 use wasmtime::{Val, ValType};
-use marine_wasm_backend_traits::{FuncSig, InstantiationError, RuntimeError, RuntimeResult, UserError, WType, WValue};
+use marine_wasm_backend_traits::{
+    FuncSig, InstantiationError, RuntimeError, RuntimeResult, UserError, WType, WValue,
+};
 
 pub(crate) fn val_type_to_wtype(ty: &wasmtime::ValType) -> WType {
     match ty {

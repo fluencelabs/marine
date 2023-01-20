@@ -170,13 +170,8 @@ impl<WB: WasmBackend> MModule<WB> {
         let it_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
-            *Arc::get_mut_unchecked(&mut wit_instance) = MaybeUninit::new(ITInstance::new(
-                &wasm_instance,
-                store,
-                name,
-                &mit,
-                modules,
-            )?); // todo why is deref_mut needed instead of &mut?
+            *Arc::get_mut_unchecked(&mut wit_instance) =
+                MaybeUninit::new(ITInstance::new(&wasm_instance, store, name, &mit, modules)?); // todo why is deref_mut needed instead of &mut?
             std::mem::transmute::<_, Arc<ITInstance<WB>>>(wit_instance)
         };
 

@@ -71,3 +71,6 @@ pub use marine_min_it_version::min_it_version;
 
 pub use marine::CallParameters;
 pub use marine::SecurityTetraplet;
+
+pub type DefaultAppService = AppService<marine::DefaultWasmBackend>;
+pub use marine::DefaultWasmBackend;

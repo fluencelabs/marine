@@ -1,7 +1,4 @@
-use crate::{
-    WasmtimeContextMut, WasmtimeFunction,
-    WasmtimeMemory, WasmtimeWasmBackend,
-};
+use crate::{WasmtimeContextMut, WasmtimeFunction, WasmtimeMemory, WasmtimeWasmBackend};
 
 use marine_wasm_backend_traits::*;
 

@@ -23,4 +23,7 @@ toml = "0.5.9"
 marine-wasmer-backend = { path = "../wasmer-backend", version = "0.1.0"}
 
 [features]
+default = ["wasmtime"]
 raw-module-api = ["marine-runtime/raw-module-api"]
+wasmtime = ["marine-runtime/wasmtime"]
+wasmer = ["marine-runtime/wasmer"]
