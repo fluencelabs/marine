@@ -95,10 +95,10 @@ impl<WB: WasmBackend> Callable<WB> {
 type ExportFunctions<WB> = HashMap<SharedString, Arc<Callable<WB>>>;
 
 pub(crate) struct MModule<WB: WasmBackend> {
-    // wasmer_instance is needed because WITInstance contains dynamic functions
+    // wasm_instance is needed because WITInstance contains dynamic functions
     // that internally keep pointer to it.
     #[allow(unused)]
-    wasmer_instance: Box<<WB as WasmBackend>::Instance>,
+    wasm_instance: Box<<WB as WasmBackend>::Instance>,
 
     // import_object is needed because ImportObject::extend doesn't really deep copy
     // imports, so we need to store imports of this module to prevent their removing.
@@ -166,12 +166,12 @@ impl<WB: WasmBackend> MModule<WB> {
         )?;
         Self::add_host_imports(store, &mut linker, raw_imports, host_imports, &mit)?;
 
-        let wasmer_instance = wasmer_module.instantiate(store, &linker)?;
+        let wasm_instance = wasmer_module.instantiate(store, &linker)?;
         let it_instance = unsafe {
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) = MaybeUninit::new(ITInstance::new(
-                &wasmer_instance,
+                &wasm_instance,
                 store,
                 name,
                 &mit,
@@ -184,17 +184,17 @@ impl<WB: WasmBackend> MModule<WB> {
 
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
-        if let Ok(initialize_func) = wasmer_instance.get_function(store, INITIALIZE_FUNC) {
+        if let Ok(initialize_func) = wasm_instance.get_function(store, INITIALIZE_FUNC) {
             initialize_func.call(store, &[])?;
         }
         // call _start to call module's main function
         #[rustfmt::skip]
-        if let Ok(start_func) = wasmer_instance.get_function(store, START_FUNC) {
+        if let Ok(start_func) = wasm_instance.get_function(store, START_FUNC) {
             start_func.call(store, &[])?;
         }
 
         Ok(Self {
-            wasmer_instance: Box::new(wasmer_instance),
+            wasm_instance: Box::new(wasm_instance),
             //it_import_object: wit_import_object,
             //host_import_object: raw_imports,
             //host_closures_import_object,
@@ -240,7 +240,7 @@ impl<WB: WasmBackend> MModule<WB> {
     }
 
     pub(crate) fn get_wasi_state<'s>(&'s mut self) -> Box<dyn WasiState + 's> {
-        <WB as WasmBackend>::Wasi::get_wasi_state(self.wasmer_instance.borrow_mut())
+        <WB as WasmBackend>::Wasi::get_wasi_state(self.wasm_instance.borrow_mut())
     }
 
     /// Returns Wasm linear memory size that this module consumes in bytes.

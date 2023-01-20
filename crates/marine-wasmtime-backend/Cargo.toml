@@ -12,8 +12,8 @@ it-memory-traits = { workspace = true }
 
 
 # all default features except async
-wasmtime = {version = "3.0.1", default-features = false, features = ["cache", "wat", "jitdump", "parallel-compilation", "cranelift", "pooling-allocator", "vtune"]}
-wasmtime-wasi = "3.0.1"
+wasmtime = {version = "4.0.0", default-features = false, features = ["cache", "wat", "jitdump", "parallel-compilation", "cranelift", "pooling-allocator", "vtune"]}
+wasmtime-wasi = "4.0.0"
 wasmparser = "0.96.0"
 multimap = "0.8.3"
 paste = "1.0.11"

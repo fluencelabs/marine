@@ -48,6 +48,7 @@ pub(super) fn init_logger() {
         // set a default level Info for Wasmer components
         .filter(Some("cranelift_codegen"), Info)
         .filter(Some("wasmer_wasi"), Info)
+        .filter(Some("wasmtime_wasi"), Info)
         //.filter(Some(WIT_MODULE_PATH), Info)
         // the same for rustyline and marine
         .filter(Some("rustyline"), Info)

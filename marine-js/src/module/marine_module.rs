@@ -65,10 +65,10 @@ impl Callable {
 type ExportFunctions = HashMap<SharedString, Rc<Callable>>;
 
 pub(crate) struct MModule {
-    // wasmer_instance is needed because WITInstance contains dynamic functions
+    // wasm_instance is needed because WITInstance contains dynamic functions
     // that internally keep pointer to it.
     #[allow(unused)]
-    wasmer_instance: Box<WasmerInstance>,
+    wasm_instance: Box<WasmerInstance>,
 
     // TODO: replace with dyn Trait
     export_funcs: ExportFunctions,
@@ -96,15 +96,15 @@ impl MModule {
         crate::misc::check_it_version(name, &it.version)?;
 
         let mit = MITInterfaces::new(it);
-        let wasmer_instance = WasmerInstance::new(&mit, Rc::new(name.to_string()));
-        let it_instance = Arc::new(ITInstance::new(&wasmer_instance, &mit)?);
+        let wasm_instance = WasmerInstance::new(&mit, Rc::new(name.to_string()));
+        let it_instance = Arc::new(ITInstance::new(&wasm_instance, &mit)?);
         let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
-        if let Ok(initialize_func) = wasmer_instance.exports.get(INITIALIZE_FUNC) {
+        if let Ok(initialize_func) = wasm_instance.exports.get(INITIALIZE_FUNC) {
             initialize_func.call(&[])?;
         }
 
         Ok(Self {
-            wasmer_instance: Box::new(wasmer_instance),
+            wasm_instance: Box::new(wasm_instance),
             export_funcs,
             export_record_types,
         })

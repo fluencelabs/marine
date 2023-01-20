@@ -70,13 +70,13 @@ impl it_memory_traits::MemoryWritable<DelayedContextLifetime<WasmtimeWasmBackend
         let buffer = [value];
         self.memory
             .write(&mut store.inner, offset as usize, &buffer)
-            .unwrap() // todo handle error
+            .expect(MEMORY_ACCESS_EXPECTATION);
     }
 
     fn write_bytes(&self, store: &mut WasmtimeContextMut<'_>, offset: u32, bytes: &[u8]) {
         self.memory
             .write(&mut store.inner, offset as usize, bytes)
-            .unwrap() // todo handle error
+            .expect(MEMORY_ACCESS_EXPECTATION);
     }
 }
 

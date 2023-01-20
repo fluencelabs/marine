@@ -6,17 +6,17 @@ pub trait Instance<WB: WasmBackend> {
         store: <WB as WasmBackend>::ContextMut<'a>,
     ) -> Box<dyn Iterator<Item = (&'a str, Export<WB>)> + 'a>;
 
-    fn memory(
+    fn get_nth_memory(
         &self,
         store: &mut impl AsContextMut<WB>,
         memory_index: u32,
-    ) -> <WB as WasmBackend>::Memory;
+    ) -> Option<<WB as WasmBackend>::Memory>;
 
-    fn memory_by_name(
+    fn get_memory(
         &self,
         store: &mut impl AsContextMut<WB>,
         memory_name: &str,
-    ) -> Option<<WB as WasmBackend>::Memory>;
+    ) -> ResolveResult<<WB as WasmBackend>::Memory>;
 
     fn get_function<'a>(
         &'a self,

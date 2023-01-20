@@ -49,15 +49,15 @@ pub(super) struct ITInstance<WB: WasmBackend> {
 
 impl<WB: WasmBackend> ITInstance<WB> {
     pub(super) fn new(
-        wasmer_instance: &<WB as WasmBackend>::Instance,
+        wasm_instance: &<WB as WasmBackend>::Instance,
         store: &mut <WB as WasmBackend>::Store,
         module_name: &str,
         wit: &MITInterfaces<'_>,
         modules: &HashMap<String, MModule<WB>>,
     ) -> MResult<Self> {
-        let mut exports = Self::extract_raw_exports(wasmer_instance, store, wit)?;
+        let mut exports = Self::extract_raw_exports(wasm_instance, store, wit)?;
         let imports = Self::extract_imports(module_name, modules, wit, exports.len())?;
-        let memories = Self::extract_memories(wasmer_instance, store);
+        let memories = Self::extract_memories(wasm_instance, store);
 
         exports.extend(imports);
         let funcs = exports;
@@ -72,14 +72,14 @@ impl<WB: WasmBackend> ITInstance<WB> {
     }
 
     fn extract_raw_exports(
-        wasmer_instance: &<WB as WasmBackend>::Instance,
+        wasm_instance: &<WB as WasmBackend>::Instance,
         store: &mut <WB as WasmBackend>::Store,
         it: &MITInterfaces<'_>,
     ) -> MResult<HashMap<usize, WITFunction<WB>>> {
         it.exports()
             .enumerate()
             .map(|(export_id, export)| {
-                let export_func = wasmer_instance.get_function(store, export.name)?;
+                let export_func = wasm_instance.get_function(store, export.name)?;
                 Ok((
                     export_id,
                     WITFunction::from_export(store, export_func, export.name.to_string())?,
@@ -133,13 +133,13 @@ impl<WB: WasmBackend> ITInstance<WB> {
     }
 
     fn extract_memories(
-        wasmer_instance: &<WB as WasmBackend>::Instance,
+        wasm_instance: &<WB as WasmBackend>::Instance,
         store: &mut <WB as WasmBackend>::Store,
     ) -> Vec<<WB as WasmBackend>::Memory> {
         use marine_wasm_backend_traits::Export::Memory;
 
         //let mut ctx = ;
-        let mut memories = wasmer_instance
+        let mut memories = wasm_instance
             .export_iter(store.as_context_mut())
             .filter_map(|(_, export)| match export {
                 Memory(memory) => Some(memory),
@@ -147,7 +147,7 @@ impl<WB: WasmBackend> ITInstance<WB> {
             })
             .collect::<Vec<_>>();
 
-        if let Some(memory) = wasmer_instance.memory_by_name(store, "memory") {
+        if let Ok(memory) = wasm_instance.get_memory(store, "memory") {
             memories.push(memory);
         }
 

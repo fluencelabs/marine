@@ -43,9 +43,9 @@ pub(super) struct ITInstance {
 }
 
 impl ITInstance {
-    pub(super) fn new(wasmer_instance: &WasmerInstance, wit: &MITInterfaces<'_>) -> MResult<Self> {
-        let exports = Self::extract_raw_exports(wasmer_instance, wit)?;
-        let memories = Self::extract_memories(wasmer_instance);
+    pub(super) fn new(wasm_instance: &WasmerInstance, wit: &MITInterfaces<'_>) -> MResult<Self> {
+        let exports = Self::extract_raw_exports(wasm_instance, wit)?;
+        let memories = Self::extract_memories(wasm_instance);
 
         let funcs = exports;
 
@@ -59,10 +59,10 @@ impl ITInstance {
     }
 
     fn extract_raw_exports(
-        wasmer_instance: &WasmerInstance,
+        wasm_instance: &WasmerInstance,
         it: &MITInterfaces<'_>,
     ) -> MResult<HashMap<usize, WITFunction>> {
-        let module_exports = &wasmer_instance.exports;
+        let module_exports = &wasm_instance.exports;
 
         it.exports()
             .enumerate()
@@ -77,13 +77,13 @@ impl ITInstance {
             .collect()
     }
 
-    fn extract_memories(wasmer_instance: &WasmerInstance) -> Vec<WITMemory> {
+    fn extract_memories(wasm_instance: &WasmerInstance) -> Vec<WITMemory> {
         use crate::marine_js::Export::Memory;
 
-        let memories = wasmer_instance
+        let memories = wasm_instance
             .exports()
             .filter_map(|(_, export)| match export {
-                Memory => Some(WITMemory::new(wasmer_instance.module_name.clone())),
+                Memory => Some(WITMemory::new(wasm_instance.module_name.clone())),
                 _ => None,
             })
             .collect::<Vec<_>>();

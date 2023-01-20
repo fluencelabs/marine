@@ -20,7 +20,6 @@ use super::SDKVersionError;
 use crate::extract_custom_sections_by_name;
 use crate::try_as_one_section;
 
-//use wasmer_core::Module as WasmerModule;
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::Module as WasmModule;
 
@@ -59,10 +58,10 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<semv
     Ok(Some(version))
 }
 
-pub fn extract_from_wasmer_module<WB: WasmBackend>(
-    wasmer_module: &<WB as WasmBackend>::Module,
+pub fn extract_from_compiled_module<WB: WasmBackend>(
+    wasm_module: &<WB as WasmBackend>::Module,
 ) -> ModuleInfoResult<semver::Version> {
-    let sections = wasmer_module
+    let sections = wasm_module
         .custom_sections(VERSION_SECTION_NAME)
         .ok_or(ModuleInfoError::NoCustomSection(VERSION_SECTION_NAME))?;
 

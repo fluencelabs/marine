@@ -5,7 +5,7 @@ use crate::{
     sig_to_fn_ty, StoreState, val_to_wvalue, WasmtimeCaller, WasmtimeContextMut,
     WasmtimeWasmBackend, wvalue_to_val,
 };
-use crate::utils::fn_ty_to_sig;
+use crate::utils::{fn_ty_to_sig, inspect_call_error};
 
 pub struct WasmtimeFunction {
     pub(crate) inner: wasmtime::Func,
@@ -106,7 +106,7 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
 
         self.inner
             .call(store.as_context_mut().inner, &args, &mut rets)
-            .map_err(|e| RuntimeError::Other(e))?; // todo add detail
+            .map_err(inspect_call_error)?;
 
         rets.iter()
             .map(val_to_wvalue)

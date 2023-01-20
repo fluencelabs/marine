@@ -57,7 +57,7 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<Modu
     Ok(Some(manifest))
 }
 
-pub fn extract_from_wasmer_module(
+pub fn extract_from_compiled_module(
     wasmer_module: &WasmerModule,
 ) -> ModuleInfoResult<Option<ModuleManifest>> {
     let sections = wasmer_module

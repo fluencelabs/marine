@@ -52,6 +52,8 @@ pub enum RuntimeError {
     #[error("{0}")]
     Trap(anyhow::Error),
     #[error("{0}")]
+    UserError(#[from] UserError),
+    #[error("{0}")]
     Other(anyhow::Error),
 }
 
@@ -83,6 +85,8 @@ pub type ImportResult<T> = Result<T, ImportError>;
 #[derive(Debug, Error)]
 pub enum InstantiationError {
     #[error("{0}")]
+    RuntimeError(RuntimeError),
+    #[error("{0}")]
     Other(#[from] anyhow::Error),
 }
 
@@ -94,6 +98,14 @@ pub enum WasiError {
     IOError(#[from] std::io::Error),
     #[error("{0}")]
     Other(#[from] anyhow::Error),
+}
+
+#[derive(Debug, Error)]
+pub enum UserError {
+    #[error("{0}")]
+    Recoverable(anyhow::Error),
+    #[error("{0}")]
+    Unrecoverable(anyhow::Error),
 }
 
 pub type WasiResult<T> = Result<T, WasiError>;

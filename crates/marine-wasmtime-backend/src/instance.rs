@@ -31,31 +31,33 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
         Box::new(exports)
     }
 
-    fn memory(
+    fn get_nth_memory(
         &self,
         store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         memory_index: u32,
-    ) -> <WasmtimeWasmBackend as WasmBackend>::Memory {
-        let memory = self
-            .inner
+    ) -> Option<<WasmtimeWasmBackend as WasmBackend>::Memory> {
+        self.inner
             .exports(&mut store.as_context_mut().inner)
             .filter_map(wasmtime::Export::into_memory)
             .nth(memory_index as usize)
-            .unwrap(); // todo change api to handle error
-
-        WasmtimeMemory::new(memory)
+            .map(WasmtimeMemory::new)
     }
 
-    fn memory_by_name(
+    fn get_memory(
         &self,
         store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         memory_name: &str,
-    ) -> Option<<WasmtimeWasmBackend as WasmBackend>::Memory> {
-        let memory = self
-            .inner
-            .get_memory(&mut store.as_context_mut().inner, memory_name);
-
-        memory.map(WasmtimeMemory::new)
+    ) -> ResolveResult<<WasmtimeWasmBackend as WasmBackend>::Memory> {
+        self.inner
+            .get_export(&mut store.as_context_mut().inner, memory_name)
+            .ok_or(ResolveError::ExportNotFound(memory_name.to_string()))
+            .and_then(|e| {
+                e.into_memory().ok_or(ResolveError::ExportTypeMismatch(
+                    "memory".to_string(),
+                    "other".to_string(),
+                ))
+            })
+            .map(WasmtimeMemory::new)
     }
 
     fn get_function<'a>(

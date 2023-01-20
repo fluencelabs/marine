@@ -20,7 +20,6 @@ use crate::ParserResult;
 
 use walrus::IdsToIndices;
 use wasmer_it::ast::Interfaces;
-//use wasmer_core::Module as WasmerModule;
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::Module as WasmModule;
 
@@ -45,9 +44,9 @@ where
 
 /// Extracts IT section of provided Wasm binary and converts it to a MITInterfaces.
 pub fn extract_it_from_module<WB: WasmBackend>(
-    wasmer_module: &<WB as WasmBackend>::Module,
+    wasm_module: &<WB as WasmBackend>::Module,
 ) -> ParserResult<Interfaces<'_>> {
-    let wit_sections = wasmer_module.custom_sections(IT_SECTION_NAME);
+    let wit_sections = wasm_module.custom_sections(IT_SECTION_NAME);
 
     let it_section = match wit_sections {
         None => Err(ITParserError::NoITSection),
