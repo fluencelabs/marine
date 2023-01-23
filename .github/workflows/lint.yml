@@ -1,0 +1,33 @@
+name: lint
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  pr:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  reviewdog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Lint actions
+        uses: reviewdog/action-actionlint@v1
+        with:
+          reporter: github-pr-check
+          fail_on_error: true
