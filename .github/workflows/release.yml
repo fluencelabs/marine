@@ -142,6 +142,9 @@ jobs:
         with:
           node-version: "16"
 
+      - run: npm i
+        working-directory: marine-js/npm-package
+
       - name: Publish to npm registry
         run: npm publish --access public
         working-directory: marine-js/npm-package
