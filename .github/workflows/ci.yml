@@ -1,4 +1,4 @@
-name: "marine"
+name: "Run tests"
 
 on:
   pull_request:
@@ -15,9 +15,10 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  marine:
-    name: "Run tests"
+  tests:
+    name: "marine / cargo and marine-js"
     runs-on: builder
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v3
