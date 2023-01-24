@@ -1,11 +1,19 @@
 use crate::WasmBackend;
 
+/// `Store` is an object that stores modules, instances, functions memories and so on.
+/// `Store` is grow-only: once something added, it will not be removed until Store is destroyed.
+/// Some of the implementations can limit allocated resources.
+/// For example, Wasmtime cannot have more than 10000 instances in one `Store`.
+///
+/// Most of the functions in interface require a handle to `Store` to work
 pub trait Store<WB: WasmBackend>: AsContextMut<WB> {
     fn new(backend: &WB) -> Self;
 }
 
+/// A temporary immutable handle to store
 pub trait Context<WB: WasmBackend>: AsContext<WB> {}
 
+/// A temporary mutable handle to store
 pub trait ContextMut<WB: WasmBackend>: AsContextMut<WB> {}
 
 pub trait AsContext<WB: WasmBackend> {
@@ -15,22 +23,3 @@ pub trait AsContext<WB: WasmBackend> {
 pub trait AsContextMut<WB: WasmBackend>: AsContext<WB> {
     fn as_context_mut(&mut self) -> <WB as WasmBackend>::ContextMut<'_>;
 }
-
-/*
-impl<T: AsContext<WB>, WB: WasmBackend> AsContext<WB> for &T {
-    fn as_context(&self) -> <WB as WasmBackend>::Context<'_> {
-        self.as_context()
-    }
-}
-
-impl<T: AsContext<WB>, WB: WasmBackend> AsContext<WB> for &mut T {
-    fn as_context(&self) -> <WB as WasmBackend>::Context<'_> {
-    }
-}
-
-impl<T: AsContextMut<WB>, WB: WasmBackend> AsContextMut<WB> for &mut T {
-    fn as_context_mut(&mut self) -> <WB as WasmBackend>::ContextMut<'_> {
-        self.as_context_mut()
-    }
-}
-*/

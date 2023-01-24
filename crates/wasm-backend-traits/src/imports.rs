@@ -4,15 +4,15 @@ use crate::{WasmBackend, WType};
 
 use std::borrow::Cow;
 
-pub trait Imports<WB: WasmBackend>: Clone
-/* + InsertFn<WB, (), ()>
-+ InsertFn<WB, (i32,), ()>
-+ InsertFn<WB, (i32, i32), ()>
-+ InsertFn<WB, (i32, i32, i32), ()>
-+ InsertFn<WB, (i32, i32, i32, i32), ()>*/
-{
+/// A "Linker" object, that is used to match functions with module imports during instantiation.
+/// Cloning is a cheap operation for this object. All clones refer to the same data in store.
+pub trait Imports<WB: WasmBackend>: Clone {
+    /// Creates a new empty object.
     fn new(store: &mut <WB as WasmBackend>::Store) -> Self;
 
+    /// Inserts a function with name `name` to the namespace `module`.
+    /// # Errors:
+    ///     An error returned if such combination of `module` and `name` already has an associated function.
     fn insert(
         &mut self,
         module: impl Into<String>,
@@ -20,33 +20,17 @@ pub trait Imports<WB: WasmBackend>: Clone
         func: <WB as WasmBackend>::Function,
     ) -> Result<(), ImportError>;
 
+    /// Inserts many named functions to the samne namespace `module`. Is equivalent to multiple calls to `insert`.
+    /// # Errors:
+    ///     An error returned if such combination of `module` and `name` already has an associated function.
+    ///
     fn register<S, I>(&mut self, name: S, namespace: I) -> Result<(), ImportError>
     where
         S: Into<String>,
         I: IntoIterator<Item = (String, <WB as WasmBackend>::Function)>;
 }
 
-pub trait InsertFn<WB: WasmBackend, Args, Rets> {
-    fn insert_fn<F>(&mut self, name: impl Into<String>, func: F)
-    where
-        F: Fn(&mut <WB as WasmBackend>::Caller<'_>, Args) -> Rets + Sync + Send + 'static;
-}
-/*
-pub trait Namespace<WB: WasmBackend>:
-    LikeNamespace<WB>
-    + InsertFn<WB, (), ()>
-    + InsertFn<WB, (i32,), ()>
-    + InsertFn<WB, (i32, i32), ()>
-    + InsertFn<WB, (i32, i32, i32), ()>
-    + InsertFn<WB, (i32, i32, i32, i32), ()>
-{
-    fn new() -> Self;
-
-    fn insert(&mut self, name: impl Into<String>, func: <WB as WasmBackend>::Function);
-}
-
-pub trait LikeNamespace<WB: WasmBackend> {}
-*/
+/// A type representing function signature.
 #[derive(Clone)]
 pub struct FuncSig {
     params: Cow<'static, [WType]>,
@@ -75,7 +59,8 @@ impl FuncSig {
 }
 
 pub trait FuncGetter<WB: WasmBackend, Args, Rets> {
-    unsafe fn get_func(
+    /// Gets an export function from the calling instance.
+    fn get_func(
         &mut self,
         name: &str,
     ) -> ResolveResult<

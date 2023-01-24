@@ -36,7 +36,7 @@ impl<'c> AsContextMut<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
 macro_rules! impl_func_getter {
     ($args:ty, $rets:ty) => {
         impl<'c> FuncGetter<WasmtimeWasmBackend, $args, $rets> for WasmtimeCaller<'c> {
-            unsafe fn get_func(
+            fn get_func(
                 &mut self,
                 name: &str,
             ) -> Result<

@@ -26,15 +26,13 @@ use std::marker::PhantomData;
 use it_memory_traits::{MemoryView};
 
 pub trait WasmBackend: Clone + Default + 'static {
-    // general
-    type Module: Module<Self>;
-    type Instance: Instance<Self>;
     type Store: Store<Self>;
+    type Module: Module<Self>;
+    type Imports: Imports<Self>; // maybe rename to Linker?
+    type Instance: Instance<Self>;
     type Context<'c>: Context<Self>;
     type ContextMut<'c>: ContextMut<Self>;
     type Caller<'c>: Caller<Self>;
-
-    type Imports: Imports<Self>; // maybe rename to Linker?
 
     type Function: Function<Self> + FuncConstructor<Self>;
     type Memory: Memory<Self>;

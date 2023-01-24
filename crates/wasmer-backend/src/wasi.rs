@@ -40,7 +40,7 @@ impl WasiImplementation<WasmerBackend> for WasmerWasi {
 
     fn get_wasi_state<'s>(
         _instance: &'s mut <WasmerBackend as WasmBackend>::Instance,
-    ) -> Box<dyn WasiState + 's> {
+    ) -> Option<Box<dyn WasiState + 's>> {
         todo!()
     }
 }

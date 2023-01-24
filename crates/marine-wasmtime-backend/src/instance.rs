@@ -2,9 +2,9 @@ use crate::{WasmtimeContextMut, WasmtimeFunction, WasmtimeMemory, WasmtimeWasmBa
 
 use marine_wasm_backend_traits::*;
 
+#[derive(Clone)]
 pub struct WasmtimeInstance {
     pub(crate) inner: wasmtime::Instance,
-    //pub(crate) exports: Vec<String, Export<WasmtimeWasmBackend>>
 }
 
 impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {

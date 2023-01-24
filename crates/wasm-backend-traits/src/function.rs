@@ -2,11 +2,16 @@ use crate::{
     AsContextMut, FuncSig, impl_for_each_function_signature, RuntimeResult, WasmBackend, WValue,
 };
 
+/// A Wasm function handle. As it is only a handle to an object in `Store`, cloning is cheap.
+/// It can be a function from host, or an export from an `Instance`.
 pub trait Function<WB: WasmBackend>: Send + Sync {
+    /// Creates a new function with dynamic signature.
+    /// The signature check is performed at runtime.
     fn new<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
     where
         F: for<'c> Fn(&[WValue]) -> Vec<WValue> + Sync + Send + 'static;
 
+    /// Creates a new function with dynamic signature that needs a context.
     fn new_with_ctx<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
     where
         F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
@@ -14,25 +19,45 @@ pub trait Function<WB: WasmBackend>: Send + Sync {
             + Send
             + 'static;
 
+    /// Creates a new function with static signature.
+    /// Requires less runtime checks when called.
     fn new_typed<Params, Results, Env>(
         store: &mut impl AsContextMut<WB>,
         func: impl IntoFunc<WB, Params, Results, Env>,
     ) -> Self;
 
+    /// Returns the signature of the function.
+    /// The signature is constructed each time this function is called, so
+    /// it is not recommended to use this function extensively.
     fn signature<'c>(&self, store: &mut impl AsContextMut<WB>) -> FuncSig;
 
+    /// Calls the wasm function.
+    /// # Panics:
+    /// If given a store different from the one that stores the function.
+    /// # Errors:
+    /// See `RuntimeError` documentation.
     fn call<'c>(
         &self,
-        store: &mut impl AsContextMut<WB>, // <- Store or ExportContext. Need to be able to extract wasmtime::StoreContextMut from them. Same for many methods.
+        store: &mut impl AsContextMut<WB>,
         args: &[WValue],
     ) -> RuntimeResult<Vec<WValue>>;
 }
 
+/// A helper trait for creating a funcction with static signature.
+/// Should not be implemented by users.
+/// Implemented for all functions that meet the following criteria:
+///     * implement Send + Sync + 'static
+///     * take or not take Caller as first parameter
+///     * take from 0 to 16 i32 parameters
+///     * return () or i32
 pub trait IntoFunc<WB: WasmBackend, Params, Results, Env> {
     fn into_func(self, ctx: &mut impl AsContextMut<WB>) -> <WB as WasmBackend>::Function;
 }
 
+/// An indicator of using Caller argument.
 pub struct WithEnv {}
+
+/// An indicator of using Caller argument.
 pub struct WithoutEnv {}
 
 #[macro_export]

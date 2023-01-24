@@ -127,28 +127,16 @@ pub(super) fn itypes_output_to_wtypes(itypes: &[IType]) -> Vec<WType> {
 
 #[macro_export] // https://github.com/rust-lang/rust/issues/57966#issuecomment-461077932
 /// Initialize Wasm function in form of Box<RefCell<Option<Func<'static, args, rets>>>> only once.
-macro_rules! init_wasm_func_once{
+macro_rules! init_wasm_func_once {
     ($func:ident, $ctx:ident, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
-        //if $func.borrow().is_none() {
-            let mut $func: Box<dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, $args) -> RuntimeResult<$rets> + Send + Sync> =
-                match unsafe { $ctx.get_func($func_name) } {
-                    Ok(func) => func,
-                    Err(_) => return vec![WValue::I32($ret_error_code)],
-                };
-
-            /*unsafe {
-                // assumed that this function will be used only in the context of closure
-                // linked to a corresponding Wasm import, so it is safe to make is static
-                // because all Wasm imports live in the Wasmer instances, which
-                // is itself static (i.e., lives until the end of the program)
-                let raw_func = std::mem::transmute::<
-                    Box<dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, $args) -> RuntimeResult<$rets> + Send + Sync + '_>,
-                    Box<dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, $args) -> RuntimeResult<$rets> + Send + Sync + 'static>,
-                >(raw_func);
-
-                *$func.borrow_mut() = Some(raw_func);*/
-            //}
-        //}
+        let mut $func: Box<
+            dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, $args) -> RuntimeResult<$rets>
+                + Send
+                + Sync,
+        > = match { $ctx.get_func($func_name) } {
+            Ok(func) => func,
+            Err(_) => return vec![WValue::I32($ret_error_code)],
+        };
     };
 }
 

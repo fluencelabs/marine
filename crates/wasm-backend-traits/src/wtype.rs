@@ -8,8 +8,6 @@ pub enum WValue {
     F32(f32),
     /// The `f64` type.
     F64(f64),
-    // /// The `v128` type.
-    //V128(u128),
 }
 
 impl From<i32> for WValue {
@@ -70,7 +68,6 @@ impl WValue {
             Self::I64(x) => x as u128,
             Self::F32(x) => f32::to_bits(x) as u128,
             Self::F64(x) => f64::to_bits(x) as u128,
-            //Self::V128(x) => x,
         }
     }
 }

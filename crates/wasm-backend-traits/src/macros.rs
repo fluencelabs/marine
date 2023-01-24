@@ -1,4 +1,11 @@
-// almost copypasted from Wasmtime
+/// Copypasted from Wasmtime.
+/// A helper macros for implementing anything for 0-16 generic parameters.
+/// The expected argument signature is this:
+/// ```
+/// macro_rules! example_arg {
+///     ($num:tt $($args:ident)*) => ();
+/// }
+/// ```
 #[macro_export]
 macro_rules! impl_for_each_function_signature {
     ($mac:ident) => {
