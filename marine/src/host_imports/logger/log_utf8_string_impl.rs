@@ -15,11 +15,9 @@
  */
 
 use marine_wasm_backend_traits::{AsContextMut, Caller, WasmBackend};
+
 use it_memory_traits::Memory;
 use it_memory_traits::MemoryReadable;
-//use wasmer_core::vm::Ctx;
-//use wasmer_core::memory::ptr::{Array, WasmPtr};
-//use crate::IType::String;
 
 pub(crate) fn log_utf8_string_closure<WB: WasmBackend>(
     logging_mask: i32,

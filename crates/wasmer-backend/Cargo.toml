@@ -3,8 +3,6 @@ name = "marine-wasmer-backend"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.1.0"}
 
@@ -12,7 +10,6 @@ marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.1.0"
 wasmer-it = { workspace = true}
 it-memory-traits = { workspace = true }
 wasmer-wasi = { version = "3.1.0"}
-#wasmer = { workspace = true, default-features = false }
 wasmer = { version = "3.1.0" }
 wasmparser = "0.96.0"
 multimap = "0.8.3"

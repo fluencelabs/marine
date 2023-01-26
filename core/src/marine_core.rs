@@ -18,7 +18,10 @@ use super::*;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
 
-use marine_wasm_backend_traits::{AsContextMut, Store, WasiState, WasmBackend};
+use marine_wasm_backend_traits::AsContextMut;
+use marine_wasm_backend_traits::Store;
+use marine_wasm_backend_traits::WasiState;
+use marine_wasm_backend_traits::WasmBackend;
 
 use serde::Serialize;
 
@@ -40,6 +43,7 @@ pub struct MarineCore<WB: WasmBackend> {
     // Wasm backend may have state in the future
     #[allow(unused)]
     wasm_backend: WB,
+    // Container for all objects created by Wasm backend
     store: <WB as WasmBackend>::Store,
 }
 
@@ -156,12 +160,16 @@ impl<WB: WasmBackend> MarineCore<WB> {
     }
 
     /// Returns a heap size that all modules consume in bytes.
-    pub fn module_memory_stats(&self) -> MemoryStats<'_> {
+    pub fn module_memory_stats(&mut self) -> MemoryStats<'_> {
         let records = self
             .modules
             .iter()
             .map(|(module_name, module)| {
-                ModuleMemoryStat::new(module_name, module.memory_size(), module.max_memory_size())
+                ModuleMemoryStat::new(
+                    module_name,
+                    module.memory_size(&mut self.store.as_context_mut()),
+                    module.max_memory_size(),
+                )
             })
             .collect::<Vec<_>>();
 

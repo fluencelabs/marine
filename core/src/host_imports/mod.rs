@@ -20,26 +20,20 @@ mod lowering;
 mod imports;
 mod utils;
 
-//use std::cell::RefCell;
+use marine_wasm_backend_traits::RuntimeResult;
+use marine_wasm_backend_traits::WasmBackend;
 
 pub use errors::HostImportError;
 pub(crate) use imports::create_host_import_func;
 
-//pub(self) use wasmer_core::types::Value as WValue;
-//pub(self) use wasmer_core::types::Type as WType;
-
 pub(self) use marine_wasm_backend_traits::WValue;
 pub(self) use marine_wasm_backend_traits::WType;
-use marine_wasm_backend_traits::{RuntimeResult, WasmBackend};
 
 pub(self) type HostImportResult<T> = std::result::Result<T, HostImportError>;
-//pub(self) type WasmModuleFunc<Args, Rets> = Box<RefCell<Option<Func<'static, Args, Rets>>>>;
 pub(self) type WasmModuleFunc<WB, Args, Rets> = Box<
     dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets> + Sync + Send,
 >;
 pub(self) type AllocateFunc<WB> = WasmModuleFunc<WB, (i32, i32), i32>;
-//pub(self) type SetResultPtrFunc<WB> = WasmModuleFunc<WB, i32, ()>;
-//pub(self) type SetResultSizeFunc<WB> = WasmModuleFunc<WB, i32, ()>;
 
 pub(self) const ALLOCATE_FUNC_NAME: &str = "allocate";
 pub(self) const SET_PTR_FUNC_NAME: &str = "set_result_ptr";

@@ -24,10 +24,8 @@ use marine_wasm_backend_traits::{
     CompilationError, ImportError, InstantiationError, ResolveError, RuntimeError, WasiError,
     WasmBackendError,
 };
-//use wasmer_runtime::error as wasmer_error;
 
 use thiserror::Error as ThisError;
-//use wasmer_core::error::ResolveError;
 
 // TODO: refactor errors
 // TODO: add module name to all errors variants
@@ -78,8 +76,8 @@ pub enum MError {
     #[error("{0}")]
     IncorrectWIT(String),
 
-    #[error("WASM BACKEND ERROR: {0}")]
-    WasmBackendError(WasmBackendError),
+    #[error("Wasm backend error: {0}")]
+    WasmBackendError(#[from] WasmBackendError),
 }
 
 impl From<MITInterfacesError> for MError {
@@ -91,12 +89,6 @@ impl From<MITInterfacesError> for MError {
 impl From<()> for MError {
     fn from(_err: ()) -> Self {
         MError::IncorrectWIT("failed to parse instructions for adapter type".to_string())
-    }
-}
-
-impl From<WasmBackendError> for MError {
-    fn from(err: WasmBackendError) -> Self {
-        MError::WasmBackendError(err)
     }
 }
 

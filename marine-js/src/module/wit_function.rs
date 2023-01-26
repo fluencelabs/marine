@@ -17,11 +17,11 @@
 use super::{IType, IFunctionArg, IValue, WValue};
 use crate::MResult;
 use crate::marine_js::DynFunc;
+use crate::module::wit_store::WITStore;
 
 use wasmer_it::interpreter::wasm;
 
 use std::rc::Rc;
-use crate::module::wit_store::WITStore;
 
 #[derive(Clone)]
 enum WITFunctionInner {

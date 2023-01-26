@@ -20,10 +20,7 @@ use super::PrepareError;
 use marine_module_info_parser::sdk_version;
 use marine_min_it_version::min_sdk_version;
 use marine_min_it_version::min_it_version;
-
 use marine_wasm_backend_traits::WasmBackend;
-
-//use wasmer_core::Module;
 
 pub(crate) fn check_sdk_version<WB: WasmBackend>(
     name: String,

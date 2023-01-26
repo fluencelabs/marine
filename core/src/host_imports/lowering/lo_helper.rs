@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-use std::marker::PhantomData;
 use super::AllocateFunc;
-
 use crate::call_wasm_func;
+
 use it_lilo::traits::Allocatable;
 use it_lilo::traits::AllocatableError;
 use it_memory_traits::MemoryView;
 use it_memory_traits::Memory;
 use marine_wasm_backend_traits::{DelayedContextLifetime, WasmBackend};
+
+use std::marker::PhantomData;
 
 pub(crate) struct LoHelper<
     'c,

@@ -25,18 +25,16 @@ use crate::host_imports::create_call_parameters_import;
 
 use marine_core::HostImportDescriptor;
 use marine_core::MModuleConfig;
-use marine_wasm_backend_traits::{Function, WasmBackend};
-//use marine_wasm_backend_traits::ImportObject;
+use marine_wasm_backend_traits::Function;
+use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::WasiVersion;
 use marine_rs_sdk::CallParameters;
 use marine_utils::bytes_to_wasm_pages_ceil;
-//use wasmer_core::import::ImportObject;
-//use wasmer_core::import::Namespace;
-//use wasmer_runtime::func;
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use std::sync::Mutex;
 
 const WASM_MAX_HEAP_SIZE: u64 = 4 * 1024 * 1024 * 1024 - 1; // 4 GiB - 1
 

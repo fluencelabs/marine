@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 Fluence Labs Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 pub mod errors;
 pub mod exports;
 pub mod imports;
@@ -38,24 +54,9 @@ pub trait WasmBackend: Clone + Default + 'static {
     type Memory: Memory<Self>;
     type MemoryView: MemoryView<DelayedContextLifetime<Self>>;
 
-    // wasi
     type Wasi: WasiImplementation<Self>;
 
     fn compile(store: &mut Self::Store, wasm: &[u8]) -> CompilationResult<Self::Module>;
-}
-
-pub trait WasmType {
-    type Type: Copy;
-
-    fn into_type(self) -> Self::Type;
-}
-
-impl WasmType for i32 {
-    type Type = i32;
-
-    fn into_type(self) -> Self::Type {
-        self
-    }
 }
 
 pub struct DelayedContextLifetime<WB: WasmBackend> {

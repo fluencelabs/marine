@@ -21,6 +21,7 @@ use super::{IType, IRecordType, IFunctionArg, IValue};
 use crate::MResult;
 use crate::marine_js::{Instance as WasmerInstance};
 use crate::module::wit_function::WITFunction;
+use crate::module::wit_store::WITStore;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_utils::SharedString;
@@ -31,7 +32,6 @@ use std::collections::HashMap;
 use std::convert::TryInto;
 use std::sync::Arc;
 use std::rc::Rc;
-use crate::module::wit_store::WITStore;
 
 const INITIALIZE_FUNC: &str = "_initialize";
 
@@ -91,8 +91,6 @@ pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfac
 #[allow(unused)]
 impl MModule {
     pub(crate) fn new(name: &str, wasm_bytes: &[u8]) -> MResult<Self> {
-        // TODO: compile module
-        // TODO: extract it section
         // TODO: extract sdk version
         let it = extract_it_from_bytes(wasm_bytes)?;
         crate::misc::check_it_version(name, &it.version)?;

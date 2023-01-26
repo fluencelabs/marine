@@ -18,7 +18,6 @@ marine-rs-sdk-main = { version = "0.7.1", features = ["logger"] }
 marine-rs-sdk = { version = "0.7.1", features = ["logger"] }
 it-json-serde = { path = "../crates/it-json-serde", version = "0.3.5" }
 
-#wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
 marine-wasm-backend-traits = { path = "../crates/wasm-backend-traits", version = "0.1.0"}
 wasmer-it = { workspace = true }
 it-memory-traits = { workspace = true }

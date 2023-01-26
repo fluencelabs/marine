@@ -23,41 +23,29 @@ use super::utils::itypes_args_to_wtypes;
 use super::utils::itypes_output_to_wtypes;
 
 use crate::MRecordTypes;
-use crate::init_wasm_func_once;
+use crate::init_wasm_func;
 use crate::call_wasm_func;
 use crate::HostImportDescriptor;
 
-//use crate::module::wit_prelude::WITMemoryView;
-
-//use wasmer_core::Func;
-//use wasmer_core::vm::Ctx;
-//use wasmer_core::typed_func::Function;
-//use wasmer_core::types::Value as WValue;
-//use wasmer_core::types::FuncSig;
 use it_lilo::lifter::ILifter;
 use it_lilo::lowerer::ILowerer;
 use it_memory_traits::Memory as ITMemory;
-
-//use std::cell::RefCell;
-use std::sync::Arc;
-//use it_memory_traits::Memory;
-
-use marine_wasm_backend_traits::{AsContextMut, Caller, DelayedContextLifetime, FuncSig, WasmBackend};
+use marine_wasm_backend_traits::AsContextMut;
+use marine_wasm_backend_traits::Caller;
+use marine_wasm_backend_traits::DelayedContextLifetime;
+use marine_wasm_backend_traits::FuncSig;
+use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::Function;
-//use marine_wasm_backend_traits::FuncGetter;
 use marine_wasm_backend_traits::errors::*;
 use marine_wasm_backend_traits::FuncGetter;
-//use marine_wasm_backend_traits::ContextMut;
+
+use std::sync::Arc;
 
 pub(crate) fn create_host_import_func<WB: WasmBackend>(
     store: &mut <WB as WasmBackend>::Store,
     descriptor: HostImportDescriptor<WB>,
     record_types: Arc<MRecordTypes>,
 ) -> <WB as WasmBackend>::Function {
-    //let allocate_func: AllocateFunc<WB> = Box::new((None));
-    //let set_result_ptr_func: SetResultPtrFunc<WB> = Box::new(RefCell::new(None));
-    //let set_result_size_func: SetResultSizeFunc<WB> = Box::new(RefCell::new(None));
-
     let HostImportDescriptor {
         host_exported_func,
         argument_types,
@@ -76,7 +64,6 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     let func = move |mut caller: <WB as WasmBackend>::Caller<'_>,
                      inputs: &[WValue]|
           -> Vec<WValue> {
-        //let store = &mut caller.as_context_mut();
         let result = {
             let memory_index = 0;
             let memory_view = caller.memory(memory_index).unwrap().view(); // todo handle error
@@ -99,7 +86,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             }
         };
 
-        init_wasm_func_once!(
+        init_wasm_func!(
             allocate_func,
             caller,
             (i32, i32),
@@ -107,24 +94,6 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             ALLOCATE_FUNC_NAME,
             2
         );
-        /*if allocate_func.borrow().is_none() {
-            let raw_func = match unsafe {
-                ctx.get_export_func_by_name::<(i32, i32), i32>(ALLOCATE_FUNC_NAME)
-            } {
-                Ok(func) => func,
-                Err(_) => return vec![WValue::I32(2)],
-            };
-
-            unsafe {
-                // assumed that this function will be used only in the context of closure
-                // linked to a corresponding Wasm import, so it is safe to make is static
-                // because all Wasm imports live in the Wasmer instances, which
-                // is itself static (i.e., lives until the end of the program)
-                let raw_func = std::mem::transmute::<Func<'_, _, _>, Func<'static, _, _>>(raw_func);
-
-                *allocate_func.borrow_mut() = Some(raw_func);
-            }
-        }*/
 
         let memory_index = 0;
         let memory_view = caller.memory(memory_index).unwrap().view(); // todo handle error
@@ -140,8 +109,8 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
                 log::error!("host closure failed: {}", e);
 
                 // returns 0 to a Wasm module in case of errors
-                init_wasm_func_once!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
-                init_wasm_func_once!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
+                init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
+                init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
 
                 call_wasm_func!(set_result_ptr_func, &mut caller.as_context_mut(), 0);
                 call_wasm_func!(set_result_size_func, &mut caller.as_context_mut(), 0);
@@ -153,8 +122,8 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
         match wvalues.len() {
             // strings and arrays are passed back to the Wasm module by pointer and size
             2 => {
-                init_wasm_func_once!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
-                init_wasm_func_once!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
+                init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
+                init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
 
                 call_wasm_func!(
                     set_result_ptr_func,
@@ -172,7 +141,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
             // records and primitive types are passed to the Wasm module by pointer
             // and value on the stack
             1 => {
-                init_wasm_func_once!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 3);
+                init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 3);
 
                 call_wasm_func!(
                     set_result_ptr_func,

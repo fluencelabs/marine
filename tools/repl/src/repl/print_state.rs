@@ -34,29 +34,4 @@ pub(super) fn print_envs(module_name: &str, wasi_state: &dyn WasiState) {
 
 pub(super) fn print_fs_state(_wasi_state: &dyn WasiState) {
     println!("Printing WASI filesystem state is not supported now.");
-    /*
-    let wasi_fs = &wasi_state.fs;
-
-    println!("preopened file descriptors:\n{:?}\n", wasi_fs.preopen_fds);
-
-    println!("name map:");
-    for (name, inode) in &wasi_fs.name_map {
-        println!("{} - {:?}", name, inode);
-    }
-
-    println!("\nfile descriptors map:");
-    for (id, fd) in &wasi_fs.fd_map {
-        println!("{} - {:?}", id, fd);
-    }
-
-    println!("\norphan file descriptors:");
-    for (fd, inode) in &wasi_fs.orphan_fds {
-        println!("{:?} - {:?}", fd, inode);
-    }
-
-    println!("\ninodes:");
-    for (id, inode) in wasi_fs.inodes.iter().enumerate() {
-        println!("{}: {:?}", id, inode);
-    }
-    */
 }

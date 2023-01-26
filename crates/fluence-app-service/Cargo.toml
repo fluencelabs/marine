@@ -17,10 +17,6 @@ serde = "1.0.147"
 serde_derive = "1.0.147"
 serde_json = "1.0.89"
 toml = "0.5.9"
-#wasmer-wasi = { workspace = true }
-
-[dev-dependencies]
-marine-wasmer-backend = { path = "../wasmer-backend", version = "0.1.0"}
 
 [features]
 default = ["wasmtime"]

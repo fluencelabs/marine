@@ -1,15 +1,31 @@
-use anyhow::anyhow;
-use marine_wasm_backend_traits::*;
+/*
+ * Copyright 2023 Fluence Labs Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 use crate::{
-    sig_to_fn_ty, StoreState, val_to_wvalue, WasmtimeCaller, WasmtimeContextMut,
-    WasmtimeWasmBackend, wvalue_to_val,
+    WasmtimeContextMut, WasmtimeWasmBackend, WasmtimeCaller, val_to_wvalue, StoreState,
+    sig_to_fn_ty, wvalue_to_val,
+    utils::{fn_ty_to_sig, inspect_call_error},
 };
-use crate::utils::{fn_ty_to_sig, inspect_call_error};
+
+use marine_wasm_backend_traits::*;
+
+use anyhow::anyhow;
 
 pub struct WasmtimeFunction {
     pub(crate) inner: wasmtime::Func,
-    //pub(crate) signature: FuncSig,
 }
 
 impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
@@ -36,10 +52,7 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
         };
 
         let func = wasmtime::Func::new(store.as_context_mut().inner, ty, func);
-        WasmtimeFunction {
-            inner: func,
-            //signature: sig
-        }
+        WasmtimeFunction { inner: func }
     }
 
     fn new_with_ctx<F>(
@@ -73,10 +86,7 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
         };
 
         let func = wasmtime::Func::new(store.as_context_mut().inner, ty, func);
-        WasmtimeFunction {
-            inner: func,
-            //signature: sig
-        }
+        WasmtimeFunction { inner: func }
     }
 
     fn new_typed<Params, Results, Env>(
@@ -125,11 +135,7 @@ macro_rules! impl_func_construction {
             };
 
             let func = wasmtime::Func::wrap(&mut ctx.inner, func);
-            /*use WType::I32;
-            let params = vec![$(replace_with!($args -> I32),)*];
-            let rets = vec![I32,];
-            let sig = FuncSig::new(params, rets);
-            */
+
             WasmtimeFunction {
                 inner: func
             }

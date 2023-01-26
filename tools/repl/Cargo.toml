@@ -20,7 +20,6 @@ anyhow = "1.0.66"
 clap = "2.34.0"
 serde = "1.0.147"
 serde_json = "1.0.89"
-#wasmer-wasi = { workspace = true }
 
 env_logger = "0.9.3"
 check-latest = "1.0.1"

@@ -14,39 +14,38 @@
  * limitations under the License.
  */
 
-use std::borrow::{BorrowMut};
 use super::wit_prelude::*;
 use super::MFunctionSignature;
 use super::MRecordTypes;
 use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
 use crate::{HostImportDescriptor, MResult};
 use crate::MModuleConfig;
+use crate::config::RawImportCreator;
 
-use marine_wasm_backend_traits::{
-    AsContextMut, DelayedContextLifetime, Function, WasiState, WasiVersion, WasmBackend,
-};
+use marine_wasm_backend_traits::{AsContextMut, Memory};
+use marine_wasm_backend_traits::DelayedContextLifetime;
+use marine_wasm_backend_traits::Function;
+use marine_wasm_backend_traits::WasiState;
+use marine_wasm_backend_traits::WasiVersion;
+use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
 use marine_wasm_backend_traits::Imports;
+use marine_wasm_backend_traits::FuncSig;
 use marine_wasm_backend_traits::WasiImplementation;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
 use marine_utils::SharedString;
-//use wasmer_core::Instance as WasmerInstance;
-//use wasmer_core::import::Namespace;
-//use wasmer_runtime::compile;
-//use wasmer_runtime::ImportObject;
 use wasmer_it::interpreter::Interpreter;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
 use std::sync::Arc;
-//use wasmer_core::types::FuncSig;
-use marine_wasm_backend_traits::FuncSig;
-use crate::config::RawImportCreator;
+use std::borrow::BorrowMut;
 
 const START_FUNC: &str = "_start";
 const INITIALIZE_FUNC: &str = "_initialize";
@@ -95,25 +94,9 @@ impl<WB: WasmBackend> Callable<WB> {
 type ExportFunctions<WB> = HashMap<SharedString, Arc<Callable<WB>>>;
 
 pub(crate) struct MModule<WB: WasmBackend> {
-    // wasm_instance is needed because WITInstance contains dynamic functions
-    // that internally keep pointer to it.
+    // Used to get WASI state
     #[allow(unused)]
     wasm_instance: Box<<WB as WasmBackend>::Instance>,
-
-    // import_object is needed because ImportObject::extend doesn't really deep copy
-    // imports, so we need to store imports of this module to prevent their removing.
-    //#[allow(unused)]
-    //it_import_object: <WB as WasmBackend>::ImportObject,
-
-    // host_import_object is needed because ImportObject::extend doesn't really deep copy
-    // imports, so we need to store imports of this module to prevent their removing.
-    // #[allow(unused)]
-    //host_import_object: <WB as WasmBackend>::ImportObject,
-
-    // host_closures_import_object is needed because ImportObject::extend doesn't really deep copy
-    // imports, so we need to store imports of this module to prevent their removing.
-    //#[allow(unused)]
-    //host_closures_import_object: <WB as WasmBackend>::ImportObject,
 
     // TODO: replace with dyn Trait
     export_funcs: ExportFunctions<WB>,
@@ -131,13 +114,10 @@ impl<WB: WasmBackend> MModule<WB> {
         config: MModuleConfig<WB>,
         modules: &HashMap<String, MModule<WB>>,
     ) -> MResult<Self> {
-        //let store = Rc::new(RefCell::new(<WB as WasmBackend>::Store::new(backend)));
-        //let mut store = store_container.deref().borrow_mut();
+        let wasm_module = WB::compile(store, wasm_bytes)?;
+        crate::misc::check_sdk_version::<WB>(name.to_string(), &wasm_module)?;
 
-        let wasmer_module = WB::compile(store, wasm_bytes)?;
-        crate::misc::check_sdk_version::<WB>(name.to_string(), &wasmer_module)?;
-
-        let it = extract_it_from_module::<WB>(&wasmer_module)?;
+        let it = extract_it_from_module::<WB>(&wasm_module)?;
         crate::misc::check_it_version(name, &it.version)?;
 
         let mit = MITInterfaces::new(it);
@@ -166,17 +146,19 @@ impl<WB: WasmBackend> MModule<WB> {
         )?;
         Self::add_host_imports(store, &mut linker, raw_imports, host_imports, &mit)?;
 
-        let wasm_instance = wasmer_module.instantiate(store, &linker)?;
+        let wasm_instance = wasm_module.instantiate(store, &linker)?;
         let it_instance = unsafe {
+            // TODO: check if this MaybeUninit/Arc tricks are still needed
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
-                MaybeUninit::new(ITInstance::new(&wasm_instance, store, name, &mit, modules)?); // todo why is deref_mut needed instead of &mut?
+                MaybeUninit::new(ITInstance::new(&wasm_instance, store, name, &mit, modules)?);
             std::mem::transmute::<_, Arc<ITInstance<WB>>>(wit_instance)
         };
 
         let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
 
+        // TODO: check if wasmtime actually calls _start or _initialize in .instantiate()
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
         if let Ok(initialize_func) = wasm_instance.get_function(store, INITIALIZE_FUNC) {
@@ -190,9 +172,6 @@ impl<WB: WasmBackend> MModule<WB> {
 
         Ok(Self {
             wasm_instance: Box::new(wasm_instance),
-            //it_import_object: wit_import_object,
-            //host_import_object: raw_imports,
-            //host_closures_import_object,
             export_funcs,
             export_record_types,
         })
@@ -239,15 +218,19 @@ impl<WB: WasmBackend> MModule<WB> {
     }
 
     /// Returns Wasm linear memory size that this module consumes in bytes.
-    pub(crate) fn memory_size(&self) -> usize {
-        // TODO: Add a method to the trait
-        1024 * 1014
+    pub(crate) fn memory_size(&self, store: &mut <WB as WasmBackend>::ContextMut<'_>) -> usize {
+        let memory = self
+            .wasm_instance
+            .get_nth_memory(store, 0)
+            .expect("It is expected that the existence of at least one memory is checked in the MModule::new function");
+
+        memory.size(store)
     }
 
     /// Returns max Wasm linear memory size that this module could consume in bytes.
     pub(crate) fn max_memory_size(&self) -> Option<usize> {
-        // TODO: Add a method to the trait
-        Some(1024 * 1014)
+        // TODO: provide limits API to marine wasm backend traits
+        None
     }
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
@@ -273,14 +256,7 @@ impl<WB: WasmBackend> MModule<WB> {
         wasi_preopened_files: HashSet<PathBuf>,
         wasi_mapped_dirs: HashMap<String, PathBuf>,
     ) -> MResult<()> {
-        let wasi_envs = wasi_envs
-            .into_iter()
-            /*.map(|(mut left, right)| {
-                left.push(61); // 61 is ASCII code of '=' // todo remove or move to backend impl
-                left.extend(right);
-                left
-            })*/
-            .collect::<Vec<_>>();
+        let wasi_envs = wasi_envs.into_iter().collect::<Vec<_>>();
         let wasi_preopened_files = wasi_preopened_files.into_iter().collect::<Vec<_>>();
         let wasi_mapped_dirs = wasi_mapped_dirs.into_iter().collect::<Vec<_>>();
 
@@ -355,7 +331,6 @@ impl<WB: WasmBackend> MModule<WB> {
             I1: Iterator<Item = &'a IType>,
             I2: Iterator<Item = &'b IType>,
         {
-            //use wasmer_core::types::FuncSig;
             use super::type_converters::itype_to_wtype;
 
             let inputs = inputs.map(itype_to_wtype).collect::<Vec<_>>();

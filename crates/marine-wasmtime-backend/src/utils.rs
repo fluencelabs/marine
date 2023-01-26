@@ -1,9 +1,26 @@
-use wasmtime::{Val, ValType};
+/*
+ * Copyright 2023 Fluence Labs Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 use marine_wasm_backend_traits::{
     FuncSig, InstantiationError, RuntimeError, RuntimeResult, UserError, WType, WValue,
 };
 
-pub(crate) fn val_type_to_wtype(ty: &wasmtime::ValType) -> WType {
+use wasmtime::{Val, ValType};
+
+pub(crate) fn val_type_to_wtype(ty: &ValType) -> WType {
     match ty {
         ValType::I32 => WType::I32,
         ValType::I64 => WType::I64,
@@ -15,7 +32,7 @@ pub(crate) fn val_type_to_wtype(ty: &wasmtime::ValType) -> WType {
     }
 }
 
-pub(crate) fn wtype_to_val_type(ty: &WType) -> wasmtime::ValType {
+pub(crate) fn wtype_to_val_type(ty: &WType) -> ValType {
     match ty {
         WType::I32 => ValType::I32,
         WType::I64 => ValType::I64,
@@ -27,16 +44,16 @@ pub(crate) fn wtype_to_val_type(ty: &WType) -> wasmtime::ValType {
     }
 }
 
-pub(crate) fn wvalue_to_val(value: &WValue) -> wasmtime::Val {
+pub(crate) fn wvalue_to_val(value: &WValue) -> Val {
     match value {
-        WValue::I32(value) => wasmtime::Val::I32(value.clone()),
-        WValue::I64(value) => wasmtime::Val::I64(value.clone()),
-        WValue::F32(value) => wasmtime::Val::F32(value.to_bits()),
-        WValue::F64(value) => wasmtime::Val::F64(value.to_bits()),
+        WValue::I32(value) => Val::I32(value.clone()),
+        WValue::I64(value) => Val::I64(value.clone()),
+        WValue::F32(value) => Val::F32(value.to_bits()),
+        WValue::F64(value) => Val::F64(value.to_bits()),
     }
 }
 
-pub(crate) fn val_to_wvalue(value: &wasmtime::Val) -> RuntimeResult<WValue> {
+pub(crate) fn val_to_wvalue(value: &Val) -> RuntimeResult<WValue> {
     match value {
         Val::I32(value) => Ok(WValue::I32(value.clone())),
         Val::I64(value) => Ok(WValue::I64(value.clone())),

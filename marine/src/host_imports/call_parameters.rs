@@ -20,8 +20,6 @@ use marine_core::HostImportDescriptor;
 use wasmer_it::IValue;
 use wasmer_it::IType;
 
-//use std::rc::Rc;
-//use std::cell::RefCell;
 use std::ops::Deref;
 use std::sync::{Arc, Mutex};
 

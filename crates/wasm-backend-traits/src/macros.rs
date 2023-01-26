@@ -1,3 +1,4 @@
+// todo: add copyright or not?
 /// Copypasted from Wasmtime.
 /// A helper macros for implementing anything for 0-16 generic parameters.
 /// The expected argument signature is this:

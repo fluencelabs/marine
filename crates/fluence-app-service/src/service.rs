@@ -21,9 +21,9 @@ use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
 use marine_wasm_backend_traits::WasmBackend;
-
 use marine::Marine;
 use marine::IValue;
+
 use serde_json::Value as JValue;
 use maplit::hashset;
 
@@ -174,7 +174,7 @@ impl<WB: WasmBackend> AppService<WB> {
 
     /// Return statistics of Wasm modules heap footprint.
     /// This operation is cheap.
-    pub fn module_memory_stats(&self) -> MemoryStats<'_> {
+    pub fn module_memory_stats(&mut self) -> MemoryStats<'_> {
         self.marine.module_memory_stats()
     }
 }

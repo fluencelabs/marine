@@ -15,8 +15,8 @@
  */
 
 use marine_wasm_backend_traits::WasmBackend;
-
 use marine::MarineConfig;
+
 use std::path::PathBuf;
 
 /// Describes behaviour of the Fluence AppService.

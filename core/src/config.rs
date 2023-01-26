@@ -18,7 +18,7 @@ use super::IValue;
 use super::IType;
 use crate::HostImportError;
 
-use marine_wasm_backend_traits::{WasmBackend};
+use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::WasiVersion;
 
 use std::path::PathBuf;

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-use marine_wasm_backend_traits::{WasmBackend};
+use marine_wasm_backend_traits::WasmBackend;
 
-use std::path::{Path, PathBuf};
 use marine_core::HostImportDescriptor;
 use marine_rs_sdk::MountedBinaryResult;
 
 use wasmer_it::IValue;
 use wasmer_it::IType;
+
+use std::path::{Path, PathBuf};
 
 pub(crate) fn create_mounted_binary_import<WB: WasmBackend>(
     mounted_binary_path: PathBuf,
