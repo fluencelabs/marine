@@ -65,19 +65,38 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
                             .into_iter()
                             .map(|name| (name, sdk_version.clone())),
                     )
+                } else {
+                    println!("Failed to extract SDK version from manifest {}", manifest_path.display());
+                    println!("Rejected some wasms:");
+                    for wasm in &new_wasms {
+                        println!("{}", wasm)
+                    }
+
+                    println!();
                 }
             }
         }
     }
 
     if wasms.is_empty() {
+        println!("Did not find any marine wasm files");
         // it is possible to build a object file without Wasm artifacts
         return Ok(());
     }
 
+    println!("Marine wasm files:");
+    for file in &wasms {
+        println!("{}", file.0);
+    }
+
+    println!();
+
     for (wasm, sdk_version) in wasms {
         let wasm_path = std::path::PathBuf::from(wasm);
-        marine_it_generator::embed_it(&wasm_path)?;
+        marine_it_generator::embed_it(&wasm_path)
+            .map(|val|{println!("embedded IT section into {}", wasm_path.display()); val})
+            .map_err(|err| {println!("failed to embed IT section into {}", wasm_path.display()); err})?;
+
         marine_module_info_parser::sdk_version::embed_from_path(
             &wasm_path,
             &wasm_path,
