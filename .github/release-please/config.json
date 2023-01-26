@@ -1,0 +1,42 @@
+{
+  "bootstrap-sha": "58c74be12e952ecacc504e17c1f066aa3681be66",
+  "release-type": "rust",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "plugins": [
+    {
+      "type": "cargo-workspace",
+      "merge": false
+    },
+    {
+      "type": "linked-versions",
+      "groupName": "marine-js and marine-js node package",
+      "components": [
+        "marine-js",
+        "marine-js-node"
+      ]
+    }
+  ],
+  "packages": {
+    "crates/it-interfaces": {},
+    "crates/module-interface": {},
+    "crates/it-parser": {},
+    "crates/it-generator": {},
+    "crates/min-it-version": {},
+    "crates/module-info-parser": {},
+    "crates/utils": {},
+    "core": {},
+    "crates/it-json-serde": {},
+    "marine": {},
+    "crates/fluence-app-service": {},
+    "tools/cli": {},
+    "tools/repl": {},
+    "marine-js": {
+      "component": "marine-js"
+    },
+    "marine-js/npm-package": {
+      "release-type": "node",
+      "component": "marine-js-node"
+    }
+  }
+}

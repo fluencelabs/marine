@@ -14,6 +14,7 @@ jobs:
   cargo-snapshot:
     name: "Publish cargo snapshots"
     runs-on: builder
+    timeout-minutes: 60
 
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
@@ -57,6 +58,7 @@ jobs:
   # publish-marine-js:
   #   name: "Publish @fluencelabs/marine-js snapshot"
   #   runs-on: builder
+  #   timemout-minutes: 60
 
   #   outputs:
   #     version: "${{ steps.snapshot.outputs.version }}"
