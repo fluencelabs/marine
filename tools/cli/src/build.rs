@@ -21,6 +21,7 @@ use semver::Version;
 
 use std::path::PathBuf;
 use std::process::Command;
+use crate::cargo_manifest::ManifestError;
 
 #[derive(serde::Deserialize)]
 #[serde(tag = "reason", rename_all = "kebab-case")]
@@ -58,50 +59,71 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
                 .into_iter()
                 .filter(|name| name.ends_with(".wasm"))
                 .collect::<Vec<_>>();
-            if !new_wasms.is_empty() {
-                if let Ok(sdk_version) = extract_sdk_version(&manifest_path) {
+
+            if new_wasms.is_empty() {
+                continue;
+            }
+
+            use ManifestError::*;
+            match extract_sdk_version(&manifest_path) {
+                // info
+                Ok(sdk_version) => {
+                    println!(
+                        "Found sdk version {sdk_version} in {}:",
+                        manifest_path.display()
+                    );
+                    println!("Applying to wasm artifacts:");
+                    for wasm_path in &new_wasms {
+                        println!("{wasm_path}");
+                    }
+
                     wasms.extend(
                         new_wasms
                             .into_iter()
                             .map(|name| (name, sdk_version.clone())),
                     )
-                } else {
-                    println!("Failed to extract SDK version from manifest {}", manifest_path.display());
-                    println!("Rejected some wasms:");
-                    for wasm in &new_wasms {
-                        println!("{}", wasm)
+                }
+                Err(e) => {
+                    let manifest_path = manifest_path.display();
+                    match e {
+                        NoSdkDependencyError => println!("No sdk version found in {manifest_path}"),
+                        CannotProcessManifest(message) => println!("WARNING: cannot process {manifest_path}: {message}"),
+                        ParseError(e) => println!("WARNING: cannot parse {manifest_path}: {e}"),
+                        Io(e) => println!("WARNING: cannot load {manifest_path}: {e}"),
+                        NoSdkVersionError => println!("ERROR: found SDK dependency in {manifest_path}, but the version is not specified."),
+                        VersionParseError(e) => println!("ERROR: found SDK dependency in {manifest_path}, but encoundeted an error while parsing its version: {e}"),
+                        InheritedDependencyUnsupported => println!("ERROR: found SDK dependency in {manifest_path}: unsupported inherited dependency.")
                     }
 
-                    println!();
+                    println!("Skipping wasm artifacts:");
+                    for wasm_path in &new_wasms {
+                        println!("{wasm_path}");
+                    }
                 }
             }
         }
     }
 
     if wasms.is_empty() {
-        println!("Did not find any marine wasm files");
+        println!("Did not find any marine wasm artifacts.");
         // it is possible to build a object file without Wasm artifacts
         return Ok(());
     }
 
-    println!("Marine wasm files:");
-    for file in &wasms {
-        println!("{}", file.0);
-    }
-
-    println!();
-
     for (wasm, sdk_version) in wasms {
         let wasm_path = std::path::PathBuf::from(wasm);
-        marine_it_generator::embed_it(&wasm_path)
-            .map(|val|{println!("embedded IT section into {}", wasm_path.display()); val})
-            .map_err(|err| {println!("failed to embed IT section into {}", wasm_path.display()); err})?;
+        print!(
+            "Embedding IT section and SDK version into {}:",
+            wasm_path.display()
+        );
 
+        marine_it_generator::embed_it(&wasm_path)?;
         marine_module_info_parser::sdk_version::embed_from_path(
             &wasm_path,
             &wasm_path,
             &sdk_version,
         )?;
+        println!(" success");
     }
 
     Ok(())
