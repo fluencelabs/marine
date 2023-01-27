@@ -84,12 +84,15 @@ jobs:
             --skip-published \
             --yes
 
+      - name: Build release binaries of marine & mrepl
+        run: cargo build --release -p marine -p mrepl
+
       - name: Upload marine binary
         if: needs.release-please.outputs.marine-release-created
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./target/release/marine
+            target/release/marine
           tag_name: ${{ needs.release-please.outputs.marine-tag-name }}
 
       - name: Upload mrepl binary
@@ -97,7 +100,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./target/release/mrepl
+            target/release/mrepl
           tag_name: ${{ needs.release-please.outputs.mrepl-tag-name }}
 
   marine-js:
