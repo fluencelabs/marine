@@ -2,8 +2,21 @@
     "name": "@fluencelabs/marine-js",
     "description": "Marine-js",
     "version": "0.1.0",
-    "main": "./dist/index.js",
-    "typings": "./dist/index.d.ts",
+    "exports": {
+        "./types": {
+            "types": "./dist/types.d.ts",
+            "import": "./dist/types.js"
+        },
+        "./MarineService": {
+            "types": "./dist/MarineService.d.ts",
+            "import": "./dist/MarineService.js"
+        },
+        "./config": {
+            "types": "./dist/config.d.ts",
+            "import": "./dist/config.js"
+        }
+    },
+    "type": "module",
     "repository": "https://github.com/fluencelabs/marine",
     "author": "Fluence Labs",
     "license": "Apache 2.0",

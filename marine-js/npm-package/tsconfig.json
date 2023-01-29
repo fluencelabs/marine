@@ -2,8 +2,8 @@
     "compilerOptions": {
         "lib": ["es2015", "dom"],
         "outDir": "./dist/",
-        "target": "es5",
-        "module": "commonjs",
+        "target": "ESNext",
+        "module": "ESNext",
         "allowJs": true,
         "strict": true,
         "esModuleInterop": true,
@@ -11,7 +11,8 @@
         "forceConsistentCasingInFileNames": true,
         "declaration": true,
         "declarationMap": false,
-        "sourceMap": true
+        "sourceMap": true,
+        "moduleResolution": "node"
     },
     "exclude": ["node_modules", "dist"],
     "include": ["src"]
