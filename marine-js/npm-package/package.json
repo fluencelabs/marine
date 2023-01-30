@@ -14,6 +14,18 @@
         "./config": {
             "types": "./dist/config.d.ts",
             "import": "./dist/config.js"
+        },
+        "./dist/types": {
+            "types": "./dist/types.d.ts",
+            "import": "./dist/types.js"
+        },
+        "./dist/MarineService": {
+            "types": "./dist/MarineService.d.ts",
+            "import": "./dist/MarineService.js"
+        },
+        "./dist/config": {
+            "types": "./dist/config.d.ts",
+            "import": "./dist/config.js"
         }
     },
     "typesVersions": {
@@ -44,8 +56,8 @@
     },
     "private": false,
     "dependencies": {
-        "@wasmer/wasi": "^0.12.0",
-        "@wasmer/wasmfs": "^0.12.0"
+        "@wasmer/wasi": "0.12.0",
+        "@wasmer/wasmfs": "0.12.0"
     },
     "devDependencies": {
         "@types/jest": "27.5.2",
