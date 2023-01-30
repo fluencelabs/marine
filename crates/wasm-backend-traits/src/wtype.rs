@@ -70,10 +70,7 @@ pub enum WType {
 
 impl WType {
     pub fn is_supported(&self) -> bool {
-        match self {
-            Self::ExternRef | Self::FuncRef | Self::V128 => false,
-            _ => true,
-        }
+        !matches!(self, Self::ExternRef | Self::FuncRef | Self::V128)
     }
 }
 

@@ -60,7 +60,7 @@ impl Function<WasmerBackend> for WasmerFunction {
             + 'static,
     {
         let ty = func_sig_to_function_type(&sig);
-        let global_env = ctx.as_context_mut().env.clone();
+        let global_env = ctx.as_context_mut().env;
         let env = FunctionEnv::new(&mut ctx.as_context_mut().inner, ());
         let func = move |env: wasmer::FunctionEnvMut<()>,
                          args: &[wasmer::Value]|
@@ -118,10 +118,10 @@ impl Function<WasmerBackend> for WasmerFunction {
 
 impl WasmerFunction {
     pub(crate) fn from_func(
-        mut ctx: impl AsContextMut<WasmerBackend>,
+        ctx: impl AsContextMut<WasmerBackend>,
         func: wasmer::Function,
     ) -> Self {
-        let ty = func.ty(&mut ctx.as_context_mut().inner);
+        let ty = func.ty(&ctx.as_context().inner);
         let sig = function_type_to_func_sig(&ty);
         WasmerFunction {
             sig,
@@ -133,7 +133,7 @@ impl WasmerFunction {
 macro_rules! impl_func_construction {
     ($num:tt $($args:ident)*) => (paste::paste!{
         fn [< new_typed_with_env_ $num >] <F>(mut ctx: WasmerContextMut<'_>, func: F) -> WasmerFunction
-            where F: Fn(WasmerCaller<'_>, $(replace_with!($args -> i32),)*) -> () + Send + Sync + 'static {
+            where F: Fn(WasmerCaller<'_>, $(replace_with!($args -> i32),)*) + Send + Sync + 'static {
             let global_env = ctx.env.clone();
             let func = move |env: FunctionEnvMut<()>, $($args,)*| {
                 let caller = WasmerCaller {inner: env, env: global_env.clone()};

@@ -65,7 +65,7 @@ pub fn extract_from_compiled_module<WB: WasmBackend>(
         .custom_sections(VERSION_SECTION_NAME)
         .ok_or(ModuleInfoError::NoCustomSection(VERSION_SECTION_NAME))?;
 
-    let section = try_as_one_section(&sections, VERSION_SECTION_NAME)?;
+    let section = try_as_one_section(sections, VERSION_SECTION_NAME)?;
     let version = as_semver(section)?;
 
     Ok(version)

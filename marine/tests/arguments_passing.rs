@@ -320,11 +320,11 @@ pub fn get_interfaces() {
     let pure_module_interface = interface
         .modules
         .get(pure_module_name)
-        .expect(&format!("{} should present in interface", pure_module_name));
+        .unwrap_or_else(|| panic!("{} should present in interface", pure_module_name));
     let effector_module_interface = interface
         .modules
         .get(effector_module_name)
-        .expect(&format!("{} should present in interface", pure_module_name));
+        .unwrap_or_else(|| panic!("{} should present in interface", pure_module_name));
 
     assert!(pure_module_interface.record_types.is_empty());
     assert!(effector_module_interface.record_types.is_empty());
@@ -609,7 +609,7 @@ pub fn string_type() {
 
 #[test]
 pub fn str_type() {
-    const FUNC_NAME: &'static str = "str_type";
+    const FUNC_NAME: &str = "str_type";
 
     let mut faas = DefaultMarine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
@@ -681,7 +681,7 @@ pub fn bool_type() {
 
 #[test]
 pub fn empty_type() {
-    const FUNC_NAME: &'static str = "empty_type";
+    const FUNC_NAME: &str = "empty_type";
 
     let mut faas = DefaultMarine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));

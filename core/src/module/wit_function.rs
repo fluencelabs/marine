@@ -105,7 +105,7 @@ impl<WB: WasmBackend> WITFunction<WB> {
     }
 }
 
-impl<'c, WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
+impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
     for WITFunction<WB>
 {
     fn name(&self) -> &str {

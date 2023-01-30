@@ -43,7 +43,7 @@ pub fn call_parameters() -> String {
 mod tests {
     use marine_rs_sdk_test::marine_test;
     use marine_rs_sdk_test::CallParameters;
-    use marine_rs_sdk_test::SecurityTetraplet;
+    
 
     #[marine_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
     fn empty_string(call_parameters: marine_test_env::call_parameters::ModuleInterface) {
@@ -53,9 +53,12 @@ mod tests {
         let host_id = "host_id";
         let particle_id = "particle_id";
 
-        let mut tetraplet = SecurityTetraplet::default();
-        tetraplet.function_name = "some_func_name".to_string();
-        tetraplet.json_path = "some_json_path".to_string();
+        let tetraplet = marine_rs_sdk::SecurityTetraplet {
+            function_name: "some_func_name".to_string(),
+            json_path: "some_json_path".to_string(),
+            ..Default::default()
+        };
+
         let tetraplets = vec![vec![tetraplet]];
 
         let cp = CallParameters {

@@ -36,7 +36,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         wasmtime_wasi::add_to_linker(&mut linker.linker, move |s: &mut StoreState| {
             &mut s.wasi[id]
         })
-        .map_err(|e| WasiError::Other(e))?; // todo add detail
+        .map_err(WasiError::Other)?; // todo add detail
 
         let args = args
             .into_iter()
@@ -63,15 +63,15 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         let wasi_ctx_builder = preopened_files
             .iter()
             .fold(wasi_ctx_builder, |builder, path| {
-                let file = std::fs::File::open(&path).unwrap(); // todo handle error
+                let file = std::fs::File::open(path).unwrap(); // todo handle error
                 let dir = wasmtime_wasi::Dir::from_std_file(file);
-                builder.preopened_dir(dir, &path).unwrap() // todo handle errpr
+                builder.preopened_dir(dir, path).unwrap() // todo handle errpr
             });
         let wasi_ctx_builder =
             mapped_dirs
                 .iter()
                 .fold(wasi_ctx_builder, |builder, (guest_name, dir)| {
-                    let file = std::fs::File::open(&dir).unwrap(); // todo handle error
+                    let file = std::fs::File::open(dir).unwrap(); // todo handle error
                     let dir = wasmtime_wasi::Dir::from_std_file(file);
                     let path = Path::new(&guest_name);
                     builder.preopened_dir(dir, path).unwrap() // todo handle error

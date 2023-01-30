@@ -56,20 +56,10 @@ impl AsContextMut<WasmerBackend> for WasmerCaller<'_> {
 macro_rules! impl_func_getter {
     ($args:ty, $rets:ty) => {
         impl FuncGetter<WasmerBackend, $args, $rets> for WasmerCaller<'_> {
-            unsafe fn get_func(
+            fn get_func(
                 &mut self,
                 _name: &str,
-            ) -> ResolveResult<
-                Box<
-                    dyn FnMut(
-                            &mut <WasmerBackend as WasmBackend>::ContextMut<'_>,
-                            $args,
-                        ) -> RuntimeResult<$rets>
-                        + Sync
-                        + Send
-                        + 'static,
-                >,
-            > {
+            ) -> ResolveResult<FuncFromCaller<WasmerBackend, $args, $rets>> {
                 todo!()
             }
         }

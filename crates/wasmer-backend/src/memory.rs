@@ -137,7 +137,7 @@ impl it_memory_traits::MemoryWritable<DelayedContextLifetime<WasmerBackend>> for
     ) {
         self.inner
             .view(store)
-            .write(offset as u64, &bytes)
+            .write(offset as u64, bytes)
             .expect(MEMORY_ACCESS_EXPECTATION);
     }
 }

@@ -211,11 +211,11 @@ pub fn get_interfaces() {
     let pure_module_interface = interface
         .modules
         .get(pure_module_name)
-        .expect(&format!("{} should present in interface", pure_module_name));
+        .unwrap_or_else(|| panic!("{} should present in interface", pure_module_name));
     let effector_module_interface = interface
         .modules
         .get(effector_module_name)
-        .expect(&format!("{} should present in interface", pure_module_name));
+        .unwrap_or_else(|| panic!("{} should present in interface", pure_module_name));
 
     assert!(!pure_module_interface.record_types.is_empty());
     assert!(!effector_module_interface.record_types.is_empty());

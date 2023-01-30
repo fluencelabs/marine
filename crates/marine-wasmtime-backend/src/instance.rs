@@ -59,9 +59,9 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
     ) -> ResolveResult<<WasmtimeWasmBackend as WasmBackend>::Memory> {
         self.inner
             .get_export(&mut store.as_context_mut().inner, memory_name)
-            .ok_or(ResolveError::ExportNotFound(memory_name.to_string()))
+            .ok_or_else(|| ResolveError::ExportNotFound(memory_name.to_string()))
             .and_then(|e| {
-                e.into_memory().ok_or(ResolveError::ExportTypeMismatch(
+                e.into_memory().ok_or_else(|| ResolveError::ExportTypeMismatch(
                     "memory".to_string(),
                     "other".to_string(),
                 ))
@@ -77,9 +77,9 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
         let func = self
             .inner
             .get_export(&mut store.as_context_mut().inner, name)
-            .ok_or(ResolveError::ExportNotFound(name.to_owned()))
+            .ok_or_else(|| ResolveError::ExportNotFound(name.to_owned()))
             .and_then(|e| {
-                e.into_func().ok_or(ResolveError::ExportTypeMismatch(
+                e.into_func().ok_or_else(|| ResolveError::ExportTypeMismatch(
                     "function".to_string(),
                     "other".to_string(),
                 ))

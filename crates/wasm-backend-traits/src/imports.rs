@@ -74,17 +74,17 @@ impl FuncSig {
     }
 }
 
+pub type FuncFromCaller<WB, Args, Rets> = Box<
+    dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets>
+    + Sync
+    + Send
+    + 'static,
+>;
+
 pub trait FuncGetter<WB: WasmBackend, Args, Rets> {
     /// Gets an export function from the calling instance.
     fn get_func(
         &mut self,
         name: &str,
-    ) -> ResolveResult<
-        Box<
-            dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets>
-                + Sync
-                + Send
-                + 'static,
-        >,
-    >;
+    ) -> ResolveResult<FuncFromCaller<WB, Args, Rets>>;
 }

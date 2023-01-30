@@ -82,9 +82,9 @@ impl WasmBackend for WasmtimeWasmBackend {
 
     fn compile(store: &mut WasmtimeStore, wasm: &[u8]) -> CompilationResult<Self::Module> {
         let module = wasmtime::Module::new(store.inner.engine(), wasm)
-            .map_err(|e| CompilationError::FailedToCompileWasm(e))?; // todo make mode detailed
+            .map_err(CompilationError::FailedToCompileWasm)?; // todo make mode detailed
         let custom_sections = WasmtimeWasmBackend::custom_sections(wasm)
-            .map_err(|e| CompilationError::FailedToExtractCustomSections(e))?; // todo make more deatailed
+            .map_err(CompilationError::FailedToExtractCustomSections)?; // todo make more deatailed
 
         Ok(WasmtimeModule {
             custom_sections,

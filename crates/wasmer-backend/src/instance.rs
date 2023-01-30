@@ -21,6 +21,7 @@ use marine_wasm_backend_traits::*;
 use anyhow::anyhow;
 use wasmer::Extern;
 
+#[derive(Clone)]
 pub struct WasmerInstance {
     pub(crate) inner: wasmer::Instance,
 }
@@ -92,8 +93,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
             .filter_map(|(_name, export)| match export {
                 Extern::Memory(memory) => Some(memory),
                 _ => None,
-            }) // todo is there a way to make it better?
-            .nth(0)
+            }).next()
             .map(Clone::clone); // todo cache memories and export in the instance
 
         self.inner

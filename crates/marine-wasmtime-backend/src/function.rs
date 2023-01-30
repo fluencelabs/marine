@@ -41,7 +41,7 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
                 .iter()
                 .map(val_to_wvalue)
                 .collect::<Result<Vec<_>, RuntimeError>>()
-                .map_err(|e| anyhow::Error::new(e))?; // todo move earlier
+                .map_err(anyhow::Error::new)?; // todo move earlier
 
             let rets = func(&args);
             for i in 0..results.len() {
@@ -127,7 +127,7 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
 macro_rules! impl_func_construction {
     ($num:tt $($args:ident)*) => (paste::paste!{
         fn [< new_typed_with_env_ $num >] <F>(mut ctx: WasmtimeContextMut<'_>, func: F) -> WasmtimeFunction
-            where F: Fn(WasmtimeCaller<'_>, $(replace_with!($args -> i32),)*) -> () + Send + Sync + 'static {
+            where F: Fn(WasmtimeCaller<'_>, $(replace_with!($args -> i32),)*) + Send + Sync + 'static {
 
             let func = move |caller: wasmtime::Caller<'_, StoreState>, $($args,)*| {
                 let caller = WasmtimeCaller {inner: caller};

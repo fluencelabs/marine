@@ -172,7 +172,7 @@ impl<WB: WasmBackend> ITInstance<WB> {
     }
 }
 
-impl<'v, WB: WasmBackend>
+impl<WB: WasmBackend>
     wasm::structures::Instance<
         ITExport,
         WITFunction<WB>,

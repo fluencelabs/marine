@@ -45,14 +45,14 @@ pub trait Function<WB: WasmBackend>: Send + Sync {
     /// Returns the signature of the function.
     /// The signature is constructed each time this function is called, so
     /// it is not recommended to use this function extensively.
-    fn signature<'c>(&self, store: &mut impl AsContextMut<WB>) -> FuncSig;
+    fn signature(&self, store: &mut impl AsContextMut<WB>) -> FuncSig;
 
     /// Calls the wasm function.
     /// # Panics:
     /// If given a store different from the one that stores the function.
     /// # Errors:
     /// See `RuntimeError` documentation.
-    fn call<'c>(
+    fn call(
         &self,
         store: &mut impl AsContextMut<WB>,
         args: &[WValue],
@@ -89,7 +89,7 @@ macro_rules! impl_into_func {
         impl<WB, F> IntoFunc<WB, ($(replace_with!($args -> i32),)*), (), WithoutEnv> for F
         where
             WB: WasmBackend,
-            F: Fn($(replace_with!($args -> i32),)*) -> () + Send + Sync + 'static,
+            F: Fn($(replace_with!($args -> i32),)*) + Send + Sync + 'static,
         {
             fn into_func(self, ctx: &mut impl AsContextMut<WB>) -> <WB as WasmBackend>::Function {
                 <WB as WasmBackend>::Function:: [< new_typed_ $num >] (ctx.as_context_mut(), self)
@@ -100,7 +100,7 @@ macro_rules! impl_into_func {
         impl<WB, F> IntoFunc<WB, ($(replace_with!($args -> i32),)*), (), WithEnv> for F
         where
             WB: WasmBackend,
-            F: Fn(<WB as WasmBackend>::Caller<'_>, $(replace_with!($args -> i32),)*) -> () + Send + Sync + 'static,
+            F: Fn(<WB as WasmBackend>::Caller<'_>, $(replace_with!($args -> i32),)*) + Send + Sync + 'static,
         {
             fn into_func(self, ctx: &mut impl AsContextMut<WB>) -> <WB as WasmBackend>::Function {
                 <WB as WasmBackend>::Function:: [< new_typed_with_env_ $num >] (ctx.as_context_mut(), self)
@@ -137,7 +137,7 @@ macro_rules! declare_func_construction {
     ($num:tt $($args:ident)*) => (paste::paste!{
         #[allow(non_snake_case)]
         fn [< new_typed_ $num >]<F>(ctx: <WB as WasmBackend>::ContextMut<'_>, func: F) -> <WB as WasmBackend>::Function
-            where F: Fn($(replace_with!($args -> i32),)*) -> () + Send + Sync + 'static
+            where F: Fn($(replace_with!($args -> i32),)*) + Send + Sync + 'static
         {
             let func = move |_: <WB as WasmBackend>::Caller<'_>, $($args,)*| { func($($args,)*)};
             Self:: [< new_typed_with_env_ $num >] (ctx, func)
@@ -145,7 +145,7 @@ macro_rules! declare_func_construction {
 
         #[allow(non_snake_case)]
         fn [< new_typed_with_env_ $num >]<F>(ctx: <WB as WasmBackend>::ContextMut<'_>, func: F) -> <WB as WasmBackend>::Function
-            where F: Fn(<WB as WasmBackend>::Caller<'_>, $(replace_with!($args -> i32),)*) -> () + Send + Sync + 'static;
+            where F: Fn(<WB as WasmBackend>::Caller<'_>, $(replace_with!($args -> i32),)*) + Send + Sync + 'static;
 
         #[allow(non_snake_case)]
         fn [< new_typed_ $num _r>]<F>(ctx: <WB as WasmBackend>::ContextMut<'_>, func: F) -> <WB as WasmBackend>::Function

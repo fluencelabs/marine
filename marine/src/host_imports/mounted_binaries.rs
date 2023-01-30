@@ -122,7 +122,7 @@ mod tests {
     #[test]
     fn call_non_existent_binary() {
         let path = std::path::Path::new("____non_existent_path____");
-        let actual = mounted_binary_import_impl(&path, vec![]).unwrap_err();
+        let actual = mounted_binary_import_impl(path, vec![]).unwrap_err();
 
         assert_eq!(actual.ret_code, 100002);
     }

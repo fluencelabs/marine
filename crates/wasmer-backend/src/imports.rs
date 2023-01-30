@@ -25,8 +25,6 @@ pub struct WasmerImports {
     pub(crate) inner: wasmer::Imports,
 }
 
-pub struct WasmerNamespace {}
-
 impl Imports<WasmerBackend> for WasmerImports {
     fn new(_store: &mut <WasmerBackend as WasmBackend>::Store) -> Self {
         Self {

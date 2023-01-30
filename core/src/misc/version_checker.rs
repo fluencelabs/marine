@@ -31,7 +31,7 @@ pub(crate) fn check_sdk_version<WB: WasmBackend>(
     let required_version = min_sdk_version();
     if module_version < *required_version {
         return Err(PrepareError::IncompatibleSDKVersions {
-            module_name: name.into(),
+            module_name: name,
             required: required_version.clone(),
             provided: module_version,
         });
