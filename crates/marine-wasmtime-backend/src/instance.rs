@@ -61,10 +61,9 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
             .get_export(&mut store.as_context_mut().inner, memory_name)
             .ok_or_else(|| ResolveError::ExportNotFound(memory_name.to_string()))
             .and_then(|e| {
-                e.into_memory().ok_or_else(|| ResolveError::ExportTypeMismatch(
-                    "memory".to_string(),
-                    "other".to_string(),
-                ))
+                e.into_memory().ok_or_else(|| {
+                    ResolveError::ExportTypeMismatch("memory".to_string(), "other".to_string())
+                })
             })
             .map(WasmtimeMemory::new)
     }
@@ -79,10 +78,9 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
             .get_export(&mut store.as_context_mut().inner, name)
             .ok_or_else(|| ResolveError::ExportNotFound(name.to_owned()))
             .and_then(|e| {
-                e.into_func().ok_or_else(|| ResolveError::ExportTypeMismatch(
-                    "function".to_string(),
-                    "other".to_string(),
-                ))
+                e.into_func().ok_or_else(|| {
+                    ResolveError::ExportTypeMismatch("function".to_string(), "other".to_string())
+                })
             })?;
 
         Ok(WasmtimeFunction { inner: func })

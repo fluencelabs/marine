@@ -43,7 +43,6 @@ pub fn call_parameters() -> String {
 mod tests {
     use marine_rs_sdk_test::marine_test;
     use marine_rs_sdk_test::CallParameters;
-    
 
     #[marine_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
     fn empty_string(call_parameters: marine_test_env::call_parameters::ModuleInterface) {

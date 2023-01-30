@@ -109,7 +109,7 @@ fn test_too_big_field_len() {
     array.add_utf8_field("repository");
 
     let actual: Result<ModuleManifest, _> = array.as_bytes().try_into();
-    let expected: Result<_, _>  = Err(ManifestError::TooBigFieldSize("version", incorrect_size));
+    let expected: Result<_, _> = Err(ManifestError::TooBigFieldSize("version", incorrect_size));
 
     assert_eq!(actual, expected);
 }
@@ -123,7 +123,7 @@ fn test_without_one_field() {
     array.add_utf8_field("description");
 
     let actual: Result<ModuleManifest, _> = array.as_bytes().try_into();
-    let expected: Result<_, _>  = Err(ManifestError::NotEnoughBytesForPrefix("repository"));
+    let expected: Result<_, _> = Err(ManifestError::NotEnoughBytesForPrefix("repository"));
 
     assert_eq!(actual, expected);
 }
@@ -131,7 +131,7 @@ fn test_without_one_field() {
 #[test]
 fn test_with_empty_slice() {
     let actual: Result<ModuleManifest, _> = vec![].as_slice().try_into();
-    let expected: Result<_, _>  = Err(ManifestError::NotEnoughBytesForPrefix("authors"));
+    let expected: Result<_, _> = Err(ManifestError::NotEnoughBytesForPrefix("authors"));
 
     assert_eq!(actual, expected);
 }

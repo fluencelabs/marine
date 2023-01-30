@@ -93,7 +93,8 @@ impl Instance<WasmerBackend> for WasmerInstance {
             .filter_map(|(_name, export)| match export {
                 Extern::Memory(memory) => Some(memory),
                 _ => None,
-            }).next()
+            })
+            .next()
             .map(Clone::clone); // todo cache memories and export in the instance
 
         self.inner

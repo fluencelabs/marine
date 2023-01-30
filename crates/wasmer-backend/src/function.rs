@@ -117,10 +117,7 @@ impl Function<WasmerBackend> for WasmerFunction {
 }
 
 impl WasmerFunction {
-    pub(crate) fn from_func(
-        ctx: impl AsContextMut<WasmerBackend>,
-        func: wasmer::Function,
-    ) -> Self {
+    pub(crate) fn from_func(ctx: impl AsContextMut<WasmerBackend>, func: wasmer::Function) -> Self {
         let ty = func.ty(&ctx.as_context().inner);
         let sig = function_type_to_func_sig(&ty);
         WasmerFunction {
