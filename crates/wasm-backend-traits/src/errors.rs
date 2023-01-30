@@ -112,7 +112,11 @@ pub enum WasiError {
     #[error("{0}")]
     IOError(#[from] std::io::Error),
     #[error("{0}")]
-    Other(#[from] anyhow::Error),
+    EngineWasiError(#[from] anyhow::Error),
+    #[error("Cumulative size of args array exceeds 2^32")]
+    TooLargeArgsArray,
+    #[error("Cumulative size of envs array exceeds 2^32")]
+    TooLargeEnvsArray,
 }
 
 #[derive(Debug, Error)]
