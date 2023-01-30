@@ -16,6 +16,19 @@
             "import": "./dist/config.js"
         }
     },
+    "typesVersions": {
+        "*": {
+            "./types": [
+                "./dist/types.d.ts"
+            ],
+            "./MarineService": [
+                "./dist/MarineService.d.ts"
+            ],
+            "./config": [
+                "./dist/config.d.ts"
+            ]
+        }
+    },
     "type": "module",
     "repository": "https://github.com/fluencelabs/marine",
     "author": "Fluence Labs",
