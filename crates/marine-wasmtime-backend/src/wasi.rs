@@ -88,7 +88,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
 
         let wasi_ctx = wasi_ctx_builder.build();
         let state = store.inner.data_mut();
-        state.wasi.push(wasi_ctx); //todo handle duplicate
+        state.wasi.push(wasi_ctx);
         Ok(())
     }
 

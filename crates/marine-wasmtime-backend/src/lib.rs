@@ -82,9 +82,9 @@ impl WasmBackend for WasmtimeWasmBackend {
 
     fn compile(store: &mut WasmtimeStore, wasm: &[u8]) -> CompilationResult<Self::Module> {
         let module = wasmtime::Module::new(store.inner.engine(), wasm)
-            .map_err(CompilationError::FailedToCompileWasm)?; // todo make mode detailed
+            .map_err(CompilationError::FailedToCompileWasm)?;
         let custom_sections = WasmtimeWasmBackend::custom_sections(wasm)
-            .map_err(CompilationError::FailedToExtractCustomSections)?; // todo make more deatailed
+            .map_err(CompilationError::FailedToExtractCustomSections)?;
 
         Ok(WasmtimeModule {
             custom_sections,
@@ -95,5 +95,5 @@ impl WasmBackend for WasmtimeWasmBackend {
 
 #[derive(Default)]
 pub struct StoreState {
-    wasi: Vec<WasiCtx>, //todo switch to Pool or something
+    wasi: Vec<WasiCtx>, // wasmtime store does not release memory until drop, so do we
 }
