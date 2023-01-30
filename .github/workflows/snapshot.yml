@@ -58,7 +58,7 @@ jobs:
   publish-marine-js:
     name: "Publish marine-js snapshot"
     runs-on: builder
-    timemout-minutes: 60
+    timeout-minutes: 60
 
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
