@@ -5,6 +5,8 @@
         "target": "ESNext",
         "module": "ESNext",
         "skipLibCheck": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
         "allowJs": true,
         "declaration": true,
         "moduleResolution": "nodenext"
