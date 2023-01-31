@@ -1,15 +1,17 @@
 import { jest } from '@jest/globals';
+import { defaultImport } from 'default-import';
 import { promises as fsPromises } from 'fs';
 import { createRequire } from 'module';
 import * as path from 'path';
 import * as url from 'url';
-import download from 'download';
+import downloadRaw from 'download';
 import { MarineService } from '../MarineService.js';
 import { callAvm } from '@fluencelabs/avm';
 import { JSONArray, JSONObject } from '../types.js';
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 const require = createRequire(import.meta.url);
+const download = defaultImport(downloadRaw);
 
 const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
 
