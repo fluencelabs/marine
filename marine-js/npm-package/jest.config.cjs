@@ -1,7 +1,16 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-    testEnvironment: 'node',
+    extensionsToTreatAsEsm: ['.ts'],
+    moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+    },
     testPathIgnorePatterns: ['dist'],
     transform: {
-        '^.+\\.(ts|js)x?$': 'ts-jest',
+        '^.+\\.tsx?$': [
+            'ts-jest',
+            {
+                useESM: true,
+            },
+        ],
     },
 };

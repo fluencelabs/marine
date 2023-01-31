@@ -4,15 +4,9 @@
         "outDir": "./dist/",
         "target": "ESNext",
         "module": "ESNext",
-        "allowJs": true,
-        "strict": true,
-        "esModuleInterop": true,
         "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "declaration": true,
-        "declarationMap": false,
-        "sourceMap": true,
-        "moduleResolution": "node"
+        "allowJs": true,
+        "moduleResolution": "nodenext"
     },
     "exclude": ["node_modules", "dist"],
     "include": ["src"]
