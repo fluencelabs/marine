@@ -15,11 +15,14 @@
  */
 
 import { WASI } from '@wasmer/wasi';
-import bindings from '@wasmer/wasi/lib/bindings/browser';
+import bindingsRaw from '@wasmer/wasi/lib/bindings/browser.js';
+import { defaultImport } from 'default-import';
 import { WasmFs } from '@wasmer/wasmfs';
-import { init } from './marine_js';
-import type { MarineServiceConfig, Env } from './config';
-import { JSONArray, JSONObject, LogFunction, LogLevel, logLevels } from './types';
+import { init } from './marine_js.js';
+import type { MarineServiceConfig, Env } from './config.js';
+import { JSONArray, JSONObject, LogFunction, LogLevel, logLevels } from './types.js';
+
+const binding = defaultImport(bindingsRaw);
 
 let cachegetUint8Memory0: any = null;
 
@@ -65,7 +68,7 @@ export class MarineService {
             args: [],
             env: this.env,
             bindings: {
-                ...bindings,
+                ...binding,
                 fs: new WasmFs().fs,
             },
         });
