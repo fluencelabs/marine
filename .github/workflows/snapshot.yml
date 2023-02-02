@@ -6,9 +6,9 @@ on:
       cargo-version:
         description: "cargo snapshot version"
         value: ${{ jobs.cargo-snapshot.outputs.version }}
-      # marine-js-version:
-      #   description: "@fluencelabs/marine-js version"
-      #   value: ${{ jobs.publish-marine-js.outputs.version }}
+      marine-js-version:
+        description: "@fluencelabs/marine-js version"
+        value: ${{ jobs.publish-marine-js.outputs.version }}
 
 jobs:
   cargo-snapshot:
