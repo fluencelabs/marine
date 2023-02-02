@@ -7,14 +7,6 @@
     {
       "type": "cargo-workspace",
       "merge": false
-    },
-    {
-      "type": "linked-versions",
-      "groupName": "marine-js and marine-js node package",
-      "components": [
-        "marine-js",
-        "marine-js-node"
-      ]
     }
   ],
   "packages": {
@@ -32,11 +24,7 @@
     "tools/cli": {},
     "tools/repl": {},
     "marine-js": {
-      "component": "marine-js"
-    },
-    "marine-js/npm-package": {
-      "release-type": "node",
-      "component": "marine-js-node"
+      "type": "simple"
     }
   }
 }
