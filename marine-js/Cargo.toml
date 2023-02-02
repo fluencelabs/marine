@@ -1,6 +1,6 @@
 [package]
 name = "marine-js"
-version = "0.3.42"
+version = "0.3.3"
 edition = "2018"
 description = "Web version of the marine runtime"
 publish = false

@@ -23,6 +23,8 @@
     "crates/fluence-app-service": {},
     "tools/cli": {},
     "tools/repl": {},
-    "marine-js": {}
+    "marine-js": {
+      "type": "simple"
+    }
   }
 }
