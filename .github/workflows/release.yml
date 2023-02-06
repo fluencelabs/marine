@@ -167,7 +167,7 @@ jobs:
 
       - name: Build marine-js package for node
         working-directory: marine-js
-        run: wasm-pack build --release -m force
+        run: ./build.sh
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.4.3
@@ -189,6 +189,9 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - run: npm i
+        working-directory: marine-js/npm-package
+
+      - run: npm run build
         working-directory: marine-js/npm-package
 
       - name: Publish to npm registry
