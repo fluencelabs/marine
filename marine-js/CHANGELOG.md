@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.44](https://github.com/fluencelabs/marine/compare/marine-js-v0.3.43...marine-js-v0.3.44) (2023-02-06)
+
+
+### Bug Fixes
+
+* **ci:** Fix marine-js release build ([#272](https://github.com/fluencelabs/marine/issues/272)) ([dce6333](https://github.com/fluencelabs/marine/commit/dce6333f43e6258f41268fa62a1530694e21d5fe))
+
 ## [0.3.43](https://github.com/fluencelabs/marine/compare/marine-js-v0.3.42...marine-js-v0.3.43) (2023-02-03)
 
 
