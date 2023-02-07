@@ -25,12 +25,14 @@ use fluence_app_service::MarineModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
 
 use serde::Deserialize;
-use serde_json::Value as JValue;
+use serde_json::{Value as JValue, Value};
 
 use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
 use std::fs;
 use std::path::PathBuf;
 use std::time::Instant;
+use anyhow::anyhow;
 
 macro_rules! next_argument {
     ($arg_name:ident, $args:ident, $error_msg:expr) => {
@@ -176,7 +178,13 @@ impl REPL {
             {
                 Ok(result) if show_result_arg => {
                     let elapsed_time = start.elapsed();
-                    format!("result: {:?}\n elapsed time: {:?}", result, elapsed_time)
+
+                    let result_string = match serde_json::to_string_pretty(&result) {
+                        Ok(pretty_printed) => pretty_printed,
+                        Err(_) => format!("{:?}", result)
+                    };
+
+                    format!("result: {}\n elapsed time: {:?}", result_string, elapsed_time)
                 }
                 Ok(_) => {
                     let elapsed_time = start.elapsed();
@@ -229,7 +237,8 @@ impl REPL {
         let mut config = config_file_path
             .as_ref()
             .map(TomlAppServiceConfig::load)
-            .transpose()?
+            .transpose()
+            .map_err(|e| anyhow!("failed to load \"{}\": {}", config_file_path.as_ref().unwrap().display(), e))?
             .unwrap_or_default();
         config.service_base_dir = Some(tmp_path);
 
@@ -366,4 +375,31 @@ fn print_help() {
             \n\
             <args> and [call_params] should be in json"
     );
+}
+
+struct JsonPrettyPrinter<'v> (&'v JValue);
+
+impl Display for JsonPrettyPrinter<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self.0 {
+            Value::Null => write!(f, "null"),
+            Value::Bool(bool_value) => write!(f, "{bool_value}"),
+            Value::Number(number) => write!(f, "{number}"),
+            Value::String(string) => write!(f, "\"{string}\""),
+            Value::Array(array) => {
+                write!(f, "[")?;
+                for value in array {
+                    write!(f, "{}", JsonPrettyPrinter(value))?;
+                }
+                write!(f, "]")
+            }
+            Value::Object(map) => {
+                writeln!(f, "{{")?;
+                for (key, value) in map.iter() {
+                    writeln!(f, "\"{}\": {}", key, JsonPrettyPrinter(value))?;
+                }
+                writeln!(f, "}}")
+            }
+        }
+    }
 }
