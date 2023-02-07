@@ -243,7 +243,12 @@ impl REPL {
             .map_err(|e| {
                 anyhow!(
                     "failed to load \"{}\": {}",
-                    config_file_path.as_ref().unwrap().display(),
+                    config_file_path
+                        .as_ref()
+                        .unwrap_or_else(|| panic!(
+                            "config_file_path is Some because it is used to load file"
+                        ))
+                        .display(),
                     e
                 )
             })?
