@@ -26,7 +26,7 @@ use fluence_app_service::TomlAppServiceConfig;
 
 use anyhow::anyhow;
 use serde::Deserialize;
-use serde_json::{Value as JValue};
+use serde_json::Value as JValue;
 
 use std::collections::HashMap;
 use std::fs;
