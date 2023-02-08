@@ -95,7 +95,7 @@ impl WasmBackend for WasmtimeWasmBackend {
     fn new() -> Self {
         let mut config = wasmtime::Config::new();
         config
-            .debug_info(true)
+            .debug_info(false)
             .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable);
         let engine = wasmtime::Engine::new(&config).unwrap();
         Self {
