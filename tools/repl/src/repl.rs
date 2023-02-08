@@ -24,6 +24,7 @@ use fluence_app_service::{AppService, CallParameters, SecurityTetraplet};
 use fluence_app_service::MarineModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
 
+use anyhow::anyhow;
 use serde::Deserialize;
 use serde_json::Value as JValue;
 
@@ -176,7 +177,16 @@ impl REPL {
             {
                 Ok(result) if show_result_arg => {
                     let elapsed_time = start.elapsed();
-                    format!("result: {:?}\n elapsed time: {:?}", result, elapsed_time)
+
+                    let result_string = match serde_json::to_string_pretty(&result) {
+                        Ok(pretty_printed) => pretty_printed,
+                        Err(_) => format!("{:?}", result),
+                    };
+
+                    format!(
+                        "result: {}\n elapsed time: {:?}",
+                        result_string, elapsed_time
+                    )
                 }
                 Ok(_) => {
                     let elapsed_time = start.elapsed();
@@ -229,7 +239,19 @@ impl REPL {
         let mut config = config_file_path
             .as_ref()
             .map(TomlAppServiceConfig::load)
-            .transpose()?
+            .transpose()
+            .map_err(|e| {
+                anyhow!(
+                    "failed to load \"{}\": {}",
+                    config_file_path
+                        .as_ref()
+                        .unwrap_or_else(|| panic!(
+                            "config_file_path is Some because it is used to load file"
+                        ))
+                        .display(),
+                    e
+                )
+            })?
             .unwrap_or_default();
         config.service_base_dir = Some(tmp_path);
 
