@@ -105,7 +105,7 @@ impl it_memory_traits::MemoryView<DelayedContextLifetime<WasmtimeWasmBackend>> f
         size: u32,
     ) -> Result<(), MemoryAccessError> {
         let memory_size = self.memory.data_size(&mut store.inner) as u64;
-        if memory_size <= (offset + size) as u64 {
+        if memory_size <= (offset as u64) + (size as u64) {
             Err(MemoryAccessError::OutOfBounds {
                 offset,
                 size,
