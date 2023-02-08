@@ -49,7 +49,7 @@ pub struct MarineCore<WB: WasmBackend> {
 
 impl<WB: WasmBackend> MarineCore<WB> {
     pub fn new() -> Self {
-        let wasm_backend = WB::default();
+        let wasm_backend = WB::new();
         let store = <WB as WasmBackend>::Store::new(&wasm_backend);
         Self {
             modules: HashMap::new(),

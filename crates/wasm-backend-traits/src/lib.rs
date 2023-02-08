@@ -57,6 +57,8 @@ pub trait WasmBackend: Clone + Default + 'static {
     type Wasi: WasiImplementation<Self>;
 
     fn compile(store: &mut Self::Store, wasm: &[u8]) -> CompilationResult<Self::Module>;
+
+    fn new() -> Self;
 }
 
 pub struct DelayedContextLifetime<WB: WasmBackend> {
