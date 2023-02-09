@@ -148,7 +148,6 @@ impl<WB: WasmBackend> AppService<WB> {
         create(&service_dir.join(SERVICE_LOCAL_DIR_NAME))?;
         create(&service_dir.join(SERVICE_TMP_DIR_NAME))?;
 
-
         // files will be mapped to service_dir later, along with user-defined ones
         let mapped_dirs = hashmap! {
             format!("/{SERVICE_LOCAL_DIR_NAME}") => PathBuf::from(format!("{SERVICE_LOCAL_DIR_NAME}")),
