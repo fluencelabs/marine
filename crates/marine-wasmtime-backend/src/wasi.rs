@@ -19,9 +19,9 @@ use crate::{StoreState, WasmtimeContextMut, WasmtimeImports, WasmtimeWasmBackend
 use marine_wasm_backend_traits::*;
 
 use anyhow::anyhow;
+use wasmtime_wasi::ambient_authority;
 
 use std::path::{Path, PathBuf};
-use std::io::ErrorKind;
 
 pub struct WasmtimeWasi {}
 
@@ -68,9 +68,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         let wasi_ctx_builder = preopened_files.iter().try_fold(
             wasi_ctx_builder,
             |builder, path| -> Result<_, WasiError> {
-                println!("preopened_dir: {} ", path.display());
-                let file = create_or_open_dir(path)?;
-                let dir = wasmtime_wasi::Dir::from_std_file(file);
+                let dir = create_or_open_dir(path)?;
                 builder
                     .preopened_dir(dir, path)
                     .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))
@@ -79,9 +77,8 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         let wasi_ctx_builder = mapped_dirs.iter().try_fold(
             wasi_ctx_builder,
             |builder, (guest_name, dir)| -> Result<_, WasiError> {
-                println!("mapped_dir: {} => {}", dir.display(), &guest_name);
-                let file = create_or_open_dir(dir)?;
-                let dir = wasmtime_wasi::Dir::from_std_file(file);
+                let dir = create_or_open_dir(dir)?;
+                //let dir = wasmtime_wasi::Dir::from_std_file(file);
                 let path = Path::new(&guest_name);
                 builder
                     .preopened_dir(dir, path)
@@ -111,18 +108,10 @@ impl WasiState for WasmtimeWasiState {
     }
 }
 
-fn create_or_open_dir(path: impl AsRef<Path>) -> std::io::Result<std::fs::File> {
+fn create_or_open_dir(path: impl AsRef<Path>) -> std::io::Result<wasmtime_wasi::Dir> {
     let path = path.as_ref();
-    match std::fs::File::open(path) {
-        Ok(file) => Ok(file),
-        Err(err) => {
-            match err.kind() {
-                ErrorKind::NotFound => {
-                    std::fs::create_dir_all(path)?;
-                    std::fs::File::open(path)
-                },
-                _ => Err(err)
-            }
-        }
+    if !path.exists() {
+        std::fs::create_dir_all(path)?;
     }
+    wasmtime_wasi::Dir::open_ambient_dir(path, ambient_authority())
 }

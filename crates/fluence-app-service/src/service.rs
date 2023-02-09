@@ -25,7 +25,7 @@ use marine::Marine;
 use marine::IValue;
 
 use serde_json::Value as JValue;
-use maplit::hashset;
+use maplit::hashmap;
 
 use std::convert::TryInto;
 use std::collections::HashMap;
@@ -148,10 +148,11 @@ impl<WB: WasmBackend> AppService<WB> {
         create(&service_dir.join(SERVICE_LOCAL_DIR_NAME))?;
         create(&service_dir.join(SERVICE_TMP_DIR_NAME))?;
 
+
         // files will be mapped to service_dir later, along with user-defined ones
-        let preopened_files = hashset! {
-            PathBuf::from(SERVICE_LOCAL_DIR_NAME),
-            PathBuf::from(SERVICE_TMP_DIR_NAME)
+        let mapped_dirs = hashmap! {
+            format!("/{SERVICE_LOCAL_DIR_NAME}") => PathBuf::from(format!("{SERVICE_LOCAL_DIR_NAME}")),
+            format!("/{SERVICE_TMP_DIR_NAME}") => PathBuf::from(format!("{SERVICE_LOCAL_DIR_NAME}")),
         };
 
         envs.insert(
@@ -163,7 +164,7 @@ impl<WB: WasmBackend> AppService<WB> {
             module.config.extend_wasi_envs(envs.clone());
             module
                 .config
-                .extend_wasi_files(preopened_files.clone(), <_>::default());
+                .extend_wasi_files(<_>::default(), mapped_dirs.clone());
             // Must be the last modification of the module.config.
             // Moves app preopened files and mapped dirs to the &service dir, keeping old aliases.
             module.config.set_wasi_fs_root(&service_dir)
