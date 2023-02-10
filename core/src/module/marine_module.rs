@@ -46,7 +46,6 @@ use std::mem::MaybeUninit;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::borrow::BorrowMut;
-use log::log;
 
 const START_FUNC: &str = "_start";
 const INITIALIZE_FUNC: &str = "_initialize";
