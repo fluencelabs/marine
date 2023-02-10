@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.7](https://github.com/fluencelabs/marine/compare/marine-v0.12.6...marine-v0.12.7) (2023-02-10)
+
+
+### Bug Fixes
+
+* **cli:** Make checking latest version an optional feature [#278](https://github.com/fluencelabs/marine/issues/278) ([da31cbb](https://github.com/fluencelabs/marine/commit/da31cbbe38e884ec7989c86af6ebf0fc19093341))
+
 ## [0.12.6](https://github.com/fluencelabs/marine/compare/marine-v0.12.5...marine-v0.12.6) (2023-01-27)
 
 
