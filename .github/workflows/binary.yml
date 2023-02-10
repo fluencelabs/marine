@@ -8,7 +8,7 @@ on:
         type: string
         required: true
       tag:
-        description: "tag name to appload binaries to"
+        description: "tag name to upload binaries to"
         type: string
         required: true
 
