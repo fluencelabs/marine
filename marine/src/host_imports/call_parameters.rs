@@ -30,8 +30,9 @@ pub(crate) fn create_call_parameters_import<WB: WasmBackend>(
 ) -> HostImportDescriptor<WB> {
     let call_parameters_closure = move |_ctx: &mut <WB as WasmBackend>::Caller<'_>,
                                         _args: Vec<IValue>| {
-        // TODO: BE EXTREMELY CAUTIOUS ABOUT .lock().unwrap(), INVESTIGATE IT/DISCUSS WITH MIKE
-        let result = crate::to_interface_value(call_parameters.lock().unwrap().deref()).unwrap();
+        // TODO: BE EXTREMELY CAUTIOUS ABOUT .lock().unwrap(), INVESTIGATE IT/DISCUSS WITÏH MIKE
+        let result =
+            { crate::to_interface_value(call_parameters.lock().unwrap().deref()).unwrap() };
         Some(result)
     };
 

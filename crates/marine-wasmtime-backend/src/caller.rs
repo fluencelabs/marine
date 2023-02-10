@@ -77,6 +77,7 @@ macro_rules! impl_func_getter {
 
                         let closure = move |store: &mut WasmtimeContextMut<'_>, args| {
                             f.call(&mut store.inner, args).map_err(|e| {
+                                log::debug!("func from caller failed: {e}");
                                 if let Some(_) = e.downcast_ref::<wasmtime::Trap>() {
                                     RuntimeError::Trap(e)
                                 } else {

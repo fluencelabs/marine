@@ -98,9 +98,7 @@ impl WasmBackend for WasmtimeWasmBackend {
             .debug_info(false)
             .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable);
         let engine = wasmtime::Engine::new(&config).unwrap();
-        Self {
-            engine
-        }
+        Self { engine }
     }
 }
 

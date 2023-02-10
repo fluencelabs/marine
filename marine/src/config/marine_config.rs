@@ -155,12 +155,17 @@ impl<WB: WasmBackend> MarineModuleConfig<WB> {
             }) => {
                 mapped_dirs
                     .values_mut()
-                    .map(|path| *path = root.join(&path))
+                    .map(|path| {
+                        *path = root.join(&path);
+                        log::debug!("mapped_dir after: {}", path.display());
+                    })
                     .for_each(drop);
 
-                let mapped_preopens = preopened_files
-                    .iter()
-                    .map(|path| (path.to_string_lossy().into(), root.join(path)));
+                let mapped_preopens = preopened_files.iter().map(|path| {
+                    let new_path = root.join(path);
+                    log::debug!("preopen after: {}", new_path.display());
+                    (path.to_string_lossy().into(), new_path)
+                });
 
                 mapped_dirs.extend(mapped_preopens);
 

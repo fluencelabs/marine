@@ -174,9 +174,10 @@ impl<WB: WasmBackend> Marine<WB> {
             module_name.to_string(),
             func_name.to_string()
         )?;
-
-        let mut cp = self.call_parameters.lock().unwrap(); // TODO MAKE SURE ITS OK
-        *cp = call_parameters;
+        {
+            let mut cp = self.call_parameters.lock().unwrap(); // TODO MAKE SURE ITS OK
+            *cp = call_parameters;
+        }
 
         let result = self.core.call(module_name, func_name, &iargs)?;
 

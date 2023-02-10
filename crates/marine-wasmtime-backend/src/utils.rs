@@ -87,9 +87,13 @@ pub(crate) fn fn_ty_to_sig(ty: &wasmtime::FuncType) -> FuncSig {
 }
 
 pub(crate) fn inspect_call_error(e: anyhow::Error) -> RuntimeError {
-    if e.downcast_ref::<wasmtime::Trap>().is_some() {
+    log::debug!("func from function failed: {e}");
+    if let Some(trap) = e.downcast_ref::<wasmtime::Trap>() {
+        log::debug!("trap: {:?}", trap);
+
         RuntimeError::Trap(e)
     } else {
+        log::debug!("not a trap");
         match e.downcast::<UserError>() {
             Ok(e) => RuntimeError::UserError(e),
             Err(e) => RuntimeError::Other(e),

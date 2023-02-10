@@ -46,6 +46,7 @@ use std::mem::MaybeUninit;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::borrow::BorrowMut;
+use log::log;
 
 const START_FUNC: &str = "_start";
 const INITIALIZE_FUNC: &str = "_initialize";
@@ -80,13 +81,14 @@ impl<WB: WasmBackend> Callable<WB> {
     ) -> MResult<Vec<IValue>> {
         use wasmer_it::interpreter::stack::Stackable;
 
+        log::debug!("Running Interpreter");
         let result = self
             .it_module_func
             .interpreter
             .run(args, Arc::make_mut(&mut self.it_instance), store)?
             .as_slice()
             .to_owned();
-
+        log::debug!("Finished running interpreter");
         Ok(result)
     }
 }
@@ -184,7 +186,13 @@ impl<WB: WasmBackend> MModule<WB> {
         function_name: &str,
         args: &[IValue],
     ) -> MResult<Vec<IValue>> {
-        self.export_funcs.get_mut(function_name).map_or_else(
+        log::debug!(
+            "calling {}::{} with args: {:?}",
+            module_name,
+            function_name,
+            args
+        );
+        let res = self.export_funcs.get_mut(function_name).map_or_else(
             || {
                 Err(MError::NoSuchFunction(
                     module_name.to_string(),
@@ -192,7 +200,14 @@ impl<WB: WasmBackend> MModule<WB> {
                 ))
             },
             |func| Arc::make_mut(func).call(store, args),
-        )
+        );
+        log::debug!(
+            "calling {}::{} with result: {:?}",
+            module_name,
+            function_name,
+            res
+        );
+        res
     }
 
     pub(crate) fn get_exports_signatures(&self) -> impl Iterator<Item = MFunctionSignature> + '_ {
@@ -385,6 +400,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
                 // TODO: optimize by prevent copying stack values
                 outputs
+                    .map_err(|e| log::error!("interpreter got error {e}"))
                     .unwrap_or_default()
                     .as_slice()
                     .iter()
