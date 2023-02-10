@@ -1420,7 +1420,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.12.6"
+version = "0.12.7"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -1955,7 +1955,7 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "anyhow",
  "check-latest",
