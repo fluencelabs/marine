@@ -70,6 +70,7 @@ pub fn main() -> Result<(), anyhow::Error> {
         return Ok(());
     }
 
+    #[cfg(feature = "check-latest")]
     if let Ok(Some(new_version)) = check_latest::check_max!() {
         use termion::color;
 
