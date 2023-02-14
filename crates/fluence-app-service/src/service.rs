@@ -150,8 +150,8 @@ impl<WB: WasmBackend> AppService<WB> {
 
         // files will be mapped to service_dir later, along with user-defined ones
         let mapped_dirs = hashmap! {
-            format!("/{SERVICE_LOCAL_DIR_NAME}") => PathBuf::from(format!("{SERVICE_LOCAL_DIR_NAME}")),
-            format!("/{SERVICE_TMP_DIR_NAME}") => PathBuf::from(format!("{SERVICE_LOCAL_DIR_NAME}")),
+            format!("/{SERVICE_LOCAL_DIR_NAME}") => PathBuf::from("{SERVICE_LOCAL_DIR_NAME}"),
+            format!("/{SERVICE_TMP_DIR_NAME}") => PathBuf::from("{SERVICE_LOCAL_DIR_NAME}"),
         };
 
         envs.insert(
