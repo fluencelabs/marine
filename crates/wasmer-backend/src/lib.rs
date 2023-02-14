@@ -72,6 +72,10 @@ impl WasmBackend for WasmerBackend {
                 })
             })
     }
+
+    fn new() -> Self {
+        <_>::default()
+    }
 }
 
 impl WasmerBackend {
