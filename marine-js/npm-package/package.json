@@ -3,6 +3,7 @@
   "description": "Marine-js",
   "version": "0.3.44",
   "exports": {
+    ".": "./dist/index.js",
     "./types": {
       "types": "./dist/types.d.ts",
       "import": "./dist/types.js"
