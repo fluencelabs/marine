@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.45](https://github.com/fluencelabs/marine/compare/marine-js-v0.3.44...marine-js-v0.3.45) (2023-02-15)
+
+
+### Bug Fixes
+
+* **marine-js:** add empty index.js as main entry point ([#282](https://github.com/fluencelabs/marine/issues/282)) ([cc430a0](https://github.com/fluencelabs/marine/commit/cc430a073517047921128e6f6bd6b221aabf71d1))
+
 ## [0.3.44](https://github.com/fluencelabs/marine/compare/marine-js-v0.3.43...marine-js-v0.3.44) (2023-02-06)
 
 

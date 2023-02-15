@@ -12,5 +12,5 @@
   "crates/fluence-app-service": "0.23.0",
   "tools/cli": "0.12.7",
   "tools/repl": "0.19.1",
-  "marine-js": "0.3.44"
+  "marine-js": "0.3.45"
 }
