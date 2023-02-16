@@ -101,6 +101,7 @@ Looks like everything is in order and the modules are ready for [deployment to t
 - [Marine Examples](https://github.com/fluencelabs/examples/tree/main/marine-examples)
 - [Quickstart](https://fluence.dev/docs/marine-book/quick-start/)
 
+Do not forget to check our [YouTube channel](https://www.youtube.com/@fluencelabs).
 
 ## Repository structure
 
