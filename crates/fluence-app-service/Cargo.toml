@@ -22,4 +22,3 @@ toml = "0.5.9"
 default = ["wasmtime"]
 raw-module-api = ["marine-runtime/raw-module-api"]
 wasmtime = ["marine-runtime/wasmtime"]
-wasmer = ["marine-runtime/wasmer"]

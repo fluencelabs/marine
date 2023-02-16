@@ -45,11 +45,6 @@ members = [
 ]
 
 [workspace.dependencies]
-#wasmer-it = { git = "https://github.com/fluencelabs/interface-types", branch = "feat/add-store", package = "wasmer-interface-types-fl", version = "0.25.0" }
-#it-memory-traits = {  git = "https://github.com/fluencelabs/interface-types", branch = "feat/add-store", package = "it-memory-traits", version = "0.3.1" }
-#it-lilo = { git = "https://github.com/fluencelabs/interface-types", branch = "feat/add-store", package = "it-lilo", version = "0.4.1"}
-#fluence-it-types = {  git = "https://github.com/fluencelabs/interface-types", branch = "feat/add-store", package = "fluence-it-types", version = "0.3.1", features = ["impls"] }
-
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.0" }
 it-memory-traits = { package = "it-memory-traits", version = "0.4.0" }
 it-lilo = { package = "it-lilo", version = "0.5.0"}
