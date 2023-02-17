@@ -99,7 +99,6 @@ pub(crate) struct MModule<WB: WasmBackend> {
     #[allow(unused)]
     wasm_instance: Box<<WB as WasmBackend>::Instance>,
 
-    // TODO: replace with dyn Trait
     export_funcs: ExportFunctions<WB>,
 
     // TODO: save refs instead copying of a record types HashMap.
