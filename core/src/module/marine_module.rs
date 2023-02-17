@@ -429,7 +429,11 @@ impl<WB: WasmBackend> MModule<WB> {
                         output_types,
                     } => {
                         let interpreter: ITInterpreter<WB> =
-                            adapter_instructions.clone().try_into()?;
+                            adapter_instructions.clone().try_into().map_err(|_| {
+                                MError::IncorrectWIT(
+                                    "failed to parse instructions for adapter type".to_string(),
+                                )
+                            })?;
 
                         let raw_import = create_raw_import(
                             wit_instance.clone(),
@@ -475,7 +479,13 @@ impl<WB: WasmBackend> MModule<WB> {
             .map(|sign| {
                 let adapter_instructions = mit.adapter_by_type_r(sign.adapter_function_type)?;
 
-                let interpreter: ITInterpreter<WB> = adapter_instructions.clone().try_into()?;
+                let interpreter: ITInterpreter<WB> =
+                    adapter_instructions.clone().try_into().map_err(|_| {
+                        MError::IncorrectWIT(
+                            "failed to parse instructions for adapter type".to_string(),
+                        )
+                    })?;
+
                 let it_module_func = ITModuleFunc {
                     interpreter: Arc::new(interpreter),
                     arguments: sign.arguments.clone(),

@@ -86,12 +86,6 @@ impl From<MITInterfacesError> for MError {
     }
 }
 
-impl From<()> for MError {
-    fn from(_err: ()) -> Self {
-        MError::IncorrectWIT("failed to parse instructions for adapter type".to_string())
-    }
-}
-
 impl From<CompilationError> for MError {
     fn from(value: CompilationError) -> Self {
         Into::<WasmBackendError>::into(value).into()
