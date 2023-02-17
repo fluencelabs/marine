@@ -98,12 +98,14 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
         let memory_index = 0;
         let memory_view = caller.memory(memory_index).unwrap().view(); // todo handle error
         let mut lo_helper = LoHelper::new(&mut allocate_func, caller.memory(memory_index).unwrap()); // todo handle error
-        let t = ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
-            .map_err(HostImportError::LowererError)
-            .and_then(|mut lowerer| {
-                ivalue_to_wvalues(&mut caller.as_context_mut(), &mut lowerer, result)
-            });
-        let wvalues = match t {
+        let lowering_result =
+            ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
+                .map_err(HostImportError::LowererError)
+                .and_then(|mut lowerer| {
+                    ivalue_to_wvalues(&mut caller.as_context_mut(), &mut lowerer, result)
+                });
+
+        let wvalues = match lowering_result {
             Ok(wvalues) => wvalues,
             Err(e) => {
                 log::error!("host closure failed: {}", e);

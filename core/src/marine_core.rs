@@ -37,11 +37,14 @@ pub struct MModuleInterface<'a> {
 }
 
 /// # Description
+///
 /// The base struct of Marine, the Fluence compute runtime.
 /// Allows dynamic loading and unloading modules, but never frees resources used for instantiation.
 /// A new module can import functions from previously loaded modules.
+///
 /// # Recommendations
-/// Its advised to use this struct to load/unload unlimited number of modules.
+///
+/// Its advised not to use this struct to load/unload unlimited number of modules.
 /// Better alternative is to use multiple instances of this struct for independent groups of modules
 /// and drop them when the group is no longer needed.
 pub struct MarineCore<WB: WasmBackend> {
