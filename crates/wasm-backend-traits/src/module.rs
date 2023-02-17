@@ -22,7 +22,10 @@ pub trait Module<WB: WasmBackend> {
     fn custom_sections(&self, key: &str) -> Option<&[Vec<u8>]>;
 
     /// Instantiates module by allocating memory, VM state and linking imports with ones from `import` argument.
+    /// Does not call `_start` or `_initialize` functions.
+    ///
     /// # Panics:
+    ///
     ///     If the `Store` given is not the same with `Store` used to create `Imports` and this object.
     fn instantiate(
         &self,
