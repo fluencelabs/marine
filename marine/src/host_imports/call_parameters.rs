@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine_wasm_backend_traits::{WasmBackend};
+use marine_wasm_backend_traits::WasmBackend;
 
 use marine_core::HostImportDescriptor;
 use wasmer_it::IValue;

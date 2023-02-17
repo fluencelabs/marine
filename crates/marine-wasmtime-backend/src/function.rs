@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-use crate::{
-    WasmtimeContextMut, WasmtimeWasmBackend, WasmtimeCaller, val_to_wvalue, StoreState,
-    sig_to_fn_ty, wvalue_to_val,
-    utils::{fn_ty_to_sig, inspect_call_error},
-};
+use crate::WasmtimeContextMut;
+use crate::WasmtimeWasmBackend;
+use crate::WasmtimeCaller;
+use crate::val_to_wvalue;
+use crate::StoreState;
+use crate::sig_to_fn_ty;
+use crate::wvalue_to_val;
+use crate::utils::fn_ty_to_sig;
+use crate::utils::inspect_call_error;
 
 use marine_wasm_backend_traits::*;
 
