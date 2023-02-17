@@ -38,6 +38,7 @@ impl Module<WasmtimeWasmBackend> for WasmtimeModule {
         store: &mut WasmtimeStore,
         imports: &WasmtimeImports,
     ) -> InstantiationResult<<WasmtimeWasmBackend as WasmBackend>::Instance> {
+        // linker will not call _start, or _initialize unless Linker::module or Linker::module_async is used
         let instance = imports
             .linker
             .instantiate(&mut store.inner, &self.inner)
