@@ -26,7 +26,7 @@ use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use crate::json_to_marine_err;
 
-use marine_wasm_backend_traits::WasmB   ackend;
+use marine_wasm_backend_traits::WasmBackend;
 
 use marine_core::MarineCore;
 use marine_core::IFunctionArg;
