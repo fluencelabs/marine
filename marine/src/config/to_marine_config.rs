@@ -87,9 +87,9 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             None => return Ok(self),
         };
 
-        self.config.wasi_envs = wasi.envs;
+        self.config.wasi_parameters.envs = wasi.envs;
 
-        self.config.wasi_mapped_dirs = wasi.mapped_dirs;
+        self.config.wasi_parameters.mapped_dirs = wasi.mapped_dirs;
 
         // Preopened files and mapped dirs are treated in the same way by the wasmer-wasi.
         // The only difference is that for preopened files the alias and the value are the same,
@@ -98,7 +98,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         // So here preopened files are moved directly to the mapped dirs to catch errors beforehand.
         for path in wasi.preopened_files {
             let alias = path.to_string_lossy();
-            match self.config.wasi_mapped_dirs.entry(alias.to_string()) {
+            match self.config.wasi_parameters.mapped_dirs.entry(alias.to_string()) {
                 Entry::Occupied(entry) => {
                     return Err(MarineError::InvalidConfig(format!(
                         "WASI preopened files conflict with WASI mapped dirs: preopen {} is also mapped to: {}. Remove one of the entries to fix this error.", entry.key(), entry.get().display())
@@ -114,7 +114,8 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         // create environment variables for all mapped directories
         let mapped_dirs = self
             .config
-            .wasi_mapped_dirs
+            .wasi_parameters
+            .mapped_dirs
             .iter()
             .map(|(from, to)| {
                 (
@@ -124,7 +125,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             })
             .collect::<HashMap<_, _>>();
 
-        self.config.wasi_envs.extend(mapped_dirs);
+        self.config.wasi_parameters.envs.extend(mapped_dirs);
 
         Ok(self)
     }
@@ -187,7 +188,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             };
 
             // overwrite possibly installed log variable in config
-            self.config.wasi_envs.insert(
+            self.config.wasi_parameters.envs.insert(
                 WASM_LOG_ENV_NAME.as_bytes().to_owned(),
                 log_level_str.into_bytes(),
             );
@@ -210,7 +211,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
     }
 
     fn add_version(mut self) -> Self {
-        self.config.wasi_version = WasiVersion::Latest;
+        self.config.wasi_parameters.version = WasiVersion::Latest;
         self
     }
 

@@ -18,6 +18,7 @@ use super::IValue;
 use super::IType;
 use crate::HostImportError;
 
+use marine_wasm_backend_traits::WasiParameters;
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::WasiVersion;
 
@@ -66,17 +67,8 @@ pub struct MModuleConfig<WB: WasmBackend> {
     /// Imports from the host side that will be used in module instantiation process.
     pub host_imports: HashMap<String, HostImportDescriptor<WB>>,
 
-    /// Desired WASI version.
-    pub wasi_version: WasiVersion,
-
-    /// Environment variables for loaded modules.
-    pub wasi_envs: HashMap<Vec<u8>, Vec<u8>>,
-
-    /// List of available directories for loaded modules.
-    pub wasi_preopened_files: HashSet<PathBuf>,
-
-    /// Mapping between paths.
-    pub wasi_mapped_dirs: HashMap<String, PathBuf>,
+    /// WASI parameters: env variables, mapped dirs, preopened files and version
+    pub wasi_parameters: WasiParameters,
 }
 
 impl<WB: WasmBackend> Default for MModuleConfig<WB> {
@@ -86,10 +78,7 @@ impl<WB: WasmBackend> Default for MModuleConfig<WB> {
             max_heap_pages_count: DEFAULT_HEAP_PAGES_COUNT,
             raw_imports: HashMap::new(),
             host_imports: HashMap::new(),
-            wasi_version: WasiVersion::Latest,
-            wasi_envs: HashMap::new(),
-            wasi_preopened_files: HashSet::new(),
-            wasi_mapped_dirs: HashMap::new(),
+            wasi_parameters: WasiParameters::default(),
         }
     }
 }
@@ -104,22 +93,22 @@ impl<WB: WasmBackend> MModuleConfig<WB> {
     }
 
     pub fn with_wasi_version(mut self, wasi_version: WasiVersion) -> Self {
-        self.wasi_version = wasi_version;
+        self.wasi_parameters.version = wasi_version;
         self
     }
 
     pub fn with_wasi_envs(mut self, envs: HashMap<Vec<u8>, Vec<u8>>) -> Self {
-        self.wasi_envs = envs;
+        self.wasi_parameters.envs = envs;
         self
     }
 
     pub fn with_wasi_preopened_files(mut self, preopened_files: HashSet<PathBuf>) -> Self {
-        self.wasi_preopened_files = preopened_files;
+        self.wasi_parameters.preopened_files = preopened_files;
         self
     }
 
     pub fn with_wasi_mapped_dirs(mut self, mapped_dirs: HashMap<String, PathBuf>) -> Self {
-        self.wasi_mapped_dirs = mapped_dirs;
+        self.wasi_parameters.mapped_dirs = mapped_dirs;
         self
     }
 }

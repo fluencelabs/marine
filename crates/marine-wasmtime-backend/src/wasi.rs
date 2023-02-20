@@ -21,7 +21,7 @@ use marine_wasm_backend_traits::*;
 use anyhow::anyhow;
 use wasmtime_wasi::ambient_authority;
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 pub struct WasmtimeWasi {}
 
@@ -29,12 +29,16 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
     fn register_in_linker(
         store: &mut WasmtimeContextMut<'_>,
         linker: &mut WasmtimeImports,
-        _version: WasiVersion, // wasmtime does not have version in API, looks like it adds everything to the linker
-        args: Vec<Vec<u8>>,
-        envs: Vec<(Vec<u8>, Vec<u8>)>,
-        preopened_files: Vec<PathBuf>,
-        mapped_dirs: Vec<(String, PathBuf)>,
+        parameters: WasiParameters,
     ) -> Result<(), WasiError> {
+        let WasiParameters {
+            args,
+            envs,
+            preopened_files,
+            mapped_dirs,
+            ..
+        } = parameters;
+
         let id = store.inner.data().wasi.len();
         wasmtime_wasi::add_to_linker(&mut linker.linker, move |s: &mut StoreState| {
             &mut s.wasi[id]

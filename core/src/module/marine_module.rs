@@ -22,11 +22,10 @@ use crate::{HostImportDescriptor, MResult};
 use crate::MModuleConfig;
 use crate::config::RawImportCreator;
 
-use marine_wasm_backend_traits::{AsContextMut, Memory};
+use marine_wasm_backend_traits::{AsContextMut, Memory, WasiParameters};
 use marine_wasm_backend_traits::DelayedContextLifetime;
 use marine_wasm_backend_traits::Function;
 use marine_wasm_backend_traits::WasiState;
-use marine_wasm_backend_traits::WasiVersion;
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::Module;
 use marine_wasm_backend_traits::Instance;
@@ -40,10 +39,8 @@ use marine_utils::SharedString;
 use wasmer_it::interpreter::Interpreter;
 
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
-use std::path::PathBuf;
 use std::sync::Arc;
 use std::borrow::BorrowMut;
 
@@ -128,22 +125,12 @@ impl<WB: WasmBackend> MModule<WB> {
         let MModuleConfig {
             raw_imports,
             host_imports,
-            wasi_version,
-            wasi_envs,
-            wasi_preopened_files,
-            wasi_mapped_dirs,
+            wasi_parameters,
             ..
         } = config;
 
         Self::add_wit_imports(store, &mut linker, &mit, wit_instance.clone())?;
-        Self::add_wasi_imports(
-            store,
-            &mut linker,
-            wasi_version,
-            wasi_envs,
-            wasi_preopened_files,
-            wasi_mapped_dirs,
-        )?;
+        Self::add_wasi_imports(store, &mut linker, wasi_parameters)?;
         Self::add_host_imports(store, &mut linker, raw_imports, host_imports, &mit)?;
 
         let wasm_instance = wasm_module.instantiate(store, &linker)?;
@@ -264,23 +251,12 @@ impl<WB: WasmBackend> MModule<WB> {
     fn add_wasi_imports(
         store: &mut <WB as WasmBackend>::Store,
         linker: &mut <WB as WasmBackend>::Imports,
-        wasi_version: WasiVersion,
-        wasi_envs: HashMap<Vec<u8>, Vec<u8>>,
-        wasi_preopened_files: HashSet<PathBuf>,
-        wasi_mapped_dirs: HashMap<String, PathBuf>,
+        parameters: WasiParameters,
     ) -> MResult<()> {
-        let wasi_envs = wasi_envs.into_iter().collect::<Vec<_>>();
-        let wasi_preopened_files = wasi_preopened_files.into_iter().collect::<Vec<_>>();
-        let wasi_mapped_dirs = wasi_mapped_dirs.into_iter().collect::<Vec<_>>();
-
         <WB as WasmBackend>::Wasi::register_in_linker(
             &mut store.as_context_mut(),
             linker,
-            wasi_version,
-            vec![],
-            wasi_envs,
-            wasi_preopened_files,
-            wasi_mapped_dirs,
+            parameters,
         )?;
 
         Ok(())

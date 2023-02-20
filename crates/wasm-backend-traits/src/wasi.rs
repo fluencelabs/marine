@@ -17,6 +17,8 @@
 use crate::{WasiError, WasmBackend};
 
 use std::path::PathBuf;
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 /// A type that provides WASI functionality to the given Wasm backend.
 pub trait WasiImplementation<WB: WasmBackend> {
@@ -26,11 +28,7 @@ pub trait WasiImplementation<WB: WasmBackend> {
     fn register_in_linker(
         store: &mut <WB as WasmBackend>::ContextMut<'_>,
         linker: &mut <WB as WasmBackend>::Imports,
-        version: WasiVersion,
-        args: Vec<Vec<u8>>,
-        envs: Vec<(Vec<u8>, Vec<u8>)>,
-        preopened_files: Vec<PathBuf>,
-        mapped_dirs: Vec<(String, PathBuf)>,
+        config: WasiParameters,
     ) -> Result<(), WasiError>;
 
     /// Optional API for getting current WASI state.
@@ -40,10 +38,21 @@ pub trait WasiImplementation<WB: WasmBackend> {
     ) -> Box<dyn WasiState + 's>;
 }
 
+#[derive(Default)]
 pub enum WasiVersion {
     Snapshot0,
     Snapshot1,
+    #[default]
     Latest,
+}
+
+#[derive(Default)]
+pub struct WasiParameters {
+    pub version: WasiVersion,
+    pub args: Vec<Vec<u8>>,
+    pub envs: HashMap<Vec<u8>, Vec<u8>>,
+    pub preopened_files: HashSet<PathBuf>,
+    pub mapped_dirs: HashMap<String, PathBuf>,
 }
 
 pub trait WasiState {
