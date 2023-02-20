@@ -32,6 +32,9 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::io::ErrorKind;
 
+#[cfg(feature = "raw-module-api")]
+use marine_wasm_backend_traits::WasiState;
+
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
 const SERVICE_TMP_DIR_NAME: &str = "tmp";
@@ -178,8 +181,6 @@ impl<WB: WasmBackend> AppService<WB> {
         self.marine.module_memory_stats()
     }
 }
-#[cfg(feature = "raw-module-api")]
-use marine_wasm_backend_traits::WasiState;
 
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
