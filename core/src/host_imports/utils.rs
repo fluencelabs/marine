@@ -43,7 +43,7 @@ pub(super) fn itypes_output_to_wtypes(itypes: &[IType]) -> Vec<WType> {
         .collect()
 }
 
-#[macro_export] // https://github.com/rust-lang/rust/issues/57966#issuecomment-461077932
+#[macro_export]
 /// Initialize Wasm function in form of Box<RefCell<Option<Func<'static, args, rets>>>>.
 /// This macro does not cache result.
 macro_rules! init_wasm_func {
