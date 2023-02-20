@@ -60,7 +60,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
             .filter_map(|(_name, export)| match export {
                 Extern::Memory(memory) => Some(memory),
                 _ => None,
-            }) // todo is there a way to make it better?
+            }) // TODO is there a way to make it better?
             .nth(memory_index as usize)
             .map(|memory| WasmerMemory {
                 inner: memory.clone(),
@@ -75,7 +75,7 @@ impl Instance<WasmerBackend> for WasmerInstance {
         self.inner
             .exports
             .get_memory(name)
-            .map_err(|e| ResolveError::Other(anyhow!(e))) // todo make detailed
+            .map_err(|e| ResolveError::Other(anyhow!(e))) // TODO make detailed
             .map(|memory| WasmerMemory {
                 inner: memory.clone(),
             })
@@ -95,12 +95,12 @@ impl Instance<WasmerBackend> for WasmerInstance {
                 _ => None,
             })
             .next()
-            .map(Clone::clone); // todo cache memories and export in the instance
+            .map(Clone::clone); // TODO cache memories and export in the instance
 
         self.inner
             .exports
             .get_function(name)
-            .map_err(|e| ResolveError::Other(anyhow!("wasmer cannot find function {}", e))) // todo make detailed
+            .map_err(|e| ResolveError::Other(anyhow!("wasmer cannot find function {}", e))) // TODO make detailed
             .map(|func| {
                 let ty = func.ty(&store.as_context());
 

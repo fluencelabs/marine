@@ -48,7 +48,7 @@ impl WasiImplementation<WasmerBackend> for WasmerWasi {
             &mut store.inner,
             &func_env,
             wasmer_wasi::WasiVersion::Latest,
-        ); //todo check if latest is right
+        ); //TODO check if latest is right
 
         linker.inner.extend(wasi_imports.into_iter());
         Ok(())
@@ -57,6 +57,6 @@ impl WasiImplementation<WasmerBackend> for WasmerWasi {
     fn get_wasi_state<'s>(
         _instance: &'s mut <WasmerBackend as WasmBackend>::Instance,
     ) -> Box<dyn WasiState + 's> {
-        todo!()
+        TODO!()
     }
 }

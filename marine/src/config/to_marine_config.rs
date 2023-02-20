@@ -132,7 +132,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
     fn populate_host_imports(
         mut self,
         host_imports: HashMap<String, HostImportDescriptor<WB>>,
-        call_parameters: Arc<Mutex<CallParameters>>, // todo show mike
+        call_parameters: Arc<Mutex<CallParameters>>, // TODO show mike
     ) -> Self {
         self.config.host_imports = host_imports;
         self.config.host_imports.insert(

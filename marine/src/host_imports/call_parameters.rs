@@ -26,7 +26,7 @@ use std::sync::{Arc, Mutex};
 /// Create the import intended for handling get_call_parameters SDK api.
 
 pub(crate) fn create_call_parameters_import<WB: WasmBackend>(
-    call_parameters: Arc<Mutex<marine_rs_sdk::CallParameters>>, // todo show mike // todo try to move inside caller's state
+    call_parameters: Arc<Mutex<marine_rs_sdk::CallParameters>>, // TODO show mike // TODO try to move inside caller's state
 ) -> HostImportDescriptor<WB> {
     let call_parameters_closure = move |_ctx: &mut <WB as WasmBackend>::Caller<'_>,
                                         _args: Vec<IValue>| {

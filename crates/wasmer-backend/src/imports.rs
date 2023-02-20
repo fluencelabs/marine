@@ -38,7 +38,7 @@ impl Imports<WasmerBackend> for WasmerImports {
         name: impl Into<String>,
         func: <WasmerBackend as WasmBackend>::Function,
     ) -> ImportResult<()> {
-        // todo check for existence
+        // TODO check for existence
         self.inner.define(&module.into(), &name.into(), func.inner);
         Ok(())
     }
@@ -48,7 +48,7 @@ impl Imports<WasmerBackend> for WasmerImports {
         S: Into<String>,
         I: IntoIterator<Item = (String, <WasmerBackend as WasmBackend>::Function)>,
     {
-        // todo check for existence
+        // TODO check for existence
         let namespace = namespace
             .into_iter()
             .map(|(name, func)| (name, Extern::Function(func.inner)));

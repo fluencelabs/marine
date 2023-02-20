@@ -45,7 +45,7 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
                 .iter()
                 .map(val_to_wvalue)
                 .collect::<Result<Vec<_>, RuntimeError>>()
-                .map_err(anyhow::Error::new)?; // todo move earlier
+                .map_err(anyhow::Error::new)?; // TODO move earlier
 
             let rets = func(&args);
             for i in 0..results.len() {

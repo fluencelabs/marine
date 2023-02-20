@@ -109,7 +109,7 @@ impl it_memory_traits::MemoryView<DelayedContextLifetime<WasmtimeWasmBackend>> f
             Err(MemoryAccessError::OutOfBounds {
                 offset,
                 size,
-                memory_size: memory_size as u32, // todo rewrite api when memory64 arrives
+                memory_size: memory_size as u32, // TODO rewrite api when memory64 arrives
             })
         } else {
             Ok(())

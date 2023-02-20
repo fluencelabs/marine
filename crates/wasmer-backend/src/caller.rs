@@ -60,7 +60,7 @@ macro_rules! impl_func_getter {
                 &mut self,
                 _name: &str,
             ) -> ResolveResult<FuncFromCaller<WasmerBackend, $args, $rets>> {
-                todo!()
+                TODO!()
             }
         }
     };

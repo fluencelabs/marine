@@ -60,11 +60,11 @@ impl WasmBackend for WasmerBackend {
         wasmer::Module::new(store.inner.engine(), wasm)
             .map_err(|e| {
                 CompilationError::Other(anyhow!("Wasmer module compilation failed: {}", e))
-                // todo make detailed
+                // TODO make detailed
             })
             .and_then(|module| {
                 let custom_sections = Self::custom_sections(wasm).map_err(|e| {
-                    CompilationError::Other(anyhow!("{}", e)) // todo make detailed
+                    CompilationError::Other(anyhow!("{}", e)) // TODO make detailed
                 })?;
                 Ok(WasmerModule {
                     inner: module,

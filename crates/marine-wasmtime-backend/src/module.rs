@@ -42,7 +42,7 @@ impl Module<WasmtimeWasmBackend> for WasmtimeModule {
         let instance = imports
             .linker
             .instantiate(&mut store.inner, &self.inner)
-            .map_err(inspect_instantiation_error)?; // todo add detail
+            .map_err(inspect_instantiation_error)?; // TODO add detail
         Ok(WasmtimeInstance { inner: instance })
     }
 }

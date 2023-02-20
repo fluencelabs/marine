@@ -49,7 +49,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
             .into_iter()
             .map(|(key, value)| {
                 unsafe {
-                    // todo maybe use strings in signature?
+                    // TODO maybe use strings in signature?
                     (
                         String::from_utf8_unchecked(key),
                         String::from_utf8_unchecked(value),
@@ -95,7 +95,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
     fn get_wasi_state<'s>(
         _instance: &'s mut <WasmtimeWasmBackend as WasmBackend>::Instance,
     ) -> Box<dyn WasiState + 's> {
-        // todo give actual state
+        // TODO give actual state
         Box::new(WasmtimeWasiState {})
     }
 }

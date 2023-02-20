@@ -108,7 +108,7 @@ impl Function<WasmerBackend> for WasmerFunction {
         let result = self
             .inner
             .call(&mut ctx.inner, &params)
-            .map_err(|e| RuntimeError::Other(anyhow!("Wasmer failed to call function: {}", e))) // todo make detailed
+            .map_err(|e| RuntimeError::Other(anyhow!("Wasmer failed to call function: {}", e))) // TODO make detailed
             .map(|rets| wasmer_val_to_generic_val(rets.as_ref()));
 
         ctx.env.as_mut(&mut ctx.inner).current_memory = prev_memory;

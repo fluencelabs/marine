@@ -38,7 +38,7 @@ impl Module<WasmerBackend> for WasmerModule {
         imports: &WasmerImports,
     ) -> InstantiationResult<<WasmerBackend as WasmBackend>::Instance> {
         wasmer::Instance::new(&mut store.inner, &self.inner, &imports.inner)
-            .map_err(|e| InstantiationError::Other(anyhow!(e))) // todo make detailed
+            .map_err(|e| InstantiationError::Other(anyhow!(e))) // TODO make detailed
             .map(|instance| WasmerInstance { inner: instance })
     }
 }
