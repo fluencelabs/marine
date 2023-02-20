@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+* The following workspace dependencies were updated
+  * dependencies
+    * fluence-app-service bumped from 0.23.0 to 0.23.1
+
 ## [0.19.1](https://github.com/fluencelabs/marine/compare/mrepl-v0.19.0...mrepl-v0.19.1) (2023-02-10)
 
 
