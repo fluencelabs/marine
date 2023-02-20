@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+pub static STANDARD_MEMORY_EXPORT_NAME: &str = "memory";
+
 use crate::{DelayedContextLifetime, WasmBackend};
 
 /// A general export representaion. Now only `Memory` and `Function` are supported values.

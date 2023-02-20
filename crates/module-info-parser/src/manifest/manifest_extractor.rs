@@ -28,7 +28,6 @@ use walrus::Module;
 use std::borrow::Cow;
 use std::path::Path;
 use std::convert::TryInto;
-use std::ops::Deref;
 
 pub fn extract_from_path<P>(wasm_module_path: P) -> ModuleInfoResult<Option<ModuleManifest>>
 where
@@ -62,7 +61,7 @@ pub fn extract_from_compiled_module(
 ) -> ModuleInfoResult<Option<ModuleManifest>> {
     let sections = wasmer_module
         .custom_sections(MANIFEST_SECTION_NAME)
-        .map(|section: Box<[u8]>| section.deref().to_vec())
+        .map(Into::<Vec<u8>>::into)
         .collect::<Vec<_>>();
 
     if sections.is_empty() {

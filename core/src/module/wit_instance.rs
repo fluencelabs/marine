@@ -20,6 +20,7 @@ use super::IRecordType;
 use crate::MResult;
 
 use marine_wasm_backend_traits::AsContextMut;
+use marine_wasm_backend_traits::STANDARD_MEMORY_EXPORT_NAME;
 use marine_wasm_backend_traits::DelayedContextLifetime;
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::Instance;
@@ -147,7 +148,7 @@ impl<WB: WasmBackend> ITInstance<WB> {
             })
             .collect::<Vec<_>>();
 
-        if let Ok(memory) = wasm_instance.get_memory(store, "memory") {
+        if let Ok(memory) = wasm_instance.get_memory(store, STANDARD_MEMORY_EXPORT_NAME) {
             memories.push(memory);
         }
 

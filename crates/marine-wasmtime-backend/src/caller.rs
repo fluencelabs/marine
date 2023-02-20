@@ -27,7 +27,10 @@ pub struct WasmtimeCaller<'c> {
 
 impl<'c> Caller<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
     fn memory(&mut self, _memory_index: u32) -> Option<WasmtimeMemory> {
-        let memory = self.inner.get_export("memory")?.into_memory()?;
+        let memory = self
+            .inner
+            .get_export(STANDARD_MEMORY_EXPORT_NAME)?
+            .into_memory()?;
 
         Some(WasmtimeMemory::new(memory))
     }

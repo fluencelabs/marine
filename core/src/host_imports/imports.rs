@@ -46,9 +46,9 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     descriptor: HostImportDescriptor<WB>,
     record_types: Arc<MRecordTypes>,
 ) -> <WB as WasmBackend>::Function {
-
     let raw_args = itypes_args_to_wtypes(&descriptor.argument_types);
-    let raw_output = itypes_output_to_wtypes(&output_type_to_types(descriptor.output_type.as_ref()));
+    let raw_output =
+        itypes_output_to_wtypes(&output_type_to_types(descriptor.output_type.as_ref()));
 
     let func = move |caller: <WB as WasmBackend>::Caller<'_>, inputs: &[WValue]| -> Vec<WValue> {
         call_host_import(caller, inputs, &descriptor, record_types.clone())
@@ -79,7 +79,13 @@ fn call_host_import<WB: WasmBackend>(
         .memory(memory_index)
         .unwrap_or_else(|| panic!("Host import called directly, not from wasm"));
 
-    let inputs = lift_inputs::<WB>(&mut caller, memory.clone(), record_types, inputs, &argument_types);
+    let inputs = lift_inputs::<WB>(
+        &mut caller,
+        memory.clone(),
+        record_types,
+        inputs,
+        &argument_types,
+    );
     let output = match inputs {
         Ok(ivalues) => host_exported_func(&mut caller, ivalues),
         Err(e) => {
@@ -95,10 +101,10 @@ fn call_host_import<WB: WasmBackend>(
 
 fn lift_inputs<WB: WasmBackend>(
     caller: &mut <WB as WasmBackend>::Caller<'_>,
-                                memory: <WB as WasmBackend>::Memory,
-                                record_types: Arc<MRecordTypes>,
-                                inputs: &[WValue],
-                                argument_types: &[IType]
+    memory: <WB as WasmBackend>::Memory,
+    record_types: Arc<MRecordTypes>,
+    inputs: &[WValue],
+    argument_types: &[IType],
 ) -> HostImportResult<Vec<IValue>> {
     let memory_view = memory.view();
     let li_helper = LiHelper::new(record_types.clone());
@@ -111,17 +117,19 @@ fn lift_inputs<WB: WasmBackend>(
     )
 }
 
-fn lower_outputs<WB: WasmBackend>(caller: &mut <WB as WasmBackend>::Caller<'_>,
-                                  memory: <WB as WasmBackend>::Memory,
-                                  output: Option<IValue>, ) -> Vec<WValue> {
+fn lower_outputs<WB: WasmBackend>(
+    caller: &mut <WB as WasmBackend>::Caller<'_>,
+    memory: <WB as WasmBackend>::Memory,
+    output: Option<IValue>,
+) -> Vec<WValue> {
     init_wasm_func!(
-            allocate_func,
-            caller,
-            (i32, i32),
-            i32,
-            ALLOCATE_FUNC_NAME,
-            2
-        );
+        allocate_func,
+        caller,
+        (i32, i32),
+        i32,
+        ALLOCATE_FUNC_NAME,
+        2
+    );
 
     let memory_view = memory.view();
     let mut lo_helper = LoHelper::new(&mut allocate_func, memory.clone());
@@ -155,15 +163,15 @@ fn lower_outputs<WB: WasmBackend>(caller: &mut <WB as WasmBackend>::Caller<'_>,
             init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
 
             call_wasm_func!(
-                    set_result_ptr_func,
-                    &mut caller.as_context_mut(),
-                    wvalues[0].to_u128() as _
-                );
+                set_result_ptr_func,
+                &mut caller.as_context_mut(),
+                wvalues[0].to_u128() as _
+            );
             call_wasm_func!(
-                    set_result_size_func,
-                    &mut caller.as_context_mut(),
-                    wvalues[1].to_u128() as _
-                );
+                set_result_size_func,
+                &mut caller.as_context_mut(),
+                wvalues[1].to_u128() as _
+            );
             vec![]
         }
 
@@ -173,10 +181,10 @@ fn lower_outputs<WB: WasmBackend>(caller: &mut <WB as WasmBackend>::Caller<'_>,
             init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 3);
 
             call_wasm_func!(
-                    set_result_ptr_func,
-                    &mut caller.as_context_mut(),
-                    wvalues[0].to_u128() as _
-                );
+                set_result_ptr_func,
+                &mut caller.as_context_mut(),
+                wvalues[0].to_u128() as _
+            );
             vec![wvalues[0].clone()]
         }
 
@@ -189,7 +197,7 @@ fn lower_outputs<WB: WasmBackend>(caller: &mut <WB as WasmBackend>::Caller<'_>,
     }
 }
 
-fn output_type_to_types(output_type: Option<&IType>) -> Vec<IType>{
+fn output_type_to_types(output_type: Option<&IType>) -> Vec<IType> {
     match output_type {
         Some(ty) => vec![ty.clone()],
         None => vec![],
