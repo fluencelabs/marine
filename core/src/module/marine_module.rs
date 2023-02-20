@@ -92,8 +92,6 @@ impl<WB: WasmBackend> Callable<WB> {
 type ExportFunctions<WB> = HashMap<SharedString, Arc<Callable<WB>>>;
 
 pub(crate) struct MModule<WB: WasmBackend> {
-    // Used to get WASI state
-    #[allow(unused)]
     wasm_instance: Box<<WB as WasmBackend>::Instance>,
 
     export_funcs: ExportFunctions<WB>,
