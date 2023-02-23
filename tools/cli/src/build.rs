@@ -16,6 +16,7 @@
 
 use crate::CLIResult;
 use crate::errors::CLIError;
+use crate::cargo_manifest::ManifestError;
 
 use semver::Version;
 
@@ -35,6 +36,8 @@ enum DiagnosticMessage {
 }
 
 pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
+    env_logger::init();
+
     let mut cargo = Command::new("cargo");
     cargo.arg("build").arg("--target").arg("wasm32-wasi");
     cargo.arg("--message-format").arg("json-render-diagnostics");
@@ -59,12 +62,16 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
                 .filter(|name| name.ends_with(".wasm"))
                 .collect::<Vec<_>>();
             if !new_wasms.is_empty() {
-                if let Ok(sdk_version) = extract_sdk_version(&manifest_path) {
-                    wasms.extend(
+                match extract_sdk_version(&manifest_path) {
+                    Ok(sdk_version) => wasms.extend(
                         new_wasms
                             .into_iter()
                             .map(|name| (name, sdk_version.clone())),
-                    )
+                    ),
+                    Err(ManifestError::NonMarineWasm) => {
+                        log::info!("Skipping {} as non-marine wasm", manifest_path.display())
+                    }
+                    Err(e) => log::error!("marine-rs-sdk version extraction failed: {}", e),
                 }
             }
         }

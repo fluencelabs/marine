@@ -1,30 +1,27 @@
-use cargo_toml::{Dependency, Error as CargoTomlError, Manifest};
+use cargo_toml::{Error as CargoTomlError, Manifest};
 use toml::de::Error as TomlError;
 use semver::Version;
 use thiserror::Error as ThisError;
 
 use std::path::Path;
-use std::str::FromStr;
-use crate::cargo_manifest::ManifestError::CannotProcessManifest;
 
 const SKD_CRATE_NAME: &str = "marine-rs-sdk";
+const LOCKFILE_NAME: &str = "Cargo.lock";
 
 #[derive(Debug, ThisError)]
 pub enum ManifestError {
+    #[error("Non-marine wasm, is to be skipped")]
+    NonMarineWasm,
     #[error("Cannot load file: {0}")]
     Io(#[from] std::io::Error),
     #[error("Cannot parse file: {0}")]
     ParseError(#[from] TomlError),
-    #[error("Cannot find marine-rs-sdk dependency")]
-    NoSdkDependencyError,
-    #[error("Cannot find version of marine-rs-sdk dependency")]
-    NoSdkVersionError,
-    #[error("Cannot parse marine-rs-sdk version: {0}")]
-    VersionParseError(#[from] semver::Error),
-    #[error("Inherited dependencies are not supported yet")]
-    InheritedDependencyUnsupported,
     #[error("Cannot process cargo manifest because of: {0}")]
     CannotProcessManifest(String),
+    #[error("Cannot find lockfile in any parent directories for {0}")]
+    CannotFindLockfile(String),
+    #[error("No package in manifest {0}")]
+    NoPackageInManifest(String),
 }
 
 pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError> {
@@ -34,27 +31,67 @@ pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError>
             CargoTomlError::Parse(e) => e.into(),
             CargoTomlError::Io(e) => e.into(),
             CargoTomlError::InheritedUnknownValue => {
-                CannotProcessManifest("inherited unknown value".to_string())
+                ManifestError::CannotProcessManifest("inherited unknown value".to_string())
             }
-            CargoTomlError::WorkspaceIntegrity(reason) => CannotProcessManifest(reason),
-            CargoTomlError::Other(reason) => CannotProcessManifest(reason.to_string()),
-            _ => CannotProcessManifest("Unknown".to_string()),
+            CargoTomlError::WorkspaceIntegrity(reason) => {
+                ManifestError::CannotProcessManifest(reason)
+            }
+            CargoTomlError::Other(reason) => {
+                ManifestError::CannotProcessManifest(reason.to_string())
+            }
+            _ => ManifestError::CannotProcessManifest("Unknown".to_string()),
         }
     })?;
 
-    let dependency = manifest
+    if !manifest.dependencies.contains_key(SKD_CRATE_NAME) {
+        return Err(ManifestError::NonMarineWasm);
+    }
+
+    let package = manifest
+        .package
+        .ok_or_else(|| ManifestError::NoPackageInManifest(format!("{}", path.display())))?;
+
+    // TODO: find & load lockfile once per `marine build` run
+    path.ancestors()
+        .find_map(|path| extract_sdk_version_from_lockfile(&package, &path.join(LOCKFILE_NAME)))
+        .ok_or_else(|| ManifestError::CannotFindLockfile(format!("{}", path.display())))
+}
+
+fn extract_sdk_version_from_lockfile(
+    target_package: &cargo_toml::Package,
+    path: &Path,
+) -> Option<semver::Version> {
+    log::debug!("Trying to load lockfile from {}", path.display());
+    let lockfile = cargo_lock::Lockfile::load(path).ok()?;
+    log::debug!(
+        "Lockfile loaded. Looking for entry for {}@{}",
+        target_package.name.as_str(),
+        target_package.version()
+    );
+    lockfile
+        .packages
+        .iter()
+        .find_map(|package| {
+            if package.name.as_str() == target_package.name.as_str()
+                && &package.version.to_string() == target_package.version()
+            {
+                log::debug!("Found entry. Looking for marine-rs-sdk dependency");
+                Some(package)
+            } else {
+                None
+            }
+        })?
         .dependencies
-        .get(SKD_CRATE_NAME)
-        .ok_or(ManifestError::NoSdkDependencyError)?;
-
-    let version = match dependency {
-        Dependency::Simple(version) => version,
-        Dependency::Detailed(detail) => detail
-            .version
-            .as_ref()
-            .ok_or(ManifestError::NoSdkVersionError)?,
-        Dependency::Inherited(_) => return Err(ManifestError::InheritedDependencyUnsupported),
-    };
-
-    Version::from_str(version).map_err(Into::into)
+        .iter()
+        .find_map(|dependency| {
+            if dependency.name.as_str() == SKD_CRATE_NAME {
+                log::debug!(
+                    "Found marine-re-sdk dependency version {}",
+                    dependency.version
+                );
+                Some(dependency.version.clone())
+            } else {
+                None
+            }
+        })
 }
