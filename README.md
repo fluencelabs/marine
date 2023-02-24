@@ -105,22 +105,22 @@ Do not forget to check our [YouTube channel](https://www.youtube.com/@fluencelab
 
 ## Repository structure
 
-- **[crates](./crates)**
-    - [it-generator](./crates/it-generator) - generator of IT
-    - [it-interfaces](./crates/it-interfaces) - handy structure for interface types handling
-    - [it-json-serde](./crates/it-json-serde) - crate for conversion between IT and JSON
-    - [min-it-version](./crates/min-it-version) - keeps minimal supported versions of IT and SDK by runtime
-    - [module-info-parser](./crates/module-info-parser) - parser of module manifest and sdk version
-    - [module-interface](./crates/module-interface)*- parser of module IT
-    - [utils](./crates/utils) - some utility functions and consts
-- **[examples](./examples)** - several Marine examples used mostly for tests
-- **[fluence-faas](./fluence-faas)** - Fluence FaaS layer provides host closures, IT<->JSON conversion, logger, config handling and other
-- **[fluence-app-service](./fluence-app-service)** - Fluence Application Service layer provides basic API for service running
-- **[runtime](./runtime)** - runtime layer provides basic functionality for loading, unloading and calling modules
-- **[marine-js](./marine-js)** - web runtime layer aim to run Marine in browser
-- **[tools](./tools)**
-    - [REPL](./tools/repl) - REPL intended to test Marine Wasm modules
-    - [CLI](./tools/cli) - CLI intended to build and extract some info from Marine Wasm modules
+- [**crates**](./crates)
+    - [it-generator](./crates/it-generator): a generator of IT
+    - [it-interfaces](./crates/it-interfaces): a handy structure for interface types handling
+    - [it-json-serde](./crates/it-json-serde): a crate for conversion between IT and JSON
+    - [min-it-version](./crates/min-it-version) keeps minimal supported versions of IT and SDK by runtime
+    - [module-info-parser](./crates/module-info-parser): a parser of the module manifest and the SDK version
+    - [module-interface](./crates/module-interface): a parser of module IT
+    - [utils](./crates/utils): some utility functions and consts
+- [**examples**](./examples): several Marine examples used mostly for tests
+- [**fluence-faas**](./fluence-faas): a Fluence FaaS layer that provides host closures, IT<->JSON conversion, logger, config handling and other things
+- [**fluence-app-service**](./fluence-app-service): a Fluence Application Service layer that provides basic API for service running
+- [**runtime**](./runtime): a runtime layer that provides basic functionality for loading, unloading and calling modules
+- [**marine-js**](./marine-js): a web runtime layer aimed to run Marine in a browser
+- [**tools**](./tools)
+    - [REPL](./tools/repl): a REPL intended to test Marine Wasm modules
+    - [CLI](./tools/cli): a CLI intended to build and extract some info from Marine Wasm modules
 
 
 ## Support
