@@ -1,7 +1,7 @@
 [package]
 name = "marine"
 description = "Fluence Marine command line tool"
-version = "0.12.6"
+version = "0.12.7"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine/tools/cli"
 license = "Apache-2.0"
@@ -24,9 +24,12 @@ toml = "0.5.9"
 atty = "0.2.14"
 thiserror = "1.0.37"
 anyhow = "1.0.66"
-check-latest = "1.0.1"
+check-latest = { version = "1.0.1", optional = true }
 clap = "2.34.0"
 exitfailure = "0.5.1"
 serde = "1.0.147"
 serde_json = "1.0.89"
 termion = "1.5.6"
+
+[features]
+check-latest = ["dep:check-latest"]

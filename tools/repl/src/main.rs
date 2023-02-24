@@ -116,6 +116,7 @@ fn print_welcome_message() {
         color::Fg(color::Reset),
     );
 
+    #[cfg(feature = "check-latest")]
     if let Ok(Some(new_version)) = check_latest::check_max!() {
         println!(
             "New version is available! {}{} -> {}{}",

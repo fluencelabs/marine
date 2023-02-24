@@ -1,8 +1,9 @@
 {
   "name": "@fluencelabs/marine-js",
   "description": "Marine-js",
-  "version": "0.3.44",
+  "version": "0.3.45",
   "exports": {
+    ".": "./dist/index.js",
     "./types": {
       "types": "./dist/types.d.ts",
       "import": "./dist/types.js"

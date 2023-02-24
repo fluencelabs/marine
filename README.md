@@ -99,7 +99,7 @@ Looks like everything is in order and the modules are ready for [deployment to t
 
 - [Marine Book](https://fluence.dev/docs/marine-book/introduction)
 - [Marine Examples](https://github.com/fluencelabs/examples/tree/main/marine-examples)
-- [Quickstart](https://fluence.dev/docs/marine-book/quick-start/)
+- [Marine Quick start](https://fluence.dev/docs/marine-book/quick-start/)
 
 Do not forget to check our [YouTube channel](https://www.youtube.com/@fluencelabs).
 
@@ -121,7 +121,6 @@ Do not forget to check our [YouTube channel](https://www.youtube.com/@fluencelab
 - [**tools**](./tools)
     - [REPL](./tools/repl): a REPL intended to test Marine Wasm modules
     - [CLI](./tools/cli): a CLI intended to build and extract some info from Marine Wasm modules
-
 
 
 ## Support
