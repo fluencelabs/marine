@@ -23,7 +23,7 @@ use super::AppServiceError;
 use marine::Marine;
 use marine::IValue;
 use serde_json::Value as JValue;
-use maplit::hashset;
+use maplit::hashmap;
 
 use std::convert::TryInto;
 use std::collections::HashMap;
@@ -131,25 +131,33 @@ impl AppService {
         service_id: String,
         mut envs: HashMap<Vec<u8>, Vec<u8>>,
     ) -> Result<()> {
-        let create = |dir: &PathBuf| match std::fs::create_dir(dir) {
-            Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
-            Err(err) => Err(AppServiceError::CreateDir {
-                err,
-                path: dir.clone(),
-            }),
-            _ => Ok(()),
+        let create = |dir: &PathBuf| {
+            println!("Creating dir: {}", dir.display());
+            match std::fs::create_dir(dir) {
+                Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
+                Err(err) => Err(AppServiceError::CreateDir {
+                    err,
+                    path: dir.clone(),
+                }),
+                _ => Ok(()),
+            }
         };
 
-        let base_dir = &config.service_base_dir;
-        let service_dir = base_dir.join(&service_id);
-        create(&service_dir)?;
-        create(&service_dir.join(SERVICE_LOCAL_DIR_NAME))?;
-        create(&service_dir.join(SERVICE_TMP_DIR_NAME))?;
+        let working_dir = &config.service_working_dir;
+        let root_tmp_dir = &config.service_tmp_dir.join(&service_id);
+
+        let service_local_dir = root_tmp_dir.join(SERVICE_LOCAL_DIR_NAME);
+        let service_tmp_dir = root_tmp_dir.join(SERVICE_TMP_DIR_NAME);
+
+        create(&working_dir)?;
+        create(&root_tmp_dir)?;
+        create(&service_tmp_dir)?;
+        create(&service_local_dir)?;
 
         // files will be mapped to service_dir later, along with user-defined ones
-        let preopened_files = hashset! {
-            PathBuf::from(SERVICE_LOCAL_DIR_NAME),
-            PathBuf::from(SERVICE_TMP_DIR_NAME)
+        let mapped_dirs = hashmap! {
+            format!("/{SERVICE_LOCAL_DIR_NAME}") => service_local_dir,
+            format!("/{SERVICE_TMP_DIR_NAME}") => service_tmp_dir,
         };
 
         envs.insert(
@@ -159,14 +167,14 @@ impl AppService {
 
         for module in &mut config.marine_config.modules_config {
             module.config.extend_wasi_envs(envs.clone());
+            // Moves app preopened files and mapped dirs to the &working dir, keeping old aliases.
+            module.config.root_preopens_at(&working_dir);
+            // Adds /tmp and /local to wasi. It is important to do it after rooting preopens at working dir,
+            // because /tmp and /local are usually in a separate temporary dir
             module
                 .config
-                .extend_wasi_files(preopened_files.clone(), <_>::default());
-            // Must be the last modification of the module.config.
-            // Moves app preopened files and mapped dirs to the &service dir, keeping old aliases.
-            module.config.set_wasi_fs_root(&service_dir)
+                .extend_wasi_files(<_>::default(), mapped_dirs.clone());
         }
-
         Ok(())
     }
 

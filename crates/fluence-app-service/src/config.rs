@@ -21,6 +21,8 @@ use std::path::PathBuf;
 #[derive(Default)]
 pub struct AppServiceConfig {
     /// Used for preparing filesystem on the service initialization stage.
-    pub service_base_dir: PathBuf,
+    pub service_working_dir: PathBuf,
+    /// Location for /tmp and /local dirs.
+    pub service_tmp_dir: PathBuf,
     pub marine_config: MarineConfig,
 }
