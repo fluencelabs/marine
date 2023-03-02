@@ -22,6 +22,8 @@ use marine_it_parser::ITParserError;
 
 use thiserror::Error as ThisError;
 
+use std::path::PathBuf;
+
 #[derive(Debug, ThisError)]
 pub enum CLIError {
     /// Unknown command was entered by user.
@@ -50,4 +52,10 @@ pub enum CLIError {
 
     #[error(transparent)]
     ManifestError(#[from] ManifestError),
+
+    #[error("Error loading lockfile at {0}: {1}")]
+    LockfileError(PathBuf, cargo_lock::Error),
+
+    #[error(transparent)]
+    MetadataError(#[from] cargo_metadata::Error),
 }
