@@ -147,8 +147,8 @@ impl AppService {
         let service_local_dir = root_tmp_dir.join(SERVICE_LOCAL_DIR_NAME);
         let service_tmp_dir = root_tmp_dir.join(SERVICE_TMP_DIR_NAME);
 
-        create(&working_dir)?;
-        create(&root_tmp_dir)?;
+        create(working_dir)?;
+        create(root_tmp_dir)?;
         create(&service_tmp_dir)?;
         create(&service_local_dir)?;
 
@@ -169,7 +169,7 @@ impl AppService {
         for module in &mut config.marine_config.modules_config {
             module.config.extend_wasi_envs(envs.clone());
             // Moves app preopened files and mapped dirs to the &working dir, keeping old aliases.
-            module.config.root_wasi_files_at(&working_dir);
+            module.config.root_wasi_files_at(working_dir);
             // Adds /tmp and /local to wasi.
             // It is important to do it after rooting preopens at working dir, because /tmp and /local are in a separate temporary dir
             module
