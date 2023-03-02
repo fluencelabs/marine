@@ -5,9 +5,9 @@ modules_dir = "artifacts/"
     logger_enabled = true
 
     [module.wasi]
-    preopened_files = ["sites"]
+    preopened_files = ["./sites"]
     # this is where files will be stored
-    #mapped_dirs = { "sites" = "/Users/valeryantopol/work/marine/examples/url-downloader/sites" }
+    mapped_dirs = { "sites" = "./sites" }
 
 [[module]]
     name = "curl_adapter"
