@@ -238,7 +238,7 @@ impl REPL {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
         let config_file_path: Option<PathBuf> = config_file_path.map(Into::into);
-        let working_dir = working_dir.unwrap_or(".".to_string());
+        let working_dir = working_dir.unwrap_or_else(|| ".".to_string());
 
         let start = Instant::now();
 
