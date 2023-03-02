@@ -6,11 +6,10 @@ use thiserror::Error as ThisError;
 use std::path::Path;
 
 const SDK_CRATE_NAME: &str = "marine-rs-sdk";
-const LOCKFILE_NAME: &str = "Cargo.lock";
 
 #[derive(Debug, ThisError)]
 pub enum ManifestError {
-    #[error("No marine-rs-sdk dependency found, wasm will be skipped")]
+    #[error("No {SDK_CRATE_NAME} dependency found, wasm will be skipped")]
     NonMarineWasm,
     #[error("Cannot load file: {0}")]
     Io(#[from] std::io::Error),
@@ -18,13 +17,24 @@ pub enum ManifestError {
     ParseError(#[from] TomlError),
     #[error("Cannot process cargo manifest because of: {0}")]
     CannotProcessManifest(String),
-    #[error("Cannot find lockfile in any parent directories for {0}")]
-    CannotFindLockfile(String),
+    #[error("Cannot find entry for {package_name}@{package_version} in Cargo.lock")]
+    PackageNotFoundInLockfile {
+        package_name: String,
+        package_version: String,
+    },
+    #[error("Cannot find {SDK_CRATE_NAME} dependency for {package_name}@{package_version} in Cargo.lock")]
+    SdkDependencyNotFoundInLockfile {
+        package_name: String,
+        package_version: String,
+    },
     #[error("No package in manifest {0}")]
     NoPackageInManifest(String),
 }
 
-pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError> {
+pub(crate) fn extract_sdk_version(
+    path: &Path,
+    lockfile: &cargo_lock::Lockfile,
+) -> Result<Version, ManifestError> {
     let path = Path::new(&path);
     let manifest = Manifest::from_path(path).map_err(|e| -> ManifestError {
         match e {
@@ -51,36 +61,32 @@ pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError>
         .package
         .ok_or_else(|| ManifestError::NoPackageInManifest(format!("{}", path.display())))?;
 
-    // TODO: find & load lockfile once per `marine build` run
-    path.ancestors()
-        .find_map(|path| extract_sdk_version_from_lockfile(&package, &path.join(LOCKFILE_NAME)))
-        .ok_or_else(|| ManifestError::CannotFindLockfile(format!("{}", path.display())))
+    extract_sdk_version_from_lockfile(&package, lockfile)
 }
 
 fn extract_sdk_version_from_lockfile(
     target_package: &cargo_toml::Package,
-    path: &Path,
-) -> Option<semver::Version> {
-    log::debug!("Trying to load lockfile from {}", path.display());
-    let lockfile = cargo_lock::Lockfile::load(path).ok()?;
-    log::debug!(
-        "Lockfile loaded. Looking for entry for {}@{}",
-        target_package.name.as_str(),
-        target_package.version()
-    );
-    lockfile
+    lockfile: &cargo_lock::Lockfile,
+) -> Result<Version, ManifestError> {
+    let package = lockfile
         .packages
         .iter()
         .find_map(|package| {
             if package.name.as_str() == target_package.name.as_str()
-                && &package.version.to_string() == target_package.version()
+                && package.version.to_string() == target_package.version()
             {
                 log::debug!("Found entry. Looking for marine-rs-sdk dependency");
                 Some(package)
             } else {
                 None
             }
-        })?
+        })
+        .ok_or_else(|| ManifestError::PackageNotFoundInLockfile {
+            package_name: target_package.name.clone(),
+            package_version: target_package.version().to_string(),
+        })?;
+
+    package
         .dependencies
         .iter()
         .find_map(|dependency| {
@@ -93,5 +99,9 @@ fn extract_sdk_version_from_lockfile(
             } else {
                 None
             }
+        })
+        .ok_or_else(|| ManifestError::SdkDependencyNotFoundInLockfile {
+            package_name: target_package.name.clone(),
+            package_version: target_package.version().to_string(),
         })
 }
