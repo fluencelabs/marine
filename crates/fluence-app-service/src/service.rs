@@ -21,7 +21,6 @@ use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
 use marine::Marine;
-use marine::MarineModuleConfig;
 use marine::IValue;
 use serde_json::Value as JValue;
 use maplit::hashmap;
@@ -133,6 +132,15 @@ impl AppService {
         service_id: String,
         mut envs: HashMap<Vec<u8>, Vec<u8>>,
     ) -> Result<()> {
+        let create = |dir: &Path| match std::fs::create_dir_all(dir) {
+            Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
+            Err(err) => Err(AppServiceError::CreateDir {
+                err,
+                path: dir.to_owned(),
+            }),
+            _ => Ok(()),
+        };
+
         let working_dir = &config.service_working_dir;
         let root_tmp_dir = &config.service_tmp_dir.join(&service_id);
 
@@ -144,8 +152,11 @@ impl AppService {
         create(&service_tmp_dir)?;
         create(&service_local_dir)?;
 
-        // files will be mapped to service_dir later, along with user-defined ones
+        // Special directories that are mapped to service_tmp_dir.
+        // Override user-defined ones.
         let mapped_dirs = hashmap! {
+            format!("{SERVICE_LOCAL_DIR_NAME}") => service_local_dir.clone(),
+            format!("{SERVICE_TMP_DIR_NAME}") => service_tmp_dir.clone(),
             format!("/{SERVICE_LOCAL_DIR_NAME}") => service_local_dir,
             format!("/{SERVICE_TMP_DIR_NAME}") => service_tmp_dir,
         };
@@ -160,15 +171,10 @@ impl AppService {
             // Moves app preopened files and mapped dirs to the &working dir, keeping old aliases.
             module.config.root_wasi_files_at(&working_dir);
             // Adds /tmp and /local to wasi.
-            // It is important to do it after rooting preopens at working dir, because /tmp and /local are usually in a separate temporary dir
+            // It is important to do it after rooting preopens at working dir, because /tmp and /local are in a separate temporary dir
             module
                 .config
                 .extend_wasi_files(<_>::default(), mapped_dirs.clone());
-
-            // Needed to support existing services that map "tmp"
-            // rust-peer tests fail witout it
-            // TODO: remove when removing "tmp" from examples/existing services
-            create_wasi_dirs(&module.config)?;
         }
         Ok(())
     }
@@ -245,30 +251,5 @@ impl AppService {
         self.marine
             .module_wasi_state(module_name)
             .map_err(Into::into)
-    }
-}
-
-fn create_wasi_dirs(config: &MarineModuleConfig) -> Result<()> {
-    if let Some(wasi_config) = &config.wasi {
-        for dir in wasi_config.mapped_dirs.values() {
-            create(dir)?;
-        }
-
-        for dir in wasi_config.preopened_files.iter() {
-            create(dir)?;
-        }
-    }
-
-    Ok(())
-}
-
-fn create(dir: &Path) -> Result<()> {
-    match std::fs::create_dir_all(dir) {
-        Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
-        Err(err) => Err(AppServiceError::CreateDir {
-            err,
-            path: dir.to_owned(),
-        }),
-        _ => Ok(()),
     }
 }
