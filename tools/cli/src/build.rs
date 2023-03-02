@@ -115,7 +115,7 @@ fn get_cargo_metadata(args: &[&str]) -> CLIResult<cargo_metadata::Metadata> {
     match args.next() {
         Some(p) if *p == "--manifest-path" => {
             if let Some(path) = args.next() {
-                cmd.manifest_path(&path);
+                cmd.manifest_path(path);
             }
         }
         Some(p) => {
