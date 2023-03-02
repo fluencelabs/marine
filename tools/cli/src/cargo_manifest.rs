@@ -71,15 +71,9 @@ fn extract_sdk_version_from_lockfile(
     let package = lockfile
         .packages
         .iter()
-        .find_map(|package| {
-            if package.name.as_str() == target_package.name.as_str()
+        .find(|package| {
+            package.name.as_str() == target_package.name.as_str()
                 && package.version.to_string() == target_package.version()
-            {
-                log::debug!("Found entry. Looking for marine-rs-sdk dependency");
-                Some(package)
-            } else {
-                None
-            }
         })
         .ok_or_else(|| ManifestError::PackageNotFoundInLockfile {
             package_name: target_package.name.clone(),
@@ -89,17 +83,8 @@ fn extract_sdk_version_from_lockfile(
     package
         .dependencies
         .iter()
-        .find_map(|dependency| {
-            if dependency.name.as_str() == SDK_CRATE_NAME {
-                log::debug!(
-                    "Found marine-re-sdk dependency version {}",
-                    dependency.version
-                );
-                Some(dependency.version.clone())
-            } else {
-                None
-            }
-        })
+        .find(|dependency| dependency.name.as_str() == SDK_CRATE_NAME)
+        .map(|dependency| dependency.version.clone())
         .ok_or_else(|| ManifestError::SdkDependencyNotFoundInLockfile {
             package_name: target_package.name.clone(),
             package_version: target_package.version().to_string(),
