@@ -5,7 +5,7 @@ use thiserror::Error as ThisError;
 
 use std::path::Path;
 
-const SKD_CRATE_NAME: &str = "marine-rs-sdk";
+const SDK_CRATE_NAME: &str = "marine-rs-sdk";
 const LOCKFILE_NAME: &str = "Cargo.lock";
 
 #[derive(Debug, ThisError)]
@@ -43,7 +43,7 @@ pub(crate) fn extract_sdk_version(path: &Path) -> Result<Version, ManifestError>
         }
     })?;
 
-    if !manifest.dependencies.contains_key(SKD_CRATE_NAME) {
+    if !manifest.dependencies.contains_key(SDK_CRATE_NAME) {
         return Err(ManifestError::NonMarineWasm);
     }
 
@@ -84,7 +84,7 @@ fn extract_sdk_version_from_lockfile(
         .dependencies
         .iter()
         .find_map(|dependency| {
-            if dependency.name.as_str() == SKD_CRATE_NAME {
+            if dependency.name.as_str() == SDK_CRATE_NAME {
                 log::debug!(
                     "Found marine-re-sdk dependency version {}",
                     dependency.version
