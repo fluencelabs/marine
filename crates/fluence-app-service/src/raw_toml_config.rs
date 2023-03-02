@@ -28,7 +28,7 @@ use std::path::PathBuf;
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlAppServiceConfig {
     pub service_working_dir: Option<String>,
-    pub service_tmp_dir: Option<String>,
+    pub service_base_dir: Option<String>,
 
     #[serde(flatten)]
     pub toml_marine_config: TomlMarineConfig,
@@ -56,14 +56,14 @@ impl TryInto<AppServiceConfig> for TomlAppServiceConfig {
             None => std::env::temp_dir(),
         };
 
-        let service_tmp_dir = match self.service_tmp_dir {
+        let service_tmp_dir = match self.service_base_dir {
             Some(tmp_dir) => PathBuf::from(tmp_dir),
             None => service_working_dir.clone(),
         };
 
         Ok(AppServiceConfig {
             service_working_dir,
-            service_tmp_dir,
+            service_base_dir: service_tmp_dir,
             marine_config,
         })
     }

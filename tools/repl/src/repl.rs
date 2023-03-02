@@ -260,7 +260,7 @@ impl REPL {
             })?
             .unwrap_or_default();
 
-        config.service_tmp_dir = Some(tmp_path);
+        config.service_base_dir = Some(tmp_path);
         config.service_working_dir = Some(working_dir);
 
         config.toml_marine_config.base_path = config_file_path

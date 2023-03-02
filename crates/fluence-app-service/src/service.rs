@@ -142,7 +142,7 @@ impl AppService {
         };
 
         let working_dir = &config.service_working_dir;
-        let root_tmp_dir = &config.service_tmp_dir.join(&service_id);
+        let root_tmp_dir = &config.service_base_dir.join(&service_id);
 
         let service_local_dir = root_tmp_dir.join(SERVICE_LOCAL_DIR_NAME);
         let service_tmp_dir = root_tmp_dir.join(SERVICE_TMP_DIR_NAME);
