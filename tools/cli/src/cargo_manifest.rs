@@ -10,7 +10,7 @@ const LOCKFILE_NAME: &str = "Cargo.lock";
 
 #[derive(Debug, ThisError)]
 pub enum ManifestError {
-    #[error("Non-marine wasm, is to be skipped")]
+    #[error("No marine-rs-sdk dependency found, wasm will be skipped")]
     NonMarineWasm,
     #[error("Cannot load file: {0}")]
     Io(#[from] std::io::Error),
