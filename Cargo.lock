@@ -893,7 +893,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.22.2"
+version = "0.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "01eec180e93188fa71a47432e298cc2725a7a247e3da6f51678443779d68dd02"
 dependencies = [
@@ -910,7 +910,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.23.1"
+version = "0.24.0"
 dependencies = [
  "log",
  "maplit",
@@ -1511,7 +1511,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.12.7"
+version = "0.13.0"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -1875,7 +1875,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.23.1"
+version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93f57e7471e12d4f758f57dc54241fe8a750d2be03725260326f85f18cc0625d"
 dependencies = [
@@ -1903,7 +1903,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.24.1"
+version = "0.25.0"
 dependencies = [
  "bytesize",
  "env_logger 0.9.3",
@@ -2050,7 +2050,7 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.19.2"
+version = "0.20.0"
 dependencies = [
  "anyhow",
  "check-latest",
