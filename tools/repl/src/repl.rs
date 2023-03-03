@@ -65,6 +65,7 @@ struct CallModuleArguments<'args> {
 #[allow(clippy::upper_case_acronyms)]
 pub(super) struct REPL {
     app_service: AppService,
+    service_working_dir: Option<String>,
 }
 
 impl REPL {
@@ -73,8 +74,11 @@ impl REPL {
         working_dir: Option<String>,
         quiet: bool,
     ) -> ReplResult<Self> {
-        let app_service = Self::create_app_service(config_file_path, working_dir, quiet)?;
-        Ok(Self { app_service })
+        let app_service = Self::create_app_service(config_file_path, working_dir.clone(), quiet)?;
+        Ok(Self {
+            app_service,
+            service_working_dir: working_dir,
+        })
     }
 
     /// Returns true, it should be the last executed command.
@@ -101,7 +105,7 @@ impl REPL {
     }
 
     fn new_service<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
-        match Self::create_app_service(args.next(), None, false) {
+        match Self::create_app_service(args.next(), self.service_working_dir.clone(), false) {
             Ok(service) => self.app_service = service,
             Err(e) => println!("failed to create a new application service: {}", e),
         };
