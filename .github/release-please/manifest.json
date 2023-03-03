@@ -8,9 +8,9 @@
   "crates/module-interface": "0.6.1",
   "crates/utils": "0.4.0",
   "core": "0.19.0",
-  "marine": "0.24.1",
-  "crates/fluence-app-service": "0.23.1",
-  "tools/cli": "0.12.7",
-  "tools/repl": "0.19.2",
+  "marine": "0.25.0",
+  "crates/fluence-app-service": "0.24.0",
+  "tools/cli": "0.13.0",
+  "tools/repl": "0.20.0",
   "marine-js": "0.3.45"
 }

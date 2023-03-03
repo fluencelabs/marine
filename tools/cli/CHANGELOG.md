@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.13.0](https://github.com/fluencelabs/marine/compare/marine-v0.12.7...marine-v0.13.0) (2023-03-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cli:** use sdk dependency version from Cargo.lock instead of Cargo.toml ([#286](https://github.com/fluencelabs/marine/issues/286))
+
+### Features
+
+* **cli:** use sdk dependency version from Cargo.lock instead of Cargo.toml ([#286](https://github.com/fluencelabs/marine/issues/286)) ([fc384a4](https://github.com/fluencelabs/marine/commit/fc384a477c2274c9ebff4968871995935b5d6900))
+
 ## [0.12.7](https://github.com/fluencelabs/marine/compare/marine-v0.12.6...marine-v0.12.7) (2023-02-10)
 
 
