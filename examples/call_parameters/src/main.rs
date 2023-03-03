@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
+#[cfg(target_arch = "wasm32")]
 use marine_rs_sdk::marine;
+#[cfg(target_arch = "wasm32")]
 use marine_rs_sdk::module_manifest;
 
+#[cfg(target_arch = "wasm32")]
 module_manifest!();
 
 pub fn main() {}
 
 #[marine]
+#[cfg(target_arch = "wasm32")]
 pub fn call_parameters() -> String {
     let cp = marine_rs_sdk::get_call_parameters();
     format!(
