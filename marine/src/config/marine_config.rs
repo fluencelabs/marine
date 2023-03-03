@@ -144,7 +144,7 @@ impl MarineModuleConfig {
         };
     }
 
-    pub fn set_wasi_fs_root(&mut self, root: &Path) {
+    pub fn root_wasi_files_at(&mut self, root: &Path) {
         // TODO: make all the security rules for paths configurable from outside
         match &mut self.wasi {
             Some(MarineWASIConfig {

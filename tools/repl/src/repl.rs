@@ -20,7 +20,9 @@ use print_state::print_envs;
 use print_state::print_fs_state;
 use crate::ReplResult;
 
-use fluence_app_service::{AppService, CallParameters, SecurityTetraplet};
+use fluence_app_service::AppService;
+use fluence_app_service::CallParameters;
+use fluence_app_service::SecurityTetraplet;
 use fluence_app_service::MarineModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
 
@@ -65,12 +67,20 @@ struct CallModuleArguments<'args> {
 #[allow(clippy::upper_case_acronyms)]
 pub(super) struct REPL {
     app_service: AppService,
+    service_working_dir: Option<String>,
 }
 
 impl REPL {
-    pub fn new<S: Into<PathBuf>>(config_file_path: Option<S>, quiet: bool) -> ReplResult<Self> {
-        let app_service = Self::create_app_service(config_file_path, quiet)?;
-        Ok(Self { app_service })
+    pub fn new<S: Into<PathBuf>>(
+        config_file_path: Option<S>,
+        working_dir: Option<String>,
+        quiet: bool,
+    ) -> ReplResult<Self> {
+        let app_service = Self::create_app_service(config_file_path, working_dir.clone(), quiet)?;
+        Ok(Self {
+            app_service,
+            service_working_dir: working_dir,
+        })
     }
 
     /// Returns true, it should be the last executed command.
@@ -97,7 +107,7 @@ impl REPL {
     }
 
     fn new_service<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
-        match Self::create_app_service(args.next(), false) {
+        match Self::create_app_service(args.next(), self.service_working_dir.clone(), false) {
             Ok(service) => self.app_service = service,
             Err(e) => println!("failed to create a new application service: {}", e),
         };
@@ -228,11 +238,13 @@ impl REPL {
 
     fn create_app_service<S: Into<PathBuf>>(
         config_file_path: Option<S>,
+        working_dir: Option<String>,
         quiet: bool,
     ) -> ReplResult<AppService> {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
         let config_file_path: Option<PathBuf> = config_file_path.map(Into::into);
+        let working_dir = working_dir.unwrap_or_else(|| ".".to_string());
 
         let start = Instant::now();
 
@@ -253,7 +265,9 @@ impl REPL {
                 )
             })?
             .unwrap_or_default();
+
         config.service_base_dir = Some(tmp_path);
+        config.service_working_dir = Some(working_dir);
 
         config.toml_marine_config.base_path = config_file_path
             .and_then(|path| path.parent().map(PathBuf::from))

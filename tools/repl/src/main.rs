@@ -49,6 +49,7 @@ fn main() -> ReplResult<()> {
         version env!("CARGO_PKG_VERSION");
         param config_file_path: Option<String>, desc: "Path to a service config";
         opt quiet: bool=false, desc: "Suppress unnecessary welcome message";
+        opt working_dir: Option<String>, desc: "Set working dir for service, default = \".\"";
     }
     .parse_or_exit();
 
@@ -59,7 +60,7 @@ fn main() -> ReplResult<()> {
         print_welcome_message();
     }
 
-    let mut repl = REPL::new(args.config_file_path, args.quiet)?;
+    let mut repl = REPL::new(args.config_file_path, args.working_dir, args.quiet)?;
 
     let mut count = 1;
     loop {
