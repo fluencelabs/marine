@@ -20,7 +20,7 @@ use crate::MemoryStats;
 use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
-use marine::Marine;
+use marine::{Marine, MarineModuleConfig};
 use marine::IValue;
 use serde_json::Value as JValue;
 use maplit::hashmap;
@@ -132,15 +132,6 @@ impl AppService {
         service_id: String,
         mut envs: HashMap<Vec<u8>, Vec<u8>>,
     ) -> Result<()> {
-        let create = |dir: &Path| match std::fs::create_dir_all(dir) {
-            Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
-            Err(err) => Err(AppServiceError::CreateDir {
-                err,
-                path: dir.to_owned(),
-            }),
-            _ => Ok(()),
-        };
-
         let working_dir = &config.service_working_dir;
         let root_tmp_dir = &config.service_base_dir.join(&service_id);
 
@@ -175,6 +166,10 @@ impl AppService {
             module
                 .config
                 .extend_wasi_files(<_>::default(), mapped_dirs.clone());
+
+            // Create all mapped directories if they do not exist
+            // Needed to provide ability to run the same services both in mrepl and rust-peer
+            create_wasi_dirs(&module.config)?;
         }
         Ok(())
     }
@@ -251,5 +246,30 @@ impl AppService {
         self.marine
             .module_wasi_state(module_name)
             .map_err(Into::into)
+    }
+}
+
+fn create_wasi_dirs(config: &MarineModuleConfig) -> Result<()> {
+    if let Some(wasi_config) = &config.wasi {
+        for dir in wasi_config.mapped_dirs.values() {
+            create(dir)?;
+        }
+
+        for dir in wasi_config.preopened_files.iter() {
+            create(dir)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn create(dir: &Path) -> Result<()> {
+    match std::fs::create_dir_all(dir) {
+        Err(e) if e.kind() == ErrorKind::AlreadyExists => Ok(()),
+        Err(err) => Err(AppServiceError::CreateDir {
+            err,
+            path: dir.to_owned(),
+        }),
+        _ => Ok(()),
     }
 }
