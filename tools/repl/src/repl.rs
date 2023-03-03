@@ -20,7 +20,9 @@ use print_state::print_envs;
 use print_state::print_fs_state;
 use crate::ReplResult;
 
-use fluence_app_service::{AppService, CallParameters, SecurityTetraplet};
+use fluence_app_service::AppService;
+use fluence_app_service::CallParameters;
+use fluence_app_service::SecurityTetraplet;
 use fluence_app_service::MarineModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
 
