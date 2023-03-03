@@ -20,7 +20,8 @@ use crate::MemoryStats;
 use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
-use marine::{Marine, MarineModuleConfig};
+use marine::Marine;
+use marine::MarineModuleConfig;
 use marine::IValue;
 use serde_json::Value as JValue;
 use maplit::hashmap;
