@@ -116,70 +116,54 @@ jobs:
           }
         ]
 
-  fluence-js-tests:
-    name: "fluence-js"
+  js-client-tests:
+    name: "js-client"
     needs:
       - marine
       - aquavm
       - rust-peer
 
-    uses: fluencelabs/fluence-js/.github/workflows/tests.yml@master
+    uses: fluencelabs/js-client/.github/workflows/tests.yml@master
     with:
-      # marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
+      marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
-  fluence-js:
+  js-client:
     needs:
       - marine
       - aquavm
 
-    uses: fluencelabs/fluence-js/.github/workflows/snapshot.yml@master
+    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
     with:
-      # marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
+      marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
       avm-version: "${{ needs.aquavm.outputs.avm-version }}"
-
-  aqua:
-    needs:
-      - fluence-js
-
-    uses: fluencelabs/aqua/.github/workflows/snapshot.yml@main
-    with:
-      fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
 
   aqua-playground:
     needs:
-      - fluence-js
-      - aqua
+      - js-client
       - rust-peer
 
     uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
     with:
-      fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
-      aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
+      js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshot }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
   registry:
     needs:
-      - aqua
       - rust-peer
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
-      aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
   fluence-cli:
     needs:
-      - aqua
       - marine
-      - fluence-js
       - rust-peer
 
     uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
     with:
-      aqua-version: "${{ needs.aqua.outputs.aqua-version }}"
-      fluence-js-version: "${{ needs.fluence-js.outputs.fluence-js-version }}"
       marine-version: "${{ needs.marine.outputs.cargo-version }}"
       mrepl-version: "${{ needs.marine.outputs.cargo-version }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
