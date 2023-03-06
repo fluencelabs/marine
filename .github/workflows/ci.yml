@@ -28,6 +28,9 @@ jobs:
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+
       - name: Install marine cli
         run: cargo install --path tools/cli
 
@@ -43,8 +46,14 @@ jobs:
         run: ./build.sh
         working-directory: core/tests/wasm_tests
 
+      - name: Run cargo check
+        run: cargo check --all-features
+
+      - name: Run cargo clippy
+        run: cargo clippy --all-features
+
       - name: Run cargo test
-        run: cargo test --release -v --all-features
+        run: cargo test --release --all-features
 
   marine-js:
     name: "marine / marine-js tests"
@@ -83,23 +92,3 @@ jobs:
       - name: Run marine-js smoke tests
         run: npm run test
         working-directory: marine-js/npm-package
-
-  lint:
-    name: "marine / lints"
-    timeout-minutes: 60
-    runs-on: builder
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: Run cargo fmt
-        run: cargo fmt --all -- --check
-
-      - name: Run cargo check
-        run: cargo check -v --all-features
-
-      - name: Run cargo clippy
-        run: cargo clippy -v --all-features
