@@ -1,5 +1,4 @@
 [workspace]
-resolver = "2" # required by wasmer-wasi to work, see https://github.com/wasmerio/wasmer/issues/3377
 members = [
     "core",
     "core/tests/wasm_tests/lilo_after_2gb",
