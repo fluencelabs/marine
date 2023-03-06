@@ -35,46 +35,23 @@ use imports::*;
 use utils::*;
 
 use marine_wasm_backend_traits::prelude::*;
+use marine_wasm_backend_traits::impl_utils::custom_sections;
 
 use wasmtime_wasi::WasiCtx;
-use multimap::MultiMap;
 
 #[derive(Clone, Default)]
 pub struct WasmtimeWasmBackend {
     engine: wasmtime::Engine,
 }
 
-impl WasmtimeWasmBackend {
-    fn custom_sections(bytes: &[u8]) -> Result<MultiMap<String, Vec<u8>>, String> {
-        use wasmparser::{Parser, Payload};
-        Parser::new(0)
-            .parse_all(bytes)
-            .filter_map(|payload| {
-                let payload = match payload {
-                    Ok(s) => s,
-                    Err(e) => return Some(Err(e.to_string())),
-                };
-                match payload {
-                    Payload::CustomSection(reader) => {
-                        let name = reader.name().to_string();
-                        let data = reader.data().to_vec();
-                        Some(Ok((name, data)))
-                    }
-                    _ => None,
-                }
-            })
-            .collect()
-    }
-}
-
 impl WasmBackend for WasmtimeWasmBackend {
-    type Module = WasmtimeModule;
-    type Instance = WasmtimeInstance;
     type Store = WasmtimeStore;
+    type Module = WasmtimeModule;
+    type Imports = WasmtimeImports;
+    type Instance = WasmtimeInstance;
     type Context<'c> = WasmtimeContext<'c>;
     type ContextMut<'c> = WasmtimeContextMut<'c>;
     type Caller<'c> = WasmtimeCaller<'c>;
-    type Imports = WasmtimeImports;
     type Function = WasmtimeFunction;
     type Memory = WasmtimeMemory;
     type MemoryView = WasmtimeMemory;
@@ -83,8 +60,9 @@ impl WasmBackend for WasmtimeWasmBackend {
     fn compile(store: &mut WasmtimeStore, wasm: &[u8]) -> CompilationResult<Self::Module> {
         let module = wasmtime::Module::new(store.inner.engine(), wasm)
             .map_err(CompilationError::FailedToCompileWasm)?;
-        let custom_sections = WasmtimeWasmBackend::custom_sections(wasm)
-            .map_err(CompilationError::FailedToExtractCustomSections)?;
+        let custom_sections =
+            custom_sections(wasm) // TODO: avoid double module parsing
+                .map_err(CompilationError::FailedToExtractCustomSections)?;
 
         Ok(WasmtimeModule {
             custom_sections,

@@ -15,9 +15,9 @@
  */
 
 use marine_wasm_backend_traits::prelude::*;
+use marine_wasm_backend_traits::impl_utils::custom_sections;
 
 use anyhow::anyhow;
-use multimap::MultiMap;
 
 mod module;
 mod store;
@@ -63,7 +63,8 @@ impl WasmBackend for WasmerBackend {
                 // TODO make detailed
             })
             .and_then(|module| {
-                let custom_sections = Self::custom_sections(wasm).map_err(|e| {
+                let custom_sections = custom_sections(wasm).map_err(|e| {
+                    // TODO: avoid double module parsing
                     CompilationError::Other(anyhow!("{}", e)) // TODO make detailed
                 })?;
                 Ok(WasmerModule {
@@ -75,28 +76,5 @@ impl WasmBackend for WasmerBackend {
 
     fn new() -> Self {
         <_>::default()
-    }
-}
-
-impl WasmerBackend {
-    fn custom_sections(bytes: &[u8]) -> Result<MultiMap<String, Vec<u8>>, String> {
-        use wasmparser::{Parser, Payload};
-        Parser::new(0)
-            .parse_all(bytes)
-            .filter_map(|payload| {
-                let payload = match payload {
-                    Ok(s) => s,
-                    Err(e) => return Some(Err(e.to_string())),
-                };
-                match payload {
-                    Payload::CustomSection(reader) => {
-                        let name = reader.name().to_string();
-                        let data = reader.data().to_vec();
-                        Some(Ok((name, data)))
-                    }
-                    _ => None,
-                }
-            })
-            .collect()
     }
 }

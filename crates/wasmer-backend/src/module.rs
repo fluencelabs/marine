@@ -17,9 +17,9 @@
 use crate::{WasmerBackend, WasmerImports, WasmerInstance, WasmerStore};
 
 use marine_wasm_backend_traits::prelude::*;
+use marine_wasm_backend_traits::impl_utils::MultiMap;
 
 use anyhow::anyhow;
-use multimap::MultiMap;
 
 pub struct WasmerModule {
     pub(crate) inner: wasmer::Module,

@@ -2596,10 +2596,11 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "it-memory-traits 0.4.0",
+ "multimap",
  "paste",
  "thiserror",
- "tuple_list",
  "wasmer-interface-types-fl 0.26.0",
+ "wasmparser 0.101.1",
 ]
 
 [[package]]
@@ -2609,7 +2610,6 @@ dependencies = [
  "anyhow",
  "it-memory-traits 0.4.0",
  "marine-wasm-backend-traits",
- "multimap",
  "paste",
  "wasmer",
  "wasmer-interface-types-fl 0.26.0",
@@ -2628,7 +2628,6 @@ dependencies = [
  "multimap",
  "paste",
  "wasmer-interface-types-fl 0.26.0",
- "wasmparser 0.96.0",
  "wasmtime",
  "wasmtime-wasi",
 ]
@@ -4313,12 +4312,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tuple_list"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "141fb9f71ee586d956d7d6e4d5a9ef8e946061188520140f7591b668841d502e"
-
-[[package]]
 name = "typenum"
 version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5242,6 +5235,16 @@ name = "wasmparser"
 version = "0.96.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "adde01ade41ab9a5d10ec8ed0bb954238cf8625b5cd5a13093d6de2ad9c2be1a"
+dependencies = [
+ "indexmap",
+ "url",
+]
+
+[[package]]
+name = "wasmparser"
+version = "0.101.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf2f22ef84ac5666544afa52f326f13e16f3d019d2e61e704fd8091c9358b130"
 dependencies = [
  "indexmap",
  "url",

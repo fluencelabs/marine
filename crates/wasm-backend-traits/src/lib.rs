@@ -26,6 +26,9 @@ pub mod caller;
 pub mod function;
 pub mod macros;
 
+/// Helper functions for backend implementations.
+pub mod impl_utils;
+
 pub mod prelude {
     pub use crate::errors::*;
     pub use crate::exports::*;
