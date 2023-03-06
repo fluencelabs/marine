@@ -53,7 +53,13 @@ jobs:
         run: cargo clippy --all-features
 
       - name: Run cargo test
-        run: cargo test --release --all-features
+        run: |
+          cargo test --release --all-features \
+            -p marine-core \
+            -p marine \
+            -p fluence-app-service \
+            -p marine \
+            -p mrepl
 
   marine-js:
     name: "marine / marine-js tests"
