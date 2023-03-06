@@ -25,6 +25,7 @@ use wasmtime::AsContext as WasmtimeAsContext;
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
 
 use std::default::Default;
+
 pub struct WasmtimeStore {
     pub(crate) inner: wasmtime::Store<StoreState>,
 }
