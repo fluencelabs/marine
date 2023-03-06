@@ -44,7 +44,7 @@ pub struct MModuleInterface<'a> {
 ///
 /// # Recommendations
 ///
-/// Its advised not to use this struct to load/unload unlimited number of modules.
+/// Its not recommended to use this struct to load/unload unlimited number of modules.
 /// Better alternative is to use multiple instances of this struct for independent groups of modules
 /// and drop them when the group is no longer needed.
 pub struct MarineCore<WB: WasmBackend> {
