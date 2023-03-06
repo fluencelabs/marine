@@ -22,8 +22,7 @@ use marine_wasm_backend_traits::Memory;
 
 use it_memory_traits::MemoryAccessError;
 
-static MEMORY_ACCESS_CONTRACT: &str =
-    "api requires checking memory bounds before accessing memory";
+static MEMORY_ACCESS_CONTRACT: &str = "api requires checking memory bounds before accessing memory";
 
 #[derive(Clone)]
 pub struct WasmtimeMemory {
