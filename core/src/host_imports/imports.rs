@@ -22,7 +22,9 @@ use super::lowering::LoHelper;
 use super::utils::itypes_args_to_wtypes;
 use super::utils::itypes_output_to_wtypes;
 
-use crate::{IType, IValue, MRecordTypes};
+use crate::IType;
+use crate::IValue;
+use crate::MRecordTypes;
 use crate::init_wasm_func;
 use crate::call_wasm_func;
 use crate::HostImportDescriptor;

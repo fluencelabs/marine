@@ -49,7 +49,7 @@ pub use prelude::*;
 pub use macros::*;
 
 use std::marker::PhantomData;
-use it_memory_traits::{MemoryView};
+use it_memory_traits::MemoryView;
 
 pub trait WasmBackend: Clone + Default + 'static {
     type Store: Store<Self>;

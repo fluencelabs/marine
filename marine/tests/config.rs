@@ -16,8 +16,12 @@
 
 extern crate core;
 
-use serde_json::{json, Value};
-use marine::{DefaultMarine, MarineError, TomlMarineConfig};
+use marine::DefaultMarine;
+use marine::MarineError;
+use marine::TomlMarineConfig;
+
+use serde_json::json;
+use serde_json::Value;
 
 #[test]
 fn load_from_modules_dir() {

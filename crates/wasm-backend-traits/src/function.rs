@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-use crate::{
-    AsContextMut, FuncSig, impl_for_each_function_signature, RuntimeResult, WasmBackend, WValue,
-};
+use crate::AsContextMut;
+use crate::FuncSig;
+use crate::impl_for_each_function_signature;
+use crate::RuntimeResult;
+use crate::WasmBackend;
+use crate::WValue;
 
 /// A Wasm function handle. As it is only a handle to an object in `Store`, cloning is cheap.
 /// It can be a function from host, or an export from an `Instance`.

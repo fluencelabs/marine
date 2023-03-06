@@ -16,7 +16,8 @@
 
 pub static STANDARD_MEMORY_EXPORT_NAME: &str = "memory";
 
-use crate::{DelayedContextLifetime, WasmBackend};
+use crate::DelayedContextLifetime;
+use crate::WasmBackend;
 
 /// A general export representaion. Now only `Memory` and `Function` are supported values.
 pub enum Export<WB: WasmBackend> {

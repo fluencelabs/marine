@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-use clap::{App, Arg, SubCommand};
+use clap::App;
+use clap::Arg;
+use clap::SubCommand;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");

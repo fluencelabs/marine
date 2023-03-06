@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use crate::{InstantiationResult, WasmBackend};
+use crate::InstantiationResult;
+use crate::WasmBackend;
 
 /// A handle to compiled wasm module.
 pub trait Module<WB: WasmBackend> {

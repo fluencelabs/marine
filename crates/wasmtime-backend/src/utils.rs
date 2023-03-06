@@ -16,7 +16,8 @@
 
 use marine_wasm_backend_traits::prelude::*;
 
-use wasmtime::{Val, ValType};
+use wasmtime::Val;
+use wasmtime::ValType;
 
 pub(crate) fn val_type_to_wtype(ty: &ValType) -> WType {
     match ty {

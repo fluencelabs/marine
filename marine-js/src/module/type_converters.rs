@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-/// Contains converters of types and values between Wasmer and wasmer_interface_types.
-use super::{WType, WValue, IType, IValue};
+use super::WType;
+use super::WValue;
+use super::IType;
+use super::IValue;
 
 pub(crate) fn wtype_to_itype(ty: &WType) -> IType {
     match ty {

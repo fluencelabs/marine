@@ -44,7 +44,8 @@ impl ModuleBootstrapper {
     }
 
     fn set_max_heap_pages_count(self, max_heap_pages_count: u32) -> PrepareResult<Self> {
-        use elements::{MemoryType, MemorySection};
+        use elements::MemoryType;
+        use elements::MemorySection;
 
         let Self { mut module } = self;
         let globals_pages_count = get_heap_base(&module)

@@ -1,7 +1,9 @@
 pub use multimap::MultiMap;
 
 pub fn custom_sections(bytes: &[u8]) -> Result<MultiMap<String, Vec<u8>>, String> {
-    use wasmparser::{Parser, Payload};
+    use wasmparser::Parser;
+    use wasmparser::Payload;
+
     Parser::new(0)
         .parse_all(bytes)
         .filter_map(|payload| {

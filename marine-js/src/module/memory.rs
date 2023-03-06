@@ -16,7 +16,10 @@
 
 use crate::marine_js::JsWasmMemoryProxy;
 
-use it_memory_traits::{MemoryAccessError, MemoryView, MemoryWritable, MemoryReadable};
+use it_memory_traits::MemoryAccessError;
+use it_memory_traits::MemoryView;
+use it_memory_traits::MemoryWritable;
+use it_memory_traits::MemoryReadable;
 use wasmer_it::interpreter::wasm;
 
 use std::rc::Rc;

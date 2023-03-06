@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-use crate::{AsContextMut, Export, ResolveResult, WasmBackend};
+use crate::AsContextMut;
+use crate::Export;
+use crate::ResolveResult;
+use crate::WasmBackend;
 
 /// A handle to an instantiated Wasm module. Cloning is cheap.
 pub trait Instance<WB: WasmBackend>: Clone {

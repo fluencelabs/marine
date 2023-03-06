@@ -15,7 +15,9 @@
  */
 
 use super::marine_module::MModule;
-use super::{IType, IFunctionArg, IValue};
+use super::IType;
+use super::IFunctionArg;
+use super::IValue;
 use super::marine_module::Callable;
 use crate::MResult;
 

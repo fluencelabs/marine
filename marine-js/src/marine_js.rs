@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-use crate::module::type_converters::{itypes_args_to_wtypes, itypes_output_to_wtypes};
+use crate::module::type_converters::itypes_args_to_wtypes;
+use crate::module::type_converters::itypes_output_to_wtypes;
 use crate::global_state::INSTANCE;
 
 use marine_it_interfaces::MITInterfaces;
 use wasmer_it::ast::FunctionArg;
 
 use wasm_bindgen::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 use serde_json::Value as JValue;
-use std::borrow::{Cow};
+use std::borrow::Cow;
 use std::rc::Rc;
 
 const ALLOCATE_FUNC_NAME: &str = "allocate";

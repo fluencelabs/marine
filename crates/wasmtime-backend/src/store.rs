@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-use crate::{StoreState, WasmtimeWasmBackend};
+use crate::StoreState;
+use crate::WasmtimeWasmBackend;
 
 use marine_wasm_backend_traits::prelude::*;
 
-use wasmtime::{AsContext as WasmtimeAsContext, StoreContext, StoreContextMut};
+use wasmtime::StoreContext;
+use wasmtime::StoreContextMut;
+use wasmtime::AsContext as WasmtimeAsContext;
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
 
 use std::default::Default;

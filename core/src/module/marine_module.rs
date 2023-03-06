@@ -17,8 +17,13 @@
 use super::wit_prelude::*;
 use super::MFunctionSignature;
 use super::MRecordTypes;
-use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
-use crate::{HostImportDescriptor, MResult};
+use super::IType;
+use super::IRecordType;
+use super::IFunctionArg;
+use super::IValue;
+use super::WValue;
+use crate::HostImportDescriptor;
+use crate::MResult;
 use crate::MModuleConfig;
 use crate::config::RawImportCreator;
 

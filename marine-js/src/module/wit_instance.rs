@@ -16,16 +16,16 @@
 
 use super::wit_prelude::*;
 use super::IRecordType;
-use crate::{
-    MResult,
-    marine_js::{Instance as WasmerInstance},
-    module::wit_store::WITStore,
-};
+use crate::MResult;
+use crate::marine_js::Instance as WasmerInstance;
+use crate::module::wit_store::WITStore;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
 use wasmer_it::interpreter::wasm;
-use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, TypedIndex};
+use wasmer_it::interpreter::wasm::structures::LocalImportIndex;
+use wasmer_it::interpreter::wasm::structures::Memory;
+use wasmer_it::interpreter::wasm::structures::TypedIndex;
 
 use std::collections::HashMap;
 

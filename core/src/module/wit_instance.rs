@@ -29,7 +29,9 @@ use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
 
 use wasmer_it::interpreter::wasm;
-use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, TypedIndex};
+use wasmer_it::interpreter::wasm::structures::LocalImportIndex;
+use wasmer_it::interpreter::wasm::structures::Memory;
+use wasmer_it::interpreter::wasm::structures::TypedIndex;
 
 use std::collections::HashMap;
 use std::sync::Arc;

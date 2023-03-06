@@ -196,7 +196,8 @@ use crate::config::as_relative_to_base;
 
 use itertools::Itertools;
 
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
+use std::convert::TryInto;
 
 impl<WB: WasmBackend> TryFrom<TomlMarineConfig> for MarineConfig<WB> {
     type Error = MarineError;

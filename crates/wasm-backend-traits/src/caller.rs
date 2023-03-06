@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-use crate::{AsContextMut, FuncGetter, WasmBackend};
+use crate::AsContextMut;
+use crate::FuncGetter;
+use crate::WasmBackend;
 
 /// `Caller` is a structure that is used to pass context to imports.
 /// It serves as a handle to `Store`, and also provides access to `Memory` and export functions

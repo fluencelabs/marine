@@ -218,7 +218,8 @@ fn pass_256kb_struct(arg: Data256KB) {
 
 mod effector {
     use marine_rs_sdk::marine;
-    use crate::{Data256KB, DroppableRecordTreeConainer};
+    use crate::Data256KB;
+    use crate::DroppableRecordTreeConainer;
     use super::TestRecord2;
 
     #[marine]

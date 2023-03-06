@@ -17,9 +17,12 @@
 use super::wit_prelude::*;
 use super::MFunctionSignature;
 use super::MRecordTypes;
-use super::{IType, IRecordType, IFunctionArg, IValue};
+use super::IType;
+use super::IRecordType;
+use super::IFunctionArg;
+use super::IValue;
 use crate::MResult;
-use crate::marine_js::{Instance as WasmerInstance};
+use crate::marine_js::Instance as WasmerInstance;
 use crate::module::wit_function::WITFunction;
 use crate::module::wit_store::WITStore;
 

@@ -16,15 +16,29 @@
 
 use crate::ReplResult;
 
-use rustyline::completion::{Completer, FilenameCompleter, Pair};
+use rustyline::completion::Completer;
+use rustyline::completion::FilenameCompleter;
+use rustyline::completion::Pair;
 use rustyline::error::ReadlineError;
-use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
-use rustyline::hint::{Hinter, HistoryHinter};
-use rustyline::validate::{self, MatchingBracketValidator, Validator};
-use rustyline::{Cmd, CompletionType, Config, Context, EditMode, Editor, KeyEvent};
+use rustyline::highlight::Highlighter;
+use rustyline::highlight::MatchingBracketHighlighter;
+use rustyline::hint::Hinter;
+use rustyline::hint::HistoryHinter;
+use rustyline::validate;
+use rustyline::validate::MatchingBracketValidator;
+use rustyline::validate::Validator;
+use rustyline::Cmd;
+use rustyline::CompletionType;
+use rustyline::Config;
+use rustyline::Context;
+use rustyline::EditMode;
+use rustyline::Editor;
+use rustyline::KeyEvent;
 use rustyline_derive::Helper;
 
-use std::borrow::Cow::{self, Borrowed, Owned};
+use std::borrow::Cow;
+use std::borrow::Cow::Borrowed;
+use std::borrow::Cow::Owned;
 use std::collections::HashSet;
 
 pub(super) fn init_editor() -> ReplResult<Editor<REPLHelper>> {

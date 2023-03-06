@@ -22,7 +22,8 @@ use marine_rs_sdk::MountedBinaryResult;
 use wasmer_it::IValue;
 use wasmer_it::IType;
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 pub(crate) fn create_mounted_binary_import<WB: WasmBackend>(
     mounted_binary_path: PathBuf,

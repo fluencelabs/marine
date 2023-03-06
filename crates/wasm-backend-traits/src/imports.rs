@@ -16,7 +16,8 @@
 
 use crate::errors::*;
 
-use crate::{WasmBackend, WType};
+use crate::WasmBackend;
+use crate::WType;
 
 use std::borrow::Cow;
 

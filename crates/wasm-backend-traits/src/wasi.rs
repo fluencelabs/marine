@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use crate::{WasiError, WasmBackend};
+use crate::WasiError;
+use crate::WasmBackend;
 
 use std::path::PathBuf;
 use std::collections::HashMap;

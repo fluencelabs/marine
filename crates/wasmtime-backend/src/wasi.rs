@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-use crate::{StoreState, WasmtimeContextMut, WasmtimeImports, WasmtimeWasmBackend};
+use crate::StoreState;
+use crate::WasmtimeContextMut;
+use crate::WasmtimeImports;
+use crate::WasmtimeWasmBackend;
 
 use marine_wasm_backend_traits::prelude::*;
 

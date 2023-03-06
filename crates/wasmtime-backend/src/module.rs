@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-use crate::{WasmtimeImports, WasmtimeInstance, WasmtimeStore, WasmtimeWasmBackend};
+use crate::WasmtimeImports;
+use crate::WasmtimeInstance;
+use crate::WasmtimeStore;
+use crate::WasmtimeWasmBackend;
 
 use marine_wasm_backend_traits::prelude::*;
 
