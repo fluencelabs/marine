@@ -59,7 +59,7 @@ jobs:
           RUSTFLAGS: "-Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort"
           RUSTDOCFLAGS: "-Cpanic=abort"
         run: |
-          cargo test --release --all-features \
+          cargo test --all-features \
             -p marine-core \
             -p marine \
             -p fluence-app-service \
