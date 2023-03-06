@@ -46,8 +46,8 @@ members = [
 
 [workspace.dependencies]
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.0" }
-it-memory-traits = { package = "it-memory-traits", version = "0.4.0" }
-it-lilo = { package = "it-lilo", version = "0.5.0"}
+it-memory-traits ="0.4.0"
+it-lilo = "0.5.0"
 fluence-it-types = { version = "0.4.0", features = ["impls"] }
 wasmer-wasi = "3.1.0"
 wasmer = "3.1.0"
