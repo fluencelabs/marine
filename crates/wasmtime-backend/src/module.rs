@@ -18,11 +18,11 @@ use crate::WasmtimeImports;
 use crate::WasmtimeInstance;
 use crate::WasmtimeStore;
 use crate::WasmtimeWasmBackend;
+use crate::utils::inspect_instantiation_error;
 
 use marine_wasm_backend_traits::prelude::*;
 
 use multimap::MultiMap;
-use crate::utils::inspect_instantiation_error;
 
 pub struct WasmtimeModule {
     pub(crate) custom_sections: MultiMap<String, Vec<u8>>,

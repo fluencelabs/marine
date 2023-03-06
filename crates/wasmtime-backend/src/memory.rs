@@ -22,7 +22,7 @@ use marine_wasm_backend_traits::Memory;
 
 use it_memory_traits::MemoryAccessError;
 
-static MEMORY_ACCESS_EXPECTATION: &str =
+static MEMORY_ACCESS_CONTRACT: &str =
     "api requires checking memory bounds before accessing memory";
 
 #[derive(Clone)]
@@ -57,7 +57,7 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<WasmtimeWasmBackend
         let mut value = [0u8];
         self.memory
             .read(&mut store.inner, offset as usize, &mut value)
-            .expect(MEMORY_ACCESS_EXPECTATION);
+            .expect(MEMORY_ACCESS_CONTRACT);
 
         value[0]
     }
@@ -70,7 +70,7 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<WasmtimeWasmBackend
         let mut value = [0u8; COUNT];
         self.memory
             .read(&mut store.inner, offset as usize, &mut value)
-            .expect(MEMORY_ACCESS_EXPECTATION);
+            .expect(MEMORY_ACCESS_CONTRACT);
         value
     }
 
@@ -78,7 +78,7 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<WasmtimeWasmBackend
         let mut value = vec![0u8; size as usize];
         self.memory
             .read(&mut store.inner, offset as usize, &mut value)
-            .expect(MEMORY_ACCESS_EXPECTATION);
+            .expect(MEMORY_ACCESS_CONTRACT);
         value
     }
 }
@@ -90,13 +90,13 @@ impl it_memory_traits::MemoryWritable<DelayedContextLifetime<WasmtimeWasmBackend
         let buffer = [value];
         self.memory
             .write(&mut store.inner, offset as usize, &buffer)
-            .expect(MEMORY_ACCESS_EXPECTATION);
+            .expect(MEMORY_ACCESS_CONTRACT);
     }
 
     fn write_bytes(&self, store: &mut WasmtimeContextMut<'_>, offset: u32, bytes: &[u8]) {
         self.memory
             .write(&mut store.inner, offset as usize, bytes)
-            .expect(MEMORY_ACCESS_EXPECTATION);
+            .expect(MEMORY_ACCESS_CONTRACT);
     }
 }
 
