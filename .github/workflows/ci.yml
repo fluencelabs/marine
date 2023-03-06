@@ -2,6 +2,8 @@ name: "Run tests"
 
 on:
   pull_request:
+    paths-ignore:
+      - "**.md"
   push:
     branches:
       - "master"
@@ -16,7 +18,7 @@ env:
 
 jobs:
   tests:
-    name: "marine / cargo and marine-js"
+    name: "marine / cargo tests"
     runs-on: builder
     timeout-minutes: 60
 
@@ -26,32 +28,8 @@ jobs:
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
-      - name: Install wasm-pack
-        run: cargo install wasm-pack
-
       - name: Install marine cli
         run: cargo install --path tools/cli
-
-      - name: Run cargo fmt
-        run: cargo fmt --all -- --check
-
-      - name: Build marine-js wasm
-        run: ./build.sh
-        working-directory: marine-js
-
-      - name: Install marine-js npm dependencies
-        uses: bahmutov/npm-install@v1
-        with:
-          working-directory: marine-js/npm-package
-
-      - name: Build marine-js npm package
-        run: npm run build
-        working-directory: marine-js/npm-package
 
       - name: Build examples
         run: ./build.sh
@@ -65,27 +43,63 @@ jobs:
         run: ./build.sh
         working-directory: core/tests/wasm_tests
 
-      - name: Run cargo check
-        run: |
-          cargo check -v --all-features \
-            -p marine-core \
-            -p marine \
-            -p fluence-app-service \
-            -p marine \
-            -p mrepl
-
       - name: Run cargo test
-        run: |
-          cargo test --release -v --all-features \
-            -p marine-core \
-            -p marine \
-            -p fluence-app-service \
-            -p marine \
-            -p mrepl \
+        run: cargo test --release -v --all-features
 
-      - name: Run cargo clippy
-        run: cargo clippy -v
+  marine-js:
+    name: "marine / marine-js tests"
+    runs-on: builder
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Run wasm-pack
+        run: ./build.sh
+        working-directory: marine-js
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: "https://registry.npmjs.org"
+          cache-dependency-path: marine-js/npm-package
+          cache: "npm"
+
+      - name: Install marine-js npm dependencies
+        run: npm i
+        working-directory: marine-js/npm-package
+
+      - name: Build marine-js npm package
+        run: npm run build
+        working-directory: marine-js/npm-package
 
       - name: Run marine-js smoke tests
         run: npm run test
         working-directory: marine-js/npm-package
+
+  lint:
+    name: "marine / lints"
+    timeout-minutes: 60
+    runs-on: builder
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+
+      - name: Run cargo check
+        run: cargo check -v --all-features
+
+      - name: Run cargo clippy
+        run: cargo clippy -v --all-features
