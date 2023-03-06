@@ -30,14 +30,8 @@ use crate::HostImportDescriptor;
 use it_lilo::lifter::ILifter;
 use it_lilo::lowerer::ILowerer;
 use it_memory_traits::Memory as ITMemory;
-use marine_wasm_backend_traits::AsContextMut;
-use marine_wasm_backend_traits::Caller;
-use marine_wasm_backend_traits::DelayedContextLifetime;
-use marine_wasm_backend_traits::FuncSig;
-use marine_wasm_backend_traits::WasmBackend;
-use marine_wasm_backend_traits::Function;
-use marine_wasm_backend_traits::errors::*;
-use marine_wasm_backend_traits::FuncGetter;
+
+use marine_wasm_backend_traits::prelude::*;
 
 use std::sync::Arc;
 
@@ -84,7 +78,7 @@ fn call_host_import<WB: WasmBackend>(
         memory.clone(),
         record_types,
         inputs,
-        &argument_types,
+        argument_types,
     );
     let output = match inputs {
         Ok(ivalues) => host_exported_func(&mut caller, ivalues),
@@ -107,13 +101,13 @@ fn lift_inputs<WB: WasmBackend>(
     argument_types: &[IType],
 ) -> HostImportResult<Vec<IValue>> {
     let memory_view = memory.view();
-    let li_helper = LiHelper::new(record_types.clone());
+    let li_helper = LiHelper::new(record_types);
     let lifter = ILifter::new(memory_view, &li_helper);
     wvalues_to_ivalues(
         &mut caller.as_context_mut(),
         &lifter,
         inputs,
-        &argument_types,
+        argument_types,
     )
 }
 
@@ -132,7 +126,7 @@ fn lower_outputs<WB: WasmBackend>(
     );
 
     let memory_view = memory.view();
-    let mut lo_helper = LoHelper::new(&mut allocate_func, memory.clone());
+    let mut lo_helper = LoHelper::new(&mut allocate_func, memory);
     let lowering_result =
         ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
             .map_err(HostImportError::LowererError)

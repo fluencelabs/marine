@@ -34,7 +34,7 @@ use memory::*;
 use imports::*;
 use utils::*;
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
 
 use wasmtime_wasi::WasiCtx;
 use multimap::MultiMap;

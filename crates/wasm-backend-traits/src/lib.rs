@@ -26,16 +26,23 @@ pub mod caller;
 pub mod function;
 pub mod macros;
 
-pub use errors::*;
-pub use exports::*;
-pub use imports::*;
-pub use store::*;
-pub use wasi::*;
-pub use wtype::*;
-pub use module::*;
-pub use instance::*;
-pub use caller::*;
-pub use function::*;
+pub mod prelude {
+    pub use crate::errors::*;
+    pub use crate::exports::*;
+    pub use crate::imports::*;
+    pub use crate::store::*;
+    pub use crate::wasi::*;
+    pub use crate::wtype::*;
+    pub use crate::module::*;
+    pub use crate::instance::*;
+    pub use crate::caller::*;
+    pub use crate::function::*;
+    pub use crate::WasmBackend;
+    pub use crate::DelayedContextLifetime;
+}
+
+pub use prelude::*;
+
 pub use macros::*;
 
 use std::marker::PhantomData;

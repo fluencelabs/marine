@@ -16,7 +16,7 @@
 
 use crate::{StoreState, WasmtimeFunction, WasmtimeStore, WasmtimeWasmBackend};
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
 
 #[derive(Clone)]
 pub struct WasmtimeImports {

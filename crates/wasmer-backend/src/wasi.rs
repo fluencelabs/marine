@@ -16,9 +16,8 @@
 
 use crate::WasmerBackend;
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
 
-use std::path::PathBuf;
 use anyhow::anyhow;
 
 pub struct WasmerWasi {}
@@ -27,12 +26,16 @@ impl WasiImplementation<WasmerBackend> for WasmerWasi {
     fn register_in_linker(
         store: &mut <WasmerBackend as WasmBackend>::ContextMut<'_>,
         linker: &mut <WasmerBackend as WasmBackend>::Imports,
-        _version: WasiVersion,
-        args: Vec<Vec<u8>>,
-        envs: Vec<(Vec<u8>, Vec<u8>)>,
-        preopened_files: Vec<PathBuf>,
-        mapped_dirs: Vec<(String, PathBuf)>,
+        wasi_params: WasiParameters,
     ) -> WasiResult<()> {
+        let WasiParameters {
+            args,
+            envs,
+            preopened_files,
+            mapped_dirs,
+            ..
+        } = wasi_params;
+
         let state = wasmer_wasi::WasiStateBuilder::default()
             .args(args.iter())
             .envs(envs.into_iter())
@@ -57,6 +60,6 @@ impl WasiImplementation<WasmerBackend> for WasmerWasi {
     fn get_wasi_state<'s>(
         _instance: &'s mut <WasmerBackend as WasmBackend>::Instance,
     ) -> Box<dyn WasiState + 's> {
-        TODO!()
+        todo!()
     }
 }

@@ -16,7 +16,8 @@
 
 use crate::{WasmerBackend, WasmerContextMut};
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
+
 use it_memory_traits::{MemoryAccessError};
 
 static MEMORY_ACCESS_EXPECTATION: &str = "User should check memory bounds prior to accessing";

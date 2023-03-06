@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-use marine_wasm_backend_traits::{FuncSig, WType, WValue};
+use marine_wasm_backend_traits::FuncSig;
+use marine_wasm_backend_traits::WType;
+use marine_wasm_backend_traits::WValue;
 
-use wasmer::{FunctionType, Type, Value};
+use wasmer::FunctionType;
+use wasmer::Type;
+use wasmer::Value;
 
 pub(crate) fn generic_val_to_wasmer_val(vals: &[WValue]) -> Vec<wasmer::Value> {
     vals.iter()

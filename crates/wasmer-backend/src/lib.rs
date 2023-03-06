@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
 
 use anyhow::anyhow;
 use multimap::MultiMap;

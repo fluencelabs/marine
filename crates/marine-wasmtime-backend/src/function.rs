@@ -24,7 +24,9 @@ use crate::wvalue_to_val;
 use crate::utils::fn_ty_to_sig;
 use crate::utils::inspect_call_error;
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
+use marine_wasm_backend_traits::impl_for_each_function_signature;
+use marine_wasm_backend_traits::replace_with;
 
 use anyhow::anyhow;
 

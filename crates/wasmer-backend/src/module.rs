@@ -16,7 +16,7 @@
 
 use crate::{WasmerBackend, WasmerImports, WasmerInstance, WasmerStore};
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
 
 use anyhow::anyhow;
 use multimap::MultiMap;

@@ -16,7 +16,7 @@
 
 use crate::{StoreState, WasmtimeWasmBackend};
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
 
 use wasmtime::{AsContext as WasmtimeAsContext, StoreContext, StoreContextMut};
 use wasmtime::AsContextMut as WasmtimeAsContextMut;

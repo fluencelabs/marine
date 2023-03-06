@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-use crate::{function_type_to_func_sig, WasmerBackend, WasmerContextMut, WasmerFunction, WasmerMemory};
+use crate::function_type_to_func_sig;
+use crate::WasmerBackend;
+use crate::WasmerContextMut;
+use crate::WasmerFunction;
+use crate::WasmerMemory;
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
 
 use anyhow::anyhow;
 use wasmer::Extern;

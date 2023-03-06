@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-use crate::{WasmtimeContextMut, WasmtimeWasmBackend};
+use crate::WasmtimeContextMut;
+use crate::WasmtimeWasmBackend;
 
-use marine_wasm_backend_traits::{DelayedContextLifetime, Memory};
+use marine_wasm_backend_traits::DelayedContextLifetime;
+use marine_wasm_backend_traits::Memory;
+
 use it_memory_traits::MemoryAccessError;
 
 static MEMORY_ACCESS_EXPECTATION: &str =

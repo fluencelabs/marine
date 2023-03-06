@@ -16,7 +16,7 @@
 
 use crate::WasmerBackend;
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
 
 use wasmer::Extern;
 

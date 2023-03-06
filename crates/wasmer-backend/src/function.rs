@@ -19,7 +19,9 @@ use crate::{
     function_type_to_func_sig, func_sig_to_function_type, WasmerCaller,
 };
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
+use marine_wasm_backend_traits::impl_for_each_function_signature;
+use marine_wasm_backend_traits::replace_with;
 
 use anyhow::anyhow;
 use wasmer::{FunctionEnv, FunctionEnvMut};

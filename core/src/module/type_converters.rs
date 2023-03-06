@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-/// Contains converters of types and values between Wasmer and wasmer_interface_types.
-use super::{IType, IValue};
+use super::IType;
+use super::IValue;
 
-use marine_wasm_backend_traits::{WType, WValue};
+use marine_wasm_backend_traits::WType;
+use marine_wasm_backend_traits::WValue;
 
 pub(super) fn wtype_to_itype(ty: &WType) -> IType {
     match ty {

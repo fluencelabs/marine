@@ -20,10 +20,7 @@ use crate::misc::PrepareError;
 use marine_it_interfaces::MITInterfacesError;
 use marine_it_parser::ITParserError;
 use marine_module_interface::it_interface::ITInterfaceError;
-use marine_wasm_backend_traits::{
-    CompilationError, ImportError, InstantiationError, ResolveError, RuntimeError, WasiError,
-    WasmBackendError,
-};
+use marine_wasm_backend_traits::errors::*;
 
 use thiserror::Error as ThisError;
 

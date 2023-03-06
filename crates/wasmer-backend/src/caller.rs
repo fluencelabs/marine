@@ -16,7 +16,7 @@
 
 use crate::{StoreState, WasmerBackend, WasmerContext, WasmerContextMut};
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
 
 use wasmer::{AsStoreRef, AsStoreMut, FunctionEnv, FunctionEnvMut};
 
@@ -60,7 +60,7 @@ macro_rules! impl_func_getter {
                 &mut self,
                 _name: &str,
             ) -> ResolveResult<FuncFromCaller<WasmerBackend, $args, $rets>> {
-                TODO!()
+                todo!()
             }
         }
     };

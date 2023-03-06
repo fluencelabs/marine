@@ -28,8 +28,9 @@ use marine_core::MModuleConfig;
 use marine_wasm_backend_traits::Function;
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::WasiVersion;
-use marine_rs_sdk::CallParameters;
 use marine_utils::bytes_to_wasm_pages_ceil;
+
+use marine_rs_sdk::CallParameters;
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;

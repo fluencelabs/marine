@@ -27,6 +27,8 @@ use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use crate::json_to_marine_err;
 
 use marine_wasm_backend_traits::WasmBackend;
+#[cfg(feature = "raw-module-api")]
+use marine_wasm_backend_traits::WasiState;
 
 use marine_core::MarineCore;
 use marine_core::IFunctionArg;
@@ -253,9 +255,6 @@ impl<WB: WasmBackend> Marine<WB> {
         Ok((arg_types, output_types, record_types))
     }
 }
-
-#[cfg(feature = "raw-module-api")]
-use marine_wasm_backend_traits::WasiState;
 
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]

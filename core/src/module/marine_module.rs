@@ -22,16 +22,7 @@ use crate::{HostImportDescriptor, MResult};
 use crate::MModuleConfig;
 use crate::config::RawImportCreator;
 
-use marine_wasm_backend_traits::{AsContextMut, Memory, WasiParameters};
-use marine_wasm_backend_traits::DelayedContextLifetime;
-use marine_wasm_backend_traits::Function;
-use marine_wasm_backend_traits::WasiState;
-use marine_wasm_backend_traits::WasmBackend;
-use marine_wasm_backend_traits::Module;
-use marine_wasm_backend_traits::Instance;
-use marine_wasm_backend_traits::Imports;
-use marine_wasm_backend_traits::FuncSig;
-use marine_wasm_backend_traits::WasiImplementation;
+use marine_wasm_backend_traits::prelude::*;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;

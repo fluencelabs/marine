@@ -16,7 +16,7 @@
 
 use crate::{WasmtimeImports, WasmtimeInstance, WasmtimeStore, WasmtimeWasmBackend};
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
 
 use multimap::MultiMap;
 use crate::utils::inspect_instantiation_error;

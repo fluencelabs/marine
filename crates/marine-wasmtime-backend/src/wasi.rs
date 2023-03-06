@@ -16,7 +16,7 @@
 
 use crate::{StoreState, WasmtimeContextMut, WasmtimeImports, WasmtimeWasmBackend};
 
-use marine_wasm_backend_traits::*;
+use marine_wasm_backend_traits::prelude::*;
 
 use anyhow::anyhow;
 use wasmtime_wasi::ambient_authority;

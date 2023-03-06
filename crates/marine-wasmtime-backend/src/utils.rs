@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-use marine_wasm_backend_traits::{
-    FuncSig, InstantiationError, RuntimeError, RuntimeResult, UserError, WType, WValue,
-};
+use marine_wasm_backend_traits::prelude::*;
 
 use wasmtime::{Val, ValType};
 
