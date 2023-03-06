@@ -254,7 +254,7 @@ impl<WB: WasmBackend> AppService<WB> {
     }
 }
 
-fn create_wasi_dirs(config: &MarineModuleConfig) -> Result<()> {
+fn create_wasi_dirs<WB: WasmBackend>(config: &MarineModuleConfig<WB>) -> Result<()> {
     if let Some(wasi_config) = &config.wasi {
         for dir in wasi_config.mapped_dirs.values() {
             create(dir)?;

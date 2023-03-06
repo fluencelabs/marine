@@ -289,6 +289,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "camino"
+version = "1.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6031a462f977dd38968b6f23378356512feeace69cef817e1a4475108093cec3"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "cap-fs-ext"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -353,13 +362,48 @@ dependencies = [
 ]
 
 [[package]]
-name = "cargo_toml"
-version = "0.14.1"
+name = "cargo-lock"
+version = "8.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2bfbc36312494041e2cdd5f06697b7e89d4b76f42773a0b5556ac290ff22acc2"
+checksum = "031718ddb8f78aa5def78a09e90defe30151d1f6c672f937af4dd916429ed996"
+dependencies = [
+ "semver 1.0.16",
+ "serde",
+ "toml 0.5.11",
+ "url",
+]
+
+[[package]]
+name = "cargo-platform"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cbdb825da8a5df079a43676dbe042702f1707b1109f713a01420fbb4cc71fa27"
 dependencies = [
  "serde",
- "toml",
+]
+
+[[package]]
+name = "cargo_metadata"
+version = "0.15.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08a1ec454bc3eead8719cb56e15dbbfecdbc14e4b3a3ae4936cc6e31f5fc0d07"
+dependencies = [
+ "camino",
+ "cargo-platform",
+ "semver 1.0.16",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "cargo_toml"
+version = "0.15.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f83bc2e401ed041b7057345ebc488c005efa0341d5541ce7004d30458d0090b"
+dependencies = [
+ "serde",
+ "toml 0.7.2",
 ]
 
 [[package]]
@@ -1357,23 +1401,23 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "toml",
+ "toml 0.5.11",
  "wasmer-wasi-fl",
 ]
 
 [[package]]
 name = "fluence-app-service"
-version = "0.23.0"
+version = "0.24.0"
 dependencies = [
  "log",
  "maplit",
  "marine-min-it-version 0.2.1",
- "marine-runtime 0.24.0",
+ "marine-runtime 0.25.0",
  "marine-wasm-backend-traits",
  "serde",
  "serde_derive",
  "serde_json",
- "toml",
+ "toml 0.5.11",
 ]
 
 [[package]]
@@ -2113,15 +2157,19 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.12.6"
+version = "0.13.0"
 dependencies = [
  "Inflector",
  "anyhow",
  "atty",
+ "cargo-lock",
+ "cargo_metadata",
  "cargo_toml",
  "check-latest",
  "clap 2.34.0",
+ "env_logger 0.10.0",
  "exitfailure",
+ "log",
  "marine-it-generator 0.9.5",
  "marine-it-parser 0.11.1",
  "marine-module-info-parser 0.5.1",
@@ -2130,7 +2178,7 @@ dependencies = [
  "serde_json",
  "termion",
  "thiserror",
- "toml",
+ "toml 0.7.2",
  "walrus",
 ]
 
@@ -2325,7 +2373,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "thiserror",
- "toml",
+ "toml 0.5.11",
  "wasm-bindgen",
  "wasmer-interface-types-fl 0.26.0",
  "web-sys",
@@ -2493,7 +2541,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "thiserror",
- "toml",
+ "toml 0.5.11",
  "wasmer-interface-types-fl 0.24.1",
  "wasmer-runtime-core-fl",
  "wasmer-runtime-fl",
@@ -2502,7 +2550,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.24.0"
+version = "0.25.0"
 dependencies = [
  "bytesize",
  "env_logger 0.9.3",
@@ -2526,7 +2574,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "thiserror",
- "toml",
+ "toml 0.5.11",
  "wasmer-interface-types-fl 0.26.0",
 ]
 
@@ -2731,13 +2779,13 @@ checksum = "7843ec2de400bcbc6a6328c958dc38e5359da6e93e72e37bc5246bf1ae776389"
 
 [[package]]
 name = "mrepl"
-version = "0.18.8"
+version = "0.20.0"
 dependencies = [
  "anyhow",
  "check-latest",
  "clap 2.34.0",
  "env_logger 0.9.3",
- "fluence-app-service 0.23.0",
+ "fluence-app-service 0.24.0",
  "itertools",
  "log",
  "marine-rs-sdk-main",
@@ -3701,6 +3749,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_spanned"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0efd8caf556a6cebd3b285caf480045fcc1ac04f6bd786b09a6f11af30c4fcf4"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "serde_urlencoded"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4250,6 +4307,40 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4f7f0dd8d50a853a531c426359045b1998f04219d88799810762cd4ad314234"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "toml"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f7afcae9e3f0fe2c370fd4657108972cbb2fa9db1b9f84849cefd80741b01cb6"
+dependencies = [
+ "serde",
+ "serde_spanned",
+ "toml_datetime",
+ "toml_edit",
+]
+
+[[package]]
+name = "toml_datetime"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ab8ed2edee10b50132aed5f331333428b011c99402b5a534154ed15746f9622"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "toml_edit"
+version = "0.19.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9a1eb0622d28f4b9c90adc4ea4b2b46b47663fde9ac5fafcb14a1369d5508825"
+dependencies = [
+ "indexmap",
+ "serde",
+ "serde_spanned",
+ "toml_datetime",
+ "winnow",
 ]
 
 [[package]]
@@ -5303,7 +5394,7 @@ dependencies = [
  "rustix",
  "serde",
  "sha2",
- "toml",
+ "toml 0.5.11",
  "windows-sys 0.42.0",
  "zstd",
 ]
@@ -5701,6 +5792,15 @@ name = "windows_x86_64_msvc"
 version = "0.42.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "447660ad36a13288b1db4d4248e857b510e8c3a225c822ba4fb748c0aafecffd"
+
+[[package]]
+name = "winnow"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee7b2c67f962bf5042bfd8b6a916178df33a26eec343ae064cb8e069f638fa6f"
+dependencies = [
+ "memchr",
+]
 
 [[package]]
 name = "winreg"
