@@ -21,6 +21,8 @@ use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
 use marine_wasm_backend_traits::WasmBackend;
+#[cfg(feature = "raw-module-api")]
+use marine_wasm_backend_traits::WasiState;
 use marine::Marine;
 use marine::IValue;
 
@@ -31,9 +33,6 @@ use std::convert::TryInto;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::io::ErrorKind;
-
-#[cfg(feature = "raw-module-api")]
-use marine_wasm_backend_traits::WasiState;
 
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
