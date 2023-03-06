@@ -1,8 +1,11 @@
-import fs from 'fs';
-import path from 'path';
-import { MarineService } from '../MarineService';
-import { LogLevel } from '../types';
+import { jest } from '@jest/globals';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as url from 'url';
+import { MarineService } from '../MarineService.js';
+import { LogLevel } from '../types.js';
 
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 const examplesDir = path.join(__dirname, '../../../../examples');
 
 const loadWasmModule = async (waspPath: string) => {

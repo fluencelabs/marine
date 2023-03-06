@@ -85,7 +85,7 @@ fn print_functions_sign<'r>(
         }
 
         for function_signature in module_interface.function_signatures.iter() {
-            write!(f, "  fn {}(", function_signature.name)?;
+            write!(f, "  func {}(", function_signature.name)?;
 
             let args = function_signature
                 .arguments
