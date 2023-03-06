@@ -32,10 +32,11 @@ use marine_utils::bytes_to_wasm_pages_ceil;
 
 use marine_rs_sdk::CallParameters;
 
+use parking_lot::Mutex;
+
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::sync::Arc;
-use std::sync::Mutex;
 
 const WASM_MAX_HEAP_SIZE: u64 = 4 * 1024 * 1024 * 1024 - 1; // 4 GiB - 1
 

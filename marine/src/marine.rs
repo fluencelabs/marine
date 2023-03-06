@@ -36,11 +36,13 @@ use marine_core::MRecordTypes;
 use marine_utils::SharedString;
 use marine_rs_sdk::CallParameters;
 
+use parking_lot::Mutex;
 use serde_json::Value as JValue;
+
 use std::convert::TryInto;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 type MFunctionSignature = (Arc<Vec<IFunctionArg>>, Arc<Vec<IType>>);
 type MModuleInterface = (Arc<Vec<IFunctionArg>>, Arc<Vec<IType>>, Arc<MRecordTypes>);
@@ -88,7 +90,7 @@ impl<WB: WasmBackend> Marine<WB> {
     {
         let mut marine = MarineCore::new();
         let config = config.try_into()?;
-        let call_parameters = Arc::new(Mutex::new(<_>::default()));
+        let call_parameters = Arc::<Mutex<CallParameters>>::default();
 
         let modules_dir = config.modules_dir;
 
@@ -142,7 +144,8 @@ impl<WB: WasmBackend> Marine<WB> {
         call_parameters: marine_rs_sdk::CallParameters,
     ) -> MarineResult<Vec<IValue>> {
         {
-            let mut cp = self.call_parameters.lock().unwrap(); // TODO MAKE SURE ITS OK
+            // a separate code block to unlock the mutex ASAP and to avoid double locking
+            let mut cp = self.call_parameters.lock();
             *cp = call_parameters;
         }
 
@@ -176,8 +179,10 @@ impl<WB: WasmBackend> Marine<WB> {
             module_name.to_string(),
             func_name.to_string()
         )?;
+
         {
-            let mut cp = self.call_parameters.lock().unwrap(); // TODO MAKE SURE ITS OK
+            // a separate code block to unlock the mutex ASAP and to avoid double locking
+            let mut cp = self.call_parameters.lock();
             *cp = call_parameters;
         }
 
