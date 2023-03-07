@@ -19,12 +19,9 @@ use crate::InstantiationResult;
 use crate::WasmBackend;
 
 /// A handle to compiled wasm module.
-pub trait Module<WB: WasmBackend> {
+pub trait Module<WB: WasmBackend>: Sized {
     /// Compiles a wasm bytes into a module and extracts custom sections.
-    fn new(
-        store: &mut <WB as WasmBackend>::Store,
-        wasm: &[u8],
-    ) -> CompilationResult<<WB as WasmBackend>::Module>;
+    fn new(store: &mut <WB as WasmBackend>::Store, wasm: &[u8]) -> CompilationResult<Self>;
 
     /// Returns custom sections corresponding to `name`, if there are any.
     fn custom_sections(&self, name: &str) -> Option<&[Vec<u8>]>;

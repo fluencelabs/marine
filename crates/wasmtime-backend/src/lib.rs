@@ -35,7 +35,6 @@ use imports::*;
 use utils::*;
 
 use marine_wasm_backend_traits::prelude::*;
-use marine_wasm_backend_traits::impl_utils::custom_sections;
 
 use wasmtime_wasi::WasiCtx;
 

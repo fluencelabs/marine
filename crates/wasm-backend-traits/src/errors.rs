@@ -68,6 +68,8 @@ pub enum RuntimeError {
     Trap(anyhow::Error),
     #[error("{0}")]
     UserError(#[from] UserError),
+    #[error("A function returned invalid number of results: expected {expected}, got {actual}")]
+    IncorrectResultsNumber { expected: usize, actual: usize },
     #[error("{0}")]
     Other(anyhow::Error),
 }

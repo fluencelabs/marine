@@ -42,19 +42,11 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
         let ty = sig_to_fn_ty(&sig);
         let func = move |_: wasmtime::Caller<'_, StoreState>,
                          args: &[wasmtime::Val],
-                         results: &mut [wasmtime::Val]| {
-            let args = args
-                .iter()
-                .map(val_to_wvalue)
-                .collect::<Result<Vec<_>, RuntimeError>>()
-                .map_err(anyhow::Error::new)?; // TODO move earlier
-
-            let rets = func(&args);
-            for i in 0..results.len() {
-                results[i] = wvalue_to_val(&rets[i]);
-            }
-
-            Ok(())
+                         results_out: &mut [wasmtime::Val]|
+              -> Result<(), anyhow::Error> {
+            let args = process_func_args(args).map_err(|e| anyhow!(e))?; // TODO move earlier
+            let results = func(&args);
+            process_func_results(&results, results_out).map_err(|e| anyhow!(e))
         };
 
         let func = wasmtime::Func::new(store.as_context_mut().inner, ty, func);
@@ -76,19 +68,12 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
 
         let func = move |caller: wasmtime::Caller<'_, StoreState>,
                          args: &[wasmtime::Val],
-                         results: &mut [wasmtime::Val]| {
+                         results_out: &mut [wasmtime::Val]|
+              -> Result<(), anyhow::Error> {
             let caller = WasmtimeCaller { inner: caller };
-            let args = args
-                .iter()
-                .map(val_to_wvalue)
-                .collect::<RuntimeResult<Vec<_>>>()
-                .map_err(|e| anyhow!(e))?;
-            let rets = func(caller, &args);
-            for i in 0..results.len() {
-                results[i] = wvalue_to_val(&rets[i]);
-            }
-
-            Ok(())
+            let args = process_func_args(args).map_err(|e| anyhow!(e))?;
+            let results = func(caller, &args);
+            process_func_results(&results, results_out).map_err(|e| anyhow!(e))
         };
 
         let func = wasmtime::Func::new(store.as_context_mut().inner, ty, func);
@@ -171,4 +156,28 @@ macro_rules! impl_func_construction {
 
 impl FuncConstructor<WasmtimeWasmBackend> for WasmtimeFunction {
     impl_for_each_function_signature!(impl_func_construction);
+}
+
+fn process_func_args(args: &[wasmtime::Val]) -> RuntimeResult<Vec<WValue>> {
+    args.iter()
+        .map(val_to_wvalue)
+        .collect::<RuntimeResult<Vec<_>>>()
+}
+
+fn process_func_results(
+    results_in: &[WValue],
+    results_out: &mut [wasmtime::Val],
+) -> RuntimeResult<()> {
+    if results_in.len() != results_out.len() {
+        return Err(RuntimeError::IncorrectResultsNumber {
+            expected: results_out.len(),
+            actual: results_in.len(),
+        });
+    }
+
+    for id in 0..results_in.len() {
+        results_out[id] = wvalue_to_val(&results_in[id]);
+    }
+
+    Ok(())
 }
