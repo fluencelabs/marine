@@ -203,7 +203,7 @@ impl<WB: WasmBackend> Marine<WB> {
     }
 
     /// Return statistic of Wasm modules heap footprint.
-    pub fn module_memory_stats(&mut self) -> MemoryStats<'_> {
+    pub fn module_memory_stats(&self) -> MemoryStats<'_> {
         self.core.module_memory_stats()
     }
 

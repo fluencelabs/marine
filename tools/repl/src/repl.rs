@@ -232,7 +232,7 @@ impl REPL {
         print!("Loaded modules interface:\n{}", interface);
     }
 
-    fn show_memory_stats(&mut self) {
+    fn show_memory_stats(&self) {
         let statistic = self.app_service.module_memory_stats();
 
         print!("Loaded modules heap sizes:\n{}", statistic);

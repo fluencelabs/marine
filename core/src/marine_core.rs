@@ -28,6 +28,7 @@ use serde::Serialize;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::cell::RefCell;
 
 /// Represent Marine module interface.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
@@ -54,7 +55,7 @@ pub struct MarineCore<WB: WasmBackend> {
     #[allow(unused)]
     wasm_backend: WB,
     // Container for all objects created by Wasm backend
-    store: <WB as WasmBackend>::Store,
+    store: RefCell<<WB as WasmBackend>::Store>,
 }
 
 impl<WB: WasmBackend> MarineCore<WB> {
@@ -64,7 +65,7 @@ impl<WB: WasmBackend> MarineCore<WB> {
         Self {
             modules: HashMap::new(),
             wasm_backend,
-            store,
+            store: RefCell::new(store),
         }
     }
 
@@ -81,7 +82,7 @@ impl<WB: WasmBackend> MarineCore<WB> {
             || Err(MError::NoSuchModule(module_name.to_string())),
             |module| {
                 module.call(
-                    &mut store.as_context_mut(),
+                    &mut store.get_mut().as_context_mut(),
                     module_name,
                     func_name.as_ref(),
                     arguments,
@@ -108,7 +109,13 @@ impl<WB: WasmBackend> MarineCore<WB> {
     ) -> MResult<()> {
         let _prepared_wasm_bytes =
             crate::misc::prepare_module(wasm_bytes, config.max_heap_pages_count)?;
-        let module = MModule::new(&name, &mut self.store, wasm_bytes, config, &self.modules)?;
+        let module = MModule::new(
+            &name,
+            self.store.get_mut(),
+            wasm_bytes,
+            config,
+            &self.modules,
+        )?;
 
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {
@@ -170,14 +177,14 @@ impl<WB: WasmBackend> MarineCore<WB> {
     }
 
     /// Returns a heap size that all modules consume in bytes.
-    pub fn module_memory_stats(&mut self) -> MemoryStats<'_> {
+    pub fn module_memory_stats(&self) -> MemoryStats<'_> {
         let records = self
             .modules
             .iter()
             .map(|(module_name, module)| {
                 ModuleMemoryStat::new(
                     module_name,
-                    module.memory_size(&mut self.store.as_context_mut()),
+                    module.memory_size(&mut self.store.borrow_mut().as_context_mut()),
                     module.max_memory_size(),
                 )
             })
