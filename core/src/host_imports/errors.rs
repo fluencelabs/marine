@@ -36,15 +36,15 @@ pub enum HostImportError {
     #[error("Not enough WValue arguments are provided from the Wasm side")]
     MismatchWValuesCount,
 
-    #[error("{0}")]
+    #[error(transparent)]
     LifterError(#[from] LiError),
 
-    #[error("{0}")]
+    #[error(transparent)]
     LowererError(#[from] LoError),
 
-    #[error("{0}")]
+    #[error(transparent)]
     RecordNotFound(#[from] RecordResolvableError),
 
-    #[error("{0}")]
+    #[error(transparent)]
     InvalidUTF8String(#[from] std::string::FromUtf8Error),
 }

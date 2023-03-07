@@ -30,19 +30,19 @@ use crate::WType;
 
 #[derive(Debug, Error)]
 pub enum WasmBackendError {
-    #[error("{0}")]
+    #[error(transparent)]
     ResolveError(#[from] ResolveError),
 
-    #[error("{0}")]
+    #[error(transparent)]
     RuntimeError(#[from] RuntimeError),
 
-    #[error("{0}")]
+    #[error(transparent)]
     CompilationError(#[from] CompilationError),
 
-    #[error("{0}")]
+    #[error(transparent)]
     ImportError(#[from] ImportError),
 
-    #[error("{0}")]
+    #[error(transparent)]
     InstantiationError(#[from] InstantiationError),
 }
 
@@ -54,7 +54,7 @@ pub enum ResolveError {
     ExportNotFound(String),
     #[error("export type mismatch: expected {0}, found {1}")]
     ExportTypeMismatch(String, String),
-    #[error("{0}")]
+    #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
 
@@ -62,15 +62,15 @@ pub type ResolveResult<T> = Result<T, ResolveError>;
 
 #[derive(Debug, Error)]
 pub enum RuntimeError {
-    #[error("{0}")]
+    #[error("Unsupported type encountered: {0}")]
     UnsupportedType(WType),
-    #[error("{0}")]
+    #[error(transparent)]
     Trap(anyhow::Error),
-    #[error("{0}")]
+    #[error(transparent)]
     UserError(#[from] UserError),
     #[error("A function returned invalid number of results: expected {expected}, got {actual}")]
     IncorrectResultsNumber { expected: usize, actual: usize },
-    #[error("{0}")]
+    #[error(transparent)]
     Other(anyhow::Error),
 }
 
@@ -78,11 +78,11 @@ pub type RuntimeResult<T> = Result<T, RuntimeError>;
 
 #[derive(Debug, Error)]
 pub enum CompilationError {
-    #[error("{0}")]
+    #[error(transparent)]
     FailedToCompileWasm(anyhow::Error),
     #[error("{0}")]
-    FailedToExtractCustomSections(String),
-    #[error("{0}")]
+    FailedToExtractCustomSections(String), // TODO: use a proper error type
+    #[error(transparent)]
     Other(anyhow::Error),
 }
 
@@ -93,7 +93,7 @@ pub enum ImportError {
     #[error("Duplicate import")]
     DuplicateImport(String, String),
 
-    #[error("{0}")]
+    #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
 
@@ -101,9 +101,9 @@ pub type ImportResult<T> = Result<T, ImportError>;
 
 #[derive(Debug, Error)]
 pub enum InstantiationError {
-    #[error("{0}")]
+    #[error(transparent)]
     RuntimeError(RuntimeError),
-    #[error("{0}")]
+    #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
 
@@ -111,9 +111,9 @@ pub type InstantiationResult<T> = Result<T, InstantiationError>;
 
 #[derive(Debug, Error)]
 pub enum WasiError {
-    #[error("{0}")]
+    #[error(transparent)]
     IOError(#[from] std::io::Error),
-    #[error("{0}")]
+    #[error(transparent)]
     EngineWasiError(#[from] anyhow::Error),
     #[error("Cumulative size of args array exceeds 2^32")]
     TooLargeArgsArray,
@@ -123,9 +123,9 @@ pub enum WasiError {
 
 #[derive(Debug, Error)]
 pub enum UserError {
-    #[error("{0}")]
+    #[error(transparent)]
     Recoverable(anyhow::Error),
-    #[error("{0}")]
+    #[error(transparent)]
     Unrecoverable(anyhow::Error),
 }
 

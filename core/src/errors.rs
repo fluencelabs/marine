@@ -31,10 +31,10 @@ use thiserror::Error as ThisError;
 pub enum MError {
     /// Errors related to failed resolving of records.
     #[error("{0}")]
-    RecordResolveError(String),
+    RecordResolveError(String), // TODO: use a proper error type
 
     /// Errors arisen during creation of a WASI context.
-    #[error("{0}")]
+    #[error(transparent)]
     WASIPrepareError(#[from] WasiError),
 
     /// Errors occurred inside marine-module-interface crate.
@@ -71,7 +71,7 @@ pub enum MError {
 
     /// Incorrect IT section.
     #[error("{0}")]
-    IncorrectWIT(String),
+    IncorrectWIT(String), // TODO: use a proper error type
 
     #[error("Wasm backend error: {0}")]
     WasmBackendError(#[from] WasmBackendError),
