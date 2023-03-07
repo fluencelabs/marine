@@ -15,6 +15,7 @@
  */
 
 pub static STANDARD_MEMORY_EXPORT_NAME: &str = "memory";
+pub static STANDARD_MEMORY_INDEX: u32 = 0;
 
 use crate::DelayedContextLifetime;
 use crate::WasmBackend;

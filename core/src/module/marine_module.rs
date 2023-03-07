@@ -215,7 +215,7 @@ impl<WB: WasmBackend> MModule<WB> {
     pub(crate) fn memory_size(&self, store: &mut <WB as WasmBackend>::ContextMut<'_>) -> usize {
         let memory = self
             .wasm_instance
-            .get_nth_memory(store, 0)
+            .get_nth_memory(store, STANDARD_MEMORY_INDEX)
             .expect("It is expected that the existence of at least one memory is checked in the MModule::new function");
 
         memory.size(store)
