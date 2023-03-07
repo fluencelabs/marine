@@ -32,25 +32,27 @@ mod raw_toml_config;
 
 pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 
+pub type WasmBackend = marine::DefaultWasmBackend;
+
 pub use errors::AppServiceError;
-pub use service::AppService;
+pub type AppService = service::AppService<WasmBackend>;
 pub use service_interface::FunctionSignature;
 pub use service_interface::RecordType;
 pub use service_interface::ServiceInterface;
 
-pub use config::AppServiceConfig;
+pub type AppServiceConfig = config::AppServiceConfig<WasmBackend>;
 pub use raw_toml_config::TomlAppServiceConfig;
 
 pub use marine::ConfigContext;
 pub use marine::WithContext;
-pub use marine::MarineConfig;
-pub use marine::MarineModuleConfig;
+pub type MarineConfig = marine::MarineConfig<WasmBackend>;
+pub type MarineModuleConfig = marine::MarineModuleConfig<WasmBackend>;
 pub use marine::MarineWASIConfig;
 pub use marine::TomlMarineConfig;
 pub use marine::TomlMarineModuleConfig;
 pub use marine::TomlMarineNamedModuleConfig;
 pub use marine::TomlWASIConfig;
-pub use marine::ModuleDescriptor;
+pub type ModuleDescriptor = marine::ModuleDescriptor<WasmBackend>;
 
 pub use marine::MarineError;
 
@@ -58,7 +60,7 @@ pub use marine::IValue;
 pub use marine::IRecordType;
 pub use marine::IFunctionArg;
 pub use marine::IType;
-pub use marine::HostImportDescriptor;
+pub type HostImportDescriptor = marine::HostImportDescriptor<WasmBackend>;
 pub use marine::HostImportError;
 pub use marine::to_interface_value;
 pub use marine::from_interface_values;
@@ -71,6 +73,3 @@ pub use marine_min_it_version::min_it_version;
 
 pub use marine::CallParameters;
 pub use marine::SecurityTetraplet;
-
-pub type DefaultAppService = AppService<marine::DefaultWasmBackend>;
-pub use marine::DefaultWasmBackend;

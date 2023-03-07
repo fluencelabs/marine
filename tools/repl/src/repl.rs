@@ -20,8 +20,7 @@ use print_state::print_envs;
 use print_state::print_fs_state;
 use crate::ReplResult;
 
-use fluence_app_service::DefaultAppService;
-use fluence_app_service::DefaultWasmBackend;
+use fluence_app_service::AppService;
 use fluence_app_service::CallParameters;
 use fluence_app_service::SecurityTetraplet;
 use fluence_app_service::MarineModuleConfig;
@@ -67,7 +66,7 @@ struct CallModuleArguments<'args> {
 
 #[allow(clippy::upper_case_acronyms)]
 pub(super) struct REPL {
-    app_service: DefaultAppService,
+    app_service: AppService,
     service_working_dir: Option<String>,
 }
 
@@ -133,13 +132,11 @@ impl REPL {
             wasi: Default::default(),
             logging_mask: Default::default(),
         };
-        let result_msg = match self
-            .app_service
-            .load_module::<MarineModuleConfig<DefaultWasmBackend>, String>(
-                module_name.into(),
-                &wasm_bytes.unwrap(),
-                Some(config),
-            ) {
+        let result_msg = match self.app_service.load_module::<MarineModuleConfig, String>(
+            module_name.into(),
+            &wasm_bytes.unwrap(),
+            Some(config),
+        ) {
             Ok(_) => {
                 let elapsed_time = start.elapsed();
                 format!(
@@ -245,7 +242,7 @@ impl REPL {
         config_file_path: Option<S>,
         working_dir: Option<String>,
         quiet: bool,
-    ) -> ReplResult<DefaultAppService> {
+    ) -> ReplResult<AppService> {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
         let config_file_path: Option<PathBuf> = config_file_path.map(Into::into);
@@ -278,8 +275,7 @@ impl REPL {
             .and_then(|path| path.parent().map(PathBuf::from))
             .unwrap_or_default();
 
-        let app_service =
-            DefaultAppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
+        let app_service = AppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
 
         let duration = start.elapsed();
 

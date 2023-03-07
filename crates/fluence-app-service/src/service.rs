@@ -226,7 +226,7 @@ impl<WB: WasmBackend> AppService<WB> {
     pub fn load_module<C, S>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
     where
         S: Into<String>,
-        C: TryInto<crate::MarineModuleConfig<WB>>,
+        C: TryInto<marine::MarineModuleConfig<WB>>,
         marine::MarineError: From<C::Error>,
     {
         self.marine

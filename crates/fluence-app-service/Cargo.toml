@@ -19,6 +19,4 @@ serde_json = "1.0.89"
 toml = "0.5.9"
 
 [features]
-default = ["wasmtime"]
 raw-module-api = ["marine-runtime/raw-module-api"]
-wasmtime = ["marine-runtime/wasmtime"]
