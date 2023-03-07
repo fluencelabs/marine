@@ -21,7 +21,7 @@ use crate::WasmBackend;
 /// Some of the implementations can limit allocated resources.
 /// For example, Wasmtime cannot have more than 10000 instances in one `Store`.
 ///
-/// Most of the functions in interface require a handle to `Store` to work
+/// Most of the functions in this crate require a handle to `Store` to work.
 pub trait Store<WB: WasmBackend>: AsContextMut<WB> {
     fn new(backend: &WB) -> Self;
 }

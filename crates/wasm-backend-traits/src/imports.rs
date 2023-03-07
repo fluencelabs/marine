@@ -37,7 +37,7 @@ pub trait Imports<WB: WasmBackend>: Clone {
         func: <WB as WasmBackend>::Function,
     ) -> Result<(), ImportError>;
 
-    /// Inserts many named functions to the samne namespace `module`. Is equivalent to multiple calls to `insert`.
+    /// Inserts several named functions to the same namespace `module` at once, an equivalent to multiple calls of `insert`.
     /// # Errors:
     ///     An error returned if such combination of `module` and `name` already has an associated function.
     ///

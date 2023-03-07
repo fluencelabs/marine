@@ -21,8 +21,8 @@ use crate::RuntimeResult;
 use crate::WasmBackend;
 use crate::WValue;
 
-/// A Wasm function handle. As it is only a handle to an object in `Store`, cloning is cheap.
-/// It can be a function from host, or an export from an `Instance`.
+/// A Wasm function handle, it can be either a function from a host or an export from an `Instance`.
+/// As it is only a handle to an object in `Store`, cloning is cheap
 pub trait Function<WB: WasmBackend>: Send + Sync {
     /// Creates a new function with dynamic signature.
     /// The signature check is performed at runtime.
@@ -52,9 +52,9 @@ pub trait Function<WB: WasmBackend>: Send + Sync {
 
     /// Calls the wasm function.
     /// # Panics:
-    /// If given a store different from the one that stores the function.
+    ///     If given a store different from the one that stores the function.
     /// # Errors:
-    /// See `RuntimeError` documentation.
+    ///     See `RuntimeError` documentation.
     fn call(
         &self,
         store: &mut impl AsContextMut<WB>,
@@ -62,7 +62,7 @@ pub trait Function<WB: WasmBackend>: Send + Sync {
     ) -> RuntimeResult<Vec<WValue>>;
 }
 
-/// A helper trait for creating a funcction with static signature.
+/// A helper trait for creating a function with a static signature.
 /// Should not be implemented by users.
 /// Implemented for all functions that meet the following criteria:
 ///     * implement Send + Sync + 'static

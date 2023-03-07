@@ -18,7 +18,7 @@ use crate::AsContextMut;
 use crate::FuncGetter;
 use crate::WasmBackend;
 
-/// `Caller` is a structure that is used to pass context to imports.
+/// `Caller` is a structure used to pass context to imports.
 /// It serves as a handle to `Store`, and also provides access to `Memory` and export functions
 /// from the caller instance, if there is one.
 pub trait Caller<WB: WasmBackend>:

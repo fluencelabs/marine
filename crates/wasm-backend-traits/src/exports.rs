@@ -20,7 +20,7 @@ pub static STANDARD_MEMORY_INDEX: u32 = 0;
 use crate::DelayedContextLifetime;
 use crate::WasmBackend;
 
-/// A general export representaion. Now only `Memory` and `Function` are supported values.
+/// Contains Wasm exports necessary for internal usage.
 pub enum Export<WB: WasmBackend> {
     Memory(<WB as WasmBackend>::Memory),
     Function(<WB as WasmBackend>::Function),
@@ -29,7 +29,8 @@ pub enum Export<WB: WasmBackend> {
 
 // TODO: add read/write/etc methods to the `Memory` trait,
 // and then make a generic implementation of interface-types traits
-/// A wasm memory handle. As it is only a handle to an object in `Store`, cloning is cheap.
+/// A wasm memory handle.
+/// As it is only a handle to an object in `Store`, cloning is cheap.
 pub trait Memory<WB: WasmBackend>:
     it_memory_traits::Memory<<WB as WasmBackend>::MemoryView, DelayedContextLifetime<WB>>
     + Clone
