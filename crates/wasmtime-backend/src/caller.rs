@@ -95,14 +95,14 @@ macro_rules! impl_func_getter {
 
                         Ok(Box::new(closure))
                     }
-                    wasmtime::Extern::Memory(_) => Err(ResolveError::ExportTypeMismatch(
-                        "function".to_string(),
-                        "memory".to_string(),
-                    )),
-                    _ => Err(ResolveError::ExportTypeMismatch(
-                        "function".to_string(),
-                        "neither memory nor function".to_string(),
-                    )),
+                    wasmtime::Extern::Memory(_) => Err(ResolveError::ExportTypeMismatch {
+                        expected: "function",
+                        actual: "memory",
+                    }),
+                    _ => Err(ResolveError::ExportTypeMismatch {
+                        expected: "function",
+                        actual: "neither memory nor function",
+                    }),
                 }
             }
         }

@@ -53,8 +53,11 @@ pub enum ResolveError {
     #[error("export not found: {0}")]
     ExportNotFound(String),
 
-    #[error("export type mismatch: expected {0}, found {1}")]
-    ExportTypeMismatch(String, String),
+    #[error("export type mismatch: expected {expected}, found {actual}")]
+    ExportTypeMismatch {
+        expected: &'static str,
+        actual: &'static str,
+    },
 
     #[error(transparent)]
     Other(#[from] anyhow::Error),
