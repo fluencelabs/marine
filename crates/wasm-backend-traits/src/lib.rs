@@ -51,6 +51,9 @@ pub use macros::*;
 use std::marker::PhantomData;
 use it_memory_traits::MemoryView;
 
+/// A core trait for any backend. It serves two purposes:
+/// * handles initialization of the library if needed
+/// * provides access to all public types -- like `mod` but for trait impls.
 pub trait WasmBackend: Clone + Default + 'static {
     type Store: Store<Self>;
     type Module: Module<Self>;
@@ -66,6 +69,8 @@ pub trait WasmBackend: Clone + Default + 'static {
 
     type Wasi: WasiImplementation<Self>;
 
+    /// Creates a new wasm backend with default configuration. In future, a configuration
+    /// may be passed as argument.
     fn new() -> Self;
 }
 
