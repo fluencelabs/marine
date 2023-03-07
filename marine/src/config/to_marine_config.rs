@@ -93,11 +93,10 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
 
         self.config.wasi_parameters.mapped_dirs = wasi.mapped_dirs;
 
-        // Preopened files and mapped dirs are treated in the same way by the wasmer-wasi.
+        // Preopened files and mapped dirs are treated in the same way by the wasm backends.
         // The only difference is that for preopened files the alias and the value are the same,
-        // while for mapped dirs user defines the alias. So it may happen that some preooened file
-        // and mapped directory will have the same alias, which will cause wasmer to panic.
-        // So here preopened files are moved directly to the mapped dirs to catch errors beforehand.
+        // while for mapped dirs user defines the alias. To avoid having same alias pointing to different files,
+        // preopened files are moved directly to the mapped dirs.
         for path in wasi.preopened_files {
             let alias = path.to_string_lossy();
             match self.config.wasi_parameters.mapped_dirs.entry(alias.to_string()) {
