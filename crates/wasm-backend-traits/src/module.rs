@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
+use crate::CompilationResult;
 use crate::InstantiationResult;
 use crate::WasmBackend;
 
 /// A handle to compiled wasm module.
 pub trait Module<WB: WasmBackend> {
-    /// Returns custom sections corresponding to `key`, if there are any.
-    fn custom_sections(&self, key: &str) -> Option<&[Vec<u8>]>;
+    /// Compiles a wasm bytes into a module and extracts custom sections.
+    fn new(
+        store: &mut <WB as WasmBackend>::Store,
+        wasm: &[u8],
+    ) -> CompilationResult<<WB as WasmBackend>::Module>;
+
+    /// Returns custom sections corresponding to `name`, if there are any.
+    fn custom_sections(&self, name: &str) -> Option<&[Vec<u8>]>;
 
     /// Instantiates module by allocating memory, VM state and linking imports with ones from `import` argument.
     /// Does not call `_start` or `_initialize` functions.

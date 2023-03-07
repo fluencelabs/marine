@@ -66,11 +66,11 @@ pub trait WasmBackend: Clone + Default + 'static {
 
     type Wasi: WasiImplementation<Self>;
 
-    fn compile(store: &mut Self::Store, wasm: &[u8]) -> CompilationResult<Self::Module>;
-
     fn new() -> Self;
 }
 
+// This struct is a helper, that allows passing <WB as WasmBackend>::ContextMut as template parameter,
+// but not specify a lifetime. Any local lifetime can be used instead.
 pub struct DelayedContextLifetime<WB: WasmBackend> {
     _data: PhantomData<WB>,
 }

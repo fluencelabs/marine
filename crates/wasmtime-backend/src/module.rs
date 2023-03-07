@@ -21,6 +21,7 @@ use crate::WasmtimeWasmBackend;
 use crate::utils::inspect_instantiation_error;
 
 use marine_wasm_backend_traits::prelude::*;
+use marine_wasm_backend_traits::impl_utils::custom_sections;
 
 use multimap::MultiMap;
 
@@ -30,9 +31,22 @@ pub struct WasmtimeModule {
 }
 
 impl Module<WasmtimeWasmBackend> for WasmtimeModule {
-    fn custom_sections(&self, key: &str) -> Option<&[Vec<u8>]> {
+    fn new(store: &mut WasmtimeStore, wasm: &[u8]) -> CompilationResult<Self> {
+        let module = wasmtime::Module::new(store.inner.engine(), wasm)
+            .map_err(CompilationError::FailedToCompileWasm)?;
+        let custom_sections =
+            custom_sections(wasm) // TODO: avoid double module parsing
+                .map_err(CompilationError::FailedToExtractCustomSections)?;
+
+        Ok(WasmtimeModule {
+            custom_sections,
+            inner: module,
+        })
+    }
+
+    fn custom_sections(&self, name: &str) -> Option<&[Vec<u8>]> {
         self.custom_sections
-            .get_vec(key)
+            .get_vec(name)
             .map(|value| value.as_slice())
     }
 

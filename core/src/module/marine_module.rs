@@ -105,7 +105,7 @@ impl<WB: WasmBackend> MModule<WB> {
         config: MModuleConfig<WB>,
         modules: &HashMap<String, MModule<WB>>,
     ) -> MResult<Self> {
-        let wasm_module = WB::compile(store, wasm_bytes)?;
+        let wasm_module = <WB as WasmBackend>::Module::new(store, wasm_bytes)?;
         crate::misc::check_sdk_version::<WB>(name.to_string(), &wasm_module)?;
 
         let it = extract_it_from_module::<WB>(&wasm_module)?;

@@ -57,19 +57,6 @@ impl WasmBackend for WasmtimeWasmBackend {
     type MemoryView = WasmtimeMemory;
     type Wasi = WasmtimeWasi;
 
-    fn compile(store: &mut WasmtimeStore, wasm: &[u8]) -> CompilationResult<Self::Module> {
-        let module = wasmtime::Module::new(store.inner.engine(), wasm)
-            .map_err(CompilationError::FailedToCompileWasm)?;
-        let custom_sections =
-            custom_sections(wasm) // TODO: avoid double module parsing
-                .map_err(CompilationError::FailedToExtractCustomSections)?;
-
-        Ok(WasmtimeModule {
-            custom_sections,
-            inner: module,
-        })
-    }
-
     fn new() -> Self {
         let mut config = wasmtime::Config::new();
         config
