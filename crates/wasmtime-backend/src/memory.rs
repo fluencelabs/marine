@@ -38,6 +38,9 @@ impl WasmtimeMemory {
 impl it_memory_traits::Memory<WasmtimeMemory, DelayedContextLifetime<WasmtimeWasmBackend>>
     for WasmtimeMemory
 {
+    // Wasmtime does not have the idea of MemoryView, while Wasmer has.
+    // And our interface-types implementation has MemoryView concept
+    // So, MemoryView in Wasmtime is just the memory.
     fn view(&self) -> WasmtimeMemory {
         self.clone()
     }
