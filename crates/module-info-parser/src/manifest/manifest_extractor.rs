@@ -57,10 +57,7 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<ModuleManif
 pub fn extract_from_compiled_module<WB: WasmBackend>(
     module: &<WB as WasmBackend>::Module,
 ) -> ModuleInfoResult<ModuleManifest> {
-    let sections = module
-        .custom_sections(MANIFEST_SECTION_NAME)
-        .ok_or(ModuleInfoError::NoCustomSection(MANIFEST_SECTION_NAME))?;
-
+    let sections = module.custom_sections(MANIFEST_SECTION_NAME);
     let section = try_as_one_section(sections, MANIFEST_SECTION_NAME)?;
     let manifest = section.as_slice().try_into()?;
 

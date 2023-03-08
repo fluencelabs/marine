@@ -44,10 +44,11 @@ impl Module<WasmtimeWasmBackend> for WasmtimeModule {
         })
     }
 
-    fn custom_sections(&self, name: &str) -> Option<&[Vec<u8>]> {
+    fn custom_sections(&self, name: &str) -> &[Vec<u8>] {
         self.custom_sections
             .get_vec(name)
             .map(|value| value.as_slice())
+            .unwrap_or_default()
     }
 
     fn instantiate(

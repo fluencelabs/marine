@@ -23,8 +23,8 @@ pub trait Module<WB: WasmBackend>: Sized {
     /// Compiles a wasm bytes into a module and extracts custom sections.
     fn new(store: &mut <WB as WasmBackend>::Store, wasm: &[u8]) -> ModuleCreationResult<Self>;
 
-    /// Returns custom sections corresponding to `name`, if there are any.
-    fn custom_sections(&self, name: &str) -> Option<&[Vec<u8>]>;
+    /// Returns custom sections corresponding to `name`, empty slice if there is no sections.
+    fn custom_sections(&self, name: &str) -> &[Vec<u8>];
 
     /// Instantiates module by allocating memory, VM state and linking imports with ones from `import` argument.
     /// Does not call `_start` or `_initialize` functions.

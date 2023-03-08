@@ -57,10 +57,7 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<semver::Ver
 pub fn extract_from_compiled_module<WB: WasmBackend>(
     wasm_module: &<WB as WasmBackend>::Module,
 ) -> ModuleInfoResult<semver::Version> {
-    let sections = wasm_module
-        .custom_sections(VERSION_SECTION_NAME)
-        .ok_or(ModuleInfoError::NoCustomSection(VERSION_SECTION_NAME))?;
-
+    let sections = wasm_module.custom_sections(VERSION_SECTION_NAME);
     let section = try_as_one_section(sections, VERSION_SECTION_NAME)?;
     let version = as_semver(section)?;
 

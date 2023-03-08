@@ -48,9 +48,9 @@ pub fn extract_it_from_module<WB: WasmBackend>(
 ) -> ParserResult<Interfaces<'_>> {
     let wit_sections = wasm_module.custom_sections(IT_SECTION_NAME);
 
-    let it_section = match wit_sections {
-        None => Err(ITParserError::NoITSection),
-        Some(sections) if sections.len() == 1 => Ok(&sections[0]),
+    let it_section = match wit_sections.len() {
+        0 => Err(ITParserError::NoITSection),
+        1 => Ok(&wit_sections[0]),
         _ => Err(ITParserError::MultipleITSections),
     }?;
 
