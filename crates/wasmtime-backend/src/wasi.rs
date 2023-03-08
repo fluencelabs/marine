@@ -114,27 +114,22 @@ fn populate_preopens(
                 .preopened_dir(guest_dir, host_path)
                 .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))
         })
-        .into()
 }
 
 fn populate_mapped_dirs(
     builder: WasiCtxBuilder,
     mapped_dirs: HashMap<String, PathBuf>,
 ) -> Result<WasiCtxBuilder, WasiError> {
-    mapped_dirs
-        .iter()
-        .try_fold(
-            builder,
-            |builder, (guest_name, host_path)| -> Result<_, WasiError> {
-                let host_dir =
-                    wasmtime_wasi::Dir::open_ambient_dir(host_path, ambient_authority())?;
-                let guest_path = Path::new(&guest_name);
-                builder
-                    .preopened_dir(host_dir, guest_path)
-                    .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))
-            },
-        )
-        .into()
+    mapped_dirs.iter().try_fold(
+        builder,
+        |builder, (guest_name, host_path)| -> Result<_, WasiError> {
+            let host_dir = wasmtime_wasi::Dir::open_ambient_dir(host_path, ambient_authority())?;
+            let guest_path = Path::new(&guest_name);
+            builder
+                .preopened_dir(host_dir, guest_path)
+                .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))
+        },
+    )
 }
 
 fn populate_envs(

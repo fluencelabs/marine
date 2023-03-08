@@ -127,6 +127,8 @@ fn lower_outputs<WB: WasmBackend>(
         2
     );
 
+    let is_record = matches!(&output, Some(IValue::Record(_)));
+
     let memory_view = memory.view();
     let mut lo_helper = LoHelper::new(&mut allocate_func, memory);
     let lowering_result =
@@ -181,7 +183,15 @@ fn lower_outputs<WB: WasmBackend>(
                 &mut caller.as_context_mut(),
                 wvalues[0].to_u128() as _
             );
-            vec![wvalues[0].clone()]
+
+            // host imports that return records are expected to return nothing
+            // this behaviour is in existing wasms, so it is required to preserve it
+            // previously it worked because there was no check against signature
+            if is_record {
+                vec![]
+            } else {
+                vec![wvalues[0].clone()]
+            }
         }
 
         // when None is passed
