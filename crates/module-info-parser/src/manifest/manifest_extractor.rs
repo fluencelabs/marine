@@ -44,10 +44,6 @@ where
 
 pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<ModuleManifest> {
     let sections = extract_custom_sections_by_name(wasm_module, MANIFEST_SECTION_NAME)?;
-    if sections.is_empty() {
-        return Err(ModuleInfoError::NoCustomSection(MANIFEST_SECTION_NAME));
-    }
-
     let section = try_as_one_section(&sections, MANIFEST_SECTION_NAME)?;
 
     let manifest = match section {
@@ -64,10 +60,6 @@ pub fn extract_from_compiled_module<WB: WasmBackend>(
     let sections = module
         .custom_sections(MANIFEST_SECTION_NAME)
         .ok_or(ModuleInfoError::NoCustomSection(MANIFEST_SECTION_NAME))?;
-
-    if sections.is_empty() {
-        return Err(ModuleInfoError::NoCustomSection(MANIFEST_SECTION_NAME));
-    }
 
     let section = try_as_one_section(sections, MANIFEST_SECTION_NAME)?;
     let manifest = section.as_slice().try_into()?;

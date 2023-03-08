@@ -44,10 +44,6 @@ where
 
 pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<semver::Version> {
     let sections = extract_custom_sections_by_name(wasm_module, VERSION_SECTION_NAME)?;
-
-    if sections.is_empty() {
-        return Err(ModuleInfoError::NoCustomSection(VERSION_SECTION_NAME));
-    }
     let section = try_as_one_section(&sections, VERSION_SECTION_NAME)?;
 
     let version = match section {
