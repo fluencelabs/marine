@@ -20,7 +20,9 @@ use crate::ModuleInfoError;
 use crate::extract_custom_sections_by_name;
 use crate::try_as_one_section;
 
-use wasmer::Module as WasmerModule;
+use marine_wasm_backend_traits::Module as ModuleTrait;
+use marine_wasm_backend_traits::WasmBackend;
+
 use marine_rs_sdk_main::MANIFEST_SECTION_NAME;
 use walrus::ModuleConfig;
 use walrus::Module;
@@ -29,7 +31,7 @@ use std::borrow::Cow;
 use std::path::Path;
 use std::convert::TryInto;
 
-pub fn extract_from_path<P>(wasm_module_path: P) -> ModuleInfoResult<Option<ModuleManifest>>
+pub fn extract_from_path<P>(wasm_module_path: P) -> ModuleInfoResult<ModuleManifest>
 where
     P: AsRef<Path>,
 {
@@ -40,10 +42,10 @@ where
     extract_from_module(&module)
 }
 
-pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<ModuleManifest>> {
+pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<ModuleManifest> {
     let sections = extract_custom_sections_by_name(wasm_module, MANIFEST_SECTION_NAME)?;
     if sections.is_empty() {
-        return Ok(None);
+        return Err(ModuleInfoError::NoCustomSection(MANIFEST_SECTION_NAME));
     }
 
     let section = try_as_one_section(&sections, MANIFEST_SECTION_NAME)?;
@@ -53,23 +55,22 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<Modu
         Cow::Owned(vec) => vec.as_slice().try_into(),
     }?;
 
-    Ok(Some(manifest))
+    Ok(manifest)
 }
 
-pub fn extract_from_compiled_module(
-    wasmer_module: &WasmerModule,
-) -> ModuleInfoResult<Option<ModuleManifest>> {
-    let sections = wasmer_module
+pub fn extract_from_compiled_module<WB: WasmBackend>(
+    module: &<WB as WasmBackend>::Module,
+) -> ModuleInfoResult<ModuleManifest> {
+    let sections = module
         .custom_sections(MANIFEST_SECTION_NAME)
-        .map(Into::<Vec<u8>>::into)
-        .collect::<Vec<_>>();
+        .ok_or(ModuleInfoError::NoCustomSection(MANIFEST_SECTION_NAME))?;
 
     if sections.is_empty() {
-        return Ok(None);
+        return Err(ModuleInfoError::NoCustomSection(MANIFEST_SECTION_NAME));
     }
 
-    let section = try_as_one_section(&sections, MANIFEST_SECTION_NAME)?;
+    let section = try_as_one_section(sections, MANIFEST_SECTION_NAME)?;
     let manifest = section.as_slice().try_into()?;
 
-    Ok(Some(manifest))
+    Ok(manifest)
 }

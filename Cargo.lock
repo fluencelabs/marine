@@ -2403,7 +2403,6 @@ dependencies = [
  "serde",
  "thiserror",
  "walrus",
- "wasmer",
 ]
 
 [[package]]

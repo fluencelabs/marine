@@ -31,7 +31,7 @@ use std::borrow::Cow;
 use std::str::FromStr;
 use std::path::Path;
 
-pub fn extract_from_path<P>(wasm_module_path: P) -> ModuleInfoResult<Option<semver::Version>>
+pub fn extract_from_path<P>(wasm_module_path: P) -> ModuleInfoResult<semver::Version>
 where
     P: AsRef<Path>,
 {
@@ -42,11 +42,11 @@ where
     extract_from_module(&module)
 }
 
-pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<semver::Version>> {
+pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<semver::Version> {
     let sections = extract_custom_sections_by_name(wasm_module, VERSION_SECTION_NAME)?;
 
     if sections.is_empty() {
-        return Ok(None);
+        return Err(ModuleInfoError::NoCustomSection(VERSION_SECTION_NAME));
     }
     let section = try_as_one_section(&sections, VERSION_SECTION_NAME)?;
 
@@ -55,7 +55,7 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Option<semv
         Cow::Owned(vec) => as_semver(vec),
     }?;
 
-    Ok(Some(version))
+    Ok(version)
 }
 
 pub fn extract_from_compiled_module<WB: WasmBackend>(

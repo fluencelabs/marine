@@ -26,6 +26,7 @@
 )]
 
 use marine_module_info_parser::manifest;
+use marine_module_info_parser::ModuleInfoError;
 use marine_module_info_parser::sdk_version;
 
 mod args;
@@ -201,19 +202,23 @@ fn info(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let wasm_path = args.value_of(args::IN_WASM_PATH).unwrap();
 
     let wasm_module = walrus::ModuleConfig::new().parse_file(wasm_path)?;
-    let sdk_version = sdk_version::extract_from_module(&wasm_module)?;
-    let module_manifest = manifest::extract_from_module(&wasm_module)?;
+    let sdk_version = sdk_version::extract_from_module(&wasm_module);
+    let module_manifest = manifest::extract_from_module(&wasm_module);
     let it_version = marine_it_parser::extract_version_from_module(&wasm_module)?;
 
     println!("it version:  {}", it_version);
     match sdk_version {
-        Some(sdk_version) => println!("sdk version: {}", sdk_version),
-        None => println!("module doesn't contain sdk version"),
+        Ok(sdk_version) => println!("sdk version: {}", sdk_version),
+        Err(ModuleInfoError::NoCustomSection(_)) => println!("module doesn't contain sdk version"),
+        Err(e) => return Err(e.into()),
     }
 
     match module_manifest {
-        Some(manifest) => println!("{}", manifest),
-        None => println!("module doesn't contain module manifest"),
+        Ok(manifest) => println!("{}", manifest),
+        Err(ModuleInfoError::NoCustomSection(_)) => {
+            println!("module doesn't contain module manifest")
+        }
+        Err(e) => return Err(e.into()),
     }
 
     Ok(())
