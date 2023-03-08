@@ -21,10 +21,14 @@ use crate::WasmtimeWasmBackend;
 
 use marine_wasm_backend_traits::prelude::*;
 
-use anyhow::anyhow;
 use wasmtime_wasi::ambient_authority;
+use wasmtime_wasi::WasiCtxBuilder;
+use anyhow::anyhow;
 
 use std::path::Path;
+use std::path::PathBuf;
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 pub struct WasmtimeWasi {}
 
@@ -41,61 +45,14 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
             mapped_dirs,
         } = parameters;
 
-        let id = store.inner.data().wasi.len();
-        wasmtime_wasi::add_to_linker(&mut linker.linker, move |s: &mut StoreState| {
-            &mut s.wasi[id]
-        })
-        .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))?;
-
-        let args = args
-            .into_iter()
-            .map(|arg| unsafe { String::from_utf8_unchecked(arg) })
-            .collect::<Vec<String>>();
-        let envs = envs
-            .into_iter()
-            .map(|(key, value)| {
-                unsafe {
-                    // TODO maybe use strings in signature?
-                    (
-                        String::from_utf8_unchecked(key),
-                        String::from_utf8_unchecked(value),
-                    )
-                }
-            })
-            .collect::<Vec<_>>();
-
-        let wasi_ctx_builder = wasmtime_wasi::WasiCtxBuilder::new()
-            .inherit_stdio()
-            .args(&args)
-            .map_err(|_| WasiError::TooLargeArgsArray)?
-            .envs(&envs)
-            .map_err(|_| WasiError::TooLargeEnvsArray)?;
-
-        let wasi_ctx_builder = preopened_files.iter().try_fold(
-            wasi_ctx_builder,
-            |builder, path| -> Result<_, WasiError> {
-                let dir = create_or_open_dir(path)?;
-                builder
-                    .preopened_dir(dir, path)
-                    .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))
-            },
-        )?;
-        let wasi_ctx_builder = mapped_dirs.iter().try_fold(
-            wasi_ctx_builder,
-            |builder, (guest_name, dir)| -> Result<_, WasiError> {
-                let dir = create_or_open_dir(dir)?;
-                //let dir = wasmtime_wasi::Dir::from_std_file(file);
-                let path = Path::new(&guest_name);
-                builder
-                    .preopened_dir(dir, path)
-                    .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))
-            },
-        )?;
+        let wasi_ctx_builder = WasiCtxBuilder::new();
+        let wasi_ctx_builder = populate_args(wasi_ctx_builder, args)?;
+        let wasi_ctx_builder = populate_envs(wasi_ctx_builder, envs)?;
+        let wasi_ctx_builder = populate_preopens(wasi_ctx_builder, preopened_files)?;
+        let wasi_ctx_builder = populate_mapped_dirs(wasi_ctx_builder, mapped_dirs)?;
 
         let wasi_ctx = wasi_ctx_builder.build();
-        let state = store.inner.data_mut();
-        state.wasi.push(wasi_ctx);
-        Ok(())
+        add_wasi_to_linker(store, linker, wasi_ctx)
     }
 
     fn get_wasi_state<'s>(
@@ -114,10 +71,90 @@ impl WasiState for WasmtimeWasiState {
     }
 }
 
-fn create_or_open_dir(path: impl AsRef<Path>) -> std::io::Result<wasmtime_wasi::Dir> {
-    let path = path.as_ref();
-    if !path.exists() {
-        std::fs::create_dir_all(path)?;
-    }
-    wasmtime_wasi::Dir::open_ambient_dir(path, ambient_authority())
+fn add_wasi_to_linker(
+    store: &mut WasmtimeContextMut<'_>,
+    linker: &mut WasmtimeImports,
+    wasi_ctx: wasmtime_wasi::WasiCtx,
+) -> Result<(), WasiError> {
+    // wasmtime-wasi gets its context from Caller<T>, which can hold any user info
+    // the only convenient method is to be provided with a closure that extracts context
+    // from used-defined type.
+    // So, here each module has its own wasi context which is stored in a vector in store.
+    let id = store.inner.data().wasi.len();
+    wasmtime_wasi::add_to_linker(&mut linker.linker, move |s: &mut StoreState| {
+        &mut s.wasi[id]
+    })
+    .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))?;
+
+    store.inner.data_mut().wasi.push(wasi_ctx);
+
+    Ok(())
+}
+
+fn populate_args(builder: WasiCtxBuilder, args: Vec<Vec<u8>>) -> Result<WasiCtxBuilder, WasiError> {
+    let args = args
+        .into_iter()
+        .map(|arg| unsafe { String::from_utf8_unchecked(arg) })
+        .collect::<Vec<String>>();
+
+    builder
+        .args(&args)
+        .map_err(|_| WasiError::TooLargeArgsArray)
+}
+
+fn populate_preopens(
+    builder: WasiCtxBuilder,
+    preopened_files: HashSet<PathBuf>,
+) -> Result<WasiCtxBuilder, WasiError> {
+    preopened_files
+        .iter()
+        .try_fold(builder, |builder, host_path| -> Result<_, WasiError> {
+            let guest_dir = wasmtime_wasi::Dir::open_ambient_dir(host_path, ambient_authority())?;
+            builder
+                .preopened_dir(guest_dir, host_path)
+                .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))
+        })
+        .into()
+}
+
+fn populate_mapped_dirs(
+    builder: WasiCtxBuilder,
+    mapped_dirs: HashMap<String, PathBuf>,
+) -> Result<WasiCtxBuilder, WasiError> {
+    mapped_dirs
+        .iter()
+        .try_fold(
+            builder,
+            |builder, (guest_name, host_path)| -> Result<_, WasiError> {
+                let host_dir =
+                    wasmtime_wasi::Dir::open_ambient_dir(host_path, ambient_authority())?;
+                let guest_path = Path::new(&guest_name);
+                builder
+                    .preopened_dir(host_dir, guest_path)
+                    .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))
+            },
+        )
+        .into()
+}
+
+fn populate_envs(
+    builder: WasiCtxBuilder,
+    envs: HashMap<Vec<u8>, Vec<u8>>,
+) -> Result<WasiCtxBuilder, WasiError> {
+    let envs = envs
+        .into_iter()
+        .map(|(key, value)| {
+            unsafe {
+                // TODO maybe use strings in signature?
+                (
+                    String::from_utf8_unchecked(key),
+                    String::from_utf8_unchecked(value),
+                )
+            }
+        })
+        .collect::<Vec<_>>();
+
+    builder
+        .envs(&envs)
+        .map_err(|_| WasiError::TooLargeEnvsArray)
 }
