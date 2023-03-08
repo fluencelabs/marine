@@ -45,7 +45,7 @@ impl it_memory_traits::Memory<WasmtimeMemory, DelayedContextLifetime<WasmtimeWas
 
 impl Memory<WasmtimeWasmBackend> for WasmtimeMemory {
     fn size(&self, store: &mut WasmtimeContextMut<'_>) -> usize {
-        self.memory.data_size(store) as usize
+        self.memory.data_size(store)
     }
 }
 
@@ -106,8 +106,15 @@ impl it_memory_traits::MemoryView<DelayedContextLifetime<WasmtimeWasmBackend>> f
         offset: u32,
         size: u32,
     ) -> Result<(), MemoryAccessError> {
-        let memory_size = self.memory.data_size(&mut store.inner) as u64;
-        if memory_size <= (offset as u64) + (size as u64) {
+        let memory_size = self.memory.data_size(&mut store.inner);
+        let final_size = offset.checked_add(size)
+            .ok_or(MemoryAccessError::OutOfBounds {
+                offset,
+                size,
+                memory_size: memory_size as u32
+            })? as usize;
+
+        if memory_size <= final_size {
             Err(MemoryAccessError::OutOfBounds {
                 offset,
                 size,
