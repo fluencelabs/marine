@@ -100,21 +100,19 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
         log::debug!("Function call with args: {:?}", args);
         let args = args.iter().map(wvalue_to_val).collect::<Vec<_>>();
 
-        let mut rets = Vec::new();
-        rets.resize(
-            self.inner.ty(store.as_context_mut()).results().len(),
-            wasmtime::Val::null(),
-        );
+        let results_count = self.inner.ty(store.as_context_mut()).results().len();
+        let mut results = vec![wasmtime::Val::null(); results_count];
 
         self.inner
-            .call(store.as_context_mut().inner, &args, &mut rets)
+            .call(store.as_context_mut().inner, &args, &mut results)
             .map_err(|e| {
                 log::debug!("Function call failed with: {:?}", &e);
                 inspect_call_error(e)
             })?;
 
         log::debug!("Function call succeed");
-        rets.iter()
+        results
+            .iter()
             .map(val_to_wvalue)
             .collect::<Result<Vec<_>, _>>()
     }
