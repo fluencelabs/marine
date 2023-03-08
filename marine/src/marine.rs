@@ -88,7 +88,7 @@ impl<WB: WasmBackend> Marine<WB> {
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
     {
-        let mut marine = MarineCore::new();
+        let mut marine = MarineCore::new()?;
         let config = config.try_into()?;
         let call_parameters = Arc::<Mutex<CallParameters>>::default();
 

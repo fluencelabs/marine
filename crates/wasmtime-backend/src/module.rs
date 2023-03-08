@@ -31,12 +31,12 @@ pub struct WasmtimeModule {
 }
 
 impl Module<WasmtimeWasmBackend> for WasmtimeModule {
-    fn new(store: &mut WasmtimeStore, wasm: &[u8]) -> CompilationResult<Self> {
+    fn new(store: &mut WasmtimeStore, wasm: &[u8]) -> ModuleCreationResult<Self> {
         let module = wasmtime::Module::new(store.inner.engine(), wasm)
-            .map_err(CompilationError::FailedToCompileWasm)?;
+            .map_err(ModuleCreationError::FailedToCompileWasm)?;
         let custom_sections =
             custom_sections(wasm) // TODO: avoid double module parsing
-                .map_err(CompilationError::FailedToExtractCustomSections)?;
+                .map_err(ModuleCreationError::FailedToExtractCustomSections)?;
 
         Ok(WasmtimeModule {
             custom_sections,

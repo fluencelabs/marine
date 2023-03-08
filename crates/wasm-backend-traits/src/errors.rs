@@ -15,6 +15,7 @@
  */
 
 use thiserror::Error;
+
 use crate::WType;
 
 /*
@@ -37,13 +38,16 @@ pub enum WasmBackendError {
     RuntimeError(#[from] RuntimeError),
 
     #[error(transparent)]
-    CompilationError(#[from] CompilationError),
+    ModuleCreationError(#[from] ModuleCreationError),
 
     #[error(transparent)]
     ImportError(#[from] ImportError),
 
     #[error(transparent)]
     InstantiationError(#[from] InstantiationError),
+
+    #[error(transparent)]
+    InitializationError(anyhow::Error)
 }
 
 pub type WasmBackendResult<T> = Result<T, WasmBackendError>;
@@ -86,7 +90,7 @@ pub enum RuntimeError {
 pub type RuntimeResult<T> = Result<T, RuntimeError>;
 
 #[derive(Debug, Error)]
-pub enum CompilationError {
+pub enum ModuleCreationError {
     #[error(transparent)]
     FailedToCompileWasm(anyhow::Error),
 
@@ -97,7 +101,7 @@ pub enum CompilationError {
     Other(anyhow::Error),
 }
 
-pub type CompilationResult<T> = Result<T, CompilationError>;
+pub type ModuleCreationResult<T> = Result<T, ModuleCreationError>;
 
 #[derive(Debug, Error)]
 pub enum ImportError {

@@ -71,7 +71,7 @@ pub trait WasmBackend: Clone + Default + 'static {
 
     /// Creates a new wasm backend with default configuration. In future, a configuration
     /// may be passed as argument.
-    fn new() -> Self;
+    fn new() -> WasmBackendResult<Self>;
 }
 
 // This struct is a helper, that allows passing <WB as WasmBackend>::ContextMut as template parameter,

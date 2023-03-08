@@ -111,6 +111,7 @@ impl wasmtime::AsContext for WasmtimeContext<'_> {
         self.inner.as_context()
     }
 }
+
 impl wasmtime::AsContext for WasmtimeContextMut<'_> {
     type Data = StoreState;
 

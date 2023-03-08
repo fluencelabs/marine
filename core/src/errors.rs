@@ -83,8 +83,8 @@ impl From<MITInterfacesError> for MError {
     }
 }
 
-impl From<CompilationError> for MError {
-    fn from(value: CompilationError) -> Self {
+impl From<ModuleCreationError> for MError {
+    fn from(value: ModuleCreationError) -> Self {
         Into::<WasmBackendError>::into(value).into()
     }
 }

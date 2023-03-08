@@ -56,13 +56,15 @@ impl WasmBackend for WasmtimeWasmBackend {
     type MemoryView = WasmtimeMemory;
     type Wasi = WasmtimeWasi;
 
-    fn new() -> Self {
+    fn new() -> WasmBackendResult<Self> {
         let mut config = wasmtime::Config::new();
         config
             .debug_info(false)
             .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable);
-        let engine = wasmtime::Engine::new(&config).unwrap();
-        Self { engine }
+        let engine = wasmtime::Engine::new(&config)
+            .map_err(WasmBackendError::InitializationError)?;
+
+        Ok(Self { engine })
     }
 }
 
