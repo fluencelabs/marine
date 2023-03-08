@@ -318,7 +318,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
             let inputs = inputs.map(itype_to_wtype).collect::<Vec<_>>();
             let outputs = outputs.map(itype_to_wtype).collect::<Vec<_>>();
-            <WB as WasmBackend>::Function::new_with_ctx(
+            <WB as WasmBackend>::Function::new_with_caller(
                 &mut store.as_context_mut(),
                 FuncSig::new(inputs, outputs),
                 raw_import,

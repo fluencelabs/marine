@@ -53,7 +53,7 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
         WasmtimeFunction { inner: func }
     }
 
-    fn new_with_ctx<F>(
+    fn new_with_caller<F>(
         store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         sig: FuncSig,
         func: F,

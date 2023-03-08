@@ -50,7 +50,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
         call_host_import(caller, inputs, &descriptor, record_types.clone())
     };
 
-    <WB as WasmBackend>::Function::new_with_ctx(
+    <WB as WasmBackend>::Function::new_with_caller(
         &mut store.as_context_mut(),
         FuncSig::new(raw_args, raw_output),
         func,

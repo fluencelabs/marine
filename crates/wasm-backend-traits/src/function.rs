@@ -31,7 +31,7 @@ pub trait Function<WB: WasmBackend>: Send + Sync {
         F: for<'c> Fn(&[WValue]) -> Vec<WValue> + Sync + Send + 'static;
 
     /// Creates a new function with dynamic signature that needs a context.
-    fn new_with_ctx<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
+    fn new_with_caller<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
     where
         F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
             + Sync
