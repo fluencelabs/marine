@@ -40,16 +40,7 @@ pub trait WasiImplementation<WB: WasmBackend> {
 }
 
 #[derive(Default)]
-pub enum WasiVersion {
-    Snapshot0,
-    Snapshot1,
-    #[default]
-    Latest,
-}
-
-#[derive(Default)]
 pub struct WasiParameters {
-    pub version: WasiVersion,
     pub args: Vec<Vec<u8>>,
     pub envs: HashMap<Vec<u8>, Vec<u8>>,
     pub preopened_files: HashSet<PathBuf>,

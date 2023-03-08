@@ -39,7 +39,6 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
             envs,
             preopened_files,
             mapped_dirs,
-            ..
         } = parameters;
 
         let id = store.inner.data().wasi.len();

@@ -27,7 +27,6 @@ use marine_core::HostImportDescriptor;
 use marine_core::MModuleConfig;
 use marine_wasm_backend_traits::Function;
 use marine_wasm_backend_traits::WasmBackend;
-use marine_wasm_backend_traits::WasiVersion;
 use marine_utils::bytes_to_wasm_pages_ceil;
 
 use marine_rs_sdk::CallParameters;
@@ -77,7 +76,6 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             .populate_logger(logger_enabled, logging_mask, logger_filter, module_name)
             .populate_host_imports(host_imports, call_parameters)
             .populate_wasi(wasi)?
-            .add_version()
             .into_config();
 
         Ok(config)
@@ -208,11 +206,6 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             .raw_imports
             .insert("log_utf8_string".to_string(), Box::new(creator));
 
-        self
-    }
-
-    fn add_version(mut self) -> Self {
-        self.config.wasi_parameters.version = WasiVersion::Latest;
         self
     }
 

@@ -20,7 +20,6 @@ use crate::HostImportError;
 
 use marine_wasm_backend_traits::WasiParameters;
 use marine_wasm_backend_traits::WasmBackend;
-use marine_wasm_backend_traits::WasiVersion;
 
 use std::path::PathBuf;
 use std::collections::HashMap;
@@ -89,11 +88,6 @@ impl<WB: WasmBackend> Default for MModuleConfig<WB> {
 impl<WB: WasmBackend> MModuleConfig<WB> {
     pub fn with_mem_pages_count(mut self, mem_pages_count: u32) -> Self {
         self.max_heap_pages_count = mem_pages_count;
-        self
-    }
-
-    pub fn with_wasi_version(mut self, wasi_version: WasiVersion) -> Self {
-        self.wasi_parameters.version = wasi_version;
         self
     }
 
