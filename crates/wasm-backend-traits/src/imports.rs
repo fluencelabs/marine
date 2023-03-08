@@ -66,12 +66,12 @@ impl FuncSig {
         }
     }
 
-    pub fn params(&self) -> impl Iterator<Item = &WType> {
-        self.params.iter()
+    pub fn params(&self) -> &[WType] {
+        &self.params
     }
 
-    pub fn returns(&self) -> impl Iterator<Item = &WType> {
-        self.returns.iter()
+    pub fn returns(&self) -> &[WType] {
+        &self.returns
     }
 }
 

@@ -61,8 +61,8 @@ impl WasmBackend for WasmtimeWasmBackend {
         config
             .debug_info(false)
             .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable);
-        let engine = wasmtime::Engine::new(&config)
-            .map_err(WasmBackendError::InitializationError)?;
+        let engine =
+            wasmtime::Engine::new(&config).map_err(WasmBackendError::InitializationError)?;
 
         Ok(Self { engine })
     }

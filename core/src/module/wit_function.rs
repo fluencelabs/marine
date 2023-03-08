@@ -61,13 +61,18 @@ impl<WB: WasmBackend> WITFunction<WB> {
         let signature = dyn_func.signature(store);
         let arguments = signature
             .params()
+            .iter()
             .map(|wtype| IFunctionArg {
                 // here it's considered as an anonymous arguments
                 name: String::new(),
                 ty: wtype_to_itype(wtype),
             })
             .collect::<Vec<_>>();
-        let outputs = signature.returns().map(wtype_to_itype).collect::<Vec<_>>();
+        let outputs = signature
+            .returns()
+            .iter()
+            .map(wtype_to_itype)
+            .collect::<Vec<_>>();
 
         let inner = WITFunctionInner::Export {
             func: Arc::new(dyn_func),

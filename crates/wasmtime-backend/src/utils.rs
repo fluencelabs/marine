@@ -65,8 +65,8 @@ pub(crate) fn val_to_wvalue(value: &Val) -> RuntimeResult<WValue> {
 }
 
 pub(crate) fn sig_to_fn_ty(sig: &FuncSig) -> wasmtime::FuncType {
-    let params = sig.params().map(wtype_to_val_type);
-    let rets = sig.returns().map(wtype_to_val_type);
+    let params = sig.params().iter().map(wtype_to_val_type);
+    let rets = sig.returns().iter().map(wtype_to_val_type);
 
     wasmtime::FuncType::new(params, rets)
 }

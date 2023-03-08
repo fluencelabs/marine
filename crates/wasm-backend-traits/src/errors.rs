@@ -47,7 +47,7 @@ pub enum WasmBackendError {
     InstantiationError(#[from] InstantiationError),
 
     #[error(transparent)]
-    InitializationError(anyhow::Error)
+    InitializationError(anyhow::Error),
 }
 
 pub type WasmBackendResult<T> = Result<T, WasmBackendError>;
