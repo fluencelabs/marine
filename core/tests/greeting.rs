@@ -26,7 +26,7 @@ static GREETING_WASM_BYTES: Lazy<Vec<u8>> = Lazy::new(|| {
 
 #[test]
 pub fn greeting_basic() {
-    let mut marine_core = DefaultMarineCore::new();
+    let mut marine_core = DefaultMarineCore::new().unwrap();
     marine_core
         .load_module("greeting", &GREETING_WASM_BYTES, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
@@ -50,7 +50,7 @@ pub fn greeting_basic() {
 #[test]
 // test loading module with the same name twice
 pub fn non_unique_module_name() {
-    let mut marine_core = DefaultMarineCore::new();
+    let mut marine_core = DefaultMarineCore::new().unwrap();
     let module_name = String::from("greeting");
     marine_core
         .load_module(&module_name, &GREETING_WASM_BYTES, <_>::default())
@@ -68,7 +68,7 @@ pub fn non_unique_module_name() {
 #[allow(unused_variables)]
 // test calling Marine with non-exist module and function names
 pub fn non_exist_module_func() {
-    let mut marine_core = DefaultMarineCore::new();
+    let mut marine_core = DefaultMarineCore::new().unwrap();
     marine_core
         .load_module("greeting", &GREETING_WASM_BYTES, <_>::default())
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
