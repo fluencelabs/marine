@@ -156,6 +156,7 @@ fn lower_outputs<WB: WasmBackend>(
     // TODO: refactor this when multi-value is supported
     match wvalues.len() {
         // strings and arrays are passed back to the Wasm module by pointer and size
+        // values used and consumed by set_result_ptr and set_result_size
         2 => {
             init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
             init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
@@ -173,9 +174,8 @@ fn lower_outputs<WB: WasmBackend>(
             vec![]
         }
 
-        // records and primitive types are passed to the Wasm module by pointer
-        // and value on the stack
-        1 => {
+        // records lowerer returns only pointer which has to be used and consumed via set_result_ptr
+        1 if is_record => {
             init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 3);
 
             call_wasm_func!(
@@ -184,15 +184,11 @@ fn lower_outputs<WB: WasmBackend>(
                 wvalues[0].to_u128() as _
             );
 
-            // host imports that return records are expected to return nothing
-            // this behaviour is in existing wasms, so it is required to preserve it
-            // previously it worked because there was no check against signature
-            if is_record {
-                vec![]
-            } else {
-                vec![wvalues[0].clone()]
-            }
+            vec![]
         }
+
+        // primitive values are passed as is
+        1 => vec![wvalues[0].clone()],
 
         // when None is passed
         0 => vec![],
