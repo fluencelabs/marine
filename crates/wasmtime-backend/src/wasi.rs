@@ -46,9 +46,13 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         } = parameters;
 
         let wasi_ctx_builder = WasiCtxBuilder::new();
+        // process and add CLI arguments to wasi context
         let wasi_ctx_builder = populate_args(wasi_ctx_builder, args)?;
+        // process and add environment variables to wasi context
         let wasi_ctx_builder = populate_envs(wasi_ctx_builder, envs)?;
+        // add preopened files to wasi context, do not create dirs
         let wasi_ctx_builder = populate_preopens(wasi_ctx_builder, preopened_files)?;
+        //  add mapped directories to wasi context , do not create dirs
         let wasi_ctx_builder = populate_mapped_dirs(wasi_ctx_builder, mapped_dirs)?;
 
         let wasi_ctx = wasi_ctx_builder.build();

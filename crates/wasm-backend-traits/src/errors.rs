@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
+use crate::WType;
+
 use thiserror::Error;
 
-use crate::WType;
+pub type WasmBackendResult<T> = Result<T, WasmBackendError>;
+pub type ResolveResult<T> = Result<T, ResolveError>;
+pub type RuntimeResult<T> = Result<T, RuntimeError>;
+pub type ModuleCreationResult<T> = Result<T, ModuleCreationError>;
+pub type InstantiationResult<T> = Result<T, InstantiationError>;
+pub type WasiResult<T> = Result<T, WasiError>;
 
 /*
    General error design goals:
        * expose as much detail as possible
-       * make as much domain-specific errors as possible implmentation-independent
+       * make as much domain-specific errors as possible implementation-independent
 
    So, Error enums should follow this principle:
        * errors fully expressible without implementation info should have implementation-independent view
@@ -50,8 +57,6 @@ pub enum WasmBackendError {
     InitializationError(anyhow::Error),
 }
 
-pub type WasmBackendResult<T> = Result<T, WasmBackendError>;
-
 #[derive(Debug, Error)]
 pub enum ResolveError {
     #[error("export not found: {0}")]
@@ -66,8 +71,6 @@ pub enum ResolveError {
     #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
-
-pub type ResolveResult<T> = Result<T, ResolveError>;
 
 #[derive(Debug, Error)]
 pub enum RuntimeError {
@@ -87,8 +90,6 @@ pub enum RuntimeError {
     Other(anyhow::Error),
 }
 
-pub type RuntimeResult<T> = Result<T, RuntimeError>;
-
 #[derive(Debug, Error)]
 pub enum ModuleCreationError {
     #[error(transparent)]
@@ -101,8 +102,6 @@ pub enum ModuleCreationError {
     Other(anyhow::Error),
 }
 
-pub type ModuleCreationResult<T> = Result<T, ModuleCreationError>;
-
 #[derive(Debug, Error)]
 pub enum ImportError {
     #[error("Duplicate import")]
@@ -112,8 +111,6 @@ pub enum ImportError {
     Other(#[from] anyhow::Error),
 }
 
-pub type ImportResult<T> = Result<T, ImportError>;
-
 #[derive(Debug, Error)]
 pub enum InstantiationError {
     #[error(transparent)]
@@ -122,8 +119,6 @@ pub enum InstantiationError {
     #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
-
-pub type InstantiationResult<T> = Result<T, InstantiationError>;
 
 #[derive(Debug, Error)]
 pub enum WasiError {
@@ -148,5 +143,3 @@ pub enum UserError {
     #[error(transparent)]
     Unrecoverable(anyhow::Error),
 }
-
-pub type WasiResult<T> = Result<T, WasiError>;

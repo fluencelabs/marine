@@ -56,6 +56,8 @@ impl<'c> AsContextMut<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
     }
 }
 
+/// Implements func_getter for given function signature.
+/// Later `get_func` variant will be statically chosen based on types.
 macro_rules! impl_func_getter {
     ($args:ty, $rets:ty) => {
         impl<'c> FuncGetter<WasmtimeWasmBackend, $args, $rets> for WasmtimeCaller<'c> {
@@ -109,6 +111,7 @@ macro_rules! impl_func_getter {
     };
 }
 
+// These signatures are sufficient for marine to work.
 impl_func_getter!((i32, i32), i32);
 impl_func_getter!((i32, i32), ());
 impl_func_getter!(i32, i32);

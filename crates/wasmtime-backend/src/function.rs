@@ -118,6 +118,8 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
     }
 }
 
+/// Generates a function that accepts a Fn with $num template parameters and turns it into WasmtimeFunction.
+/// Needed to allow users to pass almost any function to `Function::new_typed` without worrying about signature.
 macro_rules! impl_func_construction {
     ($num:tt $($args:ident)*) => (paste::paste!{
         fn [< new_typed_with_env_ $num >] <F>(mut ctx: WasmtimeContextMut<'_>, func: F) -> WasmtimeFunction
