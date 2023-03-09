@@ -72,5 +72,6 @@ pub use marine_module_interface::interface::itype_text_view;
 pub use marine_rs_sdk::CallParameters;
 pub use marine_rs_sdk::SecurityTetraplet;
 
-pub type DefaultMarine = Marine<marine_core::DefaultWasmBackend>;
-pub use marine_core::DefaultWasmBackend;
+pub use marine_core::WasmBackend;
+
+pub type DefaultMarine = Marine<WasmBackend>;

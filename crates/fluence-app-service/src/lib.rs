@@ -32,7 +32,7 @@ mod raw_toml_config;
 
 pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 
-pub type WasmBackend = marine::DefaultWasmBackend;
+pub type WasmBackend = marine::WasmBackend;
 
 pub use errors::AppServiceError;
 pub type AppService = service::AppService<WasmBackend>;
