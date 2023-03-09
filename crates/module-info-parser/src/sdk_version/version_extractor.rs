@@ -21,7 +21,7 @@ use crate::extract_custom_sections_by_name;
 use crate::try_as_one_section;
 
 use marine_wasm_backend_traits::WasmBackend;
-use marine_wasm_backend_traits::Module as WasmModule;
+use marine_wasm_backend_traits::module::Module as WasmModule;
 
 use marine_rs_sdk_main::VERSION_SECTION_NAME;
 use walrus::ModuleConfig;

@@ -17,8 +17,8 @@
 use super::IType;
 use super::IValue;
 
-use marine_wasm_backend_traits::WType;
-use marine_wasm_backend_traits::WValue;
+use marine_wasm_backend_traits::wtype::WType;
+use marine_wasm_backend_traits::wtype::WValue;
 
 pub(super) fn wtype_to_itype(ty: &WType) -> IType {
     match ty {

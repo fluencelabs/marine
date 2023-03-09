@@ -17,8 +17,7 @@
 use crate::WasmtimeContextMut;
 use crate::WasmtimeWasmBackend;
 
-use marine_wasm_backend_traits::DelayedContextLifetime;
-use marine_wasm_backend_traits::Memory;
+use marine_wasm_backend_traits::prelude::*;
 
 use it_memory_traits::MemoryAccessError;
 

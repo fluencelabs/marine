@@ -44,12 +44,13 @@ pub mod prelude {
     pub use crate::DelayedContextLifetime;
 }
 
-pub use prelude::*;
-
 pub use macros::*;
 
-use std::marker::PhantomData;
+pub(crate) use prelude::*;
+
 use it_memory_traits::MemoryView;
+
+use std::marker::PhantomData;
 
 /// A core trait for any backend. It serves two purposes:
 /// * handles initialization of the library if needed

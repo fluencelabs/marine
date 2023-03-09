@@ -18,8 +18,7 @@ use super::IValue;
 use super::IType;
 use crate::HostImportError;
 
-use marine_wasm_backend_traits::WasiParameters;
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::prelude::*;
 
 use std::path::PathBuf;
 use std::collections::HashMap;

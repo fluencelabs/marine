@@ -20,14 +20,13 @@ mod lowering;
 mod imports;
 mod utils;
 
-use marine_wasm_backend_traits::RuntimeResult;
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::prelude::*;
 
 pub use errors::HostImportError;
 pub(crate) use imports::create_host_import_func;
 
-pub(self) use marine_wasm_backend_traits::WValue;
-pub(self) use marine_wasm_backend_traits::WType;
+pub(self) use marine_wasm_backend_traits::wtype::WValue;
+pub(self) use marine_wasm_backend_traits::wtype::WType;
 
 pub(self) type HostImportResult<T> = std::result::Result<T, HostImportError>;
 pub(self) type WasmModuleFunc<WB, Args, Rets> = Box<

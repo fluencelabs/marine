@@ -19,11 +19,7 @@ use super::marine_module::MModule;
 use super::IRecordType;
 use crate::MResult;
 
-use marine_wasm_backend_traits::AsContextMut;
-use marine_wasm_backend_traits::STANDARD_MEMORY_EXPORT_NAME;
-use marine_wasm_backend_traits::DelayedContextLifetime;
-use marine_wasm_backend_traits::WasmBackend;
-use marine_wasm_backend_traits::Instance;
+use marine_wasm_backend_traits::prelude::*;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
@@ -140,7 +136,7 @@ impl<WB: WasmBackend> ITInstance<WB> {
         wasm_instance: &<WB as WasmBackend>::Instance,
         store: &mut <WB as WasmBackend>::Store,
     ) -> Vec<<WB as WasmBackend>::Memory> {
-        use marine_wasm_backend_traits::Export::Memory;
+        use marine_wasm_backend_traits::exports::Export::Memory;
 
         let mut memories = wasm_instance
             .export_iter(store.as_context_mut())

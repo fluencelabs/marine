@@ -21,10 +21,7 @@ use super::IValue;
 use super::marine_module::Callable;
 use crate::MResult;
 
-use marine_wasm_backend_traits::DelayedContextLifetime;
-use marine_wasm_backend_traits::WasmBackend;
-use marine_wasm_backend_traits::WValue;
-use marine_wasm_backend_traits::Function;
+use marine_wasm_backend_traits::prelude::*;
 
 use wasmer_it::interpreter::wasm;
 

@@ -28,7 +28,7 @@ use crate::json_to_marine_err;
 
 use marine_wasm_backend_traits::WasmBackend;
 #[cfg(feature = "raw-module-api")]
-use marine_wasm_backend_traits::WasiState;
+use marine_wasm_backend_traits::wasi::WasiState;
 
 use marine_core::MarineCore;
 use marine_core::IFunctionArg;

@@ -81,7 +81,7 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
     }
 
     fn new_typed<Params, Results, Env>(
-        store: &mut impl marine_wasm_backend_traits::AsContextMut<WasmtimeWasmBackend>,
+        store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         func: impl IntoFunc<WasmtimeWasmBackend, Params, Results, Env>,
     ) -> Self {
         func.into_func(store)

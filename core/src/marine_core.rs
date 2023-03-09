@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-use super::*;
+use super::MFunctionSignature;
+use super::MResult;
+use super::MError;
+use super::IValue;
+use super::MModuleConfig;
+use super::IRecordType;
+use super::ModuleMemoryStat;
+use super::MemoryStats;
+
 use crate::module::MModule;
 use crate::module::MRecordTypes;
 
-use marine_wasm_backend_traits::AsContextMut;
-use marine_wasm_backend_traits::Store;
-use marine_wasm_backend_traits::WasiState;
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::prelude::*;
 
 use serde::Serialize;
 
