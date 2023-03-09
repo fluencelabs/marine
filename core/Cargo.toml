@@ -19,7 +19,7 @@ marine-module-interface = { path = "../crates/module-interface", version = "0.6.
 marine-utils = { path = "../crates/utils", version = "0.4.0" }
 marine-min-it-version =  { path = "../crates/min-it-version", version = "0.2.1" }
 marine-wasm-backend-traits = {path = "../crates/wasm-backend-traits", version = "0.1.0"}
-marine-wasmtime-backend = { path = "../crates/wasmtime-backend", version = "0.1.0", optional = true}
+marine-wasmtime-backend = { path = "../crates/wasmtime-backend", version = "0.1.0"}
 
 wasmer-it = { workspace = true, default-features = false }
 it-lilo = { workspace = true}

@@ -97,7 +97,6 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
         store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         args: &[WValue],
     ) -> RuntimeResult<Vec<WValue>> {
-        log::debug!("Function call with args: {:?}", args);
         let args = args.iter().map(wvalue_to_val).collect::<Vec<_>>();
 
         let results_count = self.inner.ty(store.as_context_mut()).results().len();
@@ -105,12 +104,8 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
 
         self.inner
             .call(store.as_context_mut().inner, &args, &mut results)
-            .map_err(|e| {
-                log::debug!("Function call failed with: {:?}", &e);
-                inspect_call_error(e)
-            })?;
+            .map_err(inspect_call_error)?;
 
-        log::debug!("Function call succeed");
         results
             .iter()
             .map(val_to_wvalue)

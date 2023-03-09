@@ -73,14 +73,12 @@ impl<WB: WasmBackend> Callable<WB> {
     ) -> MResult<Vec<IValue>> {
         use wasmer_it::interpreter::stack::Stackable;
 
-        log::debug!("Running Interpreter");
         let result = self
             .it_module_func
             .interpreter
             .run(args, Arc::make_mut(&mut self.it_instance), store)?
             .as_slice()
             .to_owned();
-        log::debug!("Finished running interpreter");
         Ok(result)
     }
 }
