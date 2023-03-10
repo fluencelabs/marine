@@ -56,18 +56,28 @@ use std::marker::PhantomData;
 /// * handles initialization of the library if needed
 /// * provides access to all public types -- like `mod` but for trait impls.
 pub trait WasmBackend: Clone + Default + 'static {
+    /// A type that stores all the data, while most of the types are handles to data from `Store`.
     type Store: Store<Self>;
+    /// A compiled, but not instantiated module.
     type Module: Module<Self>;
+    /// An object that holds all the functions that are given to `Module` as imports.
     type Imports: Imports<Self>; // maybe rename to Linker?
+    /// An instantiated module ready to be executed.
     type Instance: Instance<Self>;
+    /// A temporary immutable handle to `Store`.
     type Context<'c>: Context<Self>;
+    /// A temporary mutable handle to `Store`
     type ContextMut<'c>: ContextMut<Self>;
+    /// A type that is used to pass context to imports.
     type Caller<'c>: Caller<Self>;
-
+    /// A function contained in `Store`, either host one or from wasm.
     type Function: Function<Self> + FuncConstructor<Self>;
+    /// A wasm memory.
     type Memory: Memory<Self>;
+    /// A view to the wasm memory.
     type MemoryView: MemoryView<DelayedContextLifetime<Self>>;
 
+    /// Type that provides all WASI-related APIs.
     type Wasi: WasiImplementation<Self>;
 
     /// Creates a new wasm backend with default configuration. In future, a configuration
@@ -75,8 +85,8 @@ pub trait WasmBackend: Clone + Default + 'static {
     fn new() -> WasmBackendResult<Self>;
 }
 
-// This struct is a helper, that allows passing <WB as WasmBackend>::ContextMut as template parameter,
-// but not specify a lifetime. Any local lifetime can be used instead.
+/// This struct is a helper, that allows passing `<WB as WasmBackend>::ContextMut` as template parameter,
+/// but not specify a lifetime. Any local lifetime can be used instead.
 pub struct DelayedContextLifetime<WB: WasmBackend> {
     _data: PhantomData<WB>,
 }
