@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine_wasm_backend_traits::wasi::WasiState;
+use marine_wasm_backend_traits::WasiState;
 
 pub(super) fn print_envs(module_name: &str, wasi_state: &dyn WasiState) {
     let envs = wasi_state.envs();

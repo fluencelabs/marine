@@ -23,10 +23,10 @@ use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use crate::host_imports::create_call_parameters_import;
 
-pub(self) use marine_wasm_backend_traits::prelude::*;
-
 use marine_core::HostImportDescriptor;
 use marine_core::MModuleConfig;
+use marine_wasm_backend_traits::Function;
+use marine_wasm_backend_traits::WasmBackend;
 use marine_utils::bytes_to_wasm_pages_ceil;
 
 use marine_rs_sdk::CallParameters;

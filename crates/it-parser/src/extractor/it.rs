@@ -18,10 +18,10 @@ use crate::custom::IT_SECTION_NAME;
 use crate::errors::ITParserError;
 use crate::ParserResult;
 
-use marine_wasm_backend_traits::prelude::*;
-
 use walrus::IdsToIndices;
 use wasmer_it::ast::Interfaces;
+use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::Module as WasmModule;
 
 use std::borrow::Cow;
 use std::path::Path;

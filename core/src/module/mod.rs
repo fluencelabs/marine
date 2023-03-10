@@ -42,7 +42,7 @@ pub struct MFunctionSignature {
 }
 
 pub(crate) use marine_module::MModule;
-pub(self) use marine_wasm_backend_traits::wtype::WValue;
+pub(self) use marine_wasm_backend_traits::WValue;
 
 // types that often used together
 pub(crate) mod wit_prelude {

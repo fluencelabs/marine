@@ -86,7 +86,7 @@ pub(crate) fn fn_ty_to_sig(ty: &wasmtime::FuncType) -> FuncSig {
 }
 
 pub(crate) fn inspect_call_error(e: anyhow::Error) -> RuntimeError {
-    if e.downcast_ref::<wasmtime::Trap>().is_some() {
+    if let Some(trap) = e.downcast_ref::<wasmtime::Trap>() {
         RuntimeError::Trap(e)
     } else {
         match e.downcast::<UserError>() {

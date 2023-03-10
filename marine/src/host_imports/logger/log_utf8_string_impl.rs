@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-use marine_wasm_backend_traits::prelude::*;
+use marine_wasm_backend_traits::AsContextMut;
+use marine_wasm_backend_traits::Caller;
+use marine_wasm_backend_traits::WasmBackend;
 
 use it_memory_traits::Memory;
 use it_memory_traits::MemoryReadable;
