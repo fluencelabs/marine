@@ -32,27 +32,25 @@ mod raw_toml_config;
 
 pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 
-type WasmBackend = marine_wasmtime_backend::WasmtimeWasmBackend;
-
 pub use errors::AppServiceError;
-pub type AppService = service::AppService<WasmBackend>;
+pub use service::AppService;
 pub use service_interface::FunctionSignature;
 pub use service_interface::RecordType;
 pub use service_interface::ServiceInterface;
 
-pub type AppServiceConfig = config::AppServiceConfig<WasmBackend>;
+pub use config::AppServiceConfig;
 pub use raw_toml_config::TomlAppServiceConfig;
 
 pub use marine::ConfigContext;
 pub use marine::WithContext;
-pub type MarineConfig = marine::MarineConfig<WasmBackend>;
-pub type MarineModuleConfig = marine::MarineModuleConfig<WasmBackend>;
+pub use marine::MarineConfig;
+pub use marine::MarineModuleConfig;
 pub use marine::MarineWASIConfig;
 pub use marine::TomlMarineConfig;
 pub use marine::TomlMarineModuleConfig;
 pub use marine::TomlMarineNamedModuleConfig;
 pub use marine::TomlWASIConfig;
-pub type ModuleDescriptor = marine::ModuleDescriptor<WasmBackend>;
+pub use marine::ModuleDescriptor;
 
 pub use marine::MarineError;
 
@@ -60,7 +58,7 @@ pub use marine::IValue;
 pub use marine::IRecordType;
 pub use marine::IFunctionArg;
 pub use marine::IType;
-pub type HostImportDescriptor = marine::HostImportDescriptor<WasmBackend>;
+pub use marine::HostImportDescriptor;
 pub use marine::HostImportError;
 pub use marine::to_interface_value;
 pub use marine::from_interface_values;

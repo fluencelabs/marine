@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine_core::default_backend::MarineCore;
+use marine_core::MarineCore;
 use marine_core::IValue;
 
 const REDIS_DOWNLOAD_URL: &str =

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine::default_backend::Marine;
+use marine::Marine;
 use marine::MarineModuleInterface;
 use marine::IValue;
 

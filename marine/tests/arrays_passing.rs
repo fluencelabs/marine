@@ -16,7 +16,7 @@
 
 mod utils;
 
-use marine::default_backend::Marine;
+use marine::Marine;
 use marine::IType;
 
 use once_cell::sync::Lazy;

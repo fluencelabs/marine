@@ -20,7 +20,6 @@ use crate::MemoryStats;
 use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
-use marine_wasm_backend_traits::WasmBackend;
 #[cfg(feature = "raw-module-api")]
 use marine_wasm_backend_traits::WasiState;
 use marine::Marine;
@@ -39,20 +38,20 @@ const SERVICE_ID_ENV_NAME: &str = "service_id";
 const SERVICE_LOCAL_DIR_NAME: &str = "local";
 const SERVICE_TMP_DIR_NAME: &str = "tmp";
 
-pub struct AppService<WB: WasmBackend> {
-    marine: Marine<WB>,
+pub struct AppService {
+    marine: Marine,
     facade_module_name: String,
 }
 
-impl<WB: WasmBackend> AppService<WB> {
+impl AppService {
     /// Create Service with given modules and service id.
     pub fn new<C, S>(config: C, service_id: S, envs: HashMap<Vec<u8>, Vec<u8>>) -> Result<Self>
     where
-        C: TryInto<AppServiceConfig<WB>>,
+        C: TryInto<AppServiceConfig>,
         S: Into<String>,
         AppServiceError: From<C::Error>,
     {
-        let mut config: AppServiceConfig<WB> = config.try_into()?;
+        let mut config: AppServiceConfig = config.try_into()?;
         let facade_module_name = config
             .marine_config
             .modules_config
@@ -133,7 +132,7 @@ impl<WB: WasmBackend> AppService<WB> {
     ///  2. adding service_id to environment variables
     ///  3. moving all the user defined mapped dirs and preopened files to service_base_dir/service_id/
     fn set_env_and_dirs(
-        config: &mut AppServiceConfig<WB>,
+        config: &mut AppServiceConfig,
         service_id: String,
         mut envs: HashMap<Vec<u8>, Vec<u8>>,
     ) -> Result<()> {
@@ -188,7 +187,7 @@ impl<WB: WasmBackend> AppService<WB> {
 
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
-impl<WB: WasmBackend> AppService<WB> {
+impl AppService {
     pub fn new_with_empty_facade<C, S>(
         config: C,
         service_id: S,
@@ -196,10 +195,10 @@ impl<WB: WasmBackend> AppService<WB> {
     ) -> Result<Self>
     where
         S: Into<String>,
-        C: TryInto<AppServiceConfig<WB>>,
+        C: TryInto<AppServiceConfig>,
         AppServiceError: From<C::Error>,
     {
-        let mut config: AppServiceConfig<WB> = config.try_into()?;
+        let mut config: AppServiceConfig = config.try_into()?;
         let service_id = service_id.into();
         Self::set_env_and_dirs(&mut config, service_id, envs)?;
 
@@ -226,7 +225,7 @@ impl<WB: WasmBackend> AppService<WB> {
     pub fn load_module<C, S>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
     where
         S: Into<String>,
-        C: TryInto<marine::MarineModuleConfig<WB>>,
+        C: TryInto<marine::MarineModuleConfig>,
         marine::MarineError: From<C::Error>,
     {
         self.marine
@@ -254,7 +253,7 @@ impl<WB: WasmBackend> AppService<WB> {
     }
 }
 
-fn create_wasi_dirs<WB: WasmBackend>(config: &MarineModuleConfig<WB>) -> Result<()> {
+fn create_wasi_dirs(config: &MarineModuleConfig) -> Result<()> {
     if let Some(wasi_config) = &config.wasi {
         for dir in wasi_config.mapped_dirs.values() {
             create(dir)?;

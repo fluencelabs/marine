@@ -22,9 +22,9 @@ use super::IRecordType;
 use super::IFunctionArg;
 use super::IValue;
 use super::WValue;
-use crate::HostImportDescriptor;
+use crate::generic::HostImportDescriptor;
 use crate::MResult;
-use crate::MModuleConfig;
+use crate::generic::MModuleConfig;
 use crate::config::RawImportCreator;
 
 use marine_wasm_backend_traits::prelude::*;

@@ -16,7 +16,7 @@
 
 mod utils;
 
-use marine::default_backend::Marine;
+use marine::Marine;
 use marine::IType;
 
 use pretty_assertions::assert_eq;

@@ -15,7 +15,7 @@
  */
 
 use marine_wasm_backend_traits::WasmBackend;
-use marine_core::HostImportDescriptor;
+use marine_core::generic::HostImportDescriptor;
 
 use std::collections::HashMap;
 use std::collections::HashSet;

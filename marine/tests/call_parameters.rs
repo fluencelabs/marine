@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine::default_backend::Marine;
+use marine::Marine;
 use marine::IValue;
 
 use pretty_assertions::assert_eq;

@@ -27,7 +27,7 @@ use crate::IValue;
 use crate::MRecordTypes;
 use crate::init_wasm_func;
 use crate::call_wasm_func;
-use crate::HostImportDescriptor;
+use crate::generic::HostImportDescriptor;
 
 use it_lilo::lifter::ILifter;
 use it_lilo::lowerer::ILowerer;

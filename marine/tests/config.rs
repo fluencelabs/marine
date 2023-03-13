@@ -16,7 +16,7 @@
 
 extern crate core;
 
-use marine::default_backend::Marine;
+use marine::Marine;
 use marine::MarineError;
 use marine::TomlMarineConfig;
 

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-use super::*;
+use super::generic::*;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
+use crate::{IRecordType, IValue, MemoryStats, MError, MFunctionSignature, ModuleMemoryStat, MResult};
 
 use marine_wasm_backend_traits::AsContextMut;
 use marine_wasm_backend_traits::Store;
