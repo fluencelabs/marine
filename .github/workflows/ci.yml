@@ -67,7 +67,7 @@ jobs:
 
       - name: Run cargo check
         run: |
-          cargo check -v --features "wasmtime raw-module-api" \
+          cargo check -v --features "raw-module-api" \
             -p marine-core \
             -p marine \
             -p fluence-app-service \
@@ -76,7 +76,7 @@ jobs:
 
       - name: Run cargo test
         run: |
-          cargo test --release -v --features "wasmtime raw-module-api" \
+          cargo test --release -v --features "raw-module-api" \
             -p marine-core \
             -p marine \
             -p fluence-app-service \
