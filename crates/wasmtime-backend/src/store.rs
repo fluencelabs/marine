@@ -26,14 +26,19 @@ use wasmtime::AsContextMut as WasmtimeAsContextMut;
 
 use std::default::Default;
 
+/// A type that is used to store resources allocated by runtime. It includes memories, functions,
+/// tables, globals and so on. More information here: https://webassembly.github.io/spec/core/exec/runtime.html#store.
+/// Because of that, most of the methods in API require a handle to store to function.
 pub struct WasmtimeStore {
     pub(crate) inner: wasmtime::Store<StoreState>,
 }
 
+/// Temporary immutable handle to `Store`, used to interact with stored data.
 pub struct WasmtimeContext<'s> {
     pub(crate) inner: wasmtime::StoreContext<'s, StoreState>,
 }
 
+/// Temporary mutable handle to `Store`, used to interact with stored data.
 pub struct WasmtimeContextMut<'s> {
     pub(crate) inner: wasmtime::StoreContextMut<'s, StoreState>,
 }
