@@ -60,6 +60,11 @@ pub mod ne_vec {
 
 pub(crate) type MResult<T> = std::result::Result<T, MError>;
 
-pub type WasmBackend = marine_wasmtime_backend::WasmtimeWasmBackend;
+pub mod default_backend {
+    pub type WasmBackend = marine_wasmtime_backend::WasmtimeWasmBackend;
 
-pub type DefaultMarineCore = MarineCore<WasmBackend>;
+    pub type MModuleConfig = crate::config::MModuleConfig<WasmBackend>;
+    pub type HostExportedFunc = crate::config::HostExportedFunc<WasmBackend>;
+    pub type HostImportDescriptor = crate::config::HostImportDescriptor<WasmBackend>;
+    pub type MarineCore = crate::marine_core::MarineCore<WasmBackend>;
+}

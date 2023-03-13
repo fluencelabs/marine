@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine_core::DefaultMarineCore;
+use marine_core::default_backend::MarineCore;
 use marine_core::IValue;
 
 #[test]
@@ -25,7 +25,7 @@ pub fn records() {
     let pure_wasm_bytes = std::fs::read("../examples/records/artifacts/records_pure.wasm")
         .expect("../examples/records/artifacts/records_pure.wasm should presence");
 
-    let mut marine_core = DefaultMarineCore::new().unwrap();
+    let mut marine_core = MarineCore::new().unwrap();
     let load_result = marine_core.load_module("pure", &pure_wasm_bytes, <_>::default());
     assert!(load_result.is_err());
 

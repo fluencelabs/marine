@@ -72,6 +72,13 @@ pub use marine_module_interface::interface::itype_text_view;
 pub use marine_rs_sdk::CallParameters;
 pub use marine_rs_sdk::SecurityTetraplet;
 
-pub use marine_core::WasmBackend;
+pub mod default_backend {
+    pub type Backend = marine_wasmtime_backend::WasmtimeWasmBackend;
 
-pub type DefaultMarine = Marine<WasmBackend>;
+    pub type Marine = crate::marine::Marine<Backend>;
+    pub type MarineModuleConfig = crate::config::MarineModuleConfig<Backend>;
+    pub type ModuleDescriptor = crate::config::ModuleDescriptor<Backend>;
+
+    pub type HostExportedFunc = marine_core::HostExportedFunc<Backend>;
+    pub type HostImportDescriptor = marine_core::HostImportDescriptor<Backend>;
+}

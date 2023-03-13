@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine::DefaultMarine;
+use marine::default_backend::Marine;
 use marine::IValue;
 
 use pretty_assertions::assert_eq;
@@ -34,7 +34,7 @@ pub fn call_parameters() {
     call_parameters_config.modules_dir =
         Some(PathBuf::from("../examples/call_parameters/artifacts"));
 
-    let mut faas = DefaultMarine::with_raw_config(call_parameters_config)
+    let mut faas = Marine::with_raw_config(call_parameters_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let init_peer_id = "init_peer_id";

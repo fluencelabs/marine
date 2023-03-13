@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use marine::DefaultMarine;
+use marine::default_backend::Marine;
 use marine::IValue;
 
 use pretty_assertions::assert_eq;
@@ -34,7 +34,7 @@ pub fn records() {
         toml::from_slice(&records_config_raw).expect("records config should be well-formed");
     records_config.modules_dir = Some(PathBuf::from("../examples/records/artifacts/"));
 
-    let mut marine = DefaultMarine::with_raw_config(records_config)
+    let mut marine = Marine::with_raw_config(records_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = marine
@@ -172,7 +172,7 @@ fn records_passing() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = DefaultMarine::with_raw_config(records_passing_config)
+    let mut marine = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
@@ -233,7 +233,7 @@ fn records_destruction() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = DefaultMarine::with_raw_config(records_passing_config)
+    let mut marine = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let record_array = json!([
@@ -288,7 +288,7 @@ fn records_return_frees() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = DefaultMarine::with_raw_config(records_passing_config)
+    let mut marine = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let _result = marine
@@ -406,7 +406,7 @@ fn records_pass_frees() {
         "field18": struct_16kb,
     });
 
-    let mut marine = DefaultMarine::with_raw_config(records_passing_config)
+    let mut marine = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let _result = marine

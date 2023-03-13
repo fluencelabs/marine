@@ -17,11 +17,11 @@ marine-utils = { path = "../crates/utils", version = "0.4.0" }
 marine-rs-sdk-main = { version = "0.7.1", features = ["logger"] }
 marine-rs-sdk = { version = "0.7.1", features = ["logger"] }
 it-json-serde = { path = "../crates/it-json-serde", version = "0.3.5" }
-
 marine-wasm-backend-traits = { path = "../crates/wasm-backend-traits", version = "0.1.0"}
+marine-wasmtime-backend = { path = "../crates/wasmtime-backend", version = "0.1.0"}
+
 wasmer-it = { workspace = true }
 it-memory-traits = { workspace = true }
-marine-wasmtime-backend = { path = "../crates/wasmtime-backend", version = "0.1.0", optional = true }
 
 toml = "0.5.9"
 serde = { version = "1.0.147", features = ["derive"] }

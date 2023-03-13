@@ -16,7 +16,7 @@
 
 extern crate core;
 
-use marine::DefaultMarine;
+use marine::default_backend::Marine;
 use marine::MarineError;
 use marine::TomlMarineConfig;
 
@@ -27,32 +27,28 @@ use serde_json::Value;
 fn load_from_modules_dir() {
     let config_path = "tests/config_tests/ModulesDirConfig.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let _marine =
-        DefaultMarine::with_raw_config(raw_config).expect("DefaultMarine should load all modules");
+    let _marine = Marine::with_raw_config(raw_config).expect("Marine should load all modules");
 }
 
 #[test]
 fn load_from_specified_dir() {
     let config_path = "tests/config_tests/SpecifiedDirConfig.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let _marine =
-        DefaultMarine::with_raw_config(raw_config).expect("DefaultMarine should load all modules");
+    let _marine = Marine::with_raw_config(raw_config).expect("Marine should load all modules");
 }
 
 #[test]
 fn load_from_specified_path() {
     let config_path = "tests/config_tests/SpecifiedPathConfig.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let _marine =
-        DefaultMarine::with_raw_config(raw_config).expect("DefaultMarine should load all modules");
+    let _marine = Marine::with_raw_config(raw_config).expect("Marine should load all modules");
 }
 
 #[test]
 fn wasi_mapped_dirs() {
     let config_path = "tests/wasm_tests/wasi/Config.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let mut marine =
-        DefaultMarine::with_raw_config(raw_config).expect("DefaultMarine should load all modules");
+    let mut marine = Marine::with_raw_config(raw_config).expect("Marine should load all modules");
     let file_data = std::fs::read("tests/wasm_tests/wasi/some_dir/some_file")
         .expect("file must exist for test to work");
     let result = marine
@@ -84,7 +80,7 @@ fn wasi_mapped_dirs() {
 fn wasi_mapped_dirs_conflicts_with_preopens() {
     let config_path = "tests/wasm_tests/wasi/PreopenMappedDuplicate.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let result = DefaultMarine::with_raw_config(raw_config);
+    let result = Marine::with_raw_config(raw_config);
     match result {
         Err(MarineError::InvalidConfig(_)) => (),
         Err(_) => panic!(
@@ -98,7 +94,7 @@ fn wasi_mapped_dirs_conflicts_with_preopens() {
 fn mapping_to_absolute_path_in_wasi_prohibited() {
     let config_path = "tests/wasm_tests/wasi/MapToAbsolutePath.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let result = DefaultMarine::with_raw_config(raw_config);
+    let result = Marine::with_raw_config(raw_config);
     match result {
         Err(MarineError::InvalidConfig(_)) => (),
         Err(_) => panic!("Expected InvalidConfig error telling about absolute paths"),
@@ -111,14 +107,14 @@ fn mapping_from_absolute_path_in_wasi_allowed() {
     let config_path = "tests/wasm_tests/wasi/MapFromAbsolutePath.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
     let _result =
-        DefaultMarine::with_raw_config(raw_config).expect("Module should be loaded successfully");
+        Marine::with_raw_config(raw_config).expect("Module should be loaded successfully");
 }
 
 #[test]
 fn preopening_absolute_path_in_wasi_prohibited() {
     let config_path = "tests/wasm_tests/wasi/PreopenAbsolutePath.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let result = DefaultMarine::with_raw_config(raw_config);
+    let result = Marine::with_raw_config(raw_config);
     match result {
         Err(MarineError::InvalidConfig(_)) => (),
         Err(_) => panic!("Expected InvalidConfig error telling about absolute paths"),
@@ -130,7 +126,7 @@ fn preopening_absolute_path_in_wasi_prohibited() {
 fn parent_dir_in_wasi_paths_prohibited() {
     let config_path = "tests/wasm_tests/wasi/ParentDir.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let result = DefaultMarine::with_raw_config(raw_config);
+    let result = Marine::with_raw_config(raw_config);
     match result {
         Err(MarineError::InvalidConfig(_)) => (),
         Err(_) => panic!("Expected InvalidConfig error telling about .. in config"),
