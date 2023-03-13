@@ -272,7 +272,7 @@ impl<WB: WasmBackend> Marine<WB> {
     ) -> MarineResult<()>
     where
         S: Into<String>,
-        C: TryInto<crate::MarineModuleConfig<WB>>,
+        C: TryInto<crate::generic::MarineModuleConfig<WB>>,
         MarineError: From<C::Error>,
     {
         let config = config.map(|c| c.try_into()).transpose()?;
