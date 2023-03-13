@@ -48,8 +48,9 @@ pub use prelude::*;
 
 pub use macros::*;
 
-use std::marker::PhantomData;
 use it_memory_traits::MemoryView;
+
+use std::marker::PhantomData;
 
 /// A core trait for any backend. It serves two purposes:
 /// * handles initialization of the library if needed
