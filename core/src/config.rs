@@ -66,7 +66,7 @@ pub struct MModuleConfig<WB: WasmBackend> {
     /// Imports from the host side that will be used in module instantiation process.
     pub host_imports: HashMap<String, HostImportDescriptor<WB>>,
 
-    /// WASI parameters: env variables, mapped dirs, preopened files and version
+    /// WASI parameters: env variables, mapped dirs, preopened files and args
     pub wasi_parameters: WasiParameters,
 }
 
