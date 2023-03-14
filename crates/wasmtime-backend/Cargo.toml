@@ -1,5 +1,6 @@
 [package]
 name = "marine-wasmtime-backend"
+description = "Fluence Marine Wasm backend interface implementation for Wasmtime"
 version = "0.1.0"
 edition = "2021"
 authors = ["Fluence Labs"]
