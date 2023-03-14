@@ -70,9 +70,8 @@ fn call_host_import<WB: WasmBackend>(
         ..
     } = descriptor;
 
-    let memory_index = 0;
     let memory = caller
-        .memory(memory_index)
+        .memory(STANDARD_MEMORY_INDEX)
         .unwrap_or_else(|| panic!("Host import called directly, not from wasm"));
 
     let inputs = lift_inputs::<WB>(
