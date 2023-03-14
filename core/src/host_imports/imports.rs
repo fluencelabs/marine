@@ -29,11 +29,11 @@ use crate::init_wasm_func;
 use crate::call_wasm_func;
 use crate::generic::HostImportDescriptor;
 
+use marine_wasm_backend_traits::prelude::*;
+
 use it_lilo::lifter::ILifter;
 use it_lilo::lowerer::ILowerer;
 use it_memory_traits::Memory as ITMemory;
-
-use marine_wasm_backend_traits::prelude::*;
 
 use std::sync::Arc;
 

@@ -33,7 +33,7 @@ pub trait Instance<WB: WasmBackend>: Clone {
     fn get_nth_memory(
         &self,
         store: &mut impl AsContextMut<WB>,
-        memory_index: u32,
+        memory_index: u32, // TODO: refactor memory indexing with enums
     ) -> Option<<WB as WasmBackend>::Memory>;
 
     /// Returns a memory export with given name.
