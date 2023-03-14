@@ -22,124 +22,187 @@ use super::lowering::LoHelper;
 use super::utils::itypes_args_to_wtypes;
 use super::utils::itypes_output_to_wtypes;
 
+use crate::IType;
+use crate::IValue;
 use crate::MRecordTypes;
-use crate::init_wasm_func_once;
+use crate::init_wasm_func;
 use crate::call_wasm_func;
-use crate::HostImportDescriptor;
-use crate::module::wit_prelude::WITMemoryView;
+use crate::generic::HostImportDescriptor;
 
-use wasmer_core::Func;
-use wasmer_core::vm::Ctx;
-use wasmer_core::typed_func::DynamicFunc;
-use wasmer_core::types::Value as WValue;
-use wasmer_core::types::FuncSig;
+use marine_wasm_backend_traits::prelude::*;
+
 use it_lilo::lifter::ILifter;
 use it_lilo::lowerer::ILowerer;
+use it_memory_traits::Memory as ITMemory;
 
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
-pub(crate) fn create_host_import_func(
-    descriptor: HostImportDescriptor,
-    record_types: Rc<MRecordTypes>,
-) -> DynamicFunc<'static> {
-    let allocate_func: AllocateFunc = Box::new(RefCell::new(None));
-    let set_result_ptr_func: SetResultPtrFunc = Box::new(RefCell::new(None));
-    let set_result_size_func: SetResultSizeFunc = Box::new(RefCell::new(None));
+pub(crate) fn create_host_import_func<WB: WasmBackend>(
+    store: &mut <WB as WasmBackend>::Store,
+    descriptor: HostImportDescriptor<WB>,
+    record_types: Arc<MRecordTypes>,
+) -> <WB as WasmBackend>::Function {
+    let raw_args = itypes_args_to_wtypes(&descriptor.argument_types);
+    let raw_output =
+        itypes_output_to_wtypes(&output_type_to_types(descriptor.output_type.as_ref()));
 
+    let func = move |caller: <WB as WasmBackend>::Caller<'_>, inputs: &[WValue]| -> Vec<WValue> {
+        call_host_import(caller, inputs, &descriptor, record_types.clone())
+    };
+
+    <WB as WasmBackend>::Function::new_with_caller(
+        &mut store.as_context_mut(),
+        FuncSig::new(raw_args, raw_output),
+        func,
+    )
+}
+
+fn call_host_import<WB: WasmBackend>(
+    mut caller: <WB as WasmBackend>::Caller<'_>,
+    inputs: &[WValue],
+    descriptor: &HostImportDescriptor<WB>,
+    record_types: Arc<MRecordTypes>,
+) -> Vec<WValue> {
     let HostImportDescriptor {
         host_exported_func,
         argument_types,
-        output_type,
         error_handler,
+        ..
     } = descriptor;
 
-    let output_type_to_types = |output_type| match output_type {
-        Some(ty) => vec![ty],
-        None => vec![],
-    };
+    let memory = caller
+        .memory(STANDARD_MEMORY_INDEX)
+        .unwrap_or_else(|| panic!("Host import called directly, not from wasm"));
 
-    let raw_args = itypes_args_to_wtypes(&argument_types);
-    let raw_output = itypes_output_to_wtypes(&output_type_to_types(output_type));
-
-    let func = move |ctx: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
-        let result = {
-            let memory_index = 0;
-            let memory = ctx.memory(memory_index);
-            let memory_view = WITMemoryView(memory.view::<u8>());
-            let li_helper = LiHelper::new(record_types.clone());
-            let lifter = ILifter::new(memory_view, &li_helper);
-
-            match wvalues_to_ivalues(&lifter, inputs, &argument_types) {
-                Ok(ivalues) => host_exported_func(ctx, ivalues),
-                Err(e) => {
-                    log::error!("error occurred while lifting values in host import: {}", e);
-                    error_handler
-                        .as_ref()
-                        .map_or_else(|| default_error_handler(&e), |h| h(&e))
-                }
-            }
-        };
-
-        init_wasm_func_once!(allocate_func, ctx, (i32, i32), i32, ALLOCATE_FUNC_NAME, 2);
-
-        let memory_index = 0;
-        let memory = ctx.memory(memory_index);
-        let memory_view = WITMemoryView(memory.view::<u8>());
-        let lo_helper = LoHelper::new(&allocate_func, ctx);
-        let t = ILowerer::new(memory_view, &lo_helper)
-            .map_err(HostImportError::LowererError)
-            .and_then(|lowerer| ivalue_to_wvalues(&lowerer, result));
-
-        let wvalues = match t {
-            Ok(wvalues) => wvalues,
-            Err(e) => {
-                log::error!("host closure failed: {}", e);
-
-                // returns 0 to a Wasm module in case of errors
-                init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 4);
-                init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
-
-                call_wasm_func!(set_result_ptr_func, 0);
-                call_wasm_func!(set_result_size_func, 0);
-                return vec![WValue::I32(0)];
-            }
-        };
-
-        // TODO: refactor this when multi-value is supported
-        match wvalues.len() {
-            // strings and arrays are passed back to the Wasm module by pointer and size
-            2 => {
-                init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 4);
-                init_wasm_func_once!(set_result_size_func, ctx, i32, (), SET_SIZE_FUNC_NAME, 4);
-
-                call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
-                call_wasm_func!(set_result_size_func, wvalues[1].to_u128() as _);
-                vec![]
-            }
-
-            // records and primitive types are passed to the Wasm module by pointer
-            // and value on the stack
-            1 => {
-                init_wasm_func_once!(set_result_ptr_func, ctx, i32, (), SET_PTR_FUNC_NAME, 3);
-
-                call_wasm_func!(set_result_ptr_func, wvalues[0].to_u128() as _);
-                vec![wvalues[0].clone()]
-            }
-
-            // when None is passed
-            0 => vec![],
-
-            // at now while multi-values aren't supported ivalue_to_wvalues returns only Vec with
-            // 0, 1, 2 values
-            _ => unimplemented!(),
+    let inputs = lift_inputs::<WB>(
+        &mut caller,
+        memory.clone(),
+        record_types,
+        inputs,
+        argument_types,
+    );
+    let output = match inputs {
+        Ok(ivalues) => host_exported_func(&mut caller, ivalues),
+        Err(e) => {
+            log::error!("error occurred while lifting values in host import: {}", e);
+            error_handler
+                .as_ref()
+                .map_or_else(|| default_error_handler(&e), |h| h(&e))
         }
     };
 
-    DynamicFunc::new(
-        std::sync::Arc::new(FuncSig::new(raw_args, raw_output)),
-        func,
+    lower_outputs::<WB>(&mut caller, memory, output)
+}
+
+fn lift_inputs<WB: WasmBackend>(
+    caller: &mut <WB as WasmBackend>::Caller<'_>,
+    memory: <WB as WasmBackend>::Memory,
+    record_types: Arc<MRecordTypes>,
+    inputs: &[WValue],
+    argument_types: &[IType],
+) -> HostImportResult<Vec<IValue>> {
+    let memory_view = memory.view();
+    let li_helper = LiHelper::new(record_types);
+    let lifter = ILifter::new(memory_view, &li_helper);
+    wvalues_to_ivalues(
+        &mut caller.as_context_mut(),
+        &lifter,
+        inputs,
+        argument_types,
     )
+}
+
+fn lower_outputs<WB: WasmBackend>(
+    caller: &mut <WB as WasmBackend>::Caller<'_>,
+    memory: <WB as WasmBackend>::Memory,
+    output: Option<IValue>,
+) -> Vec<WValue> {
+    init_wasm_func!(
+        allocate_func,
+        caller,
+        (i32, i32),
+        i32,
+        ALLOCATE_FUNC_NAME,
+        2
+    );
+
+    let is_record = matches!(&output, Some(IValue::Record(_)));
+
+    let memory_view = memory.view();
+    let mut lo_helper = LoHelper::new(&mut allocate_func, memory);
+    let lowering_result =
+        ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
+            .map_err(HostImportError::LowererError)
+            .and_then(|mut lowerer| {
+                ivalue_to_wvalues(&mut caller.as_context_mut(), &mut lowerer, output)
+            });
+
+    let wvalues = match lowering_result {
+        Ok(wvalues) => wvalues,
+        Err(e) => {
+            log::error!("host closure failed: {}", e);
+
+            // returns 0 to a Wasm module in case of errors
+            init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
+            init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
+
+            call_wasm_func!(set_result_ptr_func, &mut caller.as_context_mut(), 0);
+            call_wasm_func!(set_result_size_func, &mut caller.as_context_mut(), 0);
+            return vec![WValue::I32(0)];
+        }
+    };
+
+    // TODO: refactor this when multi-value is supported
+    match wvalues.len() {
+        // strings and arrays are passed back to the Wasm module by pointer and size
+        // values used and consumed by set_result_ptr and set_result_size
+        2 => {
+            init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
+            init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
+
+            call_wasm_func!(
+                set_result_ptr_func,
+                &mut caller.as_context_mut(),
+                wvalues[0].to_u128() as _
+            );
+            call_wasm_func!(
+                set_result_size_func,
+                &mut caller.as_context_mut(),
+                wvalues[1].to_u128() as _
+            );
+            vec![]
+        }
+
+        // records lowerer returns only pointer which has to be used and consumed via set_result_ptr
+        1 if is_record => {
+            init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 3);
+
+            call_wasm_func!(
+                set_result_ptr_func,
+                &mut caller.as_context_mut(),
+                wvalues[0].to_u128() as _
+            );
+
+            vec![]
+        }
+
+        // primitive values are passed as is
+        1 => vec![wvalues[0].clone()],
+
+        // when None is passed
+        0 => vec![],
+
+        // at now while multi-values aren't supported ivalue_to_wvalues returns only Vec with
+        // 0, 1, 2 values
+        _ => unimplemented!(),
+    }
+}
+
+fn output_type_to_types(output_type: Option<&IType>) -> Vec<IType> {
+    match output_type {
+        Some(ty) => vec![ty.clone()],
+        None => vec![],
+    }
 }
 
 fn default_error_handler(err: &HostImportError) -> Option<crate::IValue> {

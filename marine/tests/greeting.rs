@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-use std::path::PathBuf;
 use marine::Marine;
 use marine::MarineModuleInterface;
 use marine::IValue;
 
 use pretty_assertions::assert_eq;
 
-use std::rc::Rc;
+use std::path::PathBuf;
+use std::sync::Arc;
 
 #[test]
 pub fn greeting() {
@@ -82,9 +82,9 @@ pub fn get_interfaces() {
     let output_types = vec![marine::IType::String];
 
     let greeting_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("greeting")),
-        arguments: Rc::new(arguments),
-        outputs: Rc::new(output_types),
+        name: Arc::new(String::from("greeting")),
+        arguments: Arc::new(arguments),
+        outputs: Arc::new(output_types),
     };
 
     let record_types = std::collections::HashMap::new();

@@ -30,11 +30,11 @@ pub enum ModuleInfoError {
     MultipleCustomSections(&'static str, usize),
 
     /// Errors related to corrupted version.
-    #[error("{0}")]
+    #[error(transparent)]
     VersionError(#[from] SDKVersionError),
 
     /// Errors related to corrupted manifest.
-    #[error("{0}")]
+    #[error(transparent)]
     ManifestError(#[from] ManifestError),
 
     /// An error occurred while parsing Wasm file.

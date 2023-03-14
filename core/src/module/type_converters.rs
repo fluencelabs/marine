@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-/// Contains converters of types and values between Wasmer and wasmer_interface_types.
-use super::{WType, WValue, IType, IValue};
+use super::IType;
+use super::IValue;
+
+use marine_wasm_backend_traits::WType;
+use marine_wasm_backend_traits::WValue;
 
 pub(super) fn wtype_to_itype(ty: &WType) -> IType {
     match ty {
@@ -23,7 +26,10 @@ pub(super) fn wtype_to_itype(ty: &WType) -> IType {
         WType::I64 => IType::I64,
         WType::F32 => IType::F32,
         WType::F64 => IType::F64,
-        WType::V128 => unimplemented!(),
+        ty => {
+            eprintln!("trying to convert {:?}", ty);
+            unimplemented!()
+        }
     }
 }
 
@@ -64,6 +70,5 @@ pub(super) fn wval_to_ival(value: &WValue) -> IValue {
         WValue::I64(v) => IValue::I64(*v),
         WValue::F32(v) => IValue::F32(*v),
         WValue::F64(v) => IValue::F64(*v),
-        _ => unimplemented!(),
     }
 }

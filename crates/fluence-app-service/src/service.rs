@@ -20,9 +20,12 @@ use crate::MemoryStats;
 use crate::service_interface::ServiceInterface;
 use super::AppServiceError;
 
+#[cfg(feature = "raw-module-api")]
+use marine_wasm_backend_traits::WasiState;
 use marine::Marine;
 use marine::MarineModuleConfig;
 use marine::IValue;
+
 use serde_json::Value as JValue;
 use maplit::hashmap;
 
@@ -44,8 +47,8 @@ impl AppService {
     /// Create Service with given modules and service id.
     pub fn new<C, S>(config: C, service_id: S, envs: HashMap<Vec<u8>, Vec<u8>>) -> Result<Self>
     where
-        S: Into<String>,
         C: TryInto<AppServiceConfig>,
+        S: Into<String>,
         AppServiceError: From<C::Error>,
     {
         let mut config: AppServiceConfig = config.try_into()?;
@@ -222,7 +225,7 @@ impl AppService {
     pub fn load_module<C, S>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
     where
         S: Into<String>,
-        C: TryInto<crate::MarineModuleConfig>,
+        C: TryInto<marine::MarineModuleConfig>,
         marine::MarineError: From<C::Error>,
     {
         self.marine
@@ -243,7 +246,7 @@ impl AppService {
     pub fn get_wasi_state(
         &mut self,
         module_name: impl AsRef<str>,
-    ) -> Result<&wasmer_wasi::state::WasiState> {
+    ) -> Result<Box<dyn WasiState + '_>> {
         self.marine
             .module_wasi_state(module_name)
             .map_err(Into::into)

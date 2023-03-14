@@ -126,15 +126,17 @@ impl REPL {
         let start = Instant::now();
         let config = MarineModuleConfig {
             logger_enabled: true,
-            ..<_>::default()
+            mem_pages_count: Default::default(),
+            max_heap_size: Default::default(),
+            host_imports: Default::default(),
+            wasi: Default::default(),
+            logging_mask: Default::default(),
         };
-        let result_msg = match self
-            .app_service
-            .load_module::<fluence_app_service::MarineModuleConfig, String>(
-                module_name.into(),
-                &wasm_bytes.unwrap(),
-                Some(config),
-            ) {
+        let result_msg = match self.app_service.load_module::<MarineModuleConfig, String>(
+            module_name.into(),
+            &wasm_bytes.unwrap(),
+            Some(config),
+        ) {
             Ok(_) => {
                 let elapsed_time = start.elapsed();
                 format!(
@@ -211,7 +213,7 @@ impl REPL {
     fn show_envs<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
         next_argument!(module_name, args, "Module name should be specified");
         match self.app_service.get_wasi_state(module_name) {
-            Ok(wasi_state) => print_envs(module_name, wasi_state),
+            Ok(wasi_state) => print_envs(module_name, wasi_state.as_ref()),
             Err(e) => println!("{}", e),
         };
     }
@@ -219,7 +221,7 @@ impl REPL {
     fn show_fs<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
         next_argument!(module_name, args, "Module name should be specified");
         match self.app_service.get_wasi_state(module_name) {
-            Ok(wasi_state) => print_fs_state(wasi_state),
+            Ok(wasi_state) => print_fs_state(wasi_state.as_ref()),
             Err(e) => println!("{}", e),
         };
     }
@@ -230,7 +232,7 @@ impl REPL {
         print!("Loaded modules interface:\n{}", interface);
     }
 
-    fn show_memory_stats(&mut self) {
+    fn show_memory_stats(&self) {
         let statistic = self.app_service.module_memory_stats();
 
         print!("Loaded modules heap sizes:\n{}", statistic);

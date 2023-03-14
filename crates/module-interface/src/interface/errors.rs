@@ -22,6 +22,6 @@ pub enum InterfaceError {
     #[error("record type with type id {0} not found")]
     NotFoundRecordTypeId(u64),
 
-    #[error("{0}")]
+    #[error(transparent)]
     ITInterfaceError(#[from] ITInterfaceError),
 }

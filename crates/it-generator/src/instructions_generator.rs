@@ -27,7 +27,7 @@ use wasmer_it::IType;
 use wasmer_it::ast::Interfaces;
 use wasmer_it::IRecordType;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(PartialEq, Eq, Debug, Default)]
 pub(crate) struct ITResolver<'a> {
@@ -58,7 +58,7 @@ impl<'a> ITResolver<'a> {
                 self.types.insert(record_name.to_string(), new_type_id);
                 self.interfaces
                     .types
-                    .push(Type::Record(Rc::new(IRecordType::default())));
+                    .push(Type::Record(Arc::new(IRecordType::default())));
 
                 self.unresolved_types_count += 1;
                 new_type_id
@@ -87,14 +87,14 @@ impl<'a> ITResolver<'a> {
 
         match self.types.get(&record.name) {
             Some(pos) => {
-                self.interfaces.types[*pos] = Type::Record(Rc::new(record));
+                self.interfaces.types[*pos] = Type::Record(Arc::new(record));
                 self.unresolved_types_count -= 1;
             }
             None => {
                 self.types
                     .insert(record.name.clone(), self.interfaces.types.len());
 
-                self.interfaces.types.push(Type::Record(Rc::new(record)));
+                self.interfaces.types.push(Type::Record(Arc::new(record)));
             }
         }
     }
@@ -152,8 +152,8 @@ impl<'a> ITResolver<'a> {
 
     pub(crate) fn add_fn_type(
         &mut self,
-        arguments: Rc<Vec<wasmer_it::ast::FunctionArg>>,
-        output_types: Rc<Vec<IType>>,
+        arguments: Arc<Vec<wasmer_it::ast::FunctionArg>>,
+        output_types: Arc<Vec<IType>>,
     ) {
         let fn_type = wasmer_it::ast::Type::Function {
             arguments,

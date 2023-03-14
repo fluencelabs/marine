@@ -29,10 +29,10 @@ mod wasm_mem_pages_conversion;
 
 pub use wasm_mem_pages_conversion::*;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, Hash)]
-pub struct SharedString(pub Rc<String>);
+pub struct SharedString(pub Arc<String>);
 
 impl std::borrow::Borrow<str> for SharedString {
     fn borrow(&self) -> &str {

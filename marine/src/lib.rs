@@ -33,15 +33,11 @@ mod module_loading;
 
 pub(crate) type MarineResult<T> = std::result::Result<T, MarineError>;
 
-pub use crate::marine::Marine;
 pub use marine_interface::MarineInterface;
 
 pub use config::ConfigContext;
 pub use config::WithContext;
-pub use config::MarineConfig;
-pub use config::MarineModuleConfig;
 pub use config::MarineWASIConfig;
-pub use config::ModuleDescriptor;
 
 pub use config::TomlMarineConfig;
 pub use config::TomlMarineModuleConfig;
@@ -60,8 +56,6 @@ pub use marine_core::MFunctionSignature as MarineFunctionSignature;
 pub use marine_core::MemoryStats;
 pub use marine_core::ModuleMemoryStat;
 pub use marine_core::MRecordTypes;
-pub use marine_core::HostExportedFunc;
-pub use marine_core::HostImportDescriptor;
 pub use marine_core::HostImportError;
 pub use marine_core::to_interface_value;
 pub use marine_core::from_interface_values;
@@ -72,4 +66,25 @@ pub use marine_module_interface::interface::itype_text_view;
 pub use marine_rs_sdk::CallParameters;
 pub use marine_rs_sdk::SecurityTetraplet;
 
-pub use wasmer_core::vm::Ctx;
+pub mod generic {
+    pub use crate::marine::Marine;
+    pub use crate::config::MarineModuleConfig;
+    pub use crate::config::ModuleDescriptor;
+    pub use crate::config::MarineConfig;
+
+    pub use marine_core::generic::*;
+}
+
+pub mod wasmtime {
+    pub type WasmBackend = marine_core::wasmtime::WasmBackend;
+
+    pub type Marine = crate::marine::Marine<WasmBackend>;
+    pub type MarineModuleConfig = crate::config::MarineModuleConfig<WasmBackend>;
+    pub type ModuleDescriptor = crate::config::ModuleDescriptor<WasmBackend>;
+    pub type MarineConfig = crate::config::MarineConfig<WasmBackend>;
+
+    pub use marine_core::wasmtime::HostExportedFunc;
+    pub use marine_core::wasmtime::HostImportDescriptor;
+}
+
+pub use wasmtime::*;

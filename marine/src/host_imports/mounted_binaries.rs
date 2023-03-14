@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-use std::path::{Path, PathBuf};
-use marine_core::HostImportDescriptor;
+use marine_wasm_backend_traits::WasmBackend;
+
+use marine_core::generic::HostImportDescriptor;
 use marine_rs_sdk::MountedBinaryResult;
 
-use wasmer_core::vm::Ctx;
 use wasmer_it::IValue;
 use wasmer_it::IType;
 
-pub(crate) fn create_mounted_binary_import(mounted_binary_path: PathBuf) -> HostImportDescriptor {
-    let host_cmd_closure = move |_ctx: &mut Ctx, raw_args: Vec<IValue>| {
+use std::path::Path;
+use std::path::PathBuf;
+
+pub(crate) fn create_mounted_binary_import<WB: WasmBackend>(
+    mounted_binary_path: PathBuf,
+) -> HostImportDescriptor<WB> {
+    let host_cmd_closure = move |_ctx: &mut <WB as WasmBackend>::Caller<'_>,
+                                 raw_args: Vec<IValue>| {
         let result =
             mounted_binary_import_impl(&mounted_binary_path, raw_args).unwrap_or_else(Into::into);
 
@@ -117,7 +123,7 @@ mod tests {
     #[test]
     fn call_non_existent_binary() {
         let path = std::path::Path::new("____non_existent_path____");
-        let actual = mounted_binary_import_impl(&path, vec![]).unwrap_err();
+        let actual = mounted_binary_import_impl(path, vec![]).unwrap_err();
 
         assert_eq!(actual.ret_code, 100002);
     }

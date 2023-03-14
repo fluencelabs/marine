@@ -20,7 +20,8 @@ use crate::ParserResult;
 
 use walrus::IdsToIndices;
 use wasmer_it::ast::Interfaces;
-use wasmer_core::Module as WasmerModule;
+use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::Module as WasmModule;
 
 use std::borrow::Cow;
 use std::path::Path;
@@ -42,16 +43,18 @@ where
 }
 
 /// Extracts IT section of provided Wasm binary and converts it to a MITInterfaces.
-pub fn extract_it_from_module(wasmer_module: &WasmerModule) -> ParserResult<Interfaces<'_>> {
-    let wit_sections = wasmer_module
-        .custom_sections(IT_SECTION_NAME)
-        .ok_or(ITParserError::NoITSection)?;
+pub fn extract_it_from_module<WB: WasmBackend>(
+    wasm_module: &<WB as WasmBackend>::Module,
+) -> ParserResult<Interfaces<'_>> {
+    let wit_sections = wasm_module.custom_sections(IT_SECTION_NAME);
 
-    if wit_sections.len() > 1 {
-        return Err(ITParserError::MultipleITSections);
-    }
+    let it_section = match wit_sections.len() {
+        0 => Err(ITParserError::NoITSection),
+        1 => Ok(&wit_sections[0]),
+        _ => Err(ITParserError::MultipleITSections),
+    }?;
 
-    extract_it_from_bytes(&wit_sections[0])
+    extract_it_from_bytes(it_section)
 }
 
 pub fn extract_version_from_module(module: &walrus::Module) -> ParserResult<semver::Version> {

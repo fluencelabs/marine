@@ -4,7 +4,7 @@ description = "Fluence Marine Wasm module info (manifest and version) parser"
 version = "0.5.1"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 name = "marine_module_info_parser"
@@ -13,7 +13,7 @@ path = "src/lib.rs"
 [dependencies]
 marine-rs-sdk-main = "0.7.1"
 
-wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1" }
+marine-wasm-backend-traits = { path = "../wasm-backend-traits", version = "0.1.0"}
 
 anyhow = "1.0.66"
 chrono = "0.4.23"

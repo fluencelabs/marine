@@ -16,12 +16,12 @@
 
 mod exports;
 mod marine_module;
-mod memory;
 mod wit_function;
 mod wit_instance;
 mod type_converters;
 
 pub use wit_instance::MRecordTypes;
+
 pub use wasmer_it::IType;
 pub use wasmer_it::IRecordType;
 pub use wasmer_it::ast::FunctionArg as IFunctionArg;
@@ -31,19 +31,18 @@ pub use wasmer_it::to_interface_value;
 
 use serde::Serialize;
 use serde::Deserialize;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Represent a function type inside Marine module.
 #[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
 pub struct MFunctionSignature {
-    pub name: Rc<String>,
-    pub arguments: Rc<Vec<IFunctionArg>>,
-    pub outputs: Rc<Vec<IType>>,
+    pub name: Arc<String>,
+    pub arguments: Arc<Vec<IFunctionArg>>,
+    pub outputs: Arc<Vec<IType>>,
 }
 
 pub(crate) use marine_module::MModule;
-pub(self) use wasmer_core::types::Type as WType;
-pub(self) use wasmer_core::types::Value as WValue;
+pub(self) use marine_wasm_backend_traits::WValue;
 
 // types that often used together
 pub(crate) mod wit_prelude {
@@ -51,7 +50,4 @@ pub(crate) mod wit_prelude {
     pub(super) use super::exports::ITExport;
     pub(super) use crate::MError;
     pub(super) use super::wit_function::WITFunction;
-
-    pub(crate) use super::memory::WITMemoryView;
-    pub(crate) use super::memory::WITMemory;
 }

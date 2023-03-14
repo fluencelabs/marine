@@ -21,6 +21,6 @@ mod version_extractor;
 pub use errors::SDKVersionError;
 pub use version_extractor::extract_from_path;
 pub use version_extractor::extract_from_module;
-pub use version_extractor::extract_from_wasmer_module;
+pub use version_extractor::extract_from_compiled_module;
 pub use version_embedder::embed_from_path;
 pub use version_embedder::embed_from_module;

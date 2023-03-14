@@ -34,10 +34,10 @@ pub fn records() {
         toml::from_slice(&records_config_raw).expect("records config should be well-formed");
     records_config.modules_dir = Some(PathBuf::from("../examples/records/artifacts/"));
 
-    let mut faas = Marine::with_raw_config(records_config)
+    let mut marine = Marine::with_raw_config(records_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let result1 = faas
+    let result1 = marine
         .call_with_ivalues("records_pure", "invoke", &[], <_>::default())
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
@@ -79,7 +79,7 @@ pub fn records() {
         )]
     );
 
-    let result2 = faas
+    let result2 = marine
         .call_with_json(
             "records_effector",
             "mutate_struct",
@@ -107,7 +107,7 @@ pub fn records() {
 
     assert_eq!(result2, expected_result);
 
-    let result3 = faas
+    let result3 = marine
         .call_with_json(
             "records_effector",
             "mutate_struct",
@@ -121,7 +121,7 @@ pub fn records() {
 
     assert_eq!(result3, expected_result);
 
-    let result4 = faas
+    let result4 = marine
         .call_with_json(
             "records_effector",
             "mutate_struct",
@@ -147,7 +147,7 @@ pub fn records() {
 
     assert_eq!(result4, expected_result);
 
-    let result5 = faas
+    let result5 = marine
         .call_with_json(
             "records_effector",
             "mutate_struct",
@@ -172,11 +172,11 @@ fn records_passing() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut faas = Marine::with_raw_config(records_passing_config)
+    let mut marine = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let mut test = |func_name: &str| {
-        let result = faas
+        let result = marine
             .call_with_json(
                 "records_passing_pure",
                 func_name,
@@ -233,7 +233,7 @@ fn records_destruction() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut faas = Marine::with_raw_config(records_passing_config)
+    let mut marine = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let record_array = json!([
@@ -249,16 +249,16 @@ fn records_destruction() {
             ]
     ]);
 
-    let result = faas
+    let _result = marine
         .call_with_json(
             "records_passing_pure",
             "pass_droppable_record",
-            record_array.clone(),
+            record_array,
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    let result = faas
+    let result = marine
         .call_with_json(
             "records_passing_pure",
             "get_drop_count",
@@ -288,10 +288,10 @@ fn records_return_frees() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut faas = Marine::with_raw_config(records_passing_config)
+    let mut marine = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let _result = faas
+    let _result = marine
         .call_with_json(
             "records_passing_pure",
             "return_256kb_struct",
@@ -300,15 +300,15 @@ fn records_return_frees() {
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    let stats_after_first_call = faas
+    let stats_after_first_call = marine
         .module_memory_stats()
         .0
         .iter()
         .map(|stat| (stat.name.to_string(), stat.memory_size))
         .collect::<HashMap<String, usize>>();
 
-    for i in 0..128 {
-        let result = faas
+    for _ in 0..128 {
+        let _result = marine
             .call_with_json(
                 "records_passing_pure",
                 "return_256kb_struct",
@@ -317,7 +317,7 @@ fn records_return_frees() {
             )
             .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-        for stat in faas.module_memory_stats().0 {
+        for stat in marine.module_memory_stats().0 {
             let memory_size = stats_after_first_call.get(stat.name).unwrap();
             assert_eq!(*memory_size, stat.memory_size)
         }
@@ -326,10 +326,7 @@ fn records_return_frees() {
 
 #[test]
 fn records_pass_frees() {
-    let inner_records_config_raw = std::fs::read("./tests/wasm_tests/records_passing/Config.toml")
-        .expect("./tests/wasm_tests/records_passing/Config.toml should presence");
-
-    let mut records_passing_config =
+    let records_passing_config =
         marine::TomlMarineConfig::load("./tests/wasm_tests/records_passing/Config.toml")
             .expect("argument passing test config should be well-formed");
 
@@ -353,83 +350,83 @@ fn records_pass_frees() {
     });
 
     let struct_1kb = json!({
-        "field1": struct_64b.clone(),
-        "field2": struct_64b.clone(),
-        "field3": struct_64b.clone(),
-        "field4": struct_64b.clone(),
-        "field5": struct_64b.clone(),
-        "field6": struct_64b.clone(),
-        "field7": struct_64b.clone(),
-        "field8": struct_64b.clone(),
-        "field11": struct_64b.clone(),
-        "field12": struct_64b.clone(),
-        "field13": struct_64b.clone(),
-        "field14": struct_64b.clone(),
-        "field15": struct_64b.clone(),
-        "field16": struct_64b.clone(),
-        "field17": struct_64b.clone(),
-        "field18": struct_64b.clone(),
+        "field1": struct_64b,
+        "field2": struct_64b,
+        "field3": struct_64b,
+        "field4": struct_64b,
+        "field5": struct_64b,
+        "field6": struct_64b,
+        "field7": struct_64b,
+        "field8": struct_64b,
+        "field11": struct_64b,
+        "field12": struct_64b,
+        "field13": struct_64b,
+        "field14": struct_64b,
+        "field15": struct_64b,
+        "field16": struct_64b,
+        "field17": struct_64b,
+        "field18": struct_64b,
     });
 
     let struct_16kb = json!({
-        "field1": struct_1kb.clone(),
-        "field2": struct_1kb.clone(),
-        "field3": struct_1kb.clone(),
-        "field4": struct_1kb.clone(),
-        "field5": struct_1kb.clone(),
-        "field6": struct_1kb.clone(),
-        "field7": struct_1kb.clone(),
-        "field8": struct_1kb.clone(),
-        "field11": struct_1kb.clone(),
-        "field12": struct_1kb.clone(),
-        "field13": struct_1kb.clone(),
-        "field14": struct_1kb.clone(),
-        "field15": struct_1kb.clone(),
-        "field16": struct_1kb.clone(),
-        "field17": struct_1kb.clone(),
-        "field18": struct_1kb.clone(),
+        "field1": struct_1kb,
+        "field2": struct_1kb,
+        "field3": struct_1kb,
+        "field4": struct_1kb,
+        "field5": struct_1kb,
+        "field6": struct_1kb,
+        "field7": struct_1kb,
+        "field8": struct_1kb,
+        "field11": struct_1kb,
+        "field12": struct_1kb,
+        "field13": struct_1kb,
+        "field14": struct_1kb,
+        "field15": struct_1kb,
+        "field16": struct_1kb,
+        "field17": struct_1kb,
+        "field18": struct_1kb,
     });
 
     let struct_256kb = json!({
-        "field1": struct_16kb.clone(),
-        "field2": struct_16kb.clone(),
-        "field3": struct_16kb.clone(),
-        "field4": struct_16kb.clone(),
-        "field5": struct_16kb.clone(),
-        "field6": struct_16kb.clone(),
-        "field7": struct_16kb.clone(),
-        "field8": struct_16kb.clone(),
-        "field11": struct_16kb.clone(),
-        "field12": struct_16kb.clone(),
-        "field13": struct_16kb.clone(),
-        "field14": struct_16kb.clone(),
-        "field15": struct_16kb.clone(),
-        "field16": struct_16kb.clone(),
-        "field17": struct_16kb.clone(),
-        "field18": struct_16kb.clone(),
+        "field1": struct_16kb,
+        "field2": struct_16kb,
+        "field3": struct_16kb,
+        "field4": struct_16kb,
+        "field5": struct_16kb,
+        "field6": struct_16kb,
+        "field7": struct_16kb,
+        "field8": struct_16kb,
+        "field11": struct_16kb,
+        "field12": struct_16kb,
+        "field13": struct_16kb,
+        "field14": struct_16kb,
+        "field15": struct_16kb,
+        "field16": struct_16kb,
+        "field17": struct_16kb,
+        "field18": struct_16kb,
     });
 
-    let mut faas = Marine::with_raw_config(records_passing_config)
+    let mut marine = Marine::with_raw_config(records_passing_config)
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let result = faas
+    let _result = marine
         .call_with_json(
             "records_passing_pure",
             "pass_256kb_struct",
-            json!([struct_256kb.clone()]),
+            json!([struct_256kb]),
             <_>::default(),
         )
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-    let stats_after_first_call = faas
+    let stats_after_first_call = marine
         .module_memory_stats()
         .0
         .iter()
         .map(|stat| (stat.name.to_string(), stat.memory_size))
         .collect::<HashMap<String, usize>>();
 
-    for i in 0..128 {
-        let result = faas
+    for _ in 0..128 {
+        let _result = marine
             .call_with_json(
                 "records_passing_pure",
                 "pass_256kb_struct",
@@ -438,7 +435,7 @@ fn records_pass_frees() {
             )
             .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-        for stat in faas.module_memory_stats().0 {
+        for stat in marine.module_memory_stats().0 {
             let memory_size = stats_after_first_call.get(stat.name).unwrap();
             assert_eq!(*memory_size, stat.memory_size)
         }

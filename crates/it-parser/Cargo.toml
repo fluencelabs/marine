@@ -4,7 +4,7 @@ description = "Fluence Marine interface types parser"
 version = "0.11.1"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 name = "marine_it_parser"
@@ -13,12 +13,12 @@ path = "src/lib.rs"
 [dependencies]
 marine-it-interfaces = { path = "../it-interfaces", version = "0.7.3" }
 marine-module-interface = { path = "../module-interface", version = "0.6.1" }
+marine-wasm-backend-traits = { path = "../wasm-backend-traits", version = "0.1.0"}
 
 anyhow = "1.0.66"
 walrus = "0.19.0"
-wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1"}
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.24.1" }
-nom = "5.1"
+wasmer-it = { workspace = true }
+nom = "7.1"
 
 itertools = "0.10.5"
 semver = "1.0.14"

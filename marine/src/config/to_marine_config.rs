@@ -23,26 +23,27 @@ use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use crate::host_imports::create_call_parameters_import;
 
-use marine_core::HostImportDescriptor;
-use marine_core::MModuleConfig;
-use marine_rs_sdk::CallParameters;
+use marine_core::generic::HostImportDescriptor;
+use marine_core::generic::MModuleConfig;
+use marine_wasm_backend_traits::Function;
+use marine_wasm_backend_traits::WasmBackend;
 use marine_utils::bytes_to_wasm_pages_ceil;
-use wasmer_core::import::ImportObject;
-use wasmer_core::import::Namespace;
-use wasmer_runtime::func;
+
+use marine_rs_sdk::CallParameters;
+
+use parking_lot::Mutex;
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
 const WASM_MAX_HEAP_SIZE: u64 = 4 * 1024 * 1024 * 1024 - 1; // 4 GiB - 1
 
-struct MModuleConfigBuilder {
-    config: MModuleConfig,
+struct MModuleConfigBuilder<WB: WasmBackend> {
+    config: MModuleConfig<WB>,
 }
 
-impl MModuleConfigBuilder {
+impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
     pub(self) fn new() -> Self {
         Self {
             config: <_>::default(),
@@ -52,10 +53,10 @@ impl MModuleConfigBuilder {
     pub(self) fn build(
         self,
         module_name: String,
-        marine_module_config: Option<MarineModuleConfig>,
-        call_parameters: Rc<RefCell<CallParameters>>,
+        marine_module_config: Option<MarineModuleConfig<WB>>,
+        call_parameters: Arc<Mutex<CallParameters>>,
         logger_filter: &LoggerFilter<'_>,
-    ) -> MarineResult<MModuleConfig> {
+    ) -> MarineResult<MModuleConfig<WB>> {
         let marine_module_config = match marine_module_config {
             Some(config) => config,
             None => return Ok(self.into_config()),
@@ -75,7 +76,6 @@ impl MModuleConfigBuilder {
             .populate_logger(logger_enabled, logging_mask, logger_filter, module_name)
             .populate_host_imports(host_imports, call_parameters)
             .populate_wasi(wasi)?
-            .add_version()
             .into_config();
 
         Ok(config)
@@ -87,18 +87,17 @@ impl MModuleConfigBuilder {
             None => return Ok(self),
         };
 
-        self.config.wasi_envs = wasi.envs;
+        self.config.wasi_parameters.envs = wasi.envs;
 
-        self.config.wasi_mapped_dirs = wasi.mapped_dirs;
+        self.config.wasi_parameters.mapped_dirs = wasi.mapped_dirs;
 
-        // Preopened files and mapped dirs are treated in the same way by the wasmer-wasi.
+        // Preopened files and mapped dirs are treated in the same way by the wasm backends.
         // The only difference is that for preopened files the alias and the value are the same,
-        // while for mapped dirs user defines the alias. So it may happen that some preooened file
-        // and mapped directory will have the same alias, which will cause wasmer to panic.
-        // So here preopened files are moved directly to the mapped dirs to catch errors beforehand.
+        // while for mapped dirs user defines the alias. To avoid having same alias pointing to different files,
+        // preopened files are moved directly to the mapped dirs.
         for path in wasi.preopened_files {
             let alias = path.to_string_lossy();
-            match self.config.wasi_mapped_dirs.entry(alias.to_string()) {
+            match self.config.wasi_parameters.mapped_dirs.entry(alias.to_string()) {
                 Entry::Occupied(entry) => {
                     return Err(MarineError::InvalidConfig(format!(
                         "WASI preopened files conflict with WASI mapped dirs: preopen {} is also mapped to: {}. Remove one of the entries to fix this error.", entry.key(), entry.get().display())
@@ -114,7 +113,8 @@ impl MModuleConfigBuilder {
         // create environment variables for all mapped directories
         let mapped_dirs = self
             .config
-            .wasi_mapped_dirs
+            .wasi_parameters
+            .mapped_dirs
             .iter()
             .map(|(from, to)| {
                 (
@@ -124,15 +124,15 @@ impl MModuleConfigBuilder {
             })
             .collect::<HashMap<_, _>>();
 
-        self.config.wasi_envs.extend(mapped_dirs);
+        self.config.wasi_parameters.envs.extend(mapped_dirs);
 
         Ok(self)
     }
 
     fn populate_host_imports(
         mut self,
-        host_imports: HashMap<String, HostImportDescriptor>,
-        call_parameters: Rc<RefCell<CallParameters>>,
+        host_imports: HashMap<String, HostImportDescriptor<WB>>,
+        call_parameters: Arc<Mutex<CallParameters>>, // TODO show mike
     ) -> Self {
         self.config.host_imports = host_imports;
         self.config.host_imports.insert(
@@ -187,43 +187,40 @@ impl MModuleConfigBuilder {
             };
 
             // overwrite possibly installed log variable in config
-            self.config.wasi_envs.insert(
+            self.config.wasi_parameters.envs.insert(
                 WASM_LOG_ENV_NAME.as_bytes().to_owned(),
                 log_level_str.into_bytes(),
             );
         }
 
-        let logging_mask = logging_mask;
-        let mut namespace = Namespace::new();
-        namespace.insert(
-            "log_utf8_string",
-            func!(log_utf8_string_closure(logging_mask, module_name)),
-        );
+        let creator = move |mut store: <WB as WasmBackend>::ContextMut<'_>| {
+            let logging_mask = logging_mask;
 
-        let mut raw_host_imports = ImportObject::new();
-        raw_host_imports.register("host", namespace);
-        self.config.raw_imports = raw_host_imports;
+            <WB as WasmBackend>::Function::new_typed(
+                &mut store,
+                log_utf8_string_closure::<WB>(logging_mask, module_name),
+            )
+        };
+
+        self.config
+            .raw_imports
+            .insert("log_utf8_string".to_string(), Box::new(creator));
 
         self
     }
 
-    fn add_version(mut self) -> Self {
-        self.config.wasi_version = wasmer_wasi::WasiVersion::Latest;
-        self
-    }
-
-    fn into_config(self) -> MModuleConfig {
+    fn into_config(self) -> MModuleConfig<WB> {
         self.config
     }
 }
 
 /// Make Marine config from provided Marine config.
-pub(crate) fn make_marine_config(
+pub(crate) fn make_marine_config<WB: WasmBackend>(
     module_name: String,
-    marine_module_config: Option<MarineModuleConfig>,
-    call_parameters: Rc<RefCell<marine_rs_sdk::CallParameters>>,
+    marine_module_config: Option<MarineModuleConfig<WB>>,
+    call_parameters: Arc<Mutex<marine_rs_sdk::CallParameters>>,
     logger_filter: &LoggerFilter<'_>,
-) -> MarineResult<MModuleConfig> {
+) -> MarineResult<MModuleConfig<WB>> {
     MModuleConfigBuilder::new().build(
         module_name,
         marine_module_config,

@@ -19,10 +19,9 @@ use super::errors::ITParserError;
 use crate::ParserResult;
 
 use walrus::ModuleConfig;
-use wasmer_it::{
-    ast::Interfaces,
-    decoders::wat::{parse, Buffer},
-};
+use wasmer_it::ast::Interfaces;
+use wasmer_it::decoders::wat::parse;
+use wasmer_it::decoders::wat::Buffer;
 use wasmer_it::ToBytes;
 
 use std::path::Path;

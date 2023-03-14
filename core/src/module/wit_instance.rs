@@ -19,40 +19,49 @@ use super::marine_module::MModule;
 use super::IRecordType;
 use crate::MResult;
 
+use marine_wasm_backend_traits::AsContextMut;
+use marine_wasm_backend_traits::STANDARD_MEMORY_EXPORT_NAME;
+use marine_wasm_backend_traits::DelayedContextLifetime;
+use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::Instance;
+
 use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
+
 use wasmer_it::interpreter::wasm;
-use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, TypedIndex};
-use wasmer_core::Instance as WasmerInstance;
+use wasmer_it::interpreter::wasm::structures::LocalImportIndex;
+use wasmer_it::interpreter::wasm::structures::Memory;
+use wasmer_it::interpreter::wasm::structures::TypedIndex;
 
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
-pub type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
+pub type MRecordTypes = HashMap<u64, Arc<IRecordType>>;
 
 /// Contains all import and export functions that could be called from IT context by call-core.
 #[derive(Clone)]
-pub(super) struct ITInstance {
+pub(super) struct ITInstance<WB: WasmBackend> {
     /// IT functions indexed by id.
-    funcs: HashMap<usize, WITFunction>,
+    funcs: HashMap<usize, WITFunction<WB>>,
 
     /// IT memories.
-    memories: Vec<WITMemory>,
+    memories: Vec<<WB as WasmBackend>::Memory>,
 
     /// All record types that instance contains.
     record_types_by_id: MRecordTypes,
 }
 
-impl ITInstance {
+impl<WB: WasmBackend> ITInstance<WB> {
     pub(super) fn new(
-        wasmer_instance: &WasmerInstance,
+        wasm_instance: &<WB as WasmBackend>::Instance,
+        store: &mut <WB as WasmBackend>::Store,
         module_name: &str,
         wit: &MITInterfaces<'_>,
-        modules: &HashMap<String, MModule>,
+        modules: &HashMap<String, MModule<WB>>,
     ) -> MResult<Self> {
-        let mut exports = Self::extract_raw_exports(wasmer_instance, wit)?;
+        let mut exports = Self::extract_raw_exports(wasm_instance, store, wit)?;
         let imports = Self::extract_imports(module_name, modules, wit, exports.len())?;
-        let memories = Self::extract_memories(wasmer_instance);
+        let memories = Self::extract_memories(wasm_instance, store);
 
         exports.extend(imports);
         let funcs = exports;
@@ -67,27 +76,18 @@ impl ITInstance {
     }
 
     fn extract_raw_exports(
-        wasmer_instance: &WasmerInstance,
+        wasm_instance: &<WB as WasmBackend>::Instance,
+        store: &mut <WB as WasmBackend>::Store,
         it: &MITInterfaces<'_>,
-    ) -> MResult<HashMap<usize, WITFunction>> {
-        use wasmer_core::DynFunc;
-
-        let module_exports = &wasmer_instance.exports;
-
+    ) -> MResult<HashMap<usize, WITFunction<WB>>> {
         it.exports()
             .enumerate()
             .map(|(export_id, export)| {
-                let export_func = module_exports.get(export.name)?;
-                unsafe {
-                    // TODO: refactor this with new Wasmer API when it is ready
-                    // here it is safe because dyn func is never lives WITInstance
-                    let export_func =
-                        std::mem::transmute::<DynFunc<'_>, DynFunc<'static>>(export_func);
-                    Ok((
-                        export_id,
-                        WITFunction::from_export(export_func, export.name.to_string())?,
-                    ))
-                }
+                let export_func = wasm_instance.get_function(store, export.name)?;
+                Ok((
+                    export_id,
+                    WITFunction::from_export(store, export_func, export.name.to_string())?,
+                ))
             })
             .collect()
     }
@@ -95,10 +95,10 @@ impl ITInstance {
     /// Extracts only those imports that don't have implementations.
     fn extract_imports(
         module_name: &str,
-        modules: &HashMap<String, MModule>,
+        modules: &HashMap<String, MModule<WB>>,
         wit: &MITInterfaces<'_>,
         start_index: usize,
-    ) -> MResult<HashMap<usize, WITFunction>> {
+    ) -> MResult<HashMap<usize, WITFunction<WB>>> {
         wit.imports()
             .filter(|import|
                 // filter out imports that have implementations
@@ -129,29 +129,29 @@ impl ITInstance {
                         output_types,
                     )?;
 
-                    Ok((start_index + idx as usize, func))
+                    Ok((start_index + idx, func))
                 }
                 None => Err(MError::NoSuchModule(import.namespace.to_string())),
             })
             .collect::<MResult<HashMap<_, _>>>()
     }
 
-    fn extract_memories(wasmer_instance: &WasmerInstance) -> Vec<WITMemory> {
-        use wasmer_core::export::Export::Memory;
+    fn extract_memories(
+        wasm_instance: &<WB as WasmBackend>::Instance,
+        store: &mut <WB as WasmBackend>::Store,
+    ) -> Vec<<WB as WasmBackend>::Memory> {
+        use marine_wasm_backend_traits::Export::Memory;
 
-        let mut memories = wasmer_instance
-            .exports()
+        let mut memories = wasm_instance
+            .export_iter(store.as_context_mut())
             .filter_map(|(_, export)| match export {
-                Memory(memory) => Some(WITMemory(memory)),
+                Memory(memory) => Some(memory),
                 _ => None,
             })
             .collect::<Vec<_>>();
 
-        if let Some(Memory(memory)) = wasmer_instance
-            .import_object
-            .maybe_with_namespace("env", |env| env.get_export("memory"))
-        {
-            memories.push(WITMemory(memory));
+        if let Ok(memory) = wasm_instance.get_memory(store, STANDARD_MEMORY_EXPORT_NAME) {
+            memories.push(memory);
         }
 
         memories
@@ -175,19 +175,28 @@ impl ITInstance {
     }
 }
 
-impl<'v> wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView<'v>>
-    for ITInstance
+impl<WB: WasmBackend>
+    wasm::structures::Instance<
+        ITExport,
+        WITFunction<WB>,
+        <WB as WasmBackend>::Memory,
+        <WB as WasmBackend>::MemoryView,
+        DelayedContextLifetime<WB>,
+    > for ITInstance<WB>
 {
     fn export(&self, _export_name: &str) -> Option<&ITExport> {
         // exports aren't used in this version of IT
         None
     }
 
-    fn local_or_import<I: TypedIndex + LocalImportIndex>(&self, index: I) -> Option<&WITFunction> {
+    fn local_or_import<I: TypedIndex + LocalImportIndex>(
+        &self,
+        index: I,
+    ) -> Option<&WITFunction<WB>> {
         self.funcs.get(&index.index())
     }
 
-    fn memory(&self, index: usize) -> Option<&WITMemory> {
+    fn memory(&self, index: usize) -> Option<&<WB as WasmBackend>::Memory> {
         if index >= self.memories.len() {
             None
         } else {
@@ -195,17 +204,17 @@ impl<'v> wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryV
         }
     }
 
-    fn memory_view(&self, index: usize) -> Option<WITMemoryView<'static>> {
+    fn memory_view(&self, index: usize) -> Option<<WB as WasmBackend>::MemoryView> {
         if index >= self.memories.len() {
             return None;
         }
 
         let memory = &self.memories[index];
-        let view: WITMemoryView<'static> = memory.view();
+        let view: <WB as WasmBackend>::MemoryView = memory.view();
         Some(view)
     }
 
-    fn wit_record_by_id(&self, index: u64) -> Option<&Rc<IRecordType>> {
+    fn wit_record_by_id(&self, index: u64) -> Option<&Arc<IRecordType>> {
         self.record_types_by_id.get(&index)
     }
 }

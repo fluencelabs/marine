@@ -30,14 +30,14 @@ use marine_rs_sdk::CallParameters;
 use serde_json::Value as JValue;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
-type MFunctionSignature = (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>);
-type MModuleInterface = (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>, Rc<MRecordTypes>);
+type MFunctionSignature = (Arc<Vec<IFunctionArg>>, Arc<Vec<IType>>);
+type MModuleInterface = (Arc<Vec<IFunctionArg>>, Arc<Vec<IType>>, Arc<MRecordTypes>);
 
 struct ModuleInterface {
     function_signatures: HashMap<String, MFunctionSignature>,
-    record_types: Rc<MRecordTypes>,
+    record_types: Arc<MRecordTypes>,
 }
 
 // TODO: remove and use mutex instead
@@ -49,7 +49,7 @@ pub struct FluenceFaaS {
     marine: Marine,
 
     /// Parameters of call accessible by Wasm modules.
-    call_parameters: Rc<RefCell<CallParameters>>,
+    call_parameters: Arc<RefCell<CallParameters>>,
 
     /// Cached module interfaces by names.
     module_interfaces_cache: HashMap<String, ModuleInterface>,
@@ -60,7 +60,7 @@ impl FluenceFaaS {
     /// Creates FaaS with given modules.
     pub fn with_modules(modules: HashMap<String, Vec<u8>>) -> Result<Self> {
         let mut marine = Marine::new();
-        let call_parameters = Rc::new(RefCell::new(CallParameters::default()));
+        let call_parameters = Arc::new(RefCell::new(CallParameters::default()));
 
         for (name, wit_section_bytes) in modules {
             marine.load_module(name, &wit_section_bytes)?;
@@ -133,8 +133,8 @@ impl FluenceFaaS {
 
     /// At first, tries to find function signature and record types in module_interface_cache,
     /// if there is no them, tries to look
-    fn lookup_module_interface<'faas>(
-        &'faas mut self,
+    fn lookup_module_interface(
+        &mut self,
         module_name: &str,
         func_name: &str,
     ) -> Result<MModuleInterface> {
@@ -171,7 +171,7 @@ impl FluenceFaaS {
 
         let arg_types = arg_types.clone();
         let output_types = output_types.clone();
-        let record_types = Rc::new(module_interface.record_types.clone());
+        let record_types = Arc::new(module_interface.record_types.clone());
 
         let module_interface = ModuleInterface {
             function_signatures,

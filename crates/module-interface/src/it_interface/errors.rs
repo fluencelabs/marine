@@ -28,6 +28,6 @@ pub enum ITInterfaceError {
     #[error("mailformed module: a record contains more recursion level then allowed")]
     TooManyRecursionLevels,
 
-    #[error("{0}")]
+    #[error(transparent)]
     MITInterfacesError(#[from] MITInterfacesError),
 }

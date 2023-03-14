@@ -20,23 +20,18 @@ use super::PrepareError;
 use marine_module_info_parser::sdk_version;
 use marine_min_it_version::min_sdk_version;
 use marine_min_it_version::min_it_version;
+use marine_wasm_backend_traits::WasmBackend;
 
-use wasmer_core::Module;
-
-pub(crate) fn check_sdk_version(
-    name: impl Into<String>,
-    wasmer_module: &Module,
+pub(crate) fn check_sdk_version<WB: WasmBackend>(
+    name: String,
+    wasmer_module: &<WB as WasmBackend>::Module,
 ) -> PrepareResult<()> {
-    let module_version = sdk_version::extract_from_wasmer_module(wasmer_module)?;
-    let module_version = match module_version {
-        Some(module_version) => module_version,
-        None => return Err(PrepareError::ModuleWithoutVersion(name.into())),
-    };
+    let module_version = sdk_version::extract_from_compiled_module::<WB>(wasmer_module)?;
 
     let required_version = min_sdk_version();
     if module_version < *required_version {
         return Err(PrepareError::IncompatibleSDKVersions {
-            module_name: name.into(),
+            module_name: name,
             required: required_version.clone(),
             provided: module_version,
         });

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use marine_core::HostImportDescriptor;
+use marine_wasm_backend_traits::WasmBackend;
+use marine_core::generic::HostImportDescriptor;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -43,14 +44,14 @@ impl ConfigContext {
 
 /// Info to load a module from filesystem into runtime.
 #[derive(Default)]
-pub struct ModuleDescriptor {
+pub struct ModuleDescriptor<WB: WasmBackend> {
     pub load_from: Option<PathBuf>,
     pub file_name: String,
     pub import_name: String,
-    pub config: MarineModuleConfig,
+    pub config: MarineModuleConfig<WB>,
 }
 
-impl ModuleDescriptor {
+impl<WB: WasmBackend> ModuleDescriptor<WB> {
     pub fn get_path(&self, modules_dir: &Option<PathBuf>) -> Result<PathBuf, MarineError> {
         match &self.load_from {
             None => match modules_dir {
@@ -73,20 +74,20 @@ impl ModuleDescriptor {
 
 /// Describes the behaviour of the Marine component.
 #[derive(Default)]
-pub struct MarineConfig {
+pub struct MarineConfig<WB: WasmBackend> {
     /// Path to a dir where compiled Wasm modules are located.
     pub modules_dir: Option<PathBuf>,
 
     /// Settings for a module with particular name (not HashMap because the order is matter).
-    pub modules_config: Vec<ModuleDescriptor>,
+    pub modules_config: Vec<ModuleDescriptor<WB>>,
 
     /// Settings for a module that name's not been found in modules_config.
-    pub default_modules_config: Option<MarineModuleConfig>,
+    pub default_modules_config: Option<MarineModuleConfig<WB>>,
 }
 
 /// Various settings that could be used to guide Marine how to load a module in a proper way.
 #[derive(Default)]
-pub struct MarineModuleConfig {
+pub struct MarineModuleConfig<WB: WasmBackend> {
     /// Maximum memory size accessible by a module in Wasm pages (64 Kb).
     pub mem_pages_count: Option<u32>,
 
@@ -97,7 +98,7 @@ pub struct MarineModuleConfig {
     pub logger_enabled: bool,
 
     /// Export from host functions that will be accessible on the Wasm side by provided name.
-    pub host_imports: HashMap<String, HostImportDescriptor>,
+    pub host_imports: HashMap<String, HostImportDescriptor<WB>>,
 
     /// A WASI config.
     pub wasi: Option<MarineWASIConfig>,
@@ -106,7 +107,7 @@ pub struct MarineModuleConfig {
     pub logging_mask: i32,
 }
 
-impl MarineModuleConfig {
+impl<WB: WasmBackend> MarineModuleConfig<WB> {
     pub fn extend_wasi_envs(&mut self, new_envs: HashMap<Vec<u8>, Vec<u8>>) {
         match &mut self.wasi {
             Some(MarineWASIConfig { envs, .. }) => envs.extend(new_envs),
@@ -152,14 +153,14 @@ impl MarineModuleConfig {
                 mapped_dirs,
                 ..
             }) => {
-                mapped_dirs
-                    .values_mut()
-                    .map(|path| *path = root.join(&path))
-                    .for_each(drop);
+                mapped_dirs.values_mut().for_each(|path| {
+                    *path = root.join(&path);
+                });
 
-                let mapped_preopens = preopened_files
-                    .iter()
-                    .map(|path| (path.to_string_lossy().into(), root.join(path)));
+                let mapped_preopens = preopened_files.iter().map(|path| {
+                    let new_path = root.join(path);
+                    (path.to_string_lossy().into(), new_path)
+                });
 
                 mapped_dirs.extend(mapped_preopens);
 
@@ -193,9 +194,10 @@ use crate::config::as_relative_to_base;
 
 use itertools::Itertools;
 
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
+use std::convert::TryInto;
 
-impl TryFrom<TomlMarineConfig> for MarineConfig {
+impl<WB: WasmBackend> TryFrom<TomlMarineConfig> for MarineConfig<WB> {
     type Error = MarineError;
 
     fn try_from(toml_config: TomlMarineConfig) -> Result<Self, Self::Error> {
@@ -228,7 +230,9 @@ impl TryFrom<TomlMarineConfig> for MarineConfig {
     }
 }
 
-impl<'c> TryFrom<WithContext<'c, TomlMarineNamedModuleConfig>> for ModuleDescriptor {
+impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineNamedModuleConfig>>
+    for ModuleDescriptor<WB>
+{
     type Error = MarineError;
 
     fn try_from(config: WithContext<'c, TomlMarineNamedModuleConfig>) -> Result<Self, Self::Error> {
@@ -252,7 +256,9 @@ impl<'c> TryFrom<WithContext<'c, TomlMarineNamedModuleConfig>> for ModuleDescrip
     }
 }
 
-impl<'c> TryFrom<WithContext<'c, TomlMarineModuleConfig>> for MarineModuleConfig {
+impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>>
+    for MarineModuleConfig<WB>
+{
     type Error = MarineError;
 
     fn try_from(toml_config: WithContext<'c, TomlMarineModuleConfig>) -> Result<Self, Self::Error> {

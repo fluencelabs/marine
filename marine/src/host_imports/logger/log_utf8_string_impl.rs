@@ -14,29 +14,33 @@
  * limitations under the License.
  */
 
-use wasmer_core::vm::Ctx;
-use wasmer_core::memory::ptr::{Array, WasmPtr};
+use marine_wasm_backend_traits::AsContextMut;
+use marine_wasm_backend_traits::Caller;
+use marine_wasm_backend_traits::WasmBackend;
 
-pub(crate) fn log_utf8_string_closure(
+use it_memory_traits::Memory;
+use it_memory_traits::MemoryReadable;
+
+pub(crate) fn log_utf8_string_closure<WB: WasmBackend>(
     logging_mask: i32,
     module: String,
-) -> impl Fn(&mut Ctx, i32, i32, i32, i32) {
+) -> impl Fn(<WB as WasmBackend>::Caller<'_>, i32, i32, i32, i32) {
     move |ctx, level, target, msg_offset, msg_size| {
         if target == 0 || target & logging_mask != 0 {
-            log_utf8_string(&module, ctx, level, msg_offset, msg_size)
+            log_utf8_string::<WB>(&module, ctx, level, msg_offset, msg_size)
         }
     }
 }
 
-pub(crate) fn log_utf8_string(
+pub(crate) fn log_utf8_string<WB: WasmBackend>(
     module: &str,
-    ctx: &mut Ctx,
+    mut ctx: <WB as WasmBackend>::Caller<'_>,
     level: i32,
     msg_offset: i32,
     msg_size: i32,
 ) {
     let level = level_from_i32(level);
-    let msg = read_string(ctx, msg_offset, msg_size);
+    let msg = read_string::<WB>(&mut ctx, msg_offset, msg_size);
 
     match msg {
         Some(msg) => log::logger().log(
@@ -52,9 +56,14 @@ pub(crate) fn log_utf8_string(
 }
 
 #[inline]
-fn read_string(ctx: &Ctx, offset: i32, size: i32) -> Option<&str> {
-    let wasm_ptr = WasmPtr::<u8, Array>::new(offset as u32);
-    wasm_ptr.get_utf8_string(ctx.memory(0), size as u32)
+fn read_string<WB: WasmBackend>(
+    ctx: &mut <WB as WasmBackend>::Caller<'_>,
+    offset: i32,
+    size: i32,
+) -> Option<String> {
+    let view = ctx.memory(0).unwrap().view(); // TODO handle error
+    let bytes = view.read_vec(&mut ctx.as_context_mut(), offset as u32, size as u32);
+    String::from_utf8(bytes).ok()
 }
 
 #[inline]

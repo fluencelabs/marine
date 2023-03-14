@@ -45,15 +45,15 @@ pub enum ITParserError {
     CorruptedITSection(nom::Err<(Vec<u8>, nom::error::ErrorKind)>),
 
     /// An error related to incorrect data in IT section.
-    #[error("{0}")]
-    IncorrectITFormat(String),
+    #[error("0")]
+    IncorrectITFormat(String), // TODO: use a proper error type
 
     /// An error occurred while processing module interface.
-    #[error("{0}")]
+    #[error(transparent)]
     ModuleInterfaceError(#[from] InterfaceError),
 
     /// An error occurred while processing module IT interface.
-    #[error("{0}")]
+    #[error(transparent)]
     ModuleITInterfaceError(#[from] ITInterfaceError),
 
     /// An error occurred while parsing file in Wat format.

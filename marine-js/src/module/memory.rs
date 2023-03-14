@@ -16,10 +16,14 @@
 
 use crate::marine_js::JsWasmMemoryProxy;
 
-use it_memory_traits::{MemoryAccessError, MemoryView, MemoryWritable, MemoryReadable};
+use it_memory_traits::MemoryAccessError;
+use it_memory_traits::MemoryView;
+use it_memory_traits::MemoryWritable;
+use it_memory_traits::MemoryReadable;
 use wasmer_it::interpreter::wasm;
 
 use std::rc::Rc;
+use crate::module::wit_store::WITStore;
 
 pub(super) struct WITMemoryView {
     memory: JsWasmMemoryProxy,
@@ -33,35 +37,40 @@ impl WITMemoryView {
     }
 }
 
-impl MemoryWritable for WITMemoryView {
-    fn write_byte(&self, offset: u32, value: u8) {
+impl MemoryWritable<WITStore> for WITMemoryView {
+    fn write_byte(&self, _store: &mut (), offset: u32, value: u8) {
         self.memory.set(offset, value);
     }
 
-    fn write_bytes(&self, offset: u32, bytes: &[u8]) {
+    fn write_bytes(&self, _store: &mut (), offset: u32, bytes: &[u8]) {
         self.memory.set_range(offset, bytes);
     }
 }
 
-impl MemoryReadable for WITMemoryView {
-    fn read_byte(&self, offset: u32) -> u8 {
+impl MemoryReadable<WITStore> for WITMemoryView {
+    fn read_byte(&self, _store: &mut (), offset: u32) -> u8 {
         self.memory.get(offset)
     }
 
-    fn read_array<const COUNT: usize>(&self, offset: u32) -> [u8; COUNT] {
+    fn read_array<const COUNT: usize>(&self, _store: &mut (), offset: u32) -> [u8; COUNT] {
         let mut result = [0u8; COUNT];
         let data = self.memory.get_range(offset, COUNT as u32);
         result.copy_from_slice(&data[..COUNT]);
         result
     }
 
-    fn read_vec(&self, offset: u32, size: u32) -> Vec<u8> {
+    fn read_vec(&self, _store: &mut (), offset: u32, size: u32) -> Vec<u8> {
         self.memory.get_range(offset, size)
     }
 }
 
-impl MemoryView for WITMemoryView {
-    fn check_bounds(&self, offset: u32, size: u32) -> Result<(), MemoryAccessError> {
+impl MemoryView<WITStore> for WITMemoryView {
+    fn check_bounds(
+        &self,
+        _store: &mut (),
+        offset: u32,
+        size: u32,
+    ) -> Result<(), MemoryAccessError> {
         let memory_size = self.memory.len();
         if offset + size >= memory_size {
             Err(MemoryAccessError::OutOfBounds {
@@ -86,7 +95,7 @@ impl WITMemory {
     }
 }
 
-impl wasm::structures::Memory<WITMemoryView> for WITMemory {
+impl wasm::structures::Memory<WITMemoryView, WITStore> for WITMemory {
     fn view(&self) -> WITMemoryView {
         WITMemoryView::new(self.module_name.clone())
     }

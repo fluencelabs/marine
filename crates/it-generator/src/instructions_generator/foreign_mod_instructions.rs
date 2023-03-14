@@ -33,7 +33,7 @@ use wasmer_it::ast::FunctionArg as IFunctionArg;
 use wasmer_it::interpreter::Instruction;
 use wasmer_it::IType;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 const HOST_NAMESPACE_NAME: &str = "host";
 
@@ -148,17 +148,17 @@ fn generate_it_instructions<'f>(
     Ok(())
 }
 
-pub(crate) fn generate_raw_args(signature: &FnSignature) -> Rc<Vec<IFunctionArg>> {
+pub(crate) fn generate_raw_args(signature: &FnSignature) -> Arc<Vec<IFunctionArg>> {
     let raw_inputs = signature
         .arguments
         .iter()
         .flat_map(to_raw_input_types)
         .collect::<Vec<_>>();
 
-    Rc::new(raw_inputs)
+    Arc::new(raw_inputs)
 }
 
-pub(crate) fn generate_raw_output_type(signature: &FnSignature) -> Rc<Vec<IType>> {
+pub(crate) fn generate_raw_output_type(signature: &FnSignature) -> Arc<Vec<IType>> {
     let raw_outputs = signature
         .output_types
         .iter()
@@ -170,7 +170,7 @@ pub(crate) fn generate_raw_output_type(signature: &FnSignature) -> Rc<Vec<IType>
         })
         .collect::<Vec<_>>();
 
-    Rc::new(raw_outputs)
+    Arc::new(raw_outputs)
 }
 
 use marine_macro_impl::RustType;

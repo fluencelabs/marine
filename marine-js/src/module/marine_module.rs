@@ -17,10 +17,14 @@
 use super::wit_prelude::*;
 use super::MFunctionSignature;
 use super::MRecordTypes;
-use super::{IType, IRecordType, IFunctionArg, IValue};
+use super::IType;
+use super::IRecordType;
+use super::IFunctionArg;
+use super::IValue;
 use crate::MResult;
-use crate::marine_js::{Instance as WasmerInstance};
+use crate::marine_js::Instance as WasmerInstance;
 use crate::module::wit_function::WITFunction;
+use crate::module::wit_store::WITStore;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_utils::SharedString;
@@ -34,13 +38,14 @@ use std::rc::Rc;
 
 const INITIALIZE_FUNC: &str = "_initialize";
 
-type ITInterpreter = Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView>;
+type ITInterpreter =
+    Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView, WITStore>;
 
 #[derive(Clone)]
 pub(super) struct ITModuleFunc {
     interpreter: Arc<ITInterpreter>,
-    pub(super) arguments: Rc<Vec<IFunctionArg>>,
-    pub(super) output_types: Rc<Vec<IType>>,
+    pub(super) arguments: Arc<Vec<IFunctionArg>>,
+    pub(super) output_types: Arc<Vec<IType>>,
 }
 
 #[derive(Clone)]
@@ -55,7 +60,7 @@ impl Callable {
         let result = self
             .it_module_func
             .interpreter
-            .run(args, Arc::make_mut(&mut self.it_instance))?
+            .run(args, Arc::make_mut(&mut self.it_instance), &mut ())?
             .as_slice()
             .to_owned();
         Ok(result)
@@ -65,10 +70,10 @@ impl Callable {
 type ExportFunctions = HashMap<SharedString, Rc<Callable>>;
 
 pub(crate) struct MModule {
-    // wasmer_instance is needed because WITInstance contains dynamic functions
+    // wasm_instance is needed because WITInstance contains dynamic functions
     // that internally keep pointer to it.
     #[allow(unused)]
-    wasmer_instance: Box<WasmerInstance>,
+    wasm_instance: Box<WasmerInstance>,
 
     // TODO: replace with dyn Trait
     export_funcs: ExportFunctions,
@@ -88,20 +93,21 @@ pub(crate) fn extract_it_from_bytes(wit_section_bytes: &[u8]) -> Result<Interfac
 
 #[allow(unused)]
 impl MModule {
-    pub(crate) fn new(name: &str, wit_section_bytes: &[u8]) -> MResult<Self> {
-        let it = extract_it_from_bytes(wit_section_bytes)?;
+    pub(crate) fn new(name: &str, wasm_bytes: &[u8]) -> MResult<Self> {
+        // TODO: extract sdk version
+        let it = extract_it_from_bytes(wasm_bytes)?;
         crate::misc::check_it_version(name, &it.version)?;
 
         let mit = MITInterfaces::new(it);
-        let wasmer_instance = WasmerInstance::new(&mit, Rc::new(name.to_string()));
-        let it_instance = Arc::new(ITInstance::new(&wasmer_instance, &mit)?);
+        let wasm_instance = WasmerInstance::new(&mit, Rc::new(name.to_string()));
+        let it_instance = Arc::new(ITInstance::new(&wasm_instance, &mit)?);
         let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
-        if let Ok(initialize_func) = wasmer_instance.exports.get(INITIALIZE_FUNC) {
+        if let Ok(initialize_func) = wasm_instance.exports.get(INITIALIZE_FUNC) {
             initialize_func.call(&[])?;
         }
 
         Ok(Self {
-            wasmer_instance: Box::new(wasmer_instance),
+            wasm_instance: Box::new(wasm_instance),
             export_funcs,
             export_record_types,
         })
@@ -138,7 +144,7 @@ impl MModule {
         &self.export_record_types
     }
 
-    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&Rc<IRecordType>> {
+    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&Arc<IRecordType>> {
         self.export_record_types.get(&record_type)
     }
 

@@ -1,4 +1,5 @@
-use cargo_toml::{Error as CargoTomlError, Manifest};
+use cargo_toml::Error as CargoTomlError;
+use cargo_toml::Manifest;
 use toml::de::Error as TomlError;
 use semver::Version;
 use thiserror::Error as ThisError;

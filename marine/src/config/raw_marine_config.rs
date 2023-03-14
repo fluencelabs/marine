@@ -140,7 +140,9 @@ pub struct TomlWASIConfig {
 mod tests {
     use std::path::PathBuf;
     use bytesize::ByteSize;
-    use super::{TomlMarineNamedModuleConfig, TomlMarineModuleConfig, TomlWASIConfig};
+    use super::TomlMarineNamedModuleConfig;
+    use super::TomlMarineModuleConfig;
+    use super::TomlWASIConfig;
 
     #[test]
     fn serialize_marine_named_module_config() {

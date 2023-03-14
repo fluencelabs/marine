@@ -19,7 +19,7 @@ use wasmer_it::IType;
 use wasmer_it::ast::FunctionArg as IFunctionArg;
 use once_cell::sync::Lazy;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub(crate) struct ApiExportFuncDescriptor {
     pub(crate) name: &'static str,
@@ -31,8 +31,8 @@ pub(crate) struct ApiExportFuncDescriptor {
 impl ApiExportFuncDescriptor {
     pub fn update_interfaces(&self, interfaces: &mut Interfaces<'_>) {
         let func_type = wasmer_it::ast::Type::Function {
-            arguments: Rc::new(self.arguments.clone()),
-            output_types: Rc::new(self.output_types.clone()),
+            arguments: Arc::new(self.arguments.clone()),
+            output_types: Arc::new(self.output_types.clone()),
         };
         interfaces.types.push(func_type);
 

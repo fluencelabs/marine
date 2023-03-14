@@ -15,6 +15,7 @@
  */
 
 use marine::MarineConfig;
+
 use std::path::PathBuf;
 
 /// Describes behaviour of the Fluence AppService.

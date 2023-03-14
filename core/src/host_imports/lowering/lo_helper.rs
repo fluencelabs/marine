@@ -15,34 +15,59 @@
  */
 
 use super::AllocateFunc;
-use crate::module::wit_prelude::WITMemoryView;
-
 use crate::call_wasm_func;
+
+use marine_wasm_backend_traits::DelayedContextLifetime;
+use marine_wasm_backend_traits::WasmBackend;
+
 use it_lilo::traits::Allocatable;
 use it_lilo::traits::AllocatableError;
+use it_memory_traits::MemoryView;
+use it_memory_traits::Memory;
 
-use it_lilo::traits::DEFAULT_MEMORY_INDEX;
-use wasmer_core::vm::Ctx;
+use std::marker::PhantomData;
 
-pub(crate) struct LoHelper<'c> {
-    allocate_func: &'c AllocateFunc,
-    ctx: &'c Ctx,
+pub(crate) struct LoHelper<
+    'c,
+    WB: WasmBackend,
+    MV: MemoryView<DelayedContextLifetime<WB>>,
+    M: Memory<MV, DelayedContextLifetime<WB>>,
+> {
+    allocate_func: &'c mut AllocateFunc<WB>,
+    memory: M,
+    _memory_view_phantom: PhantomData<MV>,
 }
 
-impl<'c> LoHelper<'c> {
-    pub(crate) fn new(allocate_func: &'c AllocateFunc, ctx: &'c Ctx) -> Self {
-        Self { allocate_func, ctx }
+impl<
+        'c,
+        WB: WasmBackend,
+        MV: MemoryView<DelayedContextLifetime<WB>>,
+        M: Memory<MV, DelayedContextLifetime<WB>>,
+    > LoHelper<'c, WB, MV, M>
+{
+    pub(crate) fn new(allocate_func: &'c mut AllocateFunc<WB>, memory: M) -> Self {
+        Self {
+            allocate_func,
+            memory,
+            _memory_view_phantom: <_>::default(),
+        }
     }
 }
 
-impl<'s> Allocatable<WITMemoryView<'s>> for LoHelper<'s> {
+impl<
+        's,
+        WB: WasmBackend,
+        MV: MemoryView<DelayedContextLifetime<WB>>,
+        M: Memory<MV, DelayedContextLifetime<WB>>,
+    > Allocatable<MV, DelayedContextLifetime<WB>> for LoHelper<'s, WB, MV, M>
+{
     fn allocate(
-        &self,
+        &mut self,
+        store: &mut <WB as WasmBackend>::ContextMut<'_>,
         size: u32,
         type_tag: u32,
-    ) -> Result<(u32, WITMemoryView<'s>), AllocatableError> {
-        let offset = call_wasm_func!(self.allocate_func, size as _, type_tag as _);
-        let view = WITMemoryView(self.ctx.memory(DEFAULT_MEMORY_INDEX as u32).view());
-        Ok((offset as u32, view))
+    ) -> Result<(u32, MV), AllocatableError> {
+        let offset = call_wasm_func!(self.allocate_func, store, size as _, type_tag as _);
+        Ok((offset as u32, self.memory.view()))
     }
 }

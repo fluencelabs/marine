@@ -16,8 +16,12 @@
 
 extern crate core;
 
-use serde_json::{json, Value};
-use marine::{Marine, MarineError, TomlMarineConfig};
+use marine::Marine;
+use marine::MarineError;
+use marine::TomlMarineConfig;
+
+use serde_json::json;
+use serde_json::Value;
 
 #[test]
 fn load_from_modules_dir() {
@@ -102,7 +106,8 @@ fn mapping_to_absolute_path_in_wasi_prohibited() {
 fn mapping_from_absolute_path_in_wasi_allowed() {
     let config_path = "tests/wasm_tests/wasi/MapFromAbsolutePath.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
-    let result = Marine::with_raw_config(raw_config).expect("Module should be loaded successfully");
+    let _result =
+        Marine::with_raw_config(raw_config).expect("Module should be loaded successfully");
 }
 
 #[test]

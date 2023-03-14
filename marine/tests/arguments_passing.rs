@@ -23,7 +23,7 @@ use pretty_assertions::assert_eq;
 use once_cell::sync::Lazy;
 use serde_json::json;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
     marine::TomlMarineConfig::load("./tests/wasm_tests/arguments_passing/Config.toml")
@@ -48,15 +48,15 @@ pub fn get_interfaces() {
     let string_type_outputs = vec![IType::String];
 
     let string_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("string_type")),
-        arguments: Rc::new(string_type_arguments.clone()),
-        outputs: Rc::new(string_type_outputs.clone()),
+        name: Arc::new(String::from("string_type")),
+        arguments: Arc::new(string_type_arguments.clone()),
+        outputs: Arc::new(string_type_outputs.clone()),
     };
 
     let string_ref_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("string_ref_type")),
-        arguments: Rc::new(string_type_arguments),
-        outputs: Rc::new(string_type_outputs),
+        name: Arc::new(String::from("string_ref_type")),
+        arguments: Arc::new(string_type_arguments),
+        outputs: Arc::new(string_type_outputs),
     };
 
     let str_type_arguments = vec![marine::IFunctionArg {
@@ -66,9 +66,9 @@ pub fn get_interfaces() {
     let str_type_outputs = vec![IType::String];
 
     let str_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("str_type")),
-        arguments: Rc::new(str_type_arguments),
-        outputs: Rc::new(str_type_outputs),
+        name: Arc::new(String::from("str_type")),
+        arguments: Arc::new(str_type_arguments),
+        outputs: Arc::new(str_type_outputs),
     };
 
     let bytearray_type_arguments = vec![marine::IFunctionArg {
@@ -78,15 +78,15 @@ pub fn get_interfaces() {
     let bytearray_type_outputs = vec![IType::ByteArray];
 
     let bytearray_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("bytearray_type")),
-        arguments: Rc::new(bytearray_type_arguments.clone()),
-        outputs: Rc::new(bytearray_type_outputs.clone()),
+        name: Arc::new(String::from("bytearray_type")),
+        arguments: Arc::new(bytearray_type_arguments.clone()),
+        outputs: Arc::new(bytearray_type_outputs.clone()),
     };
 
     let bytearray_ref_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("bytearray_ref_type")),
-        arguments: Rc::new(bytearray_type_arguments),
-        outputs: Rc::new(bytearray_type_outputs),
+        name: Arc::new(String::from("bytearray_ref_type")),
+        arguments: Arc::new(bytearray_type_arguments),
+        outputs: Arc::new(bytearray_type_outputs),
     };
 
     let i32_type_arguments = vec![marine::IFunctionArg {
@@ -96,15 +96,15 @@ pub fn get_interfaces() {
     let i32_type_outputs = vec![IType::S32];
 
     let i32_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("i32_type")),
-        arguments: Rc::new(i32_type_arguments.clone()),
-        outputs: Rc::new(i32_type_outputs.clone()),
+        name: Arc::new(String::from("i32_type")),
+        arguments: Arc::new(i32_type_arguments.clone()),
+        outputs: Arc::new(i32_type_outputs.clone()),
     };
 
     let i32_ref_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("i32_ref_type")),
-        arguments: Rc::new(i32_type_arguments),
-        outputs: Rc::new(i32_type_outputs),
+        name: Arc::new(String::from("i32_ref_type")),
+        arguments: Arc::new(i32_type_arguments),
+        outputs: Arc::new(i32_type_outputs),
     };
 
     let i64_type_arguments = vec![marine::IFunctionArg {
@@ -115,15 +115,15 @@ pub fn get_interfaces() {
     let i64_type_outputs = vec![IType::S64];
 
     let i64_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("i64_type")),
-        arguments: Rc::new(i64_type_arguments.clone()),
-        outputs: Rc::new(i64_type_outputs.clone()),
+        name: Arc::new(String::from("i64_type")),
+        arguments: Arc::new(i64_type_arguments.clone()),
+        outputs: Arc::new(i64_type_outputs.clone()),
     };
 
     let i64_ref_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("i64_ref_type")),
-        arguments: Rc::new(i64_type_arguments),
-        outputs: Rc::new(i64_type_outputs),
+        name: Arc::new(String::from("i64_ref_type")),
+        arguments: Arc::new(i64_type_arguments),
+        outputs: Arc::new(i64_type_outputs),
     };
 
     let u32_type_arguments = vec![marine::IFunctionArg {
@@ -133,15 +133,15 @@ pub fn get_interfaces() {
     let u32_type_outputs = vec![IType::U32];
 
     let u32_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("u32_type")),
-        arguments: Rc::new(u32_type_arguments.clone()),
-        outputs: Rc::new(u32_type_outputs.clone()),
+        name: Arc::new(String::from("u32_type")),
+        arguments: Arc::new(u32_type_arguments.clone()),
+        outputs: Arc::new(u32_type_outputs.clone()),
     };
 
     let u32_ref_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("u32_ref_type")),
-        arguments: Rc::new(u32_type_arguments),
-        outputs: Rc::new(u32_type_outputs),
+        name: Arc::new(String::from("u32_ref_type")),
+        arguments: Arc::new(u32_type_arguments),
+        outputs: Arc::new(u32_type_outputs),
     };
 
     let u64_type_arguments = vec![marine::IFunctionArg {
@@ -151,15 +151,15 @@ pub fn get_interfaces() {
     let u64_type_outputs = vec![IType::U64];
 
     let u64_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("u64_type")),
-        arguments: Rc::new(u64_type_arguments.clone()),
-        outputs: Rc::new(u64_type_outputs.clone()),
+        name: Arc::new(String::from("u64_type")),
+        arguments: Arc::new(u64_type_arguments.clone()),
+        outputs: Arc::new(u64_type_outputs.clone()),
     };
 
     let u64_ref_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("u64_ref_type")),
-        arguments: Rc::new(u64_type_arguments),
-        outputs: Rc::new(u64_type_outputs),
+        name: Arc::new(String::from("u64_ref_type")),
+        arguments: Arc::new(u64_type_arguments),
+        outputs: Arc::new(u64_type_outputs),
     };
 
     let f32_type_arguments = vec![marine::IFunctionArg {
@@ -169,15 +169,15 @@ pub fn get_interfaces() {
     let f32_type_outputs = vec![IType::F32];
 
     let f32_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("f32_type")),
-        arguments: Rc::new(f32_type_arguments.clone()),
-        outputs: Rc::new(f32_type_outputs.clone()),
+        name: Arc::new(String::from("f32_type")),
+        arguments: Arc::new(f32_type_arguments.clone()),
+        outputs: Arc::new(f32_type_outputs.clone()),
     };
 
     let f32_ref_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("f32_ref_type")),
-        arguments: Rc::new(f32_type_arguments),
-        outputs: Rc::new(f32_type_outputs),
+        name: Arc::new(String::from("f32_ref_type")),
+        arguments: Arc::new(f32_type_arguments),
+        outputs: Arc::new(f32_type_outputs),
     };
 
     let f64_type_arguments = vec![marine::IFunctionArg {
@@ -187,24 +187,24 @@ pub fn get_interfaces() {
     let f64_type_outputs = vec![IType::F64];
 
     let f64_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("f64_type")),
-        arguments: Rc::new(f64_type_arguments.clone()),
-        outputs: Rc::new(f64_type_outputs.clone()),
+        name: Arc::new(String::from("f64_type")),
+        arguments: Arc::new(f64_type_arguments.clone()),
+        outputs: Arc::new(f64_type_outputs.clone()),
     };
 
     let f64_ref_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("f64_ref_type")),
-        arguments: Rc::new(f64_type_arguments),
-        outputs: Rc::new(f64_type_outputs),
+        name: Arc::new(String::from("f64_ref_type")),
+        arguments: Arc::new(f64_type_arguments),
+        outputs: Arc::new(f64_type_outputs),
     };
 
     let empty_type_arguments = vec![];
     let empty_type_outputs = vec![IType::String];
 
     let empty_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("empty_type")),
-        arguments: Rc::new(empty_type_arguments),
-        outputs: Rc::new(empty_type_outputs),
+        name: Arc::new(String::from("empty_type")),
+        arguments: Arc::new(empty_type_arguments),
+        outputs: Arc::new(empty_type_outputs),
     };
 
     let bool_type_arguments = vec![marine::IFunctionArg {
@@ -214,15 +214,15 @@ pub fn get_interfaces() {
     let bool_type_outputs = vec![IType::Boolean];
 
     let bool_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("bool_type")),
-        arguments: Rc::new(bool_type_arguments.clone()),
-        outputs: Rc::new(bool_type_outputs.clone()),
+        name: Arc::new(String::from("bool_type")),
+        arguments: Arc::new(bool_type_arguments.clone()),
+        outputs: Arc::new(bool_type_outputs.clone()),
     };
 
     let bool_ref_type_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("bool_ref_type")),
-        arguments: Rc::new(bool_type_arguments),
-        outputs: Rc::new(bool_type_outputs),
+        name: Arc::new(String::from("bool_ref_type")),
+        arguments: Arc::new(bool_type_arguments),
+        outputs: Arc::new(bool_type_outputs),
     };
 
     let all_types_arguments = vec![
@@ -278,15 +278,15 @@ pub fn get_interfaces() {
     let all_types_outputs = vec![IType::ByteArray];
 
     let all_types_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("all_types")),
-        arguments: Rc::new(all_types_arguments.clone()),
-        outputs: Rc::new(all_types_outputs.clone()),
+        name: Arc::new(String::from("all_types")),
+        arguments: Arc::new(all_types_arguments.clone()),
+        outputs: Arc::new(all_types_outputs.clone()),
     };
 
     let all_ref_types_sign = marine::MarineFunctionSignature {
-        name: Rc::new(String::from("all_ref_types")),
-        arguments: Rc::new(all_types_arguments),
-        outputs: Rc::new(all_types_outputs),
+        name: Arc::new(String::from("all_ref_types")),
+        arguments: Arc::new(all_types_arguments),
+        outputs: Arc::new(all_types_outputs),
     };
 
     let functions = vec![
@@ -320,11 +320,11 @@ pub fn get_interfaces() {
     let pure_module_interface = interface
         .modules
         .get(pure_module_name)
-        .expect(&format!("{} should present in interface", pure_module_name));
+        .unwrap_or_else(|| panic!("{} should present in interface", pure_module_name));
     let effector_module_interface = interface
         .modules
         .get(effector_module_name)
-        .expect(&format!("{} should present in interface", pure_module_name));
+        .unwrap_or_else(|| panic!("{} should present in interface", pure_module_name));
 
     assert!(pure_module_interface.record_types.is_empty());
     assert!(effector_module_interface.record_types.is_empty());
@@ -609,7 +609,7 @@ pub fn string_type() {
 
 #[test]
 pub fn str_type() {
-    const FUNC_NAME: &'static str = "str_type";
+    const FUNC_NAME: &str = "str_type";
 
     let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
@@ -681,7 +681,7 @@ pub fn bool_type() {
 
 #[test]
 pub fn empty_type() {
-    const FUNC_NAME: &'static str = "empty_type";
+    const FUNC_NAME: &str = "empty_type";
 
     let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));

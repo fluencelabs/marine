@@ -25,15 +25,15 @@ use wasmer_it::IType;
 
 /// Generates IT instructions for a output type of an export function.
 pub(super) trait OutputITGenerator {
-    fn generate_instructions_for_output_type<'a>(
+    fn generate_instructions_for_output_type(
         &self,
-        it_resolver: &mut ITResolver<'a>,
+        it_resolver: &mut ITResolver<'_>,
     ) -> Result<Vec<Instruction>>;
 }
 
 impl OutputITGenerator for ParsedType {
     #[rustfmt::skip]
-    fn generate_instructions_for_output_type<'a>(&self, it_resolver: &mut ITResolver<'a>) -> Result<Vec<Instruction>> {
+    fn generate_instructions_for_output_type(&self, it_resolver: &mut ITResolver<'_>) -> Result<Vec<Instruction>> {
         let instructions = match self {
             ParsedType::Boolean(_) => vec![Instruction::BoolFromI32],
             ParsedType::I8(_) => vec![Instruction::S8FromI32],

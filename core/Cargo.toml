@@ -4,7 +4,7 @@ description = "Core of Marine, the Fluence Wasm Runtime"
 version = "0.19.0"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 name = "marine_core"
@@ -17,15 +17,13 @@ marine-it-parser = { path = "../crates/it-parser", version = "0.11.1" }
 marine-it-generator = { path = "../crates/it-generator", version = "0.9.5" }
 marine-module-interface = { path = "../crates/module-interface", version = "0.6.1" }
 marine-utils = { path = "../crates/utils", version = "0.4.0" }
-marine-min-it-version = { path = "../crates/min-it-version", version = "0.2.1" }
+marine-min-it-version =  { path = "../crates/min-it-version", version = "0.2.1" }
+marine-wasm-backend-traits = {path = "../crates/wasm-backend-traits", version = "0.1.0"}
+marine-wasmtime-backend = { path = "../crates/wasmtime-backend", version = "0.1.0"}
 
-wasmer-runtime = { package = "wasmer-runtime-fl", version = "=0.17.1" }
-# dynamicfunc-fat-closures allows using state inside DynamicFunc
-wasmer-core = { package = "wasmer-runtime-core-fl", version = "=0.17.1", features = ["dynamicfunc-fat-closures"] }
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.24.1"}
-wasmer-wasi = { package = "wasmer-wasi-fl", version = "0.17.1" }
-it-lilo = "0.4.1"
-it-memory-traits = "0.3.1"
+wasmer-it = { workspace = true, default-features = false }
+it-lilo = { workspace = true}
+it-memory-traits = { workspace = true }
 bytesize = "1.1.0"
 
 multimap = "0.8.3"

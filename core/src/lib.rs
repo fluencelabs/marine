@@ -35,10 +35,6 @@ mod misc;
 mod module;
 mod memory_statistic;
 
-pub use config::MModuleConfig;
-pub use config::HostExportedFunc;
-pub use config::HostImportDescriptor;
-pub use crate::marine_core::MarineCore;
 pub use crate::marine_core::MModuleInterface;
 pub use errors::MError;
 pub use host_imports::HostImportError;
@@ -59,3 +55,21 @@ pub mod ne_vec {
 }
 
 pub(crate) type MResult<T> = std::result::Result<T, MError>;
+
+pub mod generic {
+    pub use crate::config::MModuleConfig;
+    pub use crate::config::HostExportedFunc;
+    pub use crate::config::HostImportDescriptor;
+    pub use crate::marine_core::MarineCore;
+}
+
+pub mod wasmtime {
+    pub type WasmBackend = marine_wasmtime_backend::WasmtimeWasmBackend;
+
+    pub type MModuleConfig = crate::config::MModuleConfig<WasmBackend>;
+    pub type HostExportedFunc = crate::config::HostExportedFunc<WasmBackend>;
+    pub type HostImportDescriptor = crate::config::HostImportDescriptor<WasmBackend>;
+    pub type MarineCore = crate::marine_core::MarineCore<WasmBackend>;
+}
+
+pub use crate::wasmtime::*;

@@ -17,140 +17,140 @@
 use super::wit_prelude::*;
 use super::MFunctionSignature;
 use super::MRecordTypes;
-use super::{IType, IRecordType, IFunctionArg, IValue, WValue};
+use super::IType;
+use super::IRecordType;
+use super::IFunctionArg;
+use super::IValue;
+use super::WValue;
+use crate::generic::HostImportDescriptor;
 use crate::MResult;
-use crate::MModuleConfig;
+use crate::generic::MModuleConfig;
+use crate::config::RawImportCreator;
+
+use marine_wasm_backend_traits::prelude::*;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
 use marine_utils::SharedString;
-use wasmer_core::Instance as WasmerInstance;
-use wasmer_core::import::Namespace;
-use wasmer_runtime::compile;
-use wasmer_runtime::ImportObject;
 use wasmer_it::interpreter::Interpreter;
 
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
-use std::rc::Rc;
+use std::borrow::BorrowMut;
 
-const MEMORY_INDEX: u32 = 0;
 const START_FUNC: &str = "_start";
 const INITIALIZE_FUNC: &str = "_initialize";
 
-type ITInterpreter =
-    Interpreter<ITInstance, ITExport, WITFunction, WITMemory, WITMemoryView<'static>>;
+type ITInterpreter<WB> = Interpreter<
+    ITInstance<WB>,
+    ITExport,
+    WITFunction<WB>,
+    <WB as WasmBackend>::Memory,
+    <WB as WasmBackend>::MemoryView,
+    DelayedContextLifetime<WB>,
+>;
 
 #[derive(Clone)]
-pub(super) struct ITModuleFunc {
-    interpreter: Arc<ITInterpreter>,
-    pub(super) arguments: Rc<Vec<IFunctionArg>>,
-    pub(super) output_types: Rc<Vec<IType>>,
+pub(super) struct ITModuleFunc<WB: WasmBackend> {
+    interpreter: Arc<ITInterpreter<WB>>,
+    pub(super) arguments: Arc<Vec<IFunctionArg>>,
+    pub(super) output_types: Arc<Vec<IType>>,
 }
 
 #[derive(Clone)]
-pub(super) struct Callable {
-    pub(super) it_instance: Arc<ITInstance>,
-    pub(super) it_module_func: ITModuleFunc,
+pub(super) struct Callable<WB: WasmBackend> {
+    pub(super) it_instance: Arc<ITInstance<WB>>,
+    pub(super) it_module_func: ITModuleFunc<WB>,
 }
 
-impl Callable {
-    pub fn call(&mut self, args: &[IValue]) -> MResult<Vec<IValue>> {
+impl<WB: WasmBackend> Callable<WB> {
+    pub fn call(
+        &mut self,
+        store: &mut <WB as WasmBackend>::ContextMut<'_>,
+        args: &[IValue],
+    ) -> MResult<Vec<IValue>> {
         use wasmer_it::interpreter::stack::Stackable;
 
         let result = self
             .it_module_func
             .interpreter
-            .run(args, Arc::make_mut(&mut self.it_instance))?
+            .run(args, Arc::make_mut(&mut self.it_instance), store)?
             .as_slice()
             .to_owned();
-
         Ok(result)
     }
 }
 
-type ExportFunctions = HashMap<SharedString, Rc<Callable>>;
+type ExportFunctions<WB> = HashMap<SharedString, Arc<Callable<WB>>>;
 
-pub(crate) struct MModule {
-    // wasmer_instance is needed because WITInstance contains dynamic functions
-    // that internally keep pointer to it.
-    #[allow(unused)]
-    wasmer_instance: Box<WasmerInstance>,
+pub(crate) struct MModule<WB: WasmBackend> {
+    wasm_instance: Box<<WB as WasmBackend>::Instance>,
 
-    // import_object is needed because ImportObject::extend doesn't really deep copy
-    // imports, so we need to store imports of this module to prevent their removing.
-    #[allow(unused)]
-    it_import_object: ImportObject,
-
-    // host_import_object is needed because ImportObject::extend doesn't really deep copy
-    // imports, so we need to store imports of this module to prevent their removing.
-    #[allow(unused)]
-    host_import_object: ImportObject,
-
-    // host_closures_import_object is needed because ImportObject::extend doesn't really deep copy
-    // imports, so we need to store imports of this module to prevent their removing.
-    #[allow(unused)]
-    host_closures_import_object: ImportObject,
-
-    // TODO: replace with dyn Trait
-    export_funcs: ExportFunctions,
+    export_funcs: ExportFunctions<WB>,
 
     // TODO: save refs instead copying of a record types HashMap.
     /// Record types used in exported functions as arguments or return values.
     export_record_types: MRecordTypes,
 }
 
-impl MModule {
+impl<WB: WasmBackend> MModule<WB> {
     pub(crate) fn new(
         name: &str,
+        store: &mut <WB as WasmBackend>::Store,
         wasm_bytes: &[u8],
-        config: MModuleConfig,
-        modules: &HashMap<String, MModule>,
+        config: MModuleConfig<WB>,
+        modules: &HashMap<String, MModule<WB>>,
     ) -> MResult<Self> {
-        let wasmer_module = compile(wasm_bytes)?;
-        crate::misc::check_sdk_version(name, &wasmer_module)?;
+        let wasm_module = <WB as WasmBackend>::Module::new(store, wasm_bytes)?;
+        crate::misc::check_sdk_version::<WB>(name.to_string(), &wasm_module)?;
 
-        let it = extract_it_from_module(&wasmer_module)?;
+        let it = extract_it_from_module::<WB>(&wasm_module)?;
         crate::misc::check_it_version(name, &it.version)?;
 
         let mit = MITInterfaces::new(it);
 
         let mut wit_instance = Arc::new_uninit();
-        let wit_import_object = Self::adjust_wit_imports(&mit, wit_instance.clone())?;
-        let raw_imports = config.raw_imports.clone();
-        let (wasi_import_object, host_closures_import_object) =
-            Self::create_import_objects(config, &mit, wit_import_object.clone())?;
+        let mut linker = <WB as WasmBackend>::Imports::new(store);
 
-        let wasmer_instance = wasmer_module.instantiate(&wasi_import_object)?;
+        let MModuleConfig {
+            raw_imports,
+            host_imports,
+            wasi_parameters,
+            ..
+        } = config;
+
+        Self::add_wit_imports(store, &mut linker, &mit, wit_instance.clone())?;
+        Self::add_wasi_imports(store, &mut linker, wasi_parameters)?;
+        Self::add_host_imports(store, &mut linker, raw_imports, host_imports, &mit)?;
+
+        let wasm_instance = wasm_module.instantiate(store, &linker)?;
         let it_instance = unsafe {
+            // TODO: check if this MaybeUninit/Arc tricks are still needed
             // get_mut_unchecked here is safe because currently only this modules have reference to
             // it and the environment is single-threaded
             *Arc::get_mut_unchecked(&mut wit_instance) =
-                MaybeUninit::new(ITInstance::new(&wasmer_instance, name, &mit, modules)?);
-            std::mem::transmute::<_, Arc<ITInstance>>(wit_instance)
+                MaybeUninit::new(ITInstance::new(&wasm_instance, store, name, &mit, modules)?);
+            std::mem::transmute::<_, Arc<ITInstance<WB>>>(wit_instance)
         };
 
         let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
 
+        // backend is not expected to call _start or _initialize
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
-        if let Ok(initialize_func) = wasmer_instance.exports.get::<wasmer_runtime::Func<'_, (), ()>>(INITIALIZE_FUNC) {
-            initialize_func.call()?;
+        if let Ok(initialize_func) = wasm_instance.get_function(store, INITIALIZE_FUNC) {
+            initialize_func.call(store, &[])?;
         }
-
         // call _start to call module's main function
         #[rustfmt::skip]
-        if let Ok(start_func) = wasmer_instance.exports.get::<wasmer_runtime::Func<'_, (), ()>>(START_FUNC) {
-            start_func.call()?;
+        if let Ok(start_func) = wasm_instance.get_function(store, START_FUNC) {
+            start_func.call(store, &[])?;
         }
 
         Ok(Self {
-            wasmer_instance: Box::new(wasmer_instance),
-            it_import_object: wit_import_object,
-            host_import_object: raw_imports,
-            host_closures_import_object,
+            wasm_instance: Box::new(wasm_instance),
             export_funcs,
             export_record_types,
         })
@@ -158,19 +158,33 @@ impl MModule {
 
     pub(crate) fn call(
         &mut self,
+        store: &mut <WB as WasmBackend>::ContextMut<'_>,
         module_name: &str,
         function_name: &str,
         args: &[IValue],
     ) -> MResult<Vec<IValue>> {
-        self.export_funcs.get_mut(function_name).map_or_else(
+        log::debug!(
+            "calling {}::{} with args: {:?}",
+            module_name,
+            function_name,
+            args
+        );
+        let res = self.export_funcs.get_mut(function_name).map_or_else(
             || {
                 Err(MError::NoSuchFunction(
                     module_name.to_string(),
                     function_name.to_string(),
                 ))
             },
-            |func| Rc::make_mut(func).call(args),
-        )
+            |func| Arc::make_mut(func).call(store, args),
+        );
+        log::debug!(
+            "calling {}::{} with result: {:?}",
+            module_name,
+            function_name,
+            res
+        );
+        res
     }
 
     pub(crate) fn get_exports_signatures(&self) -> impl Iterator<Item = MFunctionSignature> + '_ {
@@ -187,30 +201,28 @@ impl MModule {
         &self.export_record_types
     }
 
-    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&Rc<IRecordType>> {
+    pub(crate) fn export_record_type_by_id(&self, record_type: u64) -> Option<&Arc<IRecordType>> {
         self.export_record_types.get(&record_type)
     }
 
-    pub(crate) fn get_wasi_state(&mut self) -> &wasmer_wasi::state::WasiState {
-        unsafe { wasmer_wasi::state::get_wasi_state(self.wasmer_instance.context_mut()) }
+    pub(crate) fn get_wasi_state<'s>(&'s mut self) -> Box<dyn WasiState + 's> {
+        <WB as WasmBackend>::Wasi::get_wasi_state(self.wasm_instance.borrow_mut())
     }
 
     /// Returns Wasm linear memory size that this module consumes in bytes.
-    pub(crate) fn memory_size(&self) -> usize {
-        let pages = self.wasmer_instance.context().memory(MEMORY_INDEX).size();
-        pages.bytes().0
+    pub(crate) fn memory_size(&self, store: &mut <WB as WasmBackend>::ContextMut<'_>) -> usize {
+        let memory = self
+            .wasm_instance
+            .get_nth_memory(store, STANDARD_MEMORY_INDEX)
+            .expect("It is expected that the existence of at least one memory is checked in the MModule::new function");
+
+        memory.size(store)
     }
 
     /// Returns max Wasm linear memory size that this module could consume in bytes.
     pub(crate) fn max_memory_size(&self) -> Option<usize> {
-        let maybe_pages = self
-            .wasmer_instance
-            .context()
-            .memory(MEMORY_INDEX)
-            .descriptor()
-            .maximum;
-
-        maybe_pages.map(|pages| pages.bytes().0)
+        // TODO: provide limits API to marine wasm backend traits
+        None
     }
 
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
@@ -218,7 +230,7 @@ impl MModule {
         &self,
         module_name: &str,
         function_name: &str,
-    ) -> MResult<Rc<Callable>> {
+    ) -> MResult<Arc<Callable<WB>>> {
         match self.export_funcs.get(function_name) {
             Some(func) => Ok(func.clone()),
             None => Err(MError::NoSuchFunction(
@@ -228,121 +240,101 @@ impl MModule {
         }
     }
 
-    fn create_import_objects(
-        config: MModuleConfig,
+    fn add_wasi_imports(
+        store: &mut <WB as WasmBackend>::Store,
+        linker: &mut <WB as WasmBackend>::Imports,
+        parameters: WasiParameters,
+    ) -> MResult<()> {
+        <WB as WasmBackend>::Wasi::register_in_linker(
+            &mut store.as_context_mut(),
+            linker,
+            parameters,
+        )?;
+
+        Ok(())
+    }
+
+    fn add_host_imports(
+        store: &mut <WB as WasmBackend>::Store,
+        linker: &mut <WB as WasmBackend>::Imports,
+        raw_imports: HashMap<String, RawImportCreator<WB>>,
+        host_imports: HashMap<String, HostImportDescriptor<WB>>,
         mit: &MITInterfaces<'_>,
-        wit_import_object: ImportObject,
-    ) -> MResult<(ImportObject, ImportObject)> {
+    ) -> MResult<()> {
         use crate::host_imports::create_host_import_func;
 
-        let wasi_envs = config
-            .wasi_envs
-            .into_iter()
-            .map(|(mut left, right)| {
-                left.push(61); // 61 is ASCII code of '='
-                left.extend(right);
-                left
-            })
-            .collect::<Vec<_>>();
-        let wasi_preopened_files = config.wasi_preopened_files.into_iter().collect::<Vec<_>>();
-        let wasi_mapped_dirs = config.wasi_mapped_dirs.into_iter().collect::<Vec<_>>();
-
-        let mut wasi_import_object = wasmer_wasi::generate_import_object_for_version(
-            config.wasi_version,
-            vec![],
-            wasi_envs,
-            wasi_preopened_files,
-            wasi_mapped_dirs,
-        )
-        .map_err(MError::WASIPrepareError)?;
-
-        let mut host_closures_namespace = Namespace::new();
         let record_types = mit
             .record_types()
             .map(|(id, r)| (id, r.clone()))
             .collect::<HashMap<_, _>>();
-        let record_types = Rc::new(record_types);
+        let record_types = Arc::new(record_types);
 
-        for (import_name, descriptor) in config.host_imports {
-            let host_import = create_host_import_func(descriptor, record_types.clone());
-            host_closures_namespace.insert(import_name, host_import);
-        }
-        let mut host_closures_import_object = ImportObject::new();
-        host_closures_import_object.register("host", host_closures_namespace);
-
-        wasi_import_object.extend(wit_import_object);
-        wasi_import_object.extend(config.raw_imports);
-        wasi_import_object.extend(host_closures_import_object.clone());
-
-        Ok((wasi_import_object, host_closures_import_object))
-    }
-
-    fn instantiate_exports(
-        it_instance: &Arc<ITInstance>,
-        mit: &MITInterfaces<'_>,
-    ) -> MResult<(ExportFunctions, MRecordTypes)> {
-        let module_interface = marine_module_interface::it_interface::get_interface(mit)?;
-
-        let export_funcs = module_interface
-            .function_signatures
+        let host_imports = host_imports
             .into_iter()
-            .map(|sign| {
-                let adapter_instructions = mit.adapter_by_type_r(sign.adapter_function_type)?;
-
-                let interpreter: ITInterpreter = adapter_instructions.clone().try_into()?;
-                let it_module_func = ITModuleFunc {
-                    interpreter: Arc::new(interpreter),
-                    arguments: sign.arguments.clone(),
-                    output_types: sign.outputs.clone(),
-                };
-
-                let shared_string = SharedString(sign.name);
-                let callable = Rc::new(Callable {
-                    it_instance: it_instance.clone(),
-                    it_module_func,
-                });
-
-                Ok((shared_string, callable))
+            .map(|(import_name, descriptor)| {
+                let func = create_host_import_func::<WB>(store, descriptor, record_types.clone());
+                (import_name, func)
             })
-            .collect::<MResult<ExportFunctions>>()?;
+            .collect::<Vec<_>>();
 
-        Ok((export_funcs, module_interface.export_record_types))
+        let all_imports = raw_imports
+            .into_iter()
+            .map(|(name, creator)| (name, creator(store.as_context_mut())))
+            .chain(host_imports.into_iter())
+            .collect::<Vec<_>>();
+
+        linker.register(store, "host", all_imports.into_iter())?;
+
+        Ok(())
     }
 
     // this function deals only with import functions that have an adaptor implementation
-    fn adjust_wit_imports(
+    fn add_wit_imports(
+        store: &mut <WB as WasmBackend>::Store,
+        linker: &mut <WB as WasmBackend>::Imports,
         wit: &MITInterfaces<'_>,
-        wit_instance: Arc<MaybeUninit<ITInstance>>,
-    ) -> MResult<ImportObject> {
+        wit_instance: Arc<MaybeUninit<ITInstance<WB>>>,
+    ) -> MResult<()> {
         use marine_it_interfaces::ITAstType;
-        use wasmer_core::typed_func::DynamicFunc;
-        use wasmer_core::vm::Ctx;
 
         // returns function that will be called from imports of Wasmer module
-        fn dyn_func_from_raw_import<'a, 'b, F>(
-            inputs: impl Iterator<Item = &'a IType>,
-            outputs: impl Iterator<Item = &'b IType>,
+        fn func_from_raw_import<'a, 'b, F, WB, I1, I2>(
+            store: &mut <WB as WasmBackend>::Store,
+            inputs: I1,
+            outputs: I2,
             raw_import: F,
-        ) -> DynamicFunc<'static>
+        ) -> <WB as WasmBackend>::Function
         where
-            F: Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static,
+            F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+                + Sync
+                + Send
+                + 'static,
+            WB: WasmBackend,
+            I1: Iterator<Item = &'a IType>,
+            I2: Iterator<Item = &'b IType>,
         {
-            use wasmer_core::types::FuncSig;
             use super::type_converters::itype_to_wtype;
 
             let inputs = inputs.map(itype_to_wtype).collect::<Vec<_>>();
             let outputs = outputs.map(itype_to_wtype).collect::<Vec<_>>();
-            DynamicFunc::new(Arc::new(FuncSig::new(inputs, outputs)), raw_import)
+            <WB as WasmBackend>::Function::new_with_caller(
+                &mut store.as_context_mut(),
+                FuncSig::new(inputs, outputs),
+                raw_import,
+            )
         }
 
         // creates a closure that is represent a IT module import
-        fn create_raw_import(
-            wit_instance: Arc<MaybeUninit<ITInstance>>,
-            interpreter: ITInterpreter,
+        fn create_raw_import<WB: WasmBackend>(
+            wit_instance: Arc<MaybeUninit<ITInstance<WB>>>,
+            interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
-        ) -> impl Fn(&mut Ctx, &[WValue]) -> Vec<WValue> + 'static {
-            move |_: &mut Ctx, inputs: &[WValue]| -> Vec<WValue> {
+        ) -> impl for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+               + Sync
+               + Send
+               + 'static {
+            move |mut ctx: <WB as WasmBackend>::Caller<'_>, inputs: &[WValue]| -> Vec<WValue> {
                 use wasmer_it::interpreter::stack::Stackable;
 
                 use super::type_converters::wval_to_ival;
@@ -363,6 +355,7 @@ impl MModule {
                     interpreter.run(
                         &wit_inputs,
                         Arc::make_mut(&mut wit_instance_callable.assume_init()),
+                        &mut ctx.as_context_mut(),
                     )
                 };
 
@@ -374,6 +367,7 @@ impl MModule {
 
                 // TODO: optimize by prevent copying stack values
                 outputs
+                    .map_err(|e| log::error!("interpreter got error {e}"))
                     .unwrap_or_default()
                     .as_slice()
                     .iter()
@@ -402,7 +396,12 @@ impl MModule {
                         arguments,
                         output_types,
                     } => {
-                        let interpreter: ITInterpreter = adapter_instructions.clone().try_into()?;
+                        let interpreter: ITInterpreter<WB> =
+                            adapter_instructions.clone().try_into().map_err(|_| {
+                                MError::IncorrectWIT(
+                                    "failed to parse instructions for adapter type".to_string(),
+                                )
+                            })?;
 
                         let raw_import = create_raw_import(
                             wit_instance.clone(),
@@ -411,7 +410,8 @@ impl MModule {
                             import_name.to_string(),
                         );
 
-                        let wit_import = dyn_func_from_raw_import(
+                        let wit_import = func_from_raw_import::<_, WB, _, _>(
+                            store,
                             arguments.iter().map(|IFunctionArg { ty, .. }| ty),
                             output_types.iter(),
                             raw_import,
@@ -427,17 +427,49 @@ impl MModule {
             })
             .collect::<MResult<multimap::MultiMap<_, _>>>()?;
 
-        let mut import_object = ImportObject::new();
-
-        // TODO: refactor this
         for (namespace_name, funcs) in wit_import_funcs.into_iter() {
-            let mut namespace = Namespace::new();
-            for (import_name, import_func) in funcs.into_iter() {
-                namespace.insert(import_name.to_string(), import_func);
-            }
-            import_object.register(namespace_name, namespace);
+            let funcs = funcs.into_iter().map(|(name, f)| (name.to_string(), f));
+            linker.register(store, namespace_name, funcs)?;
         }
 
-        Ok(import_object)
+        Ok(())
+    }
+
+    fn instantiate_exports(
+        it_instance: &Arc<ITInstance<WB>>,
+        mit: &MITInterfaces<'_>,
+    ) -> MResult<(ExportFunctions<WB>, MRecordTypes)> {
+        let module_interface = marine_module_interface::it_interface::get_interface(mit)?;
+
+        let export_funcs = module_interface
+            .function_signatures
+            .into_iter()
+            .map(|sign| {
+                let adapter_instructions = mit.adapter_by_type_r(sign.adapter_function_type)?;
+
+                let interpreter: ITInterpreter<WB> =
+                    adapter_instructions.clone().try_into().map_err(|_| {
+                        MError::IncorrectWIT(
+                            "failed to parse instructions for adapter type".to_string(),
+                        )
+                    })?;
+
+                let it_module_func = ITModuleFunc {
+                    interpreter: Arc::new(interpreter),
+                    arguments: sign.arguments.clone(),
+                    output_types: sign.outputs.clone(),
+                };
+
+                let shared_string = SharedString(sign.name);
+                let callable = Arc::new(Callable {
+                    it_instance: it_instance.clone(),
+                    it_module_func,
+                });
+
+                Ok((shared_string, callable))
+            })
+            .collect::<MResult<ExportFunctions<WB>>>()?;
+
+        Ok((export_funcs, module_interface.export_record_types))
     }
 }

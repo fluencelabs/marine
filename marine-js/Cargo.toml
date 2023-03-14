@@ -1,7 +1,7 @@
 [package]
 name = "marine-js"
 version = "0.3.3"
-edition = "2018"
+edition = "2021"
 description = "Web version of the marine runtime"
 publish = false
 
@@ -17,13 +17,13 @@ marine-min-it-version = { path = "../crates/min-it-version", version = "0.2.1" }
 it-json-serde = { path = "../crates/it-json-serde", version = "0.3.5" }
 
 marine-rs-sdk = "0.7.1"
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.24.1"}
-fluence-it-types = {version = "0.3.2", features = ["impls"] }
-it-lilo = "0.4.1"
-it-memory-traits = "0.3.1"
+wasmer-it = { workspace = true}
+it-memory-traits = { workspace = true}
+fluence-it-types = { workspace = true }
+it-lilo = { workspace = true }
 
 wasm-bindgen = "0.2"
-nom = "5.1"
+nom = "7.1"
 itertools = "0.10.5"
 multimap = "0.8.3"
 boolinator = "2.4.0"

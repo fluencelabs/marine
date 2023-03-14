@@ -14,21 +14,30 @@
  * limitations under the License.
  */
 
-use marine_core::HostImportDescriptor;
-use wasmer_core::vm::Ctx;
+use marine_wasm_backend_traits::WasmBackend;
+use marine_core::generic::HostImportDescriptor;
+
 use wasmer_it::IValue;
 use wasmer_it::IType;
 
-use std::rc::Rc;
-use std::cell::RefCell;
+use parking_lot::Mutex;
+
 use std::ops::Deref;
+use std::sync::Arc;
 
 /// Create the import intended for handling get_call_parameters SDK api.
-pub(crate) fn create_call_parameters_import(
-    call_parameters: Rc<RefCell<marine_rs_sdk::CallParameters>>,
-) -> HostImportDescriptor {
-    let call_parameters_closure = move |_ctx: &mut Ctx, _args: Vec<IValue>| {
-        let result = crate::to_interface_value(call_parameters.borrow().deref()).unwrap();
+
+pub(crate) fn create_call_parameters_import<WB: WasmBackend>(
+    call_parameters: Arc<Mutex<marine_rs_sdk::CallParameters>>, // TODO try to avoid using mutex
+) -> HostImportDescriptor<WB> {
+    let call_parameters_closure = move |_ctx: &mut <WB as WasmBackend>::Caller<'_>,
+                                        _args: Vec<IValue>| {
+        let result = {
+            // a separate code block to unlock the mutex ASAP and to avoid double locking
+            crate::to_interface_value(call_parameters.lock().deref())
+                .unwrap_or_else(|_| panic!("CallParameters should be convertible to IValue"))
+        };
+
         Some(result)
     };
 

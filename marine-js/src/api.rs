@@ -22,7 +22,8 @@ use marine_rs_sdk::CallParameters;
 
 use wasm_bindgen::prelude::*;
 use serde_json::Value as JValue;
-use serde::{Serialize, Deserialize};
+use serde::Serialize;
+use serde::Deserialize;
 use maplit::hashmap;
 
 #[derive(Serialize, Deserialize)]

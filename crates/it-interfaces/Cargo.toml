@@ -4,12 +4,12 @@ description = "Fluence Marine interface types helper crate"
 version = "0.7.3"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 name = "marine_it_interfaces"
 path = "src/lib.rs"
 
 [dependencies]
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.24.1"}
+wasmer-it = { workspace = true}
 multimap = "0.8.3"

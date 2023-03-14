@@ -10,6 +10,8 @@ members = [
     "crates/min-it-version",
     "crates/module-info-parser",
     "crates/module-interface",
+    "crates/wasm-backend-traits",
+    "crates/wasmtime-backend",
     "crates/utils",
     "examples/call_parameters",
     "examples/failing",
@@ -39,6 +41,12 @@ members = [
     "tools/cli",
     "tools/repl",
 ]
+
+[workspace.dependencies]
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.0" }
+it-memory-traits ="0.4.0"
+it-lilo = "0.5.0"
+fluence-it-types = { version = "0.4.0", features = ["impls"] }
 
 [profile.release]
 opt-level = 3

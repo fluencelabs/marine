@@ -20,7 +20,7 @@ use super::RIResult;
 
 use marine_it_interfaces::MITInterfaces;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub struct ITExportFuncDescriptor<'n> {
     pub adapter_function_type: u32,
@@ -69,7 +69,7 @@ pub fn get_export_funcs(mit: &MITInterfaces<'_>) -> RIResult<Vec<IFunctionSignat
                     output_types,
                 } => {
                     let signature = IFunctionSignature {
-                        name: Rc::new(descriptor.name.to_string()),
+                        name: Arc::new(descriptor.name.to_string()),
                         arguments: arguments.clone(),
                         outputs: output_types.clone(),
                         adapter_function_type: descriptor.adapter_function_type,

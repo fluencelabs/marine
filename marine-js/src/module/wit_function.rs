@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-use super::{IType, IFunctionArg, IValue, WValue};
+use super::IType;
+use super::IFunctionArg;
+use super::IValue;
+use super::WValue;
 use crate::MResult;
 use crate::marine_js::DynFunc;
+use crate::module::wit_store::WITStore;
 
 use wasmer_it::interpreter::wasm;
 
@@ -73,7 +77,7 @@ impl WITFunction {
     }
 }
 
-impl wasm::structures::LocalImport for WITFunction {
+impl wasm::structures::LocalImport<WITStore> for WITFunction {
     fn name(&self) -> &str {
         self.name.as_str()
     }
@@ -94,8 +98,9 @@ impl wasm::structures::LocalImport for WITFunction {
         &self.outputs
     }
 
-    fn call(&self, arguments: &[IValue]) -> std::result::Result<Vec<IValue>, ()> {
-        use super::type_converters::{ival_to_wval, wval_to_ival};
+    fn call(&self, _store: &mut (), arguments: &[IValue]) -> std::result::Result<Vec<IValue>, ()> {
+        use super::type_converters::ival_to_wval;
+        use super::type_converters::wval_to_ival;
 
         match &self.inner {
             WITFunctionInner::Export { func, .. } => func

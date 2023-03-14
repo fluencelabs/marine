@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-use super::*;
+use super::generic::*;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
+use crate::{IRecordType, IValue, MemoryStats, MError, MFunctionSignature, ModuleMemoryStat, MResult};
+
+use marine_wasm_backend_traits::AsContextMut;
+use marine_wasm_backend_traits::Store;
+use marine_wasm_backend_traits::WasiState;
+use marine_wasm_backend_traits::WasmBackend;
 
 use serde::Serialize;
 
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
+use std::cell::RefCell;
 
 /// Represent Marine module interface.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
@@ -31,17 +38,36 @@ pub struct MModuleInterface<'a> {
     pub function_signatures: Vec<MFunctionSignature>,
 }
 
+/// # Description
+///
 /// The base struct of Marine, the Fluence compute runtime.
-pub struct MarineCore {
+/// Allows dynamic loading and unloading modules, but never frees resources used for instantiation.
+/// A new module can import functions from previously loaded modules.
+///
+/// # Recommendations
+///
+/// Its not recommended to use this struct to load/unload unlimited number of modules.
+/// Better alternative is to use multiple instances of this struct for independent groups of modules
+/// and drop them when the group is no longer needed.
+pub struct MarineCore<WB: WasmBackend> {
     // set of modules registered inside Marine
-    modules: HashMap<String, MModule>,
+    modules: HashMap<String, MModule<WB>>,
+    // Wasm backend may have state in the future
+    #[allow(unused)]
+    wasm_backend: WB,
+    /// Container for all objects created by a Wasm backend.
+    store: RefCell<<WB as WasmBackend>::Store>,
 }
 
-impl MarineCore {
-    pub fn new() -> Self {
-        Self {
+impl<WB: WasmBackend> MarineCore<WB> {
+    pub fn new() -> MResult<Self> {
+        let wasm_backend = WB::new()?;
+        let store = <WB as WasmBackend>::Store::new(&wasm_backend);
+        Ok(Self {
             modules: HashMap::new(),
-        }
+            wasm_backend,
+            store: RefCell::new(store),
+        })
     }
 
     /// Invoke a function of a module inside Marine by given function name with given arguments.
@@ -52,10 +78,17 @@ impl MarineCore {
         arguments: &[IValue],
     ) -> MResult<Vec<IValue>> {
         let module_name = module_name.as_ref();
-
+        let store = &mut self.store;
         self.modules.get_mut(module_name).map_or_else(
             || Err(MError::NoSuchModule(module_name.to_string())),
-            |module| module.call(module_name, func_name.as_ref(), arguments),
+            |module| {
+                module.call(
+                    &mut store.get_mut().as_context_mut(),
+                    module_name,
+                    func_name.as_ref(),
+                    arguments,
+                )
+            },
         )
     }
 
@@ -64,7 +97,7 @@ impl MarineCore {
         &mut self,
         name: impl Into<String>,
         wasm_bytes: &[u8],
-        config: MModuleConfig,
+        config: MModuleConfig<WB>,
     ) -> MResult<()> {
         self.load_module_(name.into(), wasm_bytes, config)
     }
@@ -73,11 +106,17 @@ impl MarineCore {
         &mut self,
         name: String,
         wasm_bytes: &[u8],
-        config: MModuleConfig,
+        config: MModuleConfig<WB>,
     ) -> MResult<()> {
         let _prepared_wasm_bytes =
             crate::misc::prepare_module(wasm_bytes, config.max_heap_pages_count)?;
-        let module = MModule::new(&name, wasm_bytes, config, &self.modules)?;
+        let module = MModule::new(
+            &name,
+            self.store.get_mut(),
+            wasm_bytes,
+            config,
+            &self.modules,
+        )?;
 
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {
@@ -97,10 +136,10 @@ impl MarineCore {
             .ok_or_else(|| MError::NoSuchModule(name.as_ref().to_string()))
     }
 
-    pub fn module_wasi_state(
-        &mut self,
+    pub fn module_wasi_state<'s>(
+        &'s mut self,
         module_name: impl AsRef<str>,
-    ) -> Option<&wasmer_wasi::state::WasiState> {
+    ) -> Option<Box<dyn WasiState + 's>> {
         self.modules
             .get_mut(module_name.as_ref())
             .map(|module| module.get_wasi_state())
@@ -132,7 +171,7 @@ impl MarineCore {
         &self,
         module_name: impl AsRef<str>,
         record_id: u64,
-    ) -> Option<&Rc<IRecordType>> {
+    ) -> Option<&Arc<IRecordType>> {
         self.modules
             .get(module_name.as_ref())
             .and_then(|module| module.export_record_type_by_id(record_id))
@@ -144,14 +183,18 @@ impl MarineCore {
             .modules
             .iter()
             .map(|(module_name, module)| {
-                ModuleMemoryStat::new(module_name, module.memory_size(), module.max_memory_size())
+                ModuleMemoryStat::new(
+                    module_name,
+                    module.memory_size(&mut self.store.borrow_mut().as_context_mut()),
+                    module.max_memory_size(),
+                )
             })
             .collect::<Vec<_>>();
 
         records.into()
     }
 
-    fn get_module_interface(module: &MModule) -> MModuleInterface<'_> {
+    fn get_module_interface(module: &MModule<WB>) -> MModuleInterface<'_> {
         let record_types = module.export_record_types();
 
         let function_signatures = module.get_exports_signatures().collect::<Vec<_>>();
@@ -160,11 +203,5 @@ impl MarineCore {
             record_types,
             function_signatures,
         }
-    }
-}
-
-impl Default for MarineCore {
-    fn default() -> Self {
-        Self::new()
     }
 }

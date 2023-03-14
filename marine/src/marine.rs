@@ -26,47 +26,48 @@ use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
 use crate::json_to_marine_err;
 
-use marine_core::MarineCore;
+use marine_wasm_backend_traits::WasmBackend;
+#[cfg(feature = "raw-module-api")]
+use marine_wasm_backend_traits::WasiState;
+
+use marine_core::generic::MarineCore;
 use marine_core::IFunctionArg;
 use marine_core::MRecordTypes;
 use marine_utils::SharedString;
 use marine_rs_sdk::CallParameters;
 
+use parking_lot::Mutex;
 use serde_json::Value as JValue;
-use std::cell::RefCell;
+
 use std::convert::TryInto;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::rc::Rc;
+use std::sync::Arc;
 
-type MFunctionSignature = (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>);
-type MModuleInterface = (Rc<Vec<IFunctionArg>>, Rc<Vec<IType>>, Rc<MRecordTypes>);
+type MFunctionSignature = (Arc<Vec<IFunctionArg>>, Arc<Vec<IType>>);
+type MModuleInterface = (Arc<Vec<IFunctionArg>>, Arc<Vec<IType>>, Arc<MRecordTypes>);
 
 struct ModuleInterface {
     function_signatures: HashMap<SharedString, MFunctionSignature>,
-    record_types: Rc<MRecordTypes>,
+    record_types: Arc<MRecordTypes>,
 }
 
-// TODO: remove and use mutex instead
-#[allow(clippy::non_send_fields_in_send_ty)]
-unsafe impl Send for Marine {}
-
-pub struct Marine {
+pub struct Marine<WB: WasmBackend> {
     /// Marine instance.
-    core: MarineCore,
+    core: MarineCore<WB>,
 
     /// Parameters of call accessible by Wasm modules.
-    call_parameters: Rc<RefCell<CallParameters>>,
+    call_parameters: Arc<Mutex<CallParameters>>,
 
     /// Cached module interfaces by names.
     module_interfaces_cache: HashMap<String, ModuleInterface>,
 }
 
-impl Marine {
+impl<WB: WasmBackend> Marine<WB> {
     /// Creates Marine from config deserialized from TOML.
     pub fn with_raw_config<C>(config: C) -> MarineResult<Self>
     where
-        C: TryInto<MarineConfig>,
+        C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
     {
         let config = config.try_into()?;
@@ -78,18 +79,18 @@ impl Marine {
             })
             .collect::<MarineResult<HashMap<String, PathBuf>>>()?;
 
-        Self::with_module_names::<MarineConfig>(&modules, config)
+        Self::with_module_names::<MarineConfig<WB>>(&modules, config)
     }
 
     /// Creates Marine with given modules.
     pub fn with_modules<C>(mut modules: HashMap<String, Vec<u8>>, config: C) -> MarineResult<Self>
     where
-        C: TryInto<MarineConfig>,
+        C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
     {
-        let mut marine = MarineCore::new();
+        let mut marine = MarineCore::new()?;
         let config = config.try_into()?;
-        let call_parameters = Rc::new(RefCell::new(<_>::default()));
+        let call_parameters = Arc::<Mutex<CallParameters>>::default();
 
         let modules_dir = config.modules_dir;
 
@@ -125,13 +126,13 @@ impl Marine {
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
     pub fn with_module_names<C>(names: &HashMap<String, PathBuf>, config: C) -> MarineResult<Self>
     where
-        C: TryInto<MarineConfig>,
+        C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
     {
         let config = config.try_into()?;
         let modules = load_modules_from_fs(names)?;
 
-        Self::with_modules::<MarineConfig>(modules, config)
+        Self::with_modules::<MarineConfig<WB>>(modules, config)
     }
 
     /// Call a specified function of loaded on a startup module by its name.
@@ -142,7 +143,11 @@ impl Marine {
         args: &[IValue],
         call_parameters: marine_rs_sdk::CallParameters,
     ) -> MarineResult<Vec<IValue>> {
-        self.call_parameters.replace(call_parameters);
+        {
+            // a separate code block to unlock the mutex ASAP and to avoid double locking
+            let mut cp = self.call_parameters.lock();
+            *cp = call_parameters;
+        }
 
         self.core
             .call(module_name, func_name, args)
@@ -175,7 +180,12 @@ impl Marine {
             func_name.to_string()
         )?;
 
-        self.call_parameters.replace(call_parameters);
+        {
+            // a separate code block to unlock the mutex ASAP and to avoid double locking
+            let mut cp = self.call_parameters.lock();
+            *cp = call_parameters;
+        }
+
         let result = self.core.call(module_name, func_name, &iargs)?;
 
         json_to_marine_err!(
@@ -199,8 +209,8 @@ impl Marine {
 
     /// At first, tries to find function signature and record types in module_interface_cache,
     /// if there is no them, tries to look
-    fn lookup_module_interface<'marine>(
-        &'marine mut self,
+    fn lookup_module_interface(
+        &mut self,
         module_name: &str,
         func_name: &str,
     ) -> MarineResult<MModuleInterface> {
@@ -237,7 +247,7 @@ impl Marine {
 
         let arg_types = arg_types.clone();
         let output_types = output_types.clone();
-        let record_types = Rc::new(module_interface.record_types.clone());
+        let record_types = Arc::new(module_interface.record_types.clone());
 
         let module_interface = ModuleInterface {
             function_signatures,
@@ -253,7 +263,7 @@ impl Marine {
 
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
-impl Marine {
+impl<WB: WasmBackend> Marine<WB> {
     pub fn load_module<C, S>(
         &mut self,
         name: S,
@@ -262,7 +272,7 @@ impl Marine {
     ) -> MarineResult<()>
     where
         S: Into<String>,
-        C: TryInto<crate::MarineModuleConfig>,
+        C: TryInto<crate::generic::MarineModuleConfig<WB>>,
         MarineError: From<C::Error>,
     {
         let config = config.map(|c| c.try_into()).transpose()?;
@@ -290,7 +300,7 @@ impl Marine {
     pub fn module_wasi_state(
         &mut self,
         module_name: impl AsRef<str>,
-    ) -> MarineResult<&wasmer_wasi::state::WasiState> {
+    ) -> MarineResult<Box<dyn WasiState + '_>> {
         let module_name = module_name.as_ref();
 
         self.core

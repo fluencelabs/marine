@@ -15,42 +15,50 @@
  */
 
 use super::marine_module::MModule;
-use super::{IType, IFunctionArg, IValue, WValue};
+use super::IType;
+use super::IFunctionArg;
+use super::IValue;
 use super::marine_module::Callable;
 use crate::MResult;
 
-use wasmer_it::interpreter::wasm;
-use wasmer_core::instance::DynFunc;
+use marine_wasm_backend_traits::DelayedContextLifetime;
+use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::WValue;
+use marine_wasm_backend_traits::Function;
 
-// use std::sync::Arc;
-use std::rc::Rc;
+use wasmer_it::interpreter::wasm;
+
+use std::sync::Arc;
 
 #[derive(Clone)]
-enum WITFunctionInner {
+enum WITFunctionInner<WB: WasmBackend> {
     Export {
-        func: Rc<DynFunc<'static>>,
+        func: Arc<<WB as WasmBackend>::Function>,
     },
     Import {
         // TODO: use dyn Callable here
-        callable: Rc<Callable>,
+        callable: Arc<Callable<WB>>,
     },
 }
 
 /// Represents all import and export functions that could be called from IT context by call-core.
 #[derive(Clone)]
-pub(super) struct WITFunction {
+pub(super) struct WITFunction<WB: WasmBackend> {
     name: String,
-    arguments: Rc<Vec<IFunctionArg>>,
-    outputs: Rc<Vec<IType>>,
-    inner: WITFunctionInner,
+    arguments: Arc<Vec<IFunctionArg>>,
+    outputs: Arc<Vec<IType>>,
+    inner: WITFunctionInner<WB>,
 }
 
-impl WITFunction {
+impl<WB: WasmBackend> WITFunction<WB> {
     /// Creates functions from a "usual" (not IT) module export.
-    pub(super) fn from_export(dyn_func: DynFunc<'static>, name: String) -> MResult<Self> {
+    pub(super) fn from_export(
+        store: &mut <WB as WasmBackend>::Store,
+        dyn_func: <WB as WasmBackend>::Function,
+        name: String,
+    ) -> MResult<Self> {
         use super::type_converters::wtype_to_itype;
-
-        let signature = dyn_func.signature();
+        let signature = dyn_func.signature(store);
         let arguments = signature
             .params()
             .iter()
@@ -67,11 +75,11 @@ impl WITFunction {
             .collect::<Vec<_>>();
 
         let inner = WITFunctionInner::Export {
-            func: Rc::new(dyn_func),
+            func: Arc::new(dyn_func),
         };
 
-        let arguments = Rc::new(arguments);
-        let outputs = Rc::new(outputs);
+        let arguments = Arc::new(arguments);
+        let outputs = Arc::new(outputs);
 
         Ok(Self {
             name,
@@ -83,11 +91,11 @@ impl WITFunction {
 
     /// Creates function from a module import.
     pub(super) fn from_import(
-        wit_module: &MModule,
+        wit_module: &MModule<WB>,
         module_name: &str,
         function_name: &str,
-        arguments: Rc<Vec<IFunctionArg>>,
-        outputs: Rc<Vec<IType>>,
+        arguments: Arc<Vec<IFunctionArg>>,
+        outputs: Arc<Vec<IType>>,
     ) -> MResult<Self> {
         let callable = wit_module.get_callable(module_name, function_name)?;
 
@@ -104,7 +112,9 @@ impl WITFunction {
     }
 }
 
-impl wasm::structures::LocalImport for WITFunction {
+impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
+    for WITFunction<WB>
+{
     fn name(&self) -> &str {
         self.name.as_str()
     }
@@ -125,17 +135,28 @@ impl wasm::structures::LocalImport for WITFunction {
         &self.outputs
     }
 
-    fn call(&self, arguments: &[IValue]) -> std::result::Result<Vec<IValue>, ()> {
-        use super::type_converters::{ival_to_wval, wval_to_ival};
-
+    fn call(
+        &self,
+        store: &mut <WB as WasmBackend>::ContextMut<'_>,
+        arguments: &[IValue],
+    ) -> std::result::Result<Vec<IValue>, ()> {
+        use super::type_converters::wval_to_ival;
+        use super::type_converters::ival_to_wval;
         match &self.inner {
             WITFunctionInner::Export { func, .. } => func
                 .as_ref()
-                .call(&arguments.iter().map(ival_to_wval).collect::<Vec<WValue>>())
-                .map(|result| result.iter().map(wval_to_ival).collect())
-                .map_err(|_| ()),
-            WITFunctionInner::Import { callable, .. } => Rc::make_mut(&mut callable.clone())
-                .call(arguments)
+                .call(
+                    store,
+                    arguments
+                        .iter()
+                        .map(ival_to_wval)
+                        .collect::<Vec<WValue>>()
+                        .as_slice(),
+                )
+                .map_err(|_| ())
+                .map(|results| results.iter().map(wval_to_ival).collect()),
+            WITFunctionInner::Import { callable, .. } => Arc::make_mut(&mut callable.clone())
+                .call(store, arguments)
                 .map_err(|_| ()),
         }
     }

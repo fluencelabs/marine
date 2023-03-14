@@ -22,16 +22,16 @@ use serde::Serialize;
 use serde::Deserialize;
 
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
-pub type IRecordTypes = HashMap<u64, Rc<IRecordType>>;
+pub type IRecordTypes = HashMap<u64, Arc<IRecordType>>;
 
 /// Represent a function type inside Marine module.
 #[derive(PartialEq, Eq, Debug, Clone, Hash, Serialize, Deserialize)]
 pub struct IFunctionSignature {
-    pub name: Rc<String>,
-    pub arguments: Rc<Vec<IFunctionArg>>,
-    pub outputs: Rc<Vec<IType>>,
+    pub name: Arc<String>,
+    pub arguments: Arc<Vec<IFunctionArg>>,
+    pub outputs: Arc<Vec<IType>>,
     pub adapter_function_type: u32,
 }
 

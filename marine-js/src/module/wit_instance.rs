@@ -16,18 +16,22 @@
 
 use super::wit_prelude::*;
 use super::IRecordType;
-use crate::{MResult};
-use crate::marine_js::{Instance as WasmerInstance};
+use crate::MResult;
+use crate::marine_js::Instance as WasmerInstance;
+use crate::module::wit_store::WITStore;
 
 use marine_it_interfaces::MITInterfaces;
 use marine_it_interfaces::ITAstType;
 use wasmer_it::interpreter::wasm;
-use wasmer_it::interpreter::wasm::structures::{LocalImportIndex, Memory, TypedIndex};
+use wasmer_it::interpreter::wasm::structures::LocalImportIndex;
+use wasmer_it::interpreter::wasm::structures::Memory;
+use wasmer_it::interpreter::wasm::structures::TypedIndex;
 
 use std::collections::HashMap;
-use std::rc::Rc;
 
-pub type MRecordTypes = HashMap<u64, Rc<IRecordType>>;
+use std::sync::Arc;
+
+pub type MRecordTypes = HashMap<u64, Arc<IRecordType>>;
 
 /// Contains all import and export functions that could be called from IT context by call-core.
 #[derive(Clone)]
@@ -43,9 +47,9 @@ pub(super) struct ITInstance {
 }
 
 impl ITInstance {
-    pub(super) fn new(wasmer_instance: &WasmerInstance, wit: &MITInterfaces<'_>) -> MResult<Self> {
-        let exports = Self::extract_raw_exports(wasmer_instance, wit)?;
-        let memories = Self::extract_memories(wasmer_instance);
+    pub(super) fn new(wasm_instance: &WasmerInstance, wit: &MITInterfaces<'_>) -> MResult<Self> {
+        let exports = Self::extract_raw_exports(wasm_instance, wit)?;
+        let memories = Self::extract_memories(wasm_instance);
 
         let funcs = exports;
 
@@ -59,10 +63,10 @@ impl ITInstance {
     }
 
     fn extract_raw_exports(
-        wasmer_instance: &WasmerInstance,
+        wasm_instance: &WasmerInstance,
         it: &MITInterfaces<'_>,
     ) -> MResult<HashMap<usize, WITFunction>> {
-        let module_exports = &wasmer_instance.exports;
+        let module_exports = &wasm_instance.exports;
 
         it.exports()
             .enumerate()
@@ -77,13 +81,13 @@ impl ITInstance {
             .collect()
     }
 
-    fn extract_memories(wasmer_instance: &WasmerInstance) -> Vec<WITMemory> {
+    fn extract_memories(wasm_instance: &WasmerInstance) -> Vec<WITMemory> {
         use crate::marine_js::Export::Memory;
 
-        let memories = wasmer_instance
+        let memories = wasm_instance
             .exports()
             .filter_map(|(_, export)| match export {
-                Memory => Some(WITMemory::new(wasmer_instance.module_name.clone())),
+                Memory => Some(WITMemory::new(wasm_instance.module_name.clone())),
                 _ => None,
             })
             .collect::<Vec<_>>();
@@ -109,7 +113,9 @@ impl ITInstance {
     }
 }
 
-impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView> for ITInstance {
+impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView, WITStore>
+    for ITInstance
+{
     fn export(&self, _export_name: &str) -> Option<&ITExport> {
         // exports aren't used in this version of IT
         None
@@ -137,7 +143,7 @@ impl wasm::structures::Instance<ITExport, WITFunction, WITMemory, WITMemoryView>
         Some(memory.view())
     }
 
-    fn wit_record_by_id(&self, index: u64) -> Option<&Rc<IRecordType>> {
+    fn wit_record_by_id(&self, index: u64) -> Option<&Arc<IRecordType>> {
         self.record_types_by_id.get(&index)
     }
 }
