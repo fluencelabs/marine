@@ -1,6 +1,3 @@
-[registries]
-fluence = { index = "git://crates.fluence.dev/index" }
-
 [target.wasm32-wasi]
 rustflags = [
     "-C", "link-args=-zstack-size=52428800",
