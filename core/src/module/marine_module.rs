@@ -137,7 +137,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
         let (export_funcs, export_record_types) = Self::instantiate_exports(&it_instance, &mit)?;
 
-        // Backend is not expected to call _start or _initialize
+        // backend is not expected to call _start or _initialize
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
         if let Ok(initialize_func) = wasm_instance.get_function(store, INITIALIZE_FUNC) {
