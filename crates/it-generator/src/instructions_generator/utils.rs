@@ -107,9 +107,9 @@ pub(crate) fn wtype_to_itype(pty: &RustType) -> IType {
     }
 }
 
-pub(crate) fn generate_it_args<'f>(
+pub(crate) fn generate_it_args(
     signature: &FnSignature,
-    it_resolver: &mut ITResolver<'f>,
+    it_resolver: &mut ITResolver<'_>,
 ) -> Result<Arc<Vec<IFunctionArg>>> {
     let arguments = signature
         .arguments
@@ -126,9 +126,9 @@ pub(crate) fn generate_it_args<'f>(
     Ok(arguments)
 }
 
-pub(crate) fn generate_it_output_type<'f>(
+pub(crate) fn generate_it_output_type(
     signature: &FnSignature,
-    it_resolver: &mut ITResolver<'f>,
+    it_resolver: &mut ITResolver<'_>,
 ) -> Result<Arc<Vec<IType>>> {
     let output_types = signature
         .output_types

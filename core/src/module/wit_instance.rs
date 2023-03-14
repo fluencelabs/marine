@@ -129,7 +129,7 @@ impl<WB: WasmBackend> ITInstance<WB> {
                         output_types,
                     )?;
 
-                    Ok((start_index + idx as usize, func))
+                    Ok((start_index + idx, func))
                 }
                 None => Err(MError::NoSuchModule(import.namespace.to_string())),
             })

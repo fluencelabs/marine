@@ -27,7 +27,7 @@ pub fn delete_it_section_from_file(
     out_wasm_path: PathBuf,
 ) -> Result<(), ITParserError> {
     let module = ModuleConfig::new()
-        .parse_file(&in_wasm_path)
+        .parse_file(in_wasm_path)
         .map_err(ITParserError::CorruptedWasmFile)?;
 
     let mut module = delete_it_section(module);

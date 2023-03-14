@@ -209,8 +209,8 @@ impl<WB: WasmBackend> Marine<WB> {
 
     /// At first, tries to find function signature and record types in module_interface_cache,
     /// if there is no them, tries to look
-    fn lookup_module_interface<'marine>(
-        &'marine mut self,
+    fn lookup_module_interface(
+        &mut self,
         module_name: &str,
         func_name: &str,
     ) -> MarineResult<MModuleInterface> {

@@ -25,16 +25,16 @@ use wasmer_it::IType;
 
 /// Generates IT instructions for a argument of an export function.
 pub(super) trait ArgumentITGenerator {
-    fn generate_instructions_for_arg<'a>(
+    fn generate_instructions_for_arg(
         &self,
         arg_id: u32,
-        it_resolver: &mut ITResolver<'a>,
+        it_resolver: &mut ITResolver<'_>,
     ) -> Result<Vec<Instruction>>;
 }
 
 impl ArgumentITGenerator for ParsedType {
     #[rustfmt::skip]
-    fn generate_instructions_for_arg<'a>(&self, index: u32, it_resolver: &mut ITResolver<'a>) -> Result<Vec<Instruction>> {
+    fn generate_instructions_for_arg(&self, index: u32, it_resolver: &mut ITResolver<'_>) -> Result<Vec<Instruction>> {
         let instructions = match self {
             ParsedType::Boolean(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromBool],
             ParsedType::I8(_) => vec![Instruction::ArgumentGet { index }, Instruction::I32FromS8],

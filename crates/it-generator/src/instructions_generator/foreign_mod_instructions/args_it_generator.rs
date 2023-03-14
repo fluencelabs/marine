@@ -24,19 +24,19 @@ use wasmer_it::IType;
 
 /// Generate IT instructions for a foreign mod.
 pub(super) trait ArgumentITGenerator {
-    fn generate_instructions_for_arg<'a>(
+    fn generate_instructions_for_arg(
         &self,
         arg_id: u32,
-        it_resolver: &mut ITResolver<'a>,
+        it_resolver: &mut ITResolver<'_>,
     ) -> Result<(Vec<Instruction>, u32)>;
 }
 
 #[rustfmt::skip]
 impl ArgumentITGenerator for ParsedType {
-    fn generate_instructions_for_arg<'a>(
+    fn generate_instructions_for_arg(
         &self,
         index: u32,
-        it_resolver: &mut ITResolver<'a>,
+        it_resolver: &mut ITResolver<'_>,
     ) -> Result<(Vec<Instruction>, u32)> {
         let instructions = match self {
             ParsedType::Boolean(_) => (vec![Instruction::ArgumentGet { index }, Instruction::BoolFromI32], 1),

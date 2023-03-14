@@ -133,8 +133,8 @@ impl FluenceFaaS {
 
     /// At first, tries to find function signature and record types in module_interface_cache,
     /// if there is no them, tries to look
-    fn lookup_module_interface<'faas>(
-        &'faas mut self,
+    fn lookup_module_interface(
+        &mut self,
         module_name: &str,
         func_name: &str,
     ) -> Result<MModuleInterface> {
