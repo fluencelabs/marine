@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.20.0](https://github.com/fluencelabs/marine/compare/marine-core-v0.19.0...marine-core-v0.20.0) (2023-03-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* decouple wasmer from Marine, replace it with generic backend interface ([#219](https://github.com/fluencelabs/marine/issues/219))
+
+### Features
+
+* decouple wasmer from Marine, replace it with generic backend interface ([#219](https://github.com/fluencelabs/marine/issues/219)) ([d3a773d](https://github.com/fluencelabs/marine/commit/d3a773df4f7ec80ab8146f68922802a4b9a450d0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-module-info-parser bumped from 0.5.1 to 0.6.0
+    * marine-it-interfaces bumped from 0.7.3 to 0.8.0
+    * marine-it-parser bumped from 0.11.1 to 0.12.0
+    * marine-it-generator bumped from 0.9.5 to 0.10.0
+    * marine-module-interface bumped from 0.6.1 to 0.7.0
+    * marine-utils bumped from 0.4.0 to 0.5.0
+    * marine-min-it-version bumped from 0.2.1 to 0.3.0
+    * marine-wasm-backend-traits bumped from 0.1.0 to 0.2.0
+    * marine-wasmtime-backend bumped from 0.1.0 to 0.2.0
+
 ## [Unreleased]
 
 ## [0.19.0] - 2022-12-06
