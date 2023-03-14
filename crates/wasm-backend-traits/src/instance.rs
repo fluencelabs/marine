@@ -48,8 +48,8 @@ pub trait Instance<WB: WasmBackend>: Clone {
     /// Returns an exported function with the given name.
     /// # Errors:
     ///     Returns an error if there is no export with such name, or it is not a function.
-    fn get_function<'a>(
-        &'a self,
+    fn get_function(
+        &self,
         store: &mut impl AsContextMut<WB>,
         name: &str,
     ) -> ResolveResult<<WB as WasmBackend>::Function>;

@@ -72,8 +72,8 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
             .map(WasmtimeMemory::new)
     }
 
-    fn get_function<'a>(
-        &'a self,
+    fn get_function(
+        &self,
         store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         name: &str,
     ) -> ResolveResult<<WasmtimeWasmBackend as WasmBackend>::Function> {
