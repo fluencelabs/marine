@@ -15,8 +15,8 @@
  */
 
 use marine_wasm_backend_traits::WasmBackend;
-
 use marine_core::generic::HostImportDescriptor;
+
 use wasmer_it::IValue;
 use wasmer_it::IType;
 
