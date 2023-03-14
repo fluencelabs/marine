@@ -55,7 +55,7 @@ pub struct MarineCore<WB: WasmBackend> {
     // Wasm backend may have state in the future
     #[allow(unused)]
     wasm_backend: WB,
-    // Container for all objects created by Wasm backend
+    /// Container for all objects created by a Wasm backend.
     store: RefCell<<WB as WasmBackend>::Store>,
 }
 
