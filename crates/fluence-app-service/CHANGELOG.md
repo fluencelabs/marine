@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-runtime bumped from 0.24.0 to 0.24.1
 
+## [0.25.0](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.24.0...fluence-app-service-v0.25.0) (2023-03-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* decouple wasmer from Marine, replace it with generic backend interface ([#219](https://github.com/fluencelabs/marine/issues/219))
+
+### Features
+
+* decouple wasmer from Marine, replace it with generic backend interface ([#219](https://github.com/fluencelabs/marine/issues/219)) ([d3a773d](https://github.com/fluencelabs/marine/commit/d3a773df4f7ec80ab8146f68922802a4b9a450d0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-runtime bumped from 0.25.0 to 0.26.0
+    * marine-min-it-version bumped from 0.2.1 to 0.3.0
+    * marine-wasm-backend-traits bumped from 0.1.0 to 0.2.0
+    * marine-wasmtime-backend bumped from 0.1.0 to 0.2.0
+
 ## [0.24.0](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.23.1...fluence-app-service-v0.24.0) (2023-03-03)
 
 

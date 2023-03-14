@@ -1,5 +1,24 @@
 # Changelog
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-it-interfaces bumped from 0.7.3 to 0.8.0
+    * marine-module-interface bumped from 0.6.1 to 0.7.0
+    * marine-utils bumped from 0.4.0 to 0.5.0
+    * marine-min-it-version bumped from 0.2.1 to 0.3.0
+    * it-json-serde bumped from 0.3.5 to 0.4.0
+
+## [0.4.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.3.45...marine-js-v0.4.0) (2023-03-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* decouple wasmer from Marine, replace it with generic backend interface ([#219](https://github.com/fluencelabs/marine/issues/219))
+
+### Features
+
+* decouple wasmer from Marine, replace it with generic backend interface ([#219](https://github.com/fluencelabs/marine/issues/219)) ([d3a773d](https://github.com/fluencelabs/marine/commit/d3a773df4f7ec80ab8146f68922802a4b9a450d0))
+
 ## [0.3.45](https://github.com/fluencelabs/marine/compare/marine-js-v0.3.44...marine-js-v0.3.45) (2023-02-15)
 
 
