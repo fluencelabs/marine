@@ -16,7 +16,7 @@ fluence-app-service = { path = "../../crates/fluence-app-service", version = "0.
 marine-rs-sdk-main = { version = "0.7.1", features = ["logger"] }
 marine-wasm-backend-traits = {path = "../../crates/wasm-backend-traits", version = "0.1.0"}
 
-anyhow = "1.0.66"
+anyhow = "1.0.69"
 clap = "2.34.0"
 serde = "1.0.147"
 serde_json = "1.0.89"
