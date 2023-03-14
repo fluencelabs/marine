@@ -280,9 +280,10 @@ impl<WB: WasmBackend> MModule<WB> {
         let all_imports = raw_imports
             .into_iter()
             .map(|(name, creator)| (name, creator(store.as_context_mut())))
-            .chain(host_imports.into_iter());
+            .chain(host_imports.into_iter())
+            .collect::<Vec<_>>();
 
-        linker.register("host", all_imports)?;
+        linker.register(store, "host", all_imports.into_iter())?;
 
         Ok(())
     }
@@ -428,7 +429,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
         for (namespace_name, funcs) in wit_import_funcs.into_iter() {
             let funcs = funcs.into_iter().map(|(name, f)| (name.to_string(), f));
-            linker.register(namespace_name, funcs)?;
+            linker.register(store, namespace_name, funcs)?;
         }
 
         Ok(())

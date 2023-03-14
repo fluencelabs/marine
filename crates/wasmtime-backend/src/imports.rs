@@ -35,6 +35,7 @@ impl Imports<WasmtimeWasmBackend> for WasmtimeImports {
 
     fn insert(
         &mut self,
+        store: &impl AsContext<WasmtimeWasmBackend>,
         module: impl Into<String>,
         name: impl Into<String>,
         func: <WasmtimeWasmBackend as WasmBackend>::Function,
@@ -42,19 +43,24 @@ impl Imports<WasmtimeWasmBackend> for WasmtimeImports {
         let module = module.into();
         let name = name.into();
         self.linker
-            .define(&module, &name, func.inner)
+            .define(store.as_context(), &module, &name, func.inner)
             .map_err(|_| ImportError::DuplicateImport(module, name))
             .map(|_| ())
     }
 
-    fn register<S, I>(&mut self, name: S, namespace: I) -> Result<(), ImportError>
+    fn register<S, I>(
+        &mut self,
+        store: &impl AsContext<WasmtimeWasmBackend>,
+        name: S,
+        namespace: I,
+    ) -> Result<(), ImportError>
     where
         S: Into<String>,
         I: IntoIterator<Item = (String, WasmtimeFunction)>,
     {
         let module: String = name.into();
         for (name, func) in namespace {
-            self.insert(&module, name, func)?;
+            self.insert(store, &module, name, func)?;
         }
 
         Ok(())

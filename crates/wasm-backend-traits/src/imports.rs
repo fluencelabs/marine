@@ -16,6 +16,7 @@
 
 use crate::errors::*;
 
+use crate::AsContext;
 use crate::WasmBackend;
 use crate::WType;
 
@@ -32,6 +33,7 @@ pub trait Imports<WB: WasmBackend>: Clone {
     ///     An error returned if such combination of `module` and `name` already has an associated function.
     fn insert(
         &mut self,
+        store: &impl AsContext<WB>,
         module: impl Into<String>,
         name: impl Into<String>,
         func: <WB as WasmBackend>::Function,
@@ -41,7 +43,12 @@ pub trait Imports<WB: WasmBackend>: Clone {
     /// # Errors:
     ///     An error returned if such combination of `module` and `name` already has an associated function.
     ///
-    fn register<S, I>(&mut self, name: S, namespace: I) -> Result<(), ImportError>
+    fn register<S, I>(
+        &mut self,
+        store: &impl AsContext<WB>,
+        name: S,
+        namespace: I,
+    ) -> Result<(), ImportError>
     where
         S: Into<String>,
         I: IntoIterator<Item = (String, <WB as WasmBackend>::Function)>;
