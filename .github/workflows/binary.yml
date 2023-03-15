@@ -113,7 +113,7 @@ jobs:
         id: sum
         run: |
           ls -R
-          mv "${{ inputs.binary }}/*" .
+          mv ${{ inputs.binary }}/* .
           rmdir *-artifact
           sha256sum * | tee > ${{ inputs.binary }}_SHA256_SUMS
         working-directory: binaries
