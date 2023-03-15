@@ -63,23 +63,11 @@ jobs:
           version="$(jq -r '.["marine-js"]' .github/release-please/manifest.json)"
           echo "version=${version}" >> $GITHUB_OUTPUT
 
-      - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: "16"
           registry-url: "https://registry.npmjs.org"
-
-      - name: Install cargo-edit
-        uses: baptiste0928/cargo-install@v1.3.1
-        with:
-          crate: cargo-edit
-
-      - name: Set marine-js version
-        run: cargo set-version ${{ steps.version.outputs.version }}
-        working-directory: marine-js
 
       - name: Set marine-js npm version
         run: npm version ${{ steps.version.outputs.version }}
