@@ -14,5 +14,5 @@
   "marine": "0.26.0",
   "tools/cli": "0.14.0",
   "tools/repl": "0.21.0",
-  "marine-js": "0.3.4"
+  "marine-js": "0.4.0"
 }
