@@ -69,7 +69,7 @@ jobs:
           node-version: "16"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Set version version
+      - name: Set marine-js npm version
         run: npm version ${{ steps.version.outputs.version }}
         working-directory: marine-js/npm-package
 
