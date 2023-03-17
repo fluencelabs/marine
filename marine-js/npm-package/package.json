@@ -62,7 +62,7 @@
     "default-import": "1.1.5"
   },
   "devDependencies": {
-    "@types/jest": "27.5.2",
+    "@types/jest": "29.5.0",
     "@types/download": "8.0.1",
     "@fluencelabs/avm": "0.30.5",
     "@types/node": "16.11.59",
