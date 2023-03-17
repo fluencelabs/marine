@@ -108,8 +108,6 @@ impl<WB: WasmBackend> MarineCore<WB> {
         wasm_bytes: &[u8],
         config: MModuleConfig<WB>,
     ) -> MResult<()> {
-        let _prepared_wasm_bytes =
-            crate::misc::prepare_module(wasm_bytes, config.max_heap_pages_count)?;
         let module = MModule::new(
             &name,
             self.store.get_mut(),

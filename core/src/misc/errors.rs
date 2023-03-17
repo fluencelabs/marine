@@ -20,13 +20,6 @@ use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
 pub enum PrepareError {
-    /// Error that raises on a Wasm module validation.
-    #[error("validation error: {0}, probably module is malformed")]
-    ParseError(#[from] parity_wasm::elements::Error),
-
-    #[error(transparent)]
-    HeapBaseInvalidOrMissing(#[from] HeapBaseError),
-
     #[error("overflow was happened while summation globals size '{globals_pages_count}' and heap size '{max_heap_pages_count}'")]
     MemSizesOverflow {
         globals_pages_count: u32,
@@ -56,16 +49,4 @@ pub enum PrepareError {
         required: semver::Version,
         provided: semver::Version,
     },
-}
-
-#[derive(Debug, ThisError)]
-pub enum HeapBaseError {
-    #[error("a Wasm module doesn't expose __heap_base entry")]
-    ExportNotFound,
-
-    #[error("__heap_base is initialized not by i32.const, but by a different set of instructions, that's unsupported")]
-    InitializationNotI32Const,
-
-    #[error("__heap_base has not a i32 type")]
-    WrongType,
 }
