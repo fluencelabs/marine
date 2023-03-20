@@ -21,7 +21,11 @@ jobs:
 
   sqlite-wasm:
     needs: marine
-    uses: fluencelabs/sqlite-wasm-connector/.github/workflows/tests.yml@FLU-247
+    uses: fluencelabs/sqlite-wasm-connector/.github/workflows/tests.yml@master
+
+  spell:
+    needs: marine
+    uses: fluencelabs/spell/.github/workflows/snapshot.yml@main
 
   marine-rs-sdk-test:
     needs:
