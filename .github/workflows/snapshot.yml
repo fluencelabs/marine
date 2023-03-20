@@ -58,9 +58,6 @@ jobs:
       - name: Build marine binary
         run: cargo build --release -p marine
 
-      # - name: Archive marine binary
-      #   run: tar -cvf marine.tar -C target/release/ marine
-
       - name: Upload marine binary
         uses: actions/upload-artifact@v3
         with:
