@@ -56,7 +56,7 @@ jobs:
           id: ${{ steps.version.outputs.id }}
 
       - name: Build marine binary
-        run: cargo build --release marine
+        run: cargo build --release -p marine
 
       - name: Archive marine binary
         run: tar -cvf marine.tar -C target/release/marine
