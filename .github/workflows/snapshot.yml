@@ -58,14 +58,14 @@ jobs:
       - name: Build marine binary
         run: cargo build --release -p marine
 
-      - name: Archive marine binary
-        run: tar -cvf marine.tar -C target/release/ marine
+      # - name: Archive marine binary
+      #   run: tar -cvf marine.tar -C target/release/ marine
 
-      - name: Upload marine binary archive
+      - name: Upload marine binary
         uses: actions/upload-artifact@v3
         with:
           name: marine
-          path: marine.tar
+          path: target/release/marine
 
   publish-marine-js:
     name: "Publish marine-js snapshot"
