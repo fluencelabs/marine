@@ -20,8 +20,8 @@ jobs:
     uses: ./.github/workflows/snapshot.yml
 
   sqlite-wasm:
-    uses: fluencelabs/sqlite-wasm-connector/.github/workflows/tests.yml@FLU-247
     needs: marine
+    uses: fluencelabs/sqlite-wasm-connector/.github/workflows/tests.yml@FLU-247
 
   marine-rs-sdk-test:
     needs:
