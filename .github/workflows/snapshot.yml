@@ -55,6 +55,18 @@ jobs:
         with:
           id: ${{ steps.version.outputs.id }}
 
+      - name: Build marine binary
+        run: cargo build --release marine
+
+      - name: Archive marine binary
+        run: run: tar -cvf marine.tar -C target/release/marine
+
+      - name: Upload marine binary archive
+        uses: actions/upload-artifact@v3
+        with:
+          name: marine
+          path: marine.tar
+
   publish-marine-js:
     name: "Publish marine-js snapshot"
     runs-on: builder
