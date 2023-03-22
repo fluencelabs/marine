@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-core bumped from 0.20.0 to 0.20.1
+
 ## [0.26.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.25.0...marine-runtime-v0.26.0) (2023-03-14)
 
 
