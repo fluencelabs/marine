@@ -1223,12 +1223,12 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.25.1"
+version = "0.25.0"
 dependencies = [
  "log",
  "maplit",
  "marine-min-it-version 0.3.0",
- "marine-runtime 0.26.1",
+ "marine-runtime 0.26.0",
  "marine-wasm-backend-traits",
  "marine-wasmtime-backend",
  "serde",
@@ -2044,7 +2044,7 @@ dependencies = [
 
 [[package]]
 name = "marine-core"
-version = "0.20.1"
+version = "0.20.0"
 dependencies = [
  "anyhow",
  "bytes",
@@ -2363,7 +2363,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.26.1"
+version = "0.26.0"
 dependencies = [
  "bytesize",
  "env_logger 0.9.3",
@@ -2371,7 +2371,7 @@ dependencies = [
  "it-memory-traits 0.4.0",
  "itertools",
  "log",
- "marine-core 0.20.1",
+ "marine-core 0.20.0",
  "marine-module-interface 0.7.0",
  "marine-rs-sdk",
  "marine-rs-sdk-main",
@@ -2563,13 +2563,13 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.21.1"
+version = "0.21.0"
 dependencies = [
  "anyhow",
  "check-latest",
  "clap 2.34.0",
  "env_logger 0.9.3",
- "fluence-app-service 0.25.1",
+ "fluence-app-service 0.25.0",
  "itertools",
  "log",
  "marine-rs-sdk-main",
