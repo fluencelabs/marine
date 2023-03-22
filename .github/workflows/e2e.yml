@@ -192,6 +192,7 @@ jobs:
   registry:
     needs:
       - rust-peer
+      - sqlite-wasm
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
