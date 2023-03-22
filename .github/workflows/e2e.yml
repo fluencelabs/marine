@@ -144,7 +144,7 @@ jobs:
       - js-client
       - rust-peer
 
-    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@debug-set-version
+    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@debug-version-set
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshot }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
