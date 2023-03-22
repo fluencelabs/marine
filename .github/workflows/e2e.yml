@@ -146,7 +146,7 @@ jobs:
 
     uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
     with:
-      js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshot }}"
+      js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
       rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
 
   registry:
