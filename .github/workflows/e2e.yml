@@ -27,6 +27,11 @@ jobs:
     needs: sqlite
     uses: fluencelabs/sqlite-wasm-connector/.github/workflows/tests.yml@master
 
+  sqlite-wasm-tests:
+    name: "sqlite-wasm"
+    needs: sqlite
+    uses: fluencelabs/sqlite-wasm-connector/.github/workflows/snapshot.yml@master
+
   spell:
     needs: sqlite-wasm
     uses: fluencelabs/spell/.github/workflows/snapshot.yml@main
