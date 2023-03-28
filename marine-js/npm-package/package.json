@@ -65,7 +65,7 @@
     "@types/jest": "27.5.2",
     "@types/download": "8.0.1",
     "@fluencelabs/avm": "0.30.5",
-    "@types/node": "16.11.59",
+    "@types/node": "18.15.11",
     "jest": "29.4.1",
     "ts-jest": "29.0.5",
     "ts-loader": "9.4.2",
