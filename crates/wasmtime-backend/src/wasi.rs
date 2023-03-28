@@ -160,10 +160,6 @@ fn populate_envs(
         .map_err(|_| WasiError::TooLargeEnvsArray)
 }
 
-fn populate_stdio(
-    builder: WasiCtxBuilder,
-) -> WasiCtxBuilder {
-    builder
-        .inherit_stdout()
-        .inherit_stderr()
+fn populate_stdio(builder: WasiCtxBuilder) -> WasiCtxBuilder {
+    builder.inherit_stdout().inherit_stderr()
 }
