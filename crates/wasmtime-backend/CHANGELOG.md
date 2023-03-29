@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/fluencelabs/marine/compare/marine-wasmtime-backend-v0.2.0...marine-wasmtime-backend-v0.2.1) (2023-03-29)
+
+
+### Bug Fixes
+
+* **wasmtime-backend:** give access to stdout and stderr for instances ([#312](https://github.com/fluencelabs/marine/issues/312)) ([a76ace9](https://github.com/fluencelabs/marine/commit/a76ace9337df5b07d9da3f3a449cf12f14e4cf2f))
+
 ## [0.2.0](https://github.com/fluencelabs/marine/compare/marine-wasmtime-backend-v0.1.0...marine-wasmtime-backend-v0.2.0) (2023-03-14)
 
 
