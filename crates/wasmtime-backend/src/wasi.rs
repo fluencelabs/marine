@@ -52,8 +52,10 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         let wasi_ctx_builder = populate_envs(wasi_ctx_builder, envs)?;
         // add preopened files to wasi context, do not create dirs
         let wasi_ctx_builder = populate_preopens(wasi_ctx_builder, preopened_files)?;
-        //  add mapped directories to wasi context , do not create dirs
+        // add mapped directories to wasi context, do not create dirs
         let wasi_ctx_builder = populate_mapped_dirs(wasi_ctx_builder, mapped_dirs)?;
+        // give access to runner's stdout and stderr, but not stdin
+        let wasi_ctx_builder = populate_stdio(wasi_ctx_builder);
 
         let wasi_ctx = wasi_ctx_builder.build();
         add_wasi_to_linker(store, linker, wasi_ctx)
@@ -156,4 +158,8 @@ fn populate_envs(
     builder
         .envs(&envs)
         .map_err(|_| WasiError::TooLargeEnvsArray)
+}
+
+fn populate_stdio(builder: WasiCtxBuilder) -> WasiCtxBuilder {
+    builder.inherit_stdout().inherit_stderr()
 }
