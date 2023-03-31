@@ -249,10 +249,10 @@ jobs:
   spell-aqua-tests:
     name: "spell"
     needs:
-      - rust-peer
+      - rust-peer-snapshot
     uses: fluencelabs/spell/.github/workflows/tests.yml@main
     with:
-      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
 
   registry:
     needs:
