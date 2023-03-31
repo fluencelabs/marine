@@ -55,27 +55,6 @@ jobs:
           }
         ]
 
-  marine-rs-sdk-test:
-    needs:
-      - marine
-
-    uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@master
-    with:
-      cargo-dependencies: |
-        [
-          {
-            "package": "fluence-app-service",
-            "version": "=${{ needs.marine.outputs.version }}",
-            "registry": "fluence"
-          },
-          {
-            "package": "fluence-app-service",
-            "manifest": "crates/marine-test-macro-impl/Cargo.toml",
-            "version": "=${{ needs.marine.outputs.version }}",
-            "registry": "fluence"
-          }
-        ]
-
   aquavm-wasm:
     name: "aquavm"
     needs:
@@ -267,6 +246,14 @@ jobs:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
 
+  spell-aqua-tests:
+    name: "spell"
+    needs:
+      - rust-peer
+    uses: fluencelabs/spell/.github/workflows/tests.yml@main
+    with:
+      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
+
   registry:
     needs:
       - rust-peer-snapshot
@@ -299,9 +286,11 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs:
+      - js-client-tests
       - fluence-cli
       - registry
       - aqua-playground
+      - spell-aqua-tests
 
     steps:
       - uses: lwhiteley/dependent-jobs-result-check@v1
