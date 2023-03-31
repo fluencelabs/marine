@@ -184,7 +184,7 @@ jobs:
 
     uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
     with:
-      marine-js-version: "${{ needs.marine-jq.outputs.version }}"
+      marine-js-version: "${{ needs.marine-js.outputs.version }}"
       avm-version: "${{ needs.aquavm-avm.outputs.version }}"
 
   aqua-playground:
