@@ -29,6 +29,32 @@ jobs:
     with:
       ref: ${{ github.ref }}
 
+  sqlite:
+    needs: marine
+    uses: fluencelabs/sqlite/.github/workflows/build.yml@master
+
+  sqlite-wasm:
+    needs: sqlite
+    uses: fluencelabs/sqlite-wasm-connector/.github/workflows/snapshot.yml@master
+
+  sqlite-wasm-tests:
+    name: "sqlite-wasm"
+    needs: sqlite
+    uses: fluencelabs/sqlite-wasm-connector/.github/workflows/tests.yml@master
+
+  spell:
+    needs: sqlite-wasm
+    uses: fluencelabs/spell/.github/workflows/snapshot.yml@main
+    with:
+      cargo-dependencies: |
+        [
+          {
+            "package": "marine-sqlite-connector",
+            "version": "=${{ needs.sqlite-wasm.outputs.version }}",
+            "registry": "fluence"
+          }
+        ]
+
   marine-rs-sdk-test:
     needs:
       - marine
@@ -124,6 +150,16 @@ jobs:
             "package": "air-interpreter-wasm",
             "version": "=${{ needs.aquavm-crates.outputs.version }}",
             "registry": "fluence"
+          },
+          {
+            "package": "fluence-spell-dtos",
+            "version": "=${{ needs.spell.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-spell-distro",
+            "version": "=${{ needs.spell.outputs.cargo-version }}",
+            "registry": "fluence"
           }
         ]
 
@@ -185,6 +221,16 @@ jobs:
             "package": "air-interpreter-wasm",
             "version": "=${{ needs.aquavm-crates.outputs.version }}",
             "registry": "fluence"
+          },
+          {
+            "package": "fluence-spell-dtos",
+            "version": "=${{ needs.spell.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-spell-distro",
+            "version": "=${{ needs.spell.outputs.cargo-version }}",
+            "registry": "fluence"
           }
         ]
 
@@ -224,10 +270,19 @@ jobs:
   registry:
     needs:
       - rust-peer-snapshot
+      - sqlite-wasm
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      cargo-dependencies: |
+        [
+          {
+            "package": "marine-sqlite-connector",
+            "version": "=${{ needs.sqlite-wasm.outputs.version }}",
+            "registry": "fluence"
+          }
+        ]
 
   fluence-cli:
     needs:
