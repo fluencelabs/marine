@@ -112,6 +112,7 @@ jobs:
     needs:
       - marine
       - aquavm-crates
+      - spell
 
     uses: fluencelabs/rust-peer/.github/workflows/build.yml@master
     with:
@@ -183,6 +184,7 @@ jobs:
     needs:
       - marine
       - aquavm-crates
+      - spell
 
     uses: fluencelabs/rust-peer/.github/workflows/tests.yml@master
     with:
