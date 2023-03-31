@@ -79,6 +79,7 @@ jobs:
         ]
 
   aquavm-crates:
+    name: "aquavm"
     needs:
       - marine
       - aquavm-wasm
@@ -102,6 +103,7 @@ jobs:
         ]
 
   aquavm-avm:
+    name: "aquavm"
     needs:
       - aquavm-wasm
     uses: fluencelabs/aquavm/.github/workflows/snapshot-avm.yml@master
