@@ -55,7 +55,7 @@ jobs:
     needs:
       - marine
 
-    uses: fluencelabs/aquavm/.github/workflows/snapshot-air-iterpreter-wasm.yml@master
+    uses: fluencelabs/aquavm/.github/workflows/snapshot-air-interpreter-wasm.yml@master
     with:
       cargo-dependencies: |
         [
