@@ -75,6 +75,7 @@ jobs:
 
   aquavm-crates:
     needs:
+      - marine
       - aquavm-wasm
 
     uses: fluencelabs/aquavm/.github/workflows/snapshot-cargo.yml@master
@@ -178,7 +179,7 @@ jobs:
 
   js-client:
     needs:
-      - marine
+      - marine-js
       - aquavm-avm
 
     uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
@@ -198,7 +199,7 @@ jobs:
 
   registry:
     needs:
-      - rust-peer
+      - rust-peer-snapshot
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
@@ -206,13 +207,13 @@ jobs:
 
   fluence-cli:
     needs:
-      - marine-crates
+      - marine
       - rust-peer-snapshot
 
     uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
     with:
-      marine-version: "${{ needs.marine-crates.outputs.version }}"
-      mrepl-version: "${{ needs.marine-crates.outputs.version }}"
+      marine-version: "${{ needs.marine.outputs.version }}"
+      mrepl-version: "${{ needs.marine.outputs.version }}"
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
 
   status:
