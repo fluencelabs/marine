@@ -132,7 +132,7 @@ jobs:
     needs:
       - marine
 
-    uses: fluencelabs/aquavm/.github/workflows/tests.yml@FLU-297-tests
+    uses: fluencelabs/aquavm/.github/workflows/tests.yml@master
     with:
       cargo-dependencies: |
         [
