@@ -285,30 +285,3 @@ jobs:
       marine-version: "${{ needs.marine.outputs.version }}"
       mrepl-version: "${{ needs.marine.outputs.version }}"
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
-
-  status:
-    runs-on: ubuntu-latest
-    if: always()
-    needs:
-      - js-client-tests
-      - fluence-cli
-      - registry
-      - aqua-playground
-      - spell-aqua-tests
-
-    steps:
-      - uses: lwhiteley/dependent-jobs-result-check@v1
-        id: status
-        with:
-          statuses: failure,cancelled,skipped
-          dependencies: ${{ toJSON(needs) }}
-
-      - name: Log output
-        run: |
-          echo "statuses:" "${{ steps.status.outputs.statuses }}"
-          echo "jobs:" "${{ steps.status.outputs.jobs }}"
-          echo "found any?:" "${{ steps.status.outputs.found }}"
-
-      - name: Fail run
-        if: fromJSON(steps.status.outputs.found)
-        run: exit 1
