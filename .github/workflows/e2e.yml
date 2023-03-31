@@ -139,7 +139,7 @@ jobs:
     name: "rust-peer"
     needs:
       - marine
-      - aquavm
+      - aquavm-crates
 
     uses: fluencelabs/rust-peer/.github/workflows/tests.yml@master
     with:
@@ -157,7 +157,7 @@ jobs:
           },
           {
             "package": "air-interpreter-wasm",
-            "version": "=${{ needs.aquavm.outputs.version }}",
+            "version": "=${{ needs.aquavm-crates.outputs.version }}",
             "registry": "fluence"
           }
         ]
@@ -201,18 +201,18 @@ jobs:
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
-      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
 
   fluence-cli:
     needs:
-      - marine
-      - rust-peer
+      - marine-crates
+      - rust-peer-snapshot
 
     uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
     with:
-      marine-version: "${{ needs.marine.outputs.cargo-version }}"
-      mrepl-version: "${{ needs.marine.outputs.cargo-version }}"
-      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
+      marine-version: "${{ needs.marine-crates.outputs.version }}"
+      mrepl-version: "${{ needs.marine-crates.outputs.version }}"
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
 
   status:
     runs-on: ubuntu-latest
