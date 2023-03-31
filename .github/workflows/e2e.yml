@@ -127,6 +127,29 @@ jobs:
           }
         ]
 
+  aquavm-tests:
+    name: "aquavm"
+    needs:
+      - marine
+
+    uses: fluencelabs/aquavm/.github/workflows/tests.yml@FLU-297-tests
+    with:
+      cargo-dependencies: |
+        [
+          {
+            "package": "marine-runtime",
+            "manifest": "avm/server/Cargo.toml",
+            "version": "=${{ needs.marine.outputs.version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-app-service",
+            "manifest": "air/Cargo.toml",
+            "version": "=${{ needs.marine.outputs.version }}",
+            "registry": "fluence"
+          }
+        ]
+
   rust-peer-snapshot:
     name: "rust-peer"
     needs:
