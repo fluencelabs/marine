@@ -131,7 +131,7 @@ jobs:
     needs:
       - rust-peer
 
-    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
+    uses: fluencelabs/rust-peer/.github/workflows/container.yml@master
     with:
       image-name: "docker.fluence.dev/marine"
       flavour: "minimal"
