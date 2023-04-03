@@ -70,7 +70,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Set marine-js npm version
-        run: npm version ${{ steps.version.outputs.version }}
+        run: npm version ${{ steps.version.outputs.version }} || true
         working-directory: marine-js/npm-package
 
       - name: Commit version bump
