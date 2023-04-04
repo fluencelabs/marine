@@ -8,19 +8,6 @@
     * marine-min-it-version bumped from 0.2.1 to 0.3.0
     * it-json-serde bumped from 0.3.5 to 0.4.0
 
-* The following workspace dependencies were updated
-  * dependencies
-    * marine-it-interfaces bumped from 0.8.0 to 0.8.1
-    * marine-module-interface bumped from 0.7.0 to 0.7.1
-    * it-json-serde bumped from 0.4.0 to 0.4.1
-
-## [0.4.1](https://github.com/fluencelabs/marine/compare/marine-js-v0.4.0...marine-js-v0.4.1) (2023-04-04)
-
-
-### Bug Fixes
-
-* **release-please:** Get rid of workspace.dependencies ([#316](https://github.com/fluencelabs/marine/issues/316)) ([71835e6](https://github.com/fluencelabs/marine/commit/71835e6762515a83cde1cc944d60352a4c1221f5))
-
 ## [0.4.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.3.45...marine-js-v0.4.0) (2023-03-14)
 
 

@@ -1,7 +1,7 @@
 [package]
 name = "marine"
 description = "Fluence Marine command line tool"
-version = "0.14.1"
+version = "0.14.0"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine/tools/cli"
 license = "Apache-2.0"
@@ -12,9 +12,9 @@ name = "marine"
 path = "src/main.rs"
 
 [dependencies]
-marine-it-generator = { path = "../../crates/it-generator", version = "0.10.1" }
-marine-it-parser = { path = "../../crates/it-parser", version = "0.12.1" }
-marine-module-info-parser = { path = "../../crates/module-info-parser", version = "0.6.1" }
+marine-it-generator = { path = "../../crates/it-generator", version = "0.10.0" }
+marine-it-parser = { path = "../../crates/it-parser", version = "0.12.0" }
+marine-module-info-parser = { path = "../../crates/module-info-parser", version = "0.6.0" }
 
 cargo_toml = "0.15.2"
 cargo-lock = "8.0.3"
