@@ -57,6 +57,19 @@ jobs:
           ref: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
           token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
 
+        # workaround for marine depending on itself messing with lock file
+      - name: Update Cargo.lock
+        run: cargo update --workspace
+
+      - name: Commit updated Cargo.lock
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore: Regenerate Cargo.lock"
+          branch: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
+          commit_user_name: fluencebot
+          commit_user_email: devops@fluence.one
+          commit_author: fluencebot <devops@fluence.one>
+
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
@@ -89,19 +102,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "chore: Bump marine-js version to ${{ steps.version.outputs.version }}"
-          branch: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
-          commit_user_name: fluencebot
-          commit_user_email: devops@fluence.one
-          commit_author: fluencebot <devops@fluence.one>
-
-        # workaround for marine depending on itself messing with lock file
-      - name: Update Cargo.lock
-        run: cargo update --workspace
-
-      - name: Commit updated Cargo.lock
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "chore: Regenerate Cargo.lock"
           branch: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
           commit_user_name: fluencebot
           commit_user_email: devops@fluence.one
@@ -199,6 +199,16 @@ jobs:
           exportToken: false
           secrets: |
             kv/npmjs/fluencebot token | NODE_AUTH_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Build marine-js package for node
+        working-directory: marine-js
+        run: ./build.sh
 
       - name: Setup node
         uses: actions/setup-node@v3
