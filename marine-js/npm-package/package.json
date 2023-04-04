@@ -52,6 +52,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "prebuild": "node update-imports.cjs",
     "postbuild": "cp ../marine-js-pkg/marine_js_bg.wasm ./dist/marine-js.wasm",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
@@ -70,6 +71,7 @@
     "ts-jest": "29.0.5",
     "ts-loader": "9.4.2",
     "typescript": "4.8.3",
-    "download": "8.0.0"
+    "download": "8.0.0",
+    "recast": "0.23.1"
   }
 }
