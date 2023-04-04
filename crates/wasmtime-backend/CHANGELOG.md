@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.2](https://github.com/fluencelabs/marine/compare/marine-wasmtime-backend-v0.2.1...marine-wasmtime-backend-v0.2.2) (2023-04-04)
+
+
+### Bug Fixes
+
+* **release-please:** Get rid of workspace.dependencies ([#316](https://github.com/fluencelabs/marine/issues/316)) ([71835e6](https://github.com/fluencelabs/marine/commit/71835e6762515a83cde1cc944d60352a4c1221f5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-wasm-backend-traits bumped from 0.2.0 to 0.2.1
+
 ## [0.2.1](https://github.com/fluencelabs/marine/compare/marine-wasmtime-backend-v0.2.0...marine-wasmtime-backend-v0.2.1) (2023-03-29)
 
 

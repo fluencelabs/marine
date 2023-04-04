@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.12.1](https://github.com/fluencelabs/marine/compare/marine-it-parser-v0.12.0...marine-it-parser-v0.12.1) (2023-04-04)
+
+
+### Bug Fixes
+
+* **release-please:** Get rid of workspace.dependencies ([#316](https://github.com/fluencelabs/marine/issues/316)) ([71835e6](https://github.com/fluencelabs/marine/commit/71835e6762515a83cde1cc944d60352a4c1221f5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-it-interfaces bumped from 0.8.0 to 0.8.1
+    * marine-module-interface bumped from 0.7.0 to 0.7.1
+    * marine-wasm-backend-traits bumped from 0.2.0 to 0.2.1
+
 ## [0.12.0](https://github.com/fluencelabs/marine/compare/marine-it-parser-v0.11.1...marine-it-parser-v0.12.0) (2023-03-14)
 
 
