@@ -96,7 +96,7 @@ jobs:
 
         # workaround for marine depending on itself messing with lock file
       - name: Update Cargo.lock
-        run: cargo update -p marine -p mrepl
+        run: cargo update --workspace
 
       - name: Commit updated Cargo.lock
         uses: stefanzweifel/git-auto-commit-action@v4
