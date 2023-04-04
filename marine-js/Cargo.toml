@@ -1,6 +1,6 @@
 [package]
 name = "marine-js"
-version = "0.3.4"
+version = "0.3.5"
 edition = "2021"
 description = "Web version of the marine runtime"
 publish = false
@@ -10,11 +10,11 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.8.0" }
-marine-module-interface = { path = "../crates/module-interface", version = "0.7.0" }
+marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.8.1" }
+marine-module-interface = { path = "../crates/module-interface", version = "0.7.1" }
 marine-utils = { path = "../crates/utils", version = "0.5.0" }
 marine-min-it-version = { path = "../crates/min-it-version", version = "0.3.0" }
-it-json-serde = { path = "../crates/it-json-serde", version = "0.4.0" }
+it-json-serde = { path = "../crates/it-json-serde", version = "0.4.1" }
 
 marine-rs-sdk = "0.7.1"
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
