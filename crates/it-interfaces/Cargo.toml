@@ -11,5 +11,5 @@ name = "marine_it_interfaces"
 path = "src/lib.rs"
 
 [dependencies]
-wasmer-it = { workspace = true}
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
 multimap = "0.8.3"

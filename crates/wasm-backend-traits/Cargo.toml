@@ -7,8 +7,8 @@ license = "Apache-2.0"
 edition = "2021"
 
 [dependencies]
-wasmer-it = { workspace = true }
-it-memory-traits = { workspace = true }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
+it-memory-traits = "0.4.0"
 
 thiserror = "1.0.24"
 anyhow = "1.0.68"

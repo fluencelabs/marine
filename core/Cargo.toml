@@ -21,9 +21,9 @@ marine-min-it-version =  { path = "../crates/min-it-version", version = "0.3.0" 
 marine-wasm-backend-traits = {path = "../crates/wasm-backend-traits", version = "0.2.0"}
 marine-wasmtime-backend = { path = "../crates/wasmtime-backend", version = "0.2.1"}
 
-wasmer-it = { workspace = true }
-it-lilo = { workspace = true }
-it-memory-traits = { workspace = true }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
+it-lilo = "0.5.1"
+it-memory-traits = "0.4.0"
 bytesize = "1.1.0"
 
 multimap = "0.8.3"

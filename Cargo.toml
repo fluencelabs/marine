@@ -42,12 +42,6 @@ members = [
     "tools/repl",
 ]
 
-[workspace.dependencies]
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
-it-memory-traits ="0.4.0"
-it-lilo = "0.5.1"
-fluence-it-types = { version = "0.4.1", features = ["impls"] }
-
 [profile.release]
 opt-level = 3
 debug = false

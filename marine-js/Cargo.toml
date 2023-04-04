@@ -17,10 +17,10 @@ marine-min-it-version = { path = "../crates/min-it-version", version = "0.3.0" }
 it-json-serde = { path = "../crates/it-json-serde", version = "0.4.0" }
 
 marine-rs-sdk = "0.7.1"
-wasmer-it = { workspace = true}
-it-memory-traits = { workspace = true}
-fluence-it-types = { workspace = true }
-it-lilo = { workspace = true }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
+it-memory-traits = "0.4.0"
+fluence-it-types = { version = "0.4.1", features = ["impls"] }
+it-lilo = "0.5.1"
 
 wasm-bindgen = "0.2"
 nom = "7.1"

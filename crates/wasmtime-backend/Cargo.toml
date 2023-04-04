@@ -8,8 +8,8 @@ license = "Apache-2.0"
 
 [dependencies]
 marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.2.0"}
-wasmer-it = { workspace = true }
-it-memory-traits = { workspace = true }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
+it-memory-traits = "0.4.0"
 
 # all default features except async
 wasmtime = {version = "6.0.1", default-features = false, features = ["cache", "wat", "jitdump", "parallel-compilation", "cranelift", "pooling-allocator", "vtune"]}

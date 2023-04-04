@@ -20,8 +20,8 @@ it-json-serde = { path = "../crates/it-json-serde", version = "0.4.0" }
 marine-wasm-backend-traits = { path = "../crates/wasm-backend-traits", version = "0.2.0"}
 marine-wasmtime-backend = { path = "../crates/wasmtime-backend", version = "0.2.1"}
 
-wasmer-it = { workspace = true }
-it-memory-traits = { workspace = true }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
+it-memory-traits = "0.4.0"
 
 toml = "0.5.9"
 serde = { version = "1.0.147", features = ["derive"] }
