@@ -75,6 +75,9 @@ jobs:
         continue-on-error: true
         working-directory: marine-js/npm-package
 
+      - name: Update Cargo.lock
+        run: cargo update -p marine -p mrepl
+
       - name: Commit version bump
         uses: stefanzweifel/git-auto-commit-action@v4
         with:

@@ -25,7 +25,7 @@
     "marine": {},
     "tools/cli": {},
     "tools/repl": {},
-    "marine-js": {
+    "marine-js/npm-package": {
       "release-type": "simple",
       "component": "marine-js"
     }
