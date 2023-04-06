@@ -7,6 +7,7 @@ members = [
     "crates/it-interfaces",
     "crates/it-parser",
     "crates/it-json-serde",
+    "crates/js-backend",
     "crates/min-it-version",
     "crates/module-info-parser",
     "crates/module-interface",
@@ -38,6 +39,7 @@ members = [
     "marine/tests/wasm_tests/records_passing",
     "marine/tests/wasm_tests/wasi",
     "marine-js",
+    "marine-js-2",
     "tools/cli",
     "tools/repl",
 ]
