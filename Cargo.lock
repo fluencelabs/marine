@@ -2224,8 +2224,13 @@ dependencies = [
 name = "marine-js-2"
 version = "0.1.0"
 dependencies = [
- "marine-core 0.20.3",
+ "maplit",
  "marine-js-backend",
+ "marine-rs-sdk",
+ "marine-runtime 0.26.3",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
 ]
 
 [[package]]
