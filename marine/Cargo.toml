@@ -28,7 +28,7 @@ serde = { version = "1.0.147", features = ["derive"] }
 serde_json = "1.0.89"
 serde_derive = "1.0.147"
 serde_with = "2.1.0"
-bytesize = {version = "1.1.0", features = ["serde"]}
+bytesize = {version = "1.2.0", features = ["serde"]}
 itertools = "0.10.5"
 log = "0.4.17"
 safe-transmute = "0.11.2"
