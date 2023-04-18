@@ -29,17 +29,17 @@ jobs:
     with:
       ref: ${{ github.ref }}
 
-  # sqlite:
-  #   needs: marine
-  #   uses: fluencelabs/sqlite/.github/workflows/build.yml@master
+  sqlite:
+    needs: marine
+    uses: fluencelabs/sqlite/.github/workflows/build.yml@master
 
   sqlite-wasm:
-    # needs: sqlite
+    needs: sqlite
     uses: fluencelabs/sqlite-wasm-connector/.github/workflows/snapshot.yml@master
 
   sqlite-wasm-tests:
     name: "sqlite-wasm"
-    # needs: sqlite
+    needs: sqlite
     uses: fluencelabs/sqlite-wasm-connector/.github/workflows/tests.yml@master
 
   spell:
