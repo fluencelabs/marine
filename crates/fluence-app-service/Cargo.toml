@@ -12,12 +12,12 @@ marine-min-it-version = { path = "../../crates/min-it-version", version = "0.3.0
 marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.2.1"}
 marine-wasmtime-backend = { path = "../wasmtime-backend", version = "0.2.2"}
 
-maplit = "1.0.2"
-log = "0.4.17"
-serde = "1.0.147"
-serde_derive = "1.0.147"
-serde_json = "1.0.89"
-toml = "0.5.9"
+maplit = "=1.0.2"
+log = "=0.4.17"
+serde = "=1.0.147"
+serde_derive = "=1.0.147"
+serde_json = "=1.0.89"
+toml = "=0.5.9"
 
 [features]
 raw-module-api = ["marine-runtime/raw-module-api"]

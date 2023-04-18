@@ -11,5 +11,5 @@ name = "marine_min_it_version"
 path = "src/lib.rs"
 
 [dependencies]
-once_cell = "1.16.0"
-semver = "1.0.14"
+once_cell = "=1.16.0"
+semver = "=1.0.14"
