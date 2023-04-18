@@ -26,7 +26,6 @@
     "tools/cli": {},
     "tools/repl": {},
     "marine-js": {
-      "release-type": "simple",
       "component": "marine-js"
     }
   }

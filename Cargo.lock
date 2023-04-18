@@ -1223,12 +1223,12 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.25.2"
+version = "0.25.3"
 dependencies = [
  "log",
  "maplit",
  "marine-min-it-version 0.3.0",
- "marine-runtime 0.26.2",
+ "marine-runtime 0.26.3",
  "marine-wasm-backend-traits",
  "marine-wasmtime-backend",
  "serde",
@@ -1755,7 +1755,7 @@ dependencies = [
 
 [[package]]
 name = "it-json-serde"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "serde",
  "serde_derive",
@@ -1975,7 +1975,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.14.0"
+version = "0.14.1"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -1988,9 +1988,9 @@ dependencies = [
  "env_logger 0.10.0",
  "exitfailure",
  "log",
- "marine-it-generator 0.10.0",
- "marine-it-parser 0.12.0",
- "marine-module-info-parser 0.6.0",
+ "marine-it-generator 0.10.1",
+ "marine-it-parser 0.12.1",
+ "marine-module-info-parser 0.6.1",
  "semver 1.0.17",
  "serde",
  "serde_json",
@@ -2044,7 +2044,7 @@ dependencies = [
 
 [[package]]
 name = "marine-core"
-version = "0.20.2"
+version = "0.20.3"
 dependencies = [
  "anyhow",
  "bytes",
@@ -2052,12 +2052,12 @@ dependencies = [
  "it-lilo 0.5.1",
  "it-memory-traits 0.4.0",
  "log",
- "marine-it-generator 0.10.0",
- "marine-it-interfaces 0.8.0",
- "marine-it-parser 0.12.0",
+ "marine-it-generator 0.10.1",
+ "marine-it-interfaces 0.8.1",
+ "marine-it-parser 0.12.1",
  "marine-min-it-version 0.3.0",
- "marine-module-info-parser 0.6.0",
- "marine-module-interface 0.7.0",
+ "marine-module-info-parser 0.6.1",
+ "marine-module-interface 0.7.1",
  "marine-utils 0.5.0",
  "marine-wasm-backend-traits",
  "marine-wasmtime-backend",
@@ -2091,10 +2091,10 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "it-lilo 0.5.1",
- "marine-it-parser 0.12.0",
+ "marine-it-parser 0.12.1",
  "marine-macro-impl",
  "once_cell",
  "serde",
@@ -2116,7 +2116,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-interfaces"
-version = "0.8.0"
+version = "0.8.1"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl 0.26.1",
@@ -2143,12 +2143,12 @@ dependencies = [
 
 [[package]]
 name = "marine-it-parser"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
  "anyhow",
  "itertools",
- "marine-it-interfaces 0.8.0",
- "marine-module-interface 0.7.0",
+ "marine-it-interfaces 0.8.1",
+ "marine-module-interface 0.7.1",
  "marine-wasm-backend-traits",
  "nom 7.1.3",
  "semver 1.0.17",
@@ -2160,22 +2160,22 @@ dependencies = [
 
 [[package]]
 name = "marine-js"
-version = "0.3.4"
+version = "0.4.1"
 dependencies = [
  "anyhow",
  "boolinator",
  "bytesize",
  "console_error_panic_hook",
  "fluence-it-types 0.4.1",
- "it-json-serde 0.4.0",
+ "it-json-serde 0.4.1",
  "it-lilo 0.5.1",
  "it-memory-traits 0.4.0",
  "itertools",
  "log",
  "maplit",
- "marine-it-interfaces 0.8.0",
+ "marine-it-interfaces 0.8.1",
  "marine-min-it-version 0.3.0",
- "marine-module-interface 0.7.0",
+ "marine-module-interface 0.7.1",
  "marine-rs-sdk",
  "marine-utils 0.5.0",
  "multimap",
@@ -2252,7 +2252,7 @@ dependencies = [
 
 [[package]]
 name = "marine-module-info-parser"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2283,11 +2283,11 @@ dependencies = [
 
 [[package]]
 name = "marine-module-interface"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "anyhow",
  "itertools",
- "marine-it-interfaces 0.8.0",
+ "marine-it-interfaces 0.8.1",
  "nom 7.1.3",
  "semver 1.0.17",
  "serde",
@@ -2363,16 +2363,16 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.26.2"
+version = "0.26.3"
 dependencies = [
  "bytesize",
  "env_logger 0.9.3",
- "it-json-serde 0.4.0",
+ "it-json-serde 0.4.1",
  "it-memory-traits 0.4.0",
  "itertools",
  "log",
- "marine-core 0.20.2",
- "marine-module-interface 0.7.0",
+ "marine-core 0.20.3",
+ "marine-module-interface 0.7.1",
  "marine-rs-sdk",
  "marine-rs-sdk-main",
  "marine-utils 0.5.0",
@@ -2453,7 +2453,7 @@ version = "0.5.0"
 
 [[package]]
 name = "marine-wasm-backend-traits"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "it-memory-traits 0.4.0",
@@ -2466,7 +2466,7 @@ dependencies = [
 
 [[package]]
 name = "marine-wasmtime-backend"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "anyhow",
  "it-memory-traits 0.4.0",
@@ -2563,13 +2563,13 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.21.2"
+version = "0.21.3"
 dependencies = [
  "anyhow",
  "check-latest",
  "clap 2.34.0",
  "env_logger 0.9.3",
- "fluence-app-service 0.25.2",
+ "fluence-app-service 0.25.3",
  "itertools",
  "log",
  "marine-rs-sdk-main",

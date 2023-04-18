@@ -36,7 +36,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.3
+        uses: hashicorp/vault-action@v2.5.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -52,7 +52,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Setup wasm-pack
-        uses: jetli/wasm-pack-action@v0.3.0
+        uses: jetli/wasm-pack-action@v0.4.0
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3

@@ -57,6 +57,29 @@ jobs:
           ref: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
           token: ${{ secrets.FLUENCEBOT_RELEASE_PLEASE_PAT }}
 
+        # workaround for marine depending on itself messing with lock file
+      - name: Update Cargo.lock
+        run: cargo update --workspace
+
+      - name: Commit updated Cargo.lock
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore: Regenerate Cargo.lock"
+          branch: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
+          commit_user_name: fluencebot
+          commit_user_email: devops@fluence.one
+          commit_author: fluencebot <devops@fluence.one>
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Build marine-js package for node
+        working-directory: marine-js
+        run: ./build.sh
+
       - name: Get marine-js version
         id: version
         run: |
@@ -71,6 +94,8 @@ jobs:
 
       - name: Set marine-js npm version
         run: npm version ${{ steps.version.outputs.version }}
+        # ignore when it fails when new version is same as current
+        continue-on-error: true
         working-directory: marine-js/npm-package
 
       - name: Commit version bump
@@ -97,7 +122,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.3
+        uses: hashicorp/vault-action@v2.5.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -113,7 +138,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Install cargo-workspaces
-        uses: baptiste0928/cargo-install@v1.3.0
+        uses: baptiste0928/cargo-install@v2.0.0
         with:
           crate: cargo-workspaces
 
@@ -162,18 +187,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: Install wasm-pack
-        uses: jetli/wasm-pack-action@v0.4.0
-
-      - name: Build marine-js package for node
-        working-directory: marine-js
-        run: ./build.sh
-
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.3
+        uses: hashicorp/vault-action@v2.5.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -184,6 +199,16 @@ jobs:
           exportToken: false
           secrets: |
             kv/npmjs/fluencebot token | NODE_AUTH_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Build marine-js package for node
+        working-directory: marine-js
+        run: ./build.sh
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -229,7 +254,7 @@ jobs:
           echo "found any?:" "${{ steps.status.outputs.found }}"
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.3
+        uses: hashicorp/vault-action@v2.5.0
         with:
           url: https://vault.fluence.dev
           path: jwt/github
