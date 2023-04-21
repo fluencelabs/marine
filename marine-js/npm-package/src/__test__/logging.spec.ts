@@ -14,6 +14,12 @@ const loadWasmModule = async (waspPath: string) => {
     return WebAssembly.compile(buffer);
 };
 
+const loadWasmBytes = async (waspPath: string) => {
+    const fullPath = path.join(waspPath);
+    return await fs.promises.readFile(fullPath);
+};
+
+
 describe.each([
     // force column layout
     ['error' as const],
@@ -27,7 +33,7 @@ describe.each([
         const logger = jest.fn();
 
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
-        const greeting = await loadWasmModule(
+        const greeting = await loadWasmBytes(
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
@@ -54,7 +60,7 @@ describe.each([
         const logger = jest.fn();
 
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
-        const greeting = await loadWasmModule(
+        const greeting = await loadWasmBytes(
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 

@@ -50,7 +50,7 @@ export class MarineService {
 
     constructor(
         private readonly controlModule: WebAssembly.Module,
-        private readonly serviceModule: WebAssembly.Module,
+        private readonly serviceModule: Uint8Array,
         private readonly serviceId: string,
         private logFunction: LogFunction,
         marineServiceConfig?: MarineServiceConfig,
@@ -77,8 +77,8 @@ export class MarineService {
             exports: undefined,
         };
 
-        const wasiImports = hasWasiImports(this.serviceModule) ? wasi.getImports(this.serviceModule) : {};
-
+        //const wasiImports = hasWasiImports(this.serviceModule) ? wasi.getImports(this.serviceModule) : {};
+/*
         const serviceInstance = await WebAssembly.instantiate(this.serviceModule, {
             ...wasiImports,
             host: {
@@ -101,12 +101,12 @@ export class MarineService {
         });
         wasi.start(serviceInstance);
         cfg.exports = serviceInstance.exports;
-
+*/
         const controlModuleInstance = await init(this.controlModule);
 
-        const customSections = WebAssembly.Module.customSections(this.serviceModule, 'interface-types');
-        const itCustomSections = new Uint8Array(customSections[0]);
-        let rawResult = controlModuleInstance.register_module(this.serviceId, itCustomSections, serviceInstance);
+        //const customSections = WebAssembly.Module.customSections(this.serviceModule, 'interface-types');
+        //const itCustomSections = new Uint8Array(customSections[0]);
+        let rawResult = controlModuleInstance.register_module(this.serviceId, this.serviceModule);
 
         let result: any;
         try {

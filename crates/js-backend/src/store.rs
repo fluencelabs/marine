@@ -13,6 +13,7 @@ pub struct JsContext<'c> {
 
 impl Store<JsWasmBackend> for JsStore {
     fn new(backend: &JsWasmBackend) -> Self {
+        log::debug!("JsStore created");
         Self {}
     }
 }

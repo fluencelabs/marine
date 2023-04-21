@@ -1,3 +1,5 @@
+extern crate core;
+
 use marine_wasm_backend_traits::prelude::*;
 use crate::caller::JsCaller;
 use crate::function::JsFunction;
@@ -10,6 +12,11 @@ mod caller;
 mod function;
 mod memory;
 mod wasi;
+
+mod module_info;
+mod js_conversions;
+
+use web_sys::console;
 
 use crate::store::JsStore;
 use crate::module::JsModule;
@@ -36,6 +43,7 @@ impl WasmBackend for JsWasmBackend {
     type Wasi = JsWasi;
 
     fn new() -> WasmBackendResult<Self> {
+        log::debug!("Created JsWasmBackend");
         Ok(Self {})
     }
 }

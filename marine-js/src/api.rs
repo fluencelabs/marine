@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-use crate::faas::FluenceFaaS;
-use crate::global_state::INSTANCE;
-use crate::global_state::MODULES;
+use crate::global_state::MARINE;
+
 
 use marine_rs_sdk::CallParameters;
 
@@ -24,7 +23,14 @@ use wasm_bindgen::prelude::*;
 use serde_json::Value as JValue;
 use serde::Serialize;
 use serde::Deserialize;
-use maplit::hashmap;
+
+use std::borrow::BorrowMut;
+use std::ops::{Deref, DerefMut};
+use marine::generic::Marine;
+use marine::generic::MarineConfig;
+use marine::generic::MarineModuleConfig;
+use marine::generic::ModuleDescriptor;
+use marine_js_backend::JsWasmBackend;
 
 #[derive(Serialize, Deserialize)]
 struct RegisterModuleResult {
@@ -42,8 +48,7 @@ struct CallModuleResult {
 /// # Arguments
 ///
 /// * `name` - name of module to register
-/// * `wit_section_bytes` - bytes of "interface-types" custom section from wasm file
-/// * `instance` - `WebAssembly::Instance` made from target wasm file
+/// * `wasm_bytes` - wasm file bytes
 ///
 /// # Return value
 ///
@@ -51,20 +56,46 @@ struct CallModuleResult {
 /// otherwise, it contains error message.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
-    let modules = hashmap! {
-        name.to_string() => wit_section_bytes.to_vec(),
+pub fn register_module(name: &str, wasm_bytes: &[u8]) -> String {
+    log::debug!("register_module start");
+    let modules = maplit::hashmap! {
+            name.to_string() => wasm_bytes.to_owned()
+        };
+
+    let module_config = MarineModuleConfig {
+        mem_pages_count: None,
+        max_heap_size: None,
+        logger_enabled: false,
+        host_imports: Default::default(),
+        wasi: None,
+        logging_mask: 0
     };
 
-    let faas = match FluenceFaaS::with_modules(modules) {
-        Ok(faas) => faas,
-        Err(e) => return make_register_module_result(e.to_string().as_str()),
+    let module_descriptor = ModuleDescriptor {
+        load_from: None,
+        file_name: name.to_string(),
+        import_name: name.to_string(),
+        config: module_config
     };
 
-    MODULES.with(|modules| modules.replace(Some(faas)));
+    let config = MarineConfig {
+        modules_dir: None,
+        modules_config: vec![module_descriptor],
+        default_modules_config: None
+    };
 
-    INSTANCE.with(|instance| instance.replace(Some(wasm_instance)));
+    let marine = Marine::<JsWasmBackend>::with_modules(modules, config);
+    let new_marine = match marine {
+        Err(e) => return {
+            log::debug!("register_module fail: {:?}", e);
+            make_register_module_result(&e.to_string())
+        },
+        Ok(marine) => marine,
+    };
 
+    MARINE.with(|marine| marine.replace(Some(new_marine)));
+
+    log::debug!("register_module success");
     make_register_module_result("")
 }
 
@@ -83,18 +114,7 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsVa
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
-    MODULES.with(|modules| {
-        let mut modules = modules.borrow_mut();
-        let modules = match modules.as_mut() {
-            Some(modules) => modules,
-            None => {
-                return make_call_module_result(
-                    JValue::Null,
-                    "attempt to run a function when module is not loaded",
-                )
-            }
-        };
-
+    MARINE.with(|marine| {
         let args: JValue = match serde_json::from_str(args) {
             Ok(args) => args,
             Err(e) => {
@@ -105,12 +125,16 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String
             }
         };
 
-        match modules.call_with_json(module_name, function_name, args, CallParameters::default()) {
-            Ok(result) => make_call_module_result(result, ""),
-            Err(e) => make_call_module_result(
-                JValue::Null,
-                &format!("Error calling module function: {}", e),
-            ),
+        if let Some(marine) = marine.borrow_mut().deref_mut() {
+            match marine.call_with_json(module_name, function_name, args, <_>::default()) {
+                Ok(result) => make_call_module_result(result, ""),
+                Err(e) => make_call_module_result(
+                    JValue::Null,
+                    &format!("Error calling module function: {}", e),
+                ),
+            }
+        } else {
+            make_call_module_result(JValue::Null, "marine is not initialized")
         }
     })
 }

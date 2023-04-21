@@ -5,7 +5,7 @@ use crate::JsWasmBackend;
 use crate::JsContext;
 
 pub struct JsCaller<'c> {
-    _data: PhantomData<&'c i32>,
+    pub(crate) _data: PhantomData<&'c i32>,
 }
 
 impl<'c> Caller<JsWasmBackend> for JsCaller<'c> {

@@ -1,13 +1,31 @@
 use it_memory_traits::MemoryAccessError;
+use js_sys::WebAssembly;
+use wasm_bindgen::{JsCast, JsValue};
 use marine_wasm_backend_traits::prelude::*;
 use crate::JsWasmBackend;
 
 #[derive(Clone)]
-pub struct JsMemory {}
+pub struct JsMemory {
+    pub(crate) inner: WebAssembly::Memory,
+}
+
+impl JsMemory {
+    pub(crate) fn try_from_js(mem: JsValue) -> Option<Self> {
+       mem
+           .dyn_into::<WebAssembly::Memory>()
+           .ok()
+           .map(|mem| Self { inner: mem,})
+    }
+}
+
+// this is safe because its intended to run in single thread
+unsafe impl Send for JsMemory {}
+unsafe impl Sync for JsMemory {}
 
 impl Memory<JsWasmBackend> for JsMemory {
     fn size(&self, store: &mut <JsWasmBackend as WasmBackend>::ContextMut<'_>) -> usize {
-        todo!()
+        let buffer = self.inner.buffer();
+
     }
 }
 

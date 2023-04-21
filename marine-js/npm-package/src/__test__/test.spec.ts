@@ -26,6 +26,12 @@ const loadWasmModule = async (waspPath: string) => {
     return module;
 };
 
+const loadWasmBytes = async (waspPath: string) => {
+    const fullPath = path.join(waspPath);
+    const buffer = await fsPromises.readFile(fullPath);
+    return new Uint8Array(buffer);
+};
+
 const redisDownloadUrl = 'https://github.com/fluencelabs/redis/releases/download/v0.15.0_w/redis.wasm';
 const sqliteDownloadUrl = 'https://github.com/fluencelabs/sqlite/releases/download/v0.16.0_w/sqlite3.wasm';
 
@@ -37,7 +43,7 @@ describe('Fluence app service tests', () => {
     it('Testing greeting service', async () => {
         // arrange
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
-        const greeting = await loadWasmModule(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
+        const greeting = await loadWasmBytes(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
 
         const marineService = new MarineService(marine, greeting, 'srv', dontLog);
         await marineService.init();
@@ -52,7 +58,7 @@ describe('Fluence app service tests', () => {
     it('Testing greeting service with object args', async () => {
         // arrange
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
-        const greeting = await loadWasmModule(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
+        const greeting = await loadWasmBytes(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
 
         const marineService = new MarineService(marine, greeting, 'srv', dontLog);
         await marineService.init();
@@ -67,7 +73,7 @@ describe('Fluence app service tests', () => {
     it('Testing greeting service with records', async () => {
         // arrange
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
-        const greeting = await loadWasmModule(
+        const greeting = await loadWasmBytes(
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
@@ -89,7 +95,7 @@ describe('Fluence app service tests', () => {
     it('Running avm through Marine infrastructure', async () => {
         // arrange
         const avmPackagePath = require.resolve('@fluencelabs/avm');
-        const avm = await loadWasmModule(path.join(path.dirname(avmPackagePath), 'avm.wasm'));
+        const avm = await loadWasmBytes(path.join(path.dirname(avmPackagePath), 'avm.wasm'));
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
 
         const testAvmInMarine = new MarineService(marine, avm, 'avm', dontLog);
@@ -130,9 +136,9 @@ describe('Fluence app service tests', () => {
         jest.setTimeout(10000);
         const control = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const buf = await download(sqliteDownloadUrl);
-        const sqlite = await WebAssembly.compile(buf);
+     //   const sqlite = await WebAssembly.compile(buf);
 
-        const marine = new MarineService(control, sqlite, 'sqlite', dontLog);
+        const marine = new MarineService(control, buf, 'sqlite', dontLog);
         await marine.init();
 
         let result: any;
@@ -167,9 +173,9 @@ describe('Fluence app service tests', () => {
     it.skip('Testing redis wasm', async () => {
         const control = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const buf = await download(redisDownloadUrl);
-        const redis = await WebAssembly.compile(buf);
+       // const redis = await WebAssembly.compile(buf);
 
-        const marine = new MarineService(control, redis, 'redis', dontLog);
+        const marine = new MarineService(control, buf, 'redis', dontLog);
         await marine.init();
 
         const result1 = marine.call('invoke', ['SET A 10'], undefined);
@@ -192,7 +198,7 @@ describe('Fluence app service tests', () => {
     it('Testing service which fails', async () => {
         // arrange
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
-        const failing = await loadWasmModule(path.join(examplesDir, './failing/artifacts/failing.wasm'));
+        const failing = await loadWasmBytes(path.join(examplesDir, './failing/artifacts/failing.wasm'));
 
         const marineService = new MarineService(marine, failing, 'srv', dontLog);
         await await marineService.init();
@@ -213,7 +219,7 @@ describe('Fluence app service tests', () => {
     it('Checking error when calling non-existent function', async () => {
         // arrange
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
-        const greeting = await loadWasmModule(path.join(examplesDir, './failing/artifacts/failing.wasm'));
+        const greeting = await loadWasmBytes(path.join(examplesDir, './failing/artifacts/failing.wasm'));
 
         const marineService = new MarineService(marine, greeting, 'srv', dontLog);
         await await marineService.init();
