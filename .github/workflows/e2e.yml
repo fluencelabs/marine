@@ -240,6 +240,15 @@ jobs:
       marine-js-version: "${{ needs.marine-js.outputs.version }}"
       avm-version: "${{ needs.aquavm-avm.outputs.version }}"
 
+  fluence-cli-snapshot:
+    name: "fluence-cli"
+    needs:
+      - js-client
+
+    uses: fluencelabs/fluence-cli/.github/workflows/snapshot.yml@FLU-314
+    with:
+      js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
+
   aqua-playground:
     needs:
       - js-client
@@ -261,11 +270,13 @@ jobs:
   registry:
     needs:
       - rust-peer-snapshot
+      - fluence-cli-snapshot
       - sqlite-wasm
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      fluence-cli-version: "${{ needs.fluence-cli-snapshot.outputs.version }}"
       cargo-dependencies: |
         [
           {
