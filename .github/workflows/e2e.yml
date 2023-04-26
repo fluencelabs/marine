@@ -245,7 +245,7 @@ jobs:
     needs:
       - js-client
 
-    uses: fluencelabs/fluence-cli/.github/workflows/snapshot.yml@FLU-314
+    uses: fluencelabs/fluence-cli/.github/workflows/snapshot.yml@main
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
 
