@@ -69,6 +69,28 @@ impl WasmBackend for WasmtimeWasmBackend {
 }
 
 #[derive(Default)]
+struct MyStoreLimiter {
+    memories: i32
+}
+
+impl wasmtime::ResourceLimiter for MyStoreLimiter {
+    fn memory_growing(&mut self, current: usize, desired: usize, maximum: Option<usize>) -> bool {
+        if current == 0 {
+            self.memories += 1;
+            log::debug!("Wasmtime created a memory. Total memories in this Store: {}", self.memories)
+        }
+
+        true
+    }
+
+    fn table_growing(&mut self, current: u32, desired: u32, maximum: Option<u32>) -> bool {
+        true
+    }
+}
+
+
+#[derive(Default)]
 pub struct StoreState {
     wasi: Vec<WasiCtx>, // wasmtime store does not release memory until drop, so do we
+    limiter: MyStoreLimiter,
 }

@@ -19,7 +19,7 @@ use crate::WasmtimeWasmBackend;
 
 use marine_wasm_backend_traits::prelude::*;
 
-use wasmtime::StoreContext;
+use wasmtime::{ResourceLimiter, StoreContext};
 use wasmtime::StoreContextMut;
 use wasmtime::AsContext as WasmtimeAsContext;
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
@@ -45,9 +45,13 @@ pub struct WasmtimeContextMut<'s> {
 
 impl Store<WasmtimeWasmBackend> for WasmtimeStore {
     fn new(backend: &WasmtimeWasmBackend) -> Self {
-        Self {
+        let mut res = Self {
             inner: wasmtime::Store::new(&backend.engine, <_>::default()),
-        }
+        };
+
+        res.inner.limiter(|ctx| &mut ctx.limiter);
+
+        res
     }
 }
 
