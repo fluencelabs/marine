@@ -290,6 +290,7 @@ jobs:
 
   fluence-cli:
     needs:
+      - js-client
       - marine
       - rust-peer-snapshot
 
@@ -298,3 +299,4 @@ jobs:
       marine-version: "${{ needs.marine.outputs.version }}"
       mrepl-version: "${{ needs.marine.outputs.version }}"
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
