@@ -224,7 +224,7 @@ jobs:
       - aquavm-avm
       - rust-peer-snapshot
 
-    uses: fluencelabs/js-client/.github/workflows/tests.yml@FLU-317-fix
+    uses: fluencelabs/js-client/.github/workflows/tests.yml@master
     with:
       marine-js-version: "${{ needs.marine-js.outputs.version }}"
       avm-version: "${{ needs.aquavm-avm.outputs.version }}"
@@ -235,7 +235,7 @@ jobs:
       - marine-js
       - aquavm-avm
 
-    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@FLU-317-fix
+    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
     with:
       marine-js-version: "${{ needs.marine-js.outputs.version }}"
       avm-version: "${{ needs.aquavm-avm.outputs.version }}"
