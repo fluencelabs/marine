@@ -266,6 +266,7 @@ jobs:
       - fluence-cli-snapshot
     uses: fluencelabs/spell/.github/workflows/tests.yml@FLU-312
     with:
+      ref: FLU-312
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
       fluence-cli-version: "${{ needs.fluence-cli-snapshot.outputs.version }}"
 
