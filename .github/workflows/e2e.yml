@@ -259,13 +259,14 @@ jobs:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
 
-  # spell-aqua-tests:
-  #   name: "spell"
-  #   needs:
-  #     - rust-peer-snapshot
-  #   uses: fluencelabs/spell/.github/workflows/tests.yml@main
-  #   with:
-  #     rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+  spell-aqua-tests:
+    name: "spell"
+    needs:
+      - rust-peer-snapshot
+    uses: fluencelabs/spell/.github/workflows/tests.yml@FLU-312
+    with:
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      fluence-cli-version: "${{ needs.fluence-cli-snapshot.outputs.version }}"
 
   registry:
     needs:
