@@ -3,97 +3,188 @@ name: "e2e"
 on:
   pull_request:
     paths-ignore:
-      - "!**.md"
-  push:
-    branches:
-      - "master"
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/snapshot-*.yml"
+    types:
+      - "labeled"
+      - "synchronize"
+      - "opened"
+      - "reopened"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
-env:
-  FORCE_COLOR: true
-
 jobs:
   marine:
-    uses: ./.github/workflows/snapshot.yml
+    uses: ./.github/workflows/snapshot-cargo.yml
+    with:
+      ref: ${{ github.ref }}
 
-  marine-rs-sdk-test:
-    needs:
-      - marine
+  marine-js:
+    name: "marine"
+    uses: ./.github/workflows/snapshot-marine-js.yml
+    with:
+      ref: ${{ github.ref }}
 
-    uses: fluencelabs/marine-rs-sdk-test/.github/workflows/tests.yml@master
+  sqlite:
+    needs: marine
+    uses: fluencelabs/sqlite/.github/workflows/build.yml@master
+
+  sqlite-wasm:
+    needs: sqlite
+    uses: fluencelabs/sqlite-wasm-connector/.github/workflows/snapshot.yml@master
+
+  sqlite-wasm-tests:
+    name: "sqlite-wasm"
+    needs: sqlite
+    uses: fluencelabs/sqlite-wasm-connector/.github/workflows/tests.yml@master
+
+  spell:
+    needs: sqlite-wasm
+    uses: fluencelabs/spell/.github/workflows/snapshot.yml@main
     with:
       cargo-dependencies: |
         [
           {
-            "package": "fluence-app-service",
-            "version": "=${{ needs.marine.outputs.cargo-version }}",
-            "registry": "fluence"
-          },
-          {
-            "package": "fluence-app-service",
-            "manifest": "crates/marine-test-macro-impl/Cargo.toml",
-            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "package": "marine-sqlite-connector",
+            "version": "=${{ needs.sqlite-wasm.outputs.version }}",
             "registry": "fluence"
           }
         ]
 
-  aquavm:
+  aquavm-wasm:
+    name: "aquavm"
     needs:
       - marine
 
-    uses: fluencelabs/aquavm/.github/workflows/snapshot.yml@master
+    uses: fluencelabs/aquavm/.github/workflows/snapshot-air-interpreter-wasm.yml@master
     with:
       cargo-dependencies: |
         [
           {
             "package": "marine-runtime",
             "manifest": "avm/server/Cargo.toml",
-            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "version": "=${{ needs.marine.outputs.version }}",
             "registry": "fluence"
           },
           {
             "package": "fluence-app-service",
             "manifest": "air/Cargo.toml",
-            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "version": "=${{ needs.marine.outputs.version }}",
             "registry": "fluence"
           }
         ]
+
+  aquavm-crates:
+    name: "aquavm"
+    needs:
+      - marine
+      - aquavm-wasm
+
+    uses: fluencelabs/aquavm/.github/workflows/snapshot-cargo.yml@master
+    with:
+      cargo-dependencies: |
+        [
+          {
+            "package": "marine-runtime",
+            "manifest": "avm/server/Cargo.toml",
+            "version": "=${{ needs.marine.outputs.version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-app-service",
+            "manifest": "air/Cargo.toml",
+            "version": "=${{ needs.marine.outputs.version }}",
+            "registry": "fluence"
+          }
+        ]
+
+  aquavm-avm:
+    name: "aquavm"
+    needs:
+      - aquavm-wasm
+    uses: fluencelabs/aquavm/.github/workflows/snapshot-avm.yml@master
 
   rust-peer:
     needs:
       - marine
-      - aquavm
+      - aquavm-crates
+      - spell
 
-    uses: fluencelabs/rust-peer/.github/workflows/snapshot.yml@master
+    uses: fluencelabs/rust-peer/.github/workflows/build.yml@master
     with:
-      image-name: "docker.fluence.dev/marine"
       cargo-dependencies: |
         [
           {
             "package": "fluence-app-service",
-            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "version": "=${{ needs.marine.outputs.version }}",
             "registry": "fluence"
           },
           {
             "package": "avm-server",
-            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "version": "=${{ needs.aquavm-crates.outputs.version }}",
             "registry": "fluence"
           },
           {
             "package": "air-interpreter-wasm",
-            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "version": "=${{ needs.aquavm-crates.outputs.version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-spell-dtos",
+            "version": "=${{ needs.spell.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-spell-distro",
+            "version": "=${{ needs.spell.outputs.cargo-version }}",
             "registry": "fluence"
           }
         ]
+
+  aquavm-tests:
+    name: "aquavm"
+    needs:
+      - marine
+
+    uses: fluencelabs/aquavm/.github/workflows/tests.yml@master
+    with:
+      cargo-dependencies: |
+        [
+          {
+            "package": "marine-runtime",
+            "manifest": "avm/server/Cargo.toml",
+            "version": "=${{ needs.marine.outputs.version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-app-service",
+            "manifest": "air/Cargo.toml",
+            "version": "=${{ needs.marine.outputs.version }}",
+            "registry": "fluence"
+          }
+        ]
+
+  rust-peer-snapshot:
+    name: "rust-peer"
+    needs:
+      - rust-peer
+
+    uses: fluencelabs/rust-peer/.github/workflows/container.yml@master
+    with:
+      image-name: "docker.fluence.dev/marine"
+      flavour: "minimal"
+      rust-peer-sha: "${{ needs.rust-peer.outputs.rust-peer-sha }}"
 
   rust-peer-tests:
     name: "rust-peer"
     needs:
       - marine
-      - aquavm
+      - aquavm-crates
+      - spell
 
     uses: fluencelabs/rust-peer/.github/workflows/tests.yml@master
     with:
@@ -101,17 +192,27 @@ jobs:
         [
           {
             "package": "fluence-app-service",
-            "version": "=${{ needs.marine.outputs.cargo-version }}",
+            "version": "=${{ needs.marine.outputs.version }}",
             "registry": "fluence"
           },
           {
             "package": "avm-server",
-            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "version": "=${{ needs.aquavm-crates.outputs.version }}",
             "registry": "fluence"
           },
           {
             "package": "air-interpreter-wasm",
-            "version": "=${{ needs.aquavm.outputs.cargo-version }}",
+            "version": "=${{ needs.aquavm-crates.outputs.version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-spell-dtos",
+            "version": "=${{ needs.spell.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "fluence-spell-distro",
+            "version": "=${{ needs.spell.outputs.cargo-version }}",
             "registry": "fluence"
           }
         ]
@@ -119,76 +220,83 @@ jobs:
   js-client-tests:
     name: "js-client"
     needs:
-      - marine
-      - aquavm
-      - rust-peer
+      - marine-js
+      - aquavm-avm
+      - rust-peer-snapshot
 
     uses: fluencelabs/js-client/.github/workflows/tests.yml@master
     with:
-      marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
-      avm-version: "${{ needs.aquavm.outputs.avm-version }}"
-      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
+      marine-js-version: "${{ needs.marine-js.outputs.version }}"
+      avm-version: "${{ needs.aquavm-avm.outputs.version }}"
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
 
   js-client:
     needs:
-      - marine
-      - aquavm
+      - marine-js
+      - aquavm-avm
 
     uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
     with:
-      marine-js-version: "${{ needs.marine.outputs.marine-js-version }}"
-      avm-version: "${{ needs.aquavm.outputs.avm-version }}"
+      marine-js-version: "${{ needs.marine-js.outputs.version }}"
+      avm-version: "${{ needs.aquavm-avm.outputs.version }}"
+
+  fluence-cli-snapshot:
+    name: "fluence-cli"
+    needs:
+      - js-client
+
+    uses: fluencelabs/fluence-cli/.github/workflows/snapshot.yml@main
+    with:
+      js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
 
   aqua-playground:
     needs:
       - js-client
-      - rust-peer
+      - rust-peer-snapshot
 
     uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
-      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+
+  spell-aqua-tests:
+    name: "spell"
+    needs:
+      - rust-peer-snapshot
+      - fluence-cli-snapshot
+    uses: fluencelabs/spell/.github/workflows/tests.yml@main
+    with:
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      fluence-cli-version: "${{ needs.fluence-cli-snapshot.outputs.version }}"
 
   registry:
     needs:
-      - rust-peer
+      - rust-peer-snapshot
+      - fluence-cli-snapshot
+      - sqlite-wasm
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
-      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      fluence-cli-version: "${{ needs.fluence-cli-snapshot.outputs.version }}"
+      cargo-dependencies: |
+        [
+          {
+            "package": "marine-sqlite-connector",
+            "version": "=${{ needs.sqlite-wasm.outputs.version }}",
+            "registry": "fluence"
+          }
+        ]
 
   fluence-cli:
     needs:
+      - js-client
       - marine
-      - rust-peer
+      - rust-peer-snapshot
 
     uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
     with:
-      marine-version: "${{ needs.marine.outputs.cargo-version }}"
-      mrepl-version: "${{ needs.marine.outputs.cargo-version }}"
-      rust-peer-image: "${{ needs.rust-peer.outputs.rust-peer-image }}"
-
-  status:
-    runs-on: ubuntu-latest
-    if: always()
-    needs:
-      - fluence-cli
-      - registry
-      - aqua-playground
-
-    steps:
-      - uses: lwhiteley/dependent-jobs-result-check@v1
-        id: status
-        with:
-          statuses: failure,cancelled,skipped
-          dependencies: ${{ toJSON(needs) }}
-
-      - name: Log output
-        run: |
-          echo "statuses:" "${{ steps.status.outputs.statuses }}"
-          echo "jobs:" "${{ steps.status.outputs.jobs }}"
-          echo "found any?:" "${{ steps.status.outputs.found }}"
-
-      - name: Fail run
-        if: fromJSON(steps.status.outputs.found)
-        run: exit 1
+      marine-version: "${{ needs.marine.outputs.version }}"
+      mrepl-version: "${{ needs.marine.outputs.version }}"
+      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"

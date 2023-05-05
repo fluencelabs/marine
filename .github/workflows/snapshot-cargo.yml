@@ -1,0 +1,59 @@
+name: Publish crates snapshots
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "git ref to checkout to"
+        type: string
+        default: "master"
+    outputs:
+      version:
+        description: "crate snapshots version"
+        value: ${{ jobs.publish.outputs.version }}
+
+jobs:
+  publish:
+    name: "Publish crates"
+    runs-on: builder
+    timeout-minutes: 60
+
+    outputs:
+      version: "${{ steps.snapshot.outputs.version }}"
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Marine
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/marine
+          ref: ${{ inputs.ref }}
+
+      - name: Import secrets
+        uses: hashicorp/vault-action@v2.4.3
+        with:
+          url: https://vault.fluence.dev
+          path: jwt/github
+          role: ci
+          method: jwt
+          jwtGithubAudience: "https://github.com/fluencelabs"
+          jwtTtl: 300
+          exportToken: false
+          secrets: |
+            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Generate snapshot version
+        id: version
+        uses: fluencelabs/github-actions/generate-snapshot-id@main
+
+      - name: Publish crate snapshots
+        id: snapshot
+        uses: fluencelabs/github-actions/cargo-publish-snapshot@main
+        with:
+          id: ${{ steps.version.outputs.id }}

@@ -1,63 +1,24 @@
-name: Publish snapshots
+name: Publish marine-js snapshot
 
 on:
   workflow_call:
+    inputs:
+      ref:
+        description: "git ref to checkout to"
+        type: string
+        default: "master"
     outputs:
-      cargo-version:
-        description: "cargo snapshot version"
-        value: ${{ jobs.cargo-snapshot.outputs.version }}
-      marine-js-version:
+      version:
         description: "@fluencelabs/marine-js version"
-        value: ${{ jobs.publish-marine-js.outputs.version }}
+        value: ${{ jobs.publish.outputs.version }}
+
+env:
+  FORCE_COLOR: true
 
 jobs:
-  cargo-snapshot:
-    name: "Publish cargo snapshots"
-    runs-on: builder
-    timeout-minutes: 60
-
-    outputs:
-      version: "${{ steps.snapshot.outputs.version }}"
-
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Checkout Marine
-        uses: actions/checkout@v3
-        with:
-          repository: fluencelabs/marine
-
-      - name: Import secrets
-        uses: hashicorp/vault-action@v2.5.0
-        with:
-          url: https://vault.fluence.dev
-          path: jwt/github
-          role: ci
-          method: jwt
-          jwtGithubAudience: "https://github.com/fluencelabs"
-          jwtTtl: 300
-          exportToken: false
-          secrets: |
-            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
-
-      - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: Generate snapshot version
-        id: version
-        uses: fluencelabs/github-actions/generate-snapshot-id@main
-
-      - name: Publish crate snapshots
-        id: snapshot
-        uses: fluencelabs/github-actions/cargo-publish-snapshot@main
-        with:
-          id: ${{ steps.version.outputs.id }}
-
-  publish-marine-js:
+  publish:
     name: "Publish marine-js snapshot"
-    runs-on: builder
+    runs-on: ubuntu-latest
     timeout-minutes: 60
 
     outputs:
@@ -72,6 +33,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: fluencelabs/marine
+          ref: ${{ inputs.ref }}
 
       - name: Import secrets
         uses: hashicorp/vault-action@v2.5.0
