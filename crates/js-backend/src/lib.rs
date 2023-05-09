@@ -18,6 +18,7 @@ mod js_conversions;
 
 use web_sys::console;
 
+use crate::store::JsContextMut;
 use crate::store::JsStore;
 use crate::module::JsModule;
 use crate::store::JsContext;
@@ -35,7 +36,7 @@ impl WasmBackend for JsWasmBackend {
     type Imports = JsImports;
     type Instance = JsInstance;
     type Context<'c> = JsContext<'c>;
-    type ContextMut<'c> = JsContext<'c>;
+    type ContextMut<'c> = JsContextMut<'c>;
     type Caller<'c> = JsCaller<'c>;
     type Function = JsFunction;
     type Memory = JsMemory;

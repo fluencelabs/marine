@@ -14,7 +14,6 @@ pub(crate) fn js_array_from_wval_array(values: &[WValue]) -> js_sys::Array {
     js_sys::Array::from_iter(values.iter().map(js_from_wval))
 }
 
-
 pub(crate) fn wval_to_i32(val: &WValue) -> i32 {
     match val {
         WValue::I32(val) => *val as _,
@@ -25,6 +24,10 @@ pub(crate) fn wval_to_i32(val: &WValue) -> i32 {
 }
 
 pub(crate) fn wval_from_js(ty: &WType, val: &JsValue) -> WValue {
+    if val.as_f64().is_none() {
+        web_sys::console::log_1(val);
+    }
+
     match ty {
         WType::I32 => WValue::I32(val.as_f64().unwrap() as _),
         WType::I64 => WValue::I64(val.as_f64().unwrap() as _),

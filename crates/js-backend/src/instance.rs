@@ -1,4 +1,5 @@
-use crate::{JsFunction, JsMemory, JsWasmBackend};
+use std::collections::HashMap;
+use crate::{JsContextMut, JsFunction, JsMemory, JsWasmBackend};
 use crate::module_info;
 use crate::module_info::ModuleInfo;
 
@@ -8,32 +9,31 @@ use wasm_bindgen::JsCast;
 
 #[derive(Clone)]
 pub struct JsInstance {
-    pub(crate) inner: WebAssembly::Instance,
-    pub(crate) module_info: ModuleInfo,
+    store_handle: InstanceStoreHandle,
 }
 
-impl Instance<JsWasmBackend> for JsInstance {
-    fn export_iter<'a>(
-        &'a self,
-        store: <JsWasmBackend as WasmBackend>::ContextMut<'a>,
-    ) -> Box<dyn Iterator<Item = (&'a str, Export<JsWasmBackend>)> + 'a> {
-        log::debug!("Instance::export_iter success");
-        let js_exports = self.inner.exports();
-        let iter = self
-            .module_info
+type InstanceStoreHandle = usize;
+
+impl JsInstance {
+    pub(crate) fn new(
+        ctx: &mut JsContextMut<'_>,
+        instance: WebAssembly::Instance,
+        module_info: ModuleInfo,
+    ) -> Self {
+        let js_exports = instance.exports();
+        let exports = module_info
             .exports
             .iter()
-            .map(move |(name, export)| {
+            .map(|(name, export)| {
                 let export: Export<JsWasmBackend> = match export {
                     module_info::Export::Function(sig) => {
-                        let func = js_sys::Reflect::get(js_exports.as_ref(), &name.into())
-                            .unwrap();
+                        let func = js_sys::Reflect::get(js_exports.as_ref(), &name.into()).unwrap();
 
-                        Export::Function(JsFunction::from_js(sig.clone(), func))
+                        Export::Function(JsFunction::new_stored(ctx, func.into(), sig.clone()))
                     }
                     module_info::Export::Memory => {
-                        let memory = js_sys::Reflect::get(js_exports.as_ref(), &name.into())
-                            .unwrap();
+                        let memory =
+                            js_sys::Reflect::get(js_exports.as_ref(), &name.into()).unwrap();
 
                         Export::Memory(JsMemory::try_from_js(memory).unwrap())
                     }
@@ -41,8 +41,58 @@ impl Instance<JsWasmBackend> for JsInstance {
                     module_info::Export::Global => Export::Other,
                 };
 
-                (name.as_str(), export)
-            });
+                (name.clone(), export)
+            })
+            .collect::<HashMap<String, Export<JsWasmBackend>>>();
+
+        let stored_instance = StoredInstance {
+            inner: instance,
+            module_info,
+            exports,
+        };
+
+        let store_handle = ctx.inner.store_instance(stored_instance);
+
+        Self::from_store_handle(store_handle)
+    }
+
+    pub(crate) fn from_store_handle(store_handle: usize) -> Self {
+        Self { store_handle }
+    }
+
+    fn stored_instance<'store>(&self, ctx: JsContextMut<'store>) -> &'store mut StoredInstance {
+        &mut ctx.inner.instances[self.store_handle]
+    }
+}
+
+/// Allocated instance resources
+pub(crate) struct StoredInstance {
+    pub(crate) inner: WebAssembly::Instance,
+    pub(crate) module_info: ModuleInfo,
+    pub(crate) exports: HashMap<String, Export<JsWasmBackend>>,
+}
+
+// TODO do it normally
+fn clone_export(export: &Export<JsWasmBackend>) -> Export<JsWasmBackend> {
+    match export {
+        Export::Memory(memory) => Export::Memory(memory.clone()),
+        Export::Function(func) => Export::Function(func.clone()),
+        Export::Other => Export::Other,
+    }
+}
+
+impl Instance<JsWasmBackend> for JsInstance {
+    fn export_iter<'a>(
+        &'a self,
+        mut store: <JsWasmBackend as WasmBackend>::ContextMut<'a>,
+    ) -> Box<dyn Iterator<Item = (&'a str, Export<JsWasmBackend>)> + 'a> {
+        log::debug!("Instance::export_iter success");
+        let stored_instance = self.stored_instance(store);
+
+        let iter = stored_instance
+            .exports
+            .iter()
+            .map(|(name, export)| (name.as_str(), clone_export(export)));
 
         Box::new(iter)
     }
@@ -55,14 +105,14 @@ impl Instance<JsWasmBackend> for JsInstance {
         // TODO use index
         // TODO handle errors
         log::debug!("Instance::get_nth_memory start");
-        let exports = self.inner.exports();
-        let mem = js_sys::Reflect::get(exports.as_ref(), &"memory".into()).unwrap()
+        let stored_instance = self.stored_instance(store.as_context_mut());
+        let exports = stored_instance.inner.exports();
+        let mem = js_sys::Reflect::get(exports.as_ref(), &"memory".into())
+            .unwrap()
             .dyn_into::<WebAssembly::Memory>()
             .expect("memory export wasn't a `WebAssembly.Memory`");
         log::debug!("Instance::get_nth_memory success");
-        Some(JsMemory {
-            inner: mem,
-        })
+        Some(JsMemory { inner: mem })
     }
 
     fn get_memory(
@@ -72,12 +122,27 @@ impl Instance<JsWasmBackend> for JsInstance {
     ) -> ResolveResult<<JsWasmBackend as WasmBackend>::Memory> {
         // TODO handle errors
         log::debug!("Instance::get_memory start");
-        let exports = self.inner.exports();
-        let memory = js_sys::Reflect::get(exports.as_ref(), &memory_name.into()).unwrap();
-        let memory = JsMemory::try_from_js(memory).unwrap();
+        let stored_instance = self.stored_instance(store.as_context_mut());
+        let export = stored_instance
+            .exports
+            .get(memory_name)
+            .ok_or_else(|| ResolveError::ExportNotFound(memory_name.to_string()))?;
+
+        let result = match export {
+            Export::Memory(memory) => Ok(memory.clone()),
+            Export::Function(_) => Err(ResolveError::ExportTypeMismatch {
+                expected: "memory",
+                actual: "function",
+            }),
+            Export::Other => Err(ResolveError::ExportTypeMismatch {
+                expected: "memory",
+                actual: "other(funcref or externref)",
+            }),
+        };
 
         log::debug!("Instance::get_memory success");
-        Ok(memory)
+
+        result
     }
 
     fn get_function(
@@ -86,23 +151,26 @@ impl Instance<JsWasmBackend> for JsInstance {
         name: &str,
     ) -> ResolveResult<<JsWasmBackend as WasmBackend>::Function> {
         log::debug!("Instance::get_function start");
-        // TODO handle errors
-        let exports = self.inner.exports();
-        let func = js_sys::Reflect::get(exports.as_ref(), &name.into()).unwrap();
-        let sig= self.module_info
+        let stored_instance = self.stored_instance(store.as_context_mut());
+        let export = stored_instance
             .exports
             .get(name)
-            .and_then(|export|
-                if let crate::module_info::Export::Function(sig) = export {
-                    Some(sig.clone())
-                } else {
-                    None
-                }
-            )
-            .unwrap();
+            .ok_or_else(|| ResolveError::ExportNotFound(name.to_string()))?;
+
+        let result = match export {
+            Export::Function(func) => Ok(func.clone()),
+            Export::Memory(_) => Err(ResolveError::ExportTypeMismatch {
+                expected: "function",
+                actual: "memory",
+            }),
+            Export::Other => Err(ResolveError::ExportTypeMismatch {
+                expected: "function",
+                actual: "other(funcref or externref)",
+            }),
+        };
 
         log::debug!("Instance::get_function success");
 
-        Ok(JsFunction::from_js(sig, func))
+        result
     }
 }

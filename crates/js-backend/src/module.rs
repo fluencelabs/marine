@@ -12,12 +12,12 @@ use walrus::{ExportItem, ImportKind};
 use wasm_bindgen::{JsValue, module};
 use marine_wasm_backend_traits::impl_utils::MultiMap;
 use web_sys::console;
+use crate::instance::StoredInstance;
 
 pub struct JsModule {
     inner: WebAssembly::Module,
     module_info: ModuleInfo,
 }
-
 
 impl Module<JsWasmBackend> for JsModule {
     fn new(store: &mut JsStore, wasm: &[u8]) -> ModuleCreationResult<Self> {
@@ -56,18 +56,21 @@ impl Module<JsWasmBackend> for JsModule {
         imports: &JsImports,
     ) -> InstantiationResult<<JsWasmBackend as WasmBackend>::Instance> {
         log::debug!("Module::instantiate start");
+        let imports_object = imports.build_import_object(store.as_context(), &self.inner);
+        let instance = WebAssembly::Instance::new(&self.inner, &imports_object).map_err(|e| {
+            web_sys::console::log_1(&e);
+            InstantiationError::Other(anyhow!("failed to instantiate"))
+        })?;
 
-        let imports_object = imports.as_js_object();
-        let instance = WebAssembly::Instance::new(&self.inner, &imports_object)
-            .map_err(|e| {
-                web_sys::console::log_1(&e);
-                InstantiationError::Other(anyhow!("failed to instantiate"))
-            })?;
+        // adds memory to @wasmer/wasi object
+        imports.bind_to_instance(store.as_context(), &instance);
 
+        let stored_instance = JsInstance::new(
+            &mut store.as_context_mut(),
+            instance,
+            self.module_info.clone(),
+        );
         log::debug!("Module::instantiate success");
-        Ok(JsInstance {
-            inner: instance,
-            module_info: self.module_info.clone() // TODO store everything in Store and use cheap handles
-        })
+        Ok(stored_instance)
     }
 }

@@ -10,7 +10,6 @@ use wasm_bindgen::prelude::*;
 
 use std::cell::RefCell;
 
-
 #[wasm_bindgen(start)]
 fn main() {
     log::set_logger(&wasm_bindgen_console_logger::DEFAULT_LOGGER).unwrap();

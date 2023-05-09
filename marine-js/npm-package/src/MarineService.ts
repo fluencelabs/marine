@@ -63,6 +63,8 @@ export class MarineService {
     }
 
     async init(): Promise<void> {
+        // BEGIN OF OLD CODE
+/*
         // wasi is needed to run marine modules with marine-js
         const wasi = new WASI({
             args: [],
@@ -77,8 +79,8 @@ export class MarineService {
             exports: undefined,
         };
 
-        //const wasiImports = hasWasiImports(this.serviceModule) ? wasi.getImports(this.serviceModule) : {};
-/*
+        const wasiImports = hasWasiImports(this.serviceModule) ? wasi.getImports(this.serviceModule) : {};
+
         const serviceInstance = await WebAssembly.instantiate(this.serviceModule, {
             ...wasiImports,
             host: {
@@ -99,9 +101,11 @@ export class MarineService {
                 },
             },
         });
-        wasi.start(serviceInstance);
-        cfg.exports = serviceInstance.exports;
+        //wasi.start(serviceInstance);
+        //cfg.exports = serviceInstance.exports;
 */
+/// END OF OLD CODE
+
         const controlModuleInstance = await init(this.controlModule);
 
         //const customSections = WebAssembly.Module.customSections(this.serviceModule, 'interface-types');

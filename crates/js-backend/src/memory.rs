@@ -11,10 +11,9 @@ pub struct JsMemory {
 
 impl JsMemory {
     pub(crate) fn try_from_js(mem: JsValue) -> Option<Self> {
-       mem
-           .dyn_into::<WebAssembly::Memory>()
-           .ok()
-           .map(|mem| Self { inner: mem,})
+        mem.dyn_into::<WebAssembly::Memory>()
+            .ok()
+            .map(|mem| Self { inner: mem })
     }
 }
 
@@ -22,10 +21,20 @@ impl JsMemory {
 unsafe impl Send for JsMemory {}
 unsafe impl Sync for JsMemory {}
 
+impl JsMemory {
+    fn array_buffer(&self) -> js_sys::ArrayBuffer {
+        self.inner.buffer().unchecked_into::<js_sys::ArrayBuffer>()
+    }
+
+    fn uint8_array(&self) -> js_sys::Uint8Array {
+        let buffer = self.array_buffer();
+        js_sys::Uint8Array::new(&buffer)
+    }
+}
+
 impl Memory<JsWasmBackend> for JsMemory {
     fn size(&self, store: &mut <JsWasmBackend as WasmBackend>::ContextMut<'_>) -> usize {
-        let buffer = self.inner.buffer();
-
+        self.array_buffer().byte_length() as usize
     }
 }
 
@@ -44,7 +53,24 @@ impl it_memory_traits::MemoryView<DelayedContextLifetime<JsWasmBackend>> for JsM
         offset: u32,
         size: u32,
     ) -> Result<(), MemoryAccessError> {
-        todo!()
+        let memory_size = self.size(store);
+        let end = offset
+            .checked_add(size)
+            .ok_or(MemoryAccessError::OutOfBounds {
+                offset,
+                size,
+                memory_size: memory_size as u32,
+            })?;
+
+        if end as usize >= memory_size {
+            return Err(MemoryAccessError::OutOfBounds {
+                offset,
+                size,
+                memory_size: memory_size as u32,
+            });
+        }
+
+        Ok(())
     }
 }
 
@@ -56,7 +82,7 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<JsWasmBackend>> for
         >,
         offset: u32,
     ) -> u8 {
-        todo!()
+        self.uint8_array().get_index(offset)
     }
 
     fn read_array<const COUNT: usize>(
@@ -66,7 +92,14 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<JsWasmBackend>> for
         >,
         offset: u32,
     ) -> [u8; COUNT] {
-        todo!()
+        let mut result = [0u8; COUNT];
+        let end = offset
+            .checked_add(COUNT as u32)
+            .expect("user is expected to check memory bounds before asseccing memory");
+        self.uint8_array()
+            .subarray(offset, end)
+            .copy_to(result.as_mut_slice());
+        result
     }
 
     fn read_vec(
@@ -77,7 +110,14 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<JsWasmBackend>> for
         offset: u32,
         size: u32,
     ) -> Vec<u8> {
-        todo!()
+        let mut result = vec![0u8; size as usize];
+        let end = offset
+            .checked_add(size)
+            .expect("user is expected to check memory bounds before asseccing memory");
+        self.uint8_array()
+            .subarray(offset, end)
+            .copy_to(result.as_mut_slice());
+        result
     }
 }
 
@@ -90,7 +130,7 @@ impl it_memory_traits::MemoryWritable<DelayedContextLifetime<JsWasmBackend>> for
         offset: u32,
         value: u8,
     ) {
-        todo!()
+        self.uint8_array().set_index(offset, value);
     }
 
     fn write_bytes(
@@ -101,6 +141,9 @@ impl it_memory_traits::MemoryWritable<DelayedContextLifetime<JsWasmBackend>> for
         offset: u32,
         bytes: &[u8],
     ) {
-        todo!()
+        let end = offset
+            .checked_add(bytes.len() as u32)
+            .expect("user is expected to check memory bounds before asseccing memory");
+        self.uint8_array().subarray(offset, end).copy_from(bytes);
     }
 }

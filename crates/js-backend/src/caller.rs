@@ -1,28 +1,32 @@
 use std::marker::PhantomData;
 use marine_wasm_backend_traits::prelude::*;
 
-use crate::JsWasmBackend;
+use crate::{JsInstance, JsWasmBackend};
 use crate::JsContext;
+use crate::JsContextMut;
 
 pub struct JsCaller<'c> {
+    pub(crate) store_inner: *mut crate::store::JsStoreInner,
+    pub(crate) caller_instance: Option<JsInstance>,
     pub(crate) _data: PhantomData<&'c i32>,
 }
 
 impl<'c> Caller<JsWasmBackend> for JsCaller<'c> {
     fn memory(&mut self, memory_index: u32) -> Option<<JsWasmBackend as WasmBackend>::Memory> {
-        todo!()
+        self.caller_instance
+            .and_then(|instance| instance.get_nth_memory(&mut self.as_context_mut(), 0))
     }
 }
 
 impl<'c> AsContext<JsWasmBackend> for JsCaller<'c> {
     fn as_context(&self) -> <JsWasmBackend as WasmBackend>::Context<'_> {
-        todo!()
+        JsContextMut::from_raw_ptr(self.store_inner).as_context()
     }
 }
 
 impl<'c> AsContextMut<JsWasmBackend> for JsCaller<'c> {
     fn as_context_mut(&mut self) -> <JsWasmBackend as WasmBackend>::ContextMut<'_> {
-        todo!()
+        JsContextMut::from_raw_ptr(self.store_inner)
     }
 }
 
@@ -36,7 +40,7 @@ macro_rules! impl_func_getter {
                 name: &str,
             ) -> Result<
                 Box<
-                    dyn FnMut(&mut JsContext<'_>, $args) -> Result<$rets, RuntimeError>
+                    dyn FnMut(&mut JsContextMut<'_>, $args) -> Result<$rets, RuntimeError>
                         + Sync
                         + Send
                         + 'static,

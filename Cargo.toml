@@ -39,7 +39,6 @@ members = [
     "marine/tests/wasm_tests/records_passing",
     "marine/tests/wasm_tests/wasi",
     "marine-js",
-    "marine-js-2",
     "tools/cli",
     "tools/repl",
 ]

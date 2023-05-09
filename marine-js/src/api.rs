@@ -16,7 +16,6 @@
 
 use crate::global_state::MARINE;
 
-
 use marine_rs_sdk::CallParameters;
 
 use wasm_bindgen::prelude::*;
@@ -59,37 +58,39 @@ struct CallModuleResult {
 pub fn register_module(name: &str, wasm_bytes: &[u8]) -> String {
     log::debug!("register_module start");
     let modules = maplit::hashmap! {
-            name.to_string() => wasm_bytes.to_owned()
-        };
+        name.to_string() => wasm_bytes.to_owned()
+    };
 
     let module_config = MarineModuleConfig {
         mem_pages_count: None,
         max_heap_size: None,
-        logger_enabled: false,
+        logger_enabled: true,
         host_imports: Default::default(),
         wasi: None,
-        logging_mask: 0
+        logging_mask: 0,
     };
 
     let module_descriptor = ModuleDescriptor {
         load_from: None,
         file_name: name.to_string(),
         import_name: name.to_string(),
-        config: module_config
+        config: module_config,
     };
 
     let config = MarineConfig {
         modules_dir: None,
         modules_config: vec![module_descriptor],
-        default_modules_config: None
+        default_modules_config: None,
     };
 
     let marine = Marine::<JsWasmBackend>::with_modules(modules, config);
     let new_marine = match marine {
-        Err(e) => return {
-            log::debug!("register_module fail: {:?}", e);
-            make_register_module_result(&e.to_string())
-        },
+        Err(e) => {
+            return {
+                log::debug!("register_module fail: {:?}", e);
+                make_register_module_result(&e.to_string())
+            }
+        }
         Ok(marine) => marine,
     };
 

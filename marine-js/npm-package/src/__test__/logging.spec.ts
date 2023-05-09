@@ -34,7 +34,7 @@ describe.each([
 
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmBytes(
-            path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
+            path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm')
         );
 
         const marineService = new MarineService(marine, greeting, 'srv', logger, undefined, { WASM_LOG: level });

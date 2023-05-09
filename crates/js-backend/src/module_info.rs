@@ -5,7 +5,6 @@ use walrus::{ExportItem, IdsToIndices, ValType};
 
 use std::collections::HashMap;
 
-
 #[derive(Clone)]
 pub(crate) struct ModuleInfo {
     pub(crate) custom_sections: MultiMap<String, Vec<u8>>,
@@ -17,20 +16,25 @@ pub(crate) enum Export {
     Function(FuncSig),
     Memory,
     Table,
-    Global
+    Global,
 }
 
 impl ModuleInfo {
     pub(crate) fn from_bytes(wasm: &[u8]) -> Self {
         // TODO handle errors
-        let module = walrus::ModuleConfig::new()
-            .parse(wasm)
-            .unwrap();
+        let module = walrus::ModuleConfig::new().parse(wasm).unwrap();
 
         let default_ids = IdsToIndices::default();
 
-        let custom_sections = module.customs.iter()
-            .map(|(_, section)| (section.name().to_string(), section.data(&default_ids).to_vec()))
+        let custom_sections = module
+            .customs
+            .iter()
+            .map(|(_, section)| {
+                (
+                    section.name().to_string(),
+                    section.data(&default_ids).to_vec(),
+                )
+            })
             .collect::<MultiMap<String, Vec<u8>>>();
 
         let exports = module
@@ -56,14 +60,22 @@ impl ModuleInfo {
 
         ModuleInfo {
             custom_sections,
-            exports
+            exports,
         }
     }
 }
 
 fn sig_from_walrus_ty(ty: &walrus::Type) -> FuncSig {
-    let params = ty.params().iter().map(wtype_from_walrus_val).collect::<Vec<_>>();
-    let results = ty.results().iter().map(wtype_from_walrus_val).collect::<Vec<_>>();
+    let params = ty
+        .params()
+        .iter()
+        .map(wtype_from_walrus_val)
+        .collect::<Vec<_>>();
+    let results = ty
+        .results()
+        .iter()
+        .map(wtype_from_walrus_val)
+        .collect::<Vec<_>>();
     FuncSig::new(params, results)
 }
 
