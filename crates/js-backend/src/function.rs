@@ -4,7 +4,7 @@ use marine_wasm_backend_traits::impl_for_each_function_signature;
 use marine_wasm_backend_traits::replace_with;
 
 use marine_wasm_backend_traits::prelude::*;
-use crate::JsWasmBackend;
+use crate::{JsInstance, JsWasmBackend};
 use crate::JsCaller;
 use crate::JsContext;
 use crate::JsContextMut;
@@ -17,6 +17,7 @@ use crate::store::JsStoreInner;
 #[derive(Clone)]
 pub struct JsFunction {
     pub(crate) store_handle: usize,
+    pub(crate) bound_instance: Option<JsInstance>,
 }
 
 pub(crate) struct JsFunctionStored {
@@ -30,22 +31,56 @@ impl JsFunction {
         func: js_sys::Function,
         sig: FuncSig,
     ) -> Self {
-        let stored = JsFunctionStored { js_func: func, sig };
+        let stored = JsFunctionStored { js_func: func, sig};
 
         let ctx = ctx.as_context_mut();
         let handle = ctx.inner.functions.len();
         ctx.inner.functions.push(stored);
         Self {
             store_handle: handle,
+            bound_instance: <_>::default()
         }
     }
 
-    pub(crate) fn stored(&self, ctx: &JsContext) -> &JsFunctionStored {
+    pub(crate) fn stored<'store>(&self, ctx: &JsContext<'store>) -> &'store JsFunctionStored {
         &ctx.inner.functions[self.store_handle]
     }
 
-    pub(crate) fn stored_mut(&self, ctx: &mut JsContextMut) -> &mut JsFunctionStored {
+    pub(crate) fn stored_mut<'store>(&self, ctx: JsContextMut<'store>) -> &'store mut JsFunctionStored {
         &mut ctx.inner.functions[self.store_handle]
+    }
+
+    fn call_inner(
+        &self,
+        store: &mut impl AsContextMut<JsWasmBackend>,
+        args: &[WValue],
+    ) -> RuntimeResult<Vec<WValue>> {
+        // TODO make more efficient
+
+        let params = js_array_from_wval_array(args);
+        let stored_func = self.stored_mut(store.as_context_mut());
+        let result = js_sys::Reflect::apply(&stored_func.js_func, &JsValue::NULL, &params)
+            .map_err(|e| {
+                web_sys::console::log_2(&"failed to apply func".into(), &e);
+                RuntimeError::Other(anyhow!("Failed to apply func"))
+            })?;
+
+        let result_types = stored_func.sig.returns();
+        match result_types.len() {
+            0 => Ok(vec![]),
+            1 => {
+                let value = wval_from_js(&result_types[0], &result);
+                Ok(vec![value])
+            }
+            _n => {
+                let result_array: Array = result.into();
+                Ok(result_array
+                    .iter()
+                    .enumerate()
+                    .map(|(i, js_val)| wval_from_js(&result_types[i], &js_val))
+                    .collect::<Vec<_>>())
+            }
+        }
     }
 }
 
@@ -101,7 +136,6 @@ impl Function<JsWasmBackend> for JsFunction {
                 enclosed_sig
             );
 
-            let store_inner_ptr = store.as_context_mut().inner as *mut JsStoreInner;
             web_sys::console::log_1(args);
 
             let store_inner = unsafe { &mut *store_inner_ptr };
@@ -145,7 +179,7 @@ impl Function<JsWasmBackend> for JsFunction {
     }
 
     fn signature(&self, store: &mut impl AsContextMut<JsWasmBackend>) -> FuncSig {
-        self.stored_mut(&mut store.as_context_mut()).sig.clone()
+        self.stored_mut(store.as_context_mut()).sig.clone()
     }
 
     fn call(
@@ -153,33 +187,20 @@ impl Function<JsWasmBackend> for JsFunction {
         store: &mut impl AsContextMut<JsWasmBackend>,
         args: &[WValue],
     ) -> RuntimeResult<Vec<WValue>> {
-        // TODO make more efficient
-        let params = js_array_from_wval_array(args);
-        let stored_func = self.stored_mut(&mut store.as_context_mut());
-        let result = js_sys::Reflect::apply(&stored_func.js_func, &JsValue::NULL, &params)
-            .map_err(|e| {
-                web_sys::console::log_2(&"failed to apply func".into(), &e);
-                RuntimeError::Other(anyhow!("Failed to apply func"))
-            })?;
-
-        let result_types = stored_func.sig.returns();
-        match result_types.len() {
-            0 => Ok(vec![]),
-            1 => {
-                let value = wval_from_js(&result_types[0], &result);
-                Ok(vec![value])
-            }
-            _n => {
-                let result_array: Array = result.into();
-                Ok(result_array
-                    .iter()
-                    .enumerate()
-                    .map(|(i, js_val)| wval_from_js(&result_types[i], &js_val))
-                    .collect::<Vec<_>>())
-            }
+        if let Some(instance) = &self.bound_instance {
+            store.as_context_mut().inner.wasm_call_stack.push(instance.clone())
         }
+
+        let result = self.call_inner(store, args);
+
+        if let Some(instance) = &self.bound_instance {
+            store.as_context_mut().inner.wasm_call_stack.pop();
+        }
+
+        result
     }
 }
+
 
 /// Generates a function that accepts a Fn with $num template parameters and turns it into WasmtimeFunction.
 /// Needed to allow users to pass almost any function to `Function::new_typed` without worrying about signature.

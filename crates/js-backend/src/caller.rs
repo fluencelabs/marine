@@ -14,13 +14,14 @@ pub struct JsCaller<'c> {
 impl<'c> Caller<JsWasmBackend> for JsCaller<'c> {
     fn memory(&mut self, memory_index: u32) -> Option<<JsWasmBackend as WasmBackend>::Memory> {
         self.caller_instance
+            .clone()
             .and_then(|instance| instance.get_nth_memory(&mut self.as_context_mut(), 0))
     }
 }
 
 impl<'c> AsContext<JsWasmBackend> for JsCaller<'c> {
     fn as_context(&self) -> <JsWasmBackend as WasmBackend>::Context<'_> {
-        JsContextMut::from_raw_ptr(self.store_inner).as_context()
+        JsContext::from_raw_ptr(self.store_inner)
     }
 }
 

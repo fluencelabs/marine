@@ -21,7 +21,6 @@ pub struct JsModule {
 
 impl Module<JsWasmBackend> for JsModule {
     fn new(store: &mut JsStore, wasm: &[u8]) -> ModuleCreationResult<Self> {
-        log::debug!("Module::new start");
         let data = Uint8Array::new_with_length(wasm.len() as u32);
         data.copy_from(wasm);
         let data_obj: JsValue = data.into();
@@ -39,7 +38,6 @@ impl Module<JsWasmBackend> for JsModule {
             module_info,
         };
 
-        log::debug!("Module::new success");
         Ok(module)
     }
 
@@ -55,7 +53,6 @@ impl Module<JsWasmBackend> for JsModule {
         store: &mut JsStore,
         imports: &JsImports,
     ) -> InstantiationResult<<JsWasmBackend as WasmBackend>::Instance> {
-        log::debug!("Module::instantiate start");
         let imports_object = imports.build_import_object(store.as_context(), &self.inner);
         let instance = WebAssembly::Instance::new(&self.inner, &imports_object).map_err(|e| {
             web_sys::console::log_1(&e);
@@ -70,7 +67,6 @@ impl Module<JsWasmBackend> for JsModule {
             instance,
             self.module_info.clone(),
         );
-        log::debug!("Module::instantiate success");
         Ok(stored_instance)
     }
 }

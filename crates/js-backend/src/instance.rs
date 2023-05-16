@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use js_sys::Atomics::store;
 use crate::{JsContextMut, JsFunction, JsMemory, JsWasmBackend};
 use crate::module_info;
 use crate::module_info::ModuleInfo;
@@ -53,7 +54,16 @@ impl JsInstance {
 
         let store_handle = ctx.inner.store_instance(stored_instance);
 
-        Self::from_store_handle(store_handle)
+        // Bind export functions to this instance. Looks really bad.
+        let mut instance = Self::from_store_handle(store_handle);
+        let mut stored = instance.stored_instance(ctx.as_context_mut());
+        for (_, export) in &mut stored.exports {
+            if let Export::Function(func) = export {
+                func.bound_instance = Some(instance.clone());
+            }
+        }
+
+        instance
     }
 
     pub(crate) fn from_store_handle(store_handle: usize) -> Self {
@@ -121,7 +131,7 @@ impl Instance<JsWasmBackend> for JsInstance {
         memory_name: &str,
     ) -> ResolveResult<<JsWasmBackend as WasmBackend>::Memory> {
         // TODO handle errors
-        log::debug!("Instance::get_memory start");
+        log::trace!("Instance::get_memory, instance_id: {}, memory_name: {}", self.store_handle, memory_name);
         let stored_instance = self.stored_instance(store.as_context_mut());
         let export = stored_instance
             .exports
@@ -150,7 +160,6 @@ impl Instance<JsWasmBackend> for JsInstance {
         store: &mut impl AsContextMut<JsWasmBackend>,
         name: &str,
     ) -> ResolveResult<<JsWasmBackend as WasmBackend>::Function> {
-        log::debug!("Instance::get_function start");
         let stored_instance = self.stored_instance(store.as_context_mut());
         let export = stored_instance
             .exports
@@ -168,8 +177,6 @@ impl Instance<JsWasmBackend> for JsInstance {
                 actual: "other(funcref or externref)",
             }),
         };
-
-        log::debug!("Instance::get_function success");
 
         result
     }

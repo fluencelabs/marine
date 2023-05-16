@@ -44,7 +44,6 @@ impl WasmBackend for JsWasmBackend {
     type Wasi = JsWasi;
 
     fn new() -> WasmBackendResult<Self> {
-        log::debug!("Created JsWasmBackend");
         Ok(Self {})
     }
 }

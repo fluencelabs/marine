@@ -12,6 +12,7 @@ use std::cell::RefCell;
 
 #[wasm_bindgen(start)]
 fn main() {
+    //console_log::init_with_level(log::Level::Debug).unwrap();
     log::set_logger(&wasm_bindgen_console_logger::DEFAULT_LOGGER).unwrap();
     log::set_max_level(log::LevelFilter::Debug);
 }

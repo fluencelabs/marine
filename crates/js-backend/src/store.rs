@@ -46,6 +46,14 @@ impl<'c> JsContext<'c> {
     pub(crate) fn new(inner: &'c JsStoreInner) -> Self {
         Self { inner }
     }
+
+    pub(crate) fn from_raw_ptr(store_inner: *const JsStoreInner) -> Self {
+        unsafe {
+            Self {
+                inner: &*store_inner,
+            }
+        }
+    }
 }
 
 pub struct JsContextMut<'c> {
