@@ -6,6 +6,7 @@ import { defaultImport } from 'default-import';
 const bindings = defaultImport(bindingsRaw);
 
 export function create_wasi() {
+    // TODO pass wasi config
     const env = {"A": "B"};
     return new WASI({
         args: [],
