@@ -33,7 +33,7 @@ const loadWasmBytes = async (waspPath: string) => {
 };
 
 const redisDownloadUrl = 'https://github.com/fluencelabs/redis/releases/download/v0.15.0_w/redis.wasm';
-const sqliteDownloadUrl = 'https://github.com/fluencelabs/sqlite/releases/download/v0.16.0_w/sqlite3.wasm';
+const sqliteDownloadUrl = 'https://github.com/fluencelabs/sqlite/releases/download/sqlite-wasm-v0.18.1/sqlite3.wasm';
 
 const examplesDir = path.join(__dirname, '../../../../examples');
 
@@ -210,6 +210,7 @@ describe('Fluence app service tests', () => {
             expect(true).toBe(false);
         } catch (e) {
             // assert
+            console.log("call_error", e)
             expect(e).toBeInstanceOf(WebAssembly.RuntimeError);
             const re = e as WebAssembly.RuntimeError;
             expect(re.message).toBe('unreachable');

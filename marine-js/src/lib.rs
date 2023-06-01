@@ -1,6 +1,9 @@
 mod global_state;
 mod api;
 
+// Needed for wasm_bindgen_derive
+extern crate alloc;
+
 use global_state::MARINE;
 
 use marine_js_backend::JsWasmBackend;

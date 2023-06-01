@@ -31,14 +31,14 @@ impl JsFunction {
         func: js_sys::Function,
         sig: FuncSig,
     ) -> Self {
-        let stored = JsFunctionStored { js_func: func, sig};
+        let stored = JsFunctionStored { js_func: func, sig };
 
         let ctx = ctx.as_context_mut();
         let handle = ctx.inner.functions.len();
         ctx.inner.functions.push(stored);
         Self {
             store_handle: handle,
-            bound_instance: <_>::default()
+            bound_instance: <_>::default(),
         }
     }
 
@@ -46,7 +46,10 @@ impl JsFunction {
         &ctx.inner.functions[self.store_handle]
     }
 
-    pub(crate) fn stored_mut<'store>(&self, ctx: JsContextMut<'store>) -> &'store mut JsFunctionStored {
+    pub(crate) fn stored_mut<'store>(
+        &self,
+        ctx: JsContextMut<'store>,
+    ) -> &'store mut JsFunctionStored {
         &mut ctx.inner.functions[self.store_handle]
     }
 
@@ -188,7 +191,11 @@ impl Function<JsWasmBackend> for JsFunction {
         args: &[WValue],
     ) -> RuntimeResult<Vec<WValue>> {
         if let Some(instance) = &self.bound_instance {
-            store.as_context_mut().inner.wasm_call_stack.push(instance.clone())
+            store
+                .as_context_mut()
+                .inner
+                .wasm_call_stack
+                .push(instance.clone())
         }
 
         let result = self.call_inner(store, args);
@@ -200,7 +207,6 @@ impl Function<JsWasmBackend> for JsFunction {
         result
     }
 }
-
 
 /// Generates a function that accepts a Fn with $num template parameters and turns it into WasmtimeFunction.
 /// Needed to allow users to pass almost any function to `Function::new_typed` without worrying about signature.

@@ -19,11 +19,14 @@ use crate::global_state::MARINE;
 use marine_rs_sdk::CallParameters;
 
 use wasm_bindgen::prelude::*;
+
+use wasm_bindgen_derive::TryFromJsValue;
 use serde_json::Value as JValue;
 use serde::Serialize;
 use serde::Deserialize;
 
 use std::borrow::BorrowMut;
+use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use marine::generic::Marine;
 use marine::generic::MarineConfig;
@@ -42,6 +45,14 @@ struct CallModuleResult {
     result: JValue,
 }
 
+#[derive(TryFromJsValue)]
+#[wasm_bindgen(getter_with_clone)]
+#[derive(Clone)]
+pub struct ModuleConfig {
+    pub name: String,
+    pub wasm_bytes: Vec<u8>,
+}
+
 /// Registers a module inside web-runtime.
 ///
 /// # Arguments
@@ -55,13 +66,19 @@ struct CallModuleResult {
 /// otherwise, it contains error message.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn register_module(name: &str, wasm_bytes: &[u8]) -> String {
+pub fn register_module(modules: Vec<JsValue>) -> String {
     log::debug!("register_module start");
-    let modules = maplit::hashmap! {
+    //let modules = vec![modules];
+    let modules = modules
+        .into_iter()
+        .map(|val| ModuleConfig::try_from(&val).unwrap())
+        .map(|module| (module.name, module.wasm_bytes))
+        .collect::<HashMap<String, Vec<u8>>>();
+    /*let modules = maplit::hashmap! {
         name.to_string() => wasm_bytes.to_owned()
-    };
+    };*/
 
-    let module_config = MarineModuleConfig {
+    let create_module_config = || MarineModuleConfig {
         mem_pages_count: None,
         max_heap_size: None,
         logger_enabled: true,
@@ -70,16 +87,19 @@ pub fn register_module(name: &str, wasm_bytes: &[u8]) -> String {
         logging_mask: 0,
     };
 
-    let module_descriptor = ModuleDescriptor {
-        load_from: None,
-        file_name: name.to_string(),
-        import_name: name.to_string(),
-        config: module_config,
-    };
+    let module_descriptors = modules
+        .iter()
+        .map(|(name, _)| ModuleDescriptor {
+            load_from: None,
+            file_name: name.to_string(),
+            import_name: name.to_string(),
+            config: create_module_config(),
+        })
+        .collect::<Vec<ModuleDescriptor<JsWasmBackend>>>();
 
     let config = MarineConfig {
         modules_dir: None,
-        modules_config: vec![module_descriptor],
+        modules_config: module_descriptors,
         default_modules_config: None,
     };
 

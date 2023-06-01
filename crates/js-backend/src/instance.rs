@@ -131,7 +131,11 @@ impl Instance<JsWasmBackend> for JsInstance {
         memory_name: &str,
     ) -> ResolveResult<<JsWasmBackend as WasmBackend>::Memory> {
         // TODO handle errors
-        log::trace!("Instance::get_memory, instance_id: {}, memory_name: {}", self.store_handle, memory_name);
+        log::trace!(
+            "Instance::get_memory, instance_id: {}, memory_name: {}",
+            self.store_handle,
+            memory_name
+        );
         let stored_instance = self.stored_instance(store.as_context_mut());
         let export = stored_instance
             .exports
