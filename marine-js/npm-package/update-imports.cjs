@@ -6,6 +6,8 @@ const traverse = require("@babel/traverse").default;
 const sourceFilePath = "../marine-js-pkg/marine_js.js";
 const targetFilePath = "./src/marine_js.js";
 
+const GET_IMPORTTS_FN_NAME = "__wbg_get_imports"
+
 fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
   if (err) {
     console.error("Error reading source file:", err);
@@ -17,7 +19,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
 
   traverse(sourceAst, {
     FunctionDeclaration(path) {
-      if (path.node.id.name === "getImports") {
+      if (path.node.id.name === GET_IMPORTTS_FN_NAME) {
         sourceFunction = path.node;
         path.stop();
       }
@@ -25,7 +27,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
   });
 
   if (!sourceFunction) {
-    console.error("Error: getImports function not found in source file");
+    console.error(`Error: ${GET_IMPORTTS_FN_NAME} function not found in source file`);
     process.exit(1);
   }
 
@@ -45,7 +47,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
 
     recast.visit(targetAst, {
       visitFunctionDeclaration(path) {
-        if (path.node.id.name === "getImports") {
+        if (path.node.id.name === GET_IMPORTTS_FN_NAME) {
           targetFunctionPath = path;
           return false;
         }
@@ -54,7 +56,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
     });
 
     if (!targetFunctionPath) {
-      console.error("Error: getImports function not found in target file");
+      console.error(`Error: ${GET_IMPORTTS_FN_NAME} function not found in target file`);
       process.exit(1);
     }
 
@@ -67,7 +69,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
         process.exit(1);
       }
 
-      console.log("Function getImports replaced successfully in target file.");
+      console.log(`Function ${GET_IMPORTTS_FN_NAME} replaced successfully in target file.`);
     });
   });
 });
