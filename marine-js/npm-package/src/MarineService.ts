@@ -50,7 +50,7 @@ export class MarineService {
 
     constructor(
         private readonly controlModule: WebAssembly.Module,
-        private readonly serviceModule: Uint8Array,
+        private readonly service: Array<{name: string, wasm_bytes: Uint8Array}>,
         private readonly serviceId: string,
         private logFunction: LogFunction,
         marineServiceConfig?: MarineServiceConfig,
@@ -110,7 +110,7 @@ export class MarineService {
 
         //const customSections = WebAssembly.Module.customSections(this.serviceModule, 'interface-types');
         //const itCustomSections = new Uint8Array(customSections[0]);
-        let rawResult = controlModuleInstance.register_module([{name: this.serviceId, wasm_bytes: this.serviceModule}]);
+        let rawResult = controlModuleInstance.register_module(this.service);
 
         let result: any;
         try {
@@ -135,8 +135,10 @@ export class MarineService {
             throw new Error('Terminated');
         }
 
+        // facade module is the last module of the service
+        const facade_name = this.service.slice(-1)[0].name;
         const argsString = JSON.stringify(args);
-        const rawRes = this._controlModuleInstance.call_module(this.serviceId, functionName, argsString);
+        const rawRes = this._controlModuleInstance.call_module(facade_name, functionName, argsString);
         return JSON.parse(rawRes);
     }
 }

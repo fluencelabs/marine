@@ -37,7 +37,7 @@ describe.each([
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm')
         );
 
-        const marineService = new MarineService(marine, greeting, 'srv', logger, undefined, { WASM_LOG: level });
+        const marineService = new MarineService(marine, [{name: 'srv', wasm_bytes: greeting}], 'srv', logger, undefined, { WASM_LOG: level });
         await marineService.init();
 
         // act
@@ -64,7 +64,7 @@ describe.each([
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
-        const marineService = new MarineService(marine, greeting, 'srv', logger, undefined, env);
+        const marineService = new MarineService(marine, [{name: 'srv', wasm_bytes: greeting}], 'srv', logger, undefined, env);
         await marineService.init();
 
         // act
