@@ -110,7 +110,7 @@ export class MarineService {
 
         //const customSections = WebAssembly.Module.customSections(this.serviceModule, 'interface-types');
         //const itCustomSections = new Uint8Array(customSections[0]);
-        let rawResult = controlModuleInstance.register_module(this.serviceId, this.serviceModule);
+        let rawResult = controlModuleInstance.register_module([{name: this.serviceId, wasm_bytes: this.serviceModule}]);
 
         let result: any;
         try {
@@ -137,12 +137,7 @@ export class MarineService {
 
         const argsString = JSON.stringify(args);
         const rawRes = this._controlModuleInstance.call_module(this.serviceId, functionName, argsString);
-        const jsonRes: { result: unknown; error: string } = JSON.parse(rawRes);
-        if (jsonRes.error) {
-            throw new Error(`marine-js failed with: ${jsonRes.error}`);
-        }
-
-        return jsonRes.result;
+        return JSON.parse(rawRes);
     }
 }
 

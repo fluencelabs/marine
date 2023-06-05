@@ -45,12 +45,34 @@ struct CallModuleResult {
     result: JValue,
 }
 
-#[derive(TryFromJsValue)]
-#[wasm_bindgen(getter_with_clone)]
 #[derive(Clone)]
 pub struct ModuleConfig {
     pub name: String,
     pub wasm_bytes: Vec<u8>,
+}
+
+impl TryFrom<&JsValue> for ModuleConfig {
+    type Error = ();
+
+    fn try_from(value: &JsValue) -> Result<Self, Self::Error> {
+        let obj = js_sys::Object::try_from(value).ok_or(())?;
+        let name = js_sys::Reflect::get(&obj, &"name".into())
+            .map_err(|e| {
+                web_sys::console::log_1(&e);
+            })
+            .unwrap() // TODO handle error
+            .as_string()
+            .unwrap(); // TODO handle error
+        let wasm_bytes = js_sys::Reflect::get(&obj, &"wasm_bytes".into())
+            .map_err(|e| {
+                web_sys::console::log_1(&e);
+            })
+            .unwrap(); // TODO handle error
+
+        let wasm_bytes = js_sys::Uint8Array::new(&wasm_bytes).to_vec();
+
+        Ok(Self { name, wasm_bytes })
+    }
 }
 
 /// Registers a module inside web-runtime.
@@ -68,15 +90,15 @@ pub struct ModuleConfig {
 #[wasm_bindgen]
 pub fn register_module(modules: Vec<JsValue>) -> String {
     log::debug!("register_module start");
-    //let modules = vec![modules];
+
     let modules = modules
         .into_iter()
-        .map(|val| ModuleConfig::try_from(&val).unwrap())
+        .map(|val| {
+            web_sys::console::log_1(&val);
+            ModuleConfig::try_from(&val).expect_throw("Expected {name: string, wasm_bytes: Uint8Array} structure for register_module argument")
+        })
         .map(|module| (module.name, module.wasm_bytes))
         .collect::<HashMap<String, Vec<u8>>>();
-    /*let modules = maplit::hashmap! {
-        name.to_string() => wasm_bytes.to_owned()
-    };*/
 
     let create_module_config = || MarineModuleConfig {
         mem_pages_count: None,
@@ -134,7 +156,7 @@ pub fn register_module(modules: Vec<JsValue>) -> String {
 /// "result" contains a function return value. Otherwise, "error" contains error message.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
+pub fn call_module(module_name: &str, function_name: &str, args: &str) -> Result<String, JsError> {
     MARINE.with(|marine| {
         let args: JValue = match serde_json::from_str(args) {
             Ok(args) => args,
@@ -171,12 +193,20 @@ fn make_register_module_result(error: &str) -> String {
 }
 
 #[allow(unused)] // needed because clippy marks this function as unused
-fn make_call_module_result(result: JValue, error: &str) -> String {
+fn make_call_module_result(result: JValue, error: &str) -> Result<String, JsError> {
+    if error == "" {
+        // unwrap is safe because Serialize is derived for that struct and it does not contain maps with non-string keys
+        Ok(serde_json::ser::to_string(&result).unwrap())
+    } else {
+        Err(JsError::new(error))
+    }
+    /*
     let result = CallModuleResult {
         error: error.to_string(),
         result,
     };
 
-    // unwrap is safe because Serialize is derived for that struct and it does not contain maps with non-string keys
+
     serde_json::ser::to_string(&result).unwrap()
+    */
 }

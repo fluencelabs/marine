@@ -8,6 +8,7 @@ import downloadRaw from 'download';
 import { MarineService } from '../MarineService.js';
 import { callAvm } from '@fluencelabs/avm';
 import { JSONArray, JSONObject } from '../types.js';
+import exp = require("constants");
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 const require = createRequire(import.meta.url);
@@ -201,20 +202,12 @@ describe('Fluence app service tests', () => {
         const failing = await loadWasmBytes(path.join(examplesDir, './failing/artifacts/failing.wasm'));
 
         const marineService = new MarineService(marine, failing, 'srv', dontLog);
-        await await marineService.init();
+        await marineService.init();
 
-        // act
-        try {
-            await marineService.call('failing', [], undefined);
-            // should never succeed
-            expect(true).toBe(false);
-        } catch (e) {
-            // assert
-            console.log("call_error", e)
-            expect(e).toBeInstanceOf(WebAssembly.RuntimeError);
-            const re = e as WebAssembly.RuntimeError;
-            expect(re.message).toBe('unreachable');
-        }
+
+        expect(() => marineService.call('failing', [], undefined))
+            .toThrow(new Error("Error calling module function: engine error: Execution error: `call-core 6` failed while calling the local or import function `failing`"));
+
     });
 
     it('Checking error when calling non-existent function', async () => {
@@ -234,7 +227,7 @@ describe('Fluence app service tests', () => {
             // assert
             expect(e).toBeInstanceOf(Error);
             expect((e as Error).message).toBe(
-                'marine-js failed with: Error calling module function: function with name `do_not_exist` is missing',
+                'Error calling module function: function with name `do_not_exist` is missing',
             );
         }
     });

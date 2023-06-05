@@ -186,11 +186,9 @@ export async function init(module) {
     }
 
 
-    function __wbg_adapter_20(arg0, arg1, arg2) {
+    function __wbg_adapter_26(arg0, arg1, arg2) {
         try {
-            _assertNum(arg0);
-            _assertNum(arg1);
-            const ret = wasm._dyn_core__ops__function__FnMut___A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h0bd40dc488bb7714(arg0, arg1, addBorrowedObject(arg2));
+            const ret = wasm._dyn_core__ops__function__FnMut___A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__haa7424b9b5ff614a(arg0, arg1, addBorrowedObject(arg2));
             return takeObject(ret);
         } finally {
             heap[stack_pointer++] = undefined;
@@ -233,6 +231,25 @@ export async function init(module) {
         WASM_VECTOR_LEN = arg.length;
         return ptr;
     }
+
+    function passArrayJsValueToWasm0(array, malloc) {
+        const ptr = malloc(array.length * 4) >>> 0;
+        const mem = getUint32Memory0();
+        for (let i = 0; i < array.length; i++) {
+            mem[ptr / 4 + i] = addHeapObject(array[i]);
+        }
+        WASM_VECTOR_LEN = array.length;
+        return ptr;
+    }
+    let cachedUint32Memory0 = null;
+
+    function getUint32Memory0() {
+        if (cachedUint32Memory0 === null || cachedUint32Memory0.byteLength === 0) {
+            cachedUint32Memory0 = new Uint32Array(wasm.memory.buffer);
+        }
+        return cachedUint32Memory0;
+    }
+
     /**
      * Registers a module inside web-runtime.
      *
@@ -251,36 +268,22 @@ export async function init(module) {
      * @param {any} wasm_instance
      * @returns {string}
      */
-    /**
-     * Registers a module inside web-runtime.
-     *
-     * # Arguments
-     *
-     * * `name` - name of module to register
-     * * `wasm_bytes` - wasm file bytes
-     *
-     * # Return value
-     *
-     * JSON object with field "error". If error is empty, module is registered.
-     * otherwise, it contains error message.
-     * @param {string} name
-     * @param {Uint8Array} wasm_bytes
-     * @returns {string}
-     */
-    function register_module(name, wasm_bytes) {
+    function register_module(modules) {
+        let deferred2_0;
+        let deferred2_1;
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            const ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const ptr0 = passArrayJsValueToWasm0(modules, wasm.__wbindgen_malloc);
             const len0 = WASM_VECTOR_LEN;
-            const ptr1 = passArray8ToWasm0(wasm_bytes, wasm.__wbindgen_malloc);
-            const len1 = WASM_VECTOR_LEN;
-            wasm.register_module(retptr, ptr0, len0, ptr1, len1);
+            wasm.register_module(retptr, ptr0, len0);
             var r0 = getInt32Memory0()[retptr / 4 + 0];
             var r1 = getInt32Memory0()[retptr / 4 + 1];
+            deferred2_0 = r0;
+            deferred2_1 = r1;
             return getStringFromWasm0(r0, r1);
         } finally {
             wasm.__wbindgen_add_to_stack_pointer(16);
-            wasm.__wbindgen_free(r0, r1);
+            wasm.__wbindgen_free(deferred2_0, deferred2_1);
         }
     }
 
@@ -303,6 +306,8 @@ export async function init(module) {
      * @returns {string}
      */
     function call_module(module_name, function_name, args) {
+        let deferred5_0;
+        let deferred5_1;
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
             const ptr0 = passStringToWasm0(module_name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -314,10 +319,20 @@ export async function init(module) {
             wasm.call_module(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
             var r0 = getInt32Memory0()[retptr / 4 + 0];
             var r1 = getInt32Memory0()[retptr / 4 + 1];
-            return getStringFromWasm0(r0, r1);
+            var r2 = getInt32Memory0()[retptr / 4 + 2];
+            var r3 = getInt32Memory0()[retptr / 4 + 3];
+            var ptr4 = r0;
+            var len4 = r1;
+            if (r3) {
+                ptr4 = 0; len4 = 0;
+                throw takeObject(r2);
+            }
+            deferred5_0 = ptr4;
+            deferred5_1 = len4;
+            return getStringFromWasm0(ptr4, len4);
         } finally {
             wasm.__wbindgen_add_to_stack_pointer(16);
-            wasm.__wbindgen_free(r0, r1);
+            wasm.__wbindgen_free(deferred5_0, deferred5_1);
         }
     }
 
@@ -348,11 +363,6 @@ export async function init(module) {
             return addHeapObject(ret);
         };
 
-        imports.wbg.__wbg_length_0aab7ffd65ad19ed = function(arg0) {
-            const ret = getObject(arg0).length;
-            return ret;
-        };
-
         imports.wbg.__wbindgen_memory = function() {
             const ret = wasm.memory;
             return addHeapObject(ret);
@@ -363,8 +373,8 @@ export async function init(module) {
             return addHeapObject(ret);
         };
 
-        imports.wbg.__wbg_newwithbyteoffsetandlength_88d1d8be5df94b9b = function(arg0, arg1, arg2) {
-            const ret = new Uint8Array(getObject(arg0), arg1 >>> 0, arg2 >>> 0);
+        imports.wbg.__wbg_new_09938a7d020f049b = function(arg0) {
+            const ret = new Uint8Array(getObject(arg0));
             return addHeapObject(ret);
         };
 
@@ -372,19 +382,14 @@ export async function init(module) {
             getObject(arg0).set(getObject(arg1), arg2 >>> 0);
         };
 
-        imports.wbg.__wbg_byteLength_1a59a59856fc656a = function(arg0) {
-            const ret = getObject(arg0).byteLength;
+        imports.wbg.__wbg_length_0aab7ffd65ad19ed = function(arg0) {
+            const ret = getObject(arg0).length;
             return ret;
         };
 
-        imports.wbg.__wbg_new_09938a7d020f049b = function(arg0) {
-            const ret = new Uint8Array(getObject(arg0));
+        imports.wbg.__wbg_newwithbyteoffsetandlength_88d1d8be5df94b9b = function(arg0, arg1, arg2) {
+            const ret = new Uint8Array(getObject(arg0), arg1 >>> 0, arg2 >>> 0);
             return addHeapObject(ret);
-        };
-
-        imports.wbg.__wbg_getindex_ed5eaef94b3df248 = function(arg0, arg1) {
-            const ret = getObject(arg0)[arg1 >>> 0];
-            return ret;
         };
 
         imports.wbg.__wbg_log_7bb108d119bafbc1 = function(arg0) {
@@ -422,6 +427,21 @@ export async function init(module) {
             return ret;
         };
 
+        imports.wbg.__wbg_byteLength_1a59a59856fc656a = function(arg0) {
+            const ret = getObject(arg0).byteLength;
+            return ret;
+        };
+
+        imports.wbg.__wbg_getindex_ed5eaef94b3df248 = function(arg0, arg1) {
+            const ret = getObject(arg0)[arg1 >>> 0];
+            return ret;
+        };
+
+        imports.wbg.__wbindgen_error_new = function(arg0, arg1) {
+            const ret = new Error(getStringFromWasm0(arg0, arg1));
+            return addHeapObject(ret);
+        };
+
         imports.wbg.__wbindgen_is_object = function(arg0) {
             const val = getObject(arg0);
             const ret = typeof val === "object" && val !== null;
@@ -435,16 +455,6 @@ export async function init(module) {
             }, arguments);
         };
 
-        imports.wbg.__wbindgen_is_undefined = function(arg0) {
-            const ret = getObject(arg0) === undefined;
-            return ret;
-        };
-
-        imports.wbg.__wbindgen_is_function = function(arg0) {
-            const ret = typeof (getObject(arg0)) === "function";
-            return ret;
-        };
-
         imports.wbg.__wbindgen_string_get = function(arg0, arg1) {
             const obj = getObject(arg1);
             const ret = typeof obj === "string" ? obj : undefined;
@@ -454,11 +464,8 @@ export async function init(module) {
             getInt32Memory0()[arg0 / 4 + 0] = ptr1;
         };
 
-        imports.wbg.__wbindgen_number_get = function(arg0, arg1) {
-            const obj = getObject(arg1);
-            const ret = typeof obj === "number" ? obj : undefined;
-            getFloat64Memory0()[arg0 / 8 + 1] = isLikeNone(ret) ? 0 : ret;
-            getInt32Memory0()[arg0 / 4 + 0] = !isLikeNone(ret);
+        imports.wbg.__wbg_setindex_f47cfb913f6e49c8 = function(arg0, arg1, arg2) {
+            getObject(arg0)[arg1 >>> 0] = arg2;
         };
 
         imports.wbg.__wbg_newwithlength_89eeca401d8918c2 = function(arg0) {
@@ -476,10 +483,6 @@ export async function init(module) {
         imports.wbg.__wbg_createwasi_9079145d98d65af4 = function() {
             const ret = create_wasi();
             return addHeapObject(ret);
-        };
-
-        imports.wbg.__wbg_setindex_f47cfb913f6e49c8 = function(arg0, arg1, arg2) {
-            getObject(arg0)[arg1 >>> 0] = arg2;
         };
 
         imports.wbg.__wbg_subarray_d82be056deb4ad27 = function(arg0, arg1, arg2) {
@@ -533,6 +536,13 @@ export async function init(module) {
             return ret;
         };
 
+        imports.wbg.__wbindgen_number_get = function(arg0, arg1) {
+            const obj = getObject(arg1);
+            const ret = typeof obj === "number" ? obj : undefined;
+            getFloat64Memory0()[arg0 / 8 + 1] = isLikeNone(ret) ? 0 : ret;
+            getInt32Memory0()[arg0 / 4 + 0] = !isLikeNone(ret);
+        };
+
         imports.wbg.__wbindgen_number_new = function(arg0) {
             const ret = arg0;
             return addHeapObject(ret);
@@ -572,8 +582,8 @@ export async function init(module) {
             console.warn(getStringFromWasm0(arg0, arg1));
         };
 
-        imports.wbg.__wbindgen_closure_wrapper62 = function(arg0, arg1, arg2) {
-            const ret = makeMutClosure(arg0, arg1, 106, __wbg_adapter_28);
+        imports.wbg.__wbindgen_closure_wrapper61 = function(arg0, arg1, arg2) {
+            const ret = makeMutClosure(arg0, arg1, 132, __wbg_adapter_26);
             return addHeapObject(ret);
         };
 
