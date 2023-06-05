@@ -136,7 +136,7 @@ export class MarineService {
         }
 
         // facade module is the last module of the service
-        const facade_name = this.service.slice(-1)[0].name;
+        const facade_name = this.service[this.service.length - 1].name;
         const argsString = JSON.stringify(args);
         const rawRes = this._controlModuleInstance.call_module(facade_name, functionName, argsString);
         return JSON.parse(rawRes);
