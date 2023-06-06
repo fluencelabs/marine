@@ -2186,6 +2186,7 @@ dependencies = [
  "marine-rs-sdk",
  "marine-runtime 0.26.3",
  "serde",
+ "serde-wasm-bindgen",
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-console-logger",
@@ -2204,6 +2205,7 @@ dependencies = [
  "maplit",
  "marine-wasm-backend-traits",
  "paste",
+ "serde-wasm-bindgen",
  "walrus",
  "wasm-bindgen",
  "web-sys",
@@ -3414,6 +3416,17 @@ checksum = "d733da87e79faaac25616e33d26299a41143fd4cd42746cbb0e91d8feea243fd"
 dependencies = [
  "byteorder",
  "serde",
+]
+
+[[package]]
+name = "serde-wasm-bindgen"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f3b143e2833c57ab9ad3ea280d21fd34e285a42837aeb0ee301f4f41890fa00e"
+dependencies = [
+ "js-sys",
+ "serde",
+ "wasm-bindgen",
 ]
 
 [[package]]

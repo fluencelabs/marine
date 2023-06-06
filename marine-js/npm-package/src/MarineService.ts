@@ -110,16 +110,11 @@ export class MarineService {
 
         //const customSections = WebAssembly.Module.customSections(this.serviceModule, 'interface-types');
         //const itCustomSections = new Uint8Array(customSections[0]);
-        let rawResult = controlModuleInstance.register_module(this.service);
-
-        let result: any;
-        try {
-            result = JSON.parse(rawResult);
-            this._controlModuleInstance = controlModuleInstance;
-            return result;
-        } catch (ex) {
-            throw 'register_module result parsing error: ' + ex + ', original text: ' + rawResult;
+        let config = {
+            modules: this.service
         }
+        controlModuleInstance.register_module(config);
+        this._controlModuleInstance = controlModuleInstance;
     }
 
     terminate(): void {

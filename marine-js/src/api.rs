@@ -27,11 +27,13 @@ use serde::Deserialize;
 
 use std::borrow::BorrowMut;
 use std::collections::HashMap;
+use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
 use marine::generic::Marine;
 use marine::generic::MarineConfig;
 use marine::generic::MarineModuleConfig;
 use marine::generic::ModuleDescriptor;
+use marine::MarineWASIConfig;
 use marine_js_backend::JsWasmBackend;
 
 #[derive(Serialize, Deserialize)]
@@ -45,10 +47,21 @@ struct CallModuleResult {
     result: JValue,
 }
 
-#[derive(Clone)]
+#[derive(Serialize, Deserialize)]
+pub struct WasiConfig {
+    pub envs: HashMap<String, String>,
+    pub args: Vec<String>,
+}
+#[derive(Serialize, Deserialize)]
 pub struct ModuleConfig {
     pub name: String,
     pub wasm_bytes: Vec<u8>,
+    pub wasi_config: Option<WasiConfig>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ServiceConfig {
+    pub modules: Vec<ModuleConfig>,
 }
 
 impl TryFrom<&JsValue> for ModuleConfig {
@@ -71,7 +84,11 @@ impl TryFrom<&JsValue> for ModuleConfig {
 
         let wasm_bytes = js_sys::Uint8Array::new(&wasm_bytes).to_vec();
 
-        Ok(Self { name, wasm_bytes })
+        Ok(Self {
+            name,
+            wasm_bytes,
+            wasi_config: None,
+        })
     }
 }
 
@@ -88,37 +105,52 @@ impl TryFrom<&JsValue> for ModuleConfig {
 /// otherwise, it contains error message.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn register_module(modules: Vec<JsValue>) -> String {
+pub fn register_module(config: JsValue) -> Result<(), JsError> {
+    web_sys::console::log_1(&config);
+    let config: ServiceConfig = serde_wasm_bindgen::from_value(config)?;
     log::debug!("register_module start");
 
-    let modules = modules
-        .into_iter()
-        .map(|val| {
-            web_sys::console::log_1(&val);
-            ModuleConfig::try_from(&val).expect_throw("Expected {name: string, wasm_bytes: Uint8Array} structure for register_module argument")
-        })
-        .map(|module| (module.name, module.wasm_bytes))
-        .collect::<HashMap<String, Vec<u8>>>();
+    let create_module_config = |wasi_config: Option<&WasiConfig>| {
+        let wasi_config = wasi_config.map(|config: &WasiConfig| {
+            let envs = config
+                .envs
+                .iter()
+                .map(|(name, value)| (name.clone().into_bytes(), value.clone().into_bytes()))
+                .collect();
 
-    let create_module_config = || MarineModuleConfig {
-        mem_pages_count: None,
-        max_heap_size: None,
-        logger_enabled: true,
-        host_imports: Default::default(),
-        wasi: None,
-        logging_mask: 0,
+            MarineWASIConfig {
+                envs,
+                preopened_files: <_>::default(),
+                mapped_dirs: <_>::default(),
+            }
+        });
+
+        MarineModuleConfig {
+            mem_pages_count: None,
+            max_heap_size: None,
+            logger_enabled: true,
+            host_imports: Default::default(),
+            wasi: wasi_config,
+            logging_mask: 0,
+        }
     };
 
-    let module_descriptors = modules
+    let module_descriptors = config
+        .modules
         .iter()
-        .map(|(name, _)| ModuleDescriptor {
+        .map(|(module_config)| ModuleDescriptor {
             load_from: None,
-            file_name: name.to_string(),
-            import_name: name.to_string(),
-            config: create_module_config(),
+            file_name: module_config.name.clone(),
+            import_name: module_config.name.clone(),
+            config: create_module_config(module_config.wasi_config.as_ref()),
         })
         .collect::<Vec<ModuleDescriptor<JsWasmBackend>>>();
 
+    let modules = config
+        .modules
+        .into_iter()
+        .map(|config| (config.name, config.wasm_bytes))
+        .collect();
     let config = MarineConfig {
         modules_dir: None,
         modules_config: module_descriptors,
@@ -130,7 +162,7 @@ pub fn register_module(modules: Vec<JsValue>) -> String {
         Err(e) => {
             return {
                 log::debug!("register_module fail: {:?}", e);
-                make_register_module_result(&e.to_string())
+                Err(e.into())
             }
         }
         Ok(marine) => marine,
@@ -139,7 +171,7 @@ pub fn register_module(modules: Vec<JsValue>) -> String {
     MARINE.with(|marine| marine.replace(Some(new_marine)));
 
     log::debug!("register_module success");
-    make_register_module_result("")
+    Ok(())
 }
 
 ///  Calls a function from a module.
@@ -200,13 +232,4 @@ fn make_call_module_result(result: JValue, error: &str) -> Result<String, JsErro
     } else {
         Err(JsError::new(error))
     }
-    /*
-    let result = CallModuleResult {
-        error: error.to_string(),
-        result,
-    };
-
-
-    serde_json::ser::to_string(&result).unwrap()
-    */
 }

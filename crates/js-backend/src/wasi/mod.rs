@@ -15,7 +15,20 @@ impl WasiImplementation<JsWasmBackend> for JsWasi {
         config: WasiParameters,
     ) -> Result<(), WasiError> {
         let context_index = store.inner.wasi_contexts.len();
-        store.inner.wasi_contexts.push(WasiContext::new());
+        let envs = config
+            .envs
+            .into_iter()
+            .map(|(name, value)| {
+                unsafe {
+                    // TODO safety
+                    (
+                        String::from_utf8_unchecked(name),
+                        String::from_utf8_unchecked(value),
+                    )
+                }
+            })
+            .collect();
+        store.inner.wasi_contexts.push(WasiContext::new(envs));
         linker.add_wasi(context_index);
         /*
         let wasi_namespace = wasi_snapshot_preview1_exports(store, move |ctx: JsContextMut| -> &mut WasiContext {
@@ -50,10 +63,12 @@ pub(crate) struct WasiContext {
 }
 
 impl WasiContext {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(envs: HashMap<String, String>) -> Self {
+        // TODO safety
+        let envs_js = serde_wasm_bindgen::to_value(&envs).unwrap();
         Self {
-            envs: <_>::default(),
-            wasi_impl: js_imports::create_wasi(),
+            envs,
+            wasi_impl: js_imports::create_wasi(envs_js),
         }
     }
 
