@@ -358,6 +358,11 @@ export async function init(module) {
             return addHeapObject(ret);
         };
 
+        imports.wbg.__wbindgen_error_new = function(arg0, arg1) {
+            const ret = new Error(getStringFromWasm0(arg0, arg1));
+            return addHeapObject(ret);
+        };
+
         imports.wbg.__wbg_iterator_7c7e58f62eb84700 = function() {
             const ret = Symbol.iterator;
             return addHeapObject(ret);
@@ -505,11 +510,6 @@ export async function init(module) {
         imports.wbg.__wbg_length_820c786973abdd8a = function(arg0) {
             const ret = getObject(arg0).length;
             return ret;
-        };
-
-        imports.wbg.__wbindgen_error_new = function(arg0, arg1) {
-            const ret = new Error(getStringFromWasm0(arg0, arg1));
-            return addHeapObject(ret);
         };
 
         imports.wbg.__wbg_getwithrefkey_5e6d9547403deab8 = function(arg0, arg1) {

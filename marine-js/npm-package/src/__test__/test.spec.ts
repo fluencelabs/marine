@@ -230,7 +230,7 @@ describe('Fluence app service tests', () => {
 
 
         expect(() => marineService.call('failing', [], undefined))
-            .toThrow(new Error("Error calling module function: engine error: Execution error: `call-core 6` failed while calling the local or import function `failing`"));
+            .toThrow(new Error("engine error: Execution error: `call-core 6` failed while calling the local or import function `failing`"));
 
     });
 
@@ -252,7 +252,7 @@ describe('Fluence app service tests', () => {
             // assert
             expect(e).toBeInstanceOf(Error);
             expect((e as Error).message).toBe(
-                'Error calling module function: function with name `do_not_exist` is missing',
+                'function with name `do_not_exist` is missing',
             );
         }
     });

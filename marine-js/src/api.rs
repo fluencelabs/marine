@@ -151,6 +151,7 @@ pub fn register_module(config: JsValue) -> Result<(), JsError> {
         .into_iter()
         .map(|config| (config.name, config.wasm_bytes))
         .collect();
+
     let config = MarineConfig {
         modules_dir: None,
         modules_config: module_descriptors,
@@ -190,46 +191,16 @@ pub fn register_module(config: JsValue) -> Result<(), JsError> {
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> Result<String, JsError> {
     MARINE.with(|marine| {
-        let args: JValue = match serde_json::from_str(args) {
-            Ok(args) => args,
-            Err(e) => {
-                return make_call_module_result(
-                    JValue::Null,
-                    &format!("Error deserializing args: {}", e),
-                )
-            }
-        };
-
-        if let Some(marine) = marine.borrow_mut().deref_mut() {
-            match marine.call_with_json(module_name, function_name, args, <_>::default()) {
-                Ok(result) => make_call_module_result(result, ""),
-                Err(e) => make_call_module_result(
-                    JValue::Null,
-                    &format!("Error calling module function: {}", e),
-                ),
-            }
-        } else {
-            make_call_module_result(JValue::Null, "marine is not initialized")
-        }
+        let args: JValue = serde_json::from_str(args)?; // TODO maybe add more info
+        marine
+            .borrow_mut()
+            .deref_mut()
+            .as_mut()
+            .ok_or_else(|| JsError::new("marine is not initialized"))
+            .and_then(|mut marine| {
+                let result =
+                    marine.call_with_json(module_name, function_name, args, <_>::default())?;
+                serde_json::ser::to_string(&result).map_err(|e| JsError::new(&e.to_string()))
+            })
     })
-}
-
-#[allow(unused)] // needed because clippy marks this function as unused
-fn make_register_module_result(error: &str) -> String {
-    let result = RegisterModuleResult {
-        error: error.to_string(),
-    };
-
-    // unwrap is safe because Serialize is derived for that struct and it does not contain maps with non-string keys
-    serde_json::ser::to_string(&result).unwrap()
-}
-
-#[allow(unused)] // needed because clippy marks this function as unused
-fn make_call_module_result(result: JValue, error: &str) -> Result<String, JsError> {
-    if error == "" {
-        // unwrap is safe because Serialize is derived for that struct and it does not contain maps with non-string keys
-        Ok(serde_json::ser::to_string(&result).unwrap())
-    } else {
-        Err(JsError::new(error))
-    }
 }
