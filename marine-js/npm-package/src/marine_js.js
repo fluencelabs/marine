@@ -353,16 +353,6 @@ export async function init(module) {
             takeObject(arg0);
         };
 
-        imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
-            const ret = getObject(arg0);
-            return addHeapObject(ret);
-        };
-
-        imports.wbg.__wbindgen_error_new = function(arg0, arg1) {
-            const ret = new Error(getStringFromWasm0(arg0, arg1));
-            return addHeapObject(ret);
-        };
-
         imports.wbg.__wbg_iterator_7c7e58f62eb84700 = function() {
             const ret = Symbol.iterator;
             return addHeapObject(ret);
@@ -463,6 +453,11 @@ export async function init(module) {
             getObject(arg0)[arg1 >>> 0] = arg2;
         };
 
+        imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
+            const ret = getObject(arg0);
+            return addHeapObject(ret);
+        };
+
         imports.wbg.__wbindgen_string_get = function(arg0, arg1) {
             const obj = getObject(arg1);
             const ret = typeof obj === "string" ? obj : undefined;
@@ -510,6 +505,11 @@ export async function init(module) {
         imports.wbg.__wbg_length_820c786973abdd8a = function(arg0) {
             const ret = getObject(arg0).length;
             return ret;
+        };
+
+        imports.wbg.__wbindgen_error_new = function(arg0, arg1) {
+            const ret = new Error(getStringFromWasm0(arg0, arg1));
+            return addHeapObject(ret);
         };
 
         imports.wbg.__wbg_getwithrefkey_5e6d9547403deab8 = function(arg0, arg1) {
@@ -701,8 +701,8 @@ export async function init(module) {
             console.warn(getStringFromWasm0(arg0, arg1));
         };
 
-        imports.wbg.__wbindgen_closure_wrapper81 = function(arg0, arg1, arg2) {
-            const ret = makeMutClosure(arg0, arg1, 103, __wbg_adapter_36);
+        imports.wbg.__wbindgen_closure_wrapper106 = function(arg0, arg1, arg2) {
+            const ret = makeMutClosure(arg0, arg1, 107, __wbg_adapter_36);
             return addHeapObject(ret);
         };
 

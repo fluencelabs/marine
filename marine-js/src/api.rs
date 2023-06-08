@@ -64,31 +64,49 @@ pub struct ServiceConfig {
     pub modules: Vec<ModuleConfig>,
 }
 
-impl TryFrom<&JsValue> for ModuleConfig {
-    type Error = ();
+impl Into<MarineConfig<JsWasmBackend>> for &ServiceConfig {
+    fn into(self) -> MarineConfig<JsWasmBackend> {
+        let create_module_config = |wasi_config: Option<&WasiConfig>| {
+            let wasi_config = wasi_config.map(|config: &WasiConfig| {
+                let envs = config
+                    .envs
+                    .iter()
+                    .map(|(name, value)| (name.clone().into_bytes(), value.clone().into_bytes()))
+                    .collect();
 
-    fn try_from(value: &JsValue) -> Result<Self, Self::Error> {
-        let obj = js_sys::Object::try_from(value).ok_or(())?;
-        let name = js_sys::Reflect::get(&obj, &"name".into())
-            .map_err(|e| {
-                web_sys::console::log_1(&e);
+                MarineWASIConfig {
+                    envs,
+                    preopened_files: <_>::default(),
+                    mapped_dirs: <_>::default(),
+                }
+            });
+
+            MarineModuleConfig {
+                mem_pages_count: None,
+                max_heap_size: None,
+                logger_enabled: true,
+                host_imports: Default::default(),
+                wasi: wasi_config,
+                logging_mask: 0,
+            }
+        };
+
+        let module_descriptors = self
+            .modules
+            .iter()
+            .map(|(module_config)| ModuleDescriptor {
+                load_from: None,
+                file_name: module_config.name.clone(),
+                import_name: module_config.name.clone(),
+                config: create_module_config(module_config.wasi_config.as_ref()),
             })
-            .unwrap() // TODO handle error
-            .as_string()
-            .unwrap(); // TODO handle error
-        let wasm_bytes = js_sys::Reflect::get(&obj, &"wasm_bytes".into())
-            .map_err(|e| {
-                web_sys::console::log_1(&e);
-            })
-            .unwrap(); // TODO handle error
+            .collect::<Vec<ModuleDescriptor<JsWasmBackend>>>();
 
-        let wasm_bytes = js_sys::Uint8Array::new(&wasm_bytes).to_vec();
-
-        Ok(Self {
-            name,
-            wasm_bytes,
-            wasi_config: None,
-        })
+        MarineConfig {
+            modules_dir: None,
+            modules_config: module_descriptors,
+            default_modules_config: None,
+        }
     }
 }
 
@@ -110,41 +128,7 @@ pub fn register_module(config: JsValue) -> Result<(), JsError> {
     let config: ServiceConfig = serde_wasm_bindgen::from_value(config)?;
     log::debug!("register_module start");
 
-    let create_module_config = |wasi_config: Option<&WasiConfig>| {
-        let wasi_config = wasi_config.map(|config: &WasiConfig| {
-            let envs = config
-                .envs
-                .iter()
-                .map(|(name, value)| (name.clone().into_bytes(), value.clone().into_bytes()))
-                .collect();
-
-            MarineWASIConfig {
-                envs,
-                preopened_files: <_>::default(),
-                mapped_dirs: <_>::default(),
-            }
-        });
-
-        MarineModuleConfig {
-            mem_pages_count: None,
-            max_heap_size: None,
-            logger_enabled: true,
-            host_imports: Default::default(),
-            wasi: wasi_config,
-            logging_mask: 0,
-        }
-    };
-
-    let module_descriptors = config
-        .modules
-        .iter()
-        .map(|(module_config)| ModuleDescriptor {
-            load_from: None,
-            file_name: module_config.name.clone(),
-            import_name: module_config.name.clone(),
-            config: create_module_config(module_config.wasi_config.as_ref()),
-        })
-        .collect::<Vec<ModuleDescriptor<JsWasmBackend>>>();
+    let marine_config: MarineConfig<JsWasmBackend> = (&config).into();
 
     let modules = config
         .modules
@@ -152,22 +136,7 @@ pub fn register_module(config: JsValue) -> Result<(), JsError> {
         .map(|config| (config.name, config.wasm_bytes))
         .collect();
 
-    let config = MarineConfig {
-        modules_dir: None,
-        modules_config: module_descriptors,
-        default_modules_config: None,
-    };
-
-    let marine = Marine::<JsWasmBackend>::with_modules(modules, config);
-    let new_marine = match marine {
-        Err(e) => {
-            return {
-                log::debug!("register_module fail: {:?}", e);
-                Err(e.into())
-            }
-        }
-        Ok(marine) => marine,
-    };
+    let new_marine = Marine::<JsWasmBackend>::with_modules(modules, marine_config)?;
 
     MARINE.with(|marine| marine.replace(Some(new_marine)));
 
