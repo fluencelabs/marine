@@ -98,8 +98,6 @@ impl Function<JsWasmBackend> for JsFunction {
     {
         let enclosed_sig = sig.clone();
         let wrapped = move |args: &js_sys::Array| -> js_sys::Array {
-            log::debug!("function produced by JsFunction:::new call");
-            web_sys::console::log_1(args);
             let args = enclosed_sig
                 .params()
                 .iter()
@@ -138,8 +136,6 @@ impl Function<JsWasmBackend> for JsFunction {
                 "function produced by JsFunction:::new_with_caller call, signature: {:?}",
                 enclosed_sig
             );
-
-            web_sys::console::log_1(args);
 
             let store_inner = unsafe { &mut *store_inner_ptr };
             let caller_instance = store_inner.wasm_call_stack.last().map(Clone::clone);

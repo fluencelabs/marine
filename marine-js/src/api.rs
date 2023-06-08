@@ -15,20 +15,21 @@
  */
 
 use crate::global_state::MARINE;
+use crate::logger::{marine_logger, MarineLogger};
 
 use marine_rs_sdk::CallParameters;
 
 use wasm_bindgen::prelude::*;
 
-use wasm_bindgen_derive::TryFromJsValue;
 use serde_json::Value as JValue;
 use serde::Serialize;
 use serde::Deserialize;
 
 use std::borrow::BorrowMut;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
+use web_sys::console::log;
 use marine::generic::Marine;
 use marine::generic::MarineConfig;
 use marine::generic::MarineModuleConfig;
@@ -123,8 +124,7 @@ impl Into<MarineConfig<JsWasmBackend>> for &ServiceConfig {
 /// otherwise, it contains error message.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn register_module(config: JsValue) -> Result<(), JsError> {
-    web_sys::console::log_1(&config);
+pub fn register_module(config: JsValue, log_fn: JsValue) -> Result<(), JsError> {
     let config: ServiceConfig = serde_wasm_bindgen::from_value(config)?;
     log::debug!("register_module start");
 
@@ -134,7 +134,14 @@ pub fn register_module(config: JsValue) -> Result<(), JsError> {
         .modules
         .into_iter()
         .map(|config| (config.name, config.wasm_bytes))
-        .collect();
+        .collect::<HashMap<String, Vec<u8>>>();
+
+    let module_names = modules
+        .iter()
+        .map(|(name, _)| name.clone())
+        .collect::<HashSet<String>>();
+
+    marine_logger().enable_service_logging(log_fn, module_names);
 
     let new_marine = Marine::<JsWasmBackend>::with_modules(modules, marine_config)?;
 

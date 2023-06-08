@@ -1,8 +1,6 @@
-mod global_state;
 mod api;
-
-// Needed for wasm_bindgen_derive
-extern crate alloc;
+mod global_state;
+mod logger;
 
 use global_state::MARINE;
 
@@ -12,12 +10,14 @@ use marine::generic::Marine;
 use wasm_bindgen::prelude::*;
 
 use std::cell::RefCell;
+use crate::logger::MarineLogger;
 
 #[wasm_bindgen(start)]
 fn main() {
-    //console_log::init_with_level(log::Level::Debug).unwrap();
-    log::set_logger(&wasm_bindgen_console_logger::DEFAULT_LOGGER).unwrap();
-    log::set_max_level(log::LevelFilter::Debug);
+    log::set_boxed_logger(Box::new(MarineLogger::new(log::LevelFilter::Info))).unwrap();
+    // Trace is required to accept all logs from a service.
+    // Max level for this crate is set in MarineLogger constructor.
+    log::set_max_level(log::LevelFilter::Trace);
 }
 
 #[cfg(test)]

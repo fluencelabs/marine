@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { WASI } from '@wasmer/wasi';
+import {WASI, WASIEnv} from '@wasmer/wasi';
 import bindingsRaw from '@wasmer/wasi/lib/bindings/browser.js';
 import { defaultImport } from 'default-import';
 import { WasmFs } from '@wasmer/wasmfs';
 import { init } from './marine_js.js';
-import type { MarineServiceConfig, Env } from './config.js';
+import type {MarineServiceConfig, Env, Args} from './config.js';
 import { JSONArray, JSONObject, LogFunction, LogLevel, logLevels } from './types.js';
 
 const binding = defaultImport(bindingsRaw);
@@ -43,6 +43,17 @@ type ControlModuleInstance = Awaited<ReturnType<typeof init>> | 'not-set' | 'ter
 
 const decoder = new TextDecoder();
 
+export declare class WasiConfig {
+    public envs: Env
+    public args: Args
+}
+
+export declare class ModuleDescriptor {
+    public name: string
+    public wasm_bytes: Uint8Array
+    public wasi_config?: WasiConfig
+}
+
 export class MarineService {
     private env: Env = {};
 
@@ -50,7 +61,7 @@ export class MarineService {
 
     constructor(
         private readonly controlModule: WebAssembly.Module,
-        private readonly service: Array<{name: string, wasm_bytes: Uint8Array}>,
+        private readonly service: Array<ModuleDescriptor>,
         private readonly serviceId: string,
         private logFunction: LogFunction,
         marineServiceConfig?: MarineServiceConfig,
@@ -60,6 +71,11 @@ export class MarineService {
             WASM_LOG: 'off',
             ...env,
         };
+
+        this.service.forEach(module => module.wasi_config = {
+            envs: this.env,
+            args: [],
+        });
     }
 
     async init(): Promise<void> {
@@ -113,7 +129,7 @@ export class MarineService {
         let config = {
             modules: this.service
         }
-        controlModuleInstance.register_module(config);
+        controlModuleInstance.register_module(config, this.logFunction);
         this._controlModuleInstance = controlModuleInstance;
     }
 

@@ -8,7 +8,7 @@ const bindings = defaultImport(bindingsRaw);
 export function create_wasi(env) {
     return new WASI({
         args: [],
-        env: env,
+        env: Object.fromEntries(env),
         bindings: {
             ...bindings,
             fs: new WasmFs().fs,

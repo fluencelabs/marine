@@ -46,7 +46,6 @@ impl JsImports {
                 .unwrap();
         }
 
-        web_sys::console::log_1(&import_object);
         import_object
     }
 
