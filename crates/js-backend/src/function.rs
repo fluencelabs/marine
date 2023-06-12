@@ -212,11 +212,10 @@ macro_rules! impl_func_construction {
             where F: Fn(JsCaller<'_>, $(replace_with!($args -> i32),)*) + Send + Sync + 'static {
 
             let func = move |caller: JsCaller<'_>, args: &[WValue]| -> Vec<WValue> {
-                let [$($args,)*] = args else { todo!() };;
+                let [$($args,)*] = args else { todo!() }; // TODO: Safety: explain why it will never fire
                 func(caller, $(wval_to_i32($args),)*);
                 vec![]
             };
-
 
             let arg_ty = vec![WType::I32; $num];
             let ret_ty = vec![];
@@ -229,7 +228,7 @@ macro_rules! impl_func_construction {
             where F: Fn(JsCaller<'_>, $(replace_with!($args -> i32),)*) -> i32 + Send + Sync + 'static {
 
             let func = move |caller: JsCaller<'_>, args: &[WValue]| -> Vec<WValue> {
-                let [$($args,)*] = args else { todo!() };;
+                let [$($args,)*] = args else { todo!() }; // TODO: Safety: explain why it will never fire
                 let res = func(caller, $(wval_to_i32(&$args),)*);
                 vec![WValue::I32(res)]
             };
