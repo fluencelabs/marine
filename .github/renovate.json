@@ -6,7 +6,6 @@
   ],
   "enabledManagers": ["cargo", "npm", "github-actions"],
   "schedule": "every weekend",
-  "rangeStrategy": "pin",
   "packageRules": [
     {
       "matchPackagePatterns": ["^@wasmer", "^wasmer", "^wasm-bindgen"],
