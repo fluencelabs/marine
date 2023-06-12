@@ -11,7 +11,7 @@ use crate::JsWasmBackend;
 use crate::JsCaller;
 use crate::JsContext;
 use crate::JsContextMut;
-use crate::js_conversions::js_array_from_wval_array;
+use crate::js_conversions::{js_array_from_wval_array, wval_array_from_js_array};
 use crate::js_conversions::wval_from_js;
 use crate::js_conversions::wval_to_i32;
 use crate::store::JsStoreInner;
@@ -69,8 +69,6 @@ impl JsFunction {
         store: &mut impl AsContextMut<JsWasmBackend>,
         args: &[WValue],
     ) -> RuntimeResult<Vec<WValue>> {
-        // TODO make more efficient
-
         let params = js_array_from_wval_array(args);
         let stored_func = self.stored_mut(store.as_context_mut());
         let result = js_sys::Reflect::apply(&stored_func.js_func, &JsValue::NULL, &params)
@@ -88,7 +86,7 @@ impl JsFunction {
             }
             results_number => {
                 let result_array: Array = result.into();
-                if result_array.length() != results_number {
+                if result_array.length() as usize != results_number {
                     Err(RuntimeError::IncorrectResultsNumber {
                         expected: results_number,
                         actual: result_array.length() as usize,
@@ -115,14 +113,8 @@ impl Function<JsWasmBackend> for JsFunction {
         F: for<'c> Fn(&[WValue]) -> Vec<WValue> + Sync + Send + 'static,
     {
         let enclosed_sig = sig.clone();
-        let wrapped = move |args: &js_sys::Array| -> js_sys::Array {
-            let args = enclosed_sig
-                .params()
-                .iter()
-                .enumerate()
-                .map(|(index, ty)| wval_from_js(ty, &args.get(index as u32)))
-                .collect::<Vec<_>>();
-
+        let wrapped = move |args: &Array| -> Array {
+            let args = wval_array_from_js_array(args, enclosed_sig.params().iter());
             let result = func(&args);
             js_array_from_wval_array(&result)
         };
@@ -162,14 +154,7 @@ impl Function<JsWasmBackend> for JsFunction {
                 caller_instance,
                 _data: Default::default(),
             };
-
-            let args = enclosed_sig
-                .params()
-                .iter()
-                .enumerate()
-                .map(|(index, ty)| wval_from_js(ty, &args.get(index as u32)))
-                .collect::<Vec<_>>();
-
+            let args = wval_array_from_js_array(args, enclosed_sig.params().iter());
             let result = func(caller, &args);
             js_array_from_wval_array(&result)
         };

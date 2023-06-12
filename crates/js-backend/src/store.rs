@@ -36,7 +36,7 @@ impl JsStoreInner {
 
     pub(crate) fn store_function(&mut self, function: StoredFunction) -> usize {
         let index = self.functions.len();
-        self.function.push(context);
+        self.functions.push(function);
         index
     }
 }

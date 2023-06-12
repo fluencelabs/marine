@@ -40,3 +40,13 @@ pub(crate) fn wval_from_js(ty: &WType, val: &JsValue) -> WValue {
         WType::FuncRef => panic!("FuncRef is unsupported here"),
     }
 }
+
+pub(crate) fn wval_array_from_js_array<'a>(
+    js_values: &js_sys::Array,
+    types: impl Iterator<Item = &'a WType>,
+) -> Vec<WValue> {
+    types
+        .enumerate()
+        .map(|(index, ty)| wval_from_js(ty, &js_values.get(index as u32)))
+        .collect::<Vec<_>>()
+}
