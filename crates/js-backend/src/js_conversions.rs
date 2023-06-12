@@ -1,5 +1,7 @@
 use wasm_bindgen::JsValue;
-use marine_wasm_backend_traits::{WType, WValue};
+
+use marine_wasm_backend_traits::WType;
+use marine_wasm_backend_traits::WValue;
 
 pub(crate) fn js_from_wval(val: &WValue) -> JsValue {
     match val {

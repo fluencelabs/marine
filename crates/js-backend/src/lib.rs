@@ -1,8 +1,6 @@
 extern crate core;
 
 use marine_wasm_backend_traits::prelude::*;
-use crate::caller::JsCaller;
-use crate::function::JsFunction;
 
 mod store;
 mod module;
@@ -26,6 +24,8 @@ use crate::imports::JsImports;
 use crate::instance::JsInstance;
 use crate::memory::JsMemory;
 use crate::wasi::JsWasi;
+use crate::caller::JsCaller;
+use crate::function::JsFunction;
 
 #[derive(Default, Clone)]
 pub struct JsWasmBackend {}

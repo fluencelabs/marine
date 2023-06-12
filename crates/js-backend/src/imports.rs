@@ -1,10 +1,13 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use marine_wasm_backend_traits::prelude::*;
-use crate::{JsFunction, JsWasmBackend};
 
 use maplit::hashmap;
 use wasm_bindgen::JsValue;
+
+use marine_wasm_backend_traits::prelude::*;
+
+use crate::JsFunction;
+use crate::JsWasmBackend;
 use crate::wasi::WasiContext;
 
 #[derive(Clone)]

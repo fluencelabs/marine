@@ -1,7 +1,10 @@
-use it_memory_traits::MemoryAccessError;
 use js_sys::WebAssembly;
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::JsCast;
+use wasm_bindgen::JsValue;
+
+use it_memory_traits::MemoryAccessError;
 use marine_wasm_backend_traits::prelude::*;
+
 use crate::JsWasmBackend;
 
 #[derive(Clone)]

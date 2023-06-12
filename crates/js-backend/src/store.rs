@@ -1,10 +1,11 @@
 use std::marker::PhantomData;
 use std::rc::Rc;
+
 use marine_wasm_backend_traits::prelude::*;
+
 use crate::function::JsFunctionStored;
-
-use crate::{JsInstance, JsWasmBackend};
-
+use crate::JsInstance;
+use crate::JsWasmBackend;
 use crate::instance::StoredInstance;
 use crate::wasi::WasiContext;
 

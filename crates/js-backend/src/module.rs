@@ -1,17 +1,23 @@
 use std::borrow::Cow;
 use std::collections::HashMap;
-use crate::{JsImports, JsInstance, JsStore, JsWasmBackend};
-use crate::module_info::ModuleInfo;
 
-use marine_wasm_backend_traits::prelude::*;
-
+use anyhow::anyhow;
 use js_sys::WebAssembly;
 use js_sys::Uint8Array;
-use anyhow::anyhow;
-use walrus::{ExportItem, ImportKind};
-use wasm_bindgen::{JsValue, module};
-use marine_wasm_backend_traits::impl_utils::MultiMap;
+use walrus::ExportItem;
+use walrus::ImportKind;
+use wasm_bindgen::JsValue;
+use wasm_bindgen::module;
 use web_sys::console;
+
+use marine_wasm_backend_traits::prelude::*;
+use marine_wasm_backend_traits::impl_utils::MultiMap;
+
+use crate::JsStore;
+use crate::JsInstance;
+use crate::JsImports;
+use crate::JsWasmBackend;
+use crate::module_info::ModuleInfo;
 use crate::instance::StoredInstance;
 
 pub struct JsModule {
