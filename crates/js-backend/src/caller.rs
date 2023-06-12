@@ -1,15 +1,19 @@
 use std::marker::PhantomData;
-use marine_wasm_backend_traits::prelude::*;
+
 use marine_wasm_backend_traits::impl_for_each_function_signature;
 use marine_wasm_backend_traits::replace_with;
+use marine_wasm_backend_traits::prelude::*;
 
-use crate::{JsInstance, JsWasmBackend};
 use crate::JsContext;
 use crate::JsContextMut;
+use crate::JsInstance;
+use crate::JsWasmBackend;
 
 pub struct JsCaller<'c> {
     pub(crate) store_inner: *mut crate::store::JsStoreInner,
     pub(crate) caller_instance: Option<JsInstance>,
+    // TODO: check if it is really required.
+    // TODO: It is needed because WasmBackend::Caller has a lifetime, but maybe this type can avoid having it
     pub(crate) _data: PhantomData<&'c i32>,
 }
 
@@ -33,7 +37,7 @@ impl<'c> AsContextMut<JsWasmBackend> for JsCaller<'c> {
     }
 }
 
-/// Generates a function that accepts a Fn with $num template parameters and turns it into WasmtimeFunction.
+/// Generates a function that accepts an Fn with $num template parameters and turns it into JsFunction.
 /// Needed to allow users to pass almost any function to `Function::new_typed` without worrying about signature.
 macro_rules! impl_func_getter {
     ($num:tt $($args:ident)*) => (paste::paste!{
@@ -55,13 +59,19 @@ macro_rules! impl_func_getter {
                 let func = self
                     .caller_instance
                     .as_ref()
-                    .ok_or_else(|| ResolveError::ExportNotFound(name.to_string()))?
+                    .ok_or_else(|| ResolveError::ExportNotFound(name.to_string()))? // TODO: maybe other error
                     .get_function(&mut store, name)?;
 
                 let func = move |store: &mut JsContextMut<'_>, ($($args),*)| -> Result<(), RuntimeError> {
                     let args: [WValue; $num] = [$(Into::<WValue>::into($args)),*];
-                    func.call(store, &args)?;
-                    Ok(())
+                    let res = func.call(store, &args)?;
+                    match res.len() {
+                        0 =>  Ok(()),
+                        x => Err(RuntimeError::IncorrectResultsNumber{
+                            expected: 0,
+                            actual: x,
+                        })
+                    }
                 };
 
                 Ok(Box::new(func))
@@ -92,7 +102,13 @@ macro_rules! impl_func_getter {
                 let func = move |store: &mut JsContextMut<'_>, ($($args),*)| -> Result<i32, RuntimeError> {
                     let args: [WValue; $num] = [$(Into::<WValue>::into($args)),*];
                     let res = func.call(store, &args)?;
-                    Ok(res[0].to_i32())
+                    match res.len() {
+                        1 =>  Ok(res[0].to_i32()),
+                        x => Err(RuntimeError::IncorrectResultsNumber{
+                            expected: 1,
+                            actual: x,
+                        })
+                    }
                 };
 
                 Ok(Box::new(func))

@@ -1,6 +1,6 @@
 use marine_wasm_backend_traits::prelude::*;
 
-use crate::function::JsFunctionStored;
+use crate::function::StoredFunction;
 use crate::JsInstance;
 use crate::JsWasmBackend;
 use crate::instance::StoredInstance;
@@ -12,9 +12,9 @@ pub struct JsStore {
 
 #[derive(Default)]
 pub(crate) struct JsStoreInner {
-    pub(crate) wasi_contexts: Vec<crate::wasi::WasiContext>,
+    pub(crate) wasi_contexts: Vec<WasiContext>,
     pub(crate) instances: Vec<StoredInstance>,
-    pub(crate) functions: Vec<JsFunctionStored>,
+    pub(crate) functions: Vec<StoredFunction>,
 
     // when JsFunction::call is called from host, the instance is pushed at the beginning and popped at the end
     // this is used to provide access to the caller instance for the imports
@@ -29,8 +29,14 @@ impl JsStoreInner {
     }
 
     pub(crate) fn store_wasi_context(&mut self, context: WasiContext) -> usize {
-        let index = self.instances.len();
+        let index = self.wasi_contexts.len();
         self.wasi_contexts.push(context);
+        index
+    }
+
+    pub(crate) fn store_function(&mut self, function: StoredFunction) -> usize {
+        let index = self.functions.len();
+        self.function.push(context);
         index
     }
 }
@@ -45,6 +51,8 @@ impl<'c> JsContext<'c> {
         Self { inner }
     }
 
+    /// Safety: wasm backend traits require that Store outlives everything created using it,
+    /// so this function should be called only when Store is alive.
     pub(crate) fn from_raw_ptr(store_inner: *const JsStoreInner) -> Self {
         unsafe {
             Self {

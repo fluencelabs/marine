@@ -19,12 +19,21 @@ use crate::store::JsStoreInner;
 #[derive(Clone)]
 pub struct JsFunction {
     pub(crate) store_handle: usize,
+
+    /// This field is set to Some when an object is returned from Instance or Caller.
+    /// Otherwise it will be None, i.e. just after creation.
     pub(crate) bound_instance: Option<JsInstance>,
 }
 
-pub(crate) struct JsFunctionStored {
+pub(crate) struct StoredFunction {
     pub(crate) js_func: js_sys::Function,
     pub(crate) sig: FuncSig,
+}
+
+impl StoredFunction {
+    pub(crate) fn new(js_func: js_sys::Function, sig: FuncSig) -> Self {
+        Self { js_func, sig }
+    }
 }
 
 impl JsFunction {
@@ -33,25 +42,25 @@ impl JsFunction {
         func: js_sys::Function,
         sig: FuncSig,
     ) -> Self {
-        let stored = JsFunctionStored { js_func: func, sig };
+        let handle = ctx
+            .as_context_mut()
+            .inner
+            .store_function(StoredFunction::new(func, sig));
 
-        let ctx = ctx.as_context_mut();
-        let handle = ctx.inner.functions.len();
-        ctx.inner.functions.push(stored);
         Self {
             store_handle: handle,
-            bound_instance: <_>::default(),
+            bound_instance: None,
         }
     }
 
-    pub(crate) fn stored<'store>(&self, ctx: &JsContext<'store>) -> &'store JsFunctionStored {
+    pub(crate) fn stored<'store>(&self, ctx: &JsContext<'store>) -> &'store StoredFunction {
         &ctx.inner.functions[self.store_handle]
     }
 
     pub(crate) fn stored_mut<'store>(
         &self,
         ctx: JsContextMut<'store>,
-    ) -> &'store mut JsFunctionStored {
+    ) -> &'store mut StoredFunction {
         &mut ctx.inner.functions[self.store_handle]
     }
 
@@ -77,13 +86,20 @@ impl JsFunction {
                 let value = wval_from_js(&result_types[0], &result);
                 Ok(vec![value])
             }
-            _n => {
+            results_number => {
                 let result_array: Array = result.into();
-                Ok(result_array
-                    .iter()
-                    .enumerate()
-                    .map(|(i, js_val)| wval_from_js(&result_types[i], &js_val))
-                    .collect::<Vec<_>>())
+                if result_array.length() != results_number {
+                    Err(RuntimeError::IncorrectResultsNumber {
+                        expected: results_number,
+                        actual: result_array.length() as usize,
+                    })
+                } else {
+                    Ok(result_array
+                        .iter()
+                        .enumerate()
+                        .map(|(i, js_val)| wval_from_js(&result_types[i], &js_val))
+                        .collect::<Vec<_>>())
+                }
             }
         }
     }
