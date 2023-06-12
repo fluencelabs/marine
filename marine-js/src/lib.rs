@@ -2,14 +2,14 @@ mod api;
 mod global_state;
 mod logger;
 
-use global_state::MARINE;
+use std::cell::RefCell;
+
+use wasm_bindgen::prelude::*;
 
 use marine_js_backend::JsWasmBackend;
 use marine::generic::Marine;
 
-use wasm_bindgen::prelude::*;
-
-use std::cell::RefCell;
+use crate::global_state::MARINE;
 use crate::logger::MarineLogger;
 
 #[wasm_bindgen(start)]
