@@ -1,24 +1,15 @@
-use std::borrow::Cow;
-use std::collections::HashMap;
-
 use anyhow::anyhow;
 use js_sys::WebAssembly;
 use js_sys::Uint8Array;
-use walrus::ExportItem;
-use walrus::ImportKind;
 use wasm_bindgen::JsValue;
-use wasm_bindgen::module;
-use web_sys::console;
 
 use marine_wasm_backend_traits::prelude::*;
-use marine_wasm_backend_traits::impl_utils::MultiMap;
 
 use crate::JsStore;
 use crate::JsInstance;
 use crate::JsImports;
 use crate::JsWasmBackend;
 use crate::module_info::ModuleInfo;
-use crate::instance::StoredInstance;
 
 pub struct JsModule {
     inner: WebAssembly::Module,
@@ -26,7 +17,7 @@ pub struct JsModule {
 }
 
 impl Module<JsWasmBackend> for JsModule {
-    fn new(store: &mut JsStore, wasm: &[u8]) -> ModuleCreationResult<Self> {
+    fn new(_store: &mut JsStore, wasm: &[u8]) -> ModuleCreationResult<Self> {
         let data = Uint8Array::new_with_length(wasm.len() as u32);
         data.copy_from(wasm);
         let data_obj: JsValue = data.into();

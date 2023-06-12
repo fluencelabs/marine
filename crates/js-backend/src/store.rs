@@ -1,6 +1,3 @@
-use std::marker::PhantomData;
-use std::rc::Rc;
-
 use marine_wasm_backend_traits::prelude::*;
 
 use crate::function::JsFunctionStored;
@@ -80,7 +77,7 @@ impl<'c> JsContextMut<'c> {
 impl Store<JsWasmBackend> for JsStore {
     fn new(_backend: &JsWasmBackend) -> Self {
         Self {
-            inner: Box::new(<_>::default()),
+            inner: <_>::default(),
         }
     }
 }
@@ -103,7 +100,7 @@ impl AsContextMut<JsWasmBackend> for JsStore {
 
 impl<'c> AsContext<JsWasmBackend> for JsContext<'c> {
     fn as_context(&self) -> <JsWasmBackend as WasmBackend>::Context<'_> {
-        JsContext::new(&self.inner)
+        JsContext::new(self.inner)
     }
 }
 
@@ -115,6 +112,6 @@ impl<'c> AsContext<JsWasmBackend> for JsContextMut<'c> {
 
 impl<'c> AsContextMut<JsWasmBackend> for JsContextMut<'c> {
     fn as_context_mut(&mut self) -> <JsWasmBackend as WasmBackend>::ContextMut<'_> {
-        JsContextMut::new(&mut self.inner)
+        JsContextMut::new(self.inner)
     }
 }

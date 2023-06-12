@@ -1,12 +1,15 @@
 use std::collections::HashMap;
-use js_sys::Atomics::store;
-use crate::{JsContextMut, JsFunction, JsMemory, JsWasmBackend};
-use crate::module_info;
-use crate::module_info::ModuleInfo;
 
 use js_sys::WebAssembly;
+
 use marine_wasm_backend_traits::prelude::*;
-use wasm_bindgen::JsCast;
+
+use crate::JsMemory;
+use crate::JsFunction;
+use crate::JsContextMut;
+use crate::JsWasmBackend;
+use crate::module_info;
+use crate::module_info::ModuleInfo;
 
 #[derive(Clone)]
 pub struct JsInstance {
@@ -47,17 +50,17 @@ impl JsInstance {
             .collect::<HashMap<String, Export<JsWasmBackend>>>();
 
         let stored_instance = StoredInstance {
-            inner: instance,
-            module_info,
+            _inner: instance,
+            _module_info: module_info,
             exports,
         };
 
         let store_handle = ctx.inner.store_instance(stored_instance);
 
         // Bind export functions to this instance. Looks really bad.
-        let mut instance = Self::from_store_handle(store_handle);
-        let mut stored = instance.stored_instance(ctx.as_context_mut());
-        for (_, export) in &mut stored.exports {
+        let instance = Self::from_store_handle(store_handle);
+        let stored = instance.stored_instance(ctx.as_context_mut());
+        for export in stored.exports.values_mut() {
             if let Export::Function(func) = export {
                 func.bound_instance = Some(instance.clone());
             }
@@ -77,15 +80,15 @@ impl JsInstance {
 
 /// Allocated instance resources
 pub(crate) struct StoredInstance {
-    pub(crate) inner: WebAssembly::Instance,
-    pub(crate) module_info: ModuleInfo,
+    pub(crate) _inner: WebAssembly::Instance,
+    pub(crate) _module_info: ModuleInfo,
     pub(crate) exports: HashMap<String, Export<JsWasmBackend>>,
 }
 
 impl Instance<JsWasmBackend> for JsInstance {
     fn export_iter<'a>(
         &'a self,
-        mut store: <JsWasmBackend as WasmBackend>::ContextMut<'a>,
+        store: <JsWasmBackend as WasmBackend>::ContextMut<'a>,
     ) -> Box<dyn Iterator<Item = (&'a str, Export<JsWasmBackend>)> + 'a> {
         log::debug!("Instance::export_iter success");
         let stored_instance = self.stored_instance(store);
@@ -158,7 +161,7 @@ impl Instance<JsWasmBackend> for JsInstance {
             .get(name)
             .ok_or_else(|| ResolveError::ExportNotFound(name.to_string()))?;
 
-        let result = match export {
+        match export {
             Export::Function(func) => Ok(func.clone()),
             Export::Memory(_) => Err(ResolveError::ExportTypeMismatch {
                 expected: "function",
@@ -168,8 +171,6 @@ impl Instance<JsWasmBackend> for JsInstance {
                 expected: "function",
                 actual: "other(funcref or externref)",
             }),
-        };
-
-        result
+        }
     }
 }

@@ -17,7 +17,7 @@ impl<'c> Caller<JsWasmBackend> for JsCaller<'c> {
     fn memory(&mut self, memory_index: u32) -> Option<<JsWasmBackend as WasmBackend>::Memory> {
         self.caller_instance
             .clone()
-            .and_then(|instance| instance.get_nth_memory(&mut self.as_context_mut(), 0))
+            .and_then(|instance| instance.get_nth_memory(&mut self.as_context_mut(), memory_index))
     }
 }
 
@@ -37,6 +37,7 @@ impl<'c> AsContextMut<JsWasmBackend> for JsCaller<'c> {
 /// Needed to allow users to pass almost any function to `Function::new_typed` without worrying about signature.
 macro_rules! impl_func_getter {
     ($num:tt $($args:ident)*) => (paste::paste!{
+        #[allow(unused_parens)]
         impl<'c> FuncGetter<JsWasmBackend, ($(replace_with!($args -> i32)),*), ()> for JsCaller<'c> {
             fn get_func(
                 &mut self,
@@ -67,6 +68,7 @@ macro_rules! impl_func_getter {
             }
         }
 
+        #[allow(unused_parens)]
         impl<'c> FuncGetter<JsWasmBackend, ($(replace_with!($args -> i32)),*), i32> for JsCaller<'c> {
             fn get_func(
                 &mut self,

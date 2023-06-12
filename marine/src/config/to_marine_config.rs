@@ -185,7 +185,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             self.config
                 .wasi_parameters
                 .envs
-                .insert(WASM_LOG_ENV_NAME.to_string(), log_level_str.to_string());
+                .insert(WASM_LOG_ENV_NAME.to_string(), log_level_str);
         }
 
         let creator = move |mut store: <WB as WasmBackend>::ContextMut<'_>| {

@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-use crate::global_state::MARINE;
-use crate::logger::{marine_logger, MarineLogger};
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::ops::DerefMut;
 
-use marine_rs_sdk::CallParameters;
-
-use wasm_bindgen::prelude::*;
-
-use serde_json::Value as JValue;
 use serde::Serialize;
 use serde::Deserialize;
+use serde_json::Value as JValue;
+use wasm_bindgen::prelude::*;
 
-use std::borrow::BorrowMut;
-use std::collections::{HashMap, HashSet};
-use std::hash::Hash;
-use std::ops::{Deref, DerefMut};
-use web_sys::console::log;
 use marine::generic::Marine;
 use marine::generic::MarineConfig;
 use marine::generic::MarineModuleConfig;
 use marine::generic::ModuleDescriptor;
 use marine::MarineWASIConfig;
 use marine_js_backend::JsWasmBackend;
+
+use crate::global_state::MARINE;
+use crate::logger::marine_logger;
 
 #[derive(Serialize, Deserialize)]
 struct RegisterModuleResult {
@@ -53,6 +49,7 @@ pub struct WasiConfig {
     pub envs: HashMap<String, String>,
     pub args: Vec<String>,
 }
+
 #[derive(Serialize, Deserialize)]
 pub struct ModuleConfig {
     pub name: String,
@@ -65,8 +62,8 @@ pub struct ServiceConfig {
     pub modules: Vec<ModuleConfig>,
 }
 
-impl Into<MarineConfig<JsWasmBackend>> for &ServiceConfig {
-    fn into(self) -> MarineConfig<JsWasmBackend> {
+impl From<&ServiceConfig> for MarineConfig<JsWasmBackend> {
+    fn from(val: &ServiceConfig) -> Self {
         let create_module_config = |wasi_config: Option<&WasiConfig>| {
             let wasi_config = wasi_config.map(|config: &WasiConfig| MarineWASIConfig {
                 envs: config.envs.clone(),
@@ -84,10 +81,10 @@ impl Into<MarineConfig<JsWasmBackend>> for &ServiceConfig {
             }
         };
 
-        let module_descriptors = self
+        let module_descriptors = val
             .modules
             .iter()
-            .map(|(module_config)| ModuleDescriptor {
+            .map(|module_config| ModuleDescriptor {
                 load_from: None,
                 file_name: module_config.name.clone(),
                 import_name: module_config.name.clone(),
@@ -129,8 +126,8 @@ pub fn register_module(config: JsValue, log_fn: js_sys::Function) -> Result<(), 
         .collect::<HashMap<String, Vec<u8>>>();
 
     let module_names = modules
-        .iter()
-        .map(|(name, _)| name.clone())
+        .keys()
+        .map(Clone::clone)
         .collect::<HashSet<String>>();
 
     marine_logger().enable_service_logging(log_fn, module_names);

@@ -1,14 +1,10 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use maplit::hashmap;
-use wasm_bindgen::JsValue;
-
 use marine_wasm_backend_traits::prelude::*;
 
 use crate::JsFunction;
 use crate::JsWasmBackend;
-use crate::wasi::WasiContext;
 
 #[derive(Clone)]
 pub struct JsImports {
@@ -25,7 +21,7 @@ impl JsImports {
         let import_object = self
             .wasi_ctx
             .map(|idx| store.as_context().inner.wasi_contexts[idx].get_imports(module))
-            .unwrap_or_else(|| js_sys::Object::new());
+            .unwrap_or_else(js_sys::Object::new);
 
         //let mut ctx = store.as_context();
         for (module_name, namespace) in &self.inner {
@@ -68,7 +64,7 @@ impl JsImports {
 }
 
 impl Imports<JsWasmBackend> for JsImports {
-    fn new(store: &mut <JsWasmBackend as WasmBackend>::Store) -> Self {
+    fn new(_store: &mut <JsWasmBackend as WasmBackend>::Store) -> Self {
         Self {
             inner: <_>::default(),
             wasi_ctx: None,
@@ -77,7 +73,7 @@ impl Imports<JsWasmBackend> for JsImports {
 
     fn insert(
         &mut self,
-        store: &impl AsContext<JsWasmBackend>,
+        _store: &impl AsContext<JsWasmBackend>,
         module: impl Into<String>,
         name: impl Into<String>,
         func: <JsWasmBackend as WasmBackend>::Function,

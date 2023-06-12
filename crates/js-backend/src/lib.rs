@@ -1,7 +1,3 @@
-extern crate core;
-
-use marine_wasm_backend_traits::prelude::*;
-
 mod store;
 mod module;
 mod imports;
@@ -14,7 +10,7 @@ mod wasi;
 mod module_info;
 mod js_conversions;
 
-use web_sys::console;
+use marine_wasm_backend_traits::prelude::*;
 
 use crate::store::JsContextMut;
 use crate::store::JsStore;

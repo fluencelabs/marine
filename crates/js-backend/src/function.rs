@@ -12,10 +12,8 @@ use crate::JsCaller;
 use crate::JsContext;
 use crate::JsContextMut;
 use crate::js_conversions::js_array_from_wval_array;
-use crate::js_conversions::js_from_wval;
 use crate::js_conversions::wval_from_js;
 use crate::js_conversions::wval_to_i32;
-use crate::instance::StoredInstance;
 use crate::store::JsStoreInner;
 
 #[derive(Clone)]
@@ -200,7 +198,7 @@ impl Function<JsWasmBackend> for JsFunction {
 
         let result = self.call_inner(store, args);
 
-        if let Some(instance) = &self.bound_instance {
+        if self.bound_instance.is_some() {
             store.as_context_mut().inner.wasm_call_stack.pop();
         }
 

@@ -1,10 +1,13 @@
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::collections::HashSet;
-use std::fs::metadata;
-use std::hash::Hash;
-use log::{LevelFilter, Log, Metadata, Record};
-use serde::{Deserialize, Serialize};
-use wasm_bindgen::{JsError, JsValue};
+
+use log::LevelFilter;
+use log::Log;
+use log::Metadata;
+use log::Record;
+use serde::Deserialize;
+use serde::Serialize;
+use wasm_bindgen::JsValue;
 
 struct ServiceLogger {
     log_fn: js_sys::Function,
@@ -78,7 +81,7 @@ impl MarineLoggerInner {
             .map(|logger| logger.log(record));
 
         if let Some(Err(e)) = result {
-            web_sys::console::error_2(&"failed to log service message:".into(), &e.into());
+            web_sys::console::error_2(&"failed to log service message:".into(), &e);
         }
     }
 }
