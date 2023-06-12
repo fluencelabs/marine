@@ -108,7 +108,7 @@ pub struct MarineModuleConfig<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> MarineModuleConfig<WB> {
-    pub fn extend_wasi_envs(&mut self, new_envs: HashMap<Vec<u8>, Vec<u8>>) {
+    pub fn extend_wasi_envs(&mut self, new_envs: HashMap<String, String>) {
         match &mut self.wasi {
             Some(MarineWASIConfig { envs, .. }) => envs.extend(new_envs),
             w @ None => {
@@ -174,7 +174,7 @@ impl<WB: WasmBackend> MarineModuleConfig<WB> {
 #[derive(Debug, Clone, Default)]
 pub struct MarineWASIConfig {
     /// A list of environment variables available for this module.
-    pub envs: HashMap<Vec<u8>, Vec<u8>>,
+    pub envs: HashMap<String, String>,
 
     /// A list of files available for this module.
     /// A loaded module could have access only to files from this list.
@@ -303,12 +303,12 @@ impl TryFrom<TomlWASIConfig> for MarineWASIConfig {
     type Error = MarineError;
 
     fn try_from(toml_config: TomlWASIConfig) -> Result<Self, Self::Error> {
-        let to_vec = |elem: (String, toml::Value)| -> Result<(Vec<u8>, Vec<u8>), Self::Error> {
+        let to_string = |elem: (String, toml::Value)| -> Result<(String, String), Self::Error> {
             let to = elem
                 .1
                 .try_into::<String>()
                 .map_err(MarineError::ParseConfigError)?;
-            Ok((elem.0.into_bytes(), to.into_bytes()))
+            Ok((elem.0, to))
         };
 
         // Makes sure that no user-defined paths can be safely placed in an isolated directory
@@ -344,7 +344,7 @@ impl TryFrom<TomlWASIConfig> for MarineWASIConfig {
         let envs = toml_config.envs.unwrap_or_default();
         let envs = envs
             .into_iter()
-            .map(to_vec)
+            .map(to_string)
             .collect::<Result<HashMap<_, _>, _>>()?;
 
         let preopened_files = toml_config.preopened_files.unwrap_or_default();

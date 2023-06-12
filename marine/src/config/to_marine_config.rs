@@ -116,12 +116,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             .wasi_parameters
             .mapped_dirs
             .iter()
-            .map(|(from, to)| {
-                (
-                    from.as_bytes().to_vec(),
-                    to.to_string_lossy().as_bytes().to_vec(),
-                )
-            })
+            .map(|(from, to)| (from.clone(), to.to_string_lossy().to_string()))
             .collect::<HashMap<_, _>>();
 
         self.config.wasi_parameters.envs.extend(mapped_dirs);
@@ -187,10 +182,10 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             };
 
             // overwrite possibly installed log variable in config
-            self.config.wasi_parameters.envs.insert(
-                WASM_LOG_ENV_NAME.as_bytes().to_owned(),
-                log_level_str.into_bytes(),
-            );
+            self.config
+                .wasi_parameters
+                .envs
+                .insert(WASM_LOG_ENV_NAME.to_string(), log_level_str.to_string());
         }
 
         let creator = move |mut store: <WB as WasmBackend>::ContextMut<'_>| {

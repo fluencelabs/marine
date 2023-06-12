@@ -107,11 +107,9 @@ impl Instance<JsWasmBackend> for JsInstance {
         stored_instance
             .exports
             .iter()
-            .filter_map(|(_, export)| {
-                match export {
-                    Export::Memory(memory) => Some(memory.clone()),
-                    _ => None,
-                }
+            .filter_map(|(_, export)| match export {
+                Export::Memory(memory) => Some(memory.clone()),
+                _ => None,
             })
             .nth(memory_index as usize)
     }

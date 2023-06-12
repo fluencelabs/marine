@@ -45,7 +45,7 @@ pub struct AppService {
 
 impl AppService {
     /// Create Service with given modules and service id.
-    pub fn new<C, S>(config: C, service_id: S, envs: HashMap<Vec<u8>, Vec<u8>>) -> Result<Self>
+    pub fn new<C, S>(config: C, service_id: S, envs: HashMap<String, String>) -> Result<Self>
     where
         C: TryInto<AppServiceConfig>,
         S: Into<String>,
@@ -134,7 +134,7 @@ impl AppService {
     fn set_env_and_dirs(
         config: &mut AppServiceConfig,
         service_id: String,
-        mut envs: HashMap<Vec<u8>, Vec<u8>>,
+        mut envs: HashMap<String, String>,
     ) -> Result<()> {
         let working_dir = &config.service_working_dir;
         let root_tmp_dir = &config.service_base_dir.join(&service_id);
@@ -156,10 +156,7 @@ impl AppService {
             format!("/{SERVICE_TMP_DIR_NAME}") => service_tmp_dir,
         };
 
-        envs.insert(
-            SERVICE_ID_ENV_NAME.as_bytes().to_vec(),
-            service_id.into_bytes(),
-        );
+        envs.insert(SERVICE_ID_ENV_NAME.to_string(), service_id);
 
         for module in &mut config.marine_config.modules_config {
             module.config.extend_wasi_envs(envs.clone());
@@ -191,7 +188,7 @@ impl AppService {
     pub fn new_with_empty_facade<C, S>(
         config: C,
         service_id: S,
-        envs: HashMap<Vec<u8>, Vec<u8>>,
+        envs: HashMap<String, String>,
     ) -> Result<Self>
     where
         S: Into<String>,

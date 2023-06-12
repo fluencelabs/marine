@@ -93,7 +93,7 @@ impl Imports<JsWasmBackend> for JsImports {
 
         match self.inner.entry(module_name.clone()) {
             Entry::Occupied(mut entry) => add_func(entry.get_mut()),
-            Entry::Vacant(entry) => add_func(entry.insert(HashMap::new()))
+            Entry::Vacant(entry) => add_func(entry.insert(HashMap::new())),
         }
     }
 

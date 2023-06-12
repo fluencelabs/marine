@@ -41,8 +41,8 @@ pub trait WasiImplementation<WB: WasmBackend> {
 
 #[derive(Default)]
 pub struct WasiParameters {
-    pub args: Vec<Vec<u8>>,
-    pub envs: HashMap<Vec<u8>, Vec<u8>>,
+    pub args: Vec<String>,
+    pub envs: HashMap<String, String>,
     pub preopened_files: HashSet<PathBuf>,
     pub mapped_dirs: HashMap<String, PathBuf>,
 }

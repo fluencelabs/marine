@@ -91,7 +91,7 @@ impl<WB: WasmBackend> MModuleConfig<WB> {
         self
     }
 
-    pub fn with_wasi_envs(mut self, envs: HashMap<Vec<u8>, Vec<u8>>) -> Self {
+    pub fn with_wasi_envs(mut self, envs: HashMap<String, String>) -> Self {
         self.wasi_parameters.envs = envs;
         self
     }
