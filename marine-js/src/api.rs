@@ -68,18 +68,10 @@ pub struct ServiceConfig {
 impl Into<MarineConfig<JsWasmBackend>> for &ServiceConfig {
     fn into(self) -> MarineConfig<JsWasmBackend> {
         let create_module_config = |wasi_config: Option<&WasiConfig>| {
-            let wasi_config = wasi_config.map(|config: &WasiConfig| {
-                let envs = config
-                    .envs
-                    .iter()
-                    .map(|(name, value)| (name.clone().into_bytes(), value.clone().into_bytes()))
-                    .collect();
-
-                MarineWASIConfig {
-                    envs,
-                    preopened_files: <_>::default(),
-                    mapped_dirs: <_>::default(),
-                }
+            let wasi_config = wasi_config.map(|config: &WasiConfig| MarineWASIConfig {
+                envs: config.envs.clone(),
+                preopened_files: <_>::default(),
+                mapped_dirs: <_>::default(),
             });
 
             MarineModuleConfig {

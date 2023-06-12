@@ -15,20 +15,10 @@ impl WasiImplementation<JsWasmBackend> for JsWasi {
         config: WasiParameters,
     ) -> Result<(), WasiError> {
         let context_index = store.inner.wasi_contexts.len();
-        let envs = config
-            .envs
-            .into_iter()
-            .map(|(name, value)| {
-                unsafe {
-                    // TODO safety
-                    (
-                        String::from_utf8_unchecked(name),
-                        String::from_utf8_unchecked(value),
-                    )
-                }
-            })
-            .collect();
-        store.inner.wasi_contexts.push(WasiContext::new(envs)?);
+        store
+            .inner
+            .wasi_contexts
+            .push(WasiContext::new(config.envs)?);
         linker.add_wasi(context_index);
 
         Ok(())
