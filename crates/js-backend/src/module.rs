@@ -31,7 +31,7 @@ impl Module<JsWasmBackend> for JsModule {
                 e
             )))
         })?;
-        let module_info = ModuleInfo::from_bytes(wasm);
+        let module_info = ModuleInfo::from_bytes(wasm)?;
 
         let module = Self {
             inner: module,

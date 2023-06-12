@@ -79,24 +79,21 @@ impl Imports<JsWasmBackend> for JsImports {
         name: impl Into<String>,
         func: <JsWasmBackend as WasmBackend>::Function,
     ) -> Result<(), ImportError> {
-        // todo refactor without inner match
         let module_name = module.into();
         let func_name = name.into();
-        match self.inner.entry(module_name.clone()) {
-            Entry::Occupied(mut map) => match map.get_mut().entry(func_name.clone()) {
-                Entry::Occupied(_) => Err(ImportError::DuplicateImport(module_name, func_name)),
-                Entry::Vacant(entry) => {
-                    entry.insert(func);
-                    Ok(())
-                }
-            },
-            Entry::Vacant(entry) => {
-                entry.insert(hashmap! {
-                    func_name => func
-                });
 
+        let add_func = |namespace: &mut HashMap<String, JsFunction>| -> Result<(), ImportError> {
+            if let Entry::Vacant(entry) = namespace.entry(func_name.clone()) {
+                entry.insert(func);
                 Ok(())
+            } else {
+                Err(ImportError::DuplicateImport(module_name.clone(), func_name))
             }
+        };
+
+        match self.inner.entry(module_name.clone()) {
+            Entry::Occupied(mut entry) => add_func(entry.get_mut()),
+            Entry::Vacant(entry) => add_func(entry.insert(HashMap::new()))
         }
     }
 

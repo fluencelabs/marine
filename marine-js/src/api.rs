@@ -124,7 +124,7 @@ impl Into<MarineConfig<JsWasmBackend>> for &ServiceConfig {
 /// otherwise, it contains error message.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn register_module(config: JsValue, log_fn: JsValue) -> Result<(), JsError> {
+pub fn register_module(config: JsValue, log_fn: js_sys::Function) -> Result<(), JsError> {
     let config: ServiceConfig = serde_wasm_bindgen::from_value(config)?;
     log::debug!("register_module start");
 
@@ -167,7 +167,7 @@ pub fn register_module(config: JsValue, log_fn: JsValue) -> Result<(), JsError> 
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> Result<String, JsError> {
     MARINE.with(|marine| {
-        let args: JValue = serde_json::from_str(args)?; // TODO maybe add more info
+        let args: JValue = serde_json::from_str(args)?;
         marine
             .borrow_mut()
             .deref_mut()

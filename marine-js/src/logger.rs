@@ -4,11 +4,15 @@ use std::fs::metadata;
 use std::hash::Hash;
 use log::{LevelFilter, Log, Metadata, Record};
 use serde::{Deserialize, Serialize};
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsError, JsValue};
+
+struct ServiceLogger {
+    log_fn: js_sys::Function,
+    module_names: HashSet<String>,
+}
 
 struct MarineLoggerInner {
-    service_log_fn: Option<js_sys::Function>,
-    module_names: Option<HashSet<String>>,
+    service_logger: Option<ServiceLogger>,
     self_max_level: LevelFilter,
 }
 
@@ -27,6 +31,8 @@ unsafe impl Send for MarineLogger {}
 unsafe impl Sync for MarineLogger {}
 unsafe impl Send for MarineLoggerInner {}
 unsafe impl Sync for MarineLoggerInner {}
+unsafe impl Send for ServiceLogger {}
+unsafe impl Sync for ServiceLogger {}
 
 impl MarineLogger {
     pub(crate) fn new(self_max_level: LevelFilter) -> Self {
@@ -35,7 +41,11 @@ impl MarineLogger {
         }
     }
 
-    pub(crate) fn enable_service_logging(&self, log_fn: JsValue, module_names: HashSet<String>) {
+    pub(crate) fn enable_service_logging(
+        &self,
+        log_fn: js_sys::Function,
+        module_names: HashSet<String>,
+    ) {
         self.inner
             .borrow_mut()
             .enable_service_logging(log_fn, module_names);
@@ -45,42 +55,31 @@ impl MarineLogger {
 impl MarineLoggerInner {
     fn new(self_max_level: LevelFilter) -> Self {
         Self {
-            service_log_fn: <_>::default(),
-            module_names: <_>::default(),
+            service_logger: None,
             self_max_level,
         }
     }
 
-    fn enable_service_logging(&mut self, log_fn: JsValue, module_names: HashSet<String>) {
-        self.service_log_fn = Some(log_fn.into());
-        self.module_names = Some(module_names);
+    fn enable_service_logging(&mut self, log_fn: js_sys::Function, module_names: HashSet<String>) {
+        self.service_logger = Some(ServiceLogger::new(log_fn, module_names));
     }
 
-    fn is_service_log(&self, record: &Metadata) -> bool {
-        match self.module_names.as_ref() {
+    fn is_service_log(&self, metadata: &Metadata) -> bool {
+        match &self.service_logger {
             None => false,
-            Some(modules) => modules.contains(record.target()), // TODO: is it the only needed check?
+            Some(service_logger) => service_logger.should_handle(metadata),
         }
     }
 
-    fn log_module_message(&self, record: &Record) {
-        let message = ModuleLogMessage {
-            level: record.level().to_string().to_ascii_lowercase(),
-            message: record.args().to_string(),
-            service: record.target().to_string(),
-        };
+    fn log_service_message(&self, record: &Record) {
+        let result = self
+            .service_logger
+            .as_ref()
+            .map(|logger| logger.log(record));
 
-        // TODO: safety
-        let message = serde_wasm_bindgen::to_value(&message).unwrap();
-        let params = js_sys::Array::from_iter([message].iter());
-
-        // TODO get rid of unwrap
-        js_sys::Reflect::apply(
-            self.service_log_fn.as_ref().unwrap(),
-            &JsValue::NULL,
-            &params,
-        )
-        .unwrap();
+        if let Some(Err(e)) = result {
+            web_sys::console::error_2(&"failed to log service message:".into(), &e.into());
+        }
     }
 }
 
@@ -105,7 +104,7 @@ impl log::Log for MarineLoggerInner {
 
     fn log(&self, record: &Record) {
         if self.is_service_log(record.metadata()) {
-            self.log_module_message(record)
+            self.log_service_message(record)
         } else if record.level() <= self.self_max_level {
             wasm_bindgen_console_logger::DEFAULT_LOGGER.log(record)
         }
@@ -113,6 +112,34 @@ impl log::Log for MarineLoggerInner {
 
     fn flush(&self) {
         wasm_bindgen_console_logger::DEFAULT_LOGGER.flush()
+    }
+}
+
+impl ServiceLogger {
+    fn new(log_fn: js_sys::Function, module_names: HashSet<String>) -> Self {
+        Self {
+            log_fn,
+            module_names,
+        }
+    }
+
+    fn should_handle(&self, metadata: &Metadata) -> bool {
+        self.module_names.contains(metadata.target())
+    }
+
+    fn log(&self, record: &Record) -> Result<(), JsValue> {
+        let message = ModuleLogMessage {
+            level: record.level().to_string().to_ascii_lowercase(),
+            message: record.args().to_string(),
+            service: record.target().to_string(),
+        };
+
+        let message = serde_wasm_bindgen::to_value(&message)?;
+        let params = js_sys::Array::from_iter([message].iter());
+
+        js_sys::Reflect::apply(&self.log_fn, &JsValue::NULL, &params)?;
+
+        Ok(())
     }
 }
 

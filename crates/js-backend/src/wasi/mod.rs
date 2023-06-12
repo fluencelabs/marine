@@ -2,7 +2,7 @@ pub(crate) mod js_imports;
 
 use std::collections::HashMap;
 use anyhow::anyhow;
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsError, JsValue};
 use marine_wasm_backend_traits::prelude::*;
 use crate::{JsCaller, JsContextMut, JsFunction, JsWasmBackend};
 
@@ -28,17 +28,8 @@ impl WasiImplementation<JsWasmBackend> for JsWasi {
                 }
             })
             .collect();
-        store.inner.wasi_contexts.push(WasiContext::new(envs));
+        store.inner.wasi_contexts.push(WasiContext::new(envs)?);
         linker.add_wasi(context_index);
-        /*
-        let wasi_namespace = wasi_snapshot_preview1_exports(store, move |ctx: JsContextMut| -> &mut WasiContext {
-            &mut ctx.inner.wasi_contexts[context_index]
-        });
-
-        linker.register(store, "wasi_snapshot_preview1", wasi_namespace.into_iter())
-            .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))
-
-         */
 
         Ok(())
     }
@@ -46,7 +37,15 @@ impl WasiImplementation<JsWasmBackend> for JsWasi {
     fn get_wasi_state<'s>(
         instance: &'s mut <JsWasmBackend as WasmBackend>::Instance,
     ) -> Box<dyn WasiState + 's> {
-        todo!()
+        Box::new(JsWasiState {})
+    }
+}
+
+pub struct JsWasiState {}
+
+impl WasiState for JsWasiState {
+    fn envs(&self) -> &[Vec<u8>] {
+        &[]
     }
 }
 
@@ -63,13 +62,14 @@ pub(crate) struct WasiContext {
 }
 
 impl WasiContext {
-    pub(crate) fn new(envs: HashMap<String, String>) -> Self {
-        // TODO safety
-        let envs_js = serde_wasm_bindgen::to_value(&envs).unwrap();
-        Self {
+    pub(crate) fn new(envs: HashMap<String, String>) -> Result<Self, WasiError> {
+        let envs_js = serde_wasm_bindgen::to_value(&envs)
+            .map_err(|e| WasiError::EngineWasiError(anyhow!(e.to_string())))?;
+
+        Ok(Self {
             envs,
             wasi_impl: js_imports::create_wasi(envs_js),
-        }
+        })
     }
 
     pub(crate) fn get_imports(&self, module: &js_sys::WebAssembly::Module) -> js_sys::Object {

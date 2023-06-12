@@ -1,6 +1,8 @@
-use marine_wasm_backend_traits::{FuncSig, WType};
+use marine_wasm_backend_traits::{FuncSig, ModuleCreationError, WType};
 
 use marine_wasm_backend_traits::impl_utils::MultiMap;
+
+use anyhow::anyhow;
 use walrus::{ExportItem, IdsToIndices, ValType};
 
 use std::collections::HashMap;
@@ -20,9 +22,10 @@ pub(crate) enum Export {
 }
 
 impl ModuleInfo {
-    pub(crate) fn from_bytes(wasm: &[u8]) -> Self {
-        // TODO handle errors
-        let module = walrus::ModuleConfig::new().parse(wasm).unwrap();
+    pub(crate) fn from_bytes(wasm: &[u8]) -> Result<Self, ModuleCreationError> {
+        let module = walrus::ModuleConfig::new()
+            .parse(wasm)
+            .map_err(|e| ModuleCreationError::Other(anyhow!(e)))?;
 
         let default_ids = IdsToIndices::default();
 
@@ -58,10 +61,10 @@ impl ModuleInfo {
             })
             .collect::<HashMap<String, Export>>();
 
-        ModuleInfo {
+        Ok(ModuleInfo {
             custom_sections,
             exports,
-        }
+        })
     }
 }
 

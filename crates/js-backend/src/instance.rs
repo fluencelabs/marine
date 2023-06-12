@@ -82,15 +82,6 @@ pub(crate) struct StoredInstance {
     pub(crate) exports: HashMap<String, Export<JsWasmBackend>>,
 }
 
-// TODO do it normally
-fn clone_export(export: &Export<JsWasmBackend>) -> Export<JsWasmBackend> {
-    match export {
-        Export::Memory(memory) => Export::Memory(memory.clone()),
-        Export::Function(func) => Export::Function(func.clone()),
-        Export::Other => Export::Other,
-    }
-}
-
 impl Instance<JsWasmBackend> for JsInstance {
     fn export_iter<'a>(
         &'a self,
@@ -102,7 +93,7 @@ impl Instance<JsWasmBackend> for JsInstance {
         let iter = stored_instance
             .exports
             .iter()
-            .map(|(name, export)| (name.as_str(), clone_export(export)));
+            .map(|(name, export)| (name.as_str(), export.clone()));
 
         Box::new(iter)
     }
@@ -110,19 +101,19 @@ impl Instance<JsWasmBackend> for JsInstance {
     fn get_nth_memory(
         &self,
         store: &mut impl AsContextMut<JsWasmBackend>,
-        _memory_index: u32,
+        memory_index: u32,
     ) -> Option<<JsWasmBackend as WasmBackend>::Memory> {
-        // TODO use index
-        // TODO handle errors
-        log::debug!("Instance::get_nth_memory start");
         let stored_instance = self.stored_instance(store.as_context_mut());
-        let exports = stored_instance.inner.exports();
-        let mem = js_sys::Reflect::get(exports.as_ref(), &"memory".into())
-            .unwrap()
-            .dyn_into::<WebAssembly::Memory>()
-            .expect("memory export wasn't a `WebAssembly.Memory`");
-        log::debug!("Instance::get_nth_memory success");
-        Some(JsMemory { inner: mem })
+        stored_instance
+            .exports
+            .iter()
+            .filter_map(|(_, export)| {
+                match export {
+                    Export::Memory(memory) => Some(memory.clone()),
+                    _ => None,
+                }
+            })
+            .nth(memory_index as usize)
     }
 
     fn get_memory(
@@ -130,7 +121,6 @@ impl Instance<JsWasmBackend> for JsInstance {
         store: &mut impl AsContextMut<JsWasmBackend>,
         memory_name: &str,
     ) -> ResolveResult<<JsWasmBackend as WasmBackend>::Memory> {
-        // TODO handle errors
         log::trace!(
             "Instance::get_memory, instance_id: {}, memory_name: {}",
             self.store_handle,
@@ -150,7 +140,7 @@ impl Instance<JsWasmBackend> for JsInstance {
             }),
             Export::Other => Err(ResolveError::ExportTypeMismatch {
                 expected: "memory",
-                actual: "other(funcref or externref)",
+                actual: "other (funcref or externref)",
             }),
         };
 
