@@ -7,6 +7,9 @@ use marine_wasm_backend_traits::prelude::*;
 
 use crate::JsWasmBackend;
 
+static MEMORY_ACCESS_CONTRACT: &str =
+    "user is expected to check memory bounds before accessing memory";
+
 #[derive(Clone)]
 pub struct JsMemory {
     pub(crate) inner: WebAssembly::Memory,
@@ -98,7 +101,7 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<JsWasmBackend>> for
         let mut result = [0u8; COUNT];
         let end = offset
             .checked_add(COUNT as u32)
-            .expect("user is expected to check memory bounds before asseccing memory");
+            .expect(MEMORY_ACCESS_CONTRACT);
         self.uint8_array()
             .subarray(offset, end)
             .copy_to(result.as_mut_slice());
@@ -114,9 +117,7 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<JsWasmBackend>> for
         size: u32,
     ) -> Vec<u8> {
         let mut result = vec![0u8; size as usize];
-        let end = offset
-            .checked_add(size)
-            .expect("user is expected to check memory bounds before asseccing memory");
+        let end = offset.checked_add(size).expect(MEMORY_ACCESS_CONTRACT);
         self.uint8_array()
             .subarray(offset, end)
             .copy_to(result.as_mut_slice());
@@ -146,7 +147,7 @@ impl it_memory_traits::MemoryWritable<DelayedContextLifetime<JsWasmBackend>> for
     ) {
         let end = offset
             .checked_add(bytes.len() as u32)
-            .expect("user is expected to check memory bounds before asseccing memory");
+            .expect(MEMORY_ACCESS_CONTRACT);
         self.uint8_array().subarray(offset, end).copy_from(bytes);
     }
 }

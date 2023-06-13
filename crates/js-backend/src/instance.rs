@@ -30,6 +30,7 @@ impl JsInstance {
             .iter()
             .map(|(name, export)| {
                 let export: Export<JsWasmBackend> = match export {
+                    // TODO: add safety comment for every unwrap
                     module_info::Export::Function(sig) => {
                         let func = js_sys::Reflect::get(js_exports.as_ref(), &name.into()).unwrap();
 
@@ -133,7 +134,7 @@ impl Instance<JsWasmBackend> for JsInstance {
             .get(memory_name)
             .ok_or_else(|| ResolveError::ExportNotFound(memory_name.to_string()))?;
 
-        let result = match export {
+        match export {
             Export::Memory(memory) => Ok(memory.clone()),
             Export::Function(_) => Err(ResolveError::ExportTypeMismatch {
                 expected: "memory",
@@ -143,11 +144,7 @@ impl Instance<JsWasmBackend> for JsInstance {
                 expected: "memory",
                 actual: "other (funcref or externref)",
             }),
-        };
-
-        log::debug!("Instance::get_memory success");
-
-        result
+        }
     }
 
     fn get_function(

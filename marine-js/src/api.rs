@@ -34,17 +34,6 @@ use crate::global_state::MARINE;
 use crate::logger::marine_logger;
 
 #[derive(Serialize, Deserialize)]
-struct RegisterModuleResult {
-    error: String,
-}
-
-#[derive(Serialize, Deserialize)]
-struct CallModuleResult {
-    error: String,
-    result: JValue,
-}
-
-#[derive(Serialize, Deserialize)]
 pub struct WasiConfig {
     pub envs: HashMap<String, String>,
     pub args: Vec<String>,

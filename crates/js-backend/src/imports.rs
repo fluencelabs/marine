@@ -23,7 +23,6 @@ impl JsImports {
             .map(|idx| store.as_context().inner.wasi_contexts[idx].get_imports(module))
             .unwrap_or_else(js_sys::Object::new);
 
-        //let mut ctx = store.as_context();
         for (module_name, namespace) in &self.inner {
             let namespace_obj = js_sys::Object::new();
             for (func_name, func) in namespace {
@@ -35,14 +34,14 @@ impl JsImports {
                 .map_err(|e| {
                     web_sys::console::log_1(&e);
                 })
-                .unwrap();
+                .unwrap(); // TODO: research when it can return error. So far there is no info in documentation about return value.
             }
 
             js_sys::Reflect::set(&import_object, &module_name.into(), &namespace_obj)
                 .map_err(|e| {
                     web_sys::console::log_1(&e);
                 })
-                .unwrap();
+                .unwrap(); // TODO: research when it can return error. So far there is no info in documentation about return value.
         }
 
         import_object
@@ -57,9 +56,9 @@ impl JsImports {
         store: impl AsContext<JsWasmBackend>,
         instance: &js_sys::WebAssembly::Instance,
     ) {
-        self.wasi_ctx
-            .map(|idx| store.as_context().inner.wasi_contexts[idx].bind_to_instance(instance))
-            .unwrap_or_default();
+        if let Some(handle) = &self.wasi_ctx {
+            store.as_context().inner.wasi_contexts[*handle].bind_to_instance(instance);
+        }
     }
 }
 
@@ -108,6 +107,7 @@ impl Imports<JsWasmBackend> for JsImports {
     {
         let module_name = name.into();
         for (func_name, func) in namespace {
+            // TODO: maybe rewrite without extensive cloning
             self.insert(store, module_name.clone(), func_name, func)?
         }
 

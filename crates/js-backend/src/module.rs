@@ -51,10 +51,8 @@ impl Module<JsWasmBackend> for JsModule {
         imports: &JsImports,
     ) -> InstantiationResult<<JsWasmBackend as WasmBackend>::Instance> {
         let imports_object = imports.build_import_object(store.as_context(), &self.inner);
-        let instance = WebAssembly::Instance::new(&self.inner, &imports_object).map_err(|e| {
-            web_sys::console::log_1(&e);
-            InstantiationError::Other(anyhow!("failed to instantiate"))
-        })?;
+        let instance = WebAssembly::Instance::new(&self.inner, &imports_object)
+            .map_err(|e| InstantiationError::Other(anyhow!("failed to instantiate: {:?}", e)))?;
 
         // adds memory to @wasmer/wasi object
         imports.bind_to_instance(store.as_context(), &instance);

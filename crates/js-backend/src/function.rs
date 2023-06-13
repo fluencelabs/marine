@@ -92,18 +92,14 @@ impl JsFunction {
                         actual: result_array.length() as usize,
                     })
                 } else {
-                    Ok(result_array
-                        .iter()
-                        .enumerate()
-                        .map(|(i, js_val)| wval_from_js(&result_types[i], &js_val))
-                        .collect::<Vec<_>>())
+                    Ok(wval_array_from_js_array(&result_array, result_types.iter()))
                 }
             }
         }
     }
 }
 
-// this is safe because its intended to run in single thread
+// Safety: this is safe because its intended to run in single thread
 unsafe impl Send for JsFunction {}
 unsafe impl Sync for JsFunction {}
 
@@ -154,6 +150,7 @@ impl Function<JsWasmBackend> for JsFunction {
                 caller_instance,
                 _data: Default::default(),
             };
+
             let args = wval_array_from_js_array(args, enclosed_sig.params().iter());
             let result = func(caller, &args);
             js_array_from_wval_array(&result)
@@ -189,6 +186,7 @@ impl Function<JsWasmBackend> for JsFunction {
         store: &mut impl AsContextMut<JsWasmBackend>,
         args: &[WValue],
     ) -> RuntimeResult<Vec<WValue>> {
+        // TODO: maybe check that if if there is no bound instance then it is an imported function
         if let Some(instance) = &self.bound_instance {
             store
                 .as_context_mut()

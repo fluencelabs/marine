@@ -30,6 +30,7 @@ pub(crate) fn wval_from_js(ty: &WType, val: &JsValue) -> WValue {
         web_sys::console::log_1(val);
     }
 
+    // TODO: add tests for all numeric types
     match ty {
         WType::I32 => WValue::I32(val.as_f64().unwrap() as _),
         WType::I64 => WValue::I64(val.as_f64().unwrap() as _),
