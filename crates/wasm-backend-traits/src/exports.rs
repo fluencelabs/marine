@@ -21,6 +21,7 @@ use crate::DelayedContextLifetime;
 use crate::WasmBackend;
 
 /// Contains Wasm exports necessary for internal usage.
+#[derive(Clone)]
 pub enum Export<WB: WasmBackend> {
     Memory(<WB as WasmBackend>::Memory),
     Function(<WB as WasmBackend>::Function),

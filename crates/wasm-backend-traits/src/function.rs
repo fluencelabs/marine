@@ -23,17 +23,17 @@ use crate::WValue;
 
 /// A Wasm function handle, it can be either a function from a host or an export from an `Instance`.
 /// As it is only a handle to an object in `Store`, cloning is cheap
-pub trait Function<WB: WasmBackend>: Send + Sync {
+pub trait Function<WB: WasmBackend>: Send + Sync + Clone {
     /// Creates a new function with dynamic signature.
     /// The signature check is performed at runtime.
     fn new<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
-    where
-        F: for<'c> Fn(&[WValue]) -> Vec<WValue> + Sync + Send + 'static;
+        where
+            F: for<'c> Fn(&[WValue]) -> Vec<WValue> + Sync + Send + 'static;
 
     /// Creates a new function with dynamic signature that needs a context.
     fn new_with_caller<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
-    where
-        F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+        where
+            F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
             + Sync
             + Send
             + 'static;
