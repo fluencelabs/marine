@@ -97,12 +97,7 @@ fn add_wasi_to_linker(
     Ok(())
 }
 
-fn populate_args(builder: WasiCtxBuilder, args: Vec<Vec<u8>>) -> Result<WasiCtxBuilder, WasiError> {
-    let args = args
-        .into_iter()
-        .map(|arg| unsafe { String::from_utf8_unchecked(arg) })
-        .collect::<Vec<String>>();
-
+fn populate_args(builder: WasiCtxBuilder, args: Vec<String>) -> Result<WasiCtxBuilder, WasiError> {
     builder
         .args(&args)
         .map_err(|_| WasiError::TooLargeArgsArray)
@@ -140,20 +135,9 @@ fn populate_mapped_dirs(
 
 fn populate_envs(
     builder: WasiCtxBuilder,
-    envs: HashMap<Vec<u8>, Vec<u8>>,
+    envs: HashMap<String, String>,
 ) -> Result<WasiCtxBuilder, WasiError> {
-    let envs = envs
-        .into_iter()
-        .map(|(key, value)| {
-            unsafe {
-                // TODO maybe use strings in signature?
-                (
-                    String::from_utf8_unchecked(key),
-                    String::from_utf8_unchecked(value),
-                )
-            }
-        })
-        .collect::<Vec<_>>();
+    let envs = envs.into_iter().collect::<Vec<_>>();
 
     builder
         .envs(&envs)

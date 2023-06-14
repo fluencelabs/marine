@@ -30,6 +30,7 @@ use marine_wasm_backend_traits::replace_with;
 
 use anyhow::anyhow;
 
+#[derive(Clone)]
 pub struct WasmtimeFunction {
     pub(crate) inner: wasmtime::Func,
 }

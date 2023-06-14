@@ -23,7 +23,7 @@ use crate::WValue;
 
 /// A Wasm function handle, it can be either a function from a host or an export from an `Instance`.
 /// As it is only a handle to an object in `Store`, cloning is cheap
-pub trait Function<WB: WasmBackend>: Send + Sync {
+pub trait Function<WB: WasmBackend>: Send + Sync + Clone {
     /// Creates a new function with dynamic signature.
     /// The signature check is performed at runtime.
     fn new<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
