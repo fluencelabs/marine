@@ -46,10 +46,10 @@ pub struct AppService {
 impl AppService {
     /// Create Service with given modules and service id.
     pub fn new<C, S>(config: C, service_id: S, envs: HashMap<String, String>) -> Result<Self>
-        where
-            C: TryInto<AppServiceConfig>,
-            S: Into<String>,
-            AppServiceError: From<C::Error>,
+    where
+        C: TryInto<AppServiceConfig>,
+        S: Into<String>,
+        AppServiceError: From<C::Error>,
     {
         let mut config: AppServiceConfig = config.try_into()?;
         let facade_module_name = config
