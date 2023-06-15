@@ -37,6 +37,7 @@ const redisDownloadUrl = 'https://github.com/fluencelabs/redis/releases/download
 const sqliteDownloadUrl = 'https://github.com/fluencelabs/sqlite/releases/download/sqlite-wasm-v0.18.1/sqlite3.wasm';
 
 const examplesDir = path.join(__dirname, '../../../../examples');
+const wasmTestsDir = path.join(__dirname, '../../../../marine/tests/wasm_tests');
 
 const dontLog = () => {};
 
@@ -255,5 +256,72 @@ describe('Fluence app service tests', () => {
                 'function with name `do_not_exist` is missing',
             );
         }
+    });
+
+    it('Checking arguments passing', async () => {
+        // arrange
+        const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
+        const arguments_passing_pure = await loadWasmBytes(path.join(wasmTestsDir, "./arguments_passing/artifacts/arguments_passing_pure.wasm"))
+        const arguments_passing_effector = await loadWasmBytes(path.join(wasmTestsDir, "./arguments_passing/artifacts/arguments_passing_effector.wasm"))
+
+        let service = [
+            {
+                name: "arguments_passing_effector",
+                wasm_bytes: arguments_passing_effector
+            },
+            {
+                name: "arguments_passing_pure",
+                wasm_bytes: arguments_passing_pure
+            }
+        ]
+
+        const marineService = new MarineService(marine, service, 'srv', dontLog);
+        await marineService.init();
+
+        const test = (func_name: string) => {
+            const expected_result = [
+                0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 6, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0,
+                0, 65, 1, 153, 154, 64, 34, 51, 51, 51, 51, 51, 51, 102, 108, 117, 101, 110, 99, 101,
+                19, 55, 0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 4, 5, 0, 6, 0, 0, 0, 7, 0, 0, 0,
+                0, 0, 0, 0, 65, 1, 153, 154, 64, 34, 51, 51, 51, 51, 51, 51, 102, 108, 117, 101, 110,
+                99, 101, 19, 55];
+
+            const args1 = {
+                "arg_0": 0,
+                "arg_1": 1,
+                "arg_2": 2,
+                "arg_3": 3,
+                "arg_4": 4,
+                "arg_5": 5,
+                "arg_6": 6,
+                "arg_7": 7,
+                "arg_8": 8.1,
+                "arg_9": 9.1,
+                "arg_10": "fluence",
+                "arg_11": [0x13, 0x37],
+            };
+            const result1 = marineService.call(func_name, args1, null);
+            expect(result1).toBe(expected_result)
+
+            let args2 = [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8.1,
+                9.1,
+                "fluence",
+                [0x13, 0x37]
+            ];
+            const result2 = marineService.call(func_name, args2, null)
+            expect(result2).toBe(expected_result);
+        };
+
+        test("all_types");
+        test("all_types_ref")
     });
 });
