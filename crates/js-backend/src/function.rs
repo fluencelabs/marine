@@ -148,7 +148,6 @@ impl Function<JsWasmBackend> for JsFunction {
             let caller = JsCaller {
                 store_inner,
                 caller_instance,
-                _data: Default::default(),
             };
 
             let args = wval_array_from_js_array(args, enclosed_sig.params().iter());
@@ -210,9 +209,9 @@ impl Function<JsWasmBackend> for JsFunction {
 macro_rules! impl_func_construction {
     ($num:tt $($args:ident)*) => (paste::paste!{
         fn [< new_typed_with_env_ $num >] <F>(mut ctx: JsContextMut<'_>, func: F) -> JsFunction
-            where F: Fn(JsCaller<'_>, $(replace_with!($args -> i32),)*) + Send + Sync + 'static {
+            where F: Fn(JsCaller, $(replace_with!($args -> i32),)*) + Send + Sync + 'static {
 
-            let func = move |caller: JsCaller<'_>, args: &[WValue]| -> Vec<WValue> {
+            let func = move |caller: JsCaller, args: &[WValue]| -> Vec<WValue> {
                 let [$($args,)*] = args else { todo!() }; // TODO: Safety: explain why it will never fire
                 func(caller, $(wval_to_i32($args),)*);
                 vec![]
@@ -226,9 +225,9 @@ macro_rules! impl_func_construction {
         }
 
         fn [< new_typed_with_env_ $num _r>] <F>(mut ctx: JsContextMut<'_>, func: F) -> JsFunction
-            where F: Fn(JsCaller<'_>, $(replace_with!($args -> i32),)*) -> i32 + Send + Sync + 'static {
+            where F: Fn(JsCaller, $(replace_with!($args -> i32),)*) -> i32 + Send + Sync + 'static {
 
-            let func = move |caller: JsCaller<'_>, args: &[WValue]| -> Vec<WValue> {
+            let func = move |caller: JsCaller, args: &[WValue]| -> Vec<WValue> {
                 let [$($args,)*] = args else { todo!() }; // TODO: Safety: explain why it will never fire
                 let res = func(caller, $(wval_to_i32(&$args),)*);
                 vec![WValue::I32(res)]
