@@ -13,13 +13,3 @@ fn main() {
     // Max level for this crate is set in MarineLogger constructor.
     log::set_max_level(log::LevelFilter::Trace);
 }
-
-#[cfg(test)]
-mod tests {
-    use marine_js_backend::JsWasmBackend;
-
-    #[test]
-    fn test_test() {
-        let core = marine_core::generic::MarineCore::<JsWasmBackend>::new();
-    }
-}

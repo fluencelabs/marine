@@ -33,7 +33,7 @@ impl WasmBackend for JsWasmBackend {
     type Instance = JsInstance;
     type Context<'c> = JsContext<'c>;
     type ContextMut<'c> = JsContextMut<'c>;
-    type Caller<'c> = JsCaller<'c>;
+    type Caller<'c> = JsCaller;
     type Function = JsFunction;
     type Memory = JsMemory;
     type MemoryView = JsMemory;

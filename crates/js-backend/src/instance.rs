@@ -29,19 +29,14 @@ impl JsInstance {
             .exports
             .iter()
             .map(|(name, export)| {
+                // Safety: all used names are from parsing wasm imports,
+                // so there will always be an import for the name and the type will be correct
+                let js_export = js_sys::Reflect::get(js_exports.as_ref(), &name.into()).unwrap();
                 let export: Export<JsWasmBackend> = match export {
-                    // TODO: add safety comment for every unwrap
                     module_info::Export::Function(sig) => {
-                        let func = js_sys::Reflect::get(js_exports.as_ref(), &name.into()).unwrap();
-
-                        Export::Function(JsFunction::new_stored(ctx, func.into(), sig.clone()))
+                        Export::Function(JsFunction::new_stored(ctx, js_export.into(), sig.clone()))
                     }
-                    module_info::Export::Memory => {
-                        let memory =
-                            js_sys::Reflect::get(js_exports.as_ref(), &name.into()).unwrap();
-
-                        Export::Memory(JsMemory::try_from_js(memory).unwrap())
-                    }
+                    module_info::Export::Memory => Export::Memory(JsMemory::new(js_export.into())),
                     module_info::Export::Table => Export::Other,
                     module_info::Export::Global => Export::Other,
                 };
@@ -51,8 +46,7 @@ impl JsInstance {
             .collect::<HashMap<String, Export<JsWasmBackend>>>();
 
         let stored_instance = StoredInstance {
-            _inner: instance,
-            _module_info: module_info,
+            inner: instance,
             exports,
         };
 
@@ -81,8 +75,8 @@ impl JsInstance {
 
 /// Allocated instance resources
 pub(crate) struct StoredInstance {
-    pub(crate) _inner: WebAssembly::Instance,
-    pub(crate) _module_info: ModuleInfo,
+    #[allow(unused)] // Keep the instance, so it wont get dropped
+    pub(crate) inner: WebAssembly::Instance,
     pub(crate) exports: HashMap<String, Export<JsWasmBackend>>,
 }
 

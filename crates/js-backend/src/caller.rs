@@ -9,15 +9,12 @@ use crate::JsContextMut;
 use crate::JsInstance;
 use crate::JsWasmBackend;
 
-pub struct JsCaller<'c> {
+pub struct JsCaller {
     pub(crate) store_inner: *mut crate::store::JsStoreInner,
     pub(crate) caller_instance: Option<JsInstance>,
-    // TODO: check if it is really required.
-    // TODO: It is needed because WasmBackend::Caller has a lifetime, but maybe this type can avoid having it
-    pub(crate) _data: PhantomData<&'c i32>,
 }
 
-impl<'c> Caller<JsWasmBackend> for JsCaller<'c> {
+impl Caller<JsWasmBackend> for JsCaller {
     fn memory(&mut self, memory_index: u32) -> Option<<JsWasmBackend as WasmBackend>::Memory> {
         self.caller_instance
             .clone()
@@ -25,13 +22,13 @@ impl<'c> Caller<JsWasmBackend> for JsCaller<'c> {
     }
 }
 
-impl<'c> AsContext<JsWasmBackend> for JsCaller<'c> {
+impl AsContext<JsWasmBackend> for JsCaller {
     fn as_context(&self) -> <JsWasmBackend as WasmBackend>::Context<'_> {
         JsContext::from_raw_ptr(self.store_inner)
     }
 }
 
-impl<'c> AsContextMut<JsWasmBackend> for JsCaller<'c> {
+impl AsContextMut<JsWasmBackend> for JsCaller {
     fn as_context_mut(&mut self) -> <JsWasmBackend as WasmBackend>::ContextMut<'_> {
         JsContextMut::from_raw_ptr(self.store_inner)
     }
@@ -42,7 +39,7 @@ impl<'c> AsContextMut<JsWasmBackend> for JsCaller<'c> {
 macro_rules! impl_func_getter {
     ($num:tt $($args:ident)*) => (paste::paste!{
         #[allow(unused_parens)]
-        impl<'c> FuncGetter<JsWasmBackend, ($(replace_with!($args -> i32)),*), ()> for JsCaller<'c> {
+        impl FuncGetter<JsWasmBackend, ($(replace_with!($args -> i32)),*), ()> for JsCaller {
             fn get_func(
                 &mut self,
                 name: &str,
@@ -59,7 +56,7 @@ macro_rules! impl_func_getter {
                 let func = self
                     .caller_instance
                     .as_ref()
-                    .ok_or_else(|| ResolveError::ExportNotFound(name.to_string()))? // TODO: maybe other error
+                    .ok_or_else(|| ResolveError::Other(anyhow!("Cannot call a function not bound to an instance")))?
                     .get_function(&mut store, name)?;
 
                 let func = move |store: &mut JsContextMut<'_>, ($($args),*)| -> Result<(), RuntimeError> {
@@ -79,7 +76,7 @@ macro_rules! impl_func_getter {
         }
 
         #[allow(unused_parens)]
-        impl<'c> FuncGetter<JsWasmBackend, ($(replace_with!($args -> i32)),*), i32> for JsCaller<'c> {
+        impl FuncGetter<JsWasmBackend, ($(replace_with!($args -> i32)),*), i32> for JsCaller {
             fn get_func(
                 &mut self,
                 name: &str,

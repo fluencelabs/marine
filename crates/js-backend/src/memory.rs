@@ -1,6 +1,5 @@
 use js_sys::WebAssembly;
 use wasm_bindgen::JsCast;
-use wasm_bindgen::JsValue;
 
 use it_memory_traits::MemoryAccessError;
 use marine_wasm_backend_traits::prelude::*;
@@ -16,10 +15,8 @@ pub struct JsMemory {
 }
 
 impl JsMemory {
-    pub(crate) fn try_from_js(mem: JsValue) -> Option<Self> {
-        mem.dyn_into::<WebAssembly::Memory>()
-            .ok()
-            .map(|mem| Self { inner: mem })
+    pub(crate) fn new(mem: WebAssembly::Memory) -> Self {
+        Self { inner: mem }
     }
 }
 
