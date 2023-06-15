@@ -8,6 +8,8 @@ const targetFilePath = "./src/marine_js.js";
 
 const GET_IMPORTTS_FN_NAME = "__wbg_get_imports"
 
+const WBG_ADAPTER_REGEX = /__wbg_adapter_\d+/;
+
 fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
   if (err) {
     console.error("Error reading source file:", err);
@@ -16,12 +18,13 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
 
   const sourceAst = parser.parse(sourceData, { sourceType: "module" });
   let sourceFunction = null;
-
+  let wbgAdapterFunc = null;
   traverse(sourceAst, {
     FunctionDeclaration(path) {
       if (path.node.id.name === GET_IMPORTTS_FN_NAME) {
         sourceFunction = path.node;
-        path.stop();
+      } else if (WBG_ADAPTER_REGEX.test(path.node.id.name)) {
+        wbgAdapterFunc = path.node;
       }
     },
   });
@@ -44,13 +47,16 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
     });
 
     let targetFunctionPath = null;
+    let wbgAdapderPath = null;
 
     recast.visit(targetAst, {
       visitFunctionDeclaration(path) {
         if (path.node.id.name === GET_IMPORTTS_FN_NAME) {
           targetFunctionPath = path;
-          return false;
+        } else if (WBG_ADAPTER_REGEX.test(path.node.id.name)) {
+          wbgAdapderPath = path;
         }
+
         this.traverse(path);
       },
     });
@@ -61,6 +67,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
     }
 
     targetFunctionPath.replace(sourceFunction);
+    wbgAdapderPath.replace(wbgAdapterFunc);
     const output = recast.print(targetAst).code;
 
     fs.writeFile(targetFilePath, output, "utf8", (err) => {
