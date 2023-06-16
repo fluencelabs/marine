@@ -301,7 +301,7 @@ describe('Fluence app service tests', () => {
                 "arg_11": [0x13, 0x37],
             };
             const result1 = marineService.call(func_name, args1, null);
-            expect(result1).toBe(expected_result)
+            expect(result1).toStrictEqual(expected_result)
 
             let args2 = [
                 0,
@@ -318,10 +318,10 @@ describe('Fluence app service tests', () => {
                 [0x13, 0x37]
             ];
             const result2 = marineService.call(func_name, args2, null)
-            expect(result2).toBe(expected_result);
+            expect(result2).toStrictEqual(expected_result);
         };
 
         test("all_types");
-        test("all_types_ref")
+        test("all_ref_types")
     });
 });
