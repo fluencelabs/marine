@@ -28,7 +28,6 @@ pub(crate) fn wval_to_i32(val: &WValue) -> i32 {
 pub(crate) fn wval_from_js(ty: &WType, value: &JsValue) -> WValue {
     match ty {
         WType::I32 => WValue::I32(value.as_f64().unwrap() as _),
-        //WType::I64 => WValue::I64(val.as_f64().unwrap() as _),
         WType::I64 => WValue::I64(value.clone().try_into().unwrap()),
         WType::F32 => WValue::F32(value.as_f64().unwrap() as _),
         WType::F64 => WValue::F64(value.as_f64().unwrap() as _),

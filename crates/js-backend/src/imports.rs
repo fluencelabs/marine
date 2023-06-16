@@ -34,14 +34,14 @@ impl JsImports {
                 .map_err(|e| {
                     web_sys::console::log_1(&e);
                 })
-                .unwrap(); // TODO: research when it can return error. So far there is no info in documentation about return value.
+                .unwrap(); // Safety: it looks like it fires only if the first argument is not an Object
             }
 
             js_sys::Reflect::set(&import_object, &module_name.into(), &namespace_obj)
                 .map_err(|e| {
                     web_sys::console::log_1(&e);
                 })
-                .unwrap(); // TODO: research when it can return error. So far there is no info in documentation about return value.
+                .unwrap(); // Safety: it looks like it fires only if the first argument is not an Object
         }
 
         import_object
@@ -59,6 +59,12 @@ impl JsImports {
         if let Some(handle) = &self.wasi_ctx {
             store.as_context().inner.wasi_contexts[*handle].bind_to_instance(instance);
         }
+    }
+
+    fn get_namespace(&mut self, module_name: String) -> &mut HashMap<String, JsFunction> {
+        self.inner
+            .entry(module_name.clone())
+            .or_insert(<_>::default())
     }
 }
 
@@ -80,37 +86,43 @@ impl Imports<JsWasmBackend> for JsImports {
         let module_name = module.into();
         let func_name = name.into();
 
-        let add_func = |namespace: &mut HashMap<String, JsFunction>| -> Result<(), ImportError> {
-            if let Entry::Vacant(entry) = namespace.entry(func_name.clone()) {
-                entry.insert(func);
-                Ok(())
-            } else {
-                Err(ImportError::DuplicateImport(module_name.clone(), func_name))
-            }
-        };
-
-        match self.inner.entry(module_name.clone()) {
-            Entry::Occupied(mut entry) => add_func(entry.get_mut()),
-            Entry::Vacant(entry) => add_func(entry.insert(HashMap::new())),
-        }
+        let namespace = self.get_namespace(module_name.clone());
+        add_to_namespace(namespace, func_name, func, &module_name)
     }
 
     fn register<S, I>(
         &mut self,
-        store: &impl AsContext<JsWasmBackend>,
-        name: S,
-        namespace: I,
+        _store: &impl AsContext<JsWasmBackend>,
+        module_name: S,
+        functions: I,
     ) -> Result<(), ImportError>
     where
         S: Into<String>,
         I: IntoIterator<Item = (String, <JsWasmBackend as WasmBackend>::Function)>,
     {
-        let module_name = name.into();
-        for (func_name, func) in namespace {
-            // TODO: maybe rewrite without extensive cloning
-            self.insert(store, module_name.clone(), func_name, func)?
+        let module_name = module_name.into();
+        let namespace = self.get_namespace(module_name.clone());
+        for (func_name, func) in functions {
+            add_to_namespace(namespace, func_name, func, &module_name)?;
         }
 
         Ok(())
+    }
+}
+
+fn add_to_namespace(
+    namespace: &mut HashMap<String, JsFunction>,
+    func_name: String,
+    func: JsFunction,
+    module_name: &str,
+) -> Result<(), ImportError> {
+    if let Entry::Vacant(entry) = namespace.entry(func_name.clone()) {
+        entry.insert(func);
+        Ok(())
+    } else {
+        Err(ImportError::DuplicateImport(
+            module_name.to_string(),
+            func_name,
+        ))
     }
 }

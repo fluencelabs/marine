@@ -185,13 +185,17 @@ impl Function<JsWasmBackend> for JsFunction {
         store: &mut impl AsContextMut<JsWasmBackend>,
         args: &[WValue],
     ) -> RuntimeResult<Vec<WValue>> {
-        // TODO: maybe check that if if there is no bound instance then it is an imported function
         if let Some(instance) = &self.bound_instance {
             store
                 .as_context_mut()
                 .inner
                 .wasm_call_stack
                 .push(instance.clone())
+        } else if store.as_context_mut().inner.wasm_call_stack.is_empty() {
+            return Err(RuntimeError::Other(anyhow!(
+                "Attempt to call a user-created function directly from user code. \
+                 There is no reason to do it, so it should be a user error."
+            )));
         }
 
         let result = self.call_inner(store, args);
@@ -228,7 +232,7 @@ macro_rules! impl_func_construction {
             where F: Fn(JsCaller, $(replace_with!($args -> i32),)*) -> i32 + Send + Sync + 'static {
 
             let func = move |caller: JsCaller, args: &[WValue]| -> Vec<WValue> {
-                let [$($args,)*] = args else { todo!() }; // TODO: Safety: explain why it will never fire
+                let [$($args,)*] = args else { panic!("args do not match signature") }; // Safety: signature should b
                 let res = func(caller, $(wval_to_i32(&$args),)*);
                 vec![WValue::I32(res)]
             };
