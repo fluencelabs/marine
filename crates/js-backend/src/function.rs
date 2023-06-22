@@ -96,10 +96,12 @@ impl JsFunction {
         match result_types.len() {
             0 => Ok(vec![]),
             1 => {
+                // Single value returned as is.
                 let value = wval_from_js(&result_types[0], &result);
                 Ok(vec![value])
             }
             results_number => {
+                // Multiple return values are returned as JS array of values.
                 let result_array: Array = result.into();
                 if result_array.length() as usize != results_number {
                     Err(RuntimeError::IncorrectResultsNumber {
@@ -121,20 +123,10 @@ unsafe impl Sync for JsFunction {}
 impl Function<JsWasmBackend> for JsFunction {
     fn new<F>(store: &mut impl AsContextMut<JsWasmBackend>, sig: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(&[WValue]) -> Vec<WValue> + Sync + Send + 'static,
+        F: for<'c> Fn(&'c [WValue]) -> Vec<WValue> + Sync + Send + 'static,
     {
-        let enclosed_sig = sig.clone();
-        let wrapped = move |args: &Array| -> Array {
-            let args = wval_array_from_js_array(args, enclosed_sig.params().iter());
-            let result = func(&args);
-            js_array_from_wval_array(&result)
-        };
-
-        let inner = Closure::wrap(Box::new(wrapped) as Box<dyn FnMut(&Array) -> Array>)
-            .into_js_value()
-            .unchecked_into::<js_sys::Function>();
-
-        JsFunction::new_stored(store, inner, sig)
+        let with_caller = move |_, args: &'_ [WValue]| func(args);
+        Self::new_with_caller(store, sig, with_caller)
     }
 
     fn new_with_caller<F>(
@@ -143,7 +135,7 @@ impl Function<JsWasmBackend> for JsFunction {
         func: F,
     ) -> Self
     where
-        F: for<'c> Fn(<JsWasmBackend as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+        F: for<'c> Fn(JsCaller, &[WValue]) -> Vec<WValue>
             + Sync
             + Send
             + 'static,

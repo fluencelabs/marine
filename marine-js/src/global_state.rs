@@ -19,7 +19,4 @@ use marine::generic::Marine;
 
 use std::cell::RefCell;
 
-// two variables required because public api functions borrow_mut MODULES,
-// and deep internal functions borrow_mut INSTANCE
-// this is a bad design, and it will be refactored while moving wasm compilation inside marine-web
 thread_local!(pub(crate) static MARINE: RefCell<Option<Marine<JsWasmBackend>>> = RefCell::new(None));

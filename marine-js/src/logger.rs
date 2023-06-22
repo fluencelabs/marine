@@ -32,6 +32,7 @@ struct ServiceLogger {
 
 struct MarineLoggerInner {
     service_logger: Option<ServiceLogger>,
+    /// Log level for the marine-js itself. Log level for wasm modules is set via env vars in config.
     self_max_level: LevelFilter,
 }
 
@@ -45,7 +46,7 @@ struct ModuleLogMessage {
     message: String,
     service: String,
 }
-// Safety: marine-js is supposed to be in a single-threaded wasm environment
+// Safety: marine-js is supposed to be in a single-threaded wasm environment.
 unsafe impl Send for MarineLogger {}
 unsafe impl Sync for MarineLogger {}
 unsafe impl Send for MarineLoggerInner {}
@@ -163,6 +164,6 @@ impl ServiceLogger {
 }
 
 pub(crate) fn marine_logger() -> &'static MarineLogger {
-    // Safety: MarineLogger is set as logger in the main function, so this is correct
+    // Safety: MarineLogger is set as logger in the main function, so this is correct.
     unsafe { &*(log::logger() as *const dyn Log as *const MarineLogger) }
 }

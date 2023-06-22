@@ -43,6 +43,9 @@ impl Module<JsWasmBackend> for JsModule {
                 e
             )))
         })?;
+
+        // JS WebAssembly module does not provide info about export signatures,
+        // so this data is extracted from wasm in control module.
         let module_info = ModuleInfo::from_bytes(wasm)?;
 
         let module = Self {

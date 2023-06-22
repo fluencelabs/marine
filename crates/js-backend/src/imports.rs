@@ -25,6 +25,8 @@ use std::collections::HashMap;
 #[derive(Clone)]
 pub struct JsImports {
     inner: HashMap<String, HashMap<String, JsFunction>>,
+
+    /// JS backend uses WASI imports directly from JS, so it needs special handling.
     wasi_ctx: Option<usize>,
 }
 
@@ -50,14 +52,14 @@ impl JsImports {
                 .map_err(|e| {
                     web_sys::console::log_1(&e);
                 })
-                .unwrap(); // Safety: it looks like it fires only if the first argument is not an Object
+                .unwrap(); // Safety: it looks like it fires only if the first argument is not an Object.
             }
 
             js_sys::Reflect::set(&import_object, &module_name.into(), &namespace_obj)
                 .map_err(|e| {
                     web_sys::console::log_1(&e);
                 })
-                .unwrap(); // Safety: it looks like it fires only if the first argument is not an Object
+                .unwrap(); // Safety: it looks like it fires only if the first argument is not an Object.
         }
 
         import_object
@@ -67,6 +69,7 @@ impl JsImports {
         self.wasi_ctx = Some(wasi_context_id)
     }
 
+    /// Adds memory to @wasmer/wasi object
     pub(crate) fn bind_to_instance(
         &self,
         store: impl AsContext<JsWasmBackend>,
@@ -132,13 +135,16 @@ fn add_to_namespace(
     func: JsFunction,
     module_name: &str,
 ) -> Result<(), ImportError> {
-    if let Entry::Vacant(entry) = namespace.entry(func_name.clone()) {
-        entry.insert(func);
-        Ok(())
-    } else {
-        Err(ImportError::DuplicateImport(
-            module_name.to_string(),
-            func_name,
-        ))
+    match namespace.entry(func_name) {
+        Entry::Occupied(entry) => {
+            Err(ImportError::DuplicateImport(
+                module_name.to_string(),
+                entry.key().clone(),
+            ))
+        }
+        Entry::Vacant(entry) => {
+            entry.insert(func);
+            Ok(())
+        }
     }
 }

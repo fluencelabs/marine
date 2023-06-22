@@ -92,18 +92,16 @@ impl From<&ServiceConfig> for MarineConfig<JsWasmBackend> {
 ///
 /// # Arguments
 ///
-/// * `name` - name of module to register
-/// * `wasm_bytes` - wasm file bytes
+/// * `config` - description of wasm modiles with names, wasm bytes and wasi parameters
+/// * `log_fn` - function to direct logs from wasm modules
 ///
 /// # Return value
 ///
-/// JSON object with field "error". If error is empty, module is registered.
-/// otherwise, it contains error message.
+/// Nothing. An error is signaled via exception.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
 pub fn register_module(config: JsValue, log_fn: js_sys::Function) -> Result<(), JsError> {
     let config: ServiceConfig = serde_wasm_bindgen::from_value(config)?;
-    log::debug!("register_module start");
 
     let marine_config: MarineConfig<JsWasmBackend> = (&config).into();
 
@@ -124,7 +122,6 @@ pub fn register_module(config: JsValue, log_fn: js_sys::Function) -> Result<(), 
 
     MARINE.with(|marine| marine.replace(Some(new_marine)));
 
-    log::debug!("register_module success");
     Ok(())
 }
 
@@ -138,8 +135,7 @@ pub fn register_module(config: JsValue, log_fn: js_sys::Function) -> Result<(), 
 ///
 /// # Return value
 ///
-/// JSON object with fields "error" and "result". If "error" is empty string,
-/// "result" contains a function return value. Otherwise, "error" contains error message.
+/// JSON array of values. An error is signaled via exception.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
 pub fn call_module(module_name: &str, function_name: &str, args: &str) -> Result<String, JsError> {

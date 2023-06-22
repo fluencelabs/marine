@@ -67,7 +67,7 @@ impl JsInstance {
 
         let store_handle = ctx.inner.store_instance(stored_instance);
 
-        // Bind export functions to this instance. Looks really bad.
+        // Bind export functions to this instance. Looks really bad, but i did not find better way.
         let instance = Self::from_store_handle(store_handle);
         let stored = instance.stored_instance(ctx.as_context_mut());
         for export in stored.exports.values_mut() {
@@ -100,7 +100,6 @@ impl Instance<JsWasmBackend> for JsInstance {
         &'a self,
         store: <JsWasmBackend as WasmBackend>::ContextMut<'a>,
     ) -> Box<dyn Iterator<Item = (&'a str, Export<JsWasmBackend>)> + 'a> {
-        log::debug!("Instance::export_iter success");
         let stored_instance = self.stored_instance(store);
 
         let iter = stored_instance

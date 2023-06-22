@@ -31,8 +31,11 @@ pub(crate) struct JsStoreInner {
     pub(crate) instances: Vec<StoredInstance>,
     pub(crate) functions: Vec<StoredFunction>,
 
-    // when JsFunction::call is called from host, the instance is pushed at the beginning and popped at the end
-    // this is used to provide access to the caller instance for the imports
+    /// Imports provided to the ImportObject do not know the instance they will be bound to,
+    /// so they need to get the instance handle somehow during the call.
+    /// When JsFunction::call is called from host, the corresponding instance is pushed to stack
+    /// at the start of the call, and removed at the end of the call.
+    /// This way imports can get the caller instance from the Store.
     pub(crate) wasm_call_stack: Vec<JsInstance>,
 }
 
