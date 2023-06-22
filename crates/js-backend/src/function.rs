@@ -135,10 +135,7 @@ impl Function<JsWasmBackend> for JsFunction {
         func: F,
     ) -> Self
     where
-        F: for<'c> Fn(JsCaller, &[WValue]) -> Vec<WValue>
-            + Sync
-            + Send
-            + 'static,
+        F: for<'c> Fn(JsCaller, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
     {
         // Safety: JsStoreInner is stored inside a Box and the Store is required by wasm-backend traits contract
         // to be valid for function execution. So it is safe to capture this ptr into closure and deferenece there.

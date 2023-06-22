@@ -136,12 +136,10 @@ fn add_to_namespace(
     module_name: &str,
 ) -> Result<(), ImportError> {
     match namespace.entry(func_name) {
-        Entry::Occupied(entry) => {
-            Err(ImportError::DuplicateImport(
-                module_name.to_string(),
-                entry.key().clone(),
-            ))
-        }
+        Entry::Occupied(entry) => Err(ImportError::DuplicateImport(
+            module_name.to_string(),
+            entry.key().clone(),
+        )),
         Entry::Vacant(entry) => {
             entry.insert(func);
             Ok(())
