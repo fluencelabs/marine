@@ -249,12 +249,12 @@ jobs:
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
 
-  aqua-playground:
+  aqua:
     needs:
       - js-client
       - rust-peer-snapshot
 
-    uses: fluencelabs/aqua-playground/.github/workflows/tests.yml@master
+    uses: fluencelabs/aqua/.github/workflows/tests.yml@FLU-345
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
       rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
