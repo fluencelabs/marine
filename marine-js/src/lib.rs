@@ -2,9 +2,9 @@ mod api;
 mod global_state;
 mod logger;
 
-use wasm_bindgen::prelude::*;
-
 use crate::logger::MarineLogger;
+
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
 fn main() {

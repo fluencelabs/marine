@@ -1,15 +1,15 @@
-use std::collections::HashMap;
-
-use js_sys::WebAssembly;
-
-use marine_wasm_backend_traits::prelude::*;
-
 use crate::JsMemory;
 use crate::JsFunction;
 use crate::JsContextMut;
 use crate::JsWasmBackend;
 use crate::module_info;
 use crate::module_info::ModuleInfo;
+
+use marine_wasm_backend_traits::prelude::*;
+
+use js_sys::WebAssembly;
+
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct JsInstance {

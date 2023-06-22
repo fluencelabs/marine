@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::ops::DerefMut;
-
-use serde::Serialize;
-use serde::Deserialize;
-use serde_json::Value as JValue;
-use wasm_bindgen::prelude::*;
+use crate::global_state::MARINE;
+use crate::logger::marine_logger;
 
 use marine::generic::Marine;
 use marine::generic::MarineConfig;
@@ -30,8 +23,14 @@ use marine::generic::ModuleDescriptor;
 use marine::MarineWASIConfig;
 use marine_js_backend::JsWasmBackend;
 
-use crate::global_state::MARINE;
-use crate::logger::marine_logger;
+use serde::Serialize;
+use serde::Deserialize;
+use serde_json::Value as JValue;
+use wasm_bindgen::prelude::*;
+
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::ops::DerefMut;
 
 #[derive(Serialize, Deserialize)]
 pub struct WasiConfig {

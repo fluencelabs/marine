@@ -1,10 +1,10 @@
-use marine_wasm_backend_traits::prelude::*;
-
 use crate::function::StoredFunction;
 use crate::JsInstance;
 use crate::JsWasmBackend;
 use crate::instance::StoredInstance;
 use crate::wasi::WasiContext;
+
+use marine_wasm_backend_traits::prelude::*;
 
 pub struct JsStore {
     pub(crate) inner: Box<JsStoreInner>,

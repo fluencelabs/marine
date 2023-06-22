@@ -6,11 +6,8 @@ mod caller;
 mod function;
 mod memory;
 mod wasi;
-
 mod module_info;
 mod js_conversions;
-
-use marine_wasm_backend_traits::prelude::*;
 
 use crate::store::JsContextMut;
 use crate::store::JsStore;
@@ -22,6 +19,8 @@ use crate::memory::JsMemory;
 use crate::wasi::JsWasi;
 use crate::caller::JsCaller;
 use crate::function::JsFunction;
+
+use marine_wasm_backend_traits::prelude::*;
 
 #[derive(Default, Clone)]
 pub struct JsWasmBackend {}

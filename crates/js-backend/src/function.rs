@@ -1,11 +1,3 @@
-use anyhow::anyhow;
-use js_sys::Array;
-use wasm_bindgen::prelude::*;
-
-use marine_wasm_backend_traits::impl_for_each_function_signature;
-use marine_wasm_backend_traits::replace_with;
-use marine_wasm_backend_traits::prelude::*;
-
 use crate::JsInstance;
 use crate::JsWasmBackend;
 use crate::JsCaller;
@@ -15,6 +7,14 @@ use crate::js_conversions::{js_array_from_wval_array, wval_array_from_js_array};
 use crate::js_conversions::wval_from_js;
 use crate::js_conversions::wval_to_i32;
 use crate::store::JsStoreInner;
+
+use marine_wasm_backend_traits::impl_for_each_function_signature;
+use marine_wasm_backend_traits::replace_with;
+use marine_wasm_backend_traits::prelude::*;
+
+use anyhow::anyhow;
+use js_sys::Array;
+use wasm_bindgen::prelude::*;
 
 #[derive(Clone)]
 pub struct JsFunction {

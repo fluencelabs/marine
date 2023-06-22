@@ -1,15 +1,15 @@
-use anyhow::anyhow;
-use js_sys::WebAssembly;
-use js_sys::Uint8Array;
-use wasm_bindgen::JsValue;
-
-use marine_wasm_backend_traits::prelude::*;
-
 use crate::JsStore;
 use crate::JsInstance;
 use crate::JsImports;
 use crate::JsWasmBackend;
 use crate::module_info::ModuleInfo;
+
+use marine_wasm_backend_traits::prelude::*;
+
+use anyhow::anyhow;
+use js_sys::WebAssembly;
+use js_sys::Uint8Array;
+use wasm_bindgen::JsValue;
 
 pub struct JsModule {
     inner: WebAssembly::Module,

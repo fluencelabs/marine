@@ -1,10 +1,10 @@
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
-
 use marine_wasm_backend_traits::prelude::*;
 
 use crate::JsFunction;
 use crate::JsWasmBackend;
+
+use std::collections::hash_map::Entry;
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct JsImports {

@@ -1,6 +1,3 @@
-use std::cell::RefCell;
-use std::collections::HashSet;
-
 use log::LevelFilter;
 use log::Log;
 use log::Metadata;
@@ -8,6 +5,9 @@ use log::Record;
 use serde::Deserialize;
 use serde::Serialize;
 use wasm_bindgen::JsValue;
+
+use std::cell::RefCell;
+use std::collections::HashSet;
 
 struct ServiceLogger {
     log_fn: js_sys::Function,

@@ -1,10 +1,10 @@
-use js_sys::WebAssembly;
-use wasm_bindgen::JsCast;
+use crate::JsWasmBackend;
 
 use it_memory_traits::MemoryAccessError;
 use marine_wasm_backend_traits::prelude::*;
 
-use crate::JsWasmBackend;
+use js_sys::WebAssembly;
+use wasm_bindgen::JsCast;
 
 static MEMORY_ACCESS_CONTRACT: &str =
     "user is expected to check memory bounds before accessing memory";

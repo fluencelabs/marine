@@ -1,14 +1,14 @@
 pub(crate) mod js_imports;
 
-use std::collections::HashMap;
+use crate::JsContextMut;
+use crate::JsWasmBackend;
+
+use marine_wasm_backend_traits::prelude::*;
 
 use anyhow::anyhow;
 use wasm_bindgen::JsValue;
 
-use marine_wasm_backend_traits::prelude::*;
-
-use crate::JsContextMut;
-use crate::JsWasmBackend;
+use std::collections::HashMap;
 
 pub struct JsWasi {}
 

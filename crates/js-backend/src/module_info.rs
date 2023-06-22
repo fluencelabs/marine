@@ -1,14 +1,14 @@
-use std::collections::HashMap;
+use marine_wasm_backend_traits::FuncSig;
+use marine_wasm_backend_traits::ModuleCreationError;
+use marine_wasm_backend_traits::WType;
+use marine_wasm_backend_traits::impl_utils::MultiMap;
 
 use anyhow::anyhow;
 use walrus::IdsToIndices;
 use walrus::ExportItem;
 use walrus::ValType;
 
-use marine_wasm_backend_traits::FuncSig;
-use marine_wasm_backend_traits::ModuleCreationError;
-use marine_wasm_backend_traits::WType;
-use marine_wasm_backend_traits::impl_utils::MultiMap;
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub(crate) struct ModuleInfo {
