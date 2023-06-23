@@ -44,8 +44,9 @@ jobs:
 
   spell:
     needs: sqlite-wasm
-    uses: fluencelabs/spell/.github/workflows/snapshot.yml@main
+    uses: fluencelabs/spell/.github/workflows/snapshot.yml@FLU-353
     with:
+      ref: FLU-353
       cargo-dependencies: |
         [
           {
@@ -108,14 +109,15 @@ jobs:
       - aquavm-wasm
     uses: fluencelabs/aquavm/.github/workflows/snapshot-avm.yml@master
 
-  rust-peer:
+  nox:
     needs:
       - marine
       - aquavm-crates
       - spell
 
-    uses: fluencelabs/rust-peer/.github/workflows/build.yml@master
+    uses: fluencelabs/nox/.github/workflows/build.yml@FLU-353
     with:
+      ref: FLU-353
       cargo-dependencies: |
         [
           {
@@ -168,26 +170,28 @@ jobs:
           }
         ]
 
-  rust-peer-snapshot:
-    name: "rust-peer"
+  nox-snapshot:
+    name: "nox"
     needs:
-      - rust-peer
+      - nox
 
-    uses: fluencelabs/rust-peer/.github/workflows/container.yml@master
+    uses: fluencelabs/nox/.github/workflows/container.yml@FLU-353
     with:
+      ref: FLU-353
       image-name: "docker.fluence.dev/marine"
       flavour: "minimal"
-      rust-peer-sha: "${{ needs.rust-peer.outputs.rust-peer-sha }}"
+      nox-sha: "${{ needs.nox.outputs.nox-sha }}"
 
-  rust-peer-tests:
-    name: "rust-peer"
+  nox-tests:
+    name: "nox"
     needs:
       - marine
       - aquavm-crates
       - spell
 
-    uses: fluencelabs/rust-peer/.github/workflows/tests.yml@master
+    uses: fluencelabs/nox/.github/workflows/tests.yml@FLU-353
     with:
+      ref: FLU-353
       cargo-dependencies: |
         [
           {
@@ -222,63 +226,69 @@ jobs:
     needs:
       - marine-js
       - aquavm-avm
-      - rust-peer-snapshot
+      - nox-snapshot
 
-    uses: fluencelabs/js-client/.github/workflows/tests.yml@master
+    uses: fluencelabs/js-client/.github/workflows/tests.yml@FLU-353
     with:
+      ref: FLU-353
       marine-js-version: "${{ needs.marine-js.outputs.version }}"
       avm-version: "${{ needs.aquavm-avm.outputs.version }}"
-      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
 
   js-client:
     needs:
       - marine-js
       - aquavm-avm
 
-    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
+    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@FLU-353
     with:
+      ref: FLU-353
       marine-js-version: "${{ needs.marine-js.outputs.version }}"
       avm-version: "${{ needs.aquavm-avm.outputs.version }}"
 
-  fluence-cli-snapshot:
-    name: "fluence-cli"
+  flox-snapshot:
+    name: "flox"
     needs:
       - js-client
 
-    uses: fluencelabs/fluence-cli/.github/workflows/snapshot.yml@main
+    uses: fluencelabs/flox/.github/workflows/snapshot.yml@FLU-353
     with:
+      ref: FLU-353
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
 
   aqua:
     needs:
       - js-client
-      - rust-peer-snapshot
+      - nox-snapshot
 
-    uses: fluencelabs/aqua/.github/workflows/tests.yml@FLU-345
+    uses: fluencelabs/aqua/.github/workflows/tests.yml@FLU-353
     with:
+      ref: FLU-353
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
-      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
 
   spell-aqua-tests:
     name: "spell"
     needs:
-      - rust-peer-snapshot
-      - fluence-cli-snapshot
-    uses: fluencelabs/spell/.github/workflows/tests.yml@main
+      - nox-snapshot
+      - flox-snapshot
+    uses: fluencelabs/spell/.github/workflows/tests.yml@FLU-353
     with:
-      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
-      fluence-cli-version: "${{ needs.fluence-cli-snapshot.outputs.version }}"
+      ref: FLU-353
+      nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
+      flox-version: "${{ needs.flox-snapshot.outputs.version }}"
 
   registry:
     needs:
-      - rust-peer-snapshot
-      - fluence-cli-snapshot
+      - nox-snapshot
+      - flox-snapshot
       - sqlite-wasm
 
-    uses: fluencelabs/registry/.github/workflows/tests.yml@main
+    uses: fluencelabs/registry/.github/workflows/tests.yml@FLU-353
     with:
-      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
-      fluence-cli-version: "${{ needs.fluence-cli-snapshot.outputs.version }}"
+      ref: FLU-353
+      nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
+      flox-version: "${{ needs.flox-snapshot.outputs.version }}"
       cargo-dependencies: |
         [
           {
@@ -288,15 +298,16 @@ jobs:
           }
         ]
 
-  fluence-cli:
+  flox:
     needs:
       - js-client
       - marine
-      - rust-peer-snapshot
+      - nox-snapshot
 
-    uses: fluencelabs/fluence-cli/.github/workflows/tests.yml@main
+    uses: fluencelabs/flox/.github/workflows/tests.yml@FLU-353
     with:
+      ref: FLU-353
       marine-version: "${{ needs.marine.outputs.version }}"
       mrepl-version: "${{ needs.marine.outputs.version }}"
-      rust-peer-image: "${{ needs.rust-peer-snapshot.outputs.rust-peer-image }}"
+      nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
