@@ -177,7 +177,6 @@ jobs:
 
     uses: fluencelabs/nox/.github/workflows/container.yml@FLU-353
     with:
-      ref: FLU-353
       image-name: "docker.fluence.dev/marine"
       flavour: "minimal"
       nox-sha: "${{ needs.nox.outputs.nox-sha }}"
