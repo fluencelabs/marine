@@ -81,9 +81,7 @@ impl JsImports {
     }
 
     fn get_namespace(&mut self, module_name: String) -> &mut HashMap<String, JsFunction> {
-        self.inner
-            .entry(module_name)
-            .or_insert(<_>::default())
+        self.inner.entry(module_name).or_insert(<_>::default())
     }
 }
 

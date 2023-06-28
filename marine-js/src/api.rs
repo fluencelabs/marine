@@ -31,59 +31,103 @@ use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::ops::DerefMut;
+use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
-pub struct WasiConfig {
+pub struct ApiWasiConfig {
     pub envs: HashMap<String, String>,
-    pub args: Vec<String>,
+    pub mapped_dirs: Option<HashMap<String, String>>,
+    pub preopened_files: Option<HashSet<String>>,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct ModuleConfig {
-    pub name: String,
+pub struct ApiModuleConfig {
+    pub mem_pages_count: Option<u32>,
+    pub max_heap_size: Option<u32>,
+    pub logger_enabled: bool,
+    pub wasi: Option<ApiWasiConfig>,
+    pub logging_mask: i32,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ApiModuleDescriptor {
+    pub import_name: String,
     pub wasm_bytes: Vec<u8>,
-    pub wasi_config: Option<WasiConfig>,
+    pub config: Option<ApiModuleConfig>,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct ServiceConfig {
-    pub modules: Vec<ModuleConfig>,
+pub struct ApiServiceConfig {
+    pub modules_config: Vec<ApiModuleDescriptor>,
+    pub default_modules_config: Option<ApiModuleConfig>,
 }
 
-impl From<&ServiceConfig> for MarineConfig<JsWasmBackend> {
-    fn from(val: &ServiceConfig) -> Self {
-        let create_module_config = |wasi_config: Option<&WasiConfig>| {
-            let wasi_config = wasi_config.map(|config: &WasiConfig| MarineWASIConfig {
-                envs: config.envs.clone(),
-                preopened_files: <_>::default(),
-                mapped_dirs: <_>::default(),
-            });
-
-            MarineModuleConfig {
-                mem_pages_count: None,
-                max_heap_size: None,
-                logger_enabled: true,
-                host_imports: Default::default(),
-                wasi: wasi_config,
-                logging_mask: 0,
-            }
-        };
-
-        let module_descriptors = val
-            .modules
-            .iter()
-            .map(|module_config| ModuleDescriptor {
-                load_from: None,
-                file_name: module_config.name.clone(),
-                import_name: module_config.name.clone(),
-                config: create_module_config(module_config.wasi_config.as_ref()),
+impl From<ApiWasiConfig> for MarineWASIConfig {
+    fn from(value: ApiWasiConfig) -> Self {
+        let preopened_files = value
+            .preopened_files
+            .map(|preopened_files| {
+                preopened_files
+                    .into_iter()
+                    .map(Into::into)
+                    .collect::<HashSet<PathBuf>>()
             })
+            .unwrap_or_default();
+
+        let mapped_dirs = value
+            .mapped_dirs
+            .map(|mapped_dirs| {
+                mapped_dirs
+                    .iter()
+                    .map(|(guest, host)| (guest.clone(), host.into()))
+                    .collect::<HashMap<String, PathBuf>>()
+            })
+            .unwrap_or_default();
+
+        Self {
+            envs: value.envs,
+            preopened_files,
+            mapped_dirs,
+        }
+    }
+}
+
+impl From<ApiModuleConfig> for MarineModuleConfig<JsWasmBackend> {
+    fn from(value: ApiModuleConfig) -> Self {
+        Self {
+            mem_pages_count: value.mem_pages_count,
+            max_heap_size: value.max_heap_size.map(|val| val as u64),
+            logger_enabled: value.logger_enabled,
+            host_imports: Default::default(),
+            wasi: value.wasi.map(Into::into),
+            logging_mask: value.logging_mask,
+        }
+    }
+}
+
+impl From<ApiModuleDescriptor> for ModuleDescriptor<JsWasmBackend> {
+    fn from(value: ApiModuleDescriptor) -> Self {
+        Self {
+            load_from: None,
+            file_name: value.import_name.clone(),
+            import_name: value.import_name,
+            config: value.config.map(Into::into).unwrap_or_default(),
+        }
+    }
+}
+
+impl From<ApiServiceConfig> for MarineConfig<JsWasmBackend> {
+    fn from(value: ApiServiceConfig) -> Self {
+        let modules_config = value
+            .modules_config
+            .into_iter()
+            .map(Into::into)
             .collect::<Vec<ModuleDescriptor<JsWasmBackend>>>();
 
         MarineConfig {
             modules_dir: None,
-            modules_config: module_descriptors,
-            default_modules_config: None,
+            modules_config,
+            default_modules_config: value.default_modules_config.map(Into::into),
         }
     }
 }
@@ -92,7 +136,7 @@ impl From<&ServiceConfig> for MarineConfig<JsWasmBackend> {
 ///
 /// # Arguments
 ///
-/// * `config` - description of wasm modiles with names, wasm bytes and wasi parameters
+/// * `config` - description of wasm modules with names, wasm bytes and wasi parameters
 /// * `log_fn` - function to direct logs from wasm modules
 ///
 /// # Return value
@@ -101,25 +145,24 @@ impl From<&ServiceConfig> for MarineConfig<JsWasmBackend> {
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
 pub fn register_module(config: JsValue, log_fn: js_sys::Function) -> Result<(), JsError> {
-    let config: ServiceConfig = serde_wasm_bindgen::from_value(config)?;
-
-    let marine_config: MarineConfig<JsWasmBackend> = (&config).into();
-
+    let mut config: ApiServiceConfig = serde_wasm_bindgen::from_value(config)?;
     let modules = config
-        .modules
-        .into_iter()
-        .map(|config| (config.name, config.wasm_bytes))
+        .modules_config
+        .iter_mut()
+        .map(|descriptor| {
+            (
+                descriptor.import_name.clone(),
+                std::mem::take(&mut descriptor.wasm_bytes),
+            )
+        })
         .collect::<HashMap<String, Vec<u8>>>();
 
-    let module_names = modules
-        .keys()
-        .map(Clone::clone)
-        .collect::<HashSet<String>>();
+    let marine_config: MarineConfig<JsWasmBackend> = config.into();
+    let module_names = modules.keys().cloned().collect::<HashSet<String>>();
 
     marine_logger().enable_service_logging(log_fn, module_names);
 
     let new_marine = Marine::<JsWasmBackend>::with_modules(modules, marine_config)?;
-
     MARINE.with(|marine| marine.replace(Some(new_marine)));
 
     Ok(())

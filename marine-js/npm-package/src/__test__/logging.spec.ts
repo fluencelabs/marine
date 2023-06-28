@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as url from 'url';
 import { MarineService } from '../MarineService.js';
 import { LogLevel } from '../types.js';
+import {Env, MarineModuleConfig, MarineServiceConfig, ModuleDescriptor} from "../config.js";
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 const examplesDir = path.join(__dirname, '../../../../examples');
@@ -17,6 +18,31 @@ const loadWasmModule = async (waspPath: string) => {
 const loadWasmBytes = async (waspPath: string) => {
     const fullPath = path.join(waspPath);
     return await fs.promises.readFile(fullPath);
+};
+
+const createModuleConfig = (envs: Env): MarineModuleConfig => {
+    return {
+        logger_enabled: true,
+        logging_mask: 5,
+        wasi: {
+            envs: envs,
+            preopened_files: new Set<string>(),
+            mapped_dirs: new Map<String, string>()
+        }
+    }
+}
+
+const createModuleDescriptor = (name: string, wasm_bytes: Uint8Array, envs: Env): ModuleDescriptor  => {
+    return {
+        import_name: name,
+        wasm_bytes: wasm_bytes,
+        config: createModuleConfig(envs),
+    }
+}
+const createSimpleService = (name: string, wasm_bytes: Uint8Array, envs: Env): MarineServiceConfig => {
+    return {
+        modules_config: [createModuleDescriptor(name, wasm_bytes, envs)]
+    }
 };
 
 
@@ -37,7 +63,9 @@ describe.each([
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm')
         );
 
-        const marineService = new MarineService(marine, [{name: 'srv', wasm_bytes: greeting}], 'srv', logger, undefined, { WASM_LOG: level });
+        const marineService = new MarineService(marine, 'srv', logger, createSimpleService('srv', greeting, {
+            WASM_LOG: level
+        }));
         await marineService.init();
 
         // act
@@ -52,7 +80,7 @@ describe.each([
 
 describe.each([
     // force column layout
-    [undefined],
+    [{}],
     [{ WASM_LOG: 'off' }],
 ])('WASM logging tests for level "off"', (env) => {
     it('Testing logging level by passing env: %0', async () => {
@@ -64,7 +92,7 @@ describe.each([
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
-        const marineService = new MarineService(marine, [{name: 'srv', wasm_bytes: greeting}], 'srv', logger, undefined, env);
+        const marineService = new MarineService(marine, 'srv', logger, createSimpleService('srv', greeting, env),);
         await marineService.init();
 
         // act
