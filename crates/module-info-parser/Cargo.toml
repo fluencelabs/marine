@@ -17,7 +17,7 @@ marine-wasm-backend-traits = { path = "../wasm-backend-traits", version = "0.2.1
 
 anyhow = "1.0.66"
 chrono = "0.4.26"
-walrus = "0.19.0"
+walrus = "0.20.1"
 semver = "1.0.14"
 
 serde = "1.0.147"
