@@ -56,6 +56,21 @@ jobs:
           }
         ]
 
+  decider:
+    needs:
+      - spell
+    uses: fluencelabs/decider/.github/workflows/snapshot.yml@main
+    with:
+      cargo-dependencies: |
+        [
+          {
+            "package": "fluence-spell-dtos",
+            "version": "=${{ needs.spell.outputs.cargo-version }}",
+            "manifest": "src/distro/Cargo.toml",
+            "registry": "fluence"
+          }
+        ]
+
   aquavm-wasm:
     name: "aquavm"
     needs:
@@ -114,6 +129,7 @@ jobs:
       - marine
       - aquavm-crates
       - spell
+      - decider
 
     uses: fluencelabs/nox/.github/workflows/build.yml@FLU-353
     with:
@@ -143,6 +159,12 @@ jobs:
           {
             "package": "fluence-spell-distro",
             "version": "=${{ needs.spell.outputs.cargo-version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "decider-distro",
+            "version": "=${{ needs.decider.outputs.cargo-version }}",
+            "manifest": "crates/system-services/Cargo.toml",
             "registry": "fluence"
           }
         ]
