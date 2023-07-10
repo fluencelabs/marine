@@ -145,6 +145,12 @@ jobs:
             "registry": "fluence"
           },
           {
+            "package": "decider-distro",
+            "version": "=${{ needs.decider.outputs.cargo-version }}",
+            "manifest": "crates/system-services/Cargo.toml",
+            "registry": "fluence"
+          },
+          {
             "package": "fluence-spell-dtos",
             "version": "=${{ needs.spell.outputs.cargo-version }}",
             "registry": "fluence"
@@ -152,12 +158,6 @@ jobs:
           {
             "package": "fluence-spell-distro",
             "version": "=${{ needs.spell.outputs.cargo-version }}",
-            "registry": "fluence"
-          },
-          {
-            "package": "decider-distro",
-            "version": "=${{ needs.decider.outputs.cargo-version }}",
-            "manifest": "crates/system-services/Cargo.toml",
             "registry": "fluence"
           }
         ]
