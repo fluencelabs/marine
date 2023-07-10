@@ -202,6 +202,7 @@ jobs:
       - marine
       - aquavm-crates
       - spell
+      - decider
 
     uses: fluencelabs/nox/.github/workflows/tests.yml@master
     with:
@@ -220,6 +221,12 @@ jobs:
           {
             "package": "air-interpreter-wasm",
             "version": "=${{ needs.aquavm-crates.outputs.version }}",
+            "registry": "fluence"
+          },
+          {
+            "package": "decider-distro",
+            "version": "=${{ needs.decider.outputs.cargo-version }}",
+            "manifest": "crates/system-services/Cargo.toml",
             "registry": "fluence"
           },
           {
