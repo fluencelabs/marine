@@ -125,7 +125,7 @@ jobs:
       - spell
       - decider
 
-    uses: fluencelabs/nox/.github/workflows/build.yml@master
+    uses: fluencelabs/nox/.github/workflows/build.yml@debug-spell-dtos
     with:
       cargo-dependencies: |
         [
