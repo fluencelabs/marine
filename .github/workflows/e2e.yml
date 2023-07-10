@@ -39,9 +39,8 @@ jobs:
 
   spell:
     needs: sqlite-wasm
-    uses: fluencelabs/spell/.github/workflows/snapshot.yml@FLU-353
+    uses: fluencelabs/spell/.github/workflows/snapshot.yml@main
     with:
-      ref: FLU-353
       cargo-dependencies: |
         [
           {
@@ -126,9 +125,8 @@ jobs:
       - spell
       - decider
 
-    uses: fluencelabs/nox/.github/workflows/build.yml@FLU-353
+    uses: fluencelabs/nox/.github/workflows/build.yml@master
     with:
-      ref: FLU-353
       cargo-dependencies: |
         [
           {
@@ -192,7 +190,7 @@ jobs:
     needs:
       - nox
 
-    uses: fluencelabs/nox/.github/workflows/container.yml@FLU-353
+    uses: fluencelabs/nox/.github/workflows/container.yml@master
     with:
       image-name: "docker.fluence.dev/marine"
       flavour: "minimal"
@@ -205,9 +203,8 @@ jobs:
       - aquavm-crates
       - spell
 
-    uses: fluencelabs/nox/.github/workflows/tests.yml@FLU-353
+    uses: fluencelabs/nox/.github/workflows/tests.yml@master
     with:
-      ref: FLU-353
       cargo-dependencies: |
         [
           {
@@ -244,9 +241,8 @@ jobs:
       - aquavm-avm
       - nox-snapshot
 
-    uses: fluencelabs/js-client/.github/workflows/tests.yml@FLU-353
+    uses: fluencelabs/js-client/.github/workflows/tests.yml@master
     with:
-      ref: FLU-353
       marine-js-version: "${{ needs.marine-js.outputs.version }}"
       avm-version: "${{ needs.aquavm-avm.outputs.version }}"
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
@@ -256,9 +252,8 @@ jobs:
       - marine-js
       - aquavm-avm
 
-    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@FLU-353
+    uses: fluencelabs/js-client/.github/workflows/snapshot.yml@master
     with:
-      ref: FLU-353
       marine-js-version: "${{ needs.marine-js.outputs.version }}"
       avm-version: "${{ needs.aquavm-avm.outputs.version }}"
 
@@ -267,9 +262,8 @@ jobs:
     needs:
       - js-client
 
-    uses: fluencelabs/flox/.github/workflows/snapshot.yml@FLU-353
+    uses: fluencelabs/flox/.github/workflows/snapshot.yml@main
     with:
-      ref: FLU-353
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
 
   aqua:
@@ -277,9 +271,8 @@ jobs:
       - js-client
       - nox-snapshot
 
-    uses: fluencelabs/aqua/.github/workflows/tests.yml@FLU-353
+    uses: fluencelabs/aqua/.github/workflows/tests.yml@main
     with:
-      ref: FLU-353
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
 
@@ -288,9 +281,8 @@ jobs:
     needs:
       - nox-snapshot
       - flox-snapshot
-    uses: fluencelabs/spell/.github/workflows/tests.yml@FLU-353
+    uses: fluencelabs/spell/.github/workflows/tests.yml@main
     with:
-      ref: FLU-353
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
       flox-version: "${{ needs.flox-snapshot.outputs.version }}"
 
@@ -300,9 +292,8 @@ jobs:
       - flox-snapshot
       - sqlite-wasm
 
-    uses: fluencelabs/registry/.github/workflows/tests.yml@FLU-353
+    uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
-      ref: FLU-353
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
       flox-version: "${{ needs.flox-snapshot.outputs.version }}"
       cargo-dependencies: |
@@ -320,9 +311,8 @@ jobs:
       - marine
       - nox-snapshot
 
-    uses: fluencelabs/flox/.github/workflows/tests.yml@FLU-353
+    uses: fluencelabs/flox/.github/workflows/tests.yml@main
     with:
-      ref: FLU-353
       marine-version: "${{ needs.marine.outputs.version }}"
       mrepl-version: "${{ needs.marine.outputs.version }}"
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
