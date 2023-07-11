@@ -15,7 +15,7 @@ marine-it-interfaces = { path = "../it-interfaces", version = "0.8.1" }
 marine-module-interface = { path = "../module-interface", version = "0.7.1" }
 marine-wasm-backend-traits = { path = "../wasm-backend-traits", version = "0.2.1"}
 
-anyhow = "1.0.66"
+anyhow = "1.0.71"
 walrus = "0.20.1"
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
 nom = "7.1"
