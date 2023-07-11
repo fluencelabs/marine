@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0](https://github.com/fluencelabs/marine/compare/marine-wasm-backend-traits-v0.2.1...marine-wasm-backend-traits-v0.3.0) (2023-07-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **wasm-backend, app-service:** use String for wasi env vars + require Clone for Function trait   ([#333](https://github.com/fluencelabs/marine/issues/333))
+
+### Features
+
+* **wasm-backend, app-service:** use String for wasi env vars + require Clone for Function trait   ([#333](https://github.com/fluencelabs/marine/issues/333)) ([aeae703](https://github.com/fluencelabs/marine/commit/aeae703229f5f9410429390fe2e72d6084527f14))
+
 ## [0.2.1](https://github.com/fluencelabs/marine/compare/marine-wasm-backend-traits-v0.2.0...marine-wasm-backend-traits-v0.2.1) (2023-04-04)
 
 
