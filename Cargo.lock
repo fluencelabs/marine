@@ -2363,7 +2363,7 @@ name = "marine-runtime"
 version = "0.26.3"
 dependencies = [
  "bytesize",
- "env_logger 0.9.3",
+ "env_logger 0.10.0",
  "it-json-serde 0.4.1",
  "it-memory-traits 0.4.0",
  "itertools",
@@ -2565,7 +2565,7 @@ dependencies = [
  "anyhow",
  "check-latest",
  "clap 2.34.0",
- "env_logger 0.9.3",
+ "env_logger 0.10.0",
  "fluence-app-service 0.25.3",
  "itertools",
  "log",
