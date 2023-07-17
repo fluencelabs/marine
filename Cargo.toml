@@ -13,25 +13,25 @@ members = [
     "crates/wasm-backend-traits",
     "crates/wasmtime-backend",
     "crates/utils",
-    "examples/call_parameters",
-    "examples/failing",
+    #"examples/call_parameters",
+    #"examples/failing",
     "examples/greeting",
-    "examples/greeting_record",
-    "examples/ipfs-node/effector",
-    "examples/ipfs-node/pure",
-    "examples/motivational-example/donkey",
-    "examples/motivational-example/shrek",
-    "examples/records/effector",
-    "examples/records/pure",
-    "examples/records/test-record",
-    "examples/sqlite",
-    "examples/url-downloader/curl_adapter",
-    "examples/url-downloader/facade",
-    "examples/url-downloader/local_storage",
-    "examples/multiservice_marine_test",
-    "examples/multiservice_marine_test/consumer",
-    "examples/multiservice_marine_test/producer",
-    "examples/build_rs",
+    #"examples/greeting_record",
+    #"examples/ipfs-node/effector",
+    #"examples/ipfs-node/pure",
+    #"examples/motivational-example/donkey",
+    #"examples/motivational-example/shrek",
+    #"examples/records/effector",
+    #"examples/records/pure",
+    #"examples/records/test-record",
+    #"examples/sqlite",
+    #"examples/url-downloader/curl_adapter",
+    #"examples/url-downloader/facade",
+    #"examples/url-downloader/local_storage",
+    #"examples/multiservice_marine_test",
+    #"examples/multiservice_marine_test/consumer",
+    #"examples/multiservice_marine_test/producer",
+    #"examples/build_rs",
     "marine",
     "marine/tests/wasm_tests/arguments_passing",
     "marine/tests/wasm_tests/arrays_passing",
@@ -49,3 +49,9 @@ lto = true
 debug-assertions = false
 overflow-checks = false
 panic = "abort"
+
+[patch.crates-io]
+wasmer-interface-types-fl = {version = "0.26.1", path = "../interface-types/wasmer-it"}
+it-memory-traits= {version = "0.4.0", path = "../interface-types/crates/it-memory-traits"}
+it-lilo = {version = "0.5.1", path = "../interface-types/crates/it-lilo"}
+fluence-it-types = {version = "0.4.1", path = "../interface-types/crates/it-types"}

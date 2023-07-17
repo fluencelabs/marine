@@ -92,6 +92,23 @@ impl<WB: WasmBackend> MarineCore<WB> {
         )
     }
 
+    pub async fn call_async(
+        &mut self,
+        module_name: impl AsRef<str>,
+        func_name: impl AsRef<str>,
+        arguments: &[IValue],
+    ) -> MResult<Vec<IValue>> {
+        let module_name = module_name.as_ref();
+        let store = &mut self.store;
+        let module = self.modules.get_mut(module_name).ok_or_else(|| MError::NoSuchModule(module_name.to_string()))?;
+        module.call_async(
+            &mut store.get_mut().as_context_mut(),
+            module_name,
+            func_name.as_ref(),
+            arguments,
+        ).await
+    }
+
     /// Load a new module inside Marine.
     pub fn load_module(
         &mut self,

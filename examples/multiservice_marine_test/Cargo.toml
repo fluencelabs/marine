@@ -8,4 +8,4 @@ publish = false
 [dependencies]
 
 [dev-dependencies]
-marine-rs-sdk-test = "0.8.1"
+marine-rs-sdk-test = "0.10.0"

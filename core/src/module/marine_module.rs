@@ -81,6 +81,23 @@ impl<WB: WasmBackend> Callable<WB> {
             .to_owned();
         Ok(result)
     }
+
+    pub async fn call_async(
+        &mut self,
+        store: &mut <WB as WasmBackend>::ContextMut<'_>,
+        args: &[IValue],
+    ) -> MResult<Vec<IValue>> {
+        use wasmer_it::interpreter::stack::Stackable;
+
+        let result = self
+            .it_module_func
+            .interpreter
+            .run(args, Arc::make_mut(&mut self.it_instance), store)?
+            .as_slice()
+            .to_owned();
+
+        Ok(result)
+    }
 }
 
 type ExportFunctions<WB> = HashMap<SharedString, Arc<Callable<WB>>>;
@@ -178,6 +195,36 @@ impl<WB: WasmBackend> MModule<WB> {
             },
             |func| Arc::make_mut(func).call(store, args),
         );
+        log::debug!(
+            "calling {}::{} with result: {:?}",
+            module_name,
+            function_name,
+            res
+        );
+        res
+    }
+
+    pub(crate) async fn call_async(
+        &mut self,
+        store: &mut <WB as WasmBackend>::ContextMut<'_>,
+        module_name: &str,
+        function_name: &str,
+        args: &[IValue],
+    ) -> MResult<Vec<IValue>> {
+        log::debug!(
+            "calling {}::{} with args: {:?}",
+            module_name,
+            function_name,
+            args
+        );
+        let func = self.export_funcs.get_mut(function_name).ok_or_else(|| {
+                MError::NoSuchFunction(
+                    module_name.to_string(),
+                    function_name.to_string(),
+                )
+            },
+        )?;
+        let res = Arc::make_mut(func).call_async(store, args).await;
         log::debug!(
             "calling {}::{} with result: {:?}",
             module_name,

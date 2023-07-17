@@ -66,6 +66,20 @@ impl WasmBackend for WasmtimeWasmBackend {
 
         Ok(Self { engine })
     }
+
+    fn new_async() -> WasmBackendResult<Self> {
+        let mut config = wasmtime::Config::new();
+        config
+            .debug_info(false)
+            .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable)
+            .async_support(true)
+            .epoch_interruption(true);
+
+        let engine =
+            wasmtime::Engine::new(&config).map_err(WasmBackendError::InitializationError)?;
+
+        Ok(Self { engine })
+    }
 }
 
 #[derive(Default)]

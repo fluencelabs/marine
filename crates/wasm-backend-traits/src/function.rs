@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 use crate::AsContextMut;
 use crate::FuncSig;
 use crate::impl_for_each_function_signature;
@@ -21,9 +22,11 @@ use crate::RuntimeResult;
 use crate::WasmBackend;
 use crate::WValue;
 
+use async_trait::async_trait;
+
 /// A Wasm function handle, it can be either a function from a host or an export from an `Instance`.
 /// As it is only a handle to an object in `Store`, cloning is cheap
-pub trait Function<WB: WasmBackend>: Send + Sync + Clone {
+pub trait Function<WB: WasmBackend>: AsyncFunction<WB> + Send + Sync + Clone {
     /// Creates a new function with dynamic signature.
     /// The signature check is performed at runtime.
     fn new<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
@@ -60,6 +63,12 @@ pub trait Function<WB: WasmBackend>: Send + Sync + Clone {
         store: &mut impl AsContextMut<WB>,
         args: &[WValue],
     ) -> RuntimeResult<Vec<WValue>>;
+}
+
+#[async_trait]
+pub trait AsyncFunction<WB: WasmBackend> {
+    async fn call_async<CTX>(&self, store: &mut CTX, args: &[WValue]) -> RuntimeResult<Vec<WValue>>
+    where CTX: AsContextMut<WB> + Send;
 }
 
 /// A helper trait for creating a function with a static signature.

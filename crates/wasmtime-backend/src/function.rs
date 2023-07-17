@@ -29,7 +29,9 @@ use marine_wasm_backend_traits::impl_for_each_function_signature;
 use marine_wasm_backend_traits::replace_with;
 
 use anyhow::anyhow;
+use async_trait::async_trait;
 
+//use std::future::Future;
 #[derive(Clone)]
 pub struct WasmtimeFunction {
     pub(crate) inner: wasmtime::Func,
@@ -113,6 +115,30 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
             .collect::<Result<Vec<_>, _>>()
     }
 }
+
+#[async_trait]
+impl AsyncFunction<WasmtimeWasmBackend> for WasmtimeFunction {
+    async fn call_async<CTX>(&self, store: &mut CTX, args: &[WValue]) -> RuntimeResult<Vec<WValue>>
+    where CTX: AsContextMut<WasmtimeWasmBackend> + Send {
+        let mut context = store.as_context_mut().inner;
+
+        let args = args.iter().map(wvalue_to_val).collect::<Vec<_>>();
+        let results_count = self.inner.ty(&mut context).results().len();
+        let mut results = vec![wasmtime::Val::null(); results_count];
+
+        self.inner
+            .call_async(&mut context, &args, &mut results)
+            .await
+            .map_err(inspect_call_error)?;
+
+        results
+            .iter()
+            .map(val_to_wvalue)
+            .collect::<Result<Vec<_>, _>>()
+    }
+}
+
+
 
 /// Generates a function that accepts a Fn with $num template parameters and turns it into WasmtimeFunction.
 /// Needed to allow users to pass almost any function to `Function::new_typed` without worrying about signature.
