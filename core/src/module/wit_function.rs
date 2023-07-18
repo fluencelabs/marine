@@ -24,7 +24,7 @@ use crate::MResult;
 use marine_wasm_backend_traits::DelayedContextLifetime;
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::WValue;
-use marine_wasm_backend_traits::Function;
+use marine_wasm_backend_traits::ExportFunction;
 
 use wasmer_it::interpreter::wasm;
 
@@ -33,7 +33,7 @@ use std::sync::Arc;
 #[derive(Clone)]
 enum WITFunctionInner<WB: WasmBackend> {
     Export {
-        func: Arc<<WB as WasmBackend>::Function>,
+        func: Arc<<WB as WasmBackend>::ExportFunction>,
     },
     Import {
         // TODO: use dyn Callable here
@@ -54,7 +54,7 @@ impl<WB: WasmBackend> WITFunction<WB> {
     /// Creates functions from a "usual" (not IT) module export.
     pub(super) fn from_export(
         store: &mut <WB as WasmBackend>::Store,
-        dyn_func: <WB as WasmBackend>::Function,
+        dyn_func: <WB as WasmBackend>::ExportFunction,
         name: String,
     ) -> MResult<Self> {
         use super::type_converters::wtype_to_itype;

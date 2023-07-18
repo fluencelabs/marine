@@ -31,14 +31,14 @@ const DEFAULT_HEAP_PAGES_COUNT: u32 = 1600;
 pub type ErrorHandler =
     Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + Sync + Send + 'static>>;
 pub type HostExportedFunc<WB> = Box<
-    dyn for<'c> Fn(&mut <WB as WasmBackend>::Caller<'c>, Vec<IValue>) -> Option<IValue>
+    dyn for<'c> Fn(&mut <WB as WasmBackend>::ImportCallContext<'c>, Vec<IValue>) -> Option<IValue>
         + Sync
         + Send
         + 'static,
 >;
 
 pub type RawImportCreator<WB> =
-    Box<dyn FnOnce(<WB as WasmBackend>::ContextMut<'_>) -> <WB as WasmBackend>::Function>;
+    Box<dyn FnOnce(<WB as WasmBackend>::ContextMut<'_>) -> <WB as WasmBackend>::HostFunction>;
 
 pub struct HostImportDescriptor<WB: WasmBackend> {
     /// This closure will be invoked for corresponding import.

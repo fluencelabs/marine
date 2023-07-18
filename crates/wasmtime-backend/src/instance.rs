@@ -76,7 +76,7 @@ impl Instance<WasmtimeWasmBackend> for WasmtimeInstance {
         &self,
         store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         name: &str,
-    ) -> ResolveResult<<WasmtimeWasmBackend as WasmBackend>::Function> {
+    ) -> ResolveResult<<WasmtimeWasmBackend as WasmBackend>::ExportFunction> {
         let func = self
             .inner
             .get_export(&mut store.as_context_mut().inner, name)

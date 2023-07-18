@@ -69,9 +69,11 @@ pub trait WasmBackend: Clone + Default + 'static {
     /// A temporary mutable handle to `Store`
     type ContextMut<'c>: ContextMut<Self>;
     /// A type that is used to pass context to imports.
-    type Caller<'c>: Caller<Self>;
-    /// A function contained in `Store`, either host one or from wasm.
-    type Function: Function<Self> + FuncConstructor<Self>;
+    type ImportCallContext<'c>: ImportCallContext<Self>;
+    /// A host function prepared to be used as import for instantiating a module, contained in `Store`.
+    type HostFunction: HostFunction<Self> + FuncConstructor<Self>;
+    /// An export function from a wasm instance, contained in `Store`
+    type ExportFunction: ExportFunction<Self>;
     /// A wasm memory.
     type Memory: Memory<Self>;
     /// A view to the wasm memory.

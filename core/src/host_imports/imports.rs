@@ -41,16 +41,18 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     store: &mut <WB as WasmBackend>::Store,
     descriptor: HostImportDescriptor<WB>,
     record_types: Arc<MRecordTypes>,
-) -> <WB as WasmBackend>::Function {
+) -> <WB as WasmBackend>::HostFunction {
     let raw_args = itypes_args_to_wtypes(&descriptor.argument_types);
     let raw_output =
         itypes_output_to_wtypes(&output_type_to_types(descriptor.output_type.as_ref()));
 
-    let func = move |caller: <WB as WasmBackend>::Caller<'_>, inputs: &[WValue]| -> Vec<WValue> {
-        call_host_import(caller, inputs, &descriptor, record_types.clone())
+    let func = move |call_cotnext: <WB as WasmBackend>::ImportCallContext<'_>,
+                     inputs: &[WValue]|
+          -> Vec<WValue> {
+        call_host_import(call_cotnext, inputs, &descriptor, record_types.clone())
     };
 
-    <WB as WasmBackend>::Function::new_with_caller(
+    <WB as WasmBackend>::HostFunction::new_with_caller(
         &mut store.as_context_mut(),
         FuncSig::new(raw_args, raw_output),
         func,
@@ -58,7 +60,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
 }
 
 fn call_host_import<WB: WasmBackend>(
-    mut caller: <WB as WasmBackend>::Caller<'_>,
+    mut caller: <WB as WasmBackend>::ImportCallContext<'_>,
     inputs: &[WValue],
     descriptor: &HostImportDescriptor<WB>,
     record_types: Arc<MRecordTypes>,
@@ -95,7 +97,7 @@ fn call_host_import<WB: WasmBackend>(
 }
 
 fn lift_inputs<WB: WasmBackend>(
-    caller: &mut <WB as WasmBackend>::Caller<'_>,
+    caller: &mut <WB as WasmBackend>::ImportCallContext<'_>,
     memory: <WB as WasmBackend>::Memory,
     record_types: Arc<MRecordTypes>,
     inputs: &[WValue],
@@ -113,7 +115,7 @@ fn lift_inputs<WB: WasmBackend>(
 }
 
 fn lower_outputs<WB: WasmBackend>(
-    caller: &mut <WB as WasmBackend>::Caller<'_>,
+    caller: &mut <WB as WasmBackend>::ImportCallContext<'_>,
     memory: <WB as WasmBackend>::Memory,
     output: Option<IValue>,
 ) -> Vec<WValue> {

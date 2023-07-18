@@ -50,8 +50,9 @@ impl WasmBackend for WasmtimeWasmBackend {
     type Instance = WasmtimeInstance;
     type Context<'c> = WasmtimeContext<'c>;
     type ContextMut<'c> = WasmtimeContextMut<'c>;
-    type Caller<'c> = WasmtimeCaller<'c>;
-    type Function = WasmtimeFunction;
+    type ImportCallContext<'c> = WasmtimeImportCallContext<'c>;
+    type HostFunction = WasmtimeFunction;
+    type ExportFunction = WasmtimeFunction;
     type Memory = WasmtimeMemory;
     type MemoryView = WasmtimeMemory;
     type Wasi = WasmtimeWasi;
