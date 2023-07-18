@@ -1988,7 +1988,7 @@ dependencies = [
  "termion",
  "thiserror",
  "toml 0.7.4",
- "walrus",
+ "walrus 0.20.1",
 ]
 
 [[package]]
@@ -2076,7 +2076,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "walrus",
+ "walrus 0.19.0",
  "wasmer-interface-types-fl 0.24.1",
 ]
 
@@ -2091,7 +2091,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "walrus",
+ "walrus 0.20.1",
  "wasmer-interface-types-fl 0.26.1",
 ]
 
@@ -2127,7 +2127,7 @@ dependencies = [
  "semver 1.0.17",
  "serde",
  "thiserror",
- "walrus",
+ "walrus 0.19.0",
  "wasmer-interface-types-fl 0.24.1",
  "wasmer-runtime-core-fl",
 ]
@@ -2145,7 +2145,7 @@ dependencies = [
  "semver 1.0.17",
  "serde",
  "thiserror",
- "walrus",
+ "walrus 0.20.1",
  "wasmer-interface-types-fl 0.26.1",
 ]
 
@@ -2179,7 +2179,7 @@ dependencies = [
  "marine-wasm-backend-traits",
  "paste",
  "serde-wasm-bindgen",
- "walrus",
+ "walrus 0.19.0",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -2237,7 +2237,7 @@ dependencies = [
  "semver 1.0.17",
  "serde",
  "thiserror",
- "walrus",
+ "walrus 0.19.0",
  "wasmer-runtime-core-fl",
 ]
 
@@ -2252,7 +2252,7 @@ dependencies = [
  "semver 1.0.17",
  "serde",
  "thiserror",
- "walrus",
+ "walrus 0.20.1",
 ]
 
 [[package]]
@@ -2268,7 +2268,7 @@ dependencies = [
  "semver 1.0.17",
  "serde",
  "thiserror",
- "walrus",
+ "walrus 0.19.0",
  "wasmer-interface-types-fl 0.24.1",
 ]
 
@@ -2283,7 +2283,7 @@ dependencies = [
  "semver 1.0.17",
  "serde",
  "thiserror",
- "walrus",
+ "walrus 0.20.1",
  "wasmer-interface-types-fl 0.26.1",
 ]
 
@@ -2357,7 +2357,7 @@ name = "marine-runtime"
 version = "0.26.3"
 dependencies = [
  "bytesize",
- "env_logger 0.9.3",
+ "env_logger 0.10.0",
  "it-json-serde 0.4.1",
  "it-memory-traits 0.4.0",
  "itertools",
@@ -2558,7 +2558,7 @@ dependencies = [
  "anyhow",
  "check-latest",
  "clap 2.34.0",
- "env_logger 0.9.3",
+ "env_logger 0.10.0",
  "fluence-app-service 0.25.3",
  "itertools",
  "log",
@@ -2857,9 +2857,9 @@ dependencies = [
 
 [[package]]
 name = "paste"
-version = "1.0.12"
+version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f746c4065a8fa3fe23974dd82f15431cc8d40779821001404d10d2e79ca7d79"
+checksum = "de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c"
 
 [[package]]
 name = "percent-encoding"
@@ -4058,9 +4058,9 @@ checksum = "711b9620af191e0cdc7468a8d14e709c3dcdb115b36f838e601583af800a370a"
 
 [[package]]
 name = "uuid"
-version = "1.3.4"
+version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fa2982af2eec27de306107c027578ff7f423d65f7250e40ce0fea8f45248b81"
+checksum = "79daa5ed5740825c40b389c5e50312b9c86df53fccd33f281df655642b43869d"
 dependencies = [
  "getrandom 0.2.10",
 ]
@@ -4132,6 +4132,22 @@ dependencies = [
  "log",
  "walrus-macro",
  "wasmparser 0.77.1",
+]
+
+[[package]]
+name = "walrus"
+version = "0.20.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cc27d837c587f863d99515dc8cae7cef1098bd1d99fa29373e3660c12766265e"
+dependencies = [
+ "anyhow",
+ "gimli 0.26.2",
+ "id-arena",
+ "leb128",
+ "log",
+ "walrus-macro",
+ "wasm-encoder",
+ "wasmparser 0.80.2",
 ]
 
 [[package]]
@@ -4568,6 +4584,12 @@ name = "wasmparser"
 version = "0.77.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5fe3d5405e9ea6c1317a656d6e0820912d8b7b3607823a7596117c8f666daf6f"
+
+[[package]]
+name = "wasmparser"
+version = "0.80.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "449167e2832691a1bff24cde28d2804e90e09586a448c8e76984792c44334a6b"
 
 [[package]]
 name = "wasmparser"
