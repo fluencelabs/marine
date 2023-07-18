@@ -52,5 +52,5 @@ pub trait Instance<WB: WasmBackend>: Clone {
         &self,
         store: &mut impl AsContextMut<WB>,
         name: &str,
-    ) -> ResolveResult<<WB as WasmBackend>::Function>;
+    ) -> ResolveResult<<WB as WasmBackend>::ExportFunction>;
 }

@@ -16,7 +16,7 @@
 
 use crate::WasmtimeContextMut;
 use crate::WasmtimeWasmBackend;
-use crate::WasmtimeCaller;
+use crate::WasmtimeImportCallContext;
 use crate::val_to_wvalue;
 use crate::StoreState;
 use crate::sig_to_fn_ty;
@@ -35,7 +35,7 @@ pub struct WasmtimeFunction {
     pub(crate) inner: wasmtime::Func,
 }
 
-impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
+impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
     fn new<F>(store: &mut impl AsContextMut<WasmtimeWasmBackend>, sig: FuncSig, func: F) -> Self
     where
         F: for<'c> Fn(&[WValue]) -> Vec<WValue> + Sync + Send + 'static,
@@ -60,7 +60,10 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
         func: F,
     ) -> Self
     where
-        F: for<'c> Fn(<WasmtimeWasmBackend as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+        F: for<'c> Fn(
+                <WasmtimeWasmBackend as WasmBackend>::ImportCallContext<'c>,
+                &[WValue],
+            ) -> Vec<WValue>
             + Sync
             + Send
             + 'static,
@@ -71,7 +74,7 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
                          args: &[wasmtime::Val],
                          results_out: &mut [wasmtime::Val]|
               -> Result<(), anyhow::Error> {
-            let caller = WasmtimeCaller { inner: caller };
+            let caller = WasmtimeImportCallContext { inner: caller };
             let args = process_func_args(args).map_err(|e| anyhow!(e))?;
             let results = func(caller, &args);
             process_func_results(&results, results_out).map_err(|e| anyhow!(e))
@@ -88,6 +91,13 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
         func.into_func(store)
     }
 
+    fn signature<'c>(&self, store: &mut impl AsContextMut<WasmtimeWasmBackend>) -> FuncSig {
+        let ty = self.inner.ty(store.as_context_mut());
+        fn_ty_to_sig(&ty)
+    }
+}
+
+impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
     fn signature<'c>(&self, store: &mut impl AsContextMut<WasmtimeWasmBackend>) -> FuncSig {
         let ty = self.inner.ty(store.as_context_mut());
         fn_ty_to_sig(&ty)
@@ -119,10 +129,10 @@ impl Function<WasmtimeWasmBackend> for WasmtimeFunction {
 macro_rules! impl_func_construction {
     ($num:tt $($args:ident)*) => (paste::paste!{
         fn [< new_typed_with_env_ $num >] <F>(mut ctx: WasmtimeContextMut<'_>, func: F) -> WasmtimeFunction
-            where F: Fn(WasmtimeCaller<'_>, $(replace_with!($args -> i32),)*) + Send + Sync + 'static {
+            where F: Fn(WasmtimeImportCallContext<'_>, $(replace_with!($args -> i32),)*) + Send + Sync + 'static {
 
             let func = move |caller: wasmtime::Caller<'_, StoreState>, $($args,)*| {
-                let caller = WasmtimeCaller {inner: caller};
+                let caller = WasmtimeImportCallContext {inner: caller};
                 func(caller, $($args,)*)
             };
 
@@ -134,10 +144,10 @@ macro_rules! impl_func_construction {
         }
 
         fn [< new_typed_with_env_ $num _r>] <F>(mut ctx: WasmtimeContextMut<'_>, func: F) -> WasmtimeFunction
-            where F: Fn(WasmtimeCaller<'_>, $(replace_with!($args -> i32),)*) -> i32 + Send + Sync + 'static {
+            where F: Fn(WasmtimeImportCallContext<'_>, $(replace_with!($args -> i32),)*) -> i32 + Send + Sync + 'static {
 
             let func = move |caller: wasmtime::Caller<'_, StoreState>, $($args,)*| -> i32{
-                let caller = WasmtimeCaller {inner: caller};
+                let caller = WasmtimeImportCallContext {inner: caller};
                 func(caller, $($args,)*)
             };
 

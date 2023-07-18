@@ -25,7 +25,7 @@ use crate::host_imports::create_call_parameters_import;
 
 use marine_core::generic::HostImportDescriptor;
 use marine_core::generic::MModuleConfig;
-use marine_wasm_backend_traits::Function;
+use marine_wasm_backend_traits::HostFunction;
 use marine_wasm_backend_traits::WasmBackend;
 use marine_utils::bytes_to_wasm_pages_ceil;
 
@@ -191,7 +191,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         let creator = move |mut store: <WB as WasmBackend>::ContextMut<'_>| {
             let logging_mask = logging_mask;
 
-            <WB as WasmBackend>::Function::new_typed(
+            <WB as WasmBackend>::HostFunction::new_typed(
                 &mut store,
                 log_utf8_string_closure::<WB>(logging_mask, module_name),
             )
