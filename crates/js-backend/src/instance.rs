@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 use crate::JsMemory;
-use crate::JsFunction;
+use crate::WasmExportFunction;
 use crate::JsContextMut;
 use crate::JsWasmBackend;
 use crate::module_info;
@@ -23,8 +23,11 @@ use crate::module_info::ModuleInfo;
 use marine_wasm_backend_traits::prelude::*;
 
 use js_sys::WebAssembly;
+use js_sys::Object as JsObject;
+use wasm_bindgen::prelude::*;
 
 use std::collections::HashMap;
+use std::hash::Hash;
 
 #[derive(Clone)]
 pub struct JsInstance {
@@ -36,45 +39,27 @@ type InstanceStoreHandle = usize;
 impl JsInstance {
     pub(crate) fn new(
         ctx: &mut JsContextMut<'_>,
-        instance: WebAssembly::Instance,
+        js_instance: WebAssembly::Instance,
         module_info: ModuleInfo,
     ) -> Self {
-        let js_exports = instance.exports();
-        let exports = module_info
-            .exports
-            .iter()
-            .map(|(name, export)| {
-                // Safety: all used names are from parsing wasm imports,
-                // so there will always be an import for the name and the type will be correct
-                let js_export = js_sys::Reflect::get(js_exports.as_ref(), &name.into()).unwrap();
-                let export: Export<JsWasmBackend> = match export {
-                    module_info::Export::Function(sig) => {
-                        Export::Function(JsFunction::new_stored(ctx, js_export.into(), sig.clone()))
-                    }
-                    module_info::Export::Memory => Export::Memory(JsMemory::new(js_export.into())),
-                    module_info::Export::Table => Export::Other,
-                    module_info::Export::Global => Export::Other,
-                };
-
-                (name.clone(), export)
-            })
-            .collect::<HashMap<String, Export<JsWasmBackend>>>();
-
         let stored_instance = StoredInstance {
-            inner: instance,
-            exports,
+            inner: js_instance,
+            exports: HashMap::default(),
         };
 
         let store_handle = ctx.inner.store_instance(stored_instance);
-
-        // Bind export functions to this instance. Looks really bad, but i did not find better way.
         let instance = Self::from_store_handle(store_handle);
-        let stored = instance.stored_instance(ctx.as_context_mut());
-        for export in stored.exports.values_mut() {
-            if let Export::Function(func) = export {
-                func.bound_instance = Some(instance.clone());
-            }
-        }
+        let js_exports = instance
+            .stored_instance(ctx.as_context_mut())
+            .inner
+            .exports();
+        let exports = Self::build_export_map(
+            instance.clone(),
+            ctx.as_context_mut(),
+            module_info.exports.iter(),
+            js_exports,
+        );
+        instance.stored_instance(ctx.as_context_mut()).exports = exports;
 
         instance
     }
@@ -85,6 +70,36 @@ impl JsInstance {
 
     fn stored_instance<'store>(&self, ctx: JsContextMut<'store>) -> &'store mut StoredInstance {
         &mut ctx.inner.instances[self.store_handle]
+    }
+
+    fn build_export_map<'names, 'store>(
+        instance: JsInstance,
+        mut ctx: JsContextMut<'store>,
+        module_exports: impl Iterator<Item = (&'names String, &'names crate::module_info::Export)>,
+        js_exports: JsObject,
+    ) -> HashMap<String, Export<JsWasmBackend>> {
+        module_exports
+            .map(|(name, export)| {
+                // Safety: all used names are from parsing wasm imports,
+                // so there will always be an import for the name and the type will be correct
+                let js_export = js_sys::Reflect::get(js_exports.as_ref(), &name.into()).unwrap();
+                let export: Export<JsWasmBackend> = match export {
+                    module_info::Export::Function(sig) => {
+                        Export::Function(WasmExportFunction::new_stored(
+                            &mut ctx,
+                            instance.clone(),
+                            js_export.into(),
+                            sig.clone(),
+                        ))
+                    }
+                    module_info::Export::Memory => Export::Memory(JsMemory::new(js_export.into())),
+                    module_info::Export::Table => Export::Other,
+                    module_info::Export::Global => Export::Other,
+                };
+
+                (name.clone(), export)
+            })
+            .collect::<HashMap<String, Export<JsWasmBackend>>>()
     }
 }
 
@@ -159,7 +174,7 @@ impl Instance<JsWasmBackend> for JsInstance {
         &self,
         store: &mut impl AsContextMut<JsWasmBackend>,
         name: &str,
-    ) -> ResolveResult<<JsWasmBackend as WasmBackend>::Function> {
+    ) -> ResolveResult<<JsWasmBackend as WasmBackend>::ExportFunction> {
         let stored_instance = self.stored_instance(store.as_context_mut());
         let export = stored_instance
             .exports

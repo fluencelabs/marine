@@ -33,8 +33,9 @@ use crate::imports::JsImports;
 use crate::instance::JsInstance;
 use crate::memory::JsMemory;
 use crate::wasi::JsWasi;
-use crate::caller::JsCaller;
-use crate::function::JsFunction;
+use crate::caller::JsImportCallContext;
+use crate::function::HostImportFunction;
+use crate::function::WasmExportFunction;
 
 use marine_wasm_backend_traits::prelude::*;
 
@@ -48,8 +49,9 @@ impl WasmBackend for JsWasmBackend {
     type Instance = JsInstance;
     type Context<'c> = JsContext<'c>;
     type ContextMut<'c> = JsContextMut<'c>;
-    type Caller<'c> = JsCaller;
-    type Function = JsFunction;
+    type ImportCallContext<'c> = JsImportCallContext;
+    type HostFunction = HostImportFunction;
+    type ExportFunction = WasmExportFunction;
     type Memory = JsMemory;
     type MemoryView = JsMemory;
     type Wasi = JsWasi;

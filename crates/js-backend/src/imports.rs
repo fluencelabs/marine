@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::JsFunction;
+use crate::HostImportFunction;
 use crate::JsWasmBackend;
 
 use marine_wasm_backend_traits::prelude::*;
@@ -24,7 +24,7 @@ use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct JsImports {
-    inner: HashMap<String, HashMap<String, JsFunction>>,
+    inner: HashMap<String, HashMap<String, HostImportFunction>>,
 
     /// JS backend uses WASI imports directly from JS, so it needs special handling.
     wasi_ctx: Option<usize>,
@@ -80,7 +80,7 @@ impl JsImports {
         }
     }
 
-    fn get_namespace(&mut self, module_name: String) -> &mut HashMap<String, JsFunction> {
+    fn get_namespace(&mut self, module_name: String) -> &mut HashMap<String, HostImportFunction> {
         self.inner.entry(module_name).or_insert(<_>::default())
     }
 }
@@ -98,7 +98,7 @@ impl Imports<JsWasmBackend> for JsImports {
         _store: &impl AsContext<JsWasmBackend>,
         module: impl Into<String>,
         name: impl Into<String>,
-        func: <JsWasmBackend as WasmBackend>::Function,
+        func: <JsWasmBackend as WasmBackend>::HostFunction,
     ) -> Result<(), ImportError> {
         let module_name = module.into();
         let func_name = name.into();
@@ -115,7 +115,7 @@ impl Imports<JsWasmBackend> for JsImports {
     ) -> Result<(), ImportError>
     where
         S: Into<String>,
-        I: IntoIterator<Item = (String, <JsWasmBackend as WasmBackend>::Function)>,
+        I: IntoIterator<Item = (String, <JsWasmBackend as WasmBackend>::HostFunction)>,
     {
         let module_name = module_name.into();
         let namespace = self.get_namespace(module_name.clone());
@@ -128,9 +128,9 @@ impl Imports<JsWasmBackend> for JsImports {
 }
 
 fn add_to_namespace(
-    namespace: &mut HashMap<String, JsFunction>,
+    namespace: &mut HashMap<String, HostImportFunction>,
     func_name: String,
-    func: JsFunction,
+    func: HostImportFunction,
     module_name: &str,
 ) -> Result<(), ImportError> {
     match namespace.entry(func_name) {

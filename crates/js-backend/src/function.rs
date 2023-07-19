@@ -15,7 +15,7 @@
  */
 use crate::JsInstance;
 use crate::JsWasmBackend;
-use crate::JsCaller;
+use crate::JsImportCallContext;
 use crate::JsContext;
 use crate::JsContextMut;
 use crate::js_conversions::{js_array_from_wval_array, wval_array_from_js_array};
@@ -32,12 +32,14 @@ use js_sys::Array;
 use wasm_bindgen::prelude::*;
 
 #[derive(Clone)]
-pub struct JsFunction {
+pub struct HostImportFunction {
     pub(crate) store_handle: usize,
+}
 
-    /// This field is set to Some when an object is returned from Instance or Caller.
-    /// Otherwise it will be None, i.e. just after creation.
-    pub(crate) bound_instance: Option<JsInstance>,
+#[derive(Clone)]
+pub struct WasmExportFunction {
+    pub(crate) store_handle: usize,
+    pub(crate) bound_instance: JsInstance,
 }
 
 pub(crate) struct StoredFunction {
@@ -51,9 +53,10 @@ impl StoredFunction {
     }
 }
 
-impl JsFunction {
+impl WasmExportFunction {
     pub(crate) fn new_stored(
         ctx: &mut impl AsContextMut<JsWasmBackend>,
+        instance: JsInstance,
         func: js_sys::Function,
         sig: FuncSig,
     ) -> Self {
@@ -64,7 +67,7 @@ impl JsFunction {
 
         Self {
             store_handle: handle,
-            bound_instance: None,
+            bound_instance: instance,
         }
     }
 
@@ -116,11 +119,26 @@ impl JsFunction {
     }
 }
 
-// Safety: this is safe because its intended to run in single thread
-unsafe impl Send for JsFunction {}
-unsafe impl Sync for JsFunction {}
+impl HostImportFunction {
+    pub(crate) fn stored<'store>(&self, ctx: &JsContext<'store>) -> &'store StoredFunction {
+        &ctx.inner.functions[self.store_handle]
+    }
 
-impl Function<JsWasmBackend> for JsFunction {
+    pub(crate) fn stored_mut<'store>(
+        &self,
+        ctx: JsContextMut<'store>,
+    ) -> &'store mut StoredFunction {
+        &mut ctx.inner.functions[self.store_handle]
+    }
+}
+
+// Safety: this is safe because its intended to run in single thread
+unsafe impl Send for HostImportFunction {}
+unsafe impl Sync for HostImportFunction {}
+unsafe impl Send for WasmExportFunction {}
+unsafe impl Sync for WasmExportFunction {}
+
+impl HostFunction<JsWasmBackend> for HostImportFunction {
     fn new<F>(store: &mut impl AsContextMut<JsWasmBackend>, sig: FuncSig, func: F) -> Self
     where
         F: for<'c> Fn(&'c [WValue]) -> Vec<WValue> + Sync + Send + 'static,
@@ -135,10 +153,10 @@ impl Function<JsWasmBackend> for JsFunction {
         func: F,
     ) -> Self
     where
-        F: for<'c> Fn(JsCaller, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
+        F: for<'c> Fn(JsImportCallContext, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
     {
         // Safety: JsStoreInner is stored inside a Box and the Store is required by wasm-backend traits contract
-        // to be valid for function execution. So it is safe to capture this ptr into closure and deferenece there.
+        // to be valid for function execution. So it is safe to capture this ptr into closure and deference there.
         let store_inner_ptr = store.as_context_mut().inner as *mut JsStoreInner;
         let enclosed_sig = sig.clone();
         let wrapped = move |args: &js_sys::Array| -> js_sys::Array {
@@ -149,7 +167,7 @@ impl Function<JsWasmBackend> for JsFunction {
 
             let store_inner = unsafe { &mut *store_inner_ptr };
             let caller_instance = store_inner.wasm_call_stack.last().map(Clone::clone);
-            let caller = JsCaller {
+            let caller = JsImportCallContext {
                 store_inner,
                 caller_instance,
             };
@@ -170,7 +188,14 @@ impl Function<JsWasmBackend> for JsFunction {
         );
         let bound_func = dyn_func.bind1(&JsValue::UNDEFINED, &func);
 
-        JsFunction::new_stored(store, bound_func, sig)
+        let handle = store
+            .as_context_mut()
+            .inner
+            .store_function(StoredFunction::new(bound_func, sig));
+
+        Self {
+            store_handle: handle,
+        }
     }
 
     fn new_typed<Params, Results, Env>(
@@ -183,30 +208,27 @@ impl Function<JsWasmBackend> for JsFunction {
     fn signature(&self, store: &mut impl AsContextMut<JsWasmBackend>) -> FuncSig {
         self.stored_mut(store.as_context_mut()).sig.clone()
     }
+}
+
+impl ExportFunction<JsWasmBackend> for WasmExportFunction {
+    fn signature(&self, store: &mut impl AsContextMut<JsWasmBackend>) -> FuncSig {
+        self.stored_mut(store.as_context_mut()).sig.clone()
+    }
 
     fn call(
         &self,
         store: &mut impl AsContextMut<JsWasmBackend>,
         args: &[WValue],
     ) -> RuntimeResult<Vec<WValue>> {
-        if let Some(instance) = &self.bound_instance {
-            store
-                .as_context_mut()
-                .inner
-                .wasm_call_stack
-                .push(instance.clone())
-        } else if store.as_context_mut().inner.wasm_call_stack.is_empty() {
-            return Err(RuntimeError::Other(anyhow!(
-                "Attempt to call a user-created function directly from user code. \
-                 There is no reason to do it, so it should be a user error."
-            )));
-        }
+        store
+            .as_context_mut()
+            .inner
+            .wasm_call_stack
+            .push(self.bound_instance.clone());
 
         let result = self.call_inner(store, args);
 
-        if self.bound_instance.is_some() {
-            store.as_context_mut().inner.wasm_call_stack.pop();
-        }
+        store.as_context_mut().inner.wasm_call_stack.pop();
 
         result
     }
@@ -216,10 +238,10 @@ impl Function<JsWasmBackend> for JsFunction {
 /// Needed to allow users to pass almost any function to `Function::new_typed` without worrying about signature.
 macro_rules! impl_func_construction {
     ($num:tt $($args:ident)*) => (paste::paste!{
-        fn [< new_typed_with_env_ $num >] <F>(mut ctx: JsContextMut<'_>, func: F) -> JsFunction
-            where F: Fn(JsCaller, $(replace_with!($args -> i32),)*) + Send + Sync + 'static {
+        fn [< new_typed_with_env_ $num >] <F>(mut ctx: JsContextMut<'_>, func: F) -> HostImportFunction
+            where F: Fn(JsImportCallContext, $(replace_with!($args -> i32),)*) + Send + Sync + 'static {
 
-            let func = move |caller: JsCaller, args: &[WValue]| -> Vec<WValue> {
+            let func = move |caller: JsImportCallContext, args: &[WValue]| -> Vec<WValue> {
                 let [$($args,)*] = args else { todo!() }; // TODO: Safety: explain why it will never fire
                 func(caller, $(wval_to_i32($args),)*);
                 vec![]
@@ -229,13 +251,13 @@ macro_rules! impl_func_construction {
             let ret_ty = vec![];
             let sig = FuncSig::new(arg_ty, ret_ty);
 
-            JsFunction::new_with_caller(&mut ctx, sig, func)
+            HostImportFunction::new_with_caller(&mut ctx, sig, func)
         }
 
-        fn [< new_typed_with_env_ $num _r>] <F>(mut ctx: JsContextMut<'_>, func: F) -> JsFunction
-            where F: Fn(JsCaller, $(replace_with!($args -> i32),)*) -> i32 + Send + Sync + 'static {
+        fn [< new_typed_with_env_ $num _r>] <F>(mut ctx: JsContextMut<'_>, func: F) -> HostImportFunction
+            where F: Fn(JsImportCallContext, $(replace_with!($args -> i32),)*) -> i32 + Send + Sync + 'static {
 
-            let func = move |caller: JsCaller, args: &[WValue]| -> Vec<WValue> {
+            let func = move |caller: JsImportCallContext, args: &[WValue]| -> Vec<WValue> {
                 let [$($args,)*] = args else { panic!("args do not match signature") }; // Safety: signature should b
                 let res = func(caller, $(wval_to_i32(&$args),)*);
                 vec![WValue::I32(res)]
@@ -245,11 +267,11 @@ macro_rules! impl_func_construction {
             let ret_ty = vec![WType::I32];
             let sig = FuncSig::new(arg_ty, ret_ty);
 
-            JsFunction::new_with_caller(&mut ctx, sig, func)
+            HostImportFunction::new_with_caller(&mut ctx, sig, func)
         }
     });
 }
 
-impl FuncConstructor<JsWasmBackend> for JsFunction {
+impl FuncConstructor<JsWasmBackend> for HostImportFunction {
     impl_for_each_function_signature!(impl_func_construction);
 }

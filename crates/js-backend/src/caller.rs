@@ -24,12 +24,12 @@ use marine_wasm_backend_traits::prelude::*;
 
 use anyhow::anyhow;
 
-pub struct JsCaller {
+pub struct JsImportCallContext {
     pub(crate) store_inner: *mut crate::store::JsStoreInner,
     pub(crate) caller_instance: Option<JsInstance>,
 }
 
-impl Caller<JsWasmBackend> for JsCaller {
+impl ImportCallContext<JsWasmBackend> for JsImportCallContext {
     fn memory(&mut self, memory_index: u32) -> Option<<JsWasmBackend as WasmBackend>::Memory> {
         self.caller_instance
             .clone()
@@ -37,13 +37,13 @@ impl Caller<JsWasmBackend> for JsCaller {
     }
 }
 
-impl AsContext<JsWasmBackend> for JsCaller {
+impl AsContext<JsWasmBackend> for JsImportCallContext {
     fn as_context(&self) -> <JsWasmBackend as WasmBackend>::Context<'_> {
         JsContext::from_raw_ptr(self.store_inner)
     }
 }
 
-impl AsContextMut<JsWasmBackend> for JsCaller {
+impl AsContextMut<JsWasmBackend> for JsImportCallContext {
     fn as_context_mut(&mut self) -> <JsWasmBackend as WasmBackend>::ContextMut<'_> {
         JsContextMut::from_raw_ptr(self.store_inner)
     }
@@ -54,7 +54,7 @@ impl AsContextMut<JsWasmBackend> for JsCaller {
 macro_rules! impl_func_getter {
     ($num:tt $($args:ident)*) => (paste::paste!{
         #[allow(unused_parens)]
-        impl FuncGetter<JsWasmBackend, ($(replace_with!($args -> i32)),*), ()> for JsCaller {
+        impl FuncGetter<JsWasmBackend, ($(replace_with!($args -> i32)),*), ()> for JsImportCallContext {
             fn get_func(
                 &mut self,
                 name: &str,
@@ -91,7 +91,7 @@ macro_rules! impl_func_getter {
         }
 
         #[allow(unused_parens)]
-        impl FuncGetter<JsWasmBackend, ($(replace_with!($args -> i32)),*), i32> for JsCaller {
+        impl FuncGetter<JsWasmBackend, ($(replace_with!($args -> i32)),*), i32> for JsImportCallContext {
             fn get_func(
                 &mut self,
                 name: &str,
