@@ -41,6 +41,8 @@ pub struct HostImportFunction {
 #[derive(Clone)]
 pub struct WasmExportFunction {
     pub(crate) store_handle: FunctionHandle,
+
+    /// Instance this export is extracted from.
     pub(crate) bound_instance: JsInstance,
 }
 
