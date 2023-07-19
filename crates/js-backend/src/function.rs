@@ -166,7 +166,10 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
             );
 
             let store_inner = unsafe { &mut *store_inner_ptr };
-            let caller_instance = store_inner.wasm_call_stack.last().map(Clone::clone);
+            let caller_instance = store_inner.wasm_call_stack.last().cloned().expect(
+                "Import cannot be called outside of an export call, when wasm_call_stack is empty",
+            );
+
             let caller = JsImportCallContext {
                 store_inner,
                 caller_instance,

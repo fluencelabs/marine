@@ -26,14 +26,14 @@ use anyhow::anyhow;
 
 pub struct JsImportCallContext {
     pub(crate) store_inner: *mut crate::store::JsStoreInner,
-    pub(crate) caller_instance: Option<JsInstance>,
+    pub(crate) caller_instance: JsInstance,
 }
 
 impl ImportCallContext<JsWasmBackend> for JsImportCallContext {
     fn memory(&mut self, memory_index: u32) -> Option<<JsWasmBackend as WasmBackend>::Memory> {
         self.caller_instance
-            .clone()
-            .and_then(|instance| instance.get_nth_memory(&mut self.as_context_mut(), memory_index))
+            .clone() // Without clone the borrow checker would complain about double mut borrow of self
+            .get_nth_memory(&mut self.as_context_mut(), memory_index)
     }
 }
 
@@ -70,8 +70,6 @@ macro_rules! impl_func_getter {
                 let mut store = JsContextMut::from_raw_ptr(self.store_inner);
                 let func = self
                     .caller_instance
-                    .as_ref()
-                    .ok_or_else(|| ResolveError::Other(anyhow!("Cannot call a function not bound to an instance")))?
                     .get_function(&mut store, name)?;
 
                 let func = move |store: &mut JsContextMut<'_>, ($($args),*)| -> Result<(), RuntimeError> {
@@ -107,8 +105,6 @@ macro_rules! impl_func_getter {
                 let mut store = JsContextMut::from_raw_ptr(self.store_inner);
                 let func = self
                     .caller_instance
-                    .as_ref()
-                    .ok_or_else(|| ResolveError::ExportNotFound(name.to_string()))?
                     .get_function(&mut store, name)?;
 
                 let func = move |store: &mut JsContextMut<'_>, ($($args),*)| -> Result<i32, RuntimeError> {
