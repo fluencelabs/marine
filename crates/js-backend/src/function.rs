@@ -18,10 +18,12 @@ use crate::JsWasmBackend;
 use crate::JsImportCallContext;
 use crate::JsContext;
 use crate::JsContextMut;
-use crate::js_conversions::{js_array_from_wval_array, wval_array_from_js_array};
+use crate::js_conversions::js_array_from_wval_array;
+use crate::js_conversions::wval_array_from_js_array;
 use crate::js_conversions::wval_from_js;
 use crate::js_conversions::wval_to_i32;
 use crate::store::JsStoreInner;
+use crate::store::FunctionHandle;
 
 use marine_wasm_backend_traits::impl_for_each_function_signature;
 use marine_wasm_backend_traits::replace_with;
@@ -33,12 +35,12 @@ use wasm_bindgen::prelude::*;
 
 #[derive(Clone)]
 pub struct HostImportFunction {
-    pub(crate) store_handle: usize,
+    pub(crate) store_handle: FunctionHandle,
 }
 
 #[derive(Clone)]
 pub struct WasmExportFunction {
-    pub(crate) store_handle: usize,
+    pub(crate) store_handle: FunctionHandle,
     pub(crate) bound_instance: JsInstance,
 }
 

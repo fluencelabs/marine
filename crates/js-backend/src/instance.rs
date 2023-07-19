@@ -19,6 +19,7 @@ use crate::JsContextMut;
 use crate::JsWasmBackend;
 use crate::module_info;
 use crate::module_info::ModuleInfo;
+use crate::store::InstanceHandle;
 
 use marine_wasm_backend_traits::prelude::*;
 
@@ -31,10 +32,8 @@ use std::hash::Hash;
 
 #[derive(Clone)]
 pub struct JsInstance {
-    store_handle: InstanceStoreHandle,
+    store_handle: InstanceHandle,
 }
-
-type InstanceStoreHandle = usize;
 
 impl JsInstance {
     pub(crate) fn new(
@@ -64,7 +63,7 @@ impl JsInstance {
         instance
     }
 
-    pub(crate) fn from_store_handle(store_handle: usize) -> Self {
+    pub(crate) fn from_store_handle(store_handle: InstanceHandle) -> Self {
         Self { store_handle }
     }
 
@@ -147,7 +146,7 @@ impl Instance<JsWasmBackend> for JsInstance {
         memory_name: &str,
     ) -> ResolveResult<<JsWasmBackend as WasmBackend>::Memory> {
         log::trace!(
-            "Instance::get_memory, instance_id: {}, memory_name: {}",
+            "Instance::get_memory, instance_id: {:?}, memory_name: {}",
             self.store_handle,
             memory_name
         );

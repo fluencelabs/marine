@@ -16,6 +16,7 @@
 
 use crate::HostImportFunction;
 use crate::JsWasmBackend;
+use crate::store::WasiContextHandle;
 
 use marine_wasm_backend_traits::prelude::*;
 
@@ -27,7 +28,7 @@ pub struct JsImports {
     inner: HashMap<String, HashMap<String, HostImportFunction>>,
 
     /// JS backend uses WASI imports directly from JS, so it needs special handling.
-    wasi_ctx: Option<usize>,
+    wasi_ctx: Option<WasiContextHandle>,
 }
 
 impl JsImports {
@@ -65,7 +66,7 @@ impl JsImports {
         import_object
     }
 
-    pub(crate) fn add_wasi(&mut self, wasi_context_id: usize) {
+    pub(crate) fn add_wasi(&mut self, wasi_context_id: WasiContextHandle) {
         self.wasi_ctx = Some(wasi_context_id)
     }
 
@@ -75,8 +76,8 @@ impl JsImports {
         store: impl AsContext<JsWasmBackend>,
         instance: &js_sys::WebAssembly::Instance,
     ) {
-        if let Some(handle) = &self.wasi_ctx {
-            store.as_context().inner.wasi_contexts[*handle].bind_to_instance(instance);
+        if let Some(handle) = self.wasi_ctx {
+            store.as_context().inner.wasi_contexts[handle].bind_to_instance(instance);
         }
     }
 

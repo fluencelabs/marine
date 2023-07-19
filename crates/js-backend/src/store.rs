@@ -21,15 +21,17 @@ use crate::wasi::WasiContext;
 
 use marine_wasm_backend_traits::prelude::*;
 
+use typed_index_collections::TiVec;
+
 pub struct JsStore {
     pub(crate) inner: Box<JsStoreInner>,
 }
 
 #[derive(Default)]
 pub(crate) struct JsStoreInner {
-    pub(crate) wasi_contexts: Vec<WasiContext>,
-    pub(crate) instances: Vec<StoredInstance>,
-    pub(crate) functions: Vec<StoredFunction>,
+    pub(crate) wasi_contexts: TiVec<WasiContextHandle, WasiContext>,
+    pub(crate) instances: TiVec<InstanceHandle, StoredInstance>,
+    pub(crate) functions: TiVec<FunctionHandle, StoredFunction>,
 
     /// Imports provided to the ImportObject do not know the instance they will be bound to,
     /// so they need to get the instance handle somehow during the call.
@@ -39,23 +41,26 @@ pub(crate) struct JsStoreInner {
     pub(crate) wasm_call_stack: Vec<JsInstance>,
 }
 
+#[derive(Clone, Copy, Debug, derive_more::From, derive_more::Into)]
+pub(crate) struct WasiContextHandle(usize);
+
+#[derive(Clone, Copy, Debug, derive_more::From, derive_more::Into)]
+pub(crate) struct InstanceHandle(usize);
+
+#[derive(Clone, Copy, Debug, derive_more::From, derive_more::Into)]
+pub(crate) struct FunctionHandle(usize);
+
 impl JsStoreInner {
-    pub(crate) fn store_instance(&mut self, instance: StoredInstance) -> usize {
-        let index = self.instances.len();
-        self.instances.push(instance);
-        index
+    pub(crate) fn store_instance(&mut self, instance: StoredInstance) -> InstanceHandle {
+        self.instances.push_and_get_key(instance)
     }
 
-    pub(crate) fn store_wasi_context(&mut self, context: WasiContext) -> usize {
-        let index = self.wasi_contexts.len();
-        self.wasi_contexts.push(context);
-        index
+    pub(crate) fn store_wasi_context(&mut self, context: WasiContext) -> WasiContextHandle {
+        self.wasi_contexts.push_and_get_key(context)
     }
 
-    pub(crate) fn store_function(&mut self, function: StoredFunction) -> usize {
-        let index = self.functions.len();
-        self.functions.push(function);
-        index
+    pub(crate) fn store_function(&mut self, function: StoredFunction) -> FunctionHandle {
+        self.functions.push_and_get_key(function)
     }
 }
 
