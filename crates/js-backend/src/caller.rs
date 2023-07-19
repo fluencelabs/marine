@@ -25,7 +25,10 @@ use marine_wasm_backend_traits::prelude::*;
 use anyhow::anyhow;
 
 pub struct JsImportCallContext {
+    /// A pointer to store container that is needed to access memory and functions of an instance.
     pub(crate) store_inner: *mut crate::store::JsStoreInner,
+
+    /// The instance that called the import function.
     pub(crate) caller_instance: JsInstance,
 }
 
