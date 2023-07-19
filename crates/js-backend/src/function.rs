@@ -75,10 +75,6 @@ impl WasmExportFunction {
         }
     }
 
-    pub(crate) fn stored<'store>(&self, ctx: &JsContext<'store>) -> &'store StoredFunction {
-        &ctx.inner.functions[self.store_handle]
-    }
-
     pub(crate) fn stored_mut<'store>(
         &self,
         ctx: JsContextMut<'store>,

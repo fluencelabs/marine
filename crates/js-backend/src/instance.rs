@@ -25,10 +25,8 @@ use marine_wasm_backend_traits::prelude::*;
 
 use js_sys::WebAssembly;
 use js_sys::Object as JsObject;
-use wasm_bindgen::prelude::*;
 
 use std::collections::HashMap;
-use std::hash::Hash;
 
 #[derive(Clone)]
 pub struct JsInstance {

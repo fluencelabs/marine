@@ -22,8 +22,6 @@ use marine_wasm_backend_traits::impl_for_each_function_signature;
 use marine_wasm_backend_traits::replace_with;
 use marine_wasm_backend_traits::prelude::*;
 
-use anyhow::anyhow;
-
 pub struct JsImportCallContext {
     /// A pointer to store container that is needed to access memory and functions of an instance.
     pub(crate) store_inner: *mut crate::store::JsStoreInner,
