@@ -32,7 +32,7 @@ pub struct JsImportCallContext {
 impl ImportCallContext<JsWasmBackend> for JsImportCallContext {
     fn memory(&mut self, memory_index: u32) -> Option<<JsWasmBackend as WasmBackend>::Memory> {
         self.caller_instance
-            .clone() // Without clone the borrow checker would complain about double mut borrow of self
+            .clone() // Without clone the borrow checker would complain about double mut borrow of self. The clone is cheap - a single usize copy.
             .get_nth_memory(&mut self.as_context_mut(), memory_index)
     }
 }
