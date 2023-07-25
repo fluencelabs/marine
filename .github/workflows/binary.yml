@@ -70,8 +70,11 @@ jobs:
           echo "SDKROOT=${SKDROOT}" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=${SKDROOT}" >> $GITHUB_ENV
 
-      - name: Setup rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Setup Rust toolchain
+        uses: moonrepo/setup-rust@v0
+        with:
+          inherit-toolchain: true
+          cache-target: release
 
       - name: Build ${{ inputs.binary }}
         run: cargo build -p ${{ inputs.binary }} --release

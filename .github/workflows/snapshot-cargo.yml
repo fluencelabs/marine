@@ -46,7 +46,10 @@ jobs:
             kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
 
       - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: moonrepo/setup-rust@v0
+        with:
+          inherit-toolchain: true
+          cache-target: debug
 
       - name: Generate snapshot version
         id: version

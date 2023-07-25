@@ -71,7 +71,10 @@ jobs:
           commit_author: fluencebot <devops@fluence.one>
 
       - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: moonrepo/setup-rust@v0
+        with:
+          inherit-toolchain: true
+          cache-target: debug
 
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
@@ -135,7 +138,10 @@ jobs:
             kv/crates.io/fluencebot token | CARGO_REGISTRY_TOKEN
 
       - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: moonrepo/setup-rust@v0
+        with:
+          inherit-toolchain: true
+          cache-target: release
 
       - name: Install cargo-workspaces
         uses: baptiste0928/cargo-install@v2.0.0
@@ -201,7 +207,10 @@ jobs:
             kv/npmjs/fluencebot token | NODE_AUTH_TOKEN
 
       - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: moonrepo/setup-rust@v0
+        with:
+          inherit-toolchain: true
+          cache-target: release
 
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
