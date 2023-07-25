@@ -19,6 +19,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
   const sourceAst = parser.parse(sourceData, { sourceType: "module" });
   let sourceFunction = null;
   let wbgAdapterFunc = null;
+  let imports = []
   traverse(sourceAst, {
     FunctionDeclaration(path) {
       if (path.node.id.name === GET_IMPORTTS_FN_NAME) {
@@ -27,6 +28,9 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
         wbgAdapterFunc = path.node;
       }
     },
+    ImportDeclaration(path) {
+      imports.push(path.node)
+    }
   });
 
   if (!sourceFunction) {
@@ -48,6 +52,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
 
     let targetFunctionPath = null;
     let wbgAdapderPath = null;
+    let importsPaths = []
 
     recast.visit(targetAst, {
       visitFunctionDeclaration(path) {
@@ -59,11 +64,24 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
 
         this.traverse(path);
       },
+      visitImportDeclaration(path) {
+        importsPaths.push(path)
+        this.traverse(path);
+      }
     });
 
     if (!targetFunctionPath) {
       console.error(`Error: ${GET_IMPORTTS_FN_NAME} function not found in target file`);
       process.exit(1);
+    }
+
+    if (importsPaths.length !== imports.length) {
+      console.error(`Error: source and destination have different number of import statements. Please update imports in destination manually.`);
+      process.exit(1);
+    }
+
+    for(let importIndex = 0; importIndex < importsPaths.length; importIndex++) {
+      importsPaths[importIndex].replace(imports[importIndex])
     }
 
     targetFunctionPath.replace(sourceFunction);
