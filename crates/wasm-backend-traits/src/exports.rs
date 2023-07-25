@@ -24,7 +24,7 @@ use crate::WasmBackend;
 #[derive(Clone)]
 pub enum Export<WB: WasmBackend> {
     Memory(<WB as WasmBackend>::Memory),
-    Function(<WB as WasmBackend>::Function),
+    Function(<WB as WasmBackend>::ExportFunction),
     Other,
 }
 

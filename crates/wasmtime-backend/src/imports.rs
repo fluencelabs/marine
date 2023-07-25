@@ -38,7 +38,7 @@ impl Imports<WasmtimeWasmBackend> for WasmtimeImports {
         store: &impl AsContext<WasmtimeWasmBackend>,
         module: impl Into<String>,
         name: impl Into<String>,
-        func: <WasmtimeWasmBackend as WasmBackend>::Function,
+        func: <WasmtimeWasmBackend as WasmBackend>::HostFunction,
     ) -> Result<(), ImportError> {
         let module = module.into();
         let name = name.into();

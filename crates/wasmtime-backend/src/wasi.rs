@@ -82,7 +82,7 @@ fn add_wasi_to_linker(
     linker: &mut WasmtimeImports,
     wasi_ctx: wasmtime_wasi::WasiCtx,
 ) -> Result<(), WasiError> {
-    // wasmtime-wasi gets its context from Caller<T>, which can hold any user info
+    // wasmtime-wasi gets its context from ImportCallContext<T>, which can hold any user info
     // the only convenient method is to be provided with a closure that extracts context
     // from used-defined type.
     // So, here each module has its own wasi context which is stored in a vector in store.
