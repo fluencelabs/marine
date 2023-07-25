@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 use marine_wasm_backend_traits::FuncSig;
 use marine_wasm_backend_traits::ModuleCreationError;
 use marine_wasm_backend_traits::WType;
@@ -67,8 +68,8 @@ impl ModuleInfo {
                         let func = module.funcs.get(func_id);
                         let ty_id = func.ty();
                         let ty = module.types.get(ty_id);
-                        let sig = sig_from_walrus_ty(ty);
-                        Export::Function(sig)
+                        let signature = sig_from_walrus_ty(ty);
+                        Export::Function(signature)
                     }
                     ExportItem::Table(_) => Export::Table,
                     ExportItem::Memory(_) => Export::Memory,

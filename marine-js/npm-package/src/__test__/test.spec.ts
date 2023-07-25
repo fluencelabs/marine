@@ -230,7 +230,6 @@ describe('Fluence app service tests', () => {
     it.skip('Testing redis wasm', async () => {
         const control = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const buf = await download(redisDownloadUrl);
-       // const redis = await WebAssembly.compile(buf);
 
         const marine = new MarineService(control, 'redis', dontLog, createSimpleService('redis', buf));
         await marine.init();

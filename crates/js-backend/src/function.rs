@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 use crate::JsInstance;
 use crate::JsWasmBackend;
 use crate::JsImportCallContext;
@@ -33,6 +34,12 @@ use anyhow::anyhow;
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
 
+// Safety: this is safe because its intended to run in single thread
+unsafe impl Send for HostImportFunction {}
+unsafe impl Sync for HostImportFunction {}
+unsafe impl Send for WasmExportFunction {}
+unsafe impl Sync for WasmExportFunction {}
+
 #[derive(Clone)]
 pub struct HostImportFunction {
     pub(crate) store_handle: FunctionHandle,
@@ -48,12 +55,12 @@ pub struct WasmExportFunction {
 
 pub(crate) struct StoredFunction {
     pub(crate) js_func: js_sys::Function,
-    pub(crate) sig: FuncSig,
+    pub(crate) signature: FuncSig,
 }
 
 impl StoredFunction {
-    pub(crate) fn new(js_func: js_sys::Function, sig: FuncSig) -> Self {
-        Self { js_func, sig }
+    pub(crate) fn new(js_func: js_sys::Function, signature: FuncSig) -> Self {
+        Self { js_func, signature }
     }
 }
 
@@ -62,12 +69,12 @@ impl WasmExportFunction {
         ctx: &mut impl AsContextMut<JsWasmBackend>,
         instance: JsInstance,
         func: js_sys::Function,
-        sig: FuncSig,
+        signature: FuncSig,
     ) -> Self {
         let handle = ctx
             .as_context_mut()
             .inner
-            .store_function(StoredFunction::new(func, sig));
+            .store_function(StoredFunction::new(func, signature));
 
         Self {
             store_handle: handle,
@@ -95,25 +102,28 @@ impl WasmExportFunction {
                 RuntimeError::Other(anyhow!("Failed to apply func"))
             })?;
 
-        let result_types = stored_func.sig.returns();
-        match result_types.len() {
-            0 => Ok(vec![]),
-            1 => {
-                // Single value returned as is.
-                let value = wval_from_js(&result_types[0], &result);
-                Ok(vec![value])
-            }
-            results_number => {
-                // Multiple return values are returned as JS array of values.
-                let result_array: Array = result.into();
-                if result_array.length() as usize != results_number {
-                    Err(RuntimeError::IncorrectResultsNumber {
-                        expected: results_number,
-                        actual: result_array.length() as usize,
-                    })
-                } else {
-                    Ok(wval_array_from_js_array(&result_array, result_types.iter()))
-                }
+        extract_function_results(result, stored_func.signature.returns())
+    }
+}
+
+fn extract_function_results(result: JsValue, result_types: &[WType]) -> RuntimeResult<Vec<WValue>> {
+    match result_types.len() {
+        0 => Ok(vec![]),
+        1 => {
+            // Single value returned as is.
+            let value = wval_from_js(&result_types[0], &result);
+            Ok(vec![value])
+        }
+        results_number => {
+            // Multiple return values are returned as JS array of values.
+            let result_array: Array = result.into();
+            if result_array.length() as usize != results_number {
+                Err(RuntimeError::IncorrectResultsNumber {
+                    expected: results_number,
+                    actual: result_array.length() as usize,
+                })
+            } else {
+                Ok(wval_array_from_js_array(&result_array, result_types.iter()))
             }
         }
     }
@@ -132,69 +142,34 @@ impl HostImportFunction {
     }
 }
 
-// Safety: this is safe because its intended to run in single thread
-unsafe impl Send for HostImportFunction {}
-unsafe impl Sync for HostImportFunction {}
-unsafe impl Send for WasmExportFunction {}
-unsafe impl Sync for WasmExportFunction {}
-
 impl HostFunction<JsWasmBackend> for HostImportFunction {
-    fn new<F>(store: &mut impl AsContextMut<JsWasmBackend>, sig: FuncSig, func: F) -> Self
+    fn new<F>(store: &mut impl AsContextMut<JsWasmBackend>, signature: FuncSig, func: F) -> Self
     where
         F: for<'c> Fn(&'c [WValue]) -> Vec<WValue> + Sync + Send + 'static,
     {
         let with_caller = move |_, args: &'_ [WValue]| func(args);
-        Self::new_with_caller(store, sig, with_caller)
+        Self::new_with_caller(store, signature, with_caller)
     }
 
     fn new_with_caller<F>(
         store: &mut impl AsContextMut<JsWasmBackend>,
-        sig: FuncSig,
+        signature: FuncSig,
         func: F,
     ) -> Self
     where
         F: for<'c> Fn(JsImportCallContext, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
     {
         // Safety: JsStoreInner is stored inside a Box and the Store is required by wasm-backend traits contract
-        // to be valid for function execution. So it is safe to capture this ptr into closure and deference there.
+        // to be valid for function execution. So it is safe to capture this ptr into closure and deference there
         let store_inner_ptr = store.as_context_mut().inner as *mut JsStoreInner;
-        let enclosed_sig = sig.clone();
-        let wrapped = move |args: &js_sys::Array| -> js_sys::Array {
-            log::debug!(
-                "function produced by JsFunction:::new_with_caller call, signature: {:?}",
-                enclosed_sig
-            );
 
-            let store_inner = unsafe { &mut *store_inner_ptr };
-            let caller_instance = store_inner.wasm_call_stack.last().cloned().expect(
-                "Import cannot be called outside of an export call, when wasm_call_stack is empty",
-            );
-
-            let caller = JsImportCallContext {
-                store_inner,
-                caller_instance,
-            };
-
-            let args = wval_array_from_js_array(args, enclosed_sig.params().iter());
-            let result = func(caller, &args);
-            js_array_from_wval_array(&result)
-        };
-
-        let func =
-            Closure::wrap(Box::new(wrapped) as Box<dyn FnMut(&Array) -> Array>).into_js_value();
-
-        // Make a function that converts function args into array and wrap our func with it.
-        // Otherwise our closure will get only first argument.
-        let dyn_func = js_sys::Function::new_with_args(
-            "wrapped_func",
-            "return wrapped_func(Array.prototype.slice.call(arguments, 1))",
-        );
-        let bound_func = dyn_func.bind1(&JsValue::UNDEFINED, &func);
+        let wrapped = wrap_raw_host_fn(signature.clone(), store_inner_ptr, func);
+        let closure = prepare_js_closure(wrapped);
 
         let handle = store
             .as_context_mut()
             .inner
-            .store_function(StoredFunction::new(bound_func, sig));
+            .store_function(StoredFunction::new(closure, signature));
 
         Self {
             store_handle: handle,
@@ -209,13 +184,57 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
     }
 
     fn signature(&self, store: &mut impl AsContextMut<JsWasmBackend>) -> FuncSig {
-        self.stored_mut(store.as_context_mut()).sig.clone()
+        self.stored_mut(store.as_context_mut()).signature.clone()
     }
 }
 
+fn wrap_raw_host_fn<F>(
+    signature: FuncSig,
+    store_inner_ptr: *mut JsStoreInner,
+    raw_host_function: F,
+) -> Box<dyn FnMut(&Array) -> Array>
+where
+    F: for<'c> Fn(JsImportCallContext, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
+{
+    let func = move |args: &js_sys::Array| -> js_sys::Array {
+        log::debug!(
+            "function produced by JsFunction:::new_with_caller call, signature: {:?}",
+            signature
+        );
+
+        let store_inner = unsafe { &mut *store_inner_ptr };
+        let caller_instance = store_inner.wasm_call_stack.last().cloned().expect(
+            "Import cannot be called outside of an export call, when wasm_call_stack is empty",
+        );
+
+        let caller = JsImportCallContext {
+            store_inner,
+            caller_instance,
+        };
+
+        let args = wval_array_from_js_array(args, signature.params().iter());
+        let result = raw_host_function(caller, &args);
+        js_array_from_wval_array(&result)
+    };
+
+    Box::new(func)
+}
+
+fn prepare_js_closure(func: Box<dyn FnMut(&Array) -> Array>) -> js_sys::Function {
+    let closure = Closure::wrap(func).into_js_value();
+
+    // Make a function that converts function args into array and wrap our func with it.
+    // Otherwise our closure will get only first argument.
+    let wrapper = js_sys::Function::new_with_args(
+        "wrapped_func",
+        "return wrapped_func(Array.prototype.slice.call(arguments, 1))",
+    );
+
+    wrapper.bind1(&JsValue::UNDEFINED, &closure)
+}
 impl ExportFunction<JsWasmBackend> for WasmExportFunction {
     fn signature(&self, store: &mut impl AsContextMut<JsWasmBackend>) -> FuncSig {
-        self.stored_mut(store.as_context_mut()).sig.clone()
+        self.stored_mut(store.as_context_mut()).signature.clone()
     }
 
     fn call(
@@ -252,9 +271,9 @@ macro_rules! impl_func_construction {
 
             let arg_ty = vec![WType::I32; $num];
             let ret_ty = vec![];
-            let sig = FuncSig::new(arg_ty, ret_ty);
+            let signature = FuncSig::new(arg_ty, ret_ty);
 
-            HostImportFunction::new_with_caller(&mut ctx, sig, func)
+            HostImportFunction::new_with_caller(&mut ctx, signature, func)
         }
 
         fn [< new_typed_with_env_ $num _r>] <F>(mut ctx: JsContextMut<'_>, func: F) -> HostImportFunction
@@ -268,9 +287,9 @@ macro_rules! impl_func_construction {
 
             let arg_ty = vec![WType::I32; $num];
             let ret_ty = vec![WType::I32];
-            let sig = FuncSig::new(arg_ty, ret_ty);
+            let signature = FuncSig::new(arg_ty, ret_ty);
 
-            HostImportFunction::new_with_caller(&mut ctx, sig, func)
+            HostImportFunction::new_with_caller(&mut ctx, signature, func)
         }
     });
 }

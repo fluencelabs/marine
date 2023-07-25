@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 use crate::JsMemory;
 use crate::WasmExportFunction;
 use crate::JsContextMut;
@@ -77,16 +78,16 @@ impl JsInstance {
     ) -> HashMap<String, Export<JsWasmBackend>> {
         module_exports
             .map(|(name, export)| {
-                // Safety: all used names are from parsing wasm imports,
+                // Safety: all used names are results of wasm imports parsing,
                 // so there will always be an import for the name and the type will be correct
                 let js_export = js_sys::Reflect::get(js_exports.as_ref(), &name.into()).unwrap();
                 let export: Export<JsWasmBackend> = match export {
-                    module_info::Export::Function(sig) => {
+                    module_info::Export::Function(signature) => {
                         Export::Function(WasmExportFunction::new_stored(
                             &mut ctx,
                             instance.clone(),
                             js_export.into(),
-                            sig.clone(),
+                            signature.clone(),
                         ))
                     }
                     module_info::Export::Memory => Export::Memory(JsMemory::new(js_export.into())),
@@ -100,7 +101,7 @@ impl JsInstance {
     }
 }
 
-/// Allocated instance resources
+/// Allocated instance resources.
 pub(crate) struct StoredInstance {
     #[allow(unused)] // Keep the instance, so it wont get dropped
     pub(crate) inner: WebAssembly::Instance,
