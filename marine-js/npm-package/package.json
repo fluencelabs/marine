@@ -52,8 +52,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "prebuild": "node update-imports.cjs",
-    "postbuild": "cp ../marine-js-pkg/marine_js_bg.wasm ./dist/marine-js.wasm",
+    "prebuild": "node update-imports.cjs && rm -rf ./src/snippets && cp -R ../marine-js-pkg/snippets ./src/",
+    "postbuild": "cp ../marine-js-pkg/marine_js_bg.wasm ./dist/marine-js.wasm ",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "private": false,

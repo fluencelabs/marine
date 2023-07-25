@@ -21,6 +21,7 @@ use crate::WasmBackend;
 use crate::WType;
 
 use std::borrow::Cow;
+use std::fmt::Formatter;
 
 /// A "Linker" object, that is used to match functions with module imports during instantiation.
 /// Cloning is a cheap operation for this object. All clones refer to the same data in store.
@@ -79,6 +80,17 @@ impl FuncSig {
 
     pub fn returns(&self) -> &[WType] {
         &self.returns
+    }
+}
+
+impl std::fmt::Debug for FuncSig {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "params: {:?}, returns: {:?}",
+            self.params(),
+            self.returns
+        )
     }
 }
 

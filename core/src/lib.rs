@@ -63,6 +63,7 @@ pub mod generic {
     pub use crate::marine_core::MarineCore;
 }
 
+#[cfg(feature = "default")]
 pub mod wasmtime {
     pub type WasmBackend = marine_wasmtime_backend::WasmtimeWasmBackend;
 
@@ -72,4 +73,5 @@ pub mod wasmtime {
     pub type MarineCore = crate::marine_core::MarineCore<WasmBackend>;
 }
 
+#[cfg(feature = "default")]
 pub use crate::wasmtime::*;

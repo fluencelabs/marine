@@ -14,28 +14,15 @@
  * limitations under the License.
  */
 
-import { WASI } from '@wasmer/wasi';
+import {WASI, WASIEnv} from '@wasmer/wasi';
 import bindingsRaw from '@wasmer/wasi/lib/bindings/browser.js';
 import { defaultImport } from 'default-import';
 import { WasmFs } from '@wasmer/wasmfs';
 import { init } from './marine_js.js';
-import type { MarineServiceConfig, Env } from './config.js';
+import type {MarineServiceConfig, Env, Args} from './config.js';
 import { JSONArray, JSONObject, LogFunction, LogLevel, logLevels } from './types.js';
 
 const binding = defaultImport(bindingsRaw);
-
-let cachegetUint8Memory0: any = null;
-
-function getUint8Memory0(wasm: any) {
-    if (cachegetUint8Memory0 === null || cachegetUint8Memory0.buffer !== wasm.memory.buffer) {
-        cachegetUint8Memory0 = new Uint8Array(wasm.memory.buffer);
-    }
-    return cachegetUint8Memory0;
-}
-
-function getStringFromWasm0(wasm: any, ptr: any, len: any) {
-    return decoder.decode(getUint8Memory0(wasm).subarray(ptr, ptr + len));
-}
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
@@ -50,72 +37,26 @@ export class MarineService {
 
     constructor(
         private readonly controlModule: WebAssembly.Module,
-        private readonly serviceModule: WebAssembly.Module,
         private readonly serviceId: string,
         private logFunction: LogFunction,
-        marineServiceConfig?: MarineServiceConfig,
+        private serviceConfig: MarineServiceConfig,
         env?: Env,
     ) {
-        this.env = {
-            WASM_LOG: 'off',
-            ...env,
-        };
+
+        this.serviceConfig.modules_config.forEach(module => {
+            module.config.wasi.envs = {
+                WASM_LOG: 'off',            // general default
+                ...env,                     // overridden by global envs
+                ...module.config.wasi.envs, // overridden by module-wise envs
+            }
+        })
     }
 
     async init(): Promise<void> {
-        // wasi is needed to run marine modules with marine-js
-        const wasi = new WASI({
-            args: [],
-            env: this.env,
-            bindings: {
-                ...binding,
-                fs: new WasmFs().fs,
-            },
-        });
-
-        const cfg: any = {
-            exports: undefined,
-        };
-
-        const wasiImports = hasWasiImports(this.serviceModule) ? wasi.getImports(this.serviceModule) : {};
-
-        const serviceInstance = await WebAssembly.instantiate(this.serviceModule, {
-            ...wasiImports,
-            host: {
-                log_utf8_string: (levelRaw: any, target: any, offset: any, size: any) => {
-                    let wasm = cfg.exports;
-
-                    const level = rawLevelToTypes(levelRaw);
-                    if (level === null) {
-                        return;
-                    }
-
-                    const message = getStringFromWasm0(wasm, offset, size);
-                    this.logFunction({
-                        service: this.serviceId,
-                        message,
-                        level,
-                    });
-                },
-            },
-        });
-        wasi.start(serviceInstance);
-        cfg.exports = serviceInstance.exports;
-
         const controlModuleInstance = await init(this.controlModule);
 
-        const customSections = WebAssembly.Module.customSections(this.serviceModule, 'interface-types');
-        const itCustomSections = new Uint8Array(customSections[0]);
-        let rawResult = controlModuleInstance.register_module(this.serviceId, itCustomSections, serviceInstance);
-
-        let result: any;
-        try {
-            result = JSON.parse(rawResult);
-            this._controlModuleInstance = controlModuleInstance;
-            return result;
-        } catch (ex) {
-            throw 'register_module result parsing error: ' + ex + ', original text: ' + rawResult;
-        }
+        controlModuleInstance.register_module(this.serviceConfig, this.logFunction);
+        this._controlModuleInstance = controlModuleInstance;
     }
 
     terminate(): void {
@@ -131,14 +72,11 @@ export class MarineService {
             throw new Error('Terminated');
         }
 
+        // facade module is the last module of the service
+        const facade_name = this.serviceConfig.modules_config[this.serviceConfig.modules_config.length - 1].import_name;
         const argsString = JSON.stringify(args);
-        const rawRes = this._controlModuleInstance.call_module(this.serviceId, functionName, argsString);
-        const jsonRes: { result: unknown; error: string } = JSON.parse(rawRes);
-        if (jsonRes.error) {
-            throw new Error(`marine-js failed with: ${jsonRes.error}`);
-        }
-
-        return jsonRes.result;
+        const rawRes = this._controlModuleInstance.call_module(facade_name, functionName, argsString);
+        return JSON.parse(rawRes);
     }
 }
 
