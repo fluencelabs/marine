@@ -48,7 +48,7 @@ impl JsImports {
                 js_sys::Reflect::set(
                     &namespace_obj,
                     &func_name.into(),
-                    &func.stored(&store.as_context()).js_func,
+                    &func.stored(&store.as_context()).js_function,
                 )
                 .map_err(|e| {
                     web_sys::console::log_1(&e);

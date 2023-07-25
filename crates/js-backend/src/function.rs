@@ -54,13 +54,16 @@ pub struct WasmExportFunction {
 }
 
 pub(crate) struct StoredFunction {
-    pub(crate) js_func: js_sys::Function,
+    pub(crate) js_function: js_sys::Function,
     pub(crate) signature: FuncSig,
 }
 
 impl StoredFunction {
-    pub(crate) fn new(js_func: js_sys::Function, signature: FuncSig) -> Self {
-        Self { js_func, signature }
+    pub(crate) fn new(js_function: js_sys::Function, signature: FuncSig) -> Self {
+        Self {
+            js_function,
+            signature,
+        }
     }
 }
 
@@ -96,7 +99,7 @@ impl WasmExportFunction {
     ) -> RuntimeResult<Vec<WValue>> {
         let params = js_array_from_wval_array(args);
         let stored_func = self.stored_mut(store.as_context_mut());
-        let result = js_sys::Reflect::apply(&stored_func.js_func, &JsValue::NULL, &params)
+        let result = js_sys::Reflect::apply(&stored_func.js_function, &JsValue::NULL, &params)
             .map_err(|e| {
                 web_sys::console::log_2(&"failed to apply func".into(), &e);
                 RuntimeError::Other(anyhow!("Failed to apply func"))
