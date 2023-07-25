@@ -23,6 +23,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * marine-wasm-backend-traits bumped from 0.2.0 to 0.2.1
     * marine-wasmtime-backend bumped from 0.2.1 to 0.2.2
 
+## [0.26.0](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.25.3...fluence-app-service-v0.26.0) (2023-07-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **wasm-backend, app-service:** use String for wasi env vars + require Clone for Function trait   ([#333](https://github.com/fluencelabs/marine/issues/333))
+
+### Features
+
+* **wasm-backend, app-service:** use String for wasi env vars + require Clone for Function trait   ([#333](https://github.com/fluencelabs/marine/issues/333)) ([aeae703](https://github.com/fluencelabs/marine/commit/aeae703229f5f9410429390fe2e72d6084527f14))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-runtime bumped from 0.26.3 to 0.27.0
+    * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
+    * marine-wasmtime-backend bumped from 0.2.2 to 0.3.0
+
 ## [0.25.0](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.24.0...fluence-app-service-v0.25.0) (2023-03-14)
 
 

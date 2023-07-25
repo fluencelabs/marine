@@ -8,6 +8,29 @@
     * marine-min-it-version bumped from 0.2.1 to 0.3.0
     * it-json-serde bumped from 0.3.5 to 0.4.0
 
+## [0.5.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.4.1...marine-js-v0.5.0) (2023-07-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **marine-js:** replace old marine-js with common marine-runtime + backend traits impl for JS ([#332](https://github.com/fluencelabs/marine/issues/332))
+
+### Features
+
+* **marine-js:** replace old marine-js with common marine-runtime + backend traits impl for JS ([#332](https://github.com/fluencelabs/marine/issues/332)) ([a61ddfc](https://github.com/fluencelabs/marine/commit/a61ddfc4044b53a9d5f7864c933a48f7404c473c))
+
+
+### Bug Fixes
+
+* **build:** add imports update into marine-js bindgen glue code patcher ([#348](https://github.com/fluencelabs/marine/issues/348)) ([08508ac](https://github.com/fluencelabs/marine/commit/08508ac9a3468c17135405e918fe188b5d75d761))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-js-backend bumped from 0.1.0 to 0.1.1
+
 ## [0.4.1](https://github.com/fluencelabs/marine/compare/marine-js-v0.4.0...marine-js-v0.4.1) (2023-04-04)
 
 

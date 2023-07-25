@@ -1,5 +1,9 @@
 # Changelog
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-it-parser bumped from 0.12.1 to 0.12.2
+
 ## [0.10.1](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.10.0...marine-it-generator-v0.10.1) (2023-04-04)
 
 
