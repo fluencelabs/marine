@@ -1252,12 +1252,12 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.25.3"
+version = "0.26.0"
 dependencies = [
  "log",
  "maplit",
  "marine-min-it-version 0.3.0",
- "marine-runtime 0.26.3",
+ "marine-runtime 0.27.0",
  "marine-wasm-backend-traits",
  "marine-wasmtime-backend",
  "serde",
@@ -2052,7 +2052,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.14.1"
+version = "0.14.2"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -2065,9 +2065,9 @@ dependencies = [
  "env_logger 0.10.0",
  "exitfailure",
  "log",
- "marine-it-generator 0.10.1",
- "marine-it-parser 0.12.1",
- "marine-module-info-parser 0.6.1",
+ "marine-it-generator 0.10.2",
+ "marine-it-parser 0.12.2",
+ "marine-module-info-parser 0.6.2",
  "semver 1.0.18",
  "serde",
  "serde_json",
@@ -2121,7 +2121,7 @@ dependencies = [
 
 [[package]]
 name = "marine-core"
-version = "0.20.3"
+version = "0.21.0"
 dependencies = [
  "anyhow",
  "bytes",
@@ -2129,11 +2129,11 @@ dependencies = [
  "it-lilo 0.5.1",
  "it-memory-traits 0.4.0",
  "log",
- "marine-it-generator 0.10.1",
+ "marine-it-generator 0.10.2",
  "marine-it-interfaces 0.8.1",
- "marine-it-parser 0.12.1",
+ "marine-it-parser 0.12.2",
  "marine-min-it-version 0.3.0",
- "marine-module-info-parser 0.6.1",
+ "marine-module-info-parser 0.6.2",
  "marine-module-interface 0.7.1",
  "marine-utils 0.5.0",
  "marine-wasm-backend-traits",
@@ -2168,10 +2168,10 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.10.1"
+version = "0.10.2"
 dependencies = [
  "it-lilo 0.5.1",
- "marine-it-parser 0.12.1",
+ "marine-it-parser 0.12.2",
  "marine-macro-impl",
  "once_cell",
  "serde",
@@ -2220,7 +2220,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-parser"
-version = "0.12.1"
+version = "0.12.2"
 dependencies = [
  "anyhow",
  "itertools",
@@ -2237,14 +2237,14 @@ dependencies = [
 
 [[package]]
 name = "marine-js"
-version = "0.4.1"
+version = "0.5.0"
 dependencies = [
  "js-sys",
  "log",
  "maplit",
  "marine-js-backend",
  "marine-rs-sdk",
- "marine-runtime 0.26.3",
+ "marine-runtime 0.27.0",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
@@ -2255,7 +2255,7 @@ dependencies = [
 
 [[package]]
 name = "marine-js-backend"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "derive_more",
@@ -2331,7 +2331,7 @@ dependencies = [
 
 [[package]]
 name = "marine-module-info-parser"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2442,7 +2442,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.26.3"
+version = "0.27.0"
 dependencies = [
  "bytesize",
  "env_logger 0.10.0",
@@ -2450,7 +2450,7 @@ dependencies = [
  "it-memory-traits 0.4.0",
  "itertools",
  "log",
- "marine-core 0.20.3",
+ "marine-core 0.21.0",
  "marine-module-interface 0.7.1",
  "marine-rs-sdk",
  "marine-rs-sdk-main",
@@ -2532,7 +2532,7 @@ version = "0.5.0"
 
 [[package]]
 name = "marine-wasm-backend-traits"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "it-memory-traits 0.4.0",
@@ -2545,7 +2545,7 @@ dependencies = [
 
 [[package]]
 name = "marine-wasmtime-backend"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "it-memory-traits 0.4.0",
@@ -2641,13 +2641,13 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.21.3"
+version = "0.21.4"
 dependencies = [
  "anyhow",
  "check-latest",
  "clap 2.34.0",
  "env_logger 0.10.0",
- "fluence-app-service 0.25.3",
+ "fluence-app-service 0.26.0",
  "itertools",
  "log",
  "marine-rs-sdk-main",

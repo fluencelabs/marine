@@ -1,5 +1,9 @@
 # Changelog
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
+
 ## [0.12.1](https://github.com/fluencelabs/marine/compare/marine-it-parser-v0.12.0...marine-it-parser-v0.12.1) (2023-04-04)
 
 
