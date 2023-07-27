@@ -80,4 +80,3 @@ export const defaultCallParameters: CallParameters = {
     service_id: "",
     tetraplets: []
 }
-aaaaaaaaa
