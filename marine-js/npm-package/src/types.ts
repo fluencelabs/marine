@@ -52,7 +52,6 @@ export type SecurityTetraplet = {
     json_path: string,
 }
 
-
 export type LogFunction = (message: LogMessage) => void;
 
 export interface LogMessage {
@@ -72,3 +71,12 @@ export const logLevelToEnv = (level: LogLevel): { WASM_LOG: LogLevel } => {
         WASM_LOG: level,
     };
 };
+
+export const defaultCallParameters: CallParameters = {
+    host_id: "",
+    init_peer_id: "",
+    particle_id: "",
+    service_creator_peer_id: "",
+    service_id: "",
+    tetraplets: []
+}

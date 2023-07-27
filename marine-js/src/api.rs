@@ -188,15 +188,7 @@ pub fn call_module(
     args: &str,
     call_parameters: JsValue,
 ) -> Result<String, JsError> {
-    let call_parameters = match call_parameters {
-        cp if cp.is_object() => serde_wasm_bindgen::from_value(cp)?,
-        cp if cp.is_null() || cp.is_undefined() => <_>::default(),
-        _ => {
-            return Err(JsError::new(
-                "call_parameters argument is expected to be undefined, null or an object",
-            ))
-        }
-    };
+    let call_parameters = serde_wasm_bindgen::from_value(call_parameters)?;
 
     MARINE.with(|marine| {
         let args: JValue = serde_json::from_str(args)?;

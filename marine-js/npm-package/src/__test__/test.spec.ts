@@ -7,7 +7,7 @@ import * as url from 'url';
 import downloadRaw from 'download';
 import { MarineService } from '../MarineService.js';
 import { callAvm } from '@fluencelabs/avm';
-import { JSONArray, JSONObject, CallParameters, SecurityTetraplet } from '../types.js';
+import {JSONArray, JSONObject, CallParameters, SecurityTetraplet, defaultCallParameters} from '../types.js';
 import {MarineServiceConfig, Env, Args, ModuleDescriptor} from '../config.js';
 import exp = require("constants");
 
@@ -80,7 +80,7 @@ describe('Fluence app service tests', () => {
         await marineService.init();
 
         // act
-        const res = marineService.call('greeting', ['test'], undefined);
+        const res = marineService.call('greeting', ['test'], defaultCallParameters);
 
         // assert
         expect(res).toBe('Hi, test');
@@ -95,7 +95,7 @@ describe('Fluence app service tests', () => {
         await marineService.init();
 
         // act
-        const res = marineService.call('greeting', { name: 'test' }, undefined);
+        const res = marineService.call('greeting', { name: 'test' }, defaultCallParameters);
 
         // assert
         expect(res).toBe('Hi, test');
@@ -112,8 +112,8 @@ describe('Fluence app service tests', () => {
         await marineService.init();
 
         // act
-        const greetingRecordResult = marineService.call('greeting_record', [], undefined);
-        const voidResult: any = marineService.call('void_fn', [], undefined);
+        const greetingRecordResult = marineService.call('greeting_record', [], defaultCallParameters);
+        const voidResult: any = marineService.call('void_fn', [], defaultCallParameters);
 
         // assert
         expect(greetingRecordResult).toMatchObject({
@@ -144,7 +144,7 @@ describe('Fluence app service tests', () => {
         await marineService.init();
 
         // act
-        const call_result = marineService.call('greeting', ["test"], undefined);
+        const call_result = marineService.call('greeting', ["test"], defaultCallParameters);
 
         // assert
         expect(call_result).toMatchObject(["Shrek: hi, test", "Donkey: hi, test"]);
@@ -169,7 +169,7 @@ describe('Fluence app service tests', () => {
 
         // act
         const res = await callAvm(
-            (args: JSONArray | JSONObject): unknown => testAvmInMarine.call('invoke', args, undefined),
+            (args: JSONArray | JSONObject): unknown => testAvmInMarine.call('invoke', args, defaultCallParameters),
             {
                 currentPeerId: vmPeerId,
                 initPeerId: vmPeerId,
@@ -200,12 +200,12 @@ describe('Fluence app service tests', () => {
 
         let result: any;
 
-        result = marine.call('sqlite3_open_v2', [':memory:', 6, ''], undefined);
+        result = marine.call('sqlite3_open_v2', [':memory:', 6, ''], defaultCallParameters);
         const dbHandle = result.db_handle;
         result = marine.call(
             'sqlite3_exec',
             [dbHandle, 'CREATE VIRTUAL TABLE users USING FTS5(body)', 0, 0],
-            undefined,
+            defaultCallParameters,
         );
 
         expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
@@ -213,7 +213,7 @@ describe('Fluence app service tests', () => {
         result = marine.call(
             'sqlite3_exec',
             [dbHandle, "INSERT INTO users(body) VALUES('AB'), ('BC'), ('CD'), ('DE')", 0, 0],
-            undefined,
+            defaultCallParameters,
         );
 
         expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
@@ -221,7 +221,7 @@ describe('Fluence app service tests', () => {
         result = marine.call(
             'sqlite3_exec',
             [dbHandle, "SELECT * FROM users WHERE users MATCH 'A* OR B*'", 0, 0],
-            undefined,
+            defaultCallParameters,
         );
 
         expect(result).toMatchObject({ err_msg: '', ret_code: 0 });
@@ -234,14 +234,14 @@ describe('Fluence app service tests', () => {
         const marine = new MarineService(control, 'redis', dontLog, createSimpleService('redis', buf));
         await marine.init();
 
-        const result1 = marine.call('invoke', ['SET A 10'], undefined);
-        const result2 = marine.call('invoke', ['SADD B 20'], undefined);
-        const result3 = marine.call('invoke', ['GET A'], undefined);
-        const result4 = marine.call('invoke', ['SMEMBERS B'], undefined);
+        const result1 = marine.call('invoke', ['SET A 10'], defaultCallParameters);
+        const result2 = marine.call('invoke', ['SADD B 20'], defaultCallParameters);
+        const result3 = marine.call('invoke', ['GET A'], defaultCallParameters);
+        const result4 = marine.call('invoke', ['SMEMBERS B'], defaultCallParameters);
         const result5 = marine.call(
             'invoke',
             ["eval \"redis.call('incr', 'A') return redis.call('get', 'A') * 8 + 5\"  0"],
-            undefined,
+            defaultCallParameters,
         );
 
         expect(result1).toBe('+OK\r\n');
@@ -260,7 +260,7 @@ describe('Fluence app service tests', () => {
         await marineService.init();
 
 
-        expect(() => marineService.call('failing', [], undefined))
+        expect(() => marineService.call('failing', [], defaultCallParameters))
             .toThrow(new Error("engine error: Execution error: `call-core 6` failed while calling the local or import function `failing`"));
 
     });
@@ -276,7 +276,7 @@ describe('Fluence app service tests', () => {
 
         // act
         try {
-            await marineService.call('do_not_exist', [], undefined);
+            await marineService.call('do_not_exist', [], defaultCallParameters);
             // should never succeed
             expect(true).toBe(false);
         } catch (e) {
@@ -326,7 +326,7 @@ describe('Fluence app service tests', () => {
                 "arg_10": "fluence",
                 "arg_11": [0x13, 0x37],
             };
-            const result1 = marineService.call(func_name, args1);
+            const result1 = marineService.call(func_name, args1, defaultCallParameters);
             expect(result1).toStrictEqual(expected_result)
 
             let args2 = [
@@ -343,7 +343,7 @@ describe('Fluence app service tests', () => {
                 "fluence",
                 [0x13, 0x37]
             ];
-            const result2 = marineService.call(func_name, args2)
+            const result2 = marineService.call(func_name, args2, defaultCallParameters)
             expect(result2).toStrictEqual(expected_result);
         };
 

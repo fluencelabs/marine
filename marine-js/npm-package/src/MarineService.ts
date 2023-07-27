@@ -54,7 +54,7 @@ export class MarineService {
         this._controlModuleInstance = 'not-set';
     }
 
-    call(functionName: string, args: JSONArray | JSONObject, callParams?: CallParameters): unknown {
+    call(functionName: string, args: JSONArray | JSONObject, callParams: CallParameters): unknown {
         if (this._controlModuleInstance === 'not-set') {
             throw new Error('Not initialized');
         }
