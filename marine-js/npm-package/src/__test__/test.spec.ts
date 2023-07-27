@@ -389,8 +389,13 @@ describe('Fluence app service tests', () => {
             tetraplets: tetraplets,
         };
 
-        const expected_result = "init_peer_id\nservice_id\nservice_creator_peer_id\nhost_id\nparticle_id\n[[SecurityTetraplet { peer_pk: \"peer_pk\", service_id: \"service_id\", function_name: \"some_func_name\", json_path: \"some_json_path\" }]]"
-        ;
+        const expected_result =
+            "init_peer_id\n" +
+            "service_id\n" +
+            "service_creator_peer_id\n" +
+            "host_id\n" +
+            "particle_id\n" +
+            "[[SecurityTetraplet { peer_pk: \"peer_pk\", service_id: \"service_id\", function_name: \"some_func_name\", json_path: \"some_json_path\" }]]";
 
         const result1 = marineService.call("call_parameters", [], call_parameters);
         expect(result1).toStrictEqual(expected_result)
