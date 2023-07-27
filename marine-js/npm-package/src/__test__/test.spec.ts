@@ -7,7 +7,7 @@ import * as url from 'url';
 import downloadRaw from 'download';
 import { MarineService } from '../MarineService.js';
 import { callAvm } from '@fluencelabs/avm';
-import { JSONArray, JSONObject } from '../types.js';
+import { JSONArray, JSONObject, CallParameters, SecurityTetraplet } from '../types.js';
 import {MarineServiceConfig, Env, Args, ModuleDescriptor} from '../config.js';
 import exp = require("constants");
 
@@ -326,7 +326,7 @@ describe('Fluence app service tests', () => {
                 "arg_10": "fluence",
                 "arg_11": [0x13, 0x37],
             };
-            const result1 = marineService.call(func_name, args1, null);
+            const result1 = marineService.call(func_name, args1);
             expect(result1).toStrictEqual(expected_result)
 
             let args2 = [
@@ -343,11 +343,57 @@ describe('Fluence app service tests', () => {
                 "fluence",
                 [0x13, 0x37]
             ];
-            const result2 = marineService.call(func_name, args2, null)
+            const result2 = marineService.call(func_name, args2)
             expect(result2).toStrictEqual(expected_result);
         };
 
         test("all_types");
         test("all_ref_types")
+    });
+
+    it('Checking call_parameters passing', async () => {
+        // arrange
+        const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
+        const call_parameters_wasm = await loadWasmBytes(path.join(examplesDir, './call_parameters/artifacts/call_parameters.wasm'),)
+
+        let service = {
+            modules_config: [
+                createModuleDescriptor('call_parameters', call_parameters_wasm),
+            ]
+        }
+
+        const marineService = new MarineService(marine, 'srv', dontLog, service);
+        await marineService.init();
+
+        const init_peer_id_2 = "init_peer_id";
+        const service_id = "service_id";
+        const service_creator_peer_id = "service_creator_peer_id";
+        const host_id = "host_id";
+        const particle_id = "particle_id";
+
+        const tetraplet: SecurityTetraplet = {
+                function_name: "some_func_name",
+                json_path: "some_json_path",
+                peer_pk: "peer_pk",
+                service_id: "service_id"
+        }
+
+        const tetraplets = [[tetraplet]]
+
+        const call_parameters: CallParameters = {
+            init_peer_id: init_peer_id_2,
+            service_id: service_id,
+            service_creator_peer_id: service_creator_peer_id,
+            host_id: host_id,
+            particle_id: particle_id,
+            tetraplets: tetraplets,
+        };
+
+        const expected_result = "init_peer_id\nservice_id\nservice_creator_peer_id\nhost_id\nparticle_id\n[[SecurityTetraplet { peer_pk: \"peer_pk\", service_id: \"service_id\", function_name: \"some_func_name\", json_path: \"some_json_path\" }]]"
+        ;
+
+        const result1 = marineService.call("call_parameters", [], call_parameters);
+        expect(result1).toStrictEqual(expected_result)
+
     });
 });

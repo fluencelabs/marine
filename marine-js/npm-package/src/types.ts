@@ -17,6 +17,41 @@
 export type JSONValue = string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;
 export type JSONArray = Array<JSONValue>;
 export type JSONObject = { [x: string]: JSONValue };
+export type CallParameters = {
+    /// Peer id of the AIR script initiator.
+    init_peer_id: string,
+
+    /// Id of the current service.
+    service_id: string,
+
+    /// Id of the service creator.
+    service_creator_peer_id: string,
+
+    /// PeerId of the peer who hosts this service.
+    host_id: string,
+
+    /// Id of the particle which execution resulted a call this service.
+    particle_id: string,
+
+    /// Security tetraplets which described origin of the arguments.
+    tetraplets: Array<Array<SecurityTetraplet>>,
+}
+
+export type SecurityTetraplet = {
+    /// Id of a peer where corresponding value was set.
+    peer_pk: string,
+
+    /// Id of a service that set corresponding value.
+    service_id: string,
+
+    /// Name of a function that returned corresponding value.
+    function_name: string,
+
+    /// Value was produced by applying this `json_path` to the output from `call_service`.
+    // TODO: since it's not a json path anymore, it's needed to rename it to lambda
+    json_path: string,
+}
+
 
 export type LogFunction = (message: LogMessage) => void;
 

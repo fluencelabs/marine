@@ -63,7 +63,7 @@ export class MarineService {
         this._controlModuleInstance = 'not-set';
     }
 
-    call(functionName: string, args: JSONArray | JSONObject, callParams: any): unknown {
+    call(functionName: string, args: JSONArray | JSONObject, callParams?: CallParameters): unknown {
         if (this._controlModuleInstance === 'not-set') {
             throw new Error('Not initialized');
         }
@@ -75,7 +75,7 @@ export class MarineService {
         // facade module is the last module of the service
         const facade_name = this.serviceConfig.modules_config[this.serviceConfig.modules_config.length - 1].import_name;
         const argsString = JSON.stringify(args);
-        const rawRes = this._controlModuleInstance.call_module(facade_name, functionName, argsString);
+        const rawRes = this._controlModuleInstance.call_module(facade_name, functionName, argsString, callParams);
         return JSON.parse(rawRes);
     }
 }
