@@ -176,13 +176,20 @@ pub fn register_module(config: JsValue, log_fn: js_sys::Function) -> Result<(), 
 /// * module_name - name of registered module
 /// * function_name - name of the function to call
 /// * args - JSON array of function arguments
-///
+/// * call_parameters - an object representing call paramters, with the structure defined by fluence network
 /// # Return value
 ///
 /// JSON array of values. An error is signaled via exception.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn call_module(module_name: &str, function_name: &str, args: &str) -> Result<String, JsError> {
+pub fn call_module(
+    module_name: &str,
+    function_name: &str,
+    args: &str,
+    call_parameters: JsValue,
+) -> Result<String, JsError> {
+    let call_parameters = serde_wasm_bindgen::from_value(call_parameters)?;
+
     MARINE.with(|marine| {
         let args: JValue = serde_json::from_str(args)?;
         marine
@@ -192,7 +199,7 @@ pub fn call_module(module_name: &str, function_name: &str, args: &str) -> Result
             .ok_or_else(|| JsError::new("marine is not initialized"))
             .and_then(|mut marine| {
                 let result =
-                    marine.call_with_json(module_name, function_name, args, <_>::default())?;
+                    marine.call_with_json(module_name, function_name, args, call_parameters)?;
                 serde_json::ser::to_string(&result).map_err(|e| JsError::new(&e.to_string()))
             })
     })

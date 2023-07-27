@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
 import { MarineService } from '../MarineService.js';
-import { LogLevel } from '../types.js';
+import {defaultCallParameters, LogLevel} from '../types.js';
 import {Env, MarineModuleConfig, MarineServiceConfig, ModuleDescriptor} from "../config.js";
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
@@ -69,7 +69,7 @@ describe.each([
         await marineService.init();
 
         // act
-        const res = marineService.call('log_' + level, [], undefined);
+        const res = marineService.call('log_' + level, [], defaultCallParameters);
 
         // assert
         expect(res).toBe(null);
@@ -96,11 +96,11 @@ describe.each([
         await marineService.init();
 
         // act
-        const res1 = marineService.call('log_error', [], undefined);
-        const res2 = marineService.call('log_warn', [], undefined);
-        const res3 = marineService.call('log_info', [], undefined);
-        const res4 = marineService.call('log_debug', [], undefined);
-        const res5 = marineService.call('log_trace', [], undefined);
+        const res1 = marineService.call('log_error', [], defaultCallParameters);
+        const res2 = marineService.call('log_warn', [], defaultCallParameters);
+        const res3 = marineService.call('log_info', [], defaultCallParameters);
+        const res4 = marineService.call('log_debug', [], defaultCallParameters);
+        const res5 = marineService.call('log_trace', [], defaultCallParameters);
 
         // assert
         expect(res1).toBe(null);

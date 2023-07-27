@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-import {WASI, WASIEnv} from '@wasmer/wasi';
-import bindingsRaw from '@wasmer/wasi/lib/bindings/browser.js';
-import { defaultImport } from 'default-import';
-import { WasmFs } from '@wasmer/wasmfs';
 import { init } from './marine_js.js';
-import type {MarineServiceConfig, Env, Args} from './config.js';
-import { JSONArray, JSONObject, LogFunction, LogLevel, logLevels } from './types.js';
-
-const binding = defaultImport(bindingsRaw);
+import type {MarineServiceConfig, Env} from './config.js';
+import {CallParameters, JSONArray, JSONObject, LogFunction} from './types.js';
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
 type ControlModuleInstance = Awaited<ReturnType<typeof init>> | 'not-set' | 'terminated';
-
-const decoder = new TextDecoder();
 
 export class MarineService {
     private env: Env = {};
@@ -42,7 +34,6 @@ export class MarineService {
         private serviceConfig: MarineServiceConfig,
         env?: Env,
     ) {
-
         this.serviceConfig.modules_config.forEach(module => {
             module.config.wasi.envs = {
                 WASM_LOG: 'off',            // general default
@@ -63,7 +54,7 @@ export class MarineService {
         this._controlModuleInstance = 'not-set';
     }
 
-    call(functionName: string, args: JSONArray | JSONObject, callParams: any): unknown {
+    call(functionName: string, args: JSONArray | JSONObject, callParams: CallParameters): unknown {
         if (this._controlModuleInstance === 'not-set') {
             throw new Error('Not initialized');
         }
@@ -75,32 +66,7 @@ export class MarineService {
         // facade module is the last module of the service
         const facade_name = this.serviceConfig.modules_config[this.serviceConfig.modules_config.length - 1].import_name;
         const argsString = JSON.stringify(args);
-        const rawRes = this._controlModuleInstance.call_module(facade_name, functionName, argsString);
+        const rawRes = this._controlModuleInstance.call_module(facade_name, functionName, argsString, callParams);
         return JSON.parse(rawRes);
     }
 }
-
-function hasWasiImports(module: WebAssembly.Module): boolean {
-    const imports = WebAssembly.Module.imports(module);
-    const firstWasiImport = imports.find((x) => {
-        return x.module === 'wasi_snapshot_preview1' || x.module === 'wasi_unstable';
-    });
-    return firstWasiImport !== undefined;
-}
-
-const rawLevelToTypes = (rawLevel: any): LogLevel | null => {
-    switch (rawLevel) {
-        case 1:
-            return 'error';
-        case 2:
-            return 'warn';
-        case 3:
-            return 'info';
-        case 4:
-            return 'debug';
-        case 5:
-            return 'trace';
-    }
-
-    return null;
-};
