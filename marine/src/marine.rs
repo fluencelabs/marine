@@ -83,6 +83,7 @@ impl<WB: WasmBackend> Marine<WB> {
     }
 
     /// Creates Marine with given modules.
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn with_modules<C>(mut modules: HashMap<String, Vec<u8>>, config: C) -> MarineResult<Self>
     where
         C: TryInto<MarineConfig<WB>>,
@@ -124,6 +125,7 @@ impl<WB: WasmBackend> Marine<WB> {
     }
 
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
+    #[tracing::instrument(level = "info", skip_all)]
     pub fn with_module_names<C>(names: &HashMap<String, PathBuf>, config: C) -> MarineResult<Self>
     where
         C: TryInto<MarineConfig<WB>>,
@@ -136,6 +138,7 @@ impl<WB: WasmBackend> Marine<WB> {
     }
 
     /// Call a specified function of loaded on a startup module by its name.
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn call_with_ivalues(
         &mut self,
         module_name: impl AsRef<str>,
@@ -155,6 +158,7 @@ impl<WB: WasmBackend> Marine<WB> {
     }
 
     /// Call a specified function of loaded on a startup module by its name.
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn call_with_json(
         &mut self,
         module_name: impl AsRef<str>,

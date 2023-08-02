@@ -135,6 +135,7 @@ impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
         &self.outputs
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn call(
         &self,
         store: &mut <WB as WasmBackend>::ContextMut<'_>,

@@ -22,3 +22,5 @@ web-sys = {version = "0.3.61", features = ["console"]}
 js-sys = "0.3.63"
 wasm-bindgen-console-logger = "0.1.1"
 log = "0.4.17"
+tracing = "0.1.37"
+tracing-wasm = "0.2.1"

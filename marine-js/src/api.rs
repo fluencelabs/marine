@@ -94,6 +94,7 @@ impl From<ApiWasiConfig> for MarineWASIConfig {
 }
 
 impl From<ApiModuleConfig> for MarineModuleConfig<JsWasmBackend> {
+    #[tracing::instrument(skip_all)]
     fn from(value: ApiModuleConfig) -> Self {
         Self {
             mem_pages_count: value.mem_pages_count,

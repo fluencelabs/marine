@@ -96,6 +96,7 @@ pub(crate) struct MModule<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> MModule<WB> {
+    #[tracing::instrument(level = "trace", skip(store, wasm_bytes, config, modules))]
     pub(crate) fn new(
         name: &str,
         store: &mut <WB as WasmBackend>::Store,
@@ -240,6 +241,7 @@ impl<WB: WasmBackend> MModule<WB> {
         }
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn add_wasi_imports(
         store: &mut <WB as WasmBackend>::Store,
         linker: &mut <WB as WasmBackend>::Imports,
@@ -254,6 +256,7 @@ impl<WB: WasmBackend> MModule<WB> {
         Ok(())
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn add_host_imports(
         store: &mut <WB as WasmBackend>::Store,
         linker: &mut <WB as WasmBackend>::Imports,
@@ -289,6 +292,7 @@ impl<WB: WasmBackend> MModule<WB> {
     }
 
     // this function deals only with import functions that have an adaptor implementation
+    #[tracing::instrument(level = "trace", skip_all)]
     fn add_wit_imports(
         store: &mut <WB as WasmBackend>::Store,
         linker: &mut <WB as WasmBackend>::Imports,
