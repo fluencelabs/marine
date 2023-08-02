@@ -45,7 +45,7 @@ pub(crate) fn create_mounted_binary_import<WB: WasmBackend>(
         error_handler: None,
     }
 }
-
+#[tracing::instrument(level = "trace", skip(raw_args))]
 pub(self) fn mounted_binary_import_impl(
     mounted_binary_path: &Path,
     raw_args: Vec<IValue>,
