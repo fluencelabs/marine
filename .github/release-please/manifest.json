@@ -14,6 +14,6 @@
   "marine": "0.27.0",
   "tools/cli": "0.14.2",
   "tools/repl": "0.21.4",
-  "marine-js": "0.5.0",
+  "marine-js": "0.6.0",
   "crates/js-backend": "0.1.1"
 }
