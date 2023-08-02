@@ -55,16 +55,15 @@ const wasmTestsDir = path.join(__dirname, '../../../../marine/tests/wasm_tests')
 const dontLog = () => {};
 
 
-const createModuleDescriptor = (name: string, wasm_bytes: Uint8Array): ModuleDescriptor  => {
+const createModuleDescriptor = (name: string): ModuleDescriptor  => {
     return {
         import_name: name,
-        wasm_bytes: wasm_bytes,
         config: defaultModuleConfig,
     }
 }
-const createSimpleService = (name: string, wasm_bytes: Uint8Array): MarineServiceConfig => {
+const createSimpleServiceConfig = (name: string): MarineServiceConfig => {
     return {
-        modules_config: [createModuleDescriptor(name, wasm_bytes)]
+        modules_config: [createModuleDescriptor(name)]
     }
 };
 
@@ -74,9 +73,10 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmBytes(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
 
-        let service = createSimpleService('srv', greeting);
+        const config = createSimpleServiceConfig('greeting');
+        const modules = {greeting: greeting}
 
-        const marineService = new MarineService(marine, 'srv', dontLog, service);
+        const marineService = new MarineService(marine, 'srv', dontLog, config, modules);
         await marineService.init();
 
         // act
@@ -91,7 +91,10 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmBytes(path.join(examplesDir, './greeting/artifacts/greeting.wasm'));
 
-        const marineService = new MarineService(marine, 'srv', dontLog, createSimpleService('srv', greeting));
+        const config = createSimpleServiceConfig('greeting');
+        const modules = {greeting: greeting}
+
+        const marineService = new MarineService(marine, 'srv', dontLog, config, modules);
         await marineService.init();
 
         // act
@@ -108,7 +111,10 @@ describe('Fluence app service tests', () => {
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
-        const marineService = new MarineService(marine, 'srv', dontLog, createSimpleService('srv', greeting));
+        const config = createSimpleServiceConfig('greeting');
+        const modules = {greeting: greeting}
+
+        const marineService = new MarineService(marine, 'srv', dontLog, config, modules);
         await marineService.init();
 
         // act
@@ -134,13 +140,18 @@ describe('Fluence app service tests', () => {
         );
 
 
-        let service = {
+        const config = {
             modules_config: [
-                createModuleDescriptor('donkey', donkey),
-                createModuleDescriptor('shrek', shrek)
+                createModuleDescriptor('donkey'),
+                createModuleDescriptor('shrek')
             ]
         };
-        const marineService = new MarineService(marine, 'srv', dontLog, service);
+
+        const modules = {
+            donkey: donkey,
+            shrek: shrek,
+        }
+        const marineService = new MarineService(marine, 'srv', dontLog, config, modules);
         await marineService.init();
 
         // act
@@ -156,7 +167,10 @@ describe('Fluence app service tests', () => {
         const avm = await loadWasmBytes(path.join(path.dirname(avmPackagePath), 'avm.wasm'));
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
 
-        const testAvmInMarine = new MarineService(marine, 'avm', dontLog, createSimpleService('avm', avm));
+        const config = createSimpleServiceConfig('avm');
+        const modules = {avm: avm}
+
+        const testAvmInMarine = new MarineService(marine, 'avm', dontLog, config, modules);
         await testAvmInMarine.init();
 
         const s = `(seq
@@ -195,7 +209,10 @@ describe('Fluence app service tests', () => {
         const control = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const buf = await download(sqliteDownloadUrl);
 
-        const marine = new MarineService(control, 'sqlite', dontLog, createSimpleService('sqlite', buf));
+        const config = createSimpleServiceConfig('sqlite');
+        const modules = {sqlite: new Uint8Array(buf)}
+
+        const marine = new MarineService(control, 'sqlite', dontLog, config, modules);
         await marine.init();
 
         let result: any;
@@ -231,7 +248,10 @@ describe('Fluence app service tests', () => {
         const control = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const buf = await download(redisDownloadUrl);
 
-        const marine = new MarineService(control, 'redis', dontLog, createSimpleService('redis', buf));
+        const config = createSimpleServiceConfig('redis');
+        const modules = {redis: new Uint8Array(buf)};
+
+        const marine = new MarineService(control, 'redis', dontLog, config, modules);
         await marine.init();
 
         const result1 = marine.call('invoke', ['SET A 10'], defaultCallParameters);
@@ -256,7 +276,10 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const failing = await loadWasmBytes(path.join(examplesDir, './failing/artifacts/failing.wasm'));
 
-        const marineService = new MarineService(marine, 'srv', dontLog, createSimpleService('srv', failing));
+        const config = createSimpleServiceConfig('failing');
+        const modules = {failing: failing};
+
+        const marineService = new MarineService(marine, 'srv', dontLog, config, modules);
         await marineService.init();
 
 
@@ -270,8 +293,10 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const greeting = await loadWasmBytes(path.join(examplesDir, './failing/artifacts/failing.wasm'));
 
+        const config = createSimpleServiceConfig('greeting');
+        const modules = {greeting: greeting}
 
-        const marineService = new MarineService(marine, 'srv', dontLog, createSimpleService('srv', greeting));
+        const marineService = new MarineService(marine, 'srv', dontLog, config, modules);
         await marineService.init();
 
         // act
@@ -294,14 +319,19 @@ describe('Fluence app service tests', () => {
         const arguments_passing_pure = await loadWasmBytes(path.join(wasmTestsDir, "./arguments_passing/artifacts/arguments_passing_pure.wasm"))
         const arguments_passing_effector = await loadWasmBytes(path.join(wasmTestsDir, "./arguments_passing/artifacts/arguments_passing_effector.wasm"))
 
-        let service = {
+        const config = {
             modules_config: [
-                createModuleDescriptor('arguments_passing_effector', arguments_passing_effector),
-                createModuleDescriptor('arguments_passing_pure', arguments_passing_pure),
+                createModuleDescriptor('arguments_passing_effector'),
+                createModuleDescriptor('arguments_passing_pure'),
             ]
         }
 
-        const marineService = new MarineService(marine, 'srv', dontLog, service);
+        const modules = {
+            arguments_passing_effector: arguments_passing_effector,
+            arguments_passing_pure: arguments_passing_pure,
+        }
+
+        const marineService = new MarineService(marine, 'srv', dontLog, config, modules);
         await marineService.init();
 
         const test = (func_name: string) => {
@@ -356,13 +386,10 @@ describe('Fluence app service tests', () => {
         const marine = await loadWasmModule(path.join(__dirname, '../../dist/marine-js.wasm'));
         const call_parameters_wasm = await loadWasmBytes(path.join(examplesDir, './call_parameters/artifacts/call_parameters.wasm'),)
 
-        let service = {
-            modules_config: [
-                createModuleDescriptor('call_parameters', call_parameters_wasm),
-            ]
-        }
+        const config= createSimpleServiceConfig('call_parameters');
+        const modules = {call_parameters: call_parameters_wasm};
 
-        const marineService = new MarineService(marine, 'srv', dontLog, service);
+        const marineService = new MarineService(marine, 'srv', dontLog, config, modules);
         await marineService.init();
 
         const init_peer_id_2 = "init_peer_id";

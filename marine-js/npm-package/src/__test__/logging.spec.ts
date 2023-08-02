@@ -32,16 +32,15 @@ const createModuleConfig = (envs: Env): MarineModuleConfig => {
     }
 }
 
-const createModuleDescriptor = (name: string, wasm_bytes: Uint8Array, envs: Env): ModuleDescriptor  => {
+const createModuleDescriptor = (name: string, envs: Env): ModuleDescriptor  => {
     return {
         import_name: name,
-        wasm_bytes: wasm_bytes,
         config: createModuleConfig(envs),
     }
 }
-const createSimpleService = (name: string, wasm_bytes: Uint8Array, envs: Env): MarineServiceConfig => {
+const createSimpleService = (name: string, envs: Env): MarineServiceConfig => {
     return {
-        modules_config: [createModuleDescriptor(name, wasm_bytes, envs)]
+        modules_config: [createModuleDescriptor(name, envs)]
     }
 };
 
@@ -62,10 +61,10 @@ describe.each([
         const greeting = await loadWasmBytes(
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm')
         );
+        const config = createSimpleService('srv', {WASM_LOG: level});
+        const modules = { 'srv': new Uint8Array(greeting)}
 
-        const marineService = new MarineService(marine, 'srv', logger, createSimpleService('srv', greeting, {
-            WASM_LOG: level
-        }));
+        const marineService = new MarineService(marine, 'srv', logger, config, modules);
         await marineService.init();
 
         // act
@@ -92,7 +91,10 @@ describe.each([
             path.join(examplesDir, './greeting_record/artifacts/greeting-record.wasm'),
         );
 
-        const marineService = new MarineService(marine, 'srv', logger, createSimpleService('srv', greeting, env),);
+        const config = createSimpleService('srv', {WASM_LOG: 'off'});
+        const modules = { 'srv': new Uint8Array(greeting)}
+
+        const marineService = new MarineService(marine, 'srv', logger, config, modules);
         await marineService.init();
 
         // act

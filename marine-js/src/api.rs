@@ -53,7 +53,6 @@ pub struct ApiModuleConfig {
 #[derive(Serialize, Deserialize)]
 pub struct ApiModuleDescriptor {
     pub import_name: String,
-    pub wasm_bytes: Vec<u8>,
     pub config: Option<ApiModuleConfig>,
 }
 
@@ -145,18 +144,13 @@ impl From<ApiServiceConfig> for MarineConfig<JsWasmBackend> {
 /// Nothing. An error is signaled via exception.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn register_module(config: JsValue, log_fn: js_sys::Function) -> Result<(), JsError> {
+pub fn register_module(
+    config: JsValue,
+    modules: js_sys::Object,
+    log_fn: js_sys::Function,
+) -> Result<(), JsError> {
     let mut config: ApiServiceConfig = serde_wasm_bindgen::from_value(config)?;
-    let modules = config
-        .modules_config
-        .iter_mut()
-        .map(|descriptor| {
-            (
-                descriptor.import_name.clone(),
-                std::mem::take(&mut descriptor.wasm_bytes),
-            )
-        })
-        .collect::<HashMap<String, Vec<u8>>>();
+    let modules = extract_modules(modules)?;
 
     let marine_config: MarineConfig<JsWasmBackend> = config.into();
     let module_names = modules.keys().cloned().collect::<HashSet<String>>();
@@ -167,6 +161,26 @@ pub fn register_module(config: JsValue, log_fn: js_sys::Function) -> Result<(), 
     MARINE.with(|marine| marine.replace(Some(new_marine)));
 
     Ok(())
+}
+
+fn extract_modules(modules: js_sys::Object) -> Result<HashMap<String, Vec<u8>>, JsError> {
+    let mut modules_map = HashMap::<String, Vec<u8>>::new();
+    for key in js_sys::Object::keys(&modules) {
+        if !key.is_string() {
+            return Err(JsError::new("modules object has non-string key"));
+        }
+
+        let property =
+            js_sys::Reflect::get(&modules, &key).map_err(|e| JsError::new(&format!("{:?}", e)))?;
+        let module_bytes: js_sys::Uint8Array = property.try_into()?;
+        let module_name = key
+            .as_string()
+            .ok_or_else(|| JsError::new("cannot convert modules object property to string"))?;
+        let module_bytes = module_bytes.to_vec();
+        modules_map.insert(module_name, module_bytes);
+    }
+
+    Ok(modules_map)
 }
 
 ///  Calls a function from a module.
