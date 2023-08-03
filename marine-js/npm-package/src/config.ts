@@ -29,7 +29,6 @@ export interface MarineServiceConfig {
 }
 
 export interface ModuleDescriptor {
-    wasm_bytes: Uint8Array;
     import_name: string;
     config: MarineModuleConfig;
 }

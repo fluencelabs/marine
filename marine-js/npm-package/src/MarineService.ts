@@ -32,6 +32,7 @@ export class MarineService {
         private readonly serviceId: string,
         private logFunction: LogFunction,
         private serviceConfig: MarineServiceConfig,
+        private modules: { [x: string]: Uint8Array },
         env?: Env,
     ) {
         this.serviceConfig.modules_config.forEach(module => {
@@ -46,7 +47,7 @@ export class MarineService {
     async init(): Promise<void> {
         const controlModuleInstance = await init(this.controlModule);
 
-        controlModuleInstance.register_module(this.serviceConfig, this.logFunction);
+        controlModuleInstance.register_module(this.serviceConfig, this.modules, this.logFunction);
         this._controlModuleInstance = controlModuleInstance;
     }
 
