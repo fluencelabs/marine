@@ -8,6 +8,17 @@
     * marine-min-it-version bumped from 0.2.1 to 0.3.0
     * it-json-serde bumped from 0.3.5 to 0.4.0
 
+## [0.7.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.6.0...marine-js-v0.7.0) (2023-08-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **marine-js:** update register_module interface to vastly improve performance ([#354](https://github.com/fluencelabs/marine/issues/354))
+
+### Features
+
+* **marine-js:** update register_module interface to vastly improve performance ([#354](https://github.com/fluencelabs/marine/issues/354)) ([1e1f71d](https://github.com/fluencelabs/marine/commit/1e1f71d630f8b5a53daab198489b5d805fad0989))
+
 ## [0.6.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.5.0...marine-js-v0.6.0) (2023-08-02)
 
 
