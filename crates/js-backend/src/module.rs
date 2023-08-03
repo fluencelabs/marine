@@ -33,17 +33,22 @@ pub struct JsModule {
 }
 
 impl Module<JsWasmBackend> for JsModule {
+    #[tracing::instrument(level = "trace", skip_all)]
     fn new(_store: &mut JsStore, wasm: &[u8]) -> ModuleCreationResult<Self> {
         let data = Uint8Array::new_with_length(wasm.len() as u32);
         data.copy_from(wasm);
         let data_obj: JsValue = data.into();
-        let module = WebAssembly::Module::new(&data_obj).map_err(|e| {
-            log::debug!("Module::new failed: {:?}", e);
-            ModuleCreationError::FailedToCompileWasm(anyhow!(format!(
+        let module = {
+            let span = tracing::span!(tracing::Level::TRACE, "WebAssembly::Module::new").entered();
+
+            WebAssembly::Module::new(&data_obj).map_err(|e| {
+                log::debug!("Module::new failed: {:?}", e);
+                ModuleCreationError::FailedToCompileWasm(anyhow!(format!(
                 "error compiling module: {:?}",
                 e
             )))
-        })?;
+            })?
+        };
 
         // JS WebAssembly module does not provide info about export signatures,
         // so this data is extracted from wasm in control module.
@@ -64,14 +69,19 @@ impl Module<JsWasmBackend> for JsModule {
         }
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn instantiate(
         &self,
         store: &mut JsStore,
         imports: &JsImports,
     ) -> InstantiationResult<<JsWasmBackend as WasmBackend>::Instance> {
         let imports_object = imports.build_import_object(store.as_context(), &self.inner);
-        let instance = WebAssembly::Instance::new(&self.inner, &imports_object)
-            .map_err(|e| InstantiationError::Other(anyhow!("failed to instantiate: {:?}", e)))?;
+
+        let instance = {
+            let span = tracing::span!(tracing::Level::TRACE, "WebAssembly::Instance::new").entered();
+            WebAssembly::Instance::new(&self.inner, &imports_object)
+                .map_err(|e| InstantiationError::Other(anyhow!("failed to instantiate: {:?}", e)))?
+        };
 
         // adds memory to @wasmer/wasi object
         imports.bind_to_instance(store.as_context(), &instance);

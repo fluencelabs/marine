@@ -142,11 +142,13 @@ impl<WB: WasmBackend> MModule<WB> {
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
         if let Ok(initialize_func) = wasm_instance.get_function(store, INITIALIZE_FUNC) {
+            let _span = tracing::span!(tracing::Level::TRACE, "call _initialize").entered();
             initialize_func.call(store, &[])?;
         }
         // call _start to call module's main function
         #[rustfmt::skip]
         if let Ok(start_func) = wasm_instance.get_function(store, START_FUNC) {
+            let _span = tracing::span!(tracing::Level::TRACE, "call _start").entered();
             start_func.call(store, &[])?;
         }
 
@@ -441,6 +443,7 @@ impl<WB: WasmBackend> MModule<WB> {
         Ok(())
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn instantiate_exports(
         it_instance: &Arc<ITInstance<WB>>,
         mit: &MITInterfaces<'_>,
