@@ -12,6 +12,17 @@
     * marine-it-parser bumped from 0.12.1 to 0.12.2
     * marine-module-info-parser bumped from 0.6.1 to 0.6.2
 
+## [0.15.0](https://github.com/fluencelabs/marine/compare/marine-v0.14.2...marine-v0.15.0) (2023-08-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* update versions to comply with semver ([#357](https://github.com/fluencelabs/marine/issues/357))
+
+### Bug Fixes
+
+* update versions to comply with semver ([#357](https://github.com/fluencelabs/marine/issues/357)) ([71e138d](https://github.com/fluencelabs/marine/commit/71e138dce31c2896bcd7b0657c3122c4b7f6402b))
+
 ## [0.14.0](https://github.com/fluencelabs/marine/compare/marine-v0.13.0...marine-v0.14.0) (2023-03-14)
 
 

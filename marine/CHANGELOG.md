@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * marine-core bumped from 0.20.1 to 0.20.2
     * marine-wasmtime-backend bumped from 0.2.0 to 0.2.1
 
+## [0.28.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.27.0...marine-runtime-v0.28.0) (2023-08-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* update versions to comply with semver ([#357](https://github.com/fluencelabs/marine/issues/357))
+
+### Bug Fixes
+
+* update versions to comply with semver ([#357](https://github.com/fluencelabs/marine/issues/357)) ([71e138d](https://github.com/fluencelabs/marine/commit/71e138dce31c2896bcd7b0657c3122c4b7f6402b))
+
 ## [0.27.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.26.3...marine-runtime-v0.27.0) (2023-07-25)
 
 
