@@ -2225,7 +2225,7 @@ dependencies = [
 
 [[package]]
 name = "marine-js"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "js-sys",
  "log",
@@ -2628,7 +2628,7 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.21.4"
+version = "0.22.0"
 dependencies = [
  "anyhow",
  "check-latest",

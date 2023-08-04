@@ -8,6 +8,8 @@
     * marine-min-it-version bumped from 0.2.1 to 0.3.0
     * it-json-serde bumped from 0.3.5 to 0.4.0
 
+
+
 ## [0.7.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.6.0...marine-js-v0.7.0) (2023-08-03)
 
 
