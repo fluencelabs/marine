@@ -289,7 +289,6 @@ impl<WB: WasmBackend> MModule<WB> {
     }
 
     // this function deals only with import functions that have an adaptor implementation
-
     fn add_wit_imports(
         store: &mut <WB as WasmBackend>::Store,
         linker: &mut <WB as WasmBackend>::Imports,

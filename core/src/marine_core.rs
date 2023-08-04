@@ -71,7 +71,6 @@ impl<WB: WasmBackend> MarineCore<WB> {
     }
 
     /// Invoke a function of a module inside Marine by given function name with given arguments.
-
     pub fn call(
         &mut self,
         module_name: impl AsRef<str>,
@@ -94,7 +93,6 @@ impl<WB: WasmBackend> MarineCore<WB> {
     }
 
     /// Load a new module inside Marine.
-
     pub fn load_module(
         &mut self,
         name: impl Into<String>,
