@@ -70,7 +70,7 @@ impl<'wasm> ModuleInfoParser<'wasm> {
         Ok(parser)
     }
 
-    pub(crate) fn into_module_info(&self) -> Result<ModuleInfo, ModuleCreationError> {
+    pub(crate) fn into_module_info(self) -> Result<ModuleInfo, ModuleCreationError> {
         let exports = self.extract_exports()?;
         let custom_sections = self.extract_custom_sections();
         Ok(ModuleInfo {
@@ -81,7 +81,7 @@ impl<'wasm> ModuleInfoParser<'wasm> {
 
     fn parse(&mut self, wasm: &'wasm [u8]) -> Result<(), ModuleCreationError> {
         let parser = Parser::new(0);
-        for payload in parser.parse_all(&wasm) {
+        for payload in parser.parse_all(wasm) {
             match payload.map_err(transform_err)? {
                 TypeSection(types) => {
                     self.types.reserve(types.count() as usize);
