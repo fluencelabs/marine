@@ -10,6 +10,13 @@
 
 
 
+## [0.7.2](https://github.com/fluencelabs/marine/compare/marine-js-v0.7.1...marine-js-v0.7.2) (2023-08-04)
+
+
+### Features
+
+* **marine-js:** use wasmparser instead of walrus to parse module exports ([#359](https://github.com/fluencelabs/marine/issues/359)) ([550f7d3](https://github.com/fluencelabs/marine/commit/550f7d38513625cab65fe7aed3261863cc3769d9))
+
 ## [0.7.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.6.0...marine-js-v0.7.0) (2023-08-03)
 
 
