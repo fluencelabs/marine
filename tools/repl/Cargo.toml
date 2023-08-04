@@ -12,7 +12,7 @@ name = "mrepl"
 path = "src/main.rs"
 
 [dependencies]
-fluence-app-service = { path = "../../crates/fluence-app-service", version = "0.26.0", features = ["raw-module-api"] }
+fluence-app-service = { path = "../../crates/fluence-app-service", version = "0.27.0", features = ["raw-module-api"] }
 marine-rs-sdk-main = { version = "0.7.1", features = ["logger"] }
 marine-wasm-backend-traits = {path = "../../crates/wasm-backend-traits", version = "0.3.0"}
 
