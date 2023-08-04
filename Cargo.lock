@@ -1232,7 +1232,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.23.1"
+version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "942caba094d1c219ad3656d51c827470d12dac834b4325843e9f61b12bf0d0dd"
 dependencies = [
@@ -2076,7 +2076,7 @@ dependencies = [
 
 [[package]]
 name = "marine-core"
-version = "0.19.0"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec214534c429191be20933848b185cd4ff614eac6a8d49edfa70f04087730288"
 dependencies = [
@@ -2139,7 +2139,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.9.5"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7cd47a34f51b0767bb28b3aea97d0a89716952ebe11bcf151e09a7d7c2e5eb12"
 dependencies = [
@@ -2189,7 +2189,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-parser"
-version = "0.11.1"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5e9902762a0575a992c8d6bea77d1a34f485b89ce1db438f28d9babd2ac72f3"
 dependencies = [
@@ -2225,7 +2225,7 @@ dependencies = [
 
 [[package]]
 name = "marine-js"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "js-sys",
  "log",
@@ -2302,7 +2302,7 @@ dependencies = [
 
 [[package]]
 name = "marine-module-info-parser"
-version = "0.5.1"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06c2fa2dd89f704680d957aabdb6f0babdf5b041744739db5e5b36965b1b8ed1"
 dependencies = [
@@ -2401,7 +2401,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.24.1"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "545262bf5b68d2b4f4b9eed2557f09421cc4bb62a10e71c307140f27b6411b9c"
 dependencies = [
@@ -2628,7 +2628,7 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.21.4"
+version = "0.22.0"
 dependencies = [
  "anyhow",
  "check-latest",
