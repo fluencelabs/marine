@@ -60,7 +60,6 @@ pub struct MarineCore<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> MarineCore<WB> {
-    #[tracing::instrument(level = "trace")]
     pub fn new() -> MResult<Self> {
         let wasm_backend = WB::new()?;
         let store = <WB as WasmBackend>::Store::new(&wasm_backend);
@@ -72,7 +71,7 @@ impl<WB: WasmBackend> MarineCore<WB> {
     }
 
     /// Invoke a function of a module inside Marine by given function name with given arguments.
-    #[tracing::instrument(level = "trace", skip_all)]
+
     pub fn call(
         &mut self,
         module_name: impl AsRef<str>,
@@ -95,7 +94,7 @@ impl<WB: WasmBackend> MarineCore<WB> {
     }
 
     /// Load a new module inside Marine.
-    #[tracing::instrument(level = "trace", skip_all)]
+
     pub fn load_module(
         &mut self,
         name: impl Into<String>,

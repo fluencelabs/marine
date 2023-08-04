@@ -32,7 +32,6 @@ pub(crate) fn log_utf8_string_closure<WB: WasmBackend>(
     }
 }
 
-#[tracing::instrument(level = "trace", skip_all)]
 pub(crate) fn log_utf8_string<WB: WasmBackend>(
     module: &str,
     mut ctx: <WB as WasmBackend>::ImportCallContext<'_>,

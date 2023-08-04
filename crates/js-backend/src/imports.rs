@@ -32,7 +32,6 @@ pub struct JsImports {
 }
 
 impl JsImports {
-    #[tracing::instrument(level = "trace", skip_all)]
     pub(crate) fn build_import_object(
         &self,
         store: impl AsContext<JsWasmBackend>,

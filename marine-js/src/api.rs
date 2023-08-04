@@ -93,7 +93,6 @@ impl From<ApiWasiConfig> for MarineWASIConfig {
 }
 
 impl From<ApiModuleConfig> for MarineModuleConfig<JsWasmBackend> {
-    #[tracing::instrument(skip_all)]
     fn from(value: ApiModuleConfig) -> Self {
         Self {
             mem_pages_count: value.mem_pages_count,
@@ -150,7 +149,6 @@ pub fn register_module(
     modules: js_sys::Object,
     log_fn: js_sys::Function,
 ) -> Result<(), JsError> {
-    let _span = tracing::trace_span!( "register_module").entered();
     let mut config: ApiServiceConfig = serde_wasm_bindgen::from_value(config)?;
     let modules = extract_modules(modules)?;
 
@@ -204,7 +202,6 @@ pub fn call_module(
     args: &str,
     call_parameters: JsValue,
 ) -> Result<String, JsError> {
-    let _span = tracing::trace_span!( "call_module", module_name = module_name, function_name = function_name).entered();
     let call_parameters = serde_wasm_bindgen::from_value(call_parameters)?;
 
     MARINE.with(|marine| {
