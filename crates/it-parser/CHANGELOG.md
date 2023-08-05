@@ -4,6 +4,17 @@
   * dependencies
     * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
 
+## [0.13.0](https://github.com/fluencelabs/marine/compare/marine-it-parser-v0.12.2...marine-it-parser-v0.13.0) (2023-08-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* update versions to comply with semver ([#357](https://github.com/fluencelabs/marine/issues/357))
+
+### Bug Fixes
+
+* update versions to comply with semver ([#357](https://github.com/fluencelabs/marine/issues/357)) ([71e138d](https://github.com/fluencelabs/marine/commit/71e138dce31c2896bcd7b0657c3122c4b7f6402b))
+
 ## [0.12.1](https://github.com/fluencelabs/marine/compare/marine-it-parser-v0.12.0...marine-it-parser-v0.12.1) (2023-04-04)
 
 

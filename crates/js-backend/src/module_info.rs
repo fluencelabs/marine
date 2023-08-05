@@ -20,14 +20,10 @@ use marine_wasm_backend_traits::WType;
 use marine_wasm_backend_traits::impl_utils::MultiMap;
 
 use anyhow::anyhow;
-use walrus::IdsToIndices;
-use walrus::ExportItem;
-use walrus::ValType;
-
-use wasmparser::{Parser, Chunk, Payload::*};
+use wasmparser::Parser;
+use wasmparser::Payload::*;
 
 use std::collections::HashMap;
-use std::fs::read;
 
 #[derive(Clone)]
 pub(crate) struct ModuleInfo {
@@ -46,89 +42,7 @@ pub(crate) enum Export {
 impl ModuleInfo {
     #[tracing::instrument(level = "trace", skip_all)]
     pub(crate) fn from_bytes(wasm: &[u8]) -> Result<Self, ModuleCreationError> {
-        ModuleInfoParser::new(wasm)?
-            .into_module_info()
-    }
-
-    #[tracing::instrument(level = "trace", skip_all)]
-    pub(crate) fn from_bytes_walrus(wasm: &[u8]) -> Result<Self, ModuleCreationError> {
-        let module = {
-            let _span = tracing::trace_span!("walrus::ModuleConfig::parse plain").entered();
-            walrus::ModuleConfig::new()
-                .parse(wasm)
-                .map_err(|e| ModuleCreationError::Other(anyhow!(e)))?
-        };
-
-        let default_ids = IdsToIndices::default();
-
-        let custom_sections = {
-            let _span = tracing::trace_span!("extract custom sections").entered();
-            module
-                .customs
-                .iter()
-                .map(|(_, section)| {
-                    (
-                        section.name().to_string(),
-                        section.data(&default_ids).to_vec(),
-                    )
-                })
-                .collect::<MultiMap<String, Vec<u8>>>()
-        };
-
-        let exports = {
-            let _span = tracing::trace_span!("extract exports").entered();
-            module
-                .exports
-                .iter()
-                .map(|export| {
-                    let our_export = match export.item {
-                        ExportItem::Function(func_id) => {
-                            let func = module.funcs.get(func_id);
-                            let ty_id = func.ty();
-                            let ty = module.types.get(ty_id);
-                            let signature = sig_from_walrus_ty(ty);
-                            Export::Function(signature)
-                        }
-                        ExportItem::Table(_) => Export::Table,
-                        ExportItem::Memory(_) => Export::Memory,
-                        ExportItem::Global(_) => Export::Global,
-                    };
-
-                    (export.name.clone(), our_export)
-                })
-                .collect::<HashMap<String, Export>>()
-        };
-
-        Ok(ModuleInfo {
-            custom_sections,
-            exports,
-        })
-    }
-}
-
-fn sig_from_walrus_ty(ty: &walrus::Type) -> FuncSig {
-    let params = ty
-        .params()
-        .iter()
-        .map(wtype_from_walrus_val)
-        .collect::<Vec<_>>();
-    let results = ty
-        .results()
-        .iter()
-        .map(wtype_from_walrus_val)
-        .collect::<Vec<_>>();
-    FuncSig::new(params, results)
-}
-
-fn wtype_from_walrus_val(val: &walrus::ValType) -> WType {
-    match val {
-        ValType::I32 => WType::I32,
-        ValType::I64 => WType::I64,
-        ValType::F32 => WType::F32,
-        ValType::F64 => WType::F64,
-        ValType::V128 => WType::V128,
-        ValType::Externref => WType::ExternRef,
-        ValType::Funcref => WType::FuncRef,
+        ModuleInfoParser::new(wasm)?.into_module_info()
     }
 }
 
@@ -144,7 +58,7 @@ struct ModuleInfoParser<'wasm> {
 }
 
 impl<'wasm> ModuleInfoParser<'wasm> {
-    pub(crate) fn new(wasm: &'wasm[u8]) -> Result<Self, ModuleCreationError> {
+    pub(crate) fn new(wasm: &'wasm [u8]) -> Result<Self, ModuleCreationError> {
         let mut parser = Self {
             types: <_>::default(),
             functions: <_>::default(),
@@ -157,25 +71,28 @@ impl<'wasm> ModuleInfoParser<'wasm> {
         Ok(parser)
     }
 
-    pub(crate) fn into_module_info(&self) -> Result<ModuleInfo, ModuleCreationError> {
+    pub(crate) fn into_module_info(self) -> Result<ModuleInfo, ModuleCreationError> {
         let exports = self.extract_exports()?;
         let custom_sections = self.extract_custom_sections();
-        Ok(ModuleInfo { exports, custom_sections })
+        Ok(ModuleInfo {
+            exports,
+            custom_sections,
+        })
     }
 
     fn parse(&mut self, wasm: &'wasm [u8]) -> Result<(), ModuleCreationError> {
         let parser = Parser::new(0);
-        for payload in parser.parse_all(&wasm) {
-            match payload.map_err(|e| ModuleCreationError::Other(anyhow!(e)))? {
-                // Sections for WebAssembly modules
-                Version { .. } => { /* ... */ }
+        for payload in parser.parse_all(wasm) {
+            match payload.map_err(transform_err)? {
                 TypeSection(types) => {
                     self.types.reserve(types.count() as usize);
-                    for (idx, ty) in types.into_iter().enumerate() {
-                        let ty = ty.map_err(|e| ModuleCreationError::Other(anyhow!(e)))?;
+                    for ty in types.into_iter() {
+                        let ty = ty.map_err(transform_err)?;
                         let sig = match ty.structural_type {
-                            wasmparser::StructuralType::Func(func_type) => Some(sig_from_wasmparser_ty(&func_type)),
-                            _ => None
+                            wasmparser::StructuralType::Func(func_type) => {
+                                Some(sig_from_wasmparser_ty(&func_type))
+                            }
+                            _ => None,
                         };
 
                         self.types.push(sig)
@@ -183,7 +100,7 @@ impl<'wasm> ModuleInfoParser<'wasm> {
                 }
                 ImportSection(imports) => {
                     for import in imports {
-                        let import = import.map_err(|e| ModuleCreationError::Other(anyhow!(e)))?;
+                        let import = import.map_err(transform_err)?;
                         if let wasmparser::TypeRef::Func(idx) = import.ty {
                             self.functions.push(idx)
                         }
@@ -192,56 +109,18 @@ impl<'wasm> ModuleInfoParser<'wasm> {
                 FunctionSection(functions) => {
                     self.functions.reserve(functions.count() as usize);
                     for function in functions {
-                        self.functions.push(function.map_err(|e| ModuleCreationError::Other(anyhow!(e)))?);
+                        self.functions
+                            .push(function.map_err(|e| ModuleCreationError::Other(anyhow!(e)))?);
                     }
                 }
-                TableSection(_) => { /* ... */ }
-                MemorySection(_) => { /* ... */ }
-                TagSection(_) => { /* ... */ }
-                GlobalSection(_) => { /* ... */ }
                 ExportSection(exports) => {
                     self.exports.reserve(exports.count() as usize);
                     for export in exports {
-                        self.exports.push(export.map_err(|e| ModuleCreationError::Other(anyhow!(e)))?)
+                        self.exports.push(export.map_err(transform_err)?)
                     }
                 }
-                StartSection { .. } => { /* ... */ }
-                ElementSection(_) => { /* ... */ }
-                DataCountSection { .. } => { /* ... */ }
-                DataSection(_) => { /* ... */ }
-
-                // Here we know how many functions we'll be receiving as
-                // `CodeSectionEntry`, so we can prepare for that, and
-                // afterwards we can parse and handle each function
-                // individually.
-                CodeSectionStart { .. } => { /* ... */ }
-                CodeSectionEntry(body) => {
-                    // here we can iterate over `body` to parse the function
-                    // and its locals
-                }
-
-                // Sections for WebAssembly components
-                ModuleSection { .. } => { /* ... */ }
-                InstanceSection(_) => { /* ... */ }
-                CoreTypeSection(_) => { /* ... */ }
-                ComponentSection { .. } => { /* ... */ }
-                ComponentInstanceSection(_) => { /* ... */ }
-                ComponentAliasSection(_) => { /* ... */ }
-                ComponentTypeSection(_) => { /* ... */ }
-                ComponentCanonicalSection(_) => { /* ... */ }
-                ComponentStartSection { .. } => { /* ... */ }
-                ComponentImportSection(_) => { /* ... */ }
-                ComponentExportSection(_) => { /* ... */ }
-
                 CustomSection(reader) => self.custom_sections.push((reader.name(), reader.data())),
-
-                // most likely you'd return an error here
-                UnknownSection { id, .. } => { /* ... */ }
-
-                // Once we've reached the end of a parser we either resume
-                // at the parent parser or the payload iterator is at its
-                // end and we're done.
-                End(_) => {}
+                _ => {}
             }
         }
 
@@ -277,8 +156,7 @@ impl<'wasm> ModuleInfoParser<'wasm> {
     }
 
     fn extract_custom_sections(&self) -> MultiMap<String, Vec<u8>> {
-        self
-            .custom_sections
+        self.custom_sections
             .iter()
             .map(|(name, data)| (name.to_string(), data.to_vec()))
             .collect()
@@ -308,4 +186,8 @@ fn wtype_from_wasmparser_val(val: &wasmparser::ValType) -> WType {
         wasmparser::ValType::V128 => WType::V128,
         wasmparser::ValType::Ref(_) => WType::ExternRef, // TODO maybe return an error as it is not supported?
     }
+}
+
+fn transform_err(error: wasmparser::BinaryReaderError) -> ModuleCreationError {
+    ModuleCreationError::Other(anyhow!(error))
 }
