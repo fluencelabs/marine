@@ -1264,7 +1264,7 @@ dependencies = [
  "log",
  "maplit",
  "marine-min-it-version 0.3.0",
- "marine-runtime 0.28.0",
+ "marine-runtime 0.29.0",
  "marine-wasm-backend-traits",
  "marine-wasmtime-backend",
  "serde",
@@ -2235,13 +2235,13 @@ dependencies = [
 
 [[package]]
 name = "marine-js"
-version = "0.7.2"
+version = "0.7.3"
 dependencies = [
  "js-sys",
  "log",
  "maplit",
  "marine-js-backend",
- "marine-runtime 0.28.0",
+ "marine-runtime 0.29.0",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
@@ -2485,7 +2485,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.28.0"
+version = "0.29.0"
 dependencies = [
  "bytesize",
  "env_logger 0.10.0",
@@ -2694,7 +2694,7 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.22.0"
+version = "0.23.0"
 dependencies = [
  "anyhow",
  "check-latest",

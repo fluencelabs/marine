@@ -12,6 +12,17 @@
     * marine-it-parser bumped from 0.12.1 to 0.12.2
     * marine-module-info-parser bumped from 0.6.1 to 0.6.2
 
+## [0.16.0](https://github.com/fluencelabs/marine/compare/marine-v0.15.0...marine-v0.16.0) (2023-08-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bump on minor dependency update ([#362](https://github.com/fluencelabs/marine/issues/362))
+
+### Bug Fixes
+
+* **versions:** enforce minor version bump on minor dependency update ([#362](https://github.com/fluencelabs/marine/issues/362)) ([bf8e2e9](https://github.com/fluencelabs/marine/commit/bf8e2e91141c216b1a8a1db572a01f921c77f543))
+
 ## [0.15.0](https://github.com/fluencelabs/marine/compare/marine-v0.14.2...marine-v0.15.0) (2023-08-04)
 
 
