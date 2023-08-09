@@ -11,7 +11,7 @@ name = "marine"
 path = "src/lib.rs"
 
 [dependencies]
-marine-core = { path = "../core", version = "0.22.0", default-features = false}
+marine-core = { path = "../core", version = "0.23.0", default-features = false}
 marine-module-interface = { path = "../crates/module-interface", version = "0.7.1" }
 marine-utils = { path = "../crates/utils", version = "0.5.0" }
 marine-rs-sdk-main = { version = "0.8.1", features = ["logger"] }
