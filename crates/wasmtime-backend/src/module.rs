@@ -31,6 +31,7 @@ pub struct WasmtimeModule {
 }
 
 impl Module<WasmtimeWasmBackend> for WasmtimeModule {
+    #[tracing::instrument(level = "trace", skip_all)]
     fn new(store: &mut WasmtimeStore, wasm: &[u8]) -> ModuleCreationResult<Self> {
         let module = wasmtime::Module::new(store.inner.engine(), wasm)
             .map_err(ModuleCreationError::FailedToCompileWasm)?;
@@ -44,6 +45,7 @@ impl Module<WasmtimeWasmBackend> for WasmtimeModule {
         })
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn custom_sections(&self, name: &str) -> &[Vec<u8>] {
         self.custom_sections
             .get_vec(name)
@@ -51,6 +53,7 @@ impl Module<WasmtimeWasmBackend> for WasmtimeModule {
             .unwrap_or_default()
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn instantiate(
         &self,
         store: &mut WasmtimeStore,

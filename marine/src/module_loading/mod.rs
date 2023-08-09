@@ -21,6 +21,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 /// Loads modules from a directory at a given path. Non-recursive, ignores subdirectories.
+#[tracing::instrument(level = "trace", skip_all)]
 pub(crate) fn load_modules_from_fs(
     modules: &HashMap<String, PathBuf>,
 ) -> MarineResult<HashMap<String, Vec<u8>>> {

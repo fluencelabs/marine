@@ -52,6 +52,7 @@ pub(super) struct ITInstance<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> ITInstance<WB> {
+    #[tracing::instrument(level = "trace", skip_all)]
     pub(super) fn new(
         wasm_instance: &<WB as WasmBackend>::Instance,
         store: &mut <WB as WasmBackend>::Store,

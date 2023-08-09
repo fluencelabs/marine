@@ -74,6 +74,7 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
                          args: &[wasmtime::Val],
                          results_out: &mut [wasmtime::Val]|
               -> Result<(), anyhow::Error> {
+            let _span = tracing::trace_span!("calling import function").entered();
             let caller = WasmtimeImportCallContext { inner: caller };
             let args = process_func_args(args).map_err(|e| anyhow!(e))?;
             let results = func(caller, &args);
@@ -103,6 +104,7 @@ impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         fn_ty_to_sig(&ty)
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn call<'c>(
         &self,
         store: &mut impl AsContextMut<WasmtimeWasmBackend>,

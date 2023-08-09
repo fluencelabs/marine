@@ -159,6 +159,7 @@ impl<WB: WasmBackend> MModule<WB> {
         })
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     pub(crate) fn call(
         &mut self,
         store: &mut <WB as WasmBackend>::ContextMut<'_>,

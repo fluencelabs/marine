@@ -76,6 +76,7 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<WasmtimeWasmBackend
         value
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn read_vec(&self, store: &mut WasmtimeContextMut<'_>, offset: u32, size: u32) -> Vec<u8> {
         let mut value = vec![0u8; size as usize];
         self.memory

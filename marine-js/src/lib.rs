@@ -31,15 +31,13 @@ fn main() {
     init_tracing();
 }
 
-
 #[allow(dead_code)]
 pub fn init_tracing() {
     let config = tracing_wasm::WASMLayerConfigBuilder::new()
-            .set_max_level(tracing::Level::TRACE)
-            .set_report_logs_in_timings(true)
-            .set_console_config(tracing_wasm::ConsoleConfig::ReportWithoutConsoleColor)
-            .build();
+        .set_max_level(tracing::Level::TRACE)
+        .set_report_logs_in_timings(true)
+        .set_console_config(tracing_wasm::ConsoleConfig::ReportWithoutConsoleColor)
+        .build();
 
     tracing_wasm::set_as_global_default_with_config(config)
 }
-

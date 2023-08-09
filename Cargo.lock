@@ -1271,6 +1271,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "toml 0.5.11",
+ "tracing",
 ]
 
 [[package]]
@@ -2555,6 +2556,7 @@ dependencies = [
  "marine-wasm-backend-traits",
  "multimap",
  "paste",
+ "tracing",
  "wasmer-interface-types-fl 0.26.1",
  "wasmtime",
  "wasmtime-wasi",

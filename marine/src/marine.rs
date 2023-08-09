@@ -268,6 +268,7 @@ impl<WB: WasmBackend> Marine<WB> {
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl<WB: WasmBackend> Marine<WB> {
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn load_module<C, S>(
         &mut self,
         name: S,

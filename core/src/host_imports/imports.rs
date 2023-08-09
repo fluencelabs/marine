@@ -58,7 +58,7 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
         func,
     )
 }
-
+#[tracing::instrument(level = "trace", skip_all)]
 fn call_host_import<WB: WasmBackend>(
     mut caller: <WB as WasmBackend>::ImportCallContext<'_>,
     inputs: &[WValue],
@@ -96,6 +96,7 @@ fn call_host_import<WB: WasmBackend>(
     lower_outputs::<WB>(&mut caller, memory, output)
 }
 
+#[tracing::instrument(level = "trace", skip_all)]
 fn lift_inputs<WB: WasmBackend>(
     caller: &mut <WB as WasmBackend>::ImportCallContext<'_>,
     memory: <WB as WasmBackend>::Memory,
@@ -114,6 +115,7 @@ fn lift_inputs<WB: WasmBackend>(
     )
 }
 
+#[tracing::instrument(level = "trace", skip_all)]
 fn lower_outputs<WB: WasmBackend>(
     caller: &mut <WB as WasmBackend>::ImportCallContext<'_>,
     memory: <WB as WasmBackend>::Memory,

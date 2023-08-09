@@ -45,6 +45,7 @@ pub struct AppService {
 
 impl AppService {
     /// Create Service with given modules and service id.
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn new<C, S>(config: C, service_id: S, envs: HashMap<String, String>) -> Result<Self>
     where
         C: TryInto<AppServiceConfig>,
@@ -76,6 +77,7 @@ impl AppService {
     }
 
     /// Call a specified function of loaded module by its name with arguments in json format.
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn call(
         &mut self,
         func_name: impl AsRef<str>,
@@ -93,6 +95,7 @@ impl AppService {
     }
 
     /// Call a specified function of loaded module by its name with arguments in IValue format.
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn call_with_ivalues(
         &mut self,
         func_name: impl AsRef<str>,
@@ -185,6 +188,7 @@ impl AppService {
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl AppService {
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn new_with_empty_facade<C, S>(
         config: C,
         service_id: S,
@@ -207,6 +211,7 @@ impl AppService {
         })
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn call_module(
         &mut self,
         module_name: impl AsRef<str>,
@@ -219,6 +224,7 @@ impl AppService {
             .map_err(Into::into)
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn load_module<C, S>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
     where
         S: Into<String>,

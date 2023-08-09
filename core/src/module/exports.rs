@@ -63,6 +63,7 @@ impl wasm::structures::Export for ITExport {
         &self.outputs
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn call(&self, arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
         (self.function)(arguments)
     }

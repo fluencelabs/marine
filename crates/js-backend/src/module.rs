@@ -44,9 +44,9 @@ impl Module<JsWasmBackend> for JsModule {
             WebAssembly::Module::new(&data_obj).map_err(|e| {
                 log::debug!("Module::new failed: {:?}", e);
                 ModuleCreationError::FailedToCompileWasm(anyhow!(format!(
-                "error compiling module: {:?}",
-                e
-            )))
+                    "error compiling module: {:?}",
+                    e
+                )))
             })?
         };
 
@@ -78,7 +78,8 @@ impl Module<JsWasmBackend> for JsModule {
         let imports_object = imports.build_import_object(store.as_context(), &self.inner);
 
         let instance = {
-            let span = tracing::span!(tracing::Level::TRACE, "WebAssembly::Instance::new").entered();
+            let span =
+                tracing::span!(tracing::Level::TRACE, "WebAssembly::Instance::new").entered();
             WebAssembly::Instance::new(&self.inner, &imports_object)
                 .map_err(|e| InstantiationError::Other(anyhow!("failed to instantiate: {:?}", e)))?
         };

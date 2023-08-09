@@ -121,6 +121,7 @@ impl it_memory_traits::MemoryReadable<DelayedContextLifetime<JsWasmBackend>> for
         result
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn read_vec(
         &self,
         _store: &mut <DelayedContextLifetime<JsWasmBackend> as it_memory_traits::Store>::ActualStore<

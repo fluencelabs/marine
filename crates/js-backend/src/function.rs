@@ -200,6 +200,7 @@ where
     F: for<'c> Fn(JsImportCallContext, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
 {
     let func = move |args: &js_sys::Array| -> js_sys::Array {
+        let _span = tracing::trace_span!("calling import function");
         log::debug!(
             "function produced by JsFunction:::new_with_caller call, signature: {:?}",
             signature
@@ -240,6 +241,7 @@ impl ExportFunction<JsWasmBackend> for WasmExportFunction {
         self.stored_mut(store.as_context_mut()).signature.clone()
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn call(
         &self,
         store: &mut impl AsContextMut<JsWasmBackend>,
