@@ -1,5 +1,6 @@
 [workspace]
 members = [
+
     "core",
     "core/tests/wasm_tests/lilo_after_2gb",
     "crates/fluence-app-service",
