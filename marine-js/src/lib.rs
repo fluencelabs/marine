@@ -22,15 +22,19 @@ use crate::logger::MarineLogger;
 
 use wasm_bindgen::prelude::*;
 
+
 #[wasm_bindgen(start)]
 fn main() {
     log::set_boxed_logger(Box::new(MarineLogger::new(log::LevelFilter::Info))).unwrap();
     // Trace is required to accept all logs from a service.
     // Max level for this crate is set in MarineLogger constructor.
     log::set_max_level(log::LevelFilter::Trace);
+
+    #[cfg(feature = "tracing-wasm")]
     init_tracing();
 }
 
+#[cfg(feature = "tracing-wasm")]
 #[allow(dead_code)]
 pub fn init_tracing() {
     let config = tracing_wasm::WASMLayerConfigBuilder::new()
