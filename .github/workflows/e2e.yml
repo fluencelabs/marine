@@ -12,6 +12,14 @@ on:
       - "synchronize"
       - "opened"
       - "reopened"
+  push:
+    branches:
+      - "master"
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/snapshot-*.yml"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -19,12 +27,24 @@ concurrency:
 
 jobs:
   marine:
+    if: >
+      github.event_name == 'push' ||
+      (
+        contains(github.event.pull_request.labels.*.name, 'e2e') &&
+        !github.event.pull_request.head.repo.fork
+      )
     uses: ./.github/workflows/snapshot-cargo.yml
     with:
       ref: ${{ github.ref }}
 
   marine-js:
     name: "marine"
+    if: >
+      github.event_name == 'push' ||
+      (
+        contains(github.event.pull_request.labels.*.name, 'e2e') &&
+        !github.event.pull_request.head.repo.fork
+      )
     uses: ./.github/workflows/snapshot-marine-js.yml
     with:
       ref: ${{ github.ref }}
