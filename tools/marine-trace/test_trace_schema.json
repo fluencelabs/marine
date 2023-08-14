@@ -1,0 +1,14 @@
+{
+  "calls": [
+    {
+      "func_name": "test1",
+      "args": [50],
+      "repeat": 1
+    },
+    {
+      "func_name": "test3",
+      "args": [],
+      "repeat": 10
+    }
+  ]
+}

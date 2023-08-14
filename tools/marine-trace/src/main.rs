@@ -1,35 +1,21 @@
+mod args;
+mod run;
+
+use fluence_app_service::AppService;
+
 use anyhow::anyhow;
-use clap::{arg, Parser};
+use clap::Parser;
 
 use std::path::PathBuf;
-
-#[derive(Parser)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    #[arg(short, long, value_parser = ["trace", "debug", "info", "warn", "error", "off"])]
-    trace_level: String,
-    /// Path to the service config
-    #[arg(short, long)]
-    config_path: PathBuf,
-
-    /// name of function to call from the service
-    #[arg(short, long)]
-    func_name: String,
-
-    /// JSON object or JSON array with arguments
-    #[arg(short, long, value_parser = parser_json_args)]
-    args: serde_json::Value,
-}
-
-fn parser_json_args(args: &str) -> Result<serde_json::Value, anyhow::Error> {
-    serde_json::from_str(args).map_err(|e| anyhow!(e))
-}
+use crate::args::{Args, Command};
 
 fn main() {
-    let args = Args::parse();
+    let args = args::Args::parse();
     init_tracing(args.trace_level.clone(), 0);
-    run_marine(args).unwrap();
-    //let arg = clap::Arg::new("d").value_parser(clap::builder::ValueParser::new(parser_json_args));
+    match run_marine(args.config_path, args.command) {
+        Err(e) => eprintln!("Failed to execute command: {}", e),
+        Ok(()) => eprintln!("Done"),
+    }
 }
 
 #[allow(dead_code)]
@@ -48,21 +34,32 @@ pub fn init_tracing(tracing_params: String, trace_mode: u8) {
     }
 }
 
-fn run_marine(args: Args) -> Result<(), anyhow::Error> {
-    let mut config =
-        fluence_app_service::TomlAppServiceConfig::load(&args.config_path).map_err(|e| {
-            anyhow!(
-                "Cannot load marine config from {}, error: {:?}",
-                args.config_path.display(),
-                e
-            )
-        })?;
+fn run_marine(config_path: PathBuf, command: args::Command) -> Result<(), anyhow::Error> {
+    let result = match command {
+        Command::Single {
+            func_name,
+            args,
+            call_parameters,
+        } => run::run_single(config_path, &func_name, args, call_parameters),
+        Command::CallSchema { call_schema_path } => {
+            let call_schema = std::fs::read(&call_schema_path).map_err(|e| {
+                anyhow::anyhow!(
+                    "Cannot load call schema from path: {}, error: {:?}",
+                    call_schema_path.display(),
+                    e
+                )
+            })?;
+            let call_schema = serde_json::from_slice(&call_schema).map_err(|e| {
+                anyhow::anyhow!(
+                    "Cannot parse call schema from path: {}, error: {:?}",
+                    call_schema_path.display(),
+                    e
+                )
+            })?;
 
-    config.service_base_dir = Some(args.config_path.parent().unwrap().display().to_string());
-    config.toml_marine_config.base_path = args.config_path.parent().unwrap().to_path_buf();
-    let mut app_service =
-        fluence_app_service::AppService::new(config, "traced_service", <_>::default())
-            .map_err(|e| anyhow!("Cannot create AppService: {:?}", e))?;
-    app_service.call(args.func_name, args.args, <_>::default())?;
+            run::run_call_schema(config_path, call_schema)
+        }
+    }?;
+
     Ok(())
 }
