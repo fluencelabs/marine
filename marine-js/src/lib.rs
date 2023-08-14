@@ -22,7 +22,6 @@ use crate::logger::MarineLogger;
 
 use wasm_bindgen::prelude::*;
 
-
 #[wasm_bindgen(start)]
 fn main() {
     log::set_boxed_logger(Box::new(MarineLogger::new(log::LevelFilter::Info))).unwrap();
