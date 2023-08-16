@@ -15,5 +15,3 @@ path = "src/main.rs"
 marine-rs-sdk = {version = "0.7.0", features = ["logger"]}
 log = "0.4.8"
 
-[dev-dependencies]
-marine-rs-sdk-test = "0.8.1"
