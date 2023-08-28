@@ -45,7 +45,6 @@ pub struct MFunctionSignature {
 
 pub(crate) use marine_module::MModule;
 
-
 // types that often used together
 pub(crate) mod wit_prelude {
     pub(super) use super::wit_instance::ITInstance;
