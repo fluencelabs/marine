@@ -20,6 +20,8 @@ mod wit_function;
 mod wit_instance;
 mod type_converters;
 
+use marine_wasm_backend_traits::WValue;
+
 pub use wit_instance::MRecordTypes;
 
 pub use wasmer_it::IType;
@@ -42,7 +44,7 @@ pub struct MFunctionSignature {
 }
 
 pub(crate) use marine_module::MModule;
-pub(self) use marine_wasm_backend_traits::WValue;
+
 
 // types that often used together
 pub(crate) mod wit_prelude {

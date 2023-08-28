@@ -280,7 +280,7 @@ impl<WB: WasmBackend> MModule<WB> {
         let all_imports = raw_imports
             .into_iter()
             .map(|(name, creator)| (name, creator(store.as_context_mut())))
-            .chain(host_imports.into_iter())
+            .chain(host_imports)
             .collect::<Vec<_>>();
 
         linker.register(store, "host", all_imports.into_iter())?;

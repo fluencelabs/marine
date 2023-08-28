@@ -21,4 +21,4 @@ pub(crate) use errors::PrepareError;
 pub(crate) use version_checker::check_sdk_version;
 pub(crate) use version_checker::check_it_version;
 
-pub(self) type PrepareResult<T> = std::result::Result<T, PrepareError>;
+type PrepareResult<T> = std::result::Result<T, PrepareError>;
