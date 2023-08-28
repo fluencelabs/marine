@@ -12,4 +12,4 @@ name = "greeting"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk = "0.8.1"
+marine-rs-sdk = "0.9.0"
