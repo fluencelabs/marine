@@ -1,6 +1,5 @@
 #!/bin/sh
 
-cargo update --aggressive;
 marine build --release;
 
 rm -f artifacts/* || true;

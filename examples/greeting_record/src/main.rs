@@ -65,15 +65,3 @@ pub fn log_trace() {
 
 #[marine]
 pub fn void_fn() {}
-
-#[cfg(test)]
-mod tests {
-    use marine_rs_sdk_test::marine_test;
-
-    #[marine_test(config_path = "../Config.toml", modules_dir = "../artifacts")]
-    fn smoke_test(greeting: marine_test_env::greeting_record::ModuleInterface) {
-        let actual = greeting.greeting_record();
-        assert_eq!(actual.str, "Hello, world!");
-        assert_eq!(actual.num, 42);
-    }
-}
