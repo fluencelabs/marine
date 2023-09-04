@@ -52,7 +52,7 @@ jobs:
   sqlite:
     needs:
       - marine
-    uses: fluencelabs/sqlite/.github/workflows/build.yml@FLU-384
+    uses: fluencelabs/sqlite/.github/workflows/build.yml@master
 
   sqlite-wasm:
     needs: sqlite
