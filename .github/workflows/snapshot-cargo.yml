@@ -78,5 +78,5 @@ jobs:
       - name: Upload binary to checks
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.prepare.outputs.bin }}-artifact
+          name: marine
           path: target/x86_64-unknown-linux-musl/release/marine
