@@ -18,7 +18,7 @@ use semver::Error as SemVerError;
 use thiserror::Error as ThisError;
 use std::str::Utf8Error;
 
-#[derive(Debug, ThisError, PartialEq)]
+#[derive(Debug, ThisError)]
 pub enum ManifestError {
     /// Manifest of a Wasm file doesn't have enough bytes to read size of a field from its prefix.
     #[error(
