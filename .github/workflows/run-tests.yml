@@ -112,7 +112,7 @@ jobs:
           file: lcov.info
 
       - name: Archive code coverage results
-        if: !github.event.pull_request.head.repo.fork
+        if: github.event.pull_request.head.repo.fork != true
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report.zip
