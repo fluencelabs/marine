@@ -47,8 +47,8 @@ jobs:
       )
     uses: ./.github/workflows/binary.yml
     with:
-      ref: ${{ github.ref }}
-      bin: marine
+      tag: ${{ github.ref }}
+      binary: marine
 
   marine-js:
     name: "marine"
