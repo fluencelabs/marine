@@ -57,9 +57,6 @@ jobs:
       - name: Install marine cli
         run: cargo install --path tools/cli
 
-      - name: Run cargo fmt
-        run: cargo fmt --all -- --check
-
       - name: Build marine-js wasm
         run: ./build.sh
         working-directory: marine-js
@@ -132,3 +129,7 @@ jobs:
       - name: Run marine-js smoke tests
         run: npm run test
         working-directory: marine-js/npm-package
+
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+

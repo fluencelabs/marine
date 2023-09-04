@@ -49,7 +49,7 @@ impl<
         Self {
             allocate_func,
             memory,
-            _memory_view_phantom: <_>::default(),
+            _memory_view_phantom: PhantomData,
         }
     }
 }

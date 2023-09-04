@@ -189,8 +189,6 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         }
 
         let creator = move |mut store: <WB as WasmBackend>::ContextMut<'_>| {
-            let logging_mask = logging_mask;
-
             <WB as WasmBackend>::HostFunction::new_typed(
                 &mut store,
                 log_utf8_string_closure::<WB>(logging_mask, module_name),

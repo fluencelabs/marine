@@ -26,15 +26,15 @@ use marine_wasm_backend_traits::WasmBackend;
 pub use errors::HostImportError;
 pub(crate) use imports::create_host_import_func;
 
-pub(self) use marine_wasm_backend_traits::WValue;
-pub(self) use marine_wasm_backend_traits::WType;
+use marine_wasm_backend_traits::WValue;
+use marine_wasm_backend_traits::WType;
 
-pub(self) type HostImportResult<T> = std::result::Result<T, HostImportError>;
-pub(self) type WasmModuleFunc<WB, Args, Rets> = Box<
+type HostImportResult<T> = std::result::Result<T, HostImportError>;
+type WasmModuleFunc<WB, Args, Rets> = Box<
     dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets> + Sync + Send,
 >;
-pub(self) type AllocateFunc<WB> = WasmModuleFunc<WB, (i32, i32), i32>;
+type AllocateFunc<WB> = WasmModuleFunc<WB, (i32, i32), i32>;
 
-pub(self) const ALLOCATE_FUNC_NAME: &str = "allocate";
-pub(self) const SET_PTR_FUNC_NAME: &str = "set_result_ptr";
-pub(self) const SET_SIZE_FUNC_NAME: &str = "set_result_size";
+const ALLOCATE_FUNC_NAME: &str = "allocate";
+const SET_PTR_FUNC_NAME: &str = "set_result_ptr";
+const SET_SIZE_FUNC_NAME: &str = "set_result_size";
