@@ -37,19 +37,6 @@ jobs:
     with:
       ref: ${{ github.ref }}
 
-  marine-binary:
-    name: "marine"
-    if: >
-      github.event_name == 'push' ||
-      (
-        contains(github.event.pull_request.labels.*.name, 'e2e') &&
-        !github.event.pull_request.head.repo.fork
-      )
-    uses: ./.github/workflows/binary.yml
-    with:
-      tag: ${{ github.ref }}
-      binary: marine
-
   marine-js:
     name: "marine"
     if: >
