@@ -94,14 +94,38 @@ jobs:
             -p marine \
             -p mrepl
 
-      - name: Run cargo test
-        run: |
-          cargo test --release -v --all-features \
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - uses: taiki-e/install-action@nextest
+
+      - name: Run cargo nextest
+        run: cargo llvm-cov nextest --release -v --all-features --profile ci --lcov --output-path lcov.info \
             -p marine-core \
             -p marine \
             -p fluence-app-service \
             -p marine \
             -p mrepl \
+
+      - name: Coveralls upload
+        if: inputs.cargo-dependencies == 'null'
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: lcov.info
+
+      - name: Archive code coverage results
+        if: inputs.cargo-dependencies == 'null' && !github.event.pull_request.head.repo.fork
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report.zip
+          path: lcov.info
+
+      - name: Upload test report
+        uses: dorny/test-reporter@v1
+        if: (success() || failure()) && !github.event.pull_request.head.repo.fork
+        with:
+          name: marine report
+          path: target/nextest/ci/junit.xml
+          reporter: java-junit
 
       - name: Run cargo clippy
         run: cargo clippy -v
