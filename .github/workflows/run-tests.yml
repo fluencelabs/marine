@@ -106,14 +106,13 @@ jobs:
             -p mrepl \
 
       - name: Coveralls upload
-        if: inputs.cargo-dependencies == 'null'
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           file: lcov.info
 
       - name: Archive code coverage results
-        if: inputs.cargo-dependencies == 'null' && !github.event.pull_request.head.repo.fork
+        if: !github.event.pull_request.head.repo.fork
         uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report.zip
