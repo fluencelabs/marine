@@ -79,4 +79,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: marine
-          path: target/x86_64-unknown-linux-musl/release/marine
+          path: target/x86_64-unknown-linux-gnu/release/marine
