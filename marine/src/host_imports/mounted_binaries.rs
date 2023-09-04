@@ -46,7 +46,7 @@ pub(crate) fn create_mounted_binary_import<WB: WasmBackend>(
     }
 }
 
-pub(self) fn mounted_binary_import_impl(
+fn mounted_binary_import_impl(
     mounted_binary_path: &Path,
     raw_args: Vec<IValue>,
 ) -> Result<MountedBinaryResult, MountedBinaryResult> {

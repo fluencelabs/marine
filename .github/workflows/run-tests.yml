@@ -52,13 +52,10 @@ jobs:
           node-version: 16
 
       - name: Install wasm-pack
-        run: cargo install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
 
       - name: Install marine cli
         run: cargo install --path tools/cli
-
-      - name: Run cargo fmt
-        run: cargo fmt --all -- --check
 
       - name: Build marine-js wasm
         run: ./build.sh
@@ -109,3 +106,7 @@ jobs:
       - name: Run marine-js smoke tests
         run: npm run test
         working-directory: marine-js/npm-package
+
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+

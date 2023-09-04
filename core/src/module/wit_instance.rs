@@ -100,9 +100,10 @@ impl<WB: WasmBackend> ITInstance<WB> {
         start_index: usize,
     ) -> MResult<HashMap<usize, WITFunction<WB>>> {
         wit.imports()
-            .filter(|import|
-                // filter out imports that have implementations
-                matches!(wit.adapter_types_by_core_type(import.function_type), Some(_)))
+            .filter(|import| {
+                wit.adapter_types_by_core_type(import.function_type)
+                    .is_some()
+            })
             .enumerate()
             .map(|(idx, import)| match modules.get(import.namespace) {
                 Some(module) => {
