@@ -16,9 +16,12 @@
 
 use semver::Error as SemVerError;
 use thiserror::Error as ThisError;
+use derivative::Derivative;
+
 use std::str::Utf8Error;
 
-#[derive(Debug, ThisError)]
+#[derive(Debug, ThisError, Derivative)]
+#[derivative(PartialEq)]
 pub enum ManifestError {
     /// Manifest of a Wasm file doesn't have enough bytes to read size of a field from its prefix.
     #[error(
@@ -42,7 +45,11 @@ pub enum ManifestError {
 
     /// Version can't be parsed with semver.
     #[error("embedded to the Wasm file version is corrupted: '{0}'")]
-    ModuleVersionCorrupted(#[from] SemVerError),
+    ModuleVersionCorrupted(
+        #[derivative(PartialEq(compare_with = "cmp_semver_error"))]
+        #[from]
+        SemVerError,
+    ),
 
     /// Manifest contains some trailing characters.
     #[error("embedded manifest is corrupted: there are some trailing characters")]
@@ -51,4 +58,9 @@ pub enum ManifestError {
     /// Error occurred while parsing embedded build time.
     #[error("build time can't be parsed: {0}")]
     DateTimeParseError(#[from] chrono::ParseError),
+}
+
+fn cmp_semver_error(lhs: &SemVerError, rhs: &SemVerError) -> bool {
+    // semver::Error does not provide anything better
+    lhs.to_string() == rhs.to_string()
 }
