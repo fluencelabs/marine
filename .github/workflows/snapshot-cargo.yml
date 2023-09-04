@@ -75,16 +75,8 @@ jobs:
       - name: Build marine
         run: cargo build -p marine --release
 
-      - name: Prepare binary for upload
-        id: prepare
-        env:
-          BIN: "marine"
-        run: |
-          mv target/${{ matrix.arch }}-unknown-linux-musl/release/${{ inputs.binary }} ${BIN}
-          echo "bin=${BIN}" >> $GITHUB_OUTPUT
-
       - name: Upload binary to checks
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.prepare.outputs.bin }}-artifact
-          path: ${{ steps.prepare.outputs.bin }}
+          path: target/x86_64-unknown-linux-musl/release/marine
