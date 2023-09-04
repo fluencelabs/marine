@@ -52,7 +52,6 @@ jobs:
   sqlite:
     needs:
       - marine
-      - marine-binary
     uses: fluencelabs/sqlite/.github/workflows/build.yml@master
 
   sqlite-wasm:
