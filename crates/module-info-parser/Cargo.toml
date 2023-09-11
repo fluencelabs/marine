@@ -11,7 +11,7 @@ name = "marine_module_info_parser"
 path = "src/lib.rs"
 
 [dependencies]
-marine-rs-sdk-main = "0.9.0"
+marine-rs-sdk-main = {version = "0.9.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/decouple-call-params", default-features = false }
 
 marine-wasm-backend-traits = { path = "../wasm-backend-traits", version = "0.3.0"}
 
