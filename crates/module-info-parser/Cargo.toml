@@ -19,6 +19,6 @@ anyhow = "1.0.71"
 chrono = "0.4.26"
 walrus = "0.20.1"
 semver = "1.0.14"
-
+derivative = "2.2.0"
 serde = "1.0.147"
 thiserror = "1.0.37"

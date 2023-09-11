@@ -1,6 +1,7 @@
 # Marine
 
 ![marine version on crates.io](https://img.shields.io/crates/v/marine?color=green&style=flat-square)
+[![Coverage Status](https://coveralls.io/repos/github/fluencelabs/marine/badge.svg)](https://coveralls.io/github/fluencelabs/marine)
 
 Marine is a modern general purpose Wasm runtime based on the [component model](https://github.com/WebAssembly/component-model) capable of running multi-module Wasm applications, aka services, with [interface-types](https://github.com/WebAssembly/interface-types) and a [shared-nothing linking](https://training.linuxfoundation.org/blog/how-and-why-to-link-webassembly-modules/) scheme. This execution model is well suited for a variety of scenarios and especially applicable to implementations following the [entity component system](https://en.wikipedia.org/wiki/Entity_component_system) (ECS) pattern or plugin-based architectures.
 
@@ -136,5 +137,3 @@ Any interested person is welcome to contribute to the project. Please, make sure
 ## License
 
 All software code is copyright (c) Fluence Labs, Inc. under the [Apache-2.0](./LICENSE) license.
-
-
