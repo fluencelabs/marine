@@ -8,6 +8,19 @@
   * dependencies
     * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
 
+## [0.9.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.8.0...marine-module-info-parser-v0.9.0) (2023-09-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** update marine-rs-sdk-to 0.10.0 ([#364](https://github.com/fluencelabs/marine/issues/364))
+
+### Features
+
+* **deps:** update marine-rs-sdk-to 0.10.0 ([#364](https://github.com/fluencelabs/marine/issues/364)) ([036c334](https://github.com/fluencelabs/marine/commit/036c3348e3361e3a39eb79fb16641ef4bbff1f6c))
+* **modile-info-parser:** implement PartialEq for ManifestError ([854397a](https://github.com/fluencelabs/marine/commit/854397a6c35753666ac696f4f948b9a2af121694))
+* **module-info-parser:** implement PartialEq for ManifestError ([#368](https://github.com/fluencelabs/marine/issues/368)) ([854397a](https://github.com/fluencelabs/marine/commit/854397a6c35753666ac696f4f948b9a2af121694))
+
 ## [0.8.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.7.0...marine-module-info-parser-v0.8.0) (2023-08-09)
 
 

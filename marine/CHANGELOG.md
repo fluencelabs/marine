@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * marine-core bumped from 0.20.1 to 0.20.2
     * marine-wasmtime-backend bumped from 0.2.0 to 0.2.1
 
+## [0.30.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.29.0...marine-runtime-v0.30.0) (2023-09-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** update marine-rs-sdk-to 0.10.0 ([#364](https://github.com/fluencelabs/marine/issues/364))
+
+### Features
+
+* **deps:** update marine-rs-sdk-to 0.10.0 ([#364](https://github.com/fluencelabs/marine/issues/364)) ([036c334](https://github.com/fluencelabs/marine/commit/036c3348e3361e3a39eb79fb16641ef4bbff1f6c))
+
 ## [0.29.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.28.0...marine-runtime-v0.29.0) (2023-08-09)
 
 
