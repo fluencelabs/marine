@@ -10,6 +10,6 @@ name = "facade"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk ={ version = "0.9.0", features = ["logger"] }
+marine-rs-sdk ={ version = "0.10.0", features = ["logger"] }
 anyhow = "1.0.31"
 log = "0.4.8"

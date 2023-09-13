@@ -10,5 +10,5 @@ name = "wasi_effector"
 path = "src/effector.rs"
 
 [dependencies]
-marine-rs-sdk = "0.9.0"
+marine-rs-sdk = "0.10.0"
 safe-transmute = "0.11.0"

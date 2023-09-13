@@ -10,5 +10,5 @@ name = "records_effector"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk = "0.9.0"
+marine-rs-sdk = "0.10.0"
 test-record = { path = "../test-record" }
