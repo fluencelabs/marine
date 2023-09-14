@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout Marine
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: fluencelabs/marine
           ref: ${{ inputs.ref }}
