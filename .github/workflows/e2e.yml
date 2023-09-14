@@ -50,7 +50,8 @@ jobs:
       ref: ${{ github.ref }}
 
   sqlite:
-    needs: marine
+    needs:
+      - marine
     uses: fluencelabs/sqlite/.github/workflows/build.yml@master
 
   sqlite-wasm:

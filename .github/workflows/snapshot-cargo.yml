@@ -71,3 +71,12 @@ jobs:
         uses: fluencelabs/github-actions/cargo-publish-snapshot@main
         with:
           id: ${{ steps.version.outputs.id }}
+
+      - name: Build marine
+        run: cargo build -p marine --release
+
+      - name: Upload binary to checks
+        uses: actions/upload-artifact@v3
+        with:
+          name: marine
+          path: target/release/marine
