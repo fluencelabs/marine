@@ -12,8 +12,6 @@ name = "greeting-record"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk = {version = "0.7.0", features = ["logger"]}
+marine-rs-sdk = { version = "0.10.0", features = ["logger"] }
 log = "0.4.8"
 
-[dev-dependencies]
-marine-rs-sdk-test = "0.10.0"

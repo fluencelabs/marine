@@ -21,6 +21,7 @@ use crate::WasmBackend;
 use crate::WType;
 
 use std::borrow::Cow;
+use std::fmt::Formatter;
 
 /// A "Linker" object, that is used to match functions with module imports during instantiation.
 /// Cloning is a cheap operation for this object. All clones refer to the same data in store.
@@ -36,7 +37,7 @@ pub trait Imports<WB: WasmBackend>: Clone {
         store: &impl AsContext<WB>,
         module: impl Into<String>,
         name: impl Into<String>,
-        func: <WB as WasmBackend>::Function,
+        func: <WB as WasmBackend>::HostFunction,
     ) -> Result<(), ImportError>;
 
     /// Inserts several named functions to the same namespace `module` at once, an equivalent to multiple calls of `insert`.
@@ -51,7 +52,7 @@ pub trait Imports<WB: WasmBackend>: Clone {
     ) -> Result<(), ImportError>
     where
         S: Into<String>,
-        I: IntoIterator<Item = (String, <WB as WasmBackend>::Function)>;
+        I: IntoIterator<Item = (String, <WB as WasmBackend>::HostFunction)>;
 }
 
 /// A type representing function signature.
@@ -82,7 +83,18 @@ impl FuncSig {
     }
 }
 
-pub type FuncFromCaller<WB, Args, Rets> = Box<
+impl std::fmt::Debug for FuncSig {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "params: {:?}, returns: {:?}",
+            self.params(),
+            self.returns
+        )
+    }
+}
+
+pub type FuncFromImportCallContext<WB, Args, Rets> = Box<
     dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets>
         + Sync
         + Send
@@ -91,5 +103,5 @@ pub type FuncFromCaller<WB, Args, Rets> = Box<
 
 pub trait FuncGetter<WB: WasmBackend, Args, Rets> {
     /// Gets an export function from the calling instance.
-    fn get_func(&mut self, name: &str) -> ResolveResult<FuncFromCaller<WB, Args, Rets>>;
+    fn get_func(&mut self, name: &str) -> ResolveResult<FuncFromImportCallContext<WB, Args, Rets>>;
 }

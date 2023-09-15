@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,46 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#![warn(rust_2018_idioms)]
-#![feature(get_mut_unchecked)]
-#![feature(new_uninit)]
-#![feature(stmt_expr_attributes)]
-#![deny(
-    dead_code,
-    nonstandard_style,
-    unused_imports,
-    unused_mut,
-    unused_variables,
-    unused_unsafe,
-    unreachable_patterns
-)]
 
-mod engine;
-mod errors;
-mod misc;
-mod module;
-mod faas;
+mod api;
 mod global_state;
-mod api; // contains public API functions exported to JS
-mod marine_js;
+mod logger;
 
-pub(crate) use engine::MModuleInterface;
-pub(crate) use engine::Marine;
-pub(crate) use errors::MError;
-pub(crate) use module::IValue;
-pub(crate) use module::IRecordType;
-pub(crate) use module::IFunctionArg;
-pub(crate) use module::IType;
-pub(crate) use module::MRecordTypes;
+use crate::logger::MarineLogger;
 
-pub(crate) type MResult<T> = std::result::Result<T, MError>;
-
-use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::prelude::JsValue;
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
-pub fn main() -> Result<(), JsValue> {
-    // prints human-readable stracktrace on panics, useful when investigating problems
-    console_error_panic_hook::set_once();
-    Ok(())
+fn main() {
+    log::set_boxed_logger(Box::new(MarineLogger::new(log::LevelFilter::Info))).unwrap();
+    // Trace is required to accept all logs from a service.
+    // Max level for this crate is set in MarineLogger constructor.
+    log::set_max_level(log::LevelFilter::Trace);
 }

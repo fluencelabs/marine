@@ -18,10 +18,10 @@ use crate::AsContextMut;
 use crate::FuncGetter;
 use crate::WasmBackend;
 
-/// `Caller` is a structure used to pass context to imports.
+/// `ImportCallContext` is a structure used to pass context to imports.
 /// It serves as a handle to `Store`, and also provides access to `Memory` and export functions
 /// from the caller instance, if there is one.
-pub trait Caller<WB: WasmBackend>:
+pub trait ImportCallContext<WB: WasmBackend>:
     FuncGetter<WB, (i32, i32), i32>
     + FuncGetter<WB, (i32, i32), ()>
     + FuncGetter<WB, i32, i32>

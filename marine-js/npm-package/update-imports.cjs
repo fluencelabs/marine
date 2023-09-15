@@ -6,6 +6,10 @@ const traverse = require("@babel/traverse").default;
 const sourceFilePath = "../marine-js-pkg/marine_js.js";
 const targetFilePath = "./src/marine_js.js";
 
+const GET_IMPORTTS_FN_NAME = "__wbg_get_imports"
+
+const WBG_ADAPTER_REGEX = /__wbg_adapter_\d+/;
+
 fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
   if (err) {
     console.error("Error reading source file:", err);
@@ -14,18 +18,23 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
 
   const sourceAst = parser.parse(sourceData, { sourceType: "module" });
   let sourceFunction = null;
-
+  let wbgAdapterFunc = null;
+  let imports = []
   traverse(sourceAst, {
     FunctionDeclaration(path) {
-      if (path.node.id.name === "getImports") {
+      if (path.node.id.name === GET_IMPORTTS_FN_NAME) {
         sourceFunction = path.node;
-        path.stop();
+      } else if (WBG_ADAPTER_REGEX.test(path.node.id.name)) {
+        wbgAdapterFunc = path.node;
       }
     },
+    ImportDeclaration(path) {
+      imports.push(path.node)
+    }
   });
 
   if (!sourceFunction) {
-    console.error("Error: getImports function not found in source file");
+    console.error(`Error: ${GET_IMPORTTS_FN_NAME} function not found in source file`);
     process.exit(1);
   }
 
@@ -42,23 +51,41 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
     });
 
     let targetFunctionPath = null;
+    let wbgAdapderPath = null;
+    let importsPaths = []
 
     recast.visit(targetAst, {
       visitFunctionDeclaration(path) {
-        if (path.node.id.name === "getImports") {
+        if (path.node.id.name === GET_IMPORTTS_FN_NAME) {
           targetFunctionPath = path;
-          return false;
+        } else if (WBG_ADAPTER_REGEX.test(path.node.id.name)) {
+          wbgAdapderPath = path;
         }
+
         this.traverse(path);
       },
+      visitImportDeclaration(path) {
+        importsPaths.push(path)
+        this.traverse(path);
+      }
     });
 
     if (!targetFunctionPath) {
-      console.error("Error: getImports function not found in target file");
+      console.error(`Error: ${GET_IMPORTTS_FN_NAME} function not found in target file`);
       process.exit(1);
     }
 
+    if (importsPaths.length !== imports.length) {
+      console.error(`Error: source and destination have different number of import statements. Please update imports in destination manually.`);
+      process.exit(1);
+    }
+
+    for(let importIndex = 0; importIndex < importsPaths.length; importIndex++) {
+      importsPaths[importIndex].replace(imports[importIndex])
+    }
+
     targetFunctionPath.replace(sourceFunction);
+    wbgAdapderPath.replace(wbgAdapterFunc);
     const output = recast.print(targetAst).code;
 
     fs.writeFile(targetFilePath, output, "utf8", (err) => {
@@ -67,7 +94,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
         process.exit(1);
       }
 
-      console.log("Function getImports replaced successfully in target file.");
+      console.log(`Function ${GET_IMPORTTS_FN_NAME} replaced successfully in target file.`);
     });
   });
 });

@@ -18,11 +18,6 @@ import { WASIArgs, WASIEnv } from '@wasmer/wasi';
 
 export interface MarineServiceConfig {
     /**
-     * Path to a dir where compiled Wasm modules are located.
-     */
-    modules_dir: string;
-
-    /**
      * Settings for a module with particular name (not HashMap because the order is matter).
      */
     modules_config: Array<ModuleDescriptor>;
@@ -30,12 +25,11 @@ export interface MarineServiceConfig {
     /**
      * Settings for a module that name's not been found in modules_config.
      */
-    default_modules_config: MarineModuleConfig;
+    default_modules_config?: MarineModuleConfig;
 }
 
 export interface ModuleDescriptor {
-    file_name: String;
-    import_name: String;
+    import_name: string;
     config: MarineModuleConfig;
 }
 
@@ -43,12 +37,12 @@ export interface MarineModuleConfig {
     /**
      * Maximum memory size accessible by a module in Wasm pages (64 Kb).
      */
-    mem_pages_count: number;
+    mem_pages_count?: number;
 
     /**
      * Maximum memory size for heap of Wasm module in bytes, if it set, mem_pages_count ignored.
      */
-    max_heap_size: number;
+    max_heap_size?: number;
 
     /**
      * Defines whether FaaS should provide a special host log_utf8_string function for this module.

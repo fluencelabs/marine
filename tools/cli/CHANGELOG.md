@@ -6,6 +6,45 @@
     * marine-it-parser bumped from 0.12.0 to 0.12.1
     * marine-module-info-parser bumped from 0.6.0 to 0.6.1
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-it-generator bumped from 0.10.1 to 0.10.2
+    * marine-it-parser bumped from 0.12.1 to 0.12.2
+    * marine-module-info-parser bumped from 0.6.1 to 0.6.2
+
+## [0.17.0](https://github.com/fluencelabs/marine/compare/marine-v0.16.0...marine-v0.17.0) (2023-09-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** update marine-rs-sdk-to 0.10.0 ([#364](https://github.com/fluencelabs/marine/issues/364))
+
+### Features
+
+* **deps:** update marine-rs-sdk-to 0.10.0 ([#364](https://github.com/fluencelabs/marine/issues/364)) ([036c334](https://github.com/fluencelabs/marine/commit/036c3348e3361e3a39eb79fb16641ef4bbff1f6c))
+
+## [0.16.0](https://github.com/fluencelabs/marine/compare/marine-v0.15.0...marine-v0.16.0) (2023-08-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bump on minor dependency update ([#362](https://github.com/fluencelabs/marine/issues/362))
+
+### Bug Fixes
+
+* **versions:** enforce minor version bump on minor dependency update ([#362](https://github.com/fluencelabs/marine/issues/362)) ([bf8e2e9](https://github.com/fluencelabs/marine/commit/bf8e2e91141c216b1a8a1db572a01f921c77f543))
+
+## [0.15.0](https://github.com/fluencelabs/marine/compare/marine-v0.14.2...marine-v0.15.0) (2023-08-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* update versions to comply with semver ([#357](https://github.com/fluencelabs/marine/issues/357))
+
+### Bug Fixes
+
+* update versions to comply with semver ([#357](https://github.com/fluencelabs/marine/issues/357)) ([71e138d](https://github.com/fluencelabs/marine/commit/71e138dce31c2896bcd7b0657c3122c4b7f6402b))
+
 ## [0.14.0](https://github.com/fluencelabs/marine/compare/marine-v0.13.0...marine-v0.14.0) (2023-03-14)
 
 

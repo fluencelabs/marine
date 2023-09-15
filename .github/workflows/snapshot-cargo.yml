@@ -18,6 +18,10 @@ jobs:
     runs-on: builder
     timeout-minutes: 60
 
+    env:
+      RUSTFLAGS: "-D warnings"
+      RUSTC_WRAPPER: "sccache"
+
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
 
@@ -27,13 +31,13 @@ jobs:
 
     steps:
       - name: Checkout Marine
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: fluencelabs/marine
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.4.3
+        uses: hashicorp/vault-action@cb841f2c86fb6d07cff94fda240828c1abc5ba43 # v2.7.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -46,7 +50,17 @@ jobs:
             kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
 
       - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: dsherret/rust-toolchain-file@v1
+
+      - name: Setup cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: ~/.cache/sccache
+          shared-key: marine
+          save-if: false
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
 
       - name: Generate snapshot version
         id: version
@@ -57,3 +71,12 @@ jobs:
         uses: fluencelabs/github-actions/cargo-publish-snapshot@main
         with:
           id: ${{ steps.version.outputs.id }}
+
+      - name: Build marine
+        run: cargo build -p marine --release
+
+      - name: Upload binary to checks
+        uses: actions/upload-artifact@v3
+        with:
+          name: marine
+          path: target/release/marine

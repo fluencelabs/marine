@@ -30,7 +30,7 @@ use std::sync::Arc;
 pub(crate) fn create_call_parameters_import<WB: WasmBackend>(
     call_parameters: Arc<Mutex<marine_rs_sdk::CallParameters>>, // TODO try to avoid using mutex
 ) -> HostImportDescriptor<WB> {
-    let call_parameters_closure = move |_ctx: &mut <WB as WasmBackend>::Caller<'_>,
+    let call_parameters_closure = move |_ctx: &mut <WB as WasmBackend>::ImportCallContext<'_>,
                                         _args: Vec<IValue>| {
         let result = {
             // a separate code block to unlock the mutex ASAP and to avoid double locking

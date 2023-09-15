@@ -28,10 +28,23 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Setup Rust toolchain
+        uses: dsherret/rust-toolchain-file@v1
+
+      - name: Setup cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: ~/.cache/sccache
+          shared-key: marine
+          # github allows only 10GB of cache
+          # so save cache only on merge to master
+          # to use less space and speed up CI
+          save-if: ${{ github.event_name == 'push' }}
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -39,13 +52,10 @@ jobs:
           node-version: 16
 
       - name: Install wasm-pack
-        run: cargo install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
 
       - name: Install marine cli
         run: cargo install --path tools/cli
-
-      - name: Run cargo fmt
-        run: cargo fmt --all -- --check
 
       - name: Build marine-js wasm
         run: ./build.sh
@@ -81,14 +91,37 @@ jobs:
             -p marine \
             -p mrepl
 
-      - name: Run cargo test
-        run: |
-          cargo test --release -v --all-features \
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - uses: taiki-e/install-action@nextest
+
+      - name: Run cargo nextest
+        run: cargo llvm-cov nextest --release -v --all-features --profile ci --lcov --output-path lcov.info \
             -p marine-core \
             -p marine \
             -p fluence-app-service \
             -p marine \
             -p mrepl \
+
+      - name: Coveralls upload
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: lcov.info
+
+      - name: Archive code coverage results
+        if: github.event.pull_request.head.repo.fork != true
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report.zip
+          path: lcov.info
+
+      - name: Upload test report
+        uses: dorny/test-reporter@v1
+        if: (success() || failure()) && !github.event.pull_request.head.repo.fork
+        with:
+          name: marine report
+          path: target/nextest/ci/junit.xml
+          reporter: java-junit
 
       - name: Run cargo clippy
         run: cargo clippy -v
@@ -96,3 +129,7 @@ jobs:
       - name: Run marine-js smoke tests
         run: npm run test
         working-directory: marine-js/npm-package
+
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+

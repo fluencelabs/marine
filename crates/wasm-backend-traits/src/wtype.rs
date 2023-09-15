@@ -83,6 +83,16 @@ impl WValue {
             Self::F64(x) => f64::to_bits(x) as u128,
         }
     }
+
+    /// Converts any value to i32. Floats are interpreted as plain bytes.
+    pub fn to_i32(&self) -> i32 {
+        match *self {
+            Self::I32(x) => x,
+            Self::I64(x) => x as i32,
+            Self::F32(x) => f32::to_bits(x) as i32,
+            Self::F64(x) => f64::to_bits(x) as i32,
+        }
+    }
 }
 
 impl std::fmt::Display for WType {

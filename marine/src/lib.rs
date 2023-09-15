@@ -75,6 +75,7 @@ pub mod generic {
     pub use marine_core::generic::*;
 }
 
+#[cfg(feature = "default")]
 pub mod wasmtime {
     pub type WasmBackend = marine_core::wasmtime::WasmBackend;
 
@@ -87,4 +88,5 @@ pub mod wasmtime {
     pub use marine_core::wasmtime::HostImportDescriptor;
 }
 
+#[cfg(feature = "default")]
 pub use wasmtime::*;

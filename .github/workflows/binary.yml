@@ -28,7 +28,20 @@ jobs:
       image: messense/rust-musl-cross:${{ matrix.arch }}-musl
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dsherret/rust-toolchain-file@v1
+
+      - name: Setup cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: ~/.cache/sccache
+          shared-key: marine
+          save-if: false
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
 
       - name: Build ${{ inputs.binary }}
         run: cargo build -p ${{ inputs.binary }} --release
@@ -59,7 +72,7 @@ jobs:
       MACOS_SDK: "macosx12.3"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare build variables
         run: |
@@ -70,8 +83,18 @@ jobs:
           echo "SDKROOT=${SKDROOT}" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=${SKDROOT}" >> $GITHUB_ENV
 
-      - name: Setup rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Setup Rust toolchain
+        uses: dsherret/rust-toolchain-file@v1
+
+      - name: Setup cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: ~/.cache/sccache
+          shared-key: marine
+          save-if: false
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
 
       - name: Build ${{ inputs.binary }}
         run: cargo build -p ${{ inputs.binary }} --release
@@ -102,7 +125,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download binaries
         uses: actions/download-artifact@v3

@@ -327,7 +327,7 @@ impl<WB: WasmBackend> MModule<WB> {
         let all_imports = raw_imports
             .into_iter()
             .map(|(name, creator)| (name, creator(store.as_context_mut())))
-            .chain(host_imports.into_iter())
+            .chain(host_imports)
             .collect::<Vec<_>>();
 
         linker.register(store, "host", all_imports.into_iter())?;
@@ -350,9 +350,9 @@ impl<WB: WasmBackend> MModule<WB> {
             inputs: I1,
             outputs: I2,
             raw_import: F,
-        ) -> <WB as WasmBackend>::Function
+        ) -> <WB as WasmBackend>::HostFunction
         where
-            F: for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+            F: for<'c> Fn(<WB as WasmBackend>::ImportCallContext<'c>, &[WValue]) -> Vec<WValue>
                 + Sync
                 + Send
                 + 'static,
@@ -364,7 +364,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
             let inputs = inputs.map(itype_to_wtype).collect::<Vec<_>>();
             let outputs = outputs.map(itype_to_wtype).collect::<Vec<_>>();
-            <WB as WasmBackend>::Function::new_with_caller(
+            <WB as WasmBackend>::HostFunction::new_with_caller(
                 &mut store.as_context_mut(),
                 FuncSig::new(inputs, outputs),
                 raw_import,
@@ -377,11 +377,13 @@ impl<WB: WasmBackend> MModule<WB> {
             interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
-        ) -> impl for<'c> Fn(<WB as WasmBackend>::Caller<'c>, &[WValue]) -> Vec<WValue>
+        ) -> impl for<'c> Fn(<WB as WasmBackend>::ImportCallContext<'c>, &[WValue]) -> Vec<WValue>
                + Sync
                + Send
                + 'static {
-            move |mut ctx: <WB as WasmBackend>::Caller<'_>, inputs: &[WValue]| -> Vec<WValue> {
+            move |mut ctx: <WB as WasmBackend>::ImportCallContext<'_>,
+                  inputs: &[WValue]|
+                  -> Vec<WValue> {
                 use wasmer_it::interpreter::stack::Stackable;
 
                 use super::type_converters::wval_to_ival;

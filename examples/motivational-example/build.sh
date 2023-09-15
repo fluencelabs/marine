@@ -3,13 +3,11 @@
 # This script builds all subprojects and puts all created Wasm modules in one dir
 (
   cd shrek || exit;
-  cargo update --aggressive;
   marine build --release;
 )
 
 (
   cd donkey || exit;
-  cargo update --aggressive;
   marine build --release;
 )
 

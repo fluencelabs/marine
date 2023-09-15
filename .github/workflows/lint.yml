@@ -2,34 +2,36 @@ name: lint
 
 on:
   pull_request:
-    types:
-      - opened
-      - edited
-      - synchronize
+    paths:
+      - ".github/workflows/**"
+      - ".github/renovate.json"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
-  pr:
-    name: Validate PR title
-    runs-on: ubuntu-latest
-    steps:
-      - uses: amannn/action-semantic-pull-request@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   reviewdog:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Lint actions
         uses: reviewdog/action-actionlint@v1
         env:
-          SHELLCHECK_OPTS: "-e SC2086 -e SC2207 -e SC2128 -e SC2034 -e SC2035"
+          SHELLCHECK_OPTS: "-e SC2086 -e SC2207 -e SC2128"
         with:
           reporter: github-pr-check
           fail_on_error: true
+
+  renovate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Renovate Config Validator
+        uses: tj-actions/renovate-config-validator@v2
+        with:
+          config_file: .github/renovate.json

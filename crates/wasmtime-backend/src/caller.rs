@@ -25,11 +25,11 @@ use marine_wasm_backend_traits::prelude::*;
 use wasmtime::AsContext as WasmtimeAsContext;
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
 
-pub struct WasmtimeCaller<'c> {
+pub struct WasmtimeImportCallContext<'c> {
     pub(crate) inner: wasmtime::Caller<'c, StoreState>,
 }
 
-impl<'c> Caller<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
+impl<'c> ImportCallContext<WasmtimeWasmBackend> for WasmtimeImportCallContext<'c> {
     fn memory(&mut self, _memory_index: u32) -> Option<WasmtimeMemory> {
         let memory = self
             .inner
@@ -40,7 +40,7 @@ impl<'c> Caller<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
     }
 }
 
-impl<'c> AsContext<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
+impl<'c> AsContext<WasmtimeWasmBackend> for WasmtimeImportCallContext<'c> {
     fn as_context(&self) -> WasmtimeContext<'_> {
         WasmtimeContext {
             inner: self.inner.as_context(),
@@ -48,7 +48,7 @@ impl<'c> AsContext<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
     }
 }
 
-impl<'c> AsContextMut<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
+impl<'c> AsContextMut<WasmtimeWasmBackend> for WasmtimeImportCallContext<'c> {
     fn as_context_mut(&mut self) -> <WasmtimeWasmBackend as WasmBackend>::ContextMut<'_> {
         WasmtimeContextMut {
             inner: self.inner.as_context_mut(),
@@ -60,7 +60,7 @@ impl<'c> AsContextMut<WasmtimeWasmBackend> for WasmtimeCaller<'c> {
 /// Later `get_func` variant will be statically chosen based on types.
 macro_rules! impl_func_getter {
     ($args:ty, $rets:ty) => {
-        impl<'c> FuncGetter<WasmtimeWasmBackend, $args, $rets> for WasmtimeCaller<'c> {
+        impl<'c> FuncGetter<WasmtimeWasmBackend, $args, $rets> for WasmtimeImportCallContext<'c> {
             fn get_func(
                 &mut self,
                 name: &str,

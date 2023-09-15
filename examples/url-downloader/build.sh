@@ -3,19 +3,16 @@
 # This script builds all subprojects and puts all created Wasm modules in one dir
 (
   cd local_storage || exit;
-  cargo update --aggressive;
   marine build --release;
 )
 
 (
   cd curl_adapter || exit;
-  cargo update --aggressive;
   marine build --release;
 )
 
 (
   cd facade || exit;
-  cargo update --aggressive;
   marine build --release;
 )
 

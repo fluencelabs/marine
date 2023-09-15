@@ -28,7 +28,7 @@ use std::path::PathBuf;
 pub(crate) fn create_mounted_binary_import<WB: WasmBackend>(
     mounted_binary_path: PathBuf,
 ) -> HostImportDescriptor<WB> {
-    let host_cmd_closure = move |_ctx: &mut <WB as WasmBackend>::Caller<'_>,
+    let host_cmd_closure = move |_ctx: &mut <WB as WasmBackend>::ImportCallContext<'_>,
                                  raw_args: Vec<IValue>| {
         let result =
             mounted_binary_import_impl(&mounted_binary_path, raw_args).unwrap_or_else(Into::into);
@@ -46,7 +46,7 @@ pub(crate) fn create_mounted_binary_import<WB: WasmBackend>(
     }
 }
 
-pub(self) fn mounted_binary_import_impl(
+fn mounted_binary_import_impl(
     mounted_binary_path: &Path,
     raw_args: Vec<IValue>,
 ) -> Result<MountedBinaryResult, MountedBinaryResult> {

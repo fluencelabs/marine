@@ -14,58 +14,173 @@
  * limitations under the License.
  */
 
-use crate::faas::FluenceFaaS;
-use crate::global_state::INSTANCE;
-use crate::global_state::MODULES;
+use crate::global_state::MARINE;
+use crate::logger::marine_logger;
 
-use marine_rs_sdk::CallParameters;
+use marine::generic::Marine;
+use marine::generic::MarineConfig;
+use marine::generic::MarineModuleConfig;
+use marine::generic::ModuleDescriptor;
+use marine::MarineWASIConfig;
+use marine_js_backend::JsWasmBackend;
 
-use wasm_bindgen::prelude::*;
-use serde_json::Value as JValue;
 use serde::Serialize;
 use serde::Deserialize;
-use maplit::hashmap;
+use serde_json::Value as JValue;
+use wasm_bindgen::prelude::*;
+
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::ops::DerefMut;
+use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
-struct RegisterModuleResult {
-    error: String,
+pub struct ApiWasiConfig {
+    pub envs: HashMap<String, String>,
+    pub mapped_dirs: Option<HashMap<String, String>>,
+    pub preopened_files: Option<HashSet<String>>,
 }
 
 #[derive(Serialize, Deserialize)]
-struct CallModuleResult {
-    error: String,
-    result: JValue,
+pub struct ApiModuleConfig {
+    pub mem_pages_count: Option<u32>,
+    pub max_heap_size: Option<u32>,
+    pub logger_enabled: bool,
+    pub wasi: Option<ApiWasiConfig>,
+    pub logging_mask: i32,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ApiModuleDescriptor {
+    pub import_name: String,
+    pub config: Option<ApiModuleConfig>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ApiServiceConfig {
+    pub modules_config: Vec<ApiModuleDescriptor>,
+    pub default_modules_config: Option<ApiModuleConfig>,
+}
+
+impl From<ApiWasiConfig> for MarineWASIConfig {
+    fn from(value: ApiWasiConfig) -> Self {
+        let preopened_files = value
+            .preopened_files
+            .map(|preopened_files| {
+                preopened_files
+                    .into_iter()
+                    .map(Into::into)
+                    .collect::<HashSet<PathBuf>>()
+            })
+            .unwrap_or_default();
+
+        let mapped_dirs = value
+            .mapped_dirs
+            .map(|mapped_dirs| {
+                mapped_dirs
+                    .iter()
+                    .map(|(guest, host)| (guest.clone(), host.into()))
+                    .collect::<HashMap<String, PathBuf>>()
+            })
+            .unwrap_or_default();
+
+        Self {
+            envs: value.envs,
+            preopened_files,
+            mapped_dirs,
+        }
+    }
+}
+
+impl From<ApiModuleConfig> for MarineModuleConfig<JsWasmBackend> {
+    fn from(value: ApiModuleConfig) -> Self {
+        Self {
+            mem_pages_count: value.mem_pages_count,
+            max_heap_size: value.max_heap_size.map(|val| val as u64),
+            logger_enabled: value.logger_enabled,
+            host_imports: Default::default(),
+            wasi: value.wasi.map(Into::into),
+            logging_mask: value.logging_mask,
+        }
+    }
+}
+
+impl From<ApiModuleDescriptor> for ModuleDescriptor<JsWasmBackend> {
+    fn from(value: ApiModuleDescriptor) -> Self {
+        Self {
+            load_from: None,
+            file_name: value.import_name.clone(),
+            import_name: value.import_name,
+            config: value.config.map(Into::into).unwrap_or_default(),
+        }
+    }
+}
+
+impl From<ApiServiceConfig> for MarineConfig<JsWasmBackend> {
+    fn from(value: ApiServiceConfig) -> Self {
+        let modules_config = value
+            .modules_config
+            .into_iter()
+            .map(Into::into)
+            .collect::<Vec<ModuleDescriptor<JsWasmBackend>>>();
+
+        MarineConfig {
+            modules_dir: None,
+            modules_config,
+            default_modules_config: value.default_modules_config.map(Into::into),
+        }
+    }
 }
 
 /// Registers a module inside web-runtime.
 ///
 /// # Arguments
 ///
-/// * `name` - name of module to register
-/// * `wit_section_bytes` - bytes of "interface-types" custom section from wasm file
-/// * `instance` - `WebAssembly::Instance` made from target wasm file
+/// * `config` - description of wasm modules with names, wasm bytes and wasi parameters
+/// * `log_fn` - function to direct logs from wasm modules
 ///
 /// # Return value
 ///
-/// JSON object with field "error". If error is empty, module is registered.
-/// otherwise, it contains error message.
+/// Nothing. An error is signaled via exception.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsValue) -> String {
-    let modules = hashmap! {
-        name.to_string() => wit_section_bytes.to_vec(),
-    };
+pub fn register_module(
+    config: JsValue,
+    modules: js_sys::Object,
+    log_fn: js_sys::Function,
+) -> Result<(), JsError> {
+    let mut config: ApiServiceConfig = serde_wasm_bindgen::from_value(config)?;
+    let modules = extract_modules(modules)?;
 
-    let faas = match FluenceFaaS::with_modules(modules) {
-        Ok(faas) => faas,
-        Err(e) => return make_register_module_result(e.to_string().as_str()),
-    };
+    let marine_config: MarineConfig<JsWasmBackend> = config.into();
+    let module_names = modules.keys().cloned().collect::<HashSet<String>>();
 
-    MODULES.with(|modules| modules.replace(Some(faas)));
+    marine_logger().enable_service_logging(log_fn, module_names);
 
-    INSTANCE.with(|instance| instance.replace(Some(wasm_instance)));
+    let new_marine = Marine::<JsWasmBackend>::with_modules(modules, marine_config)?;
+    MARINE.with(|marine| marine.replace(Some(new_marine)));
 
-    make_register_module_result("")
+    Ok(())
+}
+
+fn extract_modules(modules: js_sys::Object) -> Result<HashMap<String, Vec<u8>>, JsError> {
+    let mut modules_map = HashMap::<String, Vec<u8>>::new();
+    for key in js_sys::Object::keys(&modules) {
+        if !key.is_string() {
+            return Err(JsError::new("modules object has non-string key"));
+        }
+
+        let property =
+            js_sys::Reflect::get(&modules, &key).map_err(|e| JsError::new(&format!("{:?}", e)))?;
+        let module_bytes: js_sys::Uint8Array = property.try_into()?;
+        let module_name = key
+            .as_string()
+            .ok_or_else(|| JsError::new("cannot convert modules object property to string"))?;
+        let module_bytes = module_bytes.to_vec();
+        modules_map.insert(module_name, module_bytes);
+    }
+
+    Ok(modules_map)
 }
 
 ///  Calls a function from a module.
@@ -75,63 +190,31 @@ pub fn register_module(name: &str, wit_section_bytes: &[u8], wasm_instance: JsVa
 /// * module_name - name of registered module
 /// * function_name - name of the function to call
 /// * args - JSON array of function arguments
-///
+/// * call_parameters - an object representing call paramters, with the structure defined by fluence network
 /// # Return value
 ///
-/// JSON object with fields "error" and "result". If "error" is empty string,
-/// "result" contains a function return value. Otherwise, "error" contains error message.
+/// JSON array of values. An error is signaled via exception.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn call_module(module_name: &str, function_name: &str, args: &str) -> String {
-    MODULES.with(|modules| {
-        let mut modules = modules.borrow_mut();
-        let modules = match modules.as_mut() {
-            Some(modules) => modules,
-            None => {
-                return make_call_module_result(
-                    JValue::Null,
-                    "attempt to run a function when module is not loaded",
-                )
-            }
-        };
+pub fn call_module(
+    module_name: &str,
+    function_name: &str,
+    args: &str,
+    call_parameters: JsValue,
+) -> Result<String, JsError> {
+    let call_parameters = serde_wasm_bindgen::from_value(call_parameters)?;
 
-        let args: JValue = match serde_json::from_str(args) {
-            Ok(args) => args,
-            Err(e) => {
-                return make_call_module_result(
-                    JValue::Null,
-                    &format!("Error deserializing args: {}", e),
-                )
-            }
-        };
-
-        match modules.call_with_json(module_name, function_name, args, CallParameters::default()) {
-            Ok(result) => make_call_module_result(result, ""),
-            Err(e) => make_call_module_result(
-                JValue::Null,
-                &format!("Error calling module function: {}", e),
-            ),
-        }
+    MARINE.with(|marine| {
+        let args: JValue = serde_json::from_str(args)?;
+        marine
+            .borrow_mut()
+            .deref_mut()
+            .as_mut()
+            .ok_or_else(|| JsError::new("marine is not initialized"))
+            .and_then(|mut marine| {
+                let result =
+                    marine.call_with_json(module_name, function_name, args, call_parameters)?;
+                serde_json::ser::to_string(&result).map_err(|e| JsError::new(&e.to_string()))
+            })
     })
-}
-
-#[allow(unused)] // needed because clippy marks this function as unused
-fn make_register_module_result(error: &str) -> String {
-    let result = RegisterModuleResult {
-        error: error.to_string(),
-    };
-
-    // unwrap is safe because Serialize is derived for that struct and it does not contain maps with non-string keys
-    serde_json::ser::to_string(&result).unwrap()
-}
-
-#[allow(unused)] // needed because clippy marks this function as unused
-fn make_call_module_result(result: JValue, error: &str) -> String {
-    let result = CallModuleResult {
-        error: error.to_string(),
-        result,
-    };
-
-    // unwrap is safe because Serialize is derived for that struct and it does not contain maps with non-string keys
-    serde_json::ser::to_string(&result).unwrap()
 }

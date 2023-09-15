@@ -30,13 +30,13 @@ jobs:
 
     steps:
       - name: Checkout Marine
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: fluencelabs/marine
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.5.0
+        uses: hashicorp/vault-action@cb841f2c86fb6d07cff94fda240828c1abc5ba43 # v2.7.3
         with:
           url: https://vault.fluence.dev
           path: jwt/github
@@ -49,7 +49,7 @@ jobs:
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN
 
       - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: dsherret/rust-toolchain-file@v1
 
       - name: Setup wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
@@ -59,6 +59,7 @@ jobs:
         with:
           node-version: "16"
           registry-url: "https://npm.fluence.dev"
+          cache-dependency-path: marine-js/npm-package/package-lock.json
 
       - name: Build with wasm-pack
         run: ./build.sh
