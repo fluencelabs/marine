@@ -6,6 +6,7 @@ on:
       - "**.md"
       - ".github/**"
       - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/binary.yml"
       - "!.github/workflows/snapshot-*.yml"
     types:
       - "labeled"
@@ -19,6 +20,7 @@ on:
       - "**.md"
       - ".github/**"
       - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/binary.yml"
       - "!.github/workflows/snapshot-*.yml"
 
 concurrency:
