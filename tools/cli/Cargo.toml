@@ -16,7 +16,7 @@ marine-it-generator = { path = "../../crates/it-generator", version = "0.11.0" }
 marine-it-parser = { path = "../../crates/it-parser", version = "0.13.0" }
 marine-module-info-parser = { path = "../../crates/module-info-parser", version = "0.9.0" }
 
-cargo_toml = "0.15.2"
+cargo_toml = "0.16.3"
 cargo-lock = "8.0.3"
 cargo_metadata = "0.15.4"
 semver = "1.0.14"
