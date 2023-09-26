@@ -14,8 +14,8 @@ path = "src/lib.rs"
 marine-core = { path = "../core", version = "0.24.0", default-features = false}
 marine-module-interface = { path = "../crates/module-interface", version = "0.7.1" }
 marine-utils = { path = "../crates/utils", version = "0.5.0" }
-marine-rs-sdk-main = {version = "0.10.0", default-features = false, features = ["logger"] }
-marine-rs-sdk = {version = "0.10.0", default-features = false, features = ["logger"] }
+marine-rs-sdk-main = { workspace = true }
+marine-rs-sdk = { workspace = true }
 
 it-json-serde = { path = "../crates/it-json-serde", version = "0.4.1" }
 marine-wasm-backend-traits = { path = "../crates/wasm-backend-traits", version = "0.3.0"}

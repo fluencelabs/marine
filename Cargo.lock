@@ -3854,7 +3854,7 @@ dependencies = [
 name = "wasm-sqlite-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.9.0",
+ "marine-rs-sdk 0.10.0",
  "marine-sqlite-connector",
 ]
 

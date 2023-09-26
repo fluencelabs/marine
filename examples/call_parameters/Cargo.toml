@@ -10,4 +10,4 @@ name = "call_parameters"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk = "0.10.0"
+marine-rs-sdk = { workspace = true }

@@ -39,6 +39,10 @@ members = [
     "tools/repl",
 ]
 
+[workspace.dependencies]
+marine-rs-sdk = { version = "0.10.0", features = ["logger"] }
+marine-rs-sdk-main = { version = "0.10.0", default-features = false, features = ["logger"] }
+
 [profile.release]
 opt-level = 3
 debug = false
