@@ -137,3 +137,6 @@ jobs:
 
       - name: Run cargo fmt
         run: cargo fmt --all -- --check
+
+      - run: cat Cargo.toml
+        if: always()
