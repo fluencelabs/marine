@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use std::future::Future;
 use crate::WasmtimeContextMut;
 use crate::WasmtimeWasmBackend;
 use crate::WasmtimeImportCallContext;
@@ -86,6 +87,52 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         WasmtimeFunction { inner: func }
     }
 
+    fn new_with_caller_async<F>(
+        store: &mut impl AsContextMut<WasmtimeWasmBackend>,
+        sig: FuncSig,
+        func: F,
+    ) -> Self
+    where
+        F: for<'c> Fn(
+                <WasmtimeWasmBackend as WasmBackend>::ImportCallContext<'c>,
+                &'c [WValue],
+            ) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'c>
+            + Sync
+            + Send
+            + 'static,
+    {
+        let ty = sig_to_fn_ty(&sig);
+
+        let func = lifetimify_wrapped_closure(move |caller: wasmtime::Caller<StoreState>,
+                         args: &[wasmtime::Val],
+                         results_out: &mut [wasmtime::Val]|
+              -> Box<dyn Future<Output = Result<(), anyhow::Error>> + Send> {
+            Box::new(async move {
+                let caller = WasmtimeImportCallContext { inner: caller };
+                let args = process_func_args(args).map_err(|e| anyhow!(e))?;
+                let results = std::pin::Pin::from(func(caller, &args)).await;
+                process_func_results(&results, results_out).map_err(|e| anyhow!(e))
+            })
+        });
+
+        let func = wasmtime::Func::new_async(store.as_context_mut().inner, ty, func);
+        WasmtimeFunction { inner: func }
+    }
+
+    fn new_async<F>(
+        store: &mut impl AsContextMut<WasmtimeWasmBackend>,
+        sig: FuncSig,
+        func: F,
+    ) -> Self
+    where
+        F: for<'c> Fn(&'c [WValue]) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'c>
+            + Sync
+            + Send
+            + 'static,
+    {
+        todo!()
+    }
+
     fn new_typed<Params, Results, Env>(
         store: &mut impl marine_wasm_backend_traits::AsContextMut<WasmtimeWasmBackend>,
         func: impl IntoFunc<WasmtimeWasmBackend, Params, Results, Env>,
@@ -99,13 +146,14 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
     }
 }
 
+#[async_trait]
 impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
     fn signature<'c>(&self, store: &mut impl AsContextMut<WasmtimeWasmBackend>) -> FuncSig {
         let ty = self.inner.ty(store.as_context_mut());
         fn_ty_to_sig(&ty)
     }
 
-    fn call<'c>(
+    async fn call(
         &self,
         store: &mut impl AsContextMut<WasmtimeWasmBackend>,
         args: &[WValue],
@@ -129,7 +177,9 @@ impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
 #[async_trait]
 impl AsyncFunction<WasmtimeWasmBackend> for WasmtimeFunction {
     async fn call_async<CTX>(&self, store: &mut CTX, args: &[WValue]) -> RuntimeResult<Vec<WValue>>
-    where CTX: AsContextMut<WasmtimeWasmBackend> + Send {
+    where
+        CTX: AsContextMut<WasmtimeWasmBackend> + Send,
+    {
         let mut context = store.as_context_mut().inner;
 
         let args = args.iter().map(wvalue_to_val).collect::<Vec<_>>();
@@ -147,8 +197,6 @@ impl AsyncFunction<WasmtimeWasmBackend> for WasmtimeFunction {
             .collect::<Result<Vec<_>, _>>()
     }
 }
-
-
 
 /// Generates a function that accepts a Fn with $num template parameters and turns it into WasmtimeFunction.
 /// Needed to allow users to pass almost any function to `Function::new_typed` without worrying about signature.
@@ -212,4 +260,18 @@ fn process_func_results(
     }
 
     Ok(())
+}
+
+fn lifetimify_wrapped_closure<F>(func: F) -> F
+where
+    for<'c> F: Fn(
+        wasmtime::Caller<'c, StoreState>,
+        &'c [wasmtime::Val],
+        &'c mut [wasmtime::Val],
+    ) -> Box<dyn Future<Output = Result<(), anyhow::Error>> + Send + 'c>
+    + Send
+    + Sync
+    + 'static,
+{
+    func
 }

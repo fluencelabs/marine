@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use std::future::Future;
 use super::*;
 use super::lifting::wvalues_to_ivalues;
 use super::lifting::LiHelper;
@@ -46,20 +47,24 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     let raw_output =
         itypes_output_to_wtypes(&output_type_to_types(descriptor.output_type.as_ref()));
 
-    let func = move |call_context: <WB as WasmBackend>::ImportCallContext<'_>,
-                     inputs: &[WValue]|
-          -> Vec<WValue> {
-        call_host_import(call_context, inputs, &descriptor, record_types.clone())
-    };
+    let func =
+        move |call_context: <WB as WasmBackend>::ImportCallContext<'_>, inputs: &[WValue]| -> _ {
+            Box::new(call_host_import(
+                call_context,
+                inputs,
+                &descriptor,
+                record_types.clone(),
+            ))
+        };
 
-    <WB as WasmBackend>::HostFunction::new_with_caller(
+    <WB as WasmBackend>::HostFunction::new_with_caller_async(
         &mut store.as_context_mut(),
         FuncSig::new(raw_args, raw_output),
         func,
     )
 }
 
-fn call_host_import<WB: WasmBackend>(
+async fn call_host_import<WB: WasmBackend>(
     mut caller: <WB as WasmBackend>::ImportCallContext<'_>,
     inputs: &[WValue],
     descriptor: &HostImportDescriptor<WB>,
@@ -93,7 +98,7 @@ fn call_host_import<WB: WasmBackend>(
         }
     };
 
-    lower_outputs::<WB>(&mut caller, memory, output)
+    lower_outputs::<WB>(&mut caller, memory, output).await
 }
 
 fn lift_inputs<WB: WasmBackend>(
@@ -114,7 +119,7 @@ fn lift_inputs<WB: WasmBackend>(
     )
 }
 
-fn lower_outputs<WB: WasmBackend>(
+async fn lower_outputs<WB: WasmBackend>(
     caller: &mut <WB as WasmBackend>::ImportCallContext<'_>,
     memory: <WB as WasmBackend>::Memory,
     output: Option<IValue>,
@@ -132,12 +137,15 @@ fn lower_outputs<WB: WasmBackend>(
 
     let memory_view = memory.view();
     let mut lo_helper = LoHelper::new(&mut allocate_func, memory);
-    let lowering_result =
+    let lowerer =
         ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
-            .map_err(HostImportError::LowererError)
-            .and_then(|mut lowerer| {
-                ivalue_to_wvalues(&mut caller.as_context_mut(), &mut lowerer, output)
-            });
+            .map_err(HostImportError::LowererError);
+    let lowering_result = match lowerer {
+        Ok(mut lowerer) => {
+            ivalue_to_wvalues(&mut caller.as_context_mut(), &mut lowerer, output).await
+        }
+        Err(e) => Err(e),
+    };
 
     let wvalues = match lowering_result {
         Ok(wvalues) => wvalues,

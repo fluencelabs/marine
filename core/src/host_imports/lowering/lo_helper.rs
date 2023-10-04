@@ -54,6 +54,7 @@ impl<
     }
 }
 
+#[async_trait::async_trait]
 impl<
         's,
         WB: WasmBackend,
@@ -61,7 +62,7 @@ impl<
         M: Memory<MV, DelayedContextLifetime<WB>>,
     > Allocatable<MV, DelayedContextLifetime<WB>> for LoHelper<'s, WB, MV, M>
 {
-    fn allocate(
+    async fn allocate(
         &mut self,
         store: &mut <WB as WasmBackend>::ContextMut<'_>,
         size: u32,

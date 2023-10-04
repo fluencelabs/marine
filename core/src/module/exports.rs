@@ -42,6 +42,7 @@ impl ITExport {
     }
 }
 
+#[async_trait::async_trait]
 impl wasm::structures::Export for ITExport {
     fn name(&self) -> &str {
         self.name.as_str()
@@ -63,7 +64,7 @@ impl wasm::structures::Export for ITExport {
         &self.outputs
     }
 
-    fn call(&self, arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
+    async fn call_async(&self, arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
         (self.function)(arguments)
     }
 }

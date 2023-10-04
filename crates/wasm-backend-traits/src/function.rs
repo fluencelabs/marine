@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+use std::future::Future;
 use crate::AsContextMut;
 use crate::FuncSig;
 use crate::impl_for_each_function_signature;
 use crate::RuntimeResult;
 use crate::WasmBackend;
 use crate::WValue;
+
+use async_trait::async_trait;
 
 /// A host function ready to be used as an import for instantiating a module.
 /// As it is only a handle to an object in `Store`, cloning is cheap.
@@ -34,6 +37,25 @@ pub trait HostFunction<WB: WasmBackend>: AsyncFunction<WB> + Send + Sync + Clone
     fn new_with_caller<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
     where
         F: for<'c> Fn(<WB as WasmBackend>::ImportCallContext<'c>, &[WValue]) -> Vec<WValue>
+            + Sync
+            + Send
+            + 'static;
+
+    /// Creates a new function with dynamic signature that needs a context.
+    fn new_with_caller_async<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
+    where
+        F: for<'c> Fn(
+                <WB as WasmBackend>::ImportCallContext<'c>,
+                &'c [WValue],
+            ) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'c>
+            + Sync
+            + Send
+            + 'static;
+
+    /// Creates a new function with dynamic signature that needs a context.
+    fn new_async<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
+    where
+        F: for<'c> Fn(&'c [WValue]) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'c>
             + Sync
             + Send
             + 'static;
@@ -53,6 +75,7 @@ pub trait HostFunction<WB: WasmBackend>: AsyncFunction<WB> + Send + Sync + Clone
 
 /// A Wasm function handle, it can be either a function from a host or an export from an `Instance`.
 /// As it is only a handle to an object in `Store`, cloning is cheap
+#[async_trait]
 pub trait ExportFunction<WB: WasmBackend>: Send + Sync + Clone {
     /// Returns the signature of the function.
     /// The signature is constructed each time this function is called, so
@@ -64,7 +87,7 @@ pub trait ExportFunction<WB: WasmBackend>: Send + Sync + Clone {
     ///     If given a store different from the one that stores the function.
     /// # Errors:
     ///     See `RuntimeError` documentation.
-    fn call(
+    async fn call(
         &self,
         store: &mut impl AsContextMut<WB>,
         args: &[WValue],
@@ -74,7 +97,8 @@ pub trait ExportFunction<WB: WasmBackend>: Send + Sync + Clone {
 #[async_trait]
 pub trait AsyncFunction<WB: WasmBackend> {
     async fn call_async<CTX>(&self, store: &mut CTX, args: &[WValue]) -> RuntimeResult<Vec<WValue>>
-    where CTX: AsContextMut<WB> + Send;
+    where
+        CTX: AsContextMut<WB> + Send;
 }
 
 /// A helper trait for creating a function with a static signature.

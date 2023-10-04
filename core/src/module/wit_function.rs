@@ -112,6 +112,7 @@ impl<WB: WasmBackend> WITFunction<WB> {
     }
 }
 
+#[async_trait::async_trait]
 impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
     for WITFunction<WB>
 {
@@ -135,7 +136,7 @@ impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
         &self.outputs
     }
 
-    fn call(
+    async fn call_async(
         &self,
         store: &mut <WB as WasmBackend>::ContextMut<'_>,
         arguments: &[IValue],
@@ -153,10 +154,12 @@ impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
                         .collect::<Vec<WValue>>()
                         .as_slice(),
                 )
+                .await
                 .map_err(|_| ())
                 .map(|results| results.iter().map(wval_to_ival).collect()),
             WITFunctionInner::Import { callable, .. } => Arc::make_mut(&mut callable.clone())
                 .call(store, arguments)
+                .await
                 .map_err(|_| ()),
         }
     }

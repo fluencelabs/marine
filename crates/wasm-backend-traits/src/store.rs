@@ -27,12 +27,12 @@ pub trait Store<WB: WasmBackend>: AsContextMut<WB> {
 }
 
 /// A temporary immutable handle to store
-pub trait Context<WB: WasmBackend>: AsContext<WB> {}
+pub trait Context<WB: WasmBackend>: AsContext<WB> + Send {}
 
 /// A temporary mutable handle to store
-pub trait ContextMut<WB: WasmBackend>: AsContextMut<WB> {}
+pub trait ContextMut<WB: WasmBackend>: AsContextMut<WB> + Send {}
 
-pub trait AsContext<WB: WasmBackend> {
+pub trait AsContext<WB: WasmBackend>: Send {
     fn as_context(&self) -> <WB as WasmBackend>::Context<'_>;
 }
 
