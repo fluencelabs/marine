@@ -19,7 +19,7 @@ marine-module-info-parser = { path = "../../crates/module-info-parser", version 
 cargo_toml = "0.15.2"
 cargo-lock = "8.0.3"
 cargo_metadata = "0.15.4"
-semver = "1.0.14"
+semver = "1.0.20"
 walrus = "0.20.1"
 Inflector = "0.11.4"
 toml = "0.7.2"
