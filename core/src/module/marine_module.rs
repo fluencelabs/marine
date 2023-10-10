@@ -39,7 +39,6 @@ use std::convert::TryInto;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
 use std::borrow::BorrowMut;
-use std::pin::Pin;
 
 const START_FUNC: &str = "_start";
 const INITIALIZE_FUNC: &str = "_initialize";
@@ -346,10 +345,13 @@ impl<WB: WasmBackend> MModule<WB> {
             raw_import: F,
         ) -> <WB as WasmBackend>::HostFunction
         where
-            F: for<'c> Fn(<WB as WasmBackend>::ImportCallContext<'c>, &[WValue]) -> Vec<WValue>
-                + Sync
-                + Send
-                + 'static,
+            F: for<'c> Fn(
+                <WB as WasmBackend>::ImportCallContext<'c>,
+                &'c [WValue],
+            ) -> Box<dyn std::future::Future<Output = Vec<WValue>> + Send>
+            + Sync
+            + Send
+            + 'static,
             WB: WasmBackend,
             I1: Iterator<Item = &'a IType>,
             I2: Iterator<Item = &'b IType>,
@@ -358,7 +360,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
             let inputs = inputs.map(itype_to_wtype).collect::<Vec<_>>();
             let outputs = outputs.map(itype_to_wtype).collect::<Vec<_>>();
-            <WB as WasmBackend>::HostFunction::new_with_caller(
+            <WB as WasmBackend>::HostFunction::new_with_caller_async(
                 &mut store.as_context_mut(),
                 FuncSig::new(inputs, outputs),
                 raw_import,
@@ -373,15 +375,32 @@ impl<WB: WasmBackend> MModule<WB> {
             import_name: String,
         ) -> impl for<'c> Fn(
             <WB as WasmBackend>::ImportCallContext<'c>,
-            &[WValue],
-        ) -> Box<dyn std::future::Future<Output = Vec<WValue>>>
+            &'c [WValue],
+        ) -> Box<dyn std::future::Future<Output = Vec<WValue>> + Send>
                + Sync
                + Send
                + 'static {
+
+            let import_namespace = std::sync::Arc::new(import_namespace);
+            let import_name = std::sync::Arc::new(import_name);
+            //let wit_instance = std::sync::Arc::new(wit_instance);
+            let interpreter = std::sync::Arc::new(interpreter);
+
             move |mut ctx: <WB as WasmBackend>::ImportCallContext<'_>,
                   inputs: &[WValue]|
-                  -> Box<dyn std::future::Future<Output = Vec<WValue>>> {
+                  -> Box<dyn std::future::Future<Output = Vec<WValue>> + Send> {
+                let ctx = ctx;
+                let import_namespace = import_namespace.clone();
+                let import_name = import_name.clone();
+                let wit_instance = wit_instance.clone();
+                let interpreter = interpreter.clone();
                 Box::new(async move {
+/*                    let import_namespace = import_namespace.clone();
+                    let import_name = import_name.clone();
+                    let wit_instance = wit_instance.clone();
+                    let interpreter = interpreter.clone();*/
+                    let mut ctx = ctx.as_context_mut();
+
                     use wasmer_it::interpreter::stack::Stackable;
 
                     use super::type_converters::wval_to_ival;
@@ -403,7 +422,7 @@ impl<WB: WasmBackend> MModule<WB> {
                             .run(
                                 &wit_inputs,
                                 Arc::make_mut(&mut wit_instance_callable.assume_init()),
-                                &mut ctx.as_context_mut(),
+                                &mut ctx,
                             )
                             .await
                     };

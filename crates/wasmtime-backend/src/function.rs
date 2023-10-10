@@ -15,6 +15,8 @@
  */
 
 use std::future::Future;
+use std::pin::Pin;
+use std::task::Poll;
 use crate::WasmtimeContextMut;
 use crate::WasmtimeWasmBackend;
 use crate::WasmtimeImportCallContext;
@@ -102,18 +104,21 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
             + 'static,
     {
         let ty = sig_to_fn_ty(&sig);
-
-        let func = lifetimify_wrapped_closure(move |caller: wasmtime::Caller<StoreState>,
-                         args: &[wasmtime::Val],
-                         results_out: &mut [wasmtime::Val]|
-              -> Box<dyn Future<Output = Result<(), anyhow::Error>> + Send> {
-            Box::new(async move {
-                let caller = WasmtimeImportCallContext { inner: caller };
-                let args = process_func_args(args).map_err(|e| anyhow!(e))?;
-                let results = std::pin::Pin::from(func(caller, &args)).await;
-                process_func_results(&results, results_out).map_err(|e| anyhow!(e))
-            })
-        });
+        let user_func = std::sync::Arc::new(func);
+        let func = lifetimify_wrapped_closure(
+            move |caller: wasmtime::Caller<StoreState>,
+                  args: &[wasmtime::Val],
+                  results_out: &mut [wasmtime::Val]|
+                  -> Box<dyn Future<Output = Result<(), anyhow::Error>> + Send> {
+                let func = user_func.clone();
+                Box::new(async move {
+                    let caller = WasmtimeImportCallContext { inner: caller };
+                    let args = process_func_args(args).map_err(|e| anyhow!(e))?;
+                    let results = std::pin::Pin::from(func(caller, &args)).await;
+                    process_func_results(&results, results_out).map_err(|e| anyhow!(e))
+                })
+            },
+        );
 
         let func = wasmtime::Func::new_async(store.as_context_mut().inner, ty, func);
         WasmtimeFunction { inner: func }
@@ -265,13 +270,28 @@ fn process_func_results(
 fn lifetimify_wrapped_closure<F>(func: F) -> F
 where
     for<'c> F: Fn(
-        wasmtime::Caller<'c, StoreState>,
-        &'c [wasmtime::Val],
-        &'c mut [wasmtime::Val],
-    ) -> Box<dyn Future<Output = Result<(), anyhow::Error>> + Send + 'c>
-    + Send
-    + Sync
-    + 'static,
+            wasmtime::Caller<'c, StoreState>,
+            &'c [wasmtime::Val],
+            &'c mut [wasmtime::Val],
+        ) -> Box<dyn Future<Output = Result<(), anyhow::Error>> + Send + 'c>
+        + Send
+        + Sync
+        + 'static,
 {
     func
 }
+
+/*
+struct FuncCallFuture<'f, F> {
+    caller: wasmtime::Caller<'f, StoreState>,
+    args: Vec<WValue>,
+    func: &'f F,
+}
+
+impl<F> std::future::Future for FuncCallFuture<F> {
+    type Output = ();
+
+    fn poll(self: Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> Poll<Self::Output> {
+        todo!()
+    }
+}*/

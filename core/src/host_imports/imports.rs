@@ -47,15 +47,11 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     let raw_output =
         itypes_output_to_wtypes(&output_type_to_types(descriptor.output_type.as_ref()));
 
-    let func =
-        move |call_context: <WB as WasmBackend>::ImportCallContext<'_>, inputs: &[WValue]| -> _ {
-            Box::new(call_host_import(
-                call_context,
-                inputs,
-                &descriptor,
-                record_types.clone(),
-            ))
-        };
+    let func = move |call_context: <WB as WasmBackend>::ImportCallContext<'_>,
+                     inputs: &[WValue]|
+          -> Box<dyn Future<Output = Vec<WValue>> + Send> {
+        Box::new(call_host_import(call_context, inputs, &descriptor, record_types.clone()))
+    };
 
     <WB as WasmBackend>::HostFunction::new_with_caller_async(
         &mut store.as_context_mut(),
