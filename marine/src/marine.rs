@@ -32,6 +32,7 @@ use marine_wasm_backend_traits::WasiState;
 
 use marine_core::generic::MarineCore;
 use marine_core::IFunctionArg;
+use marine_core::MarineCoreConfigBuilder;
 use marine_core::MRecordTypes;
 use marine_utils::SharedString;
 use marine_rs_sdk::CallParameters;
@@ -88,8 +89,11 @@ impl<WB: WasmBackend> Marine<WB> {
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
     {
-        let mut marine = MarineCore::new()?;
         let config = config.try_into()?;
+        let core_config = MarineCoreConfigBuilder::new()
+            .memory_limit(config.memory_limit.unwrap_or(u64::MAX))
+            .build();
+        let mut marine = MarineCore::new(core_config)?;
         let call_parameters = Arc::<Mutex<CallParameters>>::default();
 
         let modules_dir = config.modules_dir;

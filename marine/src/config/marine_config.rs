@@ -78,6 +78,9 @@ pub struct MarineConfig<WB: WasmBackend> {
     /// Path to a dir where compiled Wasm modules are located.
     pub modules_dir: Option<PathBuf>,
 
+    /// Total memory available for the service (in bytes)
+    pub memory_limit: Option<u64>,
+
     /// Settings for a module with particular name (not HashMap because the order is matter).
     pub modules_config: Vec<ModuleDescriptor<WB>>,
 
@@ -224,6 +227,7 @@ impl<WB: WasmBackend> TryFrom<TomlMarineConfig> for MarineConfig<WB> {
 
         Ok(MarineConfig {
             modules_dir,
+            memory_limit: toml_config.max_heap_size.map(|size| size.as_u64()),
             modules_config,
             default_modules_config,
         })

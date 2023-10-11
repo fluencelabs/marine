@@ -19,7 +19,7 @@ use crate::WasmtimeWasmBackend;
 
 use marine_wasm_backend_traits::prelude::*;
 
-use wasmtime::StoreContext;
+use wasmtime::{ResourceLimiter, StoreContext};
 use wasmtime::StoreContextMut;
 use wasmtime::AsContext as WasmtimeAsContext;
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
@@ -48,6 +48,15 @@ impl Store<WasmtimeWasmBackend> for WasmtimeStore {
         Self {
             inner: wasmtime::Store::new(&backend.engine, <_>::default()),
         }
+    }
+
+    fn set_memory_limit(&mut self, memory_limit: u64) {
+        println!("set memory_limit: {}", memory_limit);
+        let limits = wasmtime::StoreLimitsBuilder::new()
+            .memory_size(memory_limit as usize)
+            .build();
+        self.inner.data_mut().limits = limits;
+        self.inner.limiter(|store_state| &mut store_state.limits);
     }
 }
 

@@ -58,6 +58,7 @@ pub struct HostImportDescriptor<WB: WasmBackend> {
 pub struct MModuleConfig<WB: WasmBackend> {
     /// Maximum number of Wasm memory pages that loaded module can use.
     /// Each Wasm page is 65536 bytes long.
+    #[deprecated]
     pub max_heap_pages_count: u32,
 
     /// Import object that will be used in module instantiation process.
@@ -104,5 +105,33 @@ impl<WB: WasmBackend> MModuleConfig<WB> {
     pub fn with_wasi_mapped_dirs(mut self, mapped_dirs: HashMap<String, PathBuf>) -> Self {
         self.wasi_parameters.mapped_dirs = mapped_dirs;
         self
+    }
+}
+
+pub struct MarineCoreConfig {
+    pub(crate) memory_limit: u64,
+}
+
+pub const DEFAULT_MEMORY_LIMIT: u64 = 0xFFFFFFFFFFFFFFFF;
+
+#[derive(Default, Debug)]
+pub struct MarineCoreConfigBuilder {
+    memory_limit: Option<u64>,
+}
+
+impl MarineCoreConfigBuilder {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn memory_limit(mut self, memory_limit: u64) -> Self {
+        self.memory_limit = Some(memory_limit);
+        self
+    }
+
+    pub fn build(self) -> MarineCoreConfig {
+        MarineCoreConfig {
+            memory_limit: self.memory_limit.unwrap_or(DEFAULT_MEMORY_LIMIT),
+        }
     }
 }

@@ -59,9 +59,13 @@ modules_dir = "wasm/artifacts/wasm_modules"
     mapped_dirs = {"tmp" = "/Users/user/tmp"}
  */
 
+#[serde_as]
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlMarineConfig {
     pub modules_dir: Option<PathBuf>,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde(default)]
+    pub max_heap_size: Option<bytesize::ByteSize>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub module: Vec<TomlMarineNamedModuleConfig>,
     pub default: Option<TomlMarineModuleConfig>,

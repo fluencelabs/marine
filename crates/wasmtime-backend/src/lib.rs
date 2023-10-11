@@ -72,4 +72,5 @@ impl WasmBackend for WasmtimeWasmBackend {
 #[derive(Default)]
 pub struct StoreState {
     wasi: Vec<WasiCtx>, // wasmtime store does not release memory until drop, so do we
+    limits: wasmtime::StoreLimits,
 }

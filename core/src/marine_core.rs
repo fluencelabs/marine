@@ -30,6 +30,7 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::cell::RefCell;
+use crate::config::MarineCoreConfig;
 
 /// Represent Marine module interface.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
@@ -60,9 +61,10 @@ pub struct MarineCore<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> MarineCore<WB> {
-    pub fn new() -> MResult<Self> {
+    pub fn new(config: MarineCoreConfig) -> MResult<Self> {
         let wasm_backend = WB::new()?;
-        let store = <WB as WasmBackend>::Store::new(&wasm_backend);
+        let mut store = <WB as WasmBackend>::Store::new(&wasm_backend);
+        store.set_memory_limit(config.memory_limit);
         Ok(Self {
             modules: HashMap::new(),
             wasm_backend,

@@ -24,6 +24,9 @@ use crate::WasmBackend;
 /// Most of the functions in this crate require a handle to `Store` to work.
 pub trait Store<WB: WasmBackend>: AsContextMut<WB> {
     fn new(backend: &WB) -> Self;
+
+    // TODO: create general/backend-specific core config?
+    fn set_memory_limit(&mut self, memory_limit: u64);
 }
 
 /// A temporary immutable handle to store
