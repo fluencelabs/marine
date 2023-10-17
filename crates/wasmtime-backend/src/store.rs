@@ -19,12 +19,13 @@ use crate::WasmtimeWasmBackend;
 
 use marine_wasm_backend_traits::prelude::*;
 
-use wasmtime::{ResourceLimiter, StoreContext};
+use wasmtime::{ResourceLimiter, StoreContext, StoreLimits};
 use wasmtime::StoreContextMut;
 use wasmtime::AsContext as WasmtimeAsContext;
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
 
 use std::default::Default;
+use anyhow::anyhow;
 
 /// A type that is used to store resources allocated by runtime. It includes memories, functions,
 /// tables, globals and so on. More information here: https://webassembly.github.io/spec/core/exec/runtime.html#store.
@@ -43,6 +44,10 @@ pub struct WasmtimeContextMut<'s> {
     pub(crate) inner: wasmtime::StoreContextMut<'s, StoreState>,
 }
 
+pub struct MemoryLimiter {
+    max_total_memory: u64,
+    current_total_memory: u64,
+}
 impl Store<WasmtimeWasmBackend> for WasmtimeStore {
     fn new(backend: &WasmtimeWasmBackend) -> Self {
         Self {
@@ -52,11 +57,38 @@ impl Store<WasmtimeWasmBackend> for WasmtimeStore {
 
     fn set_memory_limit(&mut self, memory_limit: u64) {
         println!("set memory_limit: {}", memory_limit);
-        let limits = wasmtime::StoreLimitsBuilder::new()
-            .memory_size(memory_limit as usize)
-            .build();
+        let limits = MemoryLimiter::new(memory_limit);
         self.inner.data_mut().limits = limits;
         self.inner.limiter(|store_state| &mut store_state.limits);
+    }
+}
+
+impl MemoryLimiter {
+    pub(crate) fn new(max_total_memory: u64) -> Self {
+        Self {
+            current_total_memory: 0,
+            max_total_memory,
+        }
+    }
+}
+
+impl ResourceLimiter for MemoryLimiter {
+    fn memory_growing(&mut self, current: usize, desired: usize, maximum: Option<usize>) -> bool {
+        let new_total_memory = self
+            .current_total_memory
+            .checked_add((desired - current) as u64)
+            .expect("Total memory can never reach 2^64");
+
+        if new_total_memory > self.max_total_memory {
+            return false;
+        }
+
+        self.current_total_memory = new_total_memory;
+        true
+    }
+
+    fn table_growing(&mut self, current: u32, desired: u32, maximum: Option<u32>) -> bool {
+        true
     }
 }
 
