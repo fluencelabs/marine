@@ -12,8 +12,8 @@ wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
 it-memory-traits = "0.4.0"
 
 # all default features except async
-wasmtime = {version = "6.0.1", default-features = false, features = ["cache", "wat", "jitdump", "parallel-compilation", "cranelift", "pooling-allocator", "vtune"]}
-wasmtime-wasi = "6.0.1"
+wasmtime = {version = "13.0.0", default-features = false, features = ["cache", "wat", "jitdump", "parallel-compilation", "cranelift", "pooling-allocator", "vtune"]}
+wasmtime-wasi = "13.0.0"
 multimap = "0.8.3"
 paste = "1.0.13"
 anyhow = "1.0.71"
