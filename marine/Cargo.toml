@@ -33,7 +33,7 @@ bytesize = {version = "1.2.0", features = ["serde"]}
 itertools = "0.10.5"
 log = "0.4.19"
 safe-transmute = "0.11.2"
-thiserror = "1.0.37"
+thiserror = "1.0.50"
 parking_lot = "0.12.1"
 
 [dev-dependencies]
