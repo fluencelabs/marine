@@ -81,7 +81,6 @@ jobs:
           {
             "package": "fluence-spell-dtos",
             "version": "=${{ needs.spell.outputs.cargo-version }}",
-            "manifest": "src/distro/Cargo.toml",
             "registry": "fluence"
           }
         ]
