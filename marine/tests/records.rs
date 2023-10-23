@@ -161,8 +161,9 @@ pub fn records() {
 
 #[test]
 fn records_passing() {
-    let inner_records_config_raw = std::fs::read_to_string("./tests/wasm_tests/records_passing/Config.toml")
-        .expect("./tests/wasm_tests/records_passing/Config.toml should exist");
+    let inner_records_config_raw =
+        std::fs::read_to_string("./tests/wasm_tests/records_passing/Config.toml")
+            .expect("./tests/wasm_tests/records_passing/Config.toml should exist");
 
     let mut records_passing_config: marine::TomlMarineConfig =
         toml::from_str(&inner_records_config_raw)
@@ -222,8 +223,9 @@ fn records_passing() {
 
 #[test]
 fn records_destruction() {
-    let inner_records_config_raw = std::fs::read_to_string("./tests/wasm_tests/records_passing/Config.toml")
-        .expect("./tests/wasm_tests/records_passing/Config.toml should exist");
+    let inner_records_config_raw =
+        std::fs::read_to_string("./tests/wasm_tests/records_passing/Config.toml")
+            .expect("./tests/wasm_tests/records_passing/Config.toml should exist");
 
     let mut records_passing_config: marine::TomlMarineConfig =
         toml::from_str(&inner_records_config_raw)
@@ -277,8 +279,9 @@ fn records_destruction() {
 
 #[test]
 fn records_return_frees() {
-    let inner_records_config_raw = std::fs::read_to_string("./tests/wasm_tests/records_passing/Config.toml")
-        .expect("./tests/wasm_tests/records_passing/Config.toml should exist");
+    let inner_records_config_raw =
+        std::fs::read_to_string("./tests/wasm_tests/records_passing/Config.toml")
+            .expect("./tests/wasm_tests/records_passing/Config.toml should exist");
 
     let mut records_passing_config: marine::TomlMarineConfig =
         toml::from_str(&inner_records_config_raw)
