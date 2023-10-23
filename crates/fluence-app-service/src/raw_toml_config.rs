@@ -39,10 +39,7 @@ impl TomlAppServiceConfig {
     /// Load config from filesystem.
     pub fn load<P: Into<PathBuf>>(path: P) -> Result<Self> {
         let path = path.into();
-        let file_content = std::fs::read(&path)?;
-        let file_content = String::from_utf8(file_content).map_err(|e| {
-            AppServiceError::ConfigParseError(format!("Error parsing config {:?}: {:?}", path, e))
-        })?;
+        let file_content = std::fs::read_to_string(&path)?;
 
         toml::from_str(&file_content).map_err(|e| {
             AppServiceError::ConfigParseError(format!("Error parsing config {:?}: {:?}", path, e))
