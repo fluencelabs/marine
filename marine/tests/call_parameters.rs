@@ -28,8 +28,11 @@ pub fn call_parameters() {
     let call_parameters_config_raw = std::fs::read(call_parameters_config_path)
         .expect("../examples/call_parameters/Config.toml should presence");
 
+    let call_parameters_config_raw = String::from_utf8(call_parameters_config_raw)
+        .expect("../examples/call_parameters/Config.toml should be in UTF-8");
+
     let mut call_parameters_config: marine::TomlMarineConfig =
-        toml::from_slice(&call_parameters_config_raw)
+        toml::from_str(&call_parameters_config_raw)
             .expect("call_parameters config should be well-formed");
     call_parameters_config.modules_dir =
         Some(PathBuf::from("../examples/call_parameters/artifacts"));
