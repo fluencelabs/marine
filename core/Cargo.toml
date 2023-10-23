@@ -32,7 +32,7 @@ semver = "1.0.14"
 serde = "1.0.147"
 log = "0.4.19"
 
-paste = "1.0.13"
+paste = "1.0.14"
 
 anyhow = "1.0.71"
 thiserror = "1.0.37"
