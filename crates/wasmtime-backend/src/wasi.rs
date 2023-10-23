@@ -55,7 +55,7 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         // add mapped directories to wasi context, do not create dirs
         let wasi_ctx_builder = populate_mapped_dirs(wasi_ctx_builder, mapped_dirs)?;
         // give access to runner's stdout and stderr, but not stdin
-        let wasi_ctx_builder = populate_stdio(wasi_ctx_builder);
+        let mut wasi_ctx_builder = populate_stdio(wasi_ctx_builder);
 
         let wasi_ctx = wasi_ctx_builder.build();
         add_wasi_to_linker(store, linker, wasi_ctx)
@@ -97,10 +97,15 @@ fn add_wasi_to_linker(
     Ok(())
 }
 
-fn populate_args(builder: WasiCtxBuilder, args: Vec<String>) -> Result<WasiCtxBuilder, WasiError> {
+fn populate_args(
+    mut builder: WasiCtxBuilder,
+    args: Vec<String>,
+) -> Result<WasiCtxBuilder, WasiError> {
     builder
         .args(&args)
-        .map_err(|_| WasiError::TooLargeArgsArray)
+        .map_err(|_| WasiError::TooLargeArgsArray)?;
+
+    Ok(builder)
 }
 
 fn populate_preopens(
@@ -109,11 +114,13 @@ fn populate_preopens(
 ) -> Result<WasiCtxBuilder, WasiError> {
     preopened_files
         .iter()
-        .try_fold(builder, |builder, host_path| -> Result<_, WasiError> {
+        .try_fold(builder, |mut builder, host_path| -> Result<_, WasiError> {
             let guest_dir = wasmtime_wasi::Dir::open_ambient_dir(host_path, ambient_authority())?;
             builder
                 .preopened_dir(guest_dir, host_path)
-                .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))
+                .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))?;
+
+            Ok(builder)
         })
 }
 
@@ -123,27 +130,33 @@ fn populate_mapped_dirs(
 ) -> Result<WasiCtxBuilder, WasiError> {
     mapped_dirs.iter().try_fold(
         builder,
-        |builder, (guest_name, host_path)| -> Result<_, WasiError> {
+        |mut builder, (guest_name, host_path)| -> Result<_, WasiError> {
             let host_dir = wasmtime_wasi::Dir::open_ambient_dir(host_path, ambient_authority())?;
             let guest_path = Path::new(&guest_name);
             builder
                 .preopened_dir(host_dir, guest_path)
-                .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))
+                .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))?;
+
+            Ok(builder)
         },
     )
 }
 
 fn populate_envs(
-    builder: WasiCtxBuilder,
+    mut builder: WasiCtxBuilder,
     envs: HashMap<String, String>,
 ) -> Result<WasiCtxBuilder, WasiError> {
     let envs = envs.into_iter().collect::<Vec<_>>();
 
     builder
         .envs(&envs)
-        .map_err(|_| WasiError::TooLargeEnvsArray)
+        .map_err(|_| WasiError::TooLargeEnvsArray)?;
+
+    Ok(builder)
 }
 
-fn populate_stdio(builder: WasiCtxBuilder) -> WasiCtxBuilder {
-    builder.inherit_stdout().inherit_stderr()
+fn populate_stdio(mut builder: WasiCtxBuilder) -> WasiCtxBuilder {
+    builder.inherit_stdout().inherit_stderr();
+
+    builder
 }
