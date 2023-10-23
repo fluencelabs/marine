@@ -19,6 +19,6 @@ wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
 nom = "7.1.3"
 
 itertools = "0.10.5"
-semver = "1.0.14"
+semver = "1.0.20"
 serde = "1.0.147"
-thiserror = "1.0.37"
+thiserror = "1.0.50"
