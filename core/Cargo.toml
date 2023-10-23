@@ -34,7 +34,7 @@ log = "0.4.20"
 
 paste = "1.0.14"
 
-anyhow = "1.0.71"
+anyhow = "1.0.75"
 thiserror = "1.0.50"
 
 [dev-dependencies]

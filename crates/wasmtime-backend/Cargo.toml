@@ -16,5 +16,5 @@ wasmtime = {version = "6.0.1", default-features = false, features = ["cache", "w
 wasmtime-wasi = "6.0.1"
 multimap = "0.8.3"
 paste = "1.0.14"
-anyhow = "1.0.71"
+anyhow = "1.0.75"
 log = "0.4.20"
