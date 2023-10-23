@@ -84,7 +84,11 @@ impl TomlMarineConfig {
             MarineError::IOError(format!("failed to load {}: {}", path.display(), e))
         })?;
 
-        let mut config: TomlMarineConfig = toml::from_slice(&file_content)?;
+        let file_content = String::from_utf8(file_content).map_err(|e| {
+            MarineError::InvalidConfig(format!("Non UTF-8 data in config file: {e}"))
+        })?;
+
+        let mut config: TomlMarineConfig = toml::from_str(&file_content)?;
 
         let default_base_path = Path::new("/");
         config.base_path = path
