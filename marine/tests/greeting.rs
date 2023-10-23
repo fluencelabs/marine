@@ -66,8 +66,8 @@ pub fn get_interfaces() {
     let greeting_config_raw = std::fs::read_to_string(greeting_config_path)
         .expect("../examples/greeting/Config.toml should presence");
 
-    let greeting_config_raw = String::from_utf8(greeting_config_raw)
-        .expect("../examples/greeting/Config.toml should be UTF-8");
+    let mut greeting_config: marine::TomlMarineConfig =
+        toml::from_str(&greeting_config_raw).expect("greeting config should be well-formed");
 
     greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
