@@ -44,9 +44,11 @@ pub struct WasmtimeContextMut<'s> {
     pub(crate) inner: wasmtime::StoreContextMut<'s, StoreState>,
 }
 
+#[derive(Default)]
 pub struct MemoryLimiter {
     max_total_memory: u64,
     current_total_memory: u64,
+    allocation_stats: MemoryAllocationStats,
 }
 impl Store<WasmtimeWasmBackend> for WasmtimeStore {
     fn new(backend: &WasmtimeWasmBackend) -> Self {
@@ -61,6 +63,13 @@ impl Store<WasmtimeWasmBackend> for WasmtimeStore {
         self.inner.data_mut().limits = limits;
         self.inner.limiter(|store_state| &mut store_state.limits);
     }
+
+    fn report_memory_allocation_stats(&self) -> Option<MemoryAllocationStats> {
+        println!("Memory allocation pattern:");
+        for (memory_size, times_allocated) in self.inner.data().limits.allocation_pattern.iter() {
+            println!("request of {} pages at once happened {times_allocated} times", memory_size / 65536);
+        }
+    }
 }
 
 impl MemoryLimiter {
@@ -68,27 +77,33 @@ impl MemoryLimiter {
         Self {
             current_total_memory: 0,
             max_total_memory,
+            allocation_pattern: <_>::default(),
         }
     }
 }
 
 impl ResourceLimiter for MemoryLimiter {
-    fn memory_growing(&mut self, current: usize, desired: usize, maximum: Option<usize>) -> bool {
+    fn memory_growing(&mut self, current: usize, desired: usize, maximum: Option<usize>) -> wasmtime::Result<bool> {
+        //println!("Memory grow from {current} to {desired} (grow size {})", desired - current);
+
+        let grow_size = (desired - current) as u64;
         let new_total_memory = self
             .current_total_memory
-            .checked_add((desired - current) as u64)
+            .checked_add(grow_size)
             .expect("Total memory can never reach 2^64");
 
+        *self.allocation_pattern.entry(grow_size as usize).or_insert(0) += 1;
+
         if new_total_memory > self.max_total_memory {
-            return false;
+            return Ok(false);
         }
 
         self.current_total_memory = new_total_memory;
-        true
+        Ok(true)
     }
 
-    fn table_growing(&mut self, current: u32, desired: u32, maximum: Option<u32>) -> bool {
-        true
+    fn table_growing(&mut self, current: u32, desired: u32, maximum: Option<u32>) -> wasmtime::Result<bool> {
+        Ok(true)
     }
 }
 

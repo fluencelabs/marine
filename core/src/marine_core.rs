@@ -84,12 +84,16 @@ impl<WB: WasmBackend> MarineCore<WB> {
         self.modules.get_mut(module_name).map_or_else(
             || Err(MError::NoSuchModule(module_name.to_string())),
             |module| {
-                module.call(
+                let result = module.call(
                     &mut store.get_mut().as_context_mut(),
                     module_name,
                     func_name.as_ref(),
                     arguments,
-                )
+                );
+
+                store.get_mut().report_allocation_pattern();
+
+                result
             },
         )
     }

@@ -49,7 +49,6 @@ impl AppService {
         config: C,
         service_id: S,
         envs: HashMap<String, String>,
-        memory_limit: u64,
     ) -> Result<Self>
     where
         C: TryInto<AppServiceConfig>,
