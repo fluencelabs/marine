@@ -65,7 +65,7 @@ jobs:
         run: cargo update --workspace
 
       - name: Commit updated Cargo.lock
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: Regenerate Cargo.lock"
           branch: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
@@ -99,7 +99,7 @@ jobs:
         working-directory: marine-js/npm-package
 
       - name: Commit version bump
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: Bump marine-js version to ${{ steps.version.outputs.version }}"
           branch: ${{ fromJson(needs.release-please.outputs.pr).headBranchName }}
