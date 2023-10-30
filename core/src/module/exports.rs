@@ -27,7 +27,7 @@ pub(crate) struct ITExport {
     name: String,
     arguments: Vec<IFunctionArg>,
     outputs: Vec<IType>,
-    function: fn(arguments: &[IValue]) -> Result<Vec<IValue>, ()>,
+    function: fn(arguments: &[IValue]) -> Result<Vec<IValue>, anyhow::Error>,
 }
 
 impl ITExport {
@@ -63,7 +63,7 @@ impl wasm::structures::Export for ITExport {
         &self.outputs
     }
 
-    fn call(&self, arguments: &[IValue]) -> Result<Vec<IValue>, ()> {
+    fn call(&self, arguments: &[IValue]) -> Result<Vec<IValue>, anyhow::Error> {
         (self.function)(arguments)
     }
 }
