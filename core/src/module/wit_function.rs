@@ -28,8 +28,9 @@ use marine_wasm_backend_traits::ExportFunction;
 
 use wasmer_it::interpreter::wasm;
 
-use std::sync::Arc;
 use anyhow::anyhow;
+
+use std::sync::Arc;
 
 #[derive(Clone)]
 enum WITFunctionInner<WB: WasmBackend> {
@@ -154,11 +155,11 @@ impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
                         .collect::<Vec<WValue>>()
                         .as_slice(),
                 )
-                .map_err(|e| {anyhow!(e)})
+                .map_err(|e| anyhow!(e))
                 .map(|results| results.iter().map(wval_to_ival).collect()),
             WITFunctionInner::Import { callable, .. } => Arc::make_mut(&mut callable.clone())
                 .call(store, arguments)
-                .map_err(|e| {anyhow!(e)}),
+                .map_err(|e| anyhow!(e)),
         }
     }
 }

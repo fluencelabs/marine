@@ -33,7 +33,10 @@ pub trait HostFunction<WB: WasmBackend>: Send + Sync + Clone {
     /// Creates a new function with dynamic signature that needs a context.
     fn new_with_caller<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(<WB as WasmBackend>::ImportCallContext<'c>, &[WValue]) -> anyhow::Result<Vec<WValue>>
+        F: for<'c> Fn(
+                <WB as WasmBackend>::ImportCallContext<'c>,
+                &[WValue],
+            ) -> anyhow::Result<Vec<WValue>>
             + Sync
             + Send
             + 'static;

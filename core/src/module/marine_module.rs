@@ -305,7 +305,10 @@ impl<WB: WasmBackend> MModule<WB> {
             raw_import: F,
         ) -> <WB as WasmBackend>::HostFunction
         where
-            F: for<'c> Fn(<WB as WasmBackend>::ImportCallContext<'c>, &[WValue]) -> anyhow::Result<Vec<WValue>>
+            F: for<'c> Fn(
+                    <WB as WasmBackend>::ImportCallContext<'c>,
+                    &[WValue],
+                ) -> anyhow::Result<Vec<WValue>>
                 + Sync
                 + Send
                 + 'static,
@@ -330,7 +333,10 @@ impl<WB: WasmBackend> MModule<WB> {
             interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
-        ) -> impl for<'c> Fn(<WB as WasmBackend>::ImportCallContext<'c>, &[WValue]) -> anyhow::Result<Vec<WValue>>
+        ) -> impl for<'c> Fn(
+            <WB as WasmBackend>::ImportCallContext<'c>,
+            &[WValue],
+        ) -> anyhow::Result<Vec<WValue>>
                + Sync
                + Send
                + 'static {
@@ -354,14 +360,16 @@ impl<WB: WasmBackend> MModule<WB> {
                 let wit_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
                 let outputs = unsafe {
                     // error here will be propagated by the special error instruction
-                    interpreter.run(
-                        &wit_inputs,
-                        Arc::make_mut(&mut wit_instance_callable.assume_init()),
-                        &mut ctx.as_context_mut(),
-                    ).map_err(|e| {
-                        log::error!("interpreter got error {e}");
-                        anyhow::anyhow!(e)
-                    })?
+                    interpreter
+                        .run(
+                            &wit_inputs,
+                            Arc::make_mut(&mut wit_instance_callable.assume_init()),
+                            &mut ctx.as_context_mut(),
+                        )
+                        .map_err(|e| {
+                            log::error!("interpreter got error {e}");
+                            anyhow::anyhow!(e)
+                        })?
                 };
 
                 log::trace!(
