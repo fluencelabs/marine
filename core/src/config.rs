@@ -25,9 +25,6 @@ use std::path::PathBuf;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-// 65536*1600 ~ 100 Mb (Wasm page size is 64 Kb)
-const DEFAULT_HEAP_PAGES_COUNT: u32 = 1600;
-
 pub type ErrorHandler =
     Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + Sync + Send + 'static>>;
 pub type HostExportedFunc<WB> = Box<
@@ -56,11 +53,6 @@ pub struct HostImportDescriptor<WB: WasmBackend> {
 }
 
 pub struct MModuleConfig<WB: WasmBackend> {
-    /// Maximum number of Wasm memory pages that loaded module can use.
-    /// Each Wasm page is 65536 bytes long.
-    #[deprecated]
-    pub max_heap_pages_count: u32,
-
     /// Import object that will be used in module instantiation process.
     pub raw_imports: HashMap<String, RawImportCreator<WB>>,
 
@@ -75,7 +67,6 @@ impl<WB: WasmBackend> Default for MModuleConfig<WB> {
     fn default() -> Self {
         // some reasonable defaults
         Self {
-            max_heap_pages_count: DEFAULT_HEAP_PAGES_COUNT,
             raw_imports: HashMap::new(),
             host_imports: HashMap::new(),
             wasi_parameters: WasiParameters::default(),
@@ -87,11 +78,6 @@ impl<WB: WasmBackend> Default for MModuleConfig<WB> {
 
 #[allow(dead_code)]
 impl<WB: WasmBackend> MModuleConfig<WB> {
-    pub fn with_mem_pages_count(mut self, mem_pages_count: u32) -> Self {
-        self.max_heap_pages_count = mem_pages_count;
-        self
-    }
-
     pub fn with_wasi_envs(mut self, envs: HashMap<String, String>) -> Self {
         self.wasi_parameters.envs = envs;
         self

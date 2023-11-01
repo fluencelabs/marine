@@ -50,6 +50,7 @@ pub struct MemoryLimiter {
     current_total_memory: u64,
     allocation_stats: MemoryAllocationStats,
 }
+
 impl Store<WasmtimeWasmBackend> for WasmtimeStore {
     fn new(backend: &WasmtimeWasmBackend) -> Self {
         Self {
@@ -86,8 +87,6 @@ impl ResourceLimiter for MemoryLimiter {
         desired: usize,
         _maximum: Option<usize>,
     ) -> wasmtime::Result<bool> {
-        //println!("Memory grow from {current} to {desired} (grow size {})", desired - current);
-
         let grow_size = (desired - current) as u64;
         let new_total_memory = self
             .current_total_memory

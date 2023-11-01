@@ -119,14 +119,9 @@ pub struct TomlMarineNamedModuleConfig {
     pub config: TomlMarineModuleConfig,
 }
 
-#[serde_as]
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlMarineModuleConfig {
-    pub mem_pages_count: Option<u32>,
-    #[serde_as(as = "Option<DisplayFromStr>")]
-    #[serde(default)]
-    pub max_heap_size: Option<bytesize::ByteSize>,
     pub logger_enabled: Option<bool>,
     pub logging_mask: Option<i32>,
     pub wasi: Option<TomlWASIConfig>,
@@ -161,8 +156,6 @@ mod tests {
             file_name: Some("file_name".to_string()),
             load_from: <_>::default(),
             config: TomlMarineModuleConfig {
-                mem_pages_count: Some(100),
-                max_heap_size: Some(ByteSize::gib(4)),
                 logger_enabled: Some(false),
                 logging_mask: Some(1),
                 wasi: Some(TomlWASIConfig {

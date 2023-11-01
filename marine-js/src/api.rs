@@ -43,8 +43,6 @@ pub struct ApiWasiConfig {
 
 #[derive(Serialize, Deserialize)]
 pub struct ApiModuleConfig {
-    pub mem_pages_count: Option<u32>,
-    pub max_heap_size: Option<u32>,
     pub logger_enabled: bool,
     pub wasi: Option<ApiWasiConfig>,
     pub logging_mask: i32,
@@ -95,8 +93,6 @@ impl From<ApiWasiConfig> for MarineWASIConfig {
 impl From<ApiModuleConfig> for MarineModuleConfig<JsWasmBackend> {
     fn from(value: ApiModuleConfig) -> Self {
         Self {
-            mem_pages_count: value.mem_pages_count,
-            max_heap_size: value.max_heap_size.map(|val| val as u64),
             logger_enabled: value.logger_enabled,
             host_imports: Default::default(),
             wasi: value.wasi.map(Into::into),
