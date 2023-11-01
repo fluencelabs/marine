@@ -148,7 +148,7 @@ impl HostImportFunction {
 impl HostFunction<JsWasmBackend> for HostImportFunction {
     fn new<F>(store: &mut impl AsContextMut<JsWasmBackend>, signature: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(&'c [WValue]) -> Vec<WValue> + Sync + Send + 'static,
+        F: for<'c> Fn(&'c [WValue]) -> anyhow::Result<Vec<WValue>> + Sync + Send + 'static,
     {
         let with_caller = move |_, args: &'_ [WValue]| func(args);
         Self::new_with_caller(store, signature, with_caller)
@@ -160,7 +160,10 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
         func: F,
     ) -> Self
     where
-        F: for<'c> Fn(JsImportCallContext, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
+        F: for<'c> Fn(JsImportCallContext, &[WValue]) -> anyhow::Result<Vec<WValue>>
+            + Sync
+            + Send
+            + 'static,
     {
         // Safety: JsStoreInner is stored inside a Box and the Store is required by wasm-backend traits contract
         // to be valid for function execution. So it is safe to capture this ptr into closure and deference there
@@ -197,7 +200,10 @@ fn wrap_raw_host_fn<F>(
     raw_host_function: F,
 ) -> Box<dyn FnMut(&Array) -> Array>
 where
-    F: for<'c> Fn(JsImportCallContext, &[WValue]) -> Vec<WValue> + Sync + Send + 'static,
+    F: for<'c> Fn(JsImportCallContext, &[WValue]) -> anyhow::Result<Vec<WValue>>
+        + Sync
+        + Send
+        + 'static,
 {
     let func = move |args: &js_sys::Array| -> js_sys::Array {
         log::debug!(
@@ -216,7 +222,8 @@ where
         };
 
         let args = wval_array_from_js_array(args, signature.params().iter());
-        let result = raw_host_function(caller, &args);
+        let result = raw_host_function(caller, &args).unwrap_throw(); // TODO is it right?
+
         js_array_from_wval_array(&result)
     };
 
@@ -266,10 +273,10 @@ macro_rules! impl_func_construction {
         fn [< new_typed_with_env_ $num >] <F>(mut ctx: JsContextMut<'_>, func: F) -> HostImportFunction
             where F: Fn(JsImportCallContext, $(replace_with!($args -> i32),)*) + Send + Sync + 'static {
 
-            let func = move |caller: JsImportCallContext, args: &[WValue]| -> Vec<WValue> {
+            let func = move |caller: JsImportCallContext, args: &[WValue]| -> anyhow::Result<Vec<WValue>> {
                 let [$($args,)*] = args else { todo!() }; // TODO: Safety: explain why it will never fire
                 func(caller, $(wval_to_i32($args),)*);
-                vec![]
+                Ok(vec![])
             };
 
             let arg_ty = vec![WType::I32; $num];
@@ -282,10 +289,10 @@ macro_rules! impl_func_construction {
         fn [< new_typed_with_env_ $num _r>] <F>(mut ctx: JsContextMut<'_>, func: F) -> HostImportFunction
             where F: Fn(JsImportCallContext, $(replace_with!($args -> i32),)*) -> i32 + Send + Sync + 'static {
 
-            let func = move |caller: JsImportCallContext, args: &[WValue]| -> Vec<WValue> {
+            let func = move |caller: JsImportCallContext, args: &[WValue]| -> anyhow::Result<Vec<WValue>> {
                 let [$($args,)*] = args else { panic!("args do not match signature") }; // Safety: signature should b
                 let res = func(caller, $(wval_to_i32(&$args),)*);
-                vec![WValue::I32(res)]
+                Ok(vec![WValue::I32(res)])
             };
 
             let arg_ty = vec![WType::I32; $num];
