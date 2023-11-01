@@ -91,8 +91,6 @@ impl<WB: WasmBackend> MarineCore<WB> {
                     arguments,
                 );
 
-                store.get_mut().report_allocation_pattern();
-
                 result
             },
         )
