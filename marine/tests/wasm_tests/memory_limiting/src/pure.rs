@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,19 @@ use marine_rs_sdk::marine;
 pub fn main() {}
 
 #[marine]
-pub fn allocate_single_module_single_piece(size: u32) -> u32 {
-    Vec::with_capacity(size as usize).leak().as_ptr() as u32
+pub fn allocate_single_module_single_piece(size: i64) -> u32 {
+    let addr = Vec::with_capacity(size as usize).leak().as_ptr();
+    unsafe { std::mem::transmute::<*const u8, u32>(addr) }
 }
 
 #[marine]
-pub fn allocate_single_module_1KB_pieces(mut size: u32) -> u32 {
-    let acc: u32 = 0;
+pub fn allocate_single_module_1KB_pieces(mut size: i64) -> u32 {
+    let mut acc: u32 = 0;
 
     while size > 0 {
         unsafe {
             let addr = Box::leak(Box::new([0u8; 1024]));
-            acc ^= addr.as_ptr() as u32;
+            acc ^= std::mem::transmute::<*const u8, u32>(addr.as_ptr());
 
             size -= 1024
         }
@@ -43,14 +44,14 @@ pub fn allocate_single_module_1KB_pieces(mut size: u32) -> u32 {
 }
 
 #[marine]
-pub fn allocate_two_modules_single_piece(size: u32) -> u32 {
+pub fn allocate_two_modules_single_piece(size: i64) -> u32 {
     let first  = allocate_single_module_single_piece(size);
     let second = effector::allocate_single_module_single_piece(size);
     first ^ second
 }
 
 #[marine]
-pub fn allocate_two_modules_1KB_pieces(size: u32) -> u32 {
+pub fn allocate_two_modules_1KB_pieces(size: i64) -> u32 {
     let first  = allocate_single_module_1KB_pieces(size);
     let second = effector::allocate_single_module_1KB_pieces(size);
     first ^ second
@@ -60,11 +61,10 @@ mod effector {
     use marine_rs_sdk::marine;
 
     #[marine]
-    #[link(wasm_import_module = "memory_liiting_effector")]
+    #[link(wasm_import_module = "memory_limiting_effector")]
     extern "C" {
-        pub fn allocate_single_module_single_piece(size: u32) -> u32;
+        pub fn allocate_single_module_single_piece(size: i64) -> u32;
 
-        #[marine]
-        pub fn allocate_single_module_1KB_pieces(size: u32) -> u32;
+        pub fn allocate_single_module_1KB_pieces(size: i64) -> u32;
     }
 }
