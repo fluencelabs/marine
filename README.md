@@ -72,9 +72,9 @@ donkey.wasm    shrek.wasm
 Now that we have our modules, we can explore them with the Marine REPL. Note that we use the  `Config.toml` file to help out the REPL by providing the module location and names. Once we got the REPL up and running, we can interact with both modules and, as expected, the `shrek` module is successfully able to access the `donkey` module's exposed functions.
 
 ```bash
-$> marine mrepl Config.toml
+$> marine repl Config.toml
 ...
-1> interfaces
+1> interface
 Loaded modules interface:
 
 shrek:
@@ -83,11 +83,14 @@ donkey:
   fn greeting(name: string) -> string
 
 2> call donkey greeting "no link module"
-result: String("Donkey: hi, no link module")
+result: "Donkey: hi, no link module"
  elapsed time: 42.985µs
 
-3> call donkey greeting "facade with link module"
-result: String("Donkey: hi, facade with link module")
+3> call shrek greeting "facade with link module"
+result: [
+  "Shrek: hi, facade with link module",
+  "Donkey: hi, facade with link module"
+]
  elapsed time: 39.25µs
 
 4> q
