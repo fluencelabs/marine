@@ -38,6 +38,8 @@ use marine_wasm_backend_traits::prelude::*;
 
 use wasmtime_wasi::WasiCtx;
 
+const MB: usize = 1024 * 1024;
+
 #[derive(Clone, Default)]
 pub struct WasmtimeWasmBackend {
     engine: wasmtime::Engine,
@@ -61,7 +63,8 @@ impl WasmBackend for WasmtimeWasmBackend {
         let mut config = wasmtime::Config::new();
         config
             .debug_info(false)
-            .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable);
+            .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable)
+            .max_wasm_stack(2 * MB);
         let engine =
             wasmtime::Engine::new(&config).map_err(WasmBackendError::InitializationError)?;
 
