@@ -10,6 +10,7 @@ edition = "2021"
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
 it-memory-traits = "0.4.0"
 
+indexmap = "2.0.2"
 thiserror = "1.0.24"
 anyhow = "1.0.71"
 wasmparser = "0.101.1"
