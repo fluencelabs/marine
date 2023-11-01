@@ -15,6 +15,7 @@
  */
 
 use super::generic::*;
+use crate::config::MarineCoreConfig;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
 use crate::{IRecordType, IValue, MemoryStats, MError, MFunctionSignature, ModuleMemoryStat, MResult};
@@ -30,7 +31,6 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::cell::RefCell;
-use crate::config::MarineCoreConfig;
 
 /// Represent Marine module interface.
 #[derive(PartialEq, Eq, Debug, Clone, Serialize)]
@@ -84,14 +84,12 @@ impl<WB: WasmBackend> MarineCore<WB> {
         self.modules.get_mut(module_name).map_or_else(
             || Err(MError::NoSuchModule(module_name.to_string())),
             |module| {
-                let result = module.call(
+                module.call(
                     &mut store.get_mut().as_context_mut(),
                     module_name,
                     func_name.as_ref(),
                     arguments,
-                );
-
-                result
+                )
             },
         )
     }
@@ -188,7 +186,6 @@ impl<WB: WasmBackend> MarineCore<WB> {
                 ModuleMemoryStat::new(
                     module_name,
                     module.memory_size(&mut self.store.borrow_mut().as_context_mut()),
-                    module.max_memory_size(),
                 )
             })
             .collect::<Vec<_>>();

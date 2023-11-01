@@ -45,14 +45,14 @@ pub fn allocate_single_module_1KB_pieces(mut size: i64) -> u32 {
 
 #[marine]
 pub fn allocate_two_modules_single_piece(size: i64) -> u32 {
-    let first  = allocate_single_module_single_piece(size);
+    let first = allocate_single_module_single_piece(size);
     let second = effector::allocate_single_module_single_piece(size);
     first ^ second
 }
 
 #[marine]
 pub fn allocate_two_modules_1KB_pieces(size: i64) -> u32 {
-    let first  = allocate_single_module_1KB_pieces(size);
+    let first = allocate_single_module_1KB_pieces(size);
     let second = effector::allocate_single_module_1KB_pieces(size);
     first ^ second
 }

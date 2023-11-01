@@ -28,22 +28,15 @@ use std::ops::Deref;
 pub struct ModuleMemoryStat<'module_name> {
     pub name: &'module_name str,
     pub memory_size: usize,
-    // None if memory maximum wasn't set
-    pub max_memory_size: Option<usize>,
 }
 
 pub struct MemoryStats<'module_name>(pub Vec<ModuleMemoryStat<'module_name>>);
 
 impl<'module_name> ModuleMemoryStat<'module_name> {
-    pub fn new(
-        module_name: &'module_name str,
-        memory_size: usize,
-        max_memory_size: Option<usize>,
-    ) -> Self {
+    pub fn new(module_name: &'module_name str, memory_size: usize) -> Self {
         ModuleMemoryStat {
             name: module_name,
             memory_size,
-            max_memory_size,
         }
     }
 }
@@ -66,15 +59,7 @@ impl fmt::Display for MemoryStats<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for record in self.0.iter() {
             let memory_size = bytesize::ByteSize::b(record.memory_size as u64);
-            match record.max_memory_size {
-                Some(max_memory_size) => {
-                    let max_memory_size = bytesize::ByteSize::b(max_memory_size as u64);
-                    writeln!(f, "{} - {}/{}", record.name, memory_size, max_memory_size)?;
-                }
-                None => {
-                    writeln!(f, "{} - {}", record.name, memory_size)?;
-                }
-            }
+            writeln!(f, "{} - {}", record.name, memory_size)?;
         }
 
         Ok(())

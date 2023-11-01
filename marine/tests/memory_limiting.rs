@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2023 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,6 @@ static LIMIT_64_MIB: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
         .expect("toml faas config should be created")
 });
 const FACADE_MODULE: &str = "memory_limiting_pure";
-const LINKED_MODULE: &str = "memory_limiting_effector";
-
 const KB: usize = 1024;
 const MB: usize = 1024 * KB;
 
@@ -55,7 +53,7 @@ pub fn triggered_on_instantiation() {
         Err(MarineError::EngineError(MError::WasmBackendError(
             WasmBackendError::InstantiationError(InstantiationError::Other(_)),
         ))) => return,
-        Ok(faas) => panic!("Expected instantiation error, but it succeed"),
+        Ok(_) => panic!("Expected instantiation error, but it succeed"),
         Err(e) => panic!("Expected isntantiation error, got: {:?}", e),
     }
 }
@@ -64,13 +62,9 @@ pub fn triggered_by_single_module() {
     let mut faas = Marine::with_raw_config(LIMIT_64_MIB.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let start_memory: usize = faas
-        .module_memory_stats()
-        .iter()
-        .map(|stats| stats.memory_size)
-        .sum();
+    let start_memory: usize = get_total_memory(&faas);
 
-    let to_allocate = 64 * MB - start_memory -  WASM_PAGE * 14;
+    let to_allocate = 64 * MB - start_memory - WASM_PAGE * 14;
 
     let result = faas.call_with_ivalues(
         FACADE_MODULE,
@@ -80,14 +74,10 @@ pub fn triggered_by_single_module() {
     );
 
     match result {
-        Err(
-            MarineError::EngineError(
-                MError::ITInstructionError(
-                    InstructionError {
-                        instruction: Instruction::CallCore { function_index },
-                        error_kind: InstructionErrorKind::LocalOrImportCall { function_name }
-                 },
-        ))) => return,
+        Err(MarineError::EngineError(MError::ITInstructionError(InstructionError {
+            instruction: Instruction::CallCore { .. },
+            error_kind: InstructionErrorKind::LocalOrImportCall { .. },
+        }))) => return,
         Err(e) => panic!("Expected LocalOrImport error, got different error: {:?}", e),
         Ok(_) => panic!("Expected Trap, got success"),
     }
@@ -112,9 +102,8 @@ pub fn not_triggered_near_limit_single_module() {
     match result {
         Ok(_) => return,
         Err(e) => {
-            //eprintln!("Total memory: {}", get_total_memory(&faas));
             panic!("Expected success, got error: {:?}", e)
-        },
+        }
     }
 }
 
@@ -123,13 +112,8 @@ pub fn triggered_by_two_modules() {
     let mut faas = Marine::with_raw_config(LIMIT_64_MIB.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let start_memory: usize = faas
-        .module_memory_stats()
-        .iter()
-        .map(|stats| stats.memory_size)
-        .sum();
-
-    let to_allocate = (64 * MB - start_memory -  WASM_PAGE * 14) / 2;
+    let start_memory: usize = get_total_memory(&faas);
+    let to_allocate = (64 * MB - start_memory - WASM_PAGE * 14) / 2;
 
     let result = faas.call_with_ivalues(
         FACADE_MODULE,
@@ -139,14 +123,10 @@ pub fn triggered_by_two_modules() {
     );
 
     match result {
-        Err(
-            MarineError::EngineError(
-                MError::ITInstructionError(
-                    InstructionError {
-                        instruction: Instruction::CallCore { function_index },
-                        error_kind: InstructionErrorKind::LocalOrImportCall { function_name }
-                    },
-                ))) => return,
+        Err(MarineError::EngineError(MError::ITInstructionError(InstructionError {
+            instruction: Instruction::CallCore { .. },
+            error_kind: InstructionErrorKind::LocalOrImportCall { .. },
+        }))) => return,
         Err(e) => panic!("Expected LocalOrImport error, got different error: {:?}", e),
         Ok(_) => panic!("Expected Trap, got success"),
     }
@@ -179,12 +159,6 @@ pub fn triggered_by_large_allocation_single_module() {
     let mut faas = Marine::with_raw_config(LIMIT_64_MIB.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let start_memory: usize = faas
-        .module_memory_stats()
-        .iter()
-        .map(|stats| stats.memory_size)
-        .sum();
-
     let to_allocate = 128 * MB;
 
     let result = faas.call_with_ivalues(
@@ -195,22 +169,17 @@ pub fn triggered_by_large_allocation_single_module() {
     );
 
     match result {
-        Err(
-            MarineError::EngineError(
-                MError::ITInstructionError(
-                    InstructionError {
-                        instruction: Instruction::CallCore { function_index },
-                        error_kind: InstructionErrorKind::LocalOrImportCall { function_name }
-                    },
-                ))) => return,
+        Err(MarineError::EngineError(MError::ITInstructionError(InstructionError {
+            instruction: Instruction::CallCore { .. },
+            error_kind: InstructionErrorKind::LocalOrImportCall { .. },
+        }))) => return,
         Err(e) => panic!("Expected LocalOrImport error, got different error: {:?}", e),
         Ok(_) => panic!("Expected Trap, got success"),
     }
 }
 
 fn get_total_memory(faas: &marine::Marine) -> usize {
-    faas
-        .module_memory_stats()
+    faas.module_memory_stats()
         .iter()
         .map(|stats| stats.memory_size)
         .sum()

@@ -19,13 +19,13 @@ use crate::WasmtimeWasmBackend;
 
 use marine_wasm_backend_traits::prelude::*;
 
-use wasmtime::{ResourceLimiter, StoreContext, StoreLimits};
+use wasmtime::ResourceLimiter;
+use wasmtime::StoreContext;
 use wasmtime::StoreContextMut;
 use wasmtime::AsContext as WasmtimeAsContext;
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
 
 use std::default::Default;
-use anyhow::anyhow;
 
 /// A type that is used to store resources allocated by runtime. It includes memories, functions,
 /// tables, globals and so on. More information here: https://webassembly.github.io/spec/core/exec/runtime.html#store.
@@ -80,7 +80,12 @@ impl MemoryLimiter {
 }
 
 impl ResourceLimiter for MemoryLimiter {
-    fn memory_growing(&mut self, current: usize, desired: usize, maximum: Option<usize>) -> wasmtime::Result<bool> {
+    fn memory_growing(
+        &mut self,
+        current: usize,
+        desired: usize,
+        _maximum: Option<usize>,
+    ) -> wasmtime::Result<bool> {
         //println!("Memory grow from {current} to {desired} (grow size {})", desired - current);
 
         let grow_size = (desired - current) as u64;
@@ -89,7 +94,11 @@ impl ResourceLimiter for MemoryLimiter {
             .checked_add(grow_size)
             .expect("Total memory can never reach 2^64");
 
-        *self.allocation_stats.allocation_pattern.entry(grow_size as usize).or_insert(0) += 1;
+        *self
+            .allocation_stats
+            .allocation_pattern
+            .entry(grow_size as usize)
+            .or_insert(0) += 1;
 
         if new_total_memory > self.max_total_memory {
             self.allocation_stats.allocation_rejects += 1;
@@ -100,7 +109,12 @@ impl ResourceLimiter for MemoryLimiter {
         Ok(true)
     }
 
-    fn table_growing(&mut self, current: u32, desired: u32, maximum: Option<u32>) -> wasmtime::Result<bool> {
+    fn table_growing(
+        &mut self,
+        _current: u32,
+        _desired: u32,
+        _maximum: Option<u32>,
+    ) -> wasmtime::Result<bool> {
         Ok(true)
     }
 }

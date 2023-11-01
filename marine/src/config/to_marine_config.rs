@@ -27,7 +27,6 @@ use marine_core::generic::HostImportDescriptor;
 use marine_core::generic::MModuleConfig;
 use marine_wasm_backend_traits::HostFunction;
 use marine_wasm_backend_traits::WasmBackend;
-use marine_utils::bytes_to_wasm_pages_ceil;
 
 use marine_rs_sdk::CallParameters;
 
@@ -36,8 +35,6 @@ use parking_lot::Mutex;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::sync::Arc;
-
-const WASM_MAX_HEAP_SIZE: u64 = 4 * 1024 * 1024 * 1024 - 1; // 4 GiB - 1
 
 struct MModuleConfigBuilder<WB: WasmBackend> {
     config: MModuleConfig<WB>,
@@ -63,8 +60,6 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         };
 
         let MarineModuleConfig {
-            mem_pages_count,
-            max_heap_size,
             logger_enabled,
             host_imports,
             wasi,
@@ -72,7 +67,6 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         } = marine_module_config;
 
         let config = self
-            .populate_max_heap_size(mem_pages_count, max_heap_size)?
             .populate_logger(logger_enabled, logging_mask, logger_filter, module_name)
             .populate_host_imports(host_imports, call_parameters)
             .populate_wasi(wasi)?
@@ -136,31 +130,6 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         );
 
         self
-    }
-
-    fn populate_max_heap_size(
-        mut self,
-        mem_pages_count: Option<u32>,
-        max_heap_size: Option<u64>,
-    ) -> MarineResult<Self> {
-        let max_heap_pages_count = match (mem_pages_count, max_heap_size) {
-            (Some(v), None) => v,
-            (_, Some(max_heap_size_wanted)) => {
-                if max_heap_size_wanted > WASM_MAX_HEAP_SIZE {
-                    return Err(MarineError::MaxHeapSizeOverflow {
-                        max_heap_size_wanted,
-                        max_heap_size_allowed: WASM_MAX_HEAP_SIZE,
-                    });
-                };
-                bytes_to_wasm_pages_ceil(max_heap_size_wanted as u32)
-            }
-            // leave the default value
-            (None, None) => return Ok(self),
-        };
-
-        self.config.max_heap_pages_count = max_heap_pages_count;
-
-        Ok(self)
     }
 
     fn populate_logger(
