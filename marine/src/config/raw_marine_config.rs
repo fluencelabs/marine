@@ -17,6 +17,7 @@
 use crate::MarineError;
 use crate::MarineResult;
 
+use bytesize::ByteSize;
 use serde_derive::Serialize;
 use serde_derive::Deserialize;
 use serde_with::serde_as;
@@ -65,7 +66,7 @@ pub struct TomlMarineConfig {
     pub modules_dir: Option<PathBuf>,
     #[serde_as(as = "Option<DisplayFromStr>")]
     #[serde(default)]
-    pub max_heap_size: Option<bytesize::ByteSize>,
+    pub max_heap_size: Option<ByteSize>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub module: Vec<TomlMarineNamedModuleConfig>,
     pub default: Option<TomlMarineModuleConfig>,
@@ -138,7 +139,6 @@ pub struct TomlWASIConfig {
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
-    use bytesize::ByteSize;
     use super::TomlMarineNamedModuleConfig;
     use super::TomlMarineModuleConfig;
     use super::TomlWASIConfig;
