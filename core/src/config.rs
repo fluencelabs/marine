@@ -98,6 +98,14 @@ pub struct MarineCoreConfig {
     pub(crate) memory_limit: u64,
 }
 
+impl Default for MarineCoreConfig {
+    fn default() -> Self {
+        Self {
+            memory_limit: DEFAULT_MEMORY_LIMIT
+        }
+    }
+}
+
 pub const DEFAULT_MEMORY_LIMIT: u64 = 0xFFFFFFFFFFFFFFFF;
 
 #[derive(Default, Debug)]
