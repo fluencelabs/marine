@@ -91,26 +91,12 @@ jobs:
             -p marine \
             -p mrepl
 
-      - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
 
       - name: Run cargo nextest
-        run: cargo llvm-cov nextest --release -v --all-features --profile ci --lcov --output-path lcov.info \
+        run: cargo nextest --release -v --all-features --profile ci \
             -p marine-core \
             -p marine-runtime
-
-      - name: Coveralls upload
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          file: lcov.info
-
-      - name: Archive code coverage results
-        if: github.event.pull_request.head.repo.fork != true
-        uses: actions/upload-artifact@v3
-        with:
-          name: code-coverage-report.zip
-          path: lcov.info
 
       - name: Upload test report
         uses: dorny/test-reporter@v1
