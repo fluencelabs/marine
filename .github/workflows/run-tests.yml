@@ -86,7 +86,7 @@ jobs:
         run: |
           cargo check -v --all-features \
             -p marine-core \
-            -p marine \
+            -p marine-runtime \
             -p fluence-app-service \
             -p marine \
             -p mrepl
@@ -97,10 +97,7 @@ jobs:
       - name: Run cargo nextest
         run: cargo llvm-cov nextest --release -v --all-features --profile ci --lcov --output-path lcov.info \
             -p marine-core \
-            -p marine \
-            -p fluence-app-service \
-            -p marine \
-            -p mrepl \
+            -p marine-runtime
 
       - name: Coveralls upload
         uses: coverallsapp/github-action@v2

@@ -15,5 +15,6 @@ slow-timeout = { period = "60s", terminate-after = 2 }
 leak-timeout = "100ms"
 
 [profile.ci]
+test-threads = 8
 [profile.ci.junit]
 path = "junit.xml"
