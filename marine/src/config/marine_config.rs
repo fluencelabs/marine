@@ -221,7 +221,7 @@ impl<WB: WasmBackend> TryFrom<TomlMarineConfig> for MarineConfig<WB> {
 
         Ok(MarineConfig {
             modules_dir,
-            memory_limit: toml_config.max_heap_size.map(|size| size.as_u64()),
+            memory_limit: toml_config.total_memory_limit.map(|size| size.as_u64()),
             modules_config,
             default_modules_config,
         })

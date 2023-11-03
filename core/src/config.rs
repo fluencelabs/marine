@@ -101,7 +101,7 @@ pub struct MarineCoreConfig {
 impl Default for MarineCoreConfig {
     fn default() -> Self {
         Self {
-            memory_limit: DEFAULT_MEMORY_LIMIT
+            memory_limit: DEFAULT_MEMORY_LIMIT,
         }
     }
 }

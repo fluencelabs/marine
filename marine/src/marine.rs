@@ -30,6 +30,7 @@ use marine_wasm_backend_traits::WasmBackend;
 #[cfg(feature = "raw-module-api")]
 use marine_wasm_backend_traits::WasiState;
 
+use marine_core::DEFAULT_MEMORY_LIMIT;
 use marine_core::generic::MarineCore;
 use marine_core::IFunctionArg;
 use marine_core::MarineCoreConfigBuilder;
@@ -91,7 +92,7 @@ impl<WB: WasmBackend> Marine<WB> {
     {
         let config = config.try_into()?;
         let core_config = MarineCoreConfigBuilder::new()
-            .memory_limit(config.memory_limit.unwrap_or(u64::MAX))
+            .memory_limit(config.memory_limit.unwrap_or(DEFAULT_MEMORY_LIMIT))
             .build();
         let mut marine = MarineCore::new(core_config)?;
         let call_parameters = Arc::<Mutex<CallParameters>>::default();

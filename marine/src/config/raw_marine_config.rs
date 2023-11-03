@@ -66,7 +66,7 @@ pub struct TomlMarineConfig {
     pub modules_dir: Option<PathBuf>,
     #[serde_as(as = "Option<DisplayFromStr>")]
     #[serde(default)]
-    pub max_heap_size: Option<ByteSize>,
+    pub total_memory_limit: Option<ByteSize>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub module: Vec<TomlMarineNamedModuleConfig>,
     pub default: Option<TomlMarineModuleConfig>,
