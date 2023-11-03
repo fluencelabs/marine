@@ -25,7 +25,7 @@ pub fn main() {}
 #[marine]
 pub fn allocate_single_module_single_piece(size: i64) -> u32 {
     let addr = Vec::with_capacity(size as usize).leak().as_ptr();
-    unsafe { std::mem::transmute::<*const u8, usize>(addr) as u32}
+    unsafe { std::mem::transmute::<*const u8, usize>(addr) as u32 }
 }
 
 #[marine]
