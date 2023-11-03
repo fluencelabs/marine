@@ -14,8 +14,8 @@ path = "src/lib.rs"
 marine-it-parser = { path = "../it-parser", version = "0.13.0" }
 marine-macro-impl = "0.7.1"
 
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
-it-lilo = "0.5.1"
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.27.0" }
+it-lilo = "0.6.0"
 
 thiserror = "1.0.50"
 walrus = "0.20.1"
