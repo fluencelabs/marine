@@ -28,6 +28,8 @@ use marine_wasm_backend_traits::ExportFunction;
 
 use wasmer_it::interpreter::wasm;
 
+use anyhow::anyhow;
+
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -139,7 +141,7 @@ impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
         &self,
         store: &mut <WB as WasmBackend>::ContextMut<'_>,
         arguments: &[IValue],
-    ) -> std::result::Result<Vec<IValue>, ()> {
+    ) -> std::result::Result<Vec<IValue>, anyhow::Error> {
         use super::type_converters::wval_to_ival;
         use super::type_converters::ival_to_wval;
         match &self.inner {
@@ -153,11 +155,11 @@ impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
                         .collect::<Vec<WValue>>()
                         .as_slice(),
                 )
-                .map_err(|_| ())
+                .map_err(|e| anyhow!(e))
                 .map(|results| results.iter().map(wval_to_ival).collect()),
             WITFunctionInner::Import { callable, .. } => Arc::make_mut(&mut callable.clone())
                 .call(store, arguments)
-                .map_err(|_| ()),
+                .map_err(|e| anyhow!(e)),
         }
     }
 }

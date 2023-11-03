@@ -77,7 +77,7 @@ pub enum RuntimeError {
     #[error("Unsupported type encountered: {0}")]
     UnsupportedType(WType),
 
-    #[error(transparent)]
+    #[error("Trap occurred: {0}")]
     Trap(anyhow::Error),
 
     #[error(transparent)]
@@ -86,7 +86,7 @@ pub enum RuntimeError {
     #[error("A function returned invalid number of results: expected {expected}, got {actual}")]
     IncorrectResultsNumber { expected: usize, actual: usize },
 
-    #[error(transparent)]
+    #[error("Unrecognized error: {0}")]
     Other(anyhow::Error),
 }
 

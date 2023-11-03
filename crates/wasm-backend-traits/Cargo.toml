@@ -7,7 +7,7 @@ license = "Apache-2.0"
 edition = "2021"
 
 [dependencies]
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.27.0" }
 it-memory-traits = "0.4.0"
 
 indexmap = "2.0.2"
