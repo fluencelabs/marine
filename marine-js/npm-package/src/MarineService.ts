@@ -16,7 +16,7 @@
 
 import { init } from './marine_js.js';
 import type {MarineServiceConfig, Env} from './config.js';
-import {CallParameters, JSONArray, JSONObject, LogFunction} from './types.js';
+import { CallParameters, JSONArray, JSONObject, JSONValue, LogFunction } from './types.js';
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
@@ -55,7 +55,7 @@ export class MarineService {
         this._controlModuleInstance = 'not-set';
     }
 
-    call(functionName: string, args: JSONArray | JSONObject, callParams: CallParameters): unknown {
+    call(functionName: string, args: JSONArray | JSONObject, callParams: CallParameters): JSONValue {
         if (this._controlModuleInstance === 'not-set') {
             throw new Error('Not initialized');
         }
