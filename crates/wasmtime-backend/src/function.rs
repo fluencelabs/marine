@@ -38,7 +38,7 @@ pub struct WasmtimeFunction {
 impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
     fn new<F>(store: &mut impl AsContextMut<WasmtimeWasmBackend>, sig: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(&[WValue]) -> Vec<WValue> + Sync + Send + 'static,
+        F: for<'c> Fn(&[WValue]) -> anyhow::Result<Vec<WValue>> + Sync + Send + 'static,
     {
         let ty = sig_to_fn_ty(&sig);
         let func = move |_: wasmtime::Caller<'_, StoreState>,
@@ -46,7 +46,7 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
                          results_out: &mut [wasmtime::Val]|
               -> Result<(), anyhow::Error> {
             let args = process_func_args(args).map_err(|e| anyhow!(e))?; // TODO move earlier
-            let results = func(&args);
+            let results = func(&args)?;
             process_func_results(&results, results_out).map_err(|e| anyhow!(e))
         };
 
@@ -63,7 +63,7 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         F: for<'c> Fn(
                 <WasmtimeWasmBackend as WasmBackend>::ImportCallContext<'c>,
                 &[WValue],
-            ) -> Vec<WValue>
+            ) -> anyhow::Result<Vec<WValue>>
             + Sync
             + Send
             + 'static,
@@ -76,7 +76,7 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
               -> Result<(), anyhow::Error> {
             let caller = WasmtimeImportCallContext { inner: caller };
             let args = process_func_args(args).map_err(|e| anyhow!(e))?;
-            let results = func(caller, &args);
+            let results = func(caller, &args)?;
             process_func_results(&results, results_out).map_err(|e| anyhow!(e))
         };
 

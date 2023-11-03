@@ -15,7 +15,10 @@ const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 const require = createRequire(import.meta.url);
 const download = defaultImport(downloadRaw);
 
-const vmPeerId = '12D3KooWNzutuy8WHXDKFqFsATvCR6j9cj2FijYbnd47geRKaQZS';
+// PeerId and secret key are deterministically derived from seed "host_peer_id"
+const VM_PEER_ID = "12D3KooWHgS5pbwe87KjDHbwRwQgrhXX8KU4f8FMU2qrVQ35fF1t";
+const VM_SECRET_KEY = Uint8Array.from([208, 43, 27, 28, 203, 241, 229, 251, 222, 32, 195, 215, 64, 54, 104, 141, 35, 147, 166, 11, 1, 231, 42, 78, 56, 169, 76, 66, 90, 183, 216, 217])
+const VM_KEY_FORMAT = 0 // Ed25519
 
 const defaultModuleConfig = {
     logger_enabled: true,
@@ -175,20 +178,23 @@ describe('Fluence app service tests', () => {
 
         const s = `(seq
             (par 
-                (call "${vmPeerId}" ("local_service_id" "local_fn_name") [] result_1)
+                (call "${VM_PEER_ID}" ("local_service_id" "local_fn_name") [] result_1)
                 (call "remote_peer_id" ("service_id" "fn_name") [] g)
             )
-            (call "${vmPeerId}" ("local_service_id" "local_fn_name") [] result_2)
+            (call "${VM_PEER_ID}" ("local_service_id" "local_fn_name") [] result_2)
         )`;
 
         // act
         const res = await callAvm(
             (args: JSONArray | JSONObject): unknown => testAvmInMarine.call('invoke', args, defaultCallParameters),
             {
-                currentPeerId: vmPeerId,
-                initPeerId: vmPeerId,
+                keyFormat: VM_KEY_FORMAT,
+                particleId: "",
+                secretKeyBytes: VM_SECRET_KEY,
+                currentPeerId: VM_PEER_ID,
+                initPeerId: VM_PEER_ID,
                 timestamp: Date.now(),
-                ttl: 10000,
+                ttl: 10000
             },
             s,
             b(''),
@@ -284,7 +290,7 @@ describe('Fluence app service tests', () => {
 
 
         expect(() => marineService.call('failing', [], defaultCallParameters))
-            .toThrow(new Error("engine error: Execution error: `call-core 6` failed while calling the local or import function `failing`"));
+            .toThrow(new Error("engine error: Execution error: `call-core 6` failed while calling the local or import function `failing`: Unrecognized error: Failed to apply func"));
 
     });
 

@@ -305,7 +305,10 @@ impl<WB: WasmBackend> MModule<WB> {
             raw_import: F,
         ) -> <WB as WasmBackend>::HostFunction
         where
-            F: for<'c> Fn(<WB as WasmBackend>::ImportCallContext<'c>, &[WValue]) -> Vec<WValue>
+            F: for<'c> Fn(
+                    <WB as WasmBackend>::ImportCallContext<'c>,
+                    &[WValue],
+                ) -> anyhow::Result<Vec<WValue>>
                 + Sync
                 + Send
                 + 'static,
@@ -330,13 +333,16 @@ impl<WB: WasmBackend> MModule<WB> {
             interpreter: ITInterpreter<WB>,
             import_namespace: String,
             import_name: String,
-        ) -> impl for<'c> Fn(<WB as WasmBackend>::ImportCallContext<'c>, &[WValue]) -> Vec<WValue>
+        ) -> impl for<'c> Fn(
+            <WB as WasmBackend>::ImportCallContext<'c>,
+            &[WValue],
+        ) -> anyhow::Result<Vec<WValue>>
                + Sync
                + Send
                + 'static {
             move |mut ctx: <WB as WasmBackend>::ImportCallContext<'_>,
                   inputs: &[WValue]|
-                  -> Vec<WValue> {
+                  -> anyhow::Result<Vec<WValue>> {
                 use wasmer_it::interpreter::stack::Stackable;
 
                 use super::type_converters::wval_to_ival;
@@ -354,11 +360,16 @@ impl<WB: WasmBackend> MModule<WB> {
                 let wit_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
                 let outputs = unsafe {
                     // error here will be propagated by the special error instruction
-                    interpreter.run(
-                        &wit_inputs,
-                        Arc::make_mut(&mut wit_instance_callable.assume_init()),
-                        &mut ctx.as_context_mut(),
-                    )
+                    interpreter
+                        .run(
+                            &wit_inputs,
+                            Arc::make_mut(&mut wit_instance_callable.assume_init()),
+                            &mut ctx.as_context_mut(),
+                        )
+                        .map_err(|e| {
+                            log::error!("interpreter got error {e}");
+                            anyhow::anyhow!(e)
+                        })?
                 };
 
                 log::trace!(
@@ -368,13 +379,11 @@ impl<WB: WasmBackend> MModule<WB> {
                 );
 
                 // TODO: optimize by prevent copying stack values
-                outputs
-                    .map_err(|e| log::error!("interpreter got error {e}"))
-                    .unwrap_or_default()
+                Ok(outputs
                     .as_slice()
                     .iter()
                     .map(ival_to_wval)
-                    .collect::<Vec<_>>()
+                    .collect::<Vec<_>>())
             }
         }
 

@@ -28,12 +28,15 @@ pub trait HostFunction<WB: WasmBackend>: Send + Sync + Clone {
     /// The signature check is performed at runtime.
     fn new<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(&[WValue]) -> Vec<WValue> + Sync + Send + 'static;
+        F: for<'c> Fn(&[WValue]) -> anyhow::Result<Vec<WValue>> + Sync + Send + 'static;
 
     /// Creates a new function with dynamic signature that needs a context.
     fn new_with_caller<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(<WB as WasmBackend>::ImportCallContext<'c>, &[WValue]) -> Vec<WValue>
+        F: for<'c> Fn(
+                <WB as WasmBackend>::ImportCallContext<'c>,
+                &[WValue],
+            ) -> anyhow::Result<Vec<WValue>>
             + Sync
             + Send
             + 'static;
