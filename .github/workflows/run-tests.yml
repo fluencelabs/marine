@@ -94,7 +94,7 @@ jobs:
       - uses: taiki-e/install-action@nextest
 
       - name: Run cargo nextest
-        run: cargo nextest --release -v --all-features --profile ci \
+        run: cargo nextest run --release -v --all-features --profile ci \
             -p marine-core \
             -p marine-runtime
 
