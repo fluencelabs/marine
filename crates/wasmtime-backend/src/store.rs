@@ -59,7 +59,6 @@ impl Store<WasmtimeWasmBackend> for WasmtimeStore {
     }
 
     fn set_memory_limit(&mut self, memory_limit: u64) {
-        println!("set memory_limit: {}", memory_limit);
         let limits = MemoryLimiter::new(memory_limit);
         self.inner.data_mut().limits = limits;
         self.inner.limiter(|store_state| &mut store_state.limits);

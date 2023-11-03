@@ -50,21 +50,7 @@ impl<'module_name> ModuleMemoryStat<'module_name> {
         }
     }
 }
-/*
-impl<'module_name> From<Vec<ModuleMemoryStat<'module_name>>> for MemoryStats<'module_name> {
-    fn from(records: Vec<ModuleMemoryStat<'module_name>>) -> Self {
-        Self(records)
-    }
-}*/
-/*
-impl<'memory_size> Deref for MemoryStats<'memory_size> {
-    type Target = [ModuleMemoryStat<'memory_size>];
 
-    fn deref(&self) -> &Self::Target {
-        self.0.as_slice()
-    }
-}
-*/
 impl fmt::Display for MemoryStats<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for record in self.modules.iter() {
