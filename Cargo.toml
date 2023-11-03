@@ -46,8 +46,3 @@ lto = true
 debug-assertions = false
 overflow-checks = false
 panic = "abort"
-
-[patch.crates-io]
-wasmer-it = { version = "0.26.1", package = "wasmer-interface-types-fl", branch = "feat/error-propagation", git = "https://github.com/fluencelabs/interface-types" }
-it-lilo = { version = "0.5.1", branch = "feat/error-propagation", git = "https://github.com/fluencelabs/interface-types" }
-it-memory-traits = { version = "0.4.0", branch = "feat/error-propagation", git = "https://github.com/fluencelabs/interface-types" }
