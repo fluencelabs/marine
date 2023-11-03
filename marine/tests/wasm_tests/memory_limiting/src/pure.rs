@@ -24,20 +24,18 @@ pub fn main() {}
 
 #[marine]
 pub fn allocate_single_module_single_piece(size: i64) -> u32 {
-    let addr = Vec::with_capacity(size as usize).leak().as_ptr();
+    let addr = Vec::<u8>::with_capacity(size as usize).leak().as_ptr();
     unsafe { std::mem::transmute::<*const u8, usize>(addr) as u32 }
 }
 
 #[marine]
-pub fn allocate_single_module_1KB_pieces(mut size: i64) -> u32 {
+pub fn allocate_single_module_64KB_pieces(n_pieces: u32) -> u32 {
     let mut acc: u32 = 0;
 
-    while size > 0 {
+    for _ in 0..n_pieces {
         unsafe {
-            let addr = Box::leak(Box::new([0u8; 1024]));
+            let addr = Box::leak(Box::new([0u8; 1024 * 64]));
             acc ^= std::mem::transmute::<*const u8, usize>(addr.as_ptr()) as u32;
-
-            size -= 1024
         }
     }
 
@@ -52,9 +50,9 @@ pub fn allocate_two_modules_single_piece(size: i64) -> u32 {
 }
 
 #[marine]
-pub fn allocate_two_modules_1KB_pieces(size: i64) -> u32 {
-    let first = allocate_single_module_1KB_pieces(size);
-    let second = effector::allocate_single_module_1KB_pieces(size);
+pub fn allocate_two_modules_64KB_pieces(n_pieces: u32) -> u32 {
+    let first = allocate_single_module_64KB_pieces(n_pieces);
+    let second = effector::allocate_single_module_64KB_pieces(n_pieces);
     first ^ second
 }
 
@@ -66,6 +64,6 @@ mod effector {
     extern "C" {
         pub fn allocate_single_module_single_piece(size: i64) -> u32;
 
-        pub fn allocate_single_module_1KB_pieces(size: i64) -> u32;
+        pub fn allocate_single_module_64KB_pieces(n_pieces: u32) -> u32;
     }
 }

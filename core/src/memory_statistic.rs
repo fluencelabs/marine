@@ -18,7 +18,8 @@ use serde::Serialize;
 use serde::Deserialize;
 
 use std::fmt;
-use std::ops::Deref;
+//use std::ops::Deref;
+use marine_wasm_backend_traits::MemoryAllocationStats;
 
 /// Contains module name and a size of its linear memory in bytes.
 /// Please note that linear memory contains not only heap, but globals, shadow stack and so on.
@@ -30,7 +31,16 @@ pub struct ModuleMemoryStat<'module_name> {
     pub memory_size: usize,
 }
 
-pub struct MemoryStats<'module_name>(pub Vec<ModuleMemoryStat<'module_name>>);
+pub struct MemoryStats<'module_name> {
+    pub modules: Vec<ModuleMemoryStat<'module_name>>,
+    pub allocation_stats: Option<MemoryAllocationStats>,
+}
+
+impl<'module_name> MemoryStats<'module_name> {
+    pub fn new(modules: Vec<ModuleMemoryStat<'module_name>>, allocation_stats: Option<MemoryAllocationStats>) -> Self {
+        Self {modules, allocation_stats}
+    }
+}
 
 impl<'module_name> ModuleMemoryStat<'module_name> {
     pub fn new(module_name: &'module_name str, memory_size: usize) -> Self {
@@ -40,13 +50,13 @@ impl<'module_name> ModuleMemoryStat<'module_name> {
         }
     }
 }
-
+/*
 impl<'module_name> From<Vec<ModuleMemoryStat<'module_name>>> for MemoryStats<'module_name> {
     fn from(records: Vec<ModuleMemoryStat<'module_name>>) -> Self {
         Self(records)
     }
-}
-
+}*/
+/*
 impl<'memory_size> Deref for MemoryStats<'memory_size> {
     type Target = [ModuleMemoryStat<'memory_size>];
 
@@ -54,10 +64,10 @@ impl<'memory_size> Deref for MemoryStats<'memory_size> {
         self.0.as_slice()
     }
 }
-
+*/
 impl fmt::Display for MemoryStats<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for record in self.0.iter() {
+        for record in self.modules.iter() {
             let memory_size = bytesize::ByteSize::b(record.memory_size as u64);
             writeln!(f, "{} - {}", record.name, memory_size)?;
         }

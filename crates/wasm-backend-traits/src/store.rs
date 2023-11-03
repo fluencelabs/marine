@@ -25,7 +25,7 @@ use crate::WasmBackend;
 pub trait Store<WB: WasmBackend>: AsContextMut<WB> {
     fn new(backend: &WB) -> Self;
 
-    // TODO: create general/backend-specific core config?
+    // TODO: create general/backend-specific core config when new parameters are needed
     fn set_memory_limit(&mut self, memory_limit: u64);
 
     fn report_memory_allocation_stats(&self) -> Option<MemoryAllocationStats> {

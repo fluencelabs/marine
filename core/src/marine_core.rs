@@ -189,8 +189,8 @@ impl<WB: WasmBackend> MarineCore<WB> {
                 )
             })
             .collect::<Vec<_>>();
-
-        records.into()
+        let allocation_stats = self.store.borrow_mut().report_memory_allocation_stats();
+        MemoryStats::new(records, allocation_stats)
     }
 
     fn get_module_interface(module: &MModule<WB>) -> MModuleInterface<'_> {
