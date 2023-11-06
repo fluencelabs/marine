@@ -47,11 +47,8 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     let raw_output =
         itypes_output_to_wtypes(&output_type_to_types(descriptor.output_type.as_ref()));
 
-    let func = move |call_context: <WB as WasmBackend>::ImportCallContext<'_>,
-                     inputs: &[WValue]|
-          -> Box<dyn Future<Output = Vec<WValue>> + Send> {
-        Box::new(call_host_import(call_context, inputs, &descriptor, record_types.clone()))
-    };
+    let descriptor = Arc::new(descriptor);
+    let func = create_host_import_closure(descriptor, record_types);
 
     <WB as WasmBackend>::HostFunction::new_with_caller_async(
         &mut store.as_context_mut(),
@@ -60,10 +57,10 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     )
 }
 
-async fn call_host_import<WB: WasmBackend>(
-    mut caller: <WB as WasmBackend>::ImportCallContext<'_>,
-    inputs: &[WValue],
-    descriptor: &HostImportDescriptor<WB>,
+async fn call_host_import<'args, WB: WasmBackend>(
+    mut caller: <WB as WasmBackend>::ImportCallContext<'args>,
+    inputs: &'args [WValue],
+    descriptor: Arc<HostImportDescriptor<WB>>,
     record_types: Arc<MRecordTypes>,
 ) -> Vec<WValue> {
     let HostImportDescriptor {
@@ -71,7 +68,7 @@ async fn call_host_import<WB: WasmBackend>(
         argument_types,
         error_handler,
         ..
-    } = descriptor;
+    } = descriptor.as_ref();
 
     let memory = caller
         .memory(STANDARD_MEMORY_INDEX)
@@ -216,4 +213,21 @@ fn default_error_handler(err: &HostImportError) -> Option<crate::IValue> {
         "an error is occurred while lifting values to interface values: {}",
         err
     )
+}
+
+fn create_host_import_closure<WB: WasmBackend>(
+    descriptor: Arc<HostImportDescriptor<WB>>,
+    record_types: Arc<MRecordTypes>,
+) -> impl for<'args> Fn(
+    <WB as WasmBackend>::ImportCallContext<'args>,
+    &'args [WValue],
+) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'args> {
+    move |call_context, inputs| {
+        Box::new(call_host_import(
+            call_context,
+            inputs,
+            descriptor.clone(),
+            record_types.clone(),
+        ))
+    }
 }

@@ -45,7 +45,7 @@ pub struct AppService {
 
 impl AppService {
     /// Create Service with given modules and service id.
-    pub fn new<C, S>(config: C, service_id: S, envs: HashMap<String, String>) -> Result<Self>
+    pub async fn new<C, S>(config: C, service_id: S, envs: HashMap<String, String>) -> Result<Self>
     where
         C: TryInto<AppServiceConfig>,
         S: Into<String>,
@@ -67,7 +67,7 @@ impl AppService {
         let service_id = service_id.into();
         Self::set_env_and_dirs(&mut config, service_id, envs)?;
 
-        let marine = Marine::with_raw_config(config.marine_config)?;
+        let marine = Marine::with_raw_config(config.marine_config).await?;
 
         Ok(Self {
             marine,
@@ -76,7 +76,7 @@ impl AppService {
     }
 
     /// Call a specified function of loaded module by its name with arguments in json format.
-    pub fn call(
+    pub async fn call(
         &mut self,
         func_name: impl AsRef<str>,
         arguments: JValue,
@@ -89,11 +89,12 @@ impl AppService {
                 arguments,
                 call_parameters,
             )
+            .await
             .map_err(Into::into)
     }
 
     /// Call a specified function of loaded module by its name with arguments in IValue format.
-    pub fn call_with_ivalues(
+    pub async fn call_with_ivalues(
         &mut self,
         func_name: impl AsRef<str>,
         arguments: &[IValue],
@@ -106,6 +107,7 @@ impl AppService {
                 arguments,
                 call_parameters,
             )
+            .await
             .map_err(Into::into)
     }
 
@@ -185,7 +187,7 @@ impl AppService {
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl AppService {
-    pub fn new_with_empty_facade<C, S>(
+    pub async fn new_with_empty_facade<C, S>(
         config: C,
         service_id: S,
         envs: HashMap<String, String>,
@@ -199,7 +201,7 @@ impl AppService {
         let service_id = service_id.into();
         Self::set_env_and_dirs(&mut config, service_id, envs)?;
 
-        let marine = Marine::with_raw_config(config.marine_config)?;
+        let marine = Marine::with_raw_config(config.marine_config).await?;
 
         Ok(Self {
             marine,
@@ -207,7 +209,7 @@ impl AppService {
         })
     }
 
-    pub fn call_module(
+    pub async fn call_module(
         &mut self,
         module_name: impl AsRef<str>,
         func_name: impl AsRef<str>,
@@ -216,10 +218,16 @@ impl AppService {
     ) -> Result<JValue> {
         self.marine
             .call_with_json(module_name, func_name, arguments, call_parameters)
+            .await
             .map_err(Into::into)
     }
 
-    pub fn load_module<C, S>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
+    pub async fn load_module<C, S>(
+        &mut self,
+        name: S,
+        wasm_bytes: &[u8],
+        config: Option<C>,
+    ) -> Result<()>
     where
         S: Into<String>,
         C: TryInto<marine::MarineModuleConfig>,
@@ -227,6 +235,7 @@ impl AppService {
     {
         self.marine
             .load_module(name, wasm_bytes, config)
+            .await
             .map_err(Into::into)
     }
 

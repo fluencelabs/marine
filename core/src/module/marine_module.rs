@@ -143,7 +143,7 @@ impl<WB: WasmBackend> MModule<WB> {
         Self::add_wasi_imports(store, &mut linker, wasi_parameters)?;
         Self::add_host_imports(store, &mut linker, raw_imports, host_imports, &mit)?;
 
-        let wasm_instance = wasm_module.instantiate(store, &linker)?;
+        let wasm_instance = wasm_module.instantiate(store, &linker).await?;
         let it_instance = unsafe {
             // TODO: check if this MaybeUninit/Arc tricks are still needed
             // get_mut_unchecked here is safe because currently only this modules have reference to
@@ -346,12 +346,13 @@ impl<WB: WasmBackend> MModule<WB> {
         ) -> <WB as WasmBackend>::HostFunction
         where
             F: for<'c> Fn(
-                <WB as WasmBackend>::ImportCallContext<'c>,
-                &'c [WValue],
-            ) -> Box<dyn std::future::Future<Output = Vec<WValue>> + Send>
-            + Sync
-            + Send
-            + 'static,
+                    <WB as WasmBackend>::ImportCallContext<'c>,
+                    &'c [WValue],
+                )
+                    -> Box<dyn std::future::Future<Output = Vec<WValue>> + Send + 'c>
+                + Sync
+                + Send
+                + 'static,
             WB: WasmBackend,
             I1: Iterator<Item = &'a IType>,
             I2: Iterator<Item = &'b IType>,
@@ -376,26 +377,24 @@ impl<WB: WasmBackend> MModule<WB> {
         ) -> impl for<'c> Fn(
             <WB as WasmBackend>::ImportCallContext<'c>,
             &'c [WValue],
-        ) -> Box<dyn std::future::Future<Output = Vec<WValue>> + Send>
+        ) -> Box<dyn std::future::Future<Output = Vec<WValue>> + Send + 'c>
                + Sync
                + Send
                + 'static {
-
             let import_namespace = std::sync::Arc::new(import_namespace);
             let import_name = std::sync::Arc::new(import_name);
             //let wit_instance = std::sync::Arc::new(wit_instance);
             let interpreter = std::sync::Arc::new(interpreter);
-
+            //lifetimify_import_closure(
             move |mut ctx: <WB as WasmBackend>::ImportCallContext<'_>,
                   inputs: &[WValue]|
                   -> Box<dyn std::future::Future<Output = Vec<WValue>> + Send> {
-                let ctx = ctx;
                 let import_namespace = import_namespace.clone();
                 let import_name = import_name.clone();
                 let wit_instance = wit_instance.clone();
                 let interpreter = interpreter.clone();
                 Box::new(async move {
-/*                    let import_namespace = import_namespace.clone();
+                    /*                    let import_namespace = import_namespace.clone();
                     let import_name = import_name.clone();
                     let wit_instance = wit_instance.clone();
                     let interpreter = interpreter.clone();*/
@@ -443,6 +442,7 @@ impl<WB: WasmBackend> MModule<WB> {
                         .collect::<Vec<_>>()
                 })
             }
+            //  )
         }
 
         let wit_import_funcs = wit

@@ -65,7 +65,7 @@ pub struct Marine<WB: WasmBackend> {
 
 impl<WB: WasmBackend> Marine<WB> {
     /// Creates Marine from config deserialized from TOML.
-    pub fn with_raw_config<C>(config: C) -> MarineResult<Self>
+    pub async fn with_raw_config<C>(config: C) -> MarineResult<Self>
     where
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
@@ -79,11 +79,14 @@ impl<WB: WasmBackend> Marine<WB> {
             })
             .collect::<MarineResult<HashMap<String, PathBuf>>>()?;
 
-        Self::with_module_names::<MarineConfig<WB>>(&modules, config)
+        Self::with_module_names::<MarineConfig<WB>>(&modules, config).await
     }
 
     /// Creates Marine with given modules.
-    pub fn with_modules<C>(mut modules: HashMap<String, Vec<u8>>, config: C) -> MarineResult<Self>
+    pub async fn with_modules<C>(
+        mut modules: HashMap<String, Vec<u8>>,
+        config: C,
+    ) -> MarineResult<Self>
     where
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
@@ -113,7 +116,9 @@ impl<WB: WasmBackend> Marine<WB> {
                 call_parameters.clone(),
                 &logger_filter,
             )?;
-            marine.load_module(module.import_name, &module_bytes, marine_module_config)?;
+            marine
+                .load_module(module.import_name, &module_bytes, marine_module_config)
+                .await?;
         }
 
         Ok(Self {
@@ -124,7 +129,10 @@ impl<WB: WasmBackend> Marine<WB> {
     }
 
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
-    pub fn with_module_names<C>(names: &HashMap<String, PathBuf>, config: C) -> MarineResult<Self>
+    pub async fn with_module_names<C>(
+        names: &HashMap<String, PathBuf>,
+        config: C,
+    ) -> MarineResult<Self>
     where
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
@@ -132,11 +140,11 @@ impl<WB: WasmBackend> Marine<WB> {
         let config = config.try_into()?;
         let modules = load_modules_from_fs(names)?;
 
-        Self::with_modules::<MarineConfig<WB>>(modules, config)
+        Self::with_modules::<MarineConfig<WB>>(modules, config).await
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub fn call_with_ivalues(
+    pub async fn call_with_ivalues(
         &mut self,
         module_name: impl AsRef<str>,
         func_name: impl AsRef<str>,
@@ -151,11 +159,12 @@ impl<WB: WasmBackend> Marine<WB> {
 
         self.core
             .call(module_name, func_name, args)
+            .await
             .map_err(Into::into)
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub fn call_with_json(
+    pub async fn call_with_json(
         &mut self,
         module_name: impl AsRef<str>,
         func_name: impl AsRef<str>,
@@ -186,7 +195,7 @@ impl<WB: WasmBackend> Marine<WB> {
             *cp = call_parameters;
         }
 
-        let result = self.core.call(module_name, func_name, &iargs)?;
+        let result = self.core.call(module_name, func_name, &iargs).await?;
 
         json_to_marine_err!(
             ivalues_to_json(result, &output_types, &record_types),
@@ -264,7 +273,7 @@ impl<WB: WasmBackend> Marine<WB> {
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl<WB: WasmBackend> Marine<WB> {
-    pub fn load_module<C, S>(
+    pub async fn load_module<C, S>(
         &mut self,
         name: S,
         wasm_bytes: &[u8],
@@ -290,6 +299,7 @@ impl<WB: WasmBackend> Marine<WB> {
         )?;
         self.core
             .load_module(name, wasm_bytes, marine_module_config)
+            .await
             .map_err(Into::into)
     }
 

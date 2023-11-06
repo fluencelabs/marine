@@ -169,7 +169,8 @@ impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         let mut results = vec![wasmtime::Val::null(); results_count];
 
         self.inner
-            .call(store.as_context_mut().inner, &args, &mut results)
+            .call_async(store.as_context_mut().inner, &args, &mut results)
+            .await
             .map_err(inspect_call_error)?;
 
         results

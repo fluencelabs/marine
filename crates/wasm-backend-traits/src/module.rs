@@ -18,7 +18,10 @@ use crate::ModuleCreationResult;
 use crate::InstantiationResult;
 use crate::WasmBackend;
 
+use async_trait::async_trait;
+
 /// A handle to compiled wasm module.
+#[async_trait]
 pub trait Module<WB: WasmBackend>: Sized {
     /// Compiles a wasm bytes into a module and extracts custom sections.
     fn new(store: &mut <WB as WasmBackend>::Store, wasm: &[u8]) -> ModuleCreationResult<Self>;
@@ -32,7 +35,7 @@ pub trait Module<WB: WasmBackend>: Sized {
     /// # Panics:
     ///
     ///     If the `Store` given is not the same with `Store` used to create `Imports` and this object.
-    fn instantiate(
+    async fn instantiate(
         &self,
         store: &mut <WB as WasmBackend>::Store,
         imports: &<WB as WasmBackend>::Imports,

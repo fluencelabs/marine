@@ -71,12 +71,13 @@ pub(super) struct REPL {
 }
 
 impl REPL {
-    pub fn new<S: Into<PathBuf>>(
+    pub async fn new<S: Into<PathBuf>>(
         config_file_path: Option<S>,
         working_dir: Option<String>,
         quiet: bool,
     ) -> ReplResult<Self> {
-        let app_service = Self::create_app_service(config_file_path, working_dir.clone(), quiet)?;
+        let app_service =
+            Self::create_app_service(config_file_path, working_dir.clone(), quiet).await?;
         Ok(Self {
             app_service,
             service_working_dir: working_dir,
@@ -84,14 +85,14 @@ impl REPL {
     }
 
     /// Returns true, it should be the last executed command.
-    pub fn execute<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) -> bool {
+    pub async fn execute<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) -> bool {
         // Explicit statements on "h"/"help" options is more convenient, as we have such commands.
         #[allow(clippy::wildcard_in_or_patterns)]
         match args.next() {
-            Some("n") | Some("new") => self.new_service(args),
-            Some("l") | Some("load") => self.load_module(args),
+            Some("n") | Some("new") => self.new_service(args).await,
+            Some("l") | Some("load") => self.load_module(args).await,
             Some("u") | Some("unload") => self.unload_module(args),
-            Some("c") | Some("call") => self.call_module(args),
+            Some("c") | Some("call") => self.call_module(args).await,
             Some("e") | Some("envs") => self.show_envs(args),
             Some("f") | Some("fs") => self.show_fs(args),
             Some("i") | Some("interface") => self.show_interface(),
@@ -106,14 +107,14 @@ impl REPL {
         true
     }
 
-    fn new_service<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
-        match Self::create_app_service(args.next(), self.service_working_dir.clone(), false) {
+    async fn new_service<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
+        match Self::create_app_service(args.next(), self.service_working_dir.clone(), false).await {
             Ok(service) => self.app_service = service,
             Err(e) => println!("failed to create a new application service: {}", e),
         };
     }
 
-    fn load_module<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
+    async fn load_module<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
         next_argument!(module_name, args, "Module name should be specified");
         next_argument!(module_path, args, "Module path should be specified");
 
@@ -132,11 +133,15 @@ impl REPL {
             wasi: Default::default(),
             logging_mask: Default::default(),
         };
-        let result_msg = match self.app_service.load_module::<MarineModuleConfig, String>(
-            module_name.into(),
-            &wasm_bytes.unwrap(),
-            Some(config),
-        ) {
+        let result_msg = match self
+            .app_service
+            .load_module::<MarineModuleConfig, String>(
+                module_name.into(),
+                &wasm_bytes.unwrap(),
+                Some(config),
+            )
+            .await
+        {
             Ok(_) => {
                 let elapsed_time = start.elapsed();
                 format!(
@@ -166,7 +171,7 @@ impl REPL {
         println!("{}", result_msg);
     }
 
-    fn call_module<'args>(&mut self, args: impl Iterator<Item = &'args str>) {
+    async fn call_module<'args>(&mut self, args: impl Iterator<Item = &'args str>) {
         let CallModuleArguments {
             module_name,
             func_name,
@@ -182,30 +187,30 @@ impl REPL {
         };
 
         let start = Instant::now();
-        let result =
-            match self
-                .app_service
-                .call_module(module_name, func_name, args, call_parameters)
-            {
-                Ok(result) if show_result_arg => {
-                    let elapsed_time = start.elapsed();
+        let result = match self
+            .app_service
+            .call_module(module_name, func_name, args, call_parameters)
+            .await
+        {
+            Ok(result) if show_result_arg => {
+                let elapsed_time = start.elapsed();
 
-                    let result_string = match serde_json::to_string_pretty(&result) {
-                        Ok(pretty_printed) => pretty_printed,
-                        Err(_) => format!("{:?}", result),
-                    };
+                let result_string = match serde_json::to_string_pretty(&result) {
+                    Ok(pretty_printed) => pretty_printed,
+                    Err(_) => format!("{:?}", result),
+                };
 
-                    format!(
-                        "result: {}\n elapsed time: {:?}",
-                        result_string, elapsed_time
-                    )
-                }
-                Ok(_) => {
-                    let elapsed_time = start.elapsed();
-                    format!("call succeeded, elapsed time: {:?}", elapsed_time)
-                }
-                Err(e) => format!("call failed with: {}", e),
-            };
+                format!(
+                    "result: {}\n elapsed time: {:?}",
+                    result_string, elapsed_time
+                )
+            }
+            Ok(_) => {
+                let elapsed_time = start.elapsed();
+                format!("call succeeded, elapsed time: {:?}", elapsed_time)
+            }
+            Err(e) => format!("call failed with: {}", e),
+        };
 
         println!("{}", result);
     }
@@ -238,7 +243,7 @@ impl REPL {
         print!("Loaded modules heap sizes:\n{}", statistic);
     }
 
-    fn create_app_service<S: Into<PathBuf>>(
+    async fn create_app_service<S: Into<PathBuf>>(
         config_file_path: Option<S>,
         working_dir: Option<String>,
         quiet: bool,
@@ -275,7 +280,8 @@ impl REPL {
             .and_then(|path| path.parent().map(PathBuf::from))
             .unwrap_or_default();
 
-        let app_service = AppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
+        let app_service =
+            AppService::new_with_empty_facade(config, &service_id, HashMap::new()).await?;
 
         let duration = start.elapsed();
 
