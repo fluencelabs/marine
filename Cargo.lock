@@ -1799,7 +1799,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -1882,7 +1882,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-interfaces"
-version = "0.10.0"
+version = "0.9.0"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -1924,7 +1924,7 @@ dependencies = [
 
 [[package]]
 name = "marine-js-backend"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "derive_more",
@@ -2002,7 +2002,7 @@ dependencies = [
 
 [[package]]
 name = "marine-min-it-version"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "once_cell",
  "semver",
@@ -2162,7 +2162,7 @@ dependencies = [
 
 [[package]]
 name = "marine-wasmtime-backend"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "it-memory-traits",

@@ -14,6 +14,33 @@
 
 
 
+## [0.8.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.7.4...marine-js-v0.8.0) (2023-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bumps ([#397](https://github.com/fluencelabs/marine/issues/397))
+* propagate errors from linked modules ([#388](https://github.com/fluencelabs/marine/issues/388))
+
+### Features
+
+* **deps:** update rust crate log to 0.4.20 ([8a6035f](https://github.com/fluencelabs/marine/commit/8a6035f2f1f9d81895926dd8e612542570c5617f))
+* **deps:** update rust crate serde_json to 1.0.107 ([0c1d378](https://github.com/fluencelabs/marine/commit/0c1d3780b04da3a63d7a59469f91bc056f3a56e7))
+* propagate errors from linked modules ([#388](https://github.com/fluencelabs/marine/issues/388)) ([a94494b](https://github.com/fluencelabs/marine/commit/a94494b042e32e284790d4ddc650e3086f6ab600))
+
+
+### Bug Fixes
+
+* **marine-js:** Add JSONValue return type ([#393](https://github.com/fluencelabs/marine/issues/393)) ([8ea6c3c](https://github.com/fluencelabs/marine/commit/8ea6c3cd1b150ec6093a333558f6956edcea8a37))
+* **versions:** enforce minor version bumps ([#397](https://github.com/fluencelabs/marine/issues/397)) ([8c217c7](https://github.com/fluencelabs/marine/commit/8c217c7c3d367f6dcb6abeea0b54de88dbd17be5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-js-backend bumped from 0.2.0 to 0.2.1
+
 ## [0.7.2](https://github.com/fluencelabs/marine/compare/marine-js-v0.7.1...marine-js-v0.7.2) (2023-08-04)
 
 

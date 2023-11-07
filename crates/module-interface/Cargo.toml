@@ -11,7 +11,7 @@ name = "marine_module_interface"
 path = "src/lib.rs"
 
 [dependencies]
-marine-it-interfaces = { path = "../it-interfaces", version = "0.10.0" }
+marine-it-interfaces = { path = "../it-interfaces", version = "0.9.0" }
 
 anyhow = "1.0.75"
 walrus = "0.20.1"
