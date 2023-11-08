@@ -221,7 +221,7 @@ fn create_host_import_closure<WB: WasmBackend>(
 ) -> impl for<'args> Fn(
     <WB as WasmBackend>::ImportCallContext<'args>,
     &'args [WValue],
-) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'args> {
+) -> Box<dyn Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'args> {
     move |call_context, inputs| {
         Box::new(call_host_import(
             call_context,

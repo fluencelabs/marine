@@ -1,7 +1,7 @@
 {
   "name": "@fluencelabs/marine-js",
   "description": "Marine-js",
-  "version": "0.7.4",
+  "version": "0.8.0",
   "exports": {
     ".": "./dist/index.js",
     "./types": {
@@ -67,7 +67,7 @@
   "devDependencies": {
     "@babel/parser": "7.22.7",
     "@babel/traverse": "7.22.8",
-    "@fluencelabs/avm": "0.30.5",
+    "@fluencelabs/avm": "0.54.0",
     "@jest/globals": "29.6.2",
     "@types/download": "8.0.1",
     "@types/jest": "27.5.2",

@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.4.0](https://github.com/fluencelabs/marine/compare/marine-wasmtime-backend-v0.3.0...marine-wasmtime-backend-v0.4.0) (2023-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bumps ([#397](https://github.com/fluencelabs/marine/issues/397))
+* propagate errors from linked modules ([#388](https://github.com/fluencelabs/marine/issues/388))
+* update wasmtime rust crate 13.0.0 ([#377](https://github.com/fluencelabs/marine/issues/377))
+
+### Features
+
+* **deps:** update rust crate anyhow to 1.0.75 ([#372](https://github.com/fluencelabs/marine/issues/372)) ([44b8e96](https://github.com/fluencelabs/marine/commit/44b8e96362cacc3d48a8a765fdd2c7aeb4fe695d))
+* **deps:** update rust crate log to 0.4.20 ([8a6035f](https://github.com/fluencelabs/marine/commit/8a6035f2f1f9d81895926dd8e612542570c5617f))
+* **deps:** update rust crate paste to 1.0.14 ([e75dafe](https://github.com/fluencelabs/marine/commit/e75dafe7c20f2c3245aba50a40c9e3e5ab8f9410))
+* propagate errors from linked modules ([#388](https://github.com/fluencelabs/marine/issues/388)) ([a94494b](https://github.com/fluencelabs/marine/commit/a94494b042e32e284790d4ddc650e3086f6ab600))
+* update wasmtime rust crate 13.0.0 ([#377](https://github.com/fluencelabs/marine/issues/377)) ([3145078](https://github.com/fluencelabs/marine/commit/3145078fbf8a28cd041ed6a2d8cfda96423d19c0))
+* **wasmtime-backend:** host stack size for WASM modules runtime has been increased to manage with AIR `fold` over 1023 elements in AquaVM ([#390](https://github.com/fluencelabs/marine/issues/390)) ([0f5d08a](https://github.com/fluencelabs/marine/commit/0f5d08aba826b678f5a72c6caf8849de04e4fb94))
+
+
+### Bug Fixes
+
+* **versions:** enforce minor version bumps ([#397](https://github.com/fluencelabs/marine/issues/397)) ([8c217c7](https://github.com/fluencelabs/marine/commit/8c217c7c3d367f6dcb6abeea0b54de88dbd17be5))
+
 ## [0.3.0](https://github.com/fluencelabs/marine/compare/marine-wasmtime-backend-v0.2.2...marine-wasmtime-backend-v0.3.0) (2023-07-25)
 
 

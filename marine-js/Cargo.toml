@@ -1,6 +1,6 @@
 [package]
 name = "marine-js"
-version = "0.7.4"
+version = "0.8.0"
 edition = "2021"
 description = "Web version of the marine runtime"
 publish = false
@@ -10,15 +10,15 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-marine-js-backend = {path = "../crates/js-backend", version = "0.1.1"}
+marine-js-backend = {path = "../crates/js-backend", version = "0.2.1"}
 marine-runtime = {path = "../marine",  default-features = false}
 
 wasm-bindgen = "0.2.86"
 serde = { version = "1.0.159", features = ["derive"] }
-serde_json = "1.0.95"
+serde_json = "1.0.107"
 serde-wasm-bindgen = "0.5.0"
 maplit = "1.0.2"
 web-sys = {version = "0.3.61", features = ["console"]}
 js-sys = "0.3.63"
 wasm-bindgen-console-logger = "0.1.1"
-log = "0.4.17"
+log = "0.4.20"

@@ -4,6 +4,25 @@
   * dependencies
     * marine-it-parser bumped from 0.12.1 to 0.12.2
 
+## [0.12.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.11.0...marine-it-generator-v0.12.0) (2023-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bumps ([#397](https://github.com/fluencelabs/marine/issues/397))
+* propagate errors from linked modules ([#388](https://github.com/fluencelabs/marine/issues/388))
+
+### Features
+
+* **deps:** update rust crate serde_json to 1.0.107 ([0c1d378](https://github.com/fluencelabs/marine/commit/0c1d3780b04da3a63d7a59469f91bc056f3a56e7))
+* **deps:** update rust crate thiserror to 1.0.50 ([0b88b23](https://github.com/fluencelabs/marine/commit/0b88b236015320972315b1bd7ae07f5277d6acbd))
+* propagate errors from linked modules ([#388](https://github.com/fluencelabs/marine/issues/388)) ([a94494b](https://github.com/fluencelabs/marine/commit/a94494b042e32e284790d4ddc650e3086f6ab600))
+
+
+### Bug Fixes
+
+* **versions:** enforce minor version bumps ([#397](https://github.com/fluencelabs/marine/issues/397)) ([8c217c7](https://github.com/fluencelabs/marine/commit/8c217c7c3d367f6dcb6abeea0b54de88dbd17be5))
+
 ## [0.11.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.10.2...marine-it-generator-v0.11.0) (2023-08-04)
 
 

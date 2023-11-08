@@ -1,22 +1,22 @@
 [package]
 name = "marine-wasmtime-backend"
 description = "Fluence Marine Wasm backend interface implementation for Wasmtime"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 authors = ["Fluence Labs"]
 license = "Apache-2.0"
 
 [dependencies]
-marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.3.0"}
-wasmer-it = { package = "wasmer-interface-types-fl", version = "0.26.1" }
+marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.4.0"}
+wasmer-it = { package = "wasmer-interface-types-fl", version = "0.27.0" }
 it-memory-traits = "0.4.0"
 
 # all default features except async
-wasmtime = {version = "9.0.4" }
-wasmtime-wasi = "9.0.4"
+wasmtime = {version = "13.0.0", default-features = false, features = ["cache", "wat", "jitdump", "parallel-compilation", "cranelift", "pooling-allocator", "vtune"]}
+wasmtime-wasi = "13.0.0"
 multimap = "0.8.3"
-paste = "1.0.13"
-anyhow = "1.0.71"
-log = "0.4.19"
+paste = "1.0.14"
+anyhow = "1.0.75"
+log = "0.4.20"
 futures = "0.3.28"
 async-trait = "0.1.71"

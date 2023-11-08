@@ -349,7 +349,7 @@ impl<WB: WasmBackend> MModule<WB> {
                     <WB as WasmBackend>::ImportCallContext<'c>,
                     &'c [WValue],
                 )
-                    -> Box<dyn std::future::Future<Output = Vec<WValue>> + Send + 'c>
+                    -> Box<dyn std::future::Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c>
                 + Sync
                 + Send
                 + 'static,
@@ -377,7 +377,7 @@ impl<WB: WasmBackend> MModule<WB> {
         ) -> impl for<'c> Fn(
             <WB as WasmBackend>::ImportCallContext<'c>,
             &'c [WValue],
-        ) -> Box<dyn std::future::Future<Output = Vec<WValue>> + Send + 'c>
+        ) -> Box<dyn std::future::Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c>
                + Sync
                + Send
                + 'static {
@@ -388,7 +388,7 @@ impl<WB: WasmBackend> MModule<WB> {
             //lifetimify_import_closure(
             move |mut ctx: <WB as WasmBackend>::ImportCallContext<'_>,
                   inputs: &[WValue]|
-                  -> Box<dyn std::future::Future<Output = Vec<WValue>> + Send> {
+                  -> Box<dyn std::future::Future<Output = anyhow::Result<Vec<WValue>>> + Send> {
                 let import_namespace = import_namespace.clone();
                 let import_name = import_name.clone();
                 let wit_instance = wit_instance.clone();
@@ -412,19 +412,23 @@ impl<WB: WasmBackend> MModule<WB> {
                         inputs
                     );
 
-                    // copy here because otherwise wit_instance will be consumed by the closure
-                    let wit_instance_callable = wit_instance.clone();
-                    let wit_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
-                    let outputs = unsafe {
-                        // error here will be propagated by the special error instruction
-                        interpreter
-                            .run(
-                                &wit_inputs,
-                                Arc::make_mut(&mut wit_instance_callable.assume_init()),
-                                &mut ctx,
-                            )
-                            .await
-                    };
+                // copy here because otherwise wit_instance will be consumed by the closure
+                let wit_instance_callable = wit_instance.clone();
+                let wit_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
+                let outputs = unsafe {
+                    // error here will be propagated by the special error instruction
+                    interpreter
+                        .run(
+                            &wit_inputs,
+                            Arc::make_mut(&mut wit_instance_callable.assume_init()),
+                            &mut ctx.as_context_mut(),
+                        )
+                        .await
+                        .map_err(|e| {
+                            log::error!("interpreter got error {e}");
+                            anyhow::anyhow!(e)
+                        })?
+                };
 
                     log::trace!(
                         "\nraw import for {}.{} finished",
@@ -433,13 +437,11 @@ impl<WB: WasmBackend> MModule<WB> {
                     );
 
                     // TODO: optimize by prevent copying stack values
-                    outputs
-                        .map_err(|e| log::error!("interpreter got error {e}"))
-                        .unwrap_or_default()
+                    Ok(outputs
                         .as_slice()
                         .iter()
                         .map(ival_to_wval)
-                        .collect::<Vec<_>>()
+                        .collect::<Vec<_>>())
                 })
             }
             //  )

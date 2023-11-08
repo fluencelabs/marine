@@ -26,6 +26,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * fluence-app-service bumped from 0.25.3 to 0.26.0
     * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
 
+## [0.25.0](https://github.com/fluencelabs/marine/compare/mrepl-v0.24.0...mrepl-v0.25.0) (2023-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bumps ([#397](https://github.com/fluencelabs/marine/issues/397))
+
+### Features
+
+* **deps:** update rust crate anyhow to 1.0.75 ([#372](https://github.com/fluencelabs/marine/issues/372)) ([44b8e96](https://github.com/fluencelabs/marine/commit/44b8e96362cacc3d48a8a765fdd2c7aeb4fe695d))
+* **deps:** update rust crate check-latest to 1.0.2 ([8480a49](https://github.com/fluencelabs/marine/commit/8480a49e084398d0b884f4f7fd2c73821f352145))
+* **deps:** update rust crate log to 0.4.20 ([8a6035f](https://github.com/fluencelabs/marine/commit/8a6035f2f1f9d81895926dd8e612542570c5617f))
+* **deps:** update rust crate serde_json to 1.0.107 ([0c1d378](https://github.com/fluencelabs/marine/commit/0c1d3780b04da3a63d7a59469f91bc056f3a56e7))
+
+
+### Bug Fixes
+
+* **versions:** enforce minor version bumps ([#397](https://github.com/fluencelabs/marine/issues/397)) ([8c217c7](https://github.com/fluencelabs/marine/commit/8c217c7c3d367f6dcb6abeea0b54de88dbd17be5))
+
 ## [0.24.0](https://github.com/fluencelabs/marine/compare/mrepl-v0.23.0...mrepl-v0.24.0) (2023-09-13)
 
 
