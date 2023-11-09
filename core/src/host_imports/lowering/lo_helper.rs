@@ -33,9 +33,9 @@ pub(crate) struct LoHelper<
     MV: MemoryView<DelayedContextLifetime<WB>>,
     M: Memory<MV, DelayedContextLifetime<WB>>,
 > {
-    allocate_func: &'c mut AllocateFunc<WB>,
+    allocate_func: AllocateFunc<WB>,
     memory: M,
-    _memory_view_phantom: PhantomData<MV>,
+    _memory_view_phantom: PhantomData<(MV, &'c i32)>,
 }
 
 impl<
@@ -45,7 +45,7 @@ impl<
         M: Memory<MV, DelayedContextLifetime<WB>>,
     > LoHelper<'c, WB, MV, M>
 {
-    pub(crate) fn new(allocate_func: &'c mut AllocateFunc<WB>, memory: M) -> Self {
+    pub(crate) fn new(allocate_func: AllocateFunc<WB>, memory: M) -> Self {
         Self {
             allocate_func,
             memory,

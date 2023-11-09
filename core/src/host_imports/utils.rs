@@ -48,11 +48,7 @@ pub(super) fn itypes_output_to_wtypes(itypes: &[IType]) -> Vec<WType> {
 /// This macro does not cache result.
 macro_rules! init_wasm_func {
     ($func:ident, $ctx:ident, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
-        let mut $func: Box<
-            dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, $args) -> RuntimeResult<$rets>
-                + Send
-                + Sync,
-        > = match { $ctx.get_func($func_name) } {
+        let $func: TypedFunc<WB, $args, $rets> = match { $ctx.get_func($func_name) } {
             Ok(func) => func,
             Err(_) => return vec![WValue::I32($ret_error_code)],
         };
@@ -63,6 +59,6 @@ macro_rules! init_wasm_func {
 /// Call Wasm function that have Box<RefCell<Option<Func<'static, args, rets>>>> type.
 macro_rules! call_wasm_func {
     ($func:expr, $store:expr, $($arg:expr),*) => {
-        $func.as_mut()($store, ($($arg),*)).unwrap()
+        $func($store, ($($arg),*)).await.unwrap()
     };
 }

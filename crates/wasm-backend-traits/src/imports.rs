@@ -22,6 +22,9 @@ use crate::WType;
 
 use std::borrow::Cow;
 use std::fmt::Formatter;
+use std::future::Future;
+use std::sync::Arc;
+use futures::future::BoxFuture;
 
 /// A "Linker" object, that is used to match functions with module imports during instantiation.
 /// Cloning is a cheap operation for this object. All clones refer to the same data in store.
@@ -94,8 +97,10 @@ impl std::fmt::Debug for FuncSig {
     }
 }
 
-pub type FuncFromImportCallContext<WB, Args, Rets> = Box<
-    dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets>
+pub type TypedFuncFuture<'c, Rets> = BoxFuture<'c, RuntimeResult<Rets>>;
+
+pub type TypedFunc<WB, Args, Rets> = Arc<
+    dyn for<'c> Fn(&'c mut <WB as WasmBackend>::ContextMut<'c>, Args) -> TypedFuncFuture<'c, Rets>
         + Sync
         + Send
         + 'static,
@@ -103,5 +108,5 @@ pub type FuncFromImportCallContext<WB, Args, Rets> = Box<
 
 pub trait FuncGetter<WB: WasmBackend, Args, Rets> {
     /// Gets an export function from the calling instance.
-    fn get_func(&mut self, name: &str) -> ResolveResult<FuncFromImportCallContext<WB, Args, Rets>>;
+    fn get_func(&mut self, name: &str) -> ResolveResult<TypedFunc<WB, Args, Rets>>;
 }

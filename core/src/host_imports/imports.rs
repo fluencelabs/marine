@@ -129,7 +129,7 @@ async fn lower_outputs<WB: WasmBackend>(
     let is_record = matches!(&output, Some(IValue::Record(_)));
 
     let memory_view = memory.view();
-    let mut lo_helper = LoHelper::new(&mut allocate_func, memory);
+    let mut lo_helper = LoHelper::new(allocate_func.clone(), memory);
     let lowerer =
         ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
             .map_err(HostImportError::LowererError);
