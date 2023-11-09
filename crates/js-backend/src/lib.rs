@@ -59,4 +59,8 @@ impl WasmBackend for JsWasmBackend {
     fn new() -> WasmBackendResult<Self> {
         Ok(Self {})
     }
+
+    fn new_async() -> WasmBackendResult<Self> {
+        Ok(Self {})
+    }
 }

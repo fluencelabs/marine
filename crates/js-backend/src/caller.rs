@@ -31,6 +31,9 @@ pub struct JsImportCallContext {
     pub(crate) caller_instance: JsInstance,
 }
 
+unsafe impl Send for JsImportCallContext {}
+unsafe impl Sync for JsImportCallContext {}
+
 impl ImportCallContext<JsWasmBackend> for JsImportCallContext {
     fn memory(&mut self, memory_index: u32) -> Option<<JsWasmBackend as WasmBackend>::Memory> {
         self.caller_instance

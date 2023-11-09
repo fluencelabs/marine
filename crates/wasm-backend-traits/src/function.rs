@@ -50,7 +50,8 @@ pub trait HostFunction<WB: WasmBackend>: AsyncFunction<WB> + Send + Sync + Clone
         F: for<'c> Fn(
                 <WB as WasmBackend>::ImportCallContext<'c>,
                 &'c [WValue],
-            ) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'c>
+            )
+                -> Box<dyn Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c>
             + Sync
             + Send
             + 'static;

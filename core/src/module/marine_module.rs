@@ -348,9 +348,9 @@ impl<WB: WasmBackend> MModule<WB> {
             F: for<'c> Fn(
                     <WB as WasmBackend>::ImportCallContext<'c>,
                     &'c [WValue],
-                )
-                    -> Box<dyn std::future::Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c>
-                + Sync
+                ) -> Box<
+                    dyn std::future::Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c,
+                > + Sync
                 + Send
                 + 'static,
             WB: WasmBackend,
@@ -377,8 +377,9 @@ impl<WB: WasmBackend> MModule<WB> {
         ) -> impl for<'c> Fn(
             <WB as WasmBackend>::ImportCallContext<'c>,
             &'c [WValue],
-        ) -> Box<dyn std::future::Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c>
-               + Sync
+        ) -> Box<
+            dyn std::future::Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c,
+        > + Sync
                + Send
                + 'static {
             let import_namespace = std::sync::Arc::new(import_namespace);

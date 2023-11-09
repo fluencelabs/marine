@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use std::future::Future;
 use crate::JsInstance;
 use crate::JsWasmBackend;
 use crate::JsImportCallContext;
@@ -182,6 +183,34 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
         }
     }
 
+    fn new_with_caller_async<F>(
+        store: &mut impl AsContextMut<JsWasmBackend>,
+        sig: FuncSig,
+        func: F,
+    ) -> Self
+    where
+        F: for<'c> Fn(
+                <JsWasmBackend as WasmBackend>::ImportCallContext<'c>,
+                &'c [WValue],
+            )
+                -> Box<dyn Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c>
+            + Sync
+            + Send
+            + 'static,
+    {
+        todo!()
+    }
+
+    fn new_async<F>(store: &mut impl AsContextMut<JsWasmBackend>, sig: FuncSig, func: F) -> Self
+    where
+        F: for<'c> Fn(&'c [WValue]) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'c>
+            + Sync
+            + Send
+            + 'static,
+    {
+        todo!()
+    }
+
     fn new_typed<Params, Results, Env>(
         store: &mut impl AsContextMut<JsWasmBackend>,
         func: impl IntoFunc<JsWasmBackend, Params, Results, Env>,
@@ -191,6 +220,16 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
 
     fn signature(&self, store: &mut impl AsContextMut<JsWasmBackend>) -> FuncSig {
         self.stored_mut(store.as_context_mut()).signature.clone()
+    }
+}
+
+#[async_trait::async_trait]
+impl AsyncFunction<JsWasmBackend> for HostImportFunction {
+    async fn call_async<CTX>(&self, store: &mut CTX, args: &[WValue]) -> RuntimeResult<Vec<WValue>>
+    where
+        CTX: AsContextMut<JsWasmBackend> + Send,
+    {
+        todo!()
     }
 }
 
@@ -242,12 +281,13 @@ fn prepare_js_closure(func: Box<dyn FnMut(&Array) -> Array>) -> js_sys::Function
 
     wrapper.bind1(&JsValue::UNDEFINED, &closure)
 }
+#[async_trait::async_trait]
 impl ExportFunction<JsWasmBackend> for WasmExportFunction {
     fn signature(&self, store: &mut impl AsContextMut<JsWasmBackend>) -> FuncSig {
         self.stored_mut(store.as_context_mut()).signature.clone()
     }
 
-    fn call(
+    async fn call(
         &self,
         store: &mut impl AsContextMut<JsWasmBackend>,
         args: &[WValue],

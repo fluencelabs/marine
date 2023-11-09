@@ -62,7 +62,7 @@ async fn call_host_import<'args, WB: WasmBackend>(
     inputs: &'args [WValue],
     descriptor: Arc<HostImportDescriptor<WB>>,
     record_types: Arc<MRecordTypes>,
-) -> Vec<WValue> {
+) -> anyhow::Result<Vec<WValue>> {
     let HostImportDescriptor {
         host_exported_func,
         argument_types,
@@ -91,7 +91,7 @@ async fn call_host_import<'args, WB: WasmBackend>(
         }
     };
 
-    lower_outputs::<WB>(&mut caller, memory, output).await
+    Ok(lower_outputs::<WB>(&mut caller, memory, output).await)
 }
 
 fn lift_inputs<WB: WasmBackend>(

@@ -98,7 +98,8 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         F: for<'c> Fn(
                 <WasmtimeWasmBackend as WasmBackend>::ImportCallContext<'c>,
                 &'c [WValue],
-            ) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'c>
+            )
+                -> Box<dyn Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c>
             + Sync
             + Send
             + 'static,
@@ -114,7 +115,7 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
                 Box::new(async move {
                     let caller = WasmtimeImportCallContext { inner: caller };
                     let args = process_func_args(args).map_err(|e| anyhow!(e))?;
-                    let results = std::pin::Pin::from(func(caller, &args)).await;
+                    let results = std::pin::Pin::from(func(caller, &args)).await?;
                     process_func_results(&results, results_out).map_err(|e| anyhow!(e))
                 })
             },
