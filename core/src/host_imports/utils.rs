@@ -47,7 +47,7 @@ pub(super) fn itypes_output_to_wtypes(itypes: &[IType]) -> Vec<WType> {
 /// Initialize Wasm function in form of Box<RefCell<Option<Func<'static, args, rets>>>>.
 /// This macro does not cache result.
 macro_rules! init_wasm_func {
-    ($func:ident, $ctx:ident, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
+    ($func:ident, $ctx:expr, $args:ty, $rets:ty, $func_name:ident, $ret_error_code: expr) => {
         let $func: TypedFunc<WB, $args, $rets> = match { $ctx.get_func($func_name) } {
             Ok(func) => func,
             Err(_) => return vec![WValue::I32($ret_error_code)],

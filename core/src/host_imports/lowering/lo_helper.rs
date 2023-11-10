@@ -15,7 +15,7 @@
  */
 
 use super::AllocateFunc;
-use crate::call_wasm_func;
+//use crate::call_wasm_func;
 
 use marine_wasm_backend_traits::DelayedContextLifetime;
 use marine_wasm_backend_traits::WasmBackend;
@@ -62,13 +62,13 @@ impl<
         M: Memory<MV, DelayedContextLifetime<WB>>,
     > Allocatable<MV, DelayedContextLifetime<WB>> for LoHelper<'s, WB, MV, M>
 {
-    async fn allocate(
+    async fn allocate<'ctx1, 'ctx2: 'ctx1>(
         &mut self,
-        store: &mut <WB as WasmBackend>::ContextMut<'_>,
+        store: &'ctx1 mut <WB as WasmBackend>::ContextMut<'ctx2>,
         size: u32,
         type_tag: u32,
     ) -> Result<(u32, MV), AllocatableError> {
-        let offset = call_wasm_func!(self.allocate_func, store, size as _, type_tag as _);
+        let offset = (self.allocate_func)(store, (size as _, type_tag as _)).await.unwrap();
         Ok((offset as u32, self.memory.view()))
     }
 }

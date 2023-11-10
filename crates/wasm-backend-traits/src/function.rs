@@ -22,6 +22,8 @@ use crate::RuntimeResult;
 use crate::WasmBackend;
 use crate::WValue;
 
+use futures::future::BoxFuture;
+
 use async_trait::async_trait;
 
 /// A host function ready to be used as an import for instantiating a module.
@@ -50,8 +52,7 @@ pub trait HostFunction<WB: WasmBackend>: AsyncFunction<WB> + Send + Sync + Clone
         F: for<'c> Fn(
                 <WB as WasmBackend>::ImportCallContext<'c>,
                 &'c [WValue],
-            )
-                -> Box<dyn Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c>
+            ) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
             + Sync
             + Send
             + 'static;

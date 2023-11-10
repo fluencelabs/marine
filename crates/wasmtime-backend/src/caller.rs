@@ -72,8 +72,8 @@ macro_rules! impl_func_getter {
             ) -> Result<TypedFunc<WasmtimeWasmBackend, $args, $rets>, ResolveError> {
                 fn create_func_getter_closure(
                     f: Arc<wasmtime::TypedFunc<$args, $rets>>,
-                ) -> impl for<'args> Fn(
-                    &'args mut WasmtimeContextMut<'args>,
+                ) -> impl for<'args, 'ctx2> Fn(
+                    &'args mut WasmtimeContextMut<'ctx2>,
                     $args,
                 ) -> TypedFuncFuture<'args, $rets>
                        + 'static {
@@ -85,8 +85,8 @@ macro_rules! impl_func_getter {
                     }
                 }
 
-                async fn call_typed_func<'args>(
-                    store: &'args mut WasmtimeContextMut<'args>,
+                async fn call_typed_func<'args, 'ctx2>(
+                    store: &'args mut WasmtimeContextMut<'ctx2>,
                     args: $args,
                     f: Arc<wasmtime::TypedFunc<$args, $rets>>,
                 ) -> RuntimeResult<$rets> {
@@ -143,8 +143,8 @@ impl<'c> FuncGetter<WasmtimeWasmBackend, (i32, i32), (i32)> for WasmtimeImportCa
     ) -> Result<TypedFunc<WasmtimeWasmBackend, (i32, i32), (i32)>, ResolveError> {
         fn create_func_getter_closure(
             f: Arc<wasmtime::TypedFunc<(i32, i32), (i32)>>,
-        ) -> impl for<'args> Fn(
-            &'args mut WasmtimeContextMut<'args>,
+        ) -> impl for<'args, 'ctx2> Fn(
+            &'args mut WasmtimeContextMut<'ctx2>,
             (i32, i32),
         ) -> TypedFuncFuture<'args, (i32)>
                + 'static {
@@ -156,8 +156,8 @@ impl<'c> FuncGetter<WasmtimeWasmBackend, (i32, i32), (i32)> for WasmtimeImportCa
             }
         }
 
-        async fn call_typed_func<'args>(
-            store: &'args mut WasmtimeContextMut<'args>,
+        async fn call_typed_func<'args, 'ctx2>(
+            store: &'args mut WasmtimeContextMut<'ctx2>,
             args: (i32, i32),
             f: Arc<wasmtime::TypedFunc<(i32, i32), (i32)>>,
         ) -> RuntimeResult<(i32)> {

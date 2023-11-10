@@ -100,7 +100,7 @@ impl std::fmt::Debug for FuncSig {
 pub type TypedFuncFuture<'c, Rets> = BoxFuture<'c, RuntimeResult<Rets>>;
 
 pub type TypedFunc<WB, Args, Rets> = Arc<
-    dyn for<'c> Fn(&'c mut <WB as WasmBackend>::ContextMut<'c>, Args) -> TypedFuncFuture<'c, Rets>
+    dyn for<'ctx1, 'ctx2> Fn(&'ctx1 mut <WB as WasmBackend>::ContextMut<'ctx2>, Args) -> TypedFuncFuture<'ctx1, Rets>
         + Sync
         + Send
         + 'static,

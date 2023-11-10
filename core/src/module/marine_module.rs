@@ -34,6 +34,9 @@ use marine_it_parser::extract_it_from_module;
 use marine_utils::SharedString;
 use wasmer_it::interpreter::AsyncInterpreter as Interpreter;
 
+use futures::future::BoxFuture;
+use futures::FutureExt;
+
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
@@ -348,9 +351,8 @@ impl<WB: WasmBackend> MModule<WB> {
             F: for<'c> Fn(
                     <WB as WasmBackend>::ImportCallContext<'c>,
                     &'c [WValue],
-                ) -> Box<
-                    dyn std::future::Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c,
-                > + Sync
+                ) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
+                + Sync
                 + Send
                 + 'static,
             WB: WasmBackend,
@@ -377,9 +379,8 @@ impl<WB: WasmBackend> MModule<WB> {
         ) -> impl for<'c> Fn(
             <WB as WasmBackend>::ImportCallContext<'c>,
             &'c [WValue],
-        ) -> Box<
-            dyn std::future::Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c,
-        > + Sync
+        ) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
+               + Sync
                + Send
                + 'static {
             let import_namespace = std::sync::Arc::new(import_namespace);
@@ -389,12 +390,12 @@ impl<WB: WasmBackend> MModule<WB> {
             //lifetimify_import_closure(
             move |mut ctx: <WB as WasmBackend>::ImportCallContext<'_>,
                   inputs: &[WValue]|
-                  -> Box<dyn std::future::Future<Output = anyhow::Result<Vec<WValue>>> + Send> {
+                  -> BoxFuture<'_, anyhow::Result<Vec<WValue>>> {
                 let import_namespace = import_namespace.clone();
                 let import_name = import_name.clone();
                 let wit_instance = wit_instance.clone();
                 let interpreter = interpreter.clone();
-                Box::new(async move {
+                async move {
                     /*                    let import_namespace = import_namespace.clone();
                     let import_name = import_name.clone();
                     let wit_instance = wit_instance.clone();
@@ -413,23 +414,23 @@ impl<WB: WasmBackend> MModule<WB> {
                         inputs
                     );
 
-                // copy here because otherwise wit_instance will be consumed by the closure
-                let wit_instance_callable = wit_instance.clone();
-                let wit_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
-                let outputs = unsafe {
-                    // error here will be propagated by the special error instruction
-                    interpreter
-                        .run(
-                            &wit_inputs,
-                            Arc::make_mut(&mut wit_instance_callable.assume_init()),
-                            &mut ctx.as_context_mut(),
-                        )
-                        .await
-                        .map_err(|e| {
-                            log::error!("interpreter got error {e}");
-                            anyhow::anyhow!(e)
-                        })?
-                };
+                    // copy here because otherwise wit_instance will be consumed by the closure
+                    let wit_instance_callable = wit_instance.clone();
+                    let wit_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
+                    let outputs = unsafe {
+                        // error here will be propagated by the special error instruction
+                        interpreter
+                            .run(
+                                &wit_inputs,
+                                Arc::make_mut(&mut wit_instance_callable.assume_init()),
+                                &mut ctx.as_context_mut(),
+                            )
+                            .await
+                            .map_err(|e| {
+                                log::error!("interpreter got error {e}");
+                                anyhow::anyhow!(e)
+                            })?
+                    };
 
                     log::trace!(
                         "\nraw import for {}.{} finished",
@@ -443,7 +444,8 @@ impl<WB: WasmBackend> MModule<WB> {
                         .iter()
                         .map(ival_to_wval)
                         .collect::<Vec<_>>())
-                })
+                }
+                .boxed()
             }
             //  )
         }

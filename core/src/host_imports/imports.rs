@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use std::future::Future;
 use super::*;
 use super::lifting::wvalues_to_ivalues;
 use super::lifting::LiHelper;
@@ -35,6 +34,9 @@ use marine_wasm_backend_traits::prelude::*;
 use it_lilo::lifter::ILifter;
 use it_lilo::lowerer::ILowerer;
 use it_memory_traits::Memory as ITMemory;
+
+use futures::future::BoxFuture;
+use futures::FutureExt;
 
 use std::sync::Arc;
 
@@ -91,7 +93,7 @@ async fn call_host_import<'args, WB: WasmBackend>(
         }
     };
 
-    Ok(lower_outputs::<WB>(&mut caller, memory, output).await)
+    Ok(lower_outputs::<'args, WB>(caller, memory, output).await)
 }
 
 fn lift_inputs<WB: WasmBackend>(
@@ -112,93 +114,121 @@ fn lift_inputs<WB: WasmBackend>(
     )
 }
 
-async fn lower_outputs<WB: WasmBackend>(
-    caller: &mut <WB as WasmBackend>::ImportCallContext<'_>,
+fn lower_outputs<'ctx, WB: WasmBackend>(
+    mut caller: <WB as WasmBackend>::ImportCallContext<'ctx>,
     memory: <WB as WasmBackend>::Memory,
     output: Option<IValue>,
-) -> Vec<WValue> {
-    init_wasm_func!(
-        allocate_func,
-        caller,
-        (i32, i32),
-        i32,
-        ALLOCATE_FUNC_NAME,
-        2
-    );
+) -> BoxFuture<'ctx, Vec<WValue>> {
+    async move {
+        init_wasm_func!(
+            allocate_func,
+            caller,
+            (i32, i32),
+            i32,
+            ALLOCATE_FUNC_NAME,
+            2
+        );
 
-    let is_record = matches!(&output, Some(IValue::Record(_)));
+        let is_record = matches!(&output, Some(IValue::Record(_)));
 
-    let memory_view = memory.view();
-    let mut lo_helper = LoHelper::new(allocate_func.clone(), memory);
-    let lowerer =
-        ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
-            .map_err(HostImportError::LowererError);
-    let lowering_result = match lowerer {
-        Ok(mut lowerer) => {
-            ivalue_to_wvalues(&mut caller.as_context_mut(), &mut lowerer, output).await
+        let memory_view = memory.view();
+        let mut lo_helper = LoHelper::new(allocate_func.clone(), memory);
+        let lowerer =
+            ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
+                .map_err(HostImportError::LowererError);
+        let lowering_result = async {
+             match lowerer {
+                Ok(mut lowerer) => { ;
+                    ivalue_to_wvalues(
+                        &mut caller.as_context_mut(),
+                        &mut lowerer,
+                        output,
+                    )
+                        .await
+                }
+                Err(e) => Err(e),
+            }
+        }.await;
+
+        let wvalues = match lowering_result {
+            Ok(wvalues) => wvalues,
+            Err(e) => {
+                log::error!("host closure failed: {}", e);
+
+                // returns 0 to a Wasm module in case of errors
+                //init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
+                //init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
+
+                let set_result_ptr_func: TypedFunc<WB, i32, ()> =
+                    match caller.get_func(SET_PTR_FUNC_NAME) {
+                        Ok(func) => func,
+                        Err(_) => return vec![WValue::I32(4)],
+                    };
+
+                let set_result_size_func: TypedFunc<WB, i32, ()> =
+                    match caller.get_func(SET_SIZE_FUNC_NAME) {
+                        Ok(func) => func,
+                        Err(_) => return vec![WValue::I32(4)],
+                    };
+
+                let mut store_ctx = caller.as_context_mut();
+                {
+                    set_result_ptr_func(&mut store_ctx, 0).await.unwrap();
+                }
+                set_result_size_func(&mut store_ctx, 0).await.unwrap();
+
+                return vec![WValue::I32(0)];
+            }
+        };
+
+        // TODO: refactor this when multi-value is supported
+        match wvalues.len() {
+            // strings and arrays are passed back to the Wasm module by pointer and size
+            // values used and consumed by set_result_ptr and set_result_size
+            2 => {
+                init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
+                init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
+
+                let mut store_ctx = caller.as_context_mut();
+                call_wasm_func!(
+                    set_result_ptr_func,
+                    &mut store_ctx,
+                    wvalues[0].to_u128() as _
+                );
+                call_wasm_func!(
+                    set_result_size_func,
+                    &mut store_ctx,
+                    wvalues[1].to_u128() as _
+                );
+                vec![]
+            }
+
+            // records lowerer returns only pointer which has to be used and consumed via set_result_ptr
+            1 if is_record => {
+                init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 3);
+
+                let mut store_ctx = caller.as_context_mut();
+                call_wasm_func!(
+                    set_result_ptr_func,
+                    &mut store_ctx,
+                    wvalues[0].to_u128() as _
+                );
+
+                vec![]
+            }
+
+            // primitive values are passed as is
+            1 => vec![wvalues[0].clone()],
+
+            // when None is passed
+            0 => vec![],
+
+            // at now while multi-values aren't supported ivalue_to_wvalues returns only Vec with
+            // 0, 1, 2 values
+            _ => unimplemented!(),
         }
-        Err(e) => Err(e),
-    };
-
-    let wvalues = match lowering_result {
-        Ok(wvalues) => wvalues,
-        Err(e) => {
-            log::error!("host closure failed: {}", e);
-
-            // returns 0 to a Wasm module in case of errors
-            init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
-            init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
-
-            call_wasm_func!(set_result_ptr_func, &mut caller.as_context_mut(), 0);
-            call_wasm_func!(set_result_size_func, &mut caller.as_context_mut(), 0);
-            return vec![WValue::I32(0)];
-        }
-    };
-
-    // TODO: refactor this when multi-value is supported
-    match wvalues.len() {
-        // strings and arrays are passed back to the Wasm module by pointer and size
-        // values used and consumed by set_result_ptr and set_result_size
-        2 => {
-            init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
-            init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
-
-            call_wasm_func!(
-                set_result_ptr_func,
-                &mut caller.as_context_mut(),
-                wvalues[0].to_u128() as _
-            );
-            call_wasm_func!(
-                set_result_size_func,
-                &mut caller.as_context_mut(),
-                wvalues[1].to_u128() as _
-            );
-            vec![]
-        }
-
-        // records lowerer returns only pointer which has to be used and consumed via set_result_ptr
-        1 if is_record => {
-            init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 3);
-
-            call_wasm_func!(
-                set_result_ptr_func,
-                &mut caller.as_context_mut(),
-                wvalues[0].to_u128() as _
-            );
-
-            vec![]
-        }
-
-        // primitive values are passed as is
-        1 => vec![wvalues[0].clone()],
-
-        // when None is passed
-        0 => vec![],
-
-        // at now while multi-values aren't supported ivalue_to_wvalues returns only Vec with
-        // 0, 1, 2 values
-        _ => unimplemented!(),
     }
+    .boxed()
 }
 
 fn output_type_to_types(output_type: Option<&IType>) -> Vec<IType> {
@@ -221,13 +251,16 @@ fn create_host_import_closure<WB: WasmBackend>(
 ) -> impl for<'args> Fn(
     <WB as WasmBackend>::ImportCallContext<'args>,
     &'args [WValue],
-) -> Box<dyn Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'args> {
+) -> BoxFuture<'args, anyhow::Result<Vec<WValue>>>
+       + Send
+       + Sync {
     move |call_context, inputs| {
-        Box::new(call_host_import(
+        call_host_import(
             call_context,
             inputs,
             descriptor.clone(),
             record_types.clone(),
-        ))
+        )
+        .boxed()
     }
 }

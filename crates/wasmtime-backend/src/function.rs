@@ -33,8 +33,8 @@ use marine_wasm_backend_traits::replace_with;
 
 use anyhow::anyhow;
 use async_trait::async_trait;
+use futures::future::BoxFuture;
 
-//use std::future::Future;
 #[derive(Clone)]
 pub struct WasmtimeFunction {
     pub(crate) inner: wasmtime::Func,
@@ -98,8 +98,7 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         F: for<'c> Fn(
                 <WasmtimeWasmBackend as WasmBackend>::ImportCallContext<'c>,
                 &'c [WValue],
-            )
-                -> Box<dyn Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c>
+            ) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
             + Sync
             + Send
             + 'static,
