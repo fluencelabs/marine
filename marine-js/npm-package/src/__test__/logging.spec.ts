@@ -68,7 +68,7 @@ describe.each([
         await marineService.init();
 
         // act
-        const res = marineService.call('log_' + level, [], defaultCallParameters);
+        const res = await marineService.call('log_' + level, [], defaultCallParameters);
 
         // assert
         expect(res).toBe(null);
@@ -98,11 +98,11 @@ describe.each([
         await marineService.init();
 
         // act
-        const res1 = marineService.call('log_error', [], defaultCallParameters);
-        const res2 = marineService.call('log_warn', [], defaultCallParameters);
-        const res3 = marineService.call('log_info', [], defaultCallParameters);
-        const res4 = marineService.call('log_debug', [], defaultCallParameters);
-        const res5 = marineService.call('log_trace', [], defaultCallParameters);
+        const res1 = await marineService.call('log_error', [], defaultCallParameters);
+        const res2 = await marineService.call('log_warn', [], defaultCallParameters);
+        const res3 = await marineService.call('log_info', [], defaultCallParameters);
+        const res4 = await marineService.call('log_debug', [], defaultCallParameters);
+        const res5 = await marineService.call('log_trace', [], defaultCallParameters);
 
         // assert
         expect(res1).toBe(null);

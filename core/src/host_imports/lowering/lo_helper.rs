@@ -68,7 +68,9 @@ impl<
         size: u32,
         type_tag: u32,
     ) -> Result<(u32, MV), AllocatableError> {
-        let offset = (self.allocate_func)(store, (size as _, type_tag as _)).await.unwrap();
+        let offset = (self.allocate_func)(store, (size as _, type_tag as _))
+            .await
+            .unwrap();
         Ok((offset as u32, self.memory.view()))
     }
 }

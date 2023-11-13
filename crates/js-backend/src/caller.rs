@@ -18,10 +18,16 @@ use crate::JsContext;
 use crate::JsContextMut;
 use crate::JsInstance;
 use crate::JsWasmBackend;
+use crate::WasmExportFunction;
 
 use marine_wasm_backend_traits::impl_for_each_function_signature;
 use marine_wasm_backend_traits::replace_with;
 use marine_wasm_backend_traits::prelude::*;
+
+use futures::future::BoxFuture;
+use futures::FutureExt;
+
+use std::sync::Arc;
 
 pub struct JsImportCallContext {
     /// A pointer to store container that is needed to access memory and functions of an instance.
@@ -63,33 +69,24 @@ macro_rules! impl_func_getter {
             fn get_func(
                 &mut self,
                 name: &str,
-            ) -> Result<
-                Box<
-                    dyn FnMut(&mut JsContextMut<'_>, ($(replace_with!($args -> i32)),*)) -> Result<(), RuntimeError>
-                        + Sync
-                        + Send
-                        + 'static,
-                >,
-                ResolveError,
-            > {
+            ) -> Result<TypedFunc<JsWasmBackend, ($(replace_with!($args -> i32)),*), ()>, ResolveError,> {
+                fn gen_typed_fn_closure(func: WasmExportFunction) -> impl for<'ctx1, 'ctx2> Fn(&'ctx1 mut JsContextMut<'ctx2>, ($(replace_with!($args -> i32)),*)) -> BoxFuture<'ctx1, Result<(), RuntimeError>> {
+                    let func = Arc::new(func);
+                    move |store: &mut JsContextMut<'_>, ($($args),*)| -> BoxFuture<'_, Result<(), RuntimeError>> {
+                        let func = func.clone();
+                        let args: [WValue; $num] = [$(Into::<WValue>::into($args)),*];
+                        call_wasm_export_func_ret_unit(func, store, args)
+                    }
+                }
+
                 let mut store = JsContextMut::from_raw_ptr(self.store_inner);
                 let func = self
                     .caller_instance
                     .get_function(&mut store, name)?;
 
-                let func = move |store: &mut JsContextMut<'_>, ($($args),*)| -> Result<(), RuntimeError> {
-                    let args: [WValue; $num] = [$(Into::<WValue>::into($args)),*];
-                    let res = func.call(store, &args)?;
-                    match res.len() {
-                        0 =>  Ok(()),
-                        x => Err(RuntimeError::IncorrectResultsNumber{
-                            expected: 0,
-                            actual: x,
-                        })
-                    }
-                };
+                let func = gen_typed_fn_closure(func);
 
-                Ok(Box::new(func))
+                Ok(Arc::new(func))
             }
         }
 
@@ -98,36 +95,63 @@ macro_rules! impl_func_getter {
             fn get_func(
                 &mut self,
                 name: &str,
-            ) -> Result<
-                Box<
-                    dyn FnMut(&mut JsContextMut<'_>, ($(replace_with!($args -> i32)),*)) -> Result<i32, RuntimeError>
-                        + Sync
-                        + Send
-                        + 'static,
-                >,
-                ResolveError,
-            > {
+            ) -> Result<TypedFunc<JsWasmBackend, ($(replace_with!($args -> i32)),*), i32>, ResolveError,> {
+                fn gen_typed_fn_closure(func: WasmExportFunction) -> impl for<'ctx1, 'ctx2> Fn(&'ctx1 mut JsContextMut<'ctx2>, ($(replace_with!($args -> i32)),*)) -> BoxFuture<'ctx1, Result<i32, RuntimeError>> + Sync + Send + 'static {
+                    let func = Arc::new(func);
+                    move |store: &mut JsContextMut<'_>, ($($args),*)| -> BoxFuture<'_, Result<i32, RuntimeError>> {
+                        let func = func.clone();
+                        let args: [WValue; $num] = [$(Into::<WValue>::into($args)),*];
+                        call_wasm_export_func_ret_i32(func, store, args)
+                    }
+                }
+
                 let mut store = JsContextMut::from_raw_ptr(self.store_inner);
                 let func = self
                     .caller_instance
                     .get_function(&mut store, name)?;
 
-                let func = move |store: &mut JsContextMut<'_>, ($($args),*)| -> Result<i32, RuntimeError> {
-                    let args: [WValue; $num] = [$(Into::<WValue>::into($args)),*];
-                    let res = func.call(store, &args)?;
-                    match res.len() {
-                        1 =>  Ok(res[0].to_i32()),
-                        x => Err(RuntimeError::IncorrectResultsNumber{
-                            expected: 1,
-                            actual: x,
-                        })
-                    }
-                };
+                let func = gen_typed_fn_closure(func);
 
-                Ok(Box::new(func))
+                Ok(Arc::new(func))
             }
         }
     });
 }
 
 impl_for_each_function_signature!(impl_func_getter);
+
+fn call_wasm_export_func_ret_i32<'ctx1, 'ctx2, const N_ARGS: usize>(
+    func: Arc<WasmExportFunction>,
+    store: &'ctx1 mut JsContextMut<'ctx2>,
+    args: [WValue; N_ARGS],
+) -> BoxFuture<'ctx1, Result<i32, RuntimeError>> {
+    async move {
+        let res = func.clone().call(store, &args).await?;
+        match res.len() {
+            1 => Ok(res[0].to_i32()),
+            x => Err(RuntimeError::IncorrectResultsNumber {
+                expected: 1,
+                actual: x,
+            }),
+        }
+    }
+    .boxed()
+}
+
+fn call_wasm_export_func_ret_unit<'ctx1, 'ctx2, const N_ARGS: usize>(
+    func: Arc<WasmExportFunction>,
+    store: &'ctx1 mut JsContextMut<'ctx2>,
+    args: [WValue; N_ARGS],
+) -> BoxFuture<'ctx1, Result<(), RuntimeError>> {
+    async move {
+        let res = func.clone().call(store, &args).await?;
+        match res.len() {
+            0 => Ok(()),
+            x => Err(RuntimeError::IncorrectResultsNumber {
+                expected: 0,
+                actual: x,
+            }),
+        }
+    }
+        .boxed()
+}

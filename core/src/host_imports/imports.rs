@@ -137,18 +137,14 @@ fn lower_outputs<'ctx, WB: WasmBackend>(
             ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
                 .map_err(HostImportError::LowererError);
         let lowering_result = async {
-             match lowerer {
-                Ok(mut lowerer) => { ;
-                    ivalue_to_wvalues(
-                        &mut caller.as_context_mut(),
-                        &mut lowerer,
-                        output,
-                    )
-                        .await
+            match lowerer {
+                Ok(mut lowerer) => {
+                    ivalue_to_wvalues(&mut caller.as_context_mut(), &mut lowerer, output).await
                 }
                 Err(e) => Err(e),
             }
-        }.await;
+        }
+        .await;
 
         let wvalues = match lowering_result {
             Ok(wvalues) => wvalues,

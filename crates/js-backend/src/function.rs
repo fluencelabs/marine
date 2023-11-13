@@ -34,6 +34,7 @@ use marine_wasm_backend_traits::prelude::*;
 use anyhow::anyhow;
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
+use futures::future::BoxFuture;
 
 // Safety: this is safe because its intended to run in single thread
 unsafe impl Send for HostImportFunction {}
@@ -192,8 +193,7 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
         F: for<'c> Fn(
                 <JsWasmBackend as WasmBackend>::ImportCallContext<'c>,
                 &'c [WValue],
-            )
-                -> Box<dyn Future<Output = anyhow::Result<Vec<WValue>>> + Send + 'c>
+            ) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
             + Sync
             + Send
             + 'static,
