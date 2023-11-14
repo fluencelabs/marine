@@ -2135,6 +2135,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "thiserror",
+ "tokio",
  "toml 0.5.11",
  "wasmer-interface-types-fl",
 ]

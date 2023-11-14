@@ -17,8 +17,8 @@
 use marine_core::MarineCore;
 use marine_core::IValue;
 
-#[test]
-pub fn records() {
+#[tokio::test]
+pub async fn records() {
     let effector_wasm_bytes = std::fs::read("../examples/records/artifacts/records_effector.wasm")
         .expect("../examples/records/artifacts/records_effector.wasm should presence");
 
@@ -26,19 +26,22 @@ pub fn records() {
         .expect("../examples/records/artifacts/records_pure.wasm should presence");
 
     let mut marine_core = MarineCore::new().unwrap();
-    let load_result = marine_core.load_module("pure", &pure_wasm_bytes, <_>::default());
+    let load_result = marine_core.load_module("pure", &pure_wasm_bytes, <_>::default()).await;
     assert!(load_result.is_err());
 
     marine_core
         .load_module("records_effector", &effector_wasm_bytes, <_>::default())
+        .await
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
     marine_core
         .load_module("records_pure", &pure_wasm_bytes, <_>::default())
+        .await
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
     let result = marine_core
         .call("records_pure", "invoke", &[])
+        .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     assert_eq!(

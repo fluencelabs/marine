@@ -21,8 +21,8 @@ use pretty_assertions::assert_eq;
 
 use std::path::PathBuf;
 
-#[test]
-pub fn call_parameters() {
+#[tokio::test]
+pub async fn call_parameters() {
     let call_parameters_config_path = "../examples/call_parameters/Config.toml";
 
     let call_parameters_config_raw = std::fs::read(call_parameters_config_path)
@@ -35,6 +35,7 @@ pub fn call_parameters() {
         Some(PathBuf::from("../examples/call_parameters/artifacts"));
 
     let mut faas = Marine::with_raw_config(call_parameters_config)
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let init_peer_id = "init_peer_id";
@@ -62,6 +63,7 @@ pub fn call_parameters() {
 
     let result = faas
         .call_with_ivalues("call_parameters", "call_parameters", &[], call_parameters)
+        .await
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
 
     assert_eq!(

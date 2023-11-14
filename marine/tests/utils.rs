@@ -19,6 +19,7 @@ macro_rules! call_faas {
     ($faas:expr, $module_name:expr, $func_name:expr, $args:expr) => {
         $faas
             .call_with_json($module_name, $func_name, $args, <_>::default())
+            .await
             .unwrap_or_else(|e| panic!("faas failed with {:?}", e))
     };
 }

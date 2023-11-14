@@ -23,8 +23,8 @@ use pretty_assertions::assert_eq;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-#[test]
-pub fn greeting() {
+#[tokio::test]
+pub async fn greeting() {
     let greeting_config_path = "../examples/greeting/Config.toml";
 
     let greeting_config_raw = std::fs::read(greeting_config_path)
@@ -35,6 +35,7 @@ pub fn greeting() {
     greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
     let mut faas = Marine::with_raw_config(greeting_config)
+        .await
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
     let result1 = faas
@@ -44,6 +45,7 @@ pub fn greeting() {
             &[IValue::String(String::from("Fluence"))],
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
     let result2 = faas
@@ -53,14 +55,15 @@ pub fn greeting() {
             &[IValue::String(String::from(""))],
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
     assert_eq!(result1, vec![IValue::String(String::from("Hi, Fluence"))]);
     assert_eq!(result2, vec![IValue::String(String::from("Hi, "))]);
 }
 
-#[test]
-pub fn get_interfaces() {
+#[tokio::test]
+pub async fn get_interfaces() {
     let greeting_config_path = "../examples/greeting/Config.toml";
 
     let greeting_config_raw = std::fs::read(greeting_config_path)
@@ -71,6 +74,7 @@ pub fn get_interfaces() {
     greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
     let faas = Marine::with_raw_config(greeting_config)
+        .await
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
     let interface = faas.get_interface();

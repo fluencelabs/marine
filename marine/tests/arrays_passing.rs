@@ -29,11 +29,12 @@ static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
         .expect("toml marine config should be created")
 });
 
-#[test]
-pub fn get_interfaces() {
+#[tokio::test]
+pub async fn get_interfaces() {
     use std::collections::HashSet;
 
     let marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let interface = marine.get_interface();
@@ -237,9 +238,10 @@ pub fn get_interfaces() {
     assert_eq!(effector_module_functions, functions);
 }
 
-#[test]
-pub fn i32_type() {
+#[tokio::test]
+pub async fn i32_type() {
     let mut marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let expected_result = json!([0, 1, 2, 3, 4, 0, 2]);
@@ -251,6 +253,7 @@ pub fn i32_type() {
             json!([[]]),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
     assert_eq!(result1, expected_result);
 
@@ -261,6 +264,7 @@ pub fn i32_type() {
             json!({ "arg": [] }),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
     assert_eq!(result2, expected_result);
 
@@ -272,21 +276,23 @@ pub fn i32_type() {
             json!([[1]]),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke i32_type: {:?}", e));
     assert_eq!(result3, expected_result);
 }
 
-#[test]
-pub fn i64_type() {
+#[tokio::test]
+pub async fn i64_type() {
     let mut marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 =
-        marine.call_with_json("arrays_passing_pure", "i64_type", json!({}), <_>::default());
+        marine.call_with_json("arrays_passing_pure", "i64_type", json!({}), <_>::default()).await;
     assert!(result1.is_err());
 
     let result2 =
-        marine.call_with_json("arrays_passing_pure", "i64_type", json!([]), <_>::default());
+        marine.call_with_json("arrays_passing_pure", "i64_type", json!([]), <_>::default()).await;
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 1, 2, 3, 4, 1, 1]);
@@ -298,6 +304,7 @@ pub fn i64_type() {
             json!({ "arg": [1] }),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke i64_type: {:?}", e));
     assert_eq!(result3, expected_result);
 
@@ -308,21 +315,23 @@ pub fn i64_type() {
             json!([[1]]),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke i64_type: {:?}", e));
     assert_eq!(result4, expected_result);
 }
 
-#[test]
-pub fn u32_type() {
+#[tokio::test]
+pub async fn u32_type() {
     let mut marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 =
-        marine.call_with_json("arrays_passing_pure", "u32_type", json!({}), <_>::default());
+        marine.call_with_json("arrays_passing_pure", "u32_type", json!({}), <_>::default()).await;
     assert!(result1.is_err());
 
     let result2 =
-        marine.call_with_json("arrays_passing_pure", "u32_type", json!([]), <_>::default());
+        marine.call_with_json("arrays_passing_pure", "u32_type", json!([]), <_>::default()).await;
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 13, 37, 2]);
@@ -339,17 +348,18 @@ pub fn u32_type() {
     assert_eq!(result4, expected_result);
 }
 
-#[test]
-pub fn u64_type() {
+#[tokio::test]
+pub async fn u64_type() {
     let mut marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 =
-        marine.call_with_json("arrays_passing_pure", "u64_type", json!({}), <_>::default());
+        marine.call_with_json("arrays_passing_pure", "u64_type", json!({}), <_>::default()).await;
     assert!(result1.is_err());
 
     let result2 =
-        marine.call_with_json("arrays_passing_pure", "u64_type", json!([]), <_>::default());
+        marine.call_with_json("arrays_passing_pure", "u64_type", json!([]), <_>::default()).await;
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 1, 2, 3, 4, 2]);
@@ -366,17 +376,18 @@ pub fn u64_type() {
     assert_eq!(result4, expected_result);
 }
 
-#[test]
-pub fn f64_type() {
+#[tokio::test]
+pub async fn f64_type() {
     let mut marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 =
-        marine.call_with_json("arrays_passing_pure", "f32_type", json!({}), <_>::default());
+        marine.call_with_json("arrays_passing_pure", "f32_type", json!({}), <_>::default()).await;
     assert!(result1.is_err());
 
     let result2 =
-        marine.call_with_json("arrays_passing_pure", "f32_type", json!([]), <_>::default());
+        marine.call_with_json("arrays_passing_pure", "f32_type", json!([]), <_>::default()).await;
     assert!(result2.is_err());
 
     let expected_result = json!([1.0, 0.0, 13.37, 1.0]);
@@ -393,9 +404,10 @@ pub fn f64_type() {
     assert_eq!(result4, expected_result);
 }
 
-#[test]
-pub fn string_type() {
+#[tokio::test]
+pub async fn string_type() {
     let mut marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine.call_with_json(
@@ -403,7 +415,7 @@ pub fn string_type() {
         "string_type",
         json!({}),
         <_>::default(),
-    );
+    ).await;
     assert!(result1.is_err());
 
     let result2 = marine.call_with_json(
@@ -411,7 +423,7 @@ pub fn string_type() {
         "string_type",
         json!([]),
         <_>::default(),
-    );
+    ).await;
     assert!(result2.is_err());
 
     let expected_result = json!(["Fluence", "marine", "from effector", "test"]);
@@ -433,9 +445,10 @@ pub fn string_type() {
     assert_eq!(result4, expected_result);
 }
 
-#[test]
-pub fn byte_type() {
+#[tokio::test]
+pub async fn byte_type() {
     let mut marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine.call_with_json(
@@ -443,7 +456,7 @@ pub fn byte_type() {
         "byte_type",
         json!({}),
         <_>::default(),
-    );
+    ).await;
     assert!(result1.is_err());
 
     let result2 = marine.call_with_json(
@@ -451,7 +464,7 @@ pub fn byte_type() {
         "byte_type",
         json!([]),
         <_>::default(),
-    );
+    ).await;
     assert!(result2.is_err());
 
     let expected_result = json!([0x13, 0x37, 0, 1, 2]);
@@ -472,9 +485,10 @@ pub fn byte_type() {
     assert_eq!(result4, expected_result);
 }
 
-#[test]
-pub fn inner_arrays_1_type() {
+#[tokio::test]
+pub async fn inner_arrays_1_type() {
     let mut marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine.call_with_json(
@@ -482,7 +496,7 @@ pub fn inner_arrays_1_type() {
         "inner_arrays_1",
         json!({}),
         <_>::default(),
-    );
+    ).await;
     assert!(result1.is_err());
 
     let result2 = marine.call_with_json(
@@ -490,7 +504,7 @@ pub fn inner_arrays_1_type() {
         "inner_arrays_1",
         json!([]),
         <_>::default(),
-    );
+    ).await;
     assert!(result2.is_err());
 
     let expected_result = json!([
@@ -519,9 +533,10 @@ pub fn inner_arrays_1_type() {
     assert_eq!(result4, expected_result);
 }
 
-#[test]
-pub fn inner_arrays_2_type() {
+#[tokio::test]
+pub async fn inner_arrays_2_type() {
     let mut marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine.call_with_json(
@@ -529,7 +544,7 @@ pub fn inner_arrays_2_type() {
         "inner_arrays_2",
         json!({}),
         <_>::default(),
-    );
+    ).await;
     assert!(result1.is_err());
 
     let result2 = marine.call_with_json(
@@ -537,7 +552,7 @@ pub fn inner_arrays_2_type() {
         "inner_arrays_2",
         json!([]),
         <_>::default(),
-    );
+    ).await;
     assert!(result2.is_err());
 
     let expected_result = json!([
@@ -591,9 +606,10 @@ pub fn inner_arrays_2_type() {
     assert_eq!(result4, expected_result);
 }
 
-#[test]
-pub fn bool_type() {
+#[tokio::test]
+pub async fn bool_type() {
     let mut marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine.call_with_json(
@@ -601,7 +617,7 @@ pub fn bool_type() {
         "bool_type",
         json!({}),
         <_>::default(),
-    );
+    ).await;
     assert!(result1.is_err());
 
     let result2 = marine.call_with_json(
@@ -609,7 +625,7 @@ pub fn bool_type() {
         "bool_type",
         json!([]),
         <_>::default(),
-    );
+    ).await;
     assert!(result2.is_err());
 
     let expected_result = json!([true, true, false, true, false, true]);
@@ -626,9 +642,10 @@ pub fn bool_type() {
     assert_eq!(result4, expected_result);
 }
 
-#[test]
-pub fn empty_type() {
+#[tokio::test]
+pub async fn empty_type() {
     let mut marine = Marine::with_raw_config(ARG_CONFIG.clone())
+        .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let expected_result = json!(["from effector"]);
@@ -646,6 +663,6 @@ pub fn empty_type() {
         "empty_type",
         json!([1]),
         <_>::default(),
-    );
+    ).await;
     assert!(result4.is_err());
 }
