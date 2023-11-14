@@ -20,7 +20,8 @@ use print_state::print_envs;
 use print_state::print_fs_state;
 use crate::ReplResult;
 
-use fluence_app_service::AppService;
+use marine_wasmtime_backend::WasmtimeWasmBackend;
+use fluence_app_service::{AppService, AppServiceFactory};
 use fluence_app_service::CallParameters;
 use fluence_app_service::SecurityTetraplet;
 use fluence_app_service::MarineModuleConfig;
@@ -64,10 +65,14 @@ struct CallModuleArguments<'args> {
     call_parameters: CallParameters,
 }
 
+const DEFAULT_TIMEOUT: std::time::Duration = std::time::Duration::from_millis(100);
 #[allow(clippy::upper_case_acronyms)]
 pub(super) struct REPL {
     app_service: AppService,
     service_working_dir: Option<String>,
+    app_service_factory: AppServiceFactory<WasmtimeWasmBackend>,
+    ticker_task_handle: std::thread::JoinHandle<()>,
+    timeout: std::time::Duration,
 }
 
 impl REPL {
@@ -76,11 +81,22 @@ impl REPL {
         working_dir: Option<String>,
         quiet: bool,
     ) -> ReplResult<Self> {
-        let app_service =
-            Self::create_app_service(config_file_path, working_dir.clone(), quiet).await?;
+        let app_service_factory = AppServiceFactory::<WasmtimeWasmBackend>::new()?;
+        let app_service = Self::create_app_service(
+            &app_service_factory,
+            config_file_path,
+            working_dir.clone(),
+            quiet,
+        )
+        .await?;
+
+        let handle = Self::spawn_ticker_thread(app_service_factory.clone());
         Ok(Self {
             app_service,
             service_working_dir: working_dir,
+            app_service_factory,
+            ticker_task_handle: handle,
+            timeout: DEFAULT_TIMEOUT,
         })
     }
 
@@ -108,7 +124,14 @@ impl REPL {
     }
 
     async fn new_service<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
-        match Self::create_app_service(args.next(), self.service_working_dir.clone(), false).await {
+        match Self::create_app_service(
+            &self.app_service_factory,
+            args.next(),
+            self.service_working_dir.clone(),
+            false,
+        )
+        .await
+        {
             Ok(service) => self.app_service = service,
             Err(e) => println!("failed to create a new application service: {}", e),
         };
@@ -187,12 +210,11 @@ impl REPL {
         };
 
         let start = Instant::now();
-        let result = match self
-            .app_service
-            .call_module(module_name, func_name, args, call_parameters)
-            .await
-        {
-            Ok(result) if show_result_arg => {
+        let call_future =
+            self.app_service
+                .call_module(module_name, func_name, args, call_parameters);
+        let result = match tokio::time::timeout(self.timeout, call_future).await {
+            Ok(Ok(result)) if show_result_arg => {
                 let elapsed_time = start.elapsed();
 
                 let result_string = match serde_json::to_string_pretty(&result) {
@@ -205,11 +227,12 @@ impl REPL {
                     result_string, elapsed_time
                 )
             }
-            Ok(_) => {
+            Ok(Ok(_)) => {
                 let elapsed_time = start.elapsed();
                 format!("call succeeded, elapsed time: {:?}", elapsed_time)
             }
-            Err(e) => format!("call failed with: {}", e),
+            Ok(Err(e)) => format!("call failed with: {}", e),
+            Err(elapsed) => format!("call interrupted: {} ({:#?})", elapsed, self.timeout),
         };
 
         println!("{}", result);
@@ -244,6 +267,7 @@ impl REPL {
     }
 
     async fn create_app_service<S: Into<PathBuf>>(
+        app_service_factory: &AppServiceFactory<WasmtimeWasmBackend>,
         config_file_path: Option<S>,
         working_dir: Option<String>,
         quiet: bool,
@@ -280,8 +304,11 @@ impl REPL {
             .and_then(|path| path.parent().map(PathBuf::from))
             .unwrap_or_default();
 
-        let app_service =
-            AppService::new_with_empty_facade(config, &service_id, HashMap::new()).await?;
+        let config = config.try_into()?;
+
+        let app_service = app_service_factory
+            .new_app_service_empty_facade(config, &service_id, HashMap::new())
+            .await?;
 
         let duration = start.elapsed();
 
@@ -293,6 +320,19 @@ impl REPL {
         }
 
         Ok(app_service)
+    }
+
+    fn spawn_ticker_thread(
+        factory: AppServiceFactory<WasmtimeWasmBackend>,
+    ) -> std::thread::JoinHandle<()> {
+        std::thread::spawn(move || {
+            let period = std::time::Duration::from_millis(10);
+
+            loop {
+                std::thread::sleep(period);
+                factory.increment_epoch();
+            }
+        })
     }
 }
 

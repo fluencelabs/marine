@@ -29,11 +29,13 @@ mod errors;
 mod service;
 mod service_interface;
 mod raw_toml_config;
+mod app_service_factory;
 
 pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 
 pub use errors::AppServiceError;
 pub use service::AppService;
+pub use app_service_factory::AppServiceFactory;
 pub use service_interface::FunctionSignature;
 pub use service_interface::RecordType;
 pub use service_interface::ServiceInterface;

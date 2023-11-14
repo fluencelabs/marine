@@ -45,9 +45,9 @@ pub struct WasmtimeContextMut<'s> {
 
 impl Store<WasmtimeWasmBackend> for WasmtimeStore {
     fn new(backend: &WasmtimeWasmBackend) -> Self {
-        Self {
-            inner: wasmtime::Store::new(&backend.engine, <_>::default()),
-        }
+        let mut store = wasmtime::Store::new(&backend.engine, <_>::default());
+        store.epoch_deadline_async_yield_and_update(1);
+        Self { inner: store }
     }
 }
 

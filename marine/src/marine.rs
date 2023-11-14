@@ -65,7 +65,7 @@ pub struct Marine<WB: WasmBackend> {
 
 impl<WB: WasmBackend> Marine<WB> {
     /// Creates Marine from config deserialized from TOML.
-    pub async fn with_raw_config<C>(config: C) -> MarineResult<Self>
+    pub async fn with_raw_config<C>(backend: WB, config: C) -> MarineResult<Self>
     where
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
@@ -79,11 +79,12 @@ impl<WB: WasmBackend> Marine<WB> {
             })
             .collect::<MarineResult<HashMap<String, PathBuf>>>()?;
 
-        Self::with_module_names::<MarineConfig<WB>>(&modules, config).await
+        Self::with_module_names::<MarineConfig<WB>>(backend, &modules, config).await
     }
 
     /// Creates Marine with given modules.
     pub async fn with_modules<C>(
+        backend: WB,
         mut modules: HashMap<String, Vec<u8>>,
         config: C,
     ) -> MarineResult<Self>
@@ -91,7 +92,7 @@ impl<WB: WasmBackend> Marine<WB> {
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
     {
-        let mut marine = MarineCore::new()?;
+        let mut marine = MarineCore::new(backend);
         let config = config.try_into()?;
         let call_parameters = Arc::<Mutex<CallParameters>>::default();
 
@@ -130,6 +131,7 @@ impl<WB: WasmBackend> Marine<WB> {
 
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
     pub async fn with_module_names<C>(
+        backend: WB,
         names: &HashMap<String, PathBuf>,
         config: C,
     ) -> MarineResult<Self>
@@ -140,7 +142,7 @@ impl<WB: WasmBackend> Marine<WB> {
         let config = config.try_into()?;
         let modules = load_modules_from_fs(names)?;
 
-        Self::with_modules::<MarineConfig<WB>>(modules, config).await
+        Self::with_modules::<MarineConfig<WB>>(backend, modules, config).await
     }
 
     /// Call a specified function of loaded on a startup module by its name.

@@ -88,6 +88,27 @@ impl WasmBackend for WasmtimeWasmBackend {
     }
 }
 
+impl WasmtimeWasmBackend {
+    pub fn increment_epoch(&self) {
+        self.engine.increment_epoch()
+    }
+
+    pub fn new_async_epoch_based() -> WasmBackendResult<Self> {
+        let mut config = wasmtime::Config::new();
+        config
+            .debug_info(false)
+            .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable)
+            .async_support(true)
+            .epoch_interruption(true)
+            .max_wasm_stack(2 * MB);
+
+        let engine =
+            wasmtime::Engine::new(&config).map_err(WasmBackendError::InitializationError)?;
+
+        Ok(Self { engine })
+    }
+}
+
 #[derive(Default)]
 pub struct StoreState {
     wasi: Vec<WasiCtx>, // wasmtime store does not release memory until drop, so do we

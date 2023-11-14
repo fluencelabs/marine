@@ -15,6 +15,7 @@ path = "src/main.rs"
 fluence-app-service = { path = "../../crates/fluence-app-service", version = "0.30.0", features = ["raw-module-api"] }
 marine-rs-sdk-main = { version = "0.10.0", default-features = false, features = ["logger"] }
 marine-wasm-backend-traits = {path = "../../crates/wasm-backend-traits", version = "0.4.0"}
+marine-wasmtime-backend = { version = "0.4.0", path = "../../crates/wasmtime-backend" }
 
 anyhow = "1.0.75"
 clap = "2.34.0"

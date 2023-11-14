@@ -22,7 +22,8 @@ use super::AppServiceError;
 
 #[cfg(feature = "raw-module-api")]
 use marine_wasm_backend_traits::WasiState;
-use marine::Marine;
+use marine_wasm_backend_traits::{WasmBackend};
+use marine::{Marine};
 use marine::MarineModuleConfig;
 use marine::IValue;
 
@@ -67,7 +68,43 @@ impl AppService {
         let service_id = service_id.into();
         Self::set_env_and_dirs(&mut config, service_id, envs)?;
 
-        let marine = Marine::with_raw_config(config.marine_config).await?;
+        let backend = marine::WasmBackend::new().unwrap();
+        let marine = Marine::with_raw_config(backend, config.marine_config).await?;
+
+        Ok(Self {
+            marine,
+            facade_module_name,
+        })
+    }
+
+    pub async fn new_with_backend<C, S>(
+        backend: marine::WasmBackend,
+        config: C,
+        service_id: S,
+        envs: HashMap<String, String>,
+    ) -> Result<Self>
+    where
+        C: TryInto<AppServiceConfig>,
+        S: Into<String>,
+        AppServiceError: From<C::Error>,
+    {
+        let mut config: AppServiceConfig = config.try_into()?;
+        let facade_module_name = config
+            .marine_config
+            .modules_config
+            .last()
+            .ok_or_else(|| {
+                AppServiceError::ConfigParseError(String::from(
+                    "config should contain at least one module",
+                ))
+            })?
+            .import_name
+            .clone();
+
+        let service_id = service_id.into();
+        Self::set_env_and_dirs(&mut config, service_id, envs)?;
+
+        let marine = Marine::with_raw_config(backend, config.marine_config).await?;
 
         Ok(Self {
             marine,
@@ -188,6 +225,7 @@ impl AppService {
 #[cfg(feature = "raw-module-api")]
 impl AppService {
     pub async fn new_with_empty_facade<C, S>(
+        backend: marine::WasmBackend,
         config: C,
         service_id: S,
         envs: HashMap<String, String>,
@@ -201,7 +239,7 @@ impl AppService {
         let service_id = service_id.into();
         Self::set_env_and_dirs(&mut config, service_id, envs)?;
 
-        let marine = Marine::with_raw_config(config.marine_config).await?;
+        let marine = Marine::with_raw_config(backend, config.marine_config).await?;
 
         Ok(Self {
             marine,

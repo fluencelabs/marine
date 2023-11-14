@@ -2290,6 +2290,7 @@ dependencies = [
  "log",
  "marine-rs-sdk-main 0.10.0",
  "marine-wasm-backend-traits",
+ "marine-wasmtime-backend",
  "rustop",
  "rustyline",
  "rustyline-derive",

@@ -60,14 +60,13 @@ pub struct MarineCore<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> MarineCore<WB> {
-    pub fn new() -> MResult<Self> {
-        let wasm_backend = WB::new()?;
+    pub fn new(wasm_backend: WB) -> Self {
         let store = <WB as WasmBackend>::Store::new(&wasm_backend);
-        Ok(Self {
+        Self {
             modules: HashMap::new(),
             wasm_backend,
             store: RefCell::new(store),
-        })
+        }
     }
 
     /// Invoke a function of a module inside Marine by given function name with given arguments.
@@ -226,5 +225,11 @@ impl<WB: WasmBackend> MarineCore<WB> {
             record_types,
             function_signatures,
         }
+    }
+}
+
+impl<WB: WasmBackend> Default for MarineCore<WB> {
+    fn default() -> Self {
+        Self::new(WB::default())
     }
 }

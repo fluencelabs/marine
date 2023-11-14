@@ -41,7 +41,7 @@ const HISTORY_FILE_PATH: &str = ".repl_history";
 
 pub(crate) type ReplResult<T> = std::result::Result<T, anyhow::Error>;
 
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread", worker_threads = 2)]
 async fn main() -> ReplResult<()> {
     init_logger();
 
