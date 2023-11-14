@@ -26,6 +26,7 @@ use crate::js_conversions::wval_from_js;
 use crate::js_conversions::wval_to_i32;
 use crate::store::JsStoreInner;
 use crate::store::FunctionHandle;
+use crate::single_shot_async_executor::execute_future_blocking;
 
 use marine_wasm_backend_traits::impl_for_each_function_signature;
 use marine_wasm_backend_traits::replace_with;
@@ -186,7 +187,7 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
 
     fn new_with_caller_async<F>(
         store: &mut impl AsContextMut<JsWasmBackend>,
-        sig: FuncSig,
+        signature: FuncSig,
         func: F,
     ) -> Self
     where
@@ -198,7 +199,21 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
             + Send
             + 'static,
     {
-        todo!()
+        // Safety: JsStoreInner is stored inside a Box and the Store is required by wasm-backend traits contract
+        // to be valid for function execution. So it is safe to capture this ptr into closure and deference there
+        let store_inner_ptr = store.as_context_mut().inner as *mut JsStoreInner;
+
+        let wrapped = wrap_raw_host_fn_async(signature.clone(), store_inner_ptr, func);
+        let closure = prepare_js_closure(wrapped);
+
+        let handle = store
+            .as_context_mut()
+            .inner
+            .store_function(StoredFunction::new(closure, signature));
+
+        Self {
+            store_handle: handle,
+        }
     }
 
     fn new_async<F>(store: &mut impl AsContextMut<JsWasmBackend>, sig: FuncSig, func: F) -> Self
@@ -268,6 +283,44 @@ where
 
     Box::new(func)
 }
+
+fn wrap_raw_host_fn_async<F>(
+    signature: FuncSig,
+    store_inner_ptr: *mut JsStoreInner,
+    raw_host_function: F,
+) -> Box<dyn FnMut(&Array) -> Array>
+    where
+        F: for<'c> Fn(JsImportCallContext, &[WValue]) -> BoxFuture<'_, anyhow::Result<Vec<WValue>>>
+        + Sync
+        + Send
+        + 'static,
+{
+    let func = move |args: &js_sys::Array| -> js_sys::Array {
+        log::debug!(
+            "function produced by JsFunction:::new_with_caller call, signature: {:?}",
+            signature
+        );
+
+        let store_inner = unsafe { &mut *store_inner_ptr };
+        let caller_instance = store_inner.wasm_call_stack.last().cloned().expect(
+            "Import cannot be called outside of an export call, when wasm_call_stack is empty",
+        );
+
+        let caller = JsImportCallContext {
+            store_inner,
+            caller_instance,
+        };
+
+        let args = wval_array_from_js_array(args, signature.params().iter());
+        let result = execute_future_blocking(raw_host_function(caller, &args)).unwrap_throw();
+
+        js_array_from_wval_array(&result)
+    };
+
+    Box::new(func)
+}
+
+
 
 fn prepare_js_closure(func: Box<dyn FnMut(&Array) -> Array>) -> js_sys::Function {
     let closure = Closure::wrap(func).into_js_value();

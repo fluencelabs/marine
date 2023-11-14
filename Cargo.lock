@@ -1962,6 +1962,7 @@ dependencies = [
  "serde-wasm-bindgen",
  "typed-index-collections",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "wasmparser 0.110.0",
  "web-sys",
 ]

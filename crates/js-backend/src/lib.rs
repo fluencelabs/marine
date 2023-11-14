@@ -25,6 +25,8 @@ mod wasi;
 mod module_info;
 mod js_conversions;
 
+mod single_shot_async_executor;
+
 use crate::store::JsContextMut;
 use crate::store::JsStore;
 use crate::module::JsModule;

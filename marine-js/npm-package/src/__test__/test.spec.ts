@@ -289,8 +289,9 @@ describe('Fluence app service tests', () => {
         await marineService.init();
 
 
-        expect(async () => await marineService.call('failing', [], defaultCallParameters))
-            .toThrow(new Error("engine error: Execution error: `call-core 6` failed while calling the local or import function `failing`: Unrecognized error: Failed to apply func"));
+        await expect(marineService.call('failing', [], defaultCallParameters))
+            .rejects
+            .toBe(new Error("engine error: Execution error: `call-core 6` failed while calling the local or import function `failing`: Unrecognized error: Failed to apply func"));
 
     });
 
