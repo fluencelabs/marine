@@ -289,8 +289,8 @@ fn wrap_raw_host_fn_async<F>(
     store_inner_ptr: *mut JsStoreInner,
     raw_host_function: F,
 ) -> Box<dyn FnMut(&Array) -> Array>
-    where
-        F: for<'c> Fn(JsImportCallContext, &[WValue]) -> BoxFuture<'_, anyhow::Result<Vec<WValue>>>
+where
+    F: for<'c> Fn(JsImportCallContext, &[WValue]) -> BoxFuture<'_, anyhow::Result<Vec<WValue>>>
         + Sync
         + Send
         + 'static,
@@ -319,8 +319,6 @@ fn wrap_raw_host_fn_async<F>(
 
     Box::new(func)
 }
-
-
 
 fn prepare_js_closure(func: Box<dyn FnMut(&Array) -> Array>) -> js_sys::Function {
     let closure = Closure::wrap(func).into_js_value();

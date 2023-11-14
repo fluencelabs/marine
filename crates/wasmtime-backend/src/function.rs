@@ -124,7 +124,17 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         WasmtimeFunction { inner: func }
     }
 
-    fn new_async<F>(store: &mut impl AsContextMut<WasmtimeWasmBackend>, sig: FuncSig, func: F) -> Self where F: for<'c> Fn(&'c [WValue]) -> Box<dyn Future<Output=Vec<WValue>> + Send + 'c> + Sync + Send + 'static {
+    fn new_async<F>(
+        store: &mut impl AsContextMut<WasmtimeWasmBackend>,
+        sig: FuncSig,
+        func: F,
+    ) -> Self
+    where
+        F: for<'c> Fn(&'c [WValue]) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'c>
+            + Sync
+            + Send
+            + 'static,
+    {
         todo!()
     }
 

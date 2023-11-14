@@ -153,5 +153,5 @@ fn call_wasm_export_func_ret_unit<'ctx1, 'ctx2, const N_ARGS: usize>(
             }),
         }
     }
-        .boxed()
+    .boxed()
 }

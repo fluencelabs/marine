@@ -22,4 +22,5 @@ use once_cell::sync::Lazy;
 use std::sync::Mutex;
 
 thread_local!(pub(crate) static MARINE_OLD: RefCell<Option<Marine<JsWasmBackend>>> = RefCell::new(None));
-pub(crate) static MARINE: Lazy<Mutex<Option<Marine<JsWasmBackend>>>> = Lazy::new(|| Mutex::new(None));
+pub(crate) static MARINE: Lazy<Mutex<Option<Marine<JsWasmBackend>>>> =
+    Lazy::new(|| Mutex::new(None));

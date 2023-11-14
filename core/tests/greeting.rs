@@ -60,7 +60,9 @@ pub async fn non_unique_module_name() {
         .await
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    let load_result = marine_core.load_module(&module_name, &GREETING_WASM_BYTES, <_>::default()).await;
+    let load_result = marine_core
+        .load_module(&module_name, &GREETING_WASM_BYTES, <_>::default())
+        .await;
     assert!(load_result.is_err());
     assert!(std::matches!(
         load_result.err().unwrap(),
@@ -82,23 +84,29 @@ pub async fn non_exist_module_func() {
     let function_name = "greeting";
     let non_exist_name = String::from("_");
 
-    let call_result1 = marine_core.call(
-        non_exist_name.as_str(),
-        function_name,
-        &[IValue::String(String::from("Fluence"))],
-    ).await;
+    let call_result1 = marine_core
+        .call(
+            non_exist_name.as_str(),
+            function_name,
+            &[IValue::String(String::from("Fluence"))],
+        )
+        .await;
 
-    let call_result2 = marine_core.call(
-        module_name,
-        non_exist_name.as_str(),
-        &[IValue::String(String::from("Fluence"))],
-    ).await;
+    let call_result2 = marine_core
+        .call(
+            module_name,
+            non_exist_name.as_str(),
+            &[IValue::String(String::from("Fluence"))],
+        )
+        .await;
 
-    let call_result3 = marine_core.call(
-        non_exist_name.as_str(),
-        non_exist_name.as_str(),
-        &[IValue::String(String::from("Fluence"))],
-    ).await;
+    let call_result3 = marine_core
+        .call(
+            non_exist_name.as_str(),
+            non_exist_name.as_str(),
+            &[IValue::String(String::from("Fluence"))],
+        )
+        .await;
 
     assert!(call_result1.is_err());
     assert!(matches!(

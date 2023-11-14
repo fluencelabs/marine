@@ -219,7 +219,8 @@ pub async fn call_module(
         .as_mut()
         .ok_or_else(|| JsError::new("marine is not initialized"))?;
 
-    let result = marine.call_with_json(module_name, function_name, args, call_parameters).await?;
+    let result = marine
+        .call_with_json(module_name, function_name, args, call_parameters)
+        .await?;
     serde_json::ser::to_string(&result).map_err(|e| JsError::new(&e.to_string()))
-
 }

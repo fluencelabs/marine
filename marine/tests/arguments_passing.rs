@@ -350,10 +350,14 @@ pub async fn all_types() {
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     async fn run_test(faas: &mut Marine, func_name: &str) {
-        let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default()).await;
+        let result1 = faas
+            .call_with_json(MODULE_NAME, func_name, json!({}), <_>::default())
+            .await;
         assert!(result1.is_err());
 
-        let result2 = faas.call_with_json(MODULE_NAME, func_name, json!([]), <_>::default()).await;
+        let result2 = faas
+            .call_with_json(MODULE_NAME, func_name, json!([]), <_>::default())
+            .await;
         assert!(result2.is_err());
 
         let expected_result = json!([
@@ -410,10 +414,14 @@ pub async fn i32_type() {
             .await
             .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-        let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default()).await;
+        let result1 = faas
+            .call_with_json(MODULE_NAME, func_name, json!({}), <_>::default())
+            .await;
         assert!(result1.is_err());
 
-        let result2 = faas.call_with_json(MODULE_NAME, func_name, json!([]), <_>::default()).await;
+        let result2 = faas
+            .call_with_json(MODULE_NAME, func_name, json!([]), <_>::default())
+            .await;
         assert!(result2.is_err());
 
         let expected_result = json!(3);
@@ -446,10 +454,14 @@ pub async fn i64_type() {
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     async fn run_test(faas: &mut Marine, func_name: &str) {
-        let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default()).await;
+        let result1 = faas
+            .call_with_json(MODULE_NAME, func_name, json!({}), <_>::default())
+            .await;
         assert!(result1.is_err());
 
-        let result2 = faas.call_with_json(MODULE_NAME, func_name, json!([]), <_>::default()).await;
+        let result2 = faas
+            .call_with_json(MODULE_NAME, func_name, json!([]), <_>::default())
+            .await;
         assert!(result2.is_err());
 
         let expected_result = json!(3);
@@ -482,10 +494,14 @@ pub async fn u32_type() {
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     async fn run_test(faas: &mut Marine, func_name: &str) {
-        let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default()).await;
+        let result1 = faas
+            .call_with_json(MODULE_NAME, func_name, json!({}), <_>::default())
+            .await;
         assert!(result1.is_err());
 
-        let result2 = faas.call_with_json(MODULE_NAME, func_name, json!([]), <_>::default()).await;
+        let result2 = faas
+            .call_with_json(MODULE_NAME, func_name, json!([]), <_>::default())
+            .await;
         assert!(result2.is_err());
 
         let expected_result = json!(3);
@@ -507,10 +523,14 @@ pub async fn u64_type() {
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     async fn run_test(faas: &mut Marine, func_name: &str) {
-        let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default()).await;
+        let result1 = faas
+            .call_with_json(MODULE_NAME, func_name, json!({}), <_>::default())
+            .await;
         assert!(result1.is_err());
 
-        let result2 = faas.call_with_json(MODULE_NAME, func_name, json!([]), <_>::default()).await;
+        let result2 = faas
+            .call_with_json(MODULE_NAME, func_name, json!([]), <_>::default())
+            .await;
         assert!(result2.is_err());
 
         let expected_result = json!(3);
@@ -532,10 +552,14 @@ pub async fn f32_type() {
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     async fn run_test(faas: &mut Marine, func_name: &str) {
-        let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default()).await;
+        let result1 = faas
+            .call_with_json(MODULE_NAME, func_name, json!({}), <_>::default())
+            .await;
         assert!(result1.is_err());
 
-        let result2 = faas.call_with_json(MODULE_NAME, func_name, json!([]), <_>::default()).await;
+        let result2 = faas
+            .call_with_json(MODULE_NAME, func_name, json!([]), <_>::default())
+            .await;
         assert!(result2.is_err());
 
         let expected_result = json!(3.0);
@@ -565,10 +589,14 @@ pub async fn f64_type() {
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     async fn run_test(faas: &mut Marine, func_name: &str) {
-        let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default()).await;
+        let result1 = faas
+            .call_with_json(MODULE_NAME, func_name, json!({}), <_>::default())
+            .await;
         assert!(result1.is_err());
 
-        let result2 = faas.call_with_json(MODULE_NAME, func_name, json!([]), <_>::default()).await;
+        let result2 = faas
+            .call_with_json(MODULE_NAME, func_name, json!([]), <_>::default())
+            .await;
         assert!(result2.is_err());
 
         let expected_result = json!(3.0);
@@ -598,10 +626,14 @@ pub async fn string_type() {
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     async fn run_test(faas: &mut Marine, func_name: &str) {
-        let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default()).await;
+        let result1 = faas
+            .call_with_json(MODULE_NAME, func_name, json!({}), <_>::default())
+            .await;
         assert!(result1.is_err());
 
-        let result2 = faas.call_with_json(MODULE_NAME, func_name, json!([]), <_>::default()).await;
+        let result2 = faas
+            .call_with_json(MODULE_NAME, func_name, json!([]), <_>::default())
+            .await;
         assert!(result2.is_err());
 
         let expected_result = json!("Fluence_Fluence_Fluence_Fluence");
@@ -624,10 +656,14 @@ pub async fn str_type() {
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let result1 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default()).await;
+    let result1 = faas
+        .call_with_json(MODULE_NAME, FUNC_NAME, json!({}), <_>::default())
+        .await;
     assert!(result1.is_err());
 
-    let result2 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default()).await;
+    let result2 = faas
+        .call_with_json(MODULE_NAME, FUNC_NAME, json!([]), <_>::default())
+        .await;
     assert!(result2.is_err());
 
     let expected_result = json!("Fluence_Fluence_Fluence_Fluence");
@@ -645,10 +681,14 @@ pub async fn bytearray_type() {
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     async fn run_test(faas: &mut Marine, func_name: &str) {
-        let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default()).await;
+        let result1 = faas
+            .call_with_json(MODULE_NAME, func_name, json!({}), <_>::default())
+            .await;
         assert!(result1.is_err());
 
-        let result2 = faas.call_with_json(MODULE_NAME, func_name, json!([]), <_>::default()).await;
+        let result2 = faas
+            .call_with_json(MODULE_NAME, func_name, json!([]), <_>::default())
+            .await;
         assert!(result2.is_err());
 
         let expected_result = json!([0x13, 0x37, 1, 1]);
@@ -673,10 +713,14 @@ pub async fn bool_type() {
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     async fn run_test(faas: &mut Marine, func_name: &str) {
-        let result1 = faas.call_with_json(MODULE_NAME, func_name, json!({}), <_>::default()).await;
+        let result1 = faas
+            .call_with_json(MODULE_NAME, func_name, json!({}), <_>::default())
+            .await;
         assert!(result1.is_err());
 
-        let result2 = faas.call_with_json(MODULE_NAME, func_name, json!([]), <_>::default()).await;
+        let result2 = faas
+            .call_with_json(MODULE_NAME, func_name, json!([]), <_>::default())
+            .await;
         assert!(result2.is_err());
 
         let expected_result = json!(true);
@@ -709,6 +753,8 @@ pub async fn empty_type() {
     let result3 = call_faas!(faas, MODULE_NAME, FUNC_NAME, json!([]));
     assert_eq!(result3, expected_result);
 
-    let result4 = faas.call_with_json(MODULE_NAME, FUNC_NAME, json!([1]), <_>::default()).await;
+    let result4 = faas
+        .call_with_json(MODULE_NAME, FUNC_NAME, json!([1]), <_>::default())
+        .await;
     assert!(result4.is_err());
 }

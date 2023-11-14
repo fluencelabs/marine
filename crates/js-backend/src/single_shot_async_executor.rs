@@ -17,7 +17,9 @@ impl ArcWake for DummyTask {
     fn wake_by_ref(_arc_self: &Arc<Self>) {}
 }
 
-pub(crate) fn execute_future_blocking(mut future: BoxFuture<anyhow::Result<Vec<WValue>>>) -> anyhow::Result<Vec<WValue>> {
+pub(crate) fn execute_future_blocking(
+    mut future: BoxFuture<anyhow::Result<Vec<WValue>>>,
+) -> anyhow::Result<Vec<WValue>> {
     let task = Arc::new(DummyTask());
     let waker = waker_ref(&task);
     let context = &mut Context::from_waker(&waker);
@@ -27,7 +29,7 @@ pub(crate) fn execute_future_blocking(mut future: BoxFuture<anyhow::Result<Vec<W
             Poll::Pending => continue,
             Poll::Ready(value) => {
                 result = value;
-                break
+                break;
             }
         }
     }

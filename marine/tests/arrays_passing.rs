@@ -287,12 +287,14 @@ pub async fn i64_type() {
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 =
-        marine.call_with_json("arrays_passing_pure", "i64_type", json!({}), <_>::default()).await;
+    let result1 = marine
+        .call_with_json("arrays_passing_pure", "i64_type", json!({}), <_>::default())
+        .await;
     assert!(result1.is_err());
 
-    let result2 =
-        marine.call_with_json("arrays_passing_pure", "i64_type", json!([]), <_>::default()).await;
+    let result2 = marine
+        .call_with_json("arrays_passing_pure", "i64_type", json!([]), <_>::default())
+        .await;
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 1, 2, 3, 4, 1, 1]);
@@ -326,12 +328,14 @@ pub async fn u32_type() {
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 =
-        marine.call_with_json("arrays_passing_pure", "u32_type", json!({}), <_>::default()).await;
+    let result1 = marine
+        .call_with_json("arrays_passing_pure", "u32_type", json!({}), <_>::default())
+        .await;
     assert!(result1.is_err());
 
-    let result2 =
-        marine.call_with_json("arrays_passing_pure", "u32_type", json!([]), <_>::default()).await;
+    let result2 = marine
+        .call_with_json("arrays_passing_pure", "u32_type", json!([]), <_>::default())
+        .await;
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 13, 37, 2]);
@@ -354,12 +358,14 @@ pub async fn u64_type() {
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 =
-        marine.call_with_json("arrays_passing_pure", "u64_type", json!({}), <_>::default()).await;
+    let result1 = marine
+        .call_with_json("arrays_passing_pure", "u64_type", json!({}), <_>::default())
+        .await;
     assert!(result1.is_err());
 
-    let result2 =
-        marine.call_with_json("arrays_passing_pure", "u64_type", json!([]), <_>::default()).await;
+    let result2 = marine
+        .call_with_json("arrays_passing_pure", "u64_type", json!([]), <_>::default())
+        .await;
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 1, 2, 3, 4, 2]);
@@ -382,12 +388,14 @@ pub async fn f64_type() {
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 =
-        marine.call_with_json("arrays_passing_pure", "f32_type", json!({}), <_>::default()).await;
+    let result1 = marine
+        .call_with_json("arrays_passing_pure", "f32_type", json!({}), <_>::default())
+        .await;
     assert!(result1.is_err());
 
-    let result2 =
-        marine.call_with_json("arrays_passing_pure", "f32_type", json!([]), <_>::default()).await;
+    let result2 = marine
+        .call_with_json("arrays_passing_pure", "f32_type", json!([]), <_>::default())
+        .await;
     assert!(result2.is_err());
 
     let expected_result = json!([1.0, 0.0, 13.37, 1.0]);
@@ -410,20 +418,24 @@ pub async fn string_type() {
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = marine.call_with_json(
-        "arrays_passing_pure",
-        "string_type",
-        json!({}),
-        <_>::default(),
-    ).await;
+    let result1 = marine
+        .call_with_json(
+            "arrays_passing_pure",
+            "string_type",
+            json!({}),
+            <_>::default(),
+        )
+        .await;
     assert!(result1.is_err());
 
-    let result2 = marine.call_with_json(
-        "arrays_passing_pure",
-        "string_type",
-        json!([]),
-        <_>::default(),
-    ).await;
+    let result2 = marine
+        .call_with_json(
+            "arrays_passing_pure",
+            "string_type",
+            json!([]),
+            <_>::default(),
+        )
+        .await;
     assert!(result2.is_err());
 
     let expected_result = json!(["Fluence", "marine", "from effector", "test"]);
@@ -451,20 +463,24 @@ pub async fn byte_type() {
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = marine.call_with_json(
-        "arrays_passing_pure",
-        "byte_type",
-        json!({}),
-        <_>::default(),
-    ).await;
+    let result1 = marine
+        .call_with_json(
+            "arrays_passing_pure",
+            "byte_type",
+            json!({}),
+            <_>::default(),
+        )
+        .await;
     assert!(result1.is_err());
 
-    let result2 = marine.call_with_json(
-        "arrays_passing_pure",
-        "byte_type",
-        json!([]),
-        <_>::default(),
-    ).await;
+    let result2 = marine
+        .call_with_json(
+            "arrays_passing_pure",
+            "byte_type",
+            json!([]),
+            <_>::default(),
+        )
+        .await;
     assert!(result2.is_err());
 
     let expected_result = json!([0x13, 0x37, 0, 1, 2]);
@@ -491,20 +507,24 @@ pub async fn inner_arrays_1_type() {
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = marine.call_with_json(
-        "arrays_passing_pure",
-        "inner_arrays_1",
-        json!({}),
-        <_>::default(),
-    ).await;
+    let result1 = marine
+        .call_with_json(
+            "arrays_passing_pure",
+            "inner_arrays_1",
+            json!({}),
+            <_>::default(),
+        )
+        .await;
     assert!(result1.is_err());
 
-    let result2 = marine.call_with_json(
-        "arrays_passing_pure",
-        "inner_arrays_1",
-        json!([]),
-        <_>::default(),
-    ).await;
+    let result2 = marine
+        .call_with_json(
+            "arrays_passing_pure",
+            "inner_arrays_1",
+            json!([]),
+            <_>::default(),
+        )
+        .await;
     assert!(result2.is_err());
 
     let expected_result = json!([
@@ -539,20 +559,24 @@ pub async fn inner_arrays_2_type() {
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = marine.call_with_json(
-        "arrays_passing_pure",
-        "inner_arrays_2",
-        json!({}),
-        <_>::default(),
-    ).await;
+    let result1 = marine
+        .call_with_json(
+            "arrays_passing_pure",
+            "inner_arrays_2",
+            json!({}),
+            <_>::default(),
+        )
+        .await;
     assert!(result1.is_err());
 
-    let result2 = marine.call_with_json(
-        "arrays_passing_pure",
-        "inner_arrays_2",
-        json!([]),
-        <_>::default(),
-    ).await;
+    let result2 = marine
+        .call_with_json(
+            "arrays_passing_pure",
+            "inner_arrays_2",
+            json!([]),
+            <_>::default(),
+        )
+        .await;
     assert!(result2.is_err());
 
     let expected_result = json!([
@@ -612,20 +636,24 @@ pub async fn bool_type() {
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
-    let result1 = marine.call_with_json(
-        "arrays_passing_pure",
-        "bool_type",
-        json!({}),
-        <_>::default(),
-    ).await;
+    let result1 = marine
+        .call_with_json(
+            "arrays_passing_pure",
+            "bool_type",
+            json!({}),
+            <_>::default(),
+        )
+        .await;
     assert!(result1.is_err());
 
-    let result2 = marine.call_with_json(
-        "arrays_passing_pure",
-        "bool_type",
-        json!([]),
-        <_>::default(),
-    ).await;
+    let result2 = marine
+        .call_with_json(
+            "arrays_passing_pure",
+            "bool_type",
+            json!([]),
+            <_>::default(),
+        )
+        .await;
     assert!(result2.is_err());
 
     let expected_result = json!([true, true, false, true, false, true]);
@@ -658,11 +686,13 @@ pub async fn empty_type() {
     let result3 = call_faas!(marine, "arrays_passing_pure", "empty_type", json!([]));
     assert_eq!(result3, expected_result);
 
-    let result4 = marine.call_with_json(
-        "arrays_passing_pure",
-        "empty_type",
-        json!([1]),
-        <_>::default(),
-    ).await;
+    let result4 = marine
+        .call_with_json(
+            "arrays_passing_pure",
+            "empty_type",
+            json!([1]),
+            <_>::default(),
+        )
+        .await;
     assert!(result4.is_err());
 }
