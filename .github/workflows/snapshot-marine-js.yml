@@ -55,7 +55,7 @@ jobs:
         uses: jetli/wasm-pack-action@v0.4.0
 
       - name: Setup node with self-hosted npm registry
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "16"
           registry-url: "https://npm.fluence.dev"
