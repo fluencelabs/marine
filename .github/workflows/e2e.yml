@@ -145,7 +145,7 @@ jobs:
       - spell
       - decider
 
-    uses: fluencelabs/nox/.github/workflows/build.yml@debug-spell-dtos
+    uses: fluencelabs/nox/.github/workflows/build.yml@master
     with:
       cargo-dependencies: |
         [
@@ -213,8 +213,6 @@ jobs:
     uses: fluencelabs/nox/.github/workflows/container.yml@master
     with:
       image-name: "docker.fluence.dev/marine"
-      flavour: "minimal"
-      nox-sha: "${{ needs.nox.outputs.nox-sha }}"
 
   nox-tests:
     name: "nox"
@@ -284,12 +282,12 @@ jobs:
       marine-js-version: "${{ needs.marine-js.outputs.version }}"
       avm-version: "${{ needs.aquavm-avm.outputs.version }}"
 
-  flox-snapshot:
-    name: "flox"
+  fcli-snapshot:
+    name: "cli"
     needs:
       - js-client
 
-    uses: fluencelabs/flox/.github/workflows/snapshot.yml@main
+    uses: fluencelabs/cli/.github/workflows/snapshot.yml@main
     with:
       js-client-snapshots: "${{ needs.js-client.outputs.js-client-snapshots }}"
 
@@ -307,22 +305,22 @@ jobs:
     name: "spell"
     needs:
       - nox-snapshot
-      - flox-snapshot
+      - fcli-snapshot
     uses: fluencelabs/spell/.github/workflows/tests.yml@main
     with:
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
-      flox-version: "${{ needs.flox-snapshot.outputs.version }}"
+      fcli-version: "${{ needs.fcli-snapshot.outputs.version }}"
 
   registry:
     needs:
       - nox-snapshot
-      - flox-snapshot
+      - fcli-snapshot
       - sqlite-wasm
 
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
       nox-image: "${{ needs.nox-snapshot.outputs.nox-image }}"
-      flox-version: "${{ needs.flox-snapshot.outputs.version }}"
+      fcli-version: "${{ needs.fcli-snapshot.outputs.version }}"
       cargo-dependencies: |
         [
           {
@@ -332,13 +330,13 @@ jobs:
           }
         ]
 
-  flox:
+  fcli:
     needs:
       - js-client
       - marine
       - nox-snapshot
 
-    uses: fluencelabs/flox/.github/workflows/tests.yml@main
+    uses: fluencelabs/cli/.github/workflows/tests.yml@main
     with:
       marine-version: "${{ needs.marine.outputs.version }}"
       mrepl-version: "${{ needs.marine.outputs.version }}"
