@@ -118,7 +118,9 @@ impl<WB: WasmBackend> Marine<WB> {
                 call_parameters.clone(),
                 &logger_filter,
             )?;
-            marine.load_module(module.import_name, &module_bytes, marine_module_config)?;
+            marine
+                .load_module(module.import_name, &module_bytes, marine_module_config)
+                .map_err(|e| check_for_oom_and_convert_error(&marine, e))?;
         }
 
         Ok(Self {
@@ -156,7 +158,7 @@ impl<WB: WasmBackend> Marine<WB> {
 
         self.core
             .call(module_name, func_name, args)
-            .map_err(Into::into)
+            .map_err(|e| check_for_oom_and_convert_error(&self.core, e))
     }
 
     /// Call a specified function of loaded on a startup module by its name.
@@ -191,7 +193,10 @@ impl<WB: WasmBackend> Marine<WB> {
             *cp = call_parameters;
         }
 
-        let result = self.core.call(module_name, func_name, &iargs)?;
+        let result = self
+            .core
+            .call(module_name, func_name, &iargs)
+            .map_err(|e| check_for_oom_and_convert_error(&self.core, e))?;
 
         json_to_marine_err!(
             ivalues_to_json(result, &output_types, &record_types),
@@ -295,7 +300,7 @@ impl<WB: WasmBackend> Marine<WB> {
         )?;
         self.core
             .load_module(name, wasm_bytes, marine_module_config)
-            .map_err(Into::into)
+            .map_err(|e| check_for_oom_and_convert_error(&self.core, e))
     }
 
     pub fn unload_module(&mut self, module_name: impl AsRef<str>) -> MarineResult<()> {
@@ -311,5 +316,18 @@ impl<WB: WasmBackend> Marine<WB> {
         self.core
             .module_wasi_state(module_name)
             .ok_or_else(|| MarineError::NoSuchModule(module_name.to_string()))
+    }
+}
+
+fn check_for_oom_and_convert_error<WB: WasmBackend>(
+    core: &MarineCore<WB>,
+    error: marine_core::MError,
+) -> MarineError {
+    match core.module_memory_stats().allocation_stats {
+        Some(stats) if stats.allocation_rejects > 0 => MarineError::HighProbabilityOOM {
+            original_error: error,
+            allocation_stats: stats,
+        },
+        _ => error.into(),
     }
 }

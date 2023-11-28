@@ -15,6 +15,7 @@
  */
 
 use marine_core::MError;
+use marine_wasm_backend_traits::MemoryAllocationStats;
 use it_json_serde::ITJsonSeDeError;
 
 use thiserror::Error;
@@ -77,6 +78,16 @@ pub enum MarineError {
     /// Marine errors.
     #[error("engine error: {0}")]
     EngineError(#[from] MError),
+
+    /// When marine returned an error and there was a rejected allocation,
+    /// the most probable cause is OOM. Otherwise this error is the same as EngineError.
+    /// This error is on marine-runtime level,
+    /// because otherwise it is impossible to check allocation stats after a failed instantiation.
+    #[error("Engine error when OOM suspected")]
+    HighProbabilityOOM {
+        original_error: MError,
+        allocation_stats: MemoryAllocationStats,
+    },
 }
 
 impl From<std::convert::Infallible> for MarineError {

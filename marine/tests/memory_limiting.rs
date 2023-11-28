@@ -117,7 +117,6 @@ pub fn triggered_by_two_modules() {
     let mut faas = Marine::with_raw_config(LIMIT_64_MIB.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-
     // make sure there is no free space
     fill_start_memory(&mut faas);
 
@@ -147,7 +146,6 @@ pub fn not_triggered_near_limit_two_modules() {
     let mut faas = Marine::with_raw_config(LIMIT_64_MIB.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-
     // make sure there is no free space
     fill_start_memory(&mut faas);
 
@@ -173,7 +171,6 @@ pub fn not_triggered_near_limit_two_modules() {
 pub fn triggered_by_large_allocation_single_module() {
     let mut faas = Marine::with_raw_config(LIMIT_64_MIB.clone())
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
-
 
     // make sure there is no free space
     fill_start_memory(&mut faas);
@@ -210,12 +207,14 @@ fn get_total_memory(faas: &marine::Marine) -> usize {
 fn fill_start_memory(marine: &mut Marine) {
     let start_memory = get_total_memory(marine);
     let pages_to_allocate = (start_memory / 2) / WASM_PAGE_SIZE;
-    let _ = marine.call_with_ivalues(
-        FACADE_MODULE,
-        "allocate_two_modules_64KB_pieces",
-        &[IValue::U32(pages_to_allocate as u32)],
-        CallParameters::default(),
-    ).expect("Should successfully allocate");
+    let _ = marine
+        .call_with_ivalues(
+            FACADE_MODULE,
+            "allocate_two_modules_64KB_pieces",
+            &[IValue::U32(pages_to_allocate as u32)],
+            CallParameters::default(),
+        )
+        .expect("Should successfully allocate");
 
     let new_memory = get_total_memory(marine);
     assert!(new_memory > start_memory)

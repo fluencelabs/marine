@@ -47,7 +47,7 @@ pub trait AsContextMut<WB: WasmBackend>: AsContext<WB> {
     fn as_context_mut(&mut self) -> <WB as WasmBackend>::ContextMut<'_>;
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct MemoryAllocationStats {
     pub allocation_rejects: u32,
     pub allocation_pattern: indexmap::IndexMap<usize, u32>,

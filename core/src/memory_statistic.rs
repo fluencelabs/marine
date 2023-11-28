@@ -37,8 +37,14 @@ pub struct MemoryStats<'module_name> {
 }
 
 impl<'module_name> MemoryStats<'module_name> {
-    pub fn new(modules: Vec<ModuleMemoryStat<'module_name>>, allocation_stats: Option<MemoryAllocationStats>) -> Self {
-        Self {modules, allocation_stats}
+    pub fn new(
+        modules: Vec<ModuleMemoryStat<'module_name>>,
+        allocation_stats: Option<MemoryAllocationStats>,
+    ) -> Self {
+        Self {
+            modules,
+            allocation_stats,
+        }
     }
 }
 
