@@ -21,7 +21,7 @@ use crate::WasmBackend;
 use async_trait::async_trait;
 
 /// A handle to compiled wasm module.
-#[async_trait]
+//#[async_trait]
 pub trait Module<WB: WasmBackend>: Sized {
     /// Compiles a wasm bytes into a module and extracts custom sections.
     fn new(store: &mut <WB as WasmBackend>::Store, wasm: &[u8]) -> ModuleCreationResult<Self>;

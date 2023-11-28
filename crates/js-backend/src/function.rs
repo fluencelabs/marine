@@ -238,7 +238,6 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
     }
 }
 
-#[async_trait::async_trait]
 impl AsyncFunction<JsWasmBackend> for HostImportFunction {
     async fn call_async<CTX>(&self, store: &mut CTX, args: &[WValue]) -> RuntimeResult<Vec<WValue>>
     where

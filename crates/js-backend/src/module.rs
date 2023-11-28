@@ -35,7 +35,7 @@ pub struct JsModule {
 unsafe impl Send for JsModule {}
 unsafe impl Sync for JsModule {}
 
-#[async_trait::async_trait]
+//#[async_trait::async_trait]
 impl Module<JsWasmBackend> for JsModule {
     fn new(_store: &mut JsStore, wasm: &[u8]) -> ModuleCreationResult<Self> {
         let data = Uint8Array::new_with_length(wasm.len() as u32);

@@ -151,36 +151,38 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
     }
 }
 
-#[async_trait]
+//#[async_trait]
 impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
     fn signature<'c>(&self, store: &mut impl AsContextMut<WasmtimeWasmBackend>) -> FuncSig {
         let ty = self.inner.ty(store.as_context_mut());
         fn_ty_to_sig(&ty)
     }
 
-    async fn call(
+    fn call<'store>(
         &self,
-        store: &mut impl AsContextMut<WasmtimeWasmBackend>,
+        store: &'store mut impl AsContextMut<WasmtimeWasmBackend>,
         args: &[WValue],
-    ) -> RuntimeResult<Vec<WValue>> {
+    ) -> impl Future<Output = RuntimeResult<Vec<WValue>>> + Send + 'store {
         let args = args.iter().map(wvalue_to_val).collect::<Vec<_>>();
 
         let results_count = self.inner.ty(store.as_context_mut()).results().len();
         let mut results = vec![wasmtime::Val::null(); results_count];
+        let func = self.inner.clone();
+        async move {
+            func
+                .call_async(store.as_context_mut().inner, &args, &mut results)
+                .await
+                .map_err(inspect_call_error)?;
 
-        self.inner
-            .call_async(store.as_context_mut().inner, &args, &mut results)
-            .await
-            .map_err(inspect_call_error)?;
-
-        results
-            .iter()
-            .map(val_to_wvalue)
-            .collect::<Result<Vec<_>, _>>()
+            results
+                .iter()
+                .map(val_to_wvalue)
+                .collect::<Result<Vec<_>, _>>()
+        }
     }
 }
 
-#[async_trait]
+//#[async_trait]
 impl AsyncFunction<WasmtimeWasmBackend> for WasmtimeFunction {
     async fn call_async<CTX>(&self, store: &mut CTX, args: &[WValue]) -> RuntimeResult<Vec<WValue>>
     where

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#![feature(async_fn_in_trait)]
+#![feature(return_position_impl_trait_in_trait)]
+
 mod caller;
 mod store;
 mod utils;

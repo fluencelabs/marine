@@ -31,7 +31,7 @@ pub struct WasmtimeModule {
     pub(crate) inner: wasmtime::Module,
 }
 
-#[async_trait]
+//#[async_trait]
 impl Module<WasmtimeWasmBackend> for WasmtimeModule {
     fn new(store: &mut WasmtimeStore, wasm: &[u8]) -> ModuleCreationResult<Self> {
         let module = wasmtime::Module::new(store.inner.engine(), wasm)
