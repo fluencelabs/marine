@@ -83,7 +83,7 @@ pub enum MarineError {
     /// the most probable cause is OOM. Otherwise this error is the same as EngineError.
     /// This error is on marine-runtime level,
     /// because otherwise it is impossible to check allocation stats after a failed instantiation.
-    #[error("Engine error when OOM suspected")]
+    #[error("Engine error when OOM suspected ({0} failed allocations), engine error: {original_error}", .allocation_stats.allocation_rejects)]
     HighProbabilityOOM {
         original_error: MError,
         allocation_stats: MemoryAllocationStats,
