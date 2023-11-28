@@ -322,12 +322,16 @@ impl<WB: WasmBackend> Marine<WB> {
 
 fn check_for_oom_and_convert_error<WB: WasmBackend>(
     core: &MarineCore<WB>,
-    error: marine_core::MError,
+    error: MError,
 ) -> MarineError {
     let allocation_stats = match core.module_memory_stats().allocation_stats {
-        Some(allocation_stats) if allocation_stats.allocation_rejects > 0 => allocation_stats,
+        Some(allocation_stats) => allocation_stats,
         _ => return error.into(),
     };
+
+    if allocation_stats.allocation_rejects == 0 {
+        return error.into();
+    }
 
     match error {
         MError::ITInstructionError(_)
