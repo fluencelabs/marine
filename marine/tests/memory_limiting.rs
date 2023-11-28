@@ -20,14 +20,6 @@ use marine::{CallParameters, IValue, Marine, MarineError};
 
 use once_cell::sync::Lazy;
 
-use marine_core::MError;
-use marine_wasm_backend_traits::WasmBackendError;
-use marine_wasm_backend_traits::InstantiationError;
-
-use wasmer_it::errors::InstructionErrorKind;
-use wasmer_it::errors::InstructionError;
-use wasmer_it::interpreter::Instruction;
-
 static FAIL_ON_STARTUP_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
     marine::TomlMarineConfig::load(
         "./tests/wasm_tests/memory_limiting/2MiB_limit_fail_on_startup.toml",
@@ -49,11 +41,14 @@ pub fn triggered_on_instantiation() {
     let faas = Marine::with_raw_config(FAIL_ON_STARTUP_CONFIG.clone());
 
     match faas {
-        Err(MarineError::EngineError(MError::WasmBackendError(
-            WasmBackendError::InstantiationError(InstantiationError::Other(_)),
-        ))) => return,
-        Ok(_) => panic!("Expected instantiation error, but it succeed"),
-        Err(e) => panic!("Expected isntantiation error, got: {:?}", e),
+        Err(MarineError::HighProbabilityOOM {
+            allocation_stats, ..
+        }) if allocation_stats.allocation_rejects > 0 => return,
+        Ok(_) => panic!("Expected HighProbabilityOOM instantiation error, but it succeed"),
+        Err(e) => panic!(
+            "Expected HighProbabilityOOM instantiation error, got: {:?}",
+            e
+        ),
     }
 }
 #[test]
@@ -76,12 +71,14 @@ pub fn triggered_by_single_module() {
 
     assert_eq!(get_total_memory(&faas), 64 * MB);
     match result {
-        Err(MarineError::EngineError(MError::ITInstructionError(InstructionError {
-            instruction: Instruction::CallCore { .. },
-            error_kind: InstructionErrorKind::LocalOrImportCall { .. },
-        }))) => return,
-        Err(e) => panic!("Expected LocalOrImport error, got different error: {:?}", e),
-        Ok(_) => panic!("Expected Trap, got success"),
+        Err(MarineError::HighProbabilityOOM {
+            allocation_stats, ..
+        }) if allocation_stats.allocation_rejects > 0 => return,
+        Err(e) => panic!(
+            "Expected HighProbabilityOOM error, got different error: {:?}",
+            e
+        ),
+        Ok(_) => panic!("Expected HighProbabilityOOM error, got success"),
     }
 }
 
@@ -132,12 +129,14 @@ pub fn triggered_by_two_modules() {
 
     assert_eq!(get_total_memory(&faas), 64 * MB);
     match result {
-        Err(MarineError::EngineError(MError::ITInstructionError(InstructionError {
-            instruction: Instruction::CallCore { .. },
-            error_kind: InstructionErrorKind::LocalOrImportCall { .. },
-        }))) => return,
-        Err(e) => panic!("Expected LocalOrImport error, got different error: {:?}", e),
-        Ok(_) => panic!("Expected Trap, got success"),
+        Err(MarineError::HighProbabilityOOM {
+            allocation_stats, ..
+        }) if allocation_stats.allocation_rejects > 0 => return,
+        Err(e) => panic!(
+            "Expected HighProbabilityOOM error, got different error: {:?}",
+            e
+        ),
+        Ok(_) => panic!("Expected HighProbabilityOOM, got success"),
     }
 }
 
@@ -187,12 +186,14 @@ pub fn triggered_by_large_allocation_single_module() {
 
     assert_eq!(get_total_memory(&faas), start_memory);
     match result {
-        Err(MarineError::EngineError(MError::ITInstructionError(InstructionError {
-            instruction: Instruction::CallCore { .. },
-            error_kind: InstructionErrorKind::LocalOrImportCall { .. },
-        }))) => return,
-        Err(e) => panic!("Expected LocalOrImport error, got different error: {:?}", e),
-        Ok(_) => panic!("Expected Trap, got success"),
+        Err(MarineError::HighProbabilityOOM {
+            allocation_stats, ..
+        }) if allocation_stats.allocation_rejects > 0 => return,
+        Err(e) => panic!(
+            "Expected HighProbabilityOOM error, got different error: {:?}",
+            e
+        ),
+        Ok(_) => panic!("Expected HighProbabilityOOM error, got success"),
     }
 }
 
