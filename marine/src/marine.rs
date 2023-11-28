@@ -31,6 +31,7 @@ use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::WasiState;
 
 use marine_core::DEFAULT_MEMORY_LIMIT;
+use marine_core::MError;
 use marine_core::generic::MarineCore;
 use marine_core::IFunctionArg;
 use marine_core::MarineCoreConfigBuilder;
@@ -323,10 +324,17 @@ fn check_for_oom_and_convert_error<WB: WasmBackend>(
     core: &MarineCore<WB>,
     error: marine_core::MError,
 ) -> MarineError {
-    match core.module_memory_stats().allocation_stats {
-        Some(stats) if stats.allocation_rejects > 0 => MarineError::HighProbabilityOOM {
+    let allocation_stats = match core.module_memory_stats().allocation_stats {
+        Some(allocation_stats) if allocation_stats.allocation_rejects > 0 => allocation_stats,
+        _ => return error.into(),
+    };
+
+    match error {
+        MError::ITInstructionError(_)
+        | MError::HostImportError(_)
+        | MError::WasmBackendError(_) => MarineError::HighProbabilityOOM {
+            allocation_stats,
             original_error: error,
-            allocation_stats: stats,
         },
         _ => error.into(),
     }
