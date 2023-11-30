@@ -22,8 +22,8 @@ use super::AppServiceError;
 
 #[cfg(feature = "raw-module-api")]
 use marine_wasm_backend_traits::WasiState;
-use marine_wasm_backend_traits::{WasmBackend};
-use marine::{Marine};
+use marine_wasm_backend_traits::WasmBackend;
+use marine::Marine;
 use marine::MarineModuleConfig;
 use marine::IValue;
 

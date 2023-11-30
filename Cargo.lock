@@ -1859,7 +1859,6 @@ name = "marine-core"
 version = "0.25.0"
 dependencies = [
  "anyhow",
- "async-trait",
  "bytes",
  "bytesize",
  "futures",
@@ -1951,7 +1950,6 @@ name = "marine-js-backend"
 version = "0.2.1"
 dependencies = [
  "anyhow",
- "async-trait",
  "derive_more",
  "futures",
  "it-memory-traits",
@@ -2180,7 +2178,6 @@ name = "marine-wasm-backend-traits"
 version = "0.4.0"
 dependencies = [
  "anyhow",
- "async-trait",
  "futures",
  "it-memory-traits",
  "multimap",
@@ -2195,7 +2192,6 @@ name = "marine-wasmtime-backend"
 version = "0.4.0"
 dependencies = [
  "anyhow",
- "async-trait",
  "futures",
  "it-memory-traits",
  "log",

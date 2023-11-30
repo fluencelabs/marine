@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use std::future::Future;
 use crate::AsContextMut;
 use crate::FuncSig;
 use crate::impl_for_each_function_signature;
@@ -23,6 +22,8 @@ use crate::WasmBackend;
 use crate::WValue;
 
 use futures::future::BoxFuture;
+
+use std::future::Future;
 
 /// A host function ready to be used as an import for instantiating a module.
 /// As it is only a handle to an object in `Store`, cloning is cheap.

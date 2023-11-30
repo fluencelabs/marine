@@ -25,7 +25,6 @@ wasmer-it = { package = "wasmer-interface-types-fl", version = "0.27.0" }
 it-lilo = "0.6.0"
 it-memory-traits = "0.4.0"
 bytesize = "1.2.0"
-async-trait = "0.1.73"
 futures = "0.3.29"
 
 multimap = "0.8.3"

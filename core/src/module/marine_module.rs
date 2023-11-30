@@ -85,23 +85,6 @@ impl<WB: WasmBackend> Callable<WB> {
             .to_owned();
         Ok(result)
     }
-    /*
-    pub async fn call_async(
-        &mut self,
-        store: &mut <WB as WasmBackend>::ContextMut<'_>,
-        args: &[IValue],
-    ) -> MResult<Vec<IValue>> {
-        use wasmer_it::interpreter::stack::Stackable;
-
-        let result = self
-            .it_module_func
-            .interpreter
-            .run(args, Arc::make_mut(&mut self.it_instance), store).await?
-            .as_slice()
-            .to_owned();
-
-        Ok(result)
-    }*/
 }
 
 type ExportFunctions<WB> = HashMap<SharedString, Arc<Callable<WB>>>;
@@ -396,10 +379,6 @@ impl<WB: WasmBackend> MModule<WB> {
                 let wit_instance = wit_instance.clone();
                 let interpreter = interpreter.clone();
                 async move {
-                    /*                    let import_namespace = import_namespace.clone();
-                    let import_name = import_name.clone();
-                    let wit_instance = wit_instance.clone();
-                    let interpreter = interpreter.clone();*/
                     let mut ctx = ctx.as_context_mut();
 
                     use wasmer_it::interpreter::stack::Stackable;

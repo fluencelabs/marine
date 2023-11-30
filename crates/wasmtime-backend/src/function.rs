@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-use std::future::Future;
-use std::pin::Pin;
-use std::task::Poll;
-use crate::WasmtimeContextMut;
 use crate::WasmtimeWasmBackend;
 use crate::WasmtimeImportCallContext;
+use crate::WasmtimeContextMut;
 use crate::val_to_wvalue;
 use crate::StoreState;
 use crate::sig_to_fn_ty;
@@ -34,6 +31,8 @@ use marine_wasm_backend_traits::replace_with;
 use anyhow::anyhow;
 use futures::future::BoxFuture;
 use futures::FutureExt;
+
+use std::future::Future;
 
 #[derive(Clone)]
 pub struct WasmtimeFunction {
@@ -288,18 +287,3 @@ where
 {
     func
 }
-
-/*
-struct FuncCallFuture<'f, F> {
-    caller: wasmtime::Caller<'f, StoreState>,
-    args: Vec<WValue>,
-    func: &'f F,
-}
-
-impl<F> std::future::Future for FuncCallFuture<F> {
-    type Output = ();
-
-    fn poll(self: Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> Poll<Self::Output> {
-        todo!()
-    }
-}*/

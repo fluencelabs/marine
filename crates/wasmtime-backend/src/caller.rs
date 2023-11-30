@@ -27,7 +27,6 @@ use wasmtime::AsContextMut as WasmtimeAsContextMut;
 use futures::future::BoxFuture;
 use futures::FutureExt;
 
-use std::future::Future;
 use std::sync::Arc;
 
 pub struct WasmtimeImportCallContext<'c> {
@@ -129,70 +128,9 @@ macro_rules! impl_func_getter {
 }
 
 // These signatures are sufficient for marine to work.
-//impl_func_getter!((i32, i32), i32);
+impl_func_getter!((i32, i32), i32);
 impl_func_getter!((i32, i32), ());
 impl_func_getter!(i32, i32);
 impl_func_getter!(i32, ());
 impl_func_getter!((), i32);
 impl_func_getter!((), ());
-
-impl<'c> FuncGetter<WasmtimeWasmBackend, (i32, i32), (i32)> for WasmtimeImportCallContext<'c> {
-    fn get_func(
-        &mut self,
-        name: &str,
-    ) -> Result<TypedFunc<WasmtimeWasmBackend, (i32, i32), (i32)>, ResolveError> {
-        fn create_func_getter_closure(
-            f: Arc<wasmtime::TypedFunc<(i32, i32), (i32)>>,
-        ) -> impl for<'args, 'ctx2> Fn(
-            &'args mut WasmtimeContextMut<'ctx2>,
-            (i32, i32),
-        ) -> TypedFuncFuture<'args, (i32)>
-               + 'static {
-            move |store: &mut WasmtimeContextMut<'_>,
-                  args: (i32, i32)|
-                  -> TypedFuncFuture<'_, (i32)> {
-                let f = f.clone();
-                call_typed_func(store, args, f).boxed()
-            }
-        }
-
-        async fn call_typed_func<'args, 'ctx2>(
-            store: &'args mut WasmtimeContextMut<'ctx2>,
-            args: (i32, i32),
-            f: Arc<wasmtime::TypedFunc<(i32, i32), (i32)>>,
-        ) -> RuntimeResult<(i32)> {
-            f.call_async(&mut store.inner, args).await.map_err(|e| {
-                if let Some(_) = e.downcast_ref::<wasmtime::Trap>() {
-                    RuntimeError::Trap(e)
-                } else {
-                    RuntimeError::Other(e)
-                }
-            })
-        }
-
-        let export = self
-            .inner
-            .get_export(name)
-            .ok_or(ResolveError::ExportNotFound(name.to_string()))?;
-
-        match export {
-            wasmtime::Extern::Func(f) => {
-                let f = f
-                    .typed(&mut self.inner)
-                    .map_err(|e| ResolveError::Other(e))?;
-                let f = Arc::new(f);
-                let closure = create_func_getter_closure(f);
-
-                Ok(Arc::new(closure))
-            }
-            wasmtime::Extern::Memory(_) => Err(ResolveError::ExportTypeMismatch {
-                expected: "function",
-                actual: "memory",
-            }),
-            _ => Err(ResolveError::ExportTypeMismatch {
-                expected: "function",
-                actual: "neither memory nor function",
-            }),
-        }
-    }
-}

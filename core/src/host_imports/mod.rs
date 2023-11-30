@@ -29,9 +29,6 @@ use marine_wasm_backend_traits::WValue;
 use marine_wasm_backend_traits::WType;
 
 type HostImportResult<T> = std::result::Result<T, HostImportError>;
-/*type WasmModuleFunc<WB, Args, Rets> = Box<
-    dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets> + Sync + Send,
->;*/
 type AllocateFunc<WB> = TypedFunc<WB, (i32, i32), i32>;
 
 const ALLOCATE_FUNC_NAME: &str = "allocate";

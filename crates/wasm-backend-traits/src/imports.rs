@@ -20,11 +20,11 @@ use crate::AsContext;
 use crate::WasmBackend;
 use crate::WType;
 
+use futures::future::BoxFuture;
+
 use std::borrow::Cow;
 use std::fmt::Formatter;
-use std::future::Future;
 use std::sync::Arc;
-use futures::future::BoxFuture;
 
 /// A "Linker" object, that is used to match functions with module imports during instantiation.
 /// Cloning is a cheap operation for this object. All clones refer to the same data in store.

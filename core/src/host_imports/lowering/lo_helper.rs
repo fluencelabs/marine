@@ -15,7 +15,6 @@
  */
 
 use super::AllocateFunc;
-//use crate::call_wasm_func;
 
 use marine_wasm_backend_traits::DelayedContextLifetime;
 use marine_wasm_backend_traits::WasmBackend;
@@ -31,22 +30,20 @@ use futures::FutureExt;
 use std::marker::PhantomData;
 
 pub(crate) struct LoHelper<
-    'c,
     WB: WasmBackend,
     MV: MemoryView<DelayedContextLifetime<WB>>,
     M: Memory<MV, DelayedContextLifetime<WB>>,
 > {
     allocate_func: AllocateFunc<WB>,
     memory: M,
-    _memory_view_phantom: PhantomData<(MV, &'c i32)>,
+    _memory_view_phantom: PhantomData<MV>,
 }
 
 impl<
-        'c,
         WB: WasmBackend,
         MV: MemoryView<DelayedContextLifetime<WB>>,
         M: Memory<MV, DelayedContextLifetime<WB>>,
-    > LoHelper<'c, WB, MV, M>
+    > LoHelper<WB, MV, M>
 {
     pub(crate) fn new(allocate_func: AllocateFunc<WB>, memory: M) -> Self {
         Self {
@@ -58,11 +55,10 @@ impl<
 }
 
 impl<
-        's,
         WB: WasmBackend,
         MV: MemoryView<DelayedContextLifetime<WB>>,
         M: Memory<MV, DelayedContextLifetime<WB>>,
-    > Allocatable<MV, DelayedContextLifetime<WB>> for LoHelper<'s, WB, MV, M>
+    > Allocatable<MV, DelayedContextLifetime<WB>> for LoHelper<WB, MV, M>
 {
     fn allocate<'this, 'ctx1: 'this, 'ctx2: 'ctx1>(
         &'this mut self,
