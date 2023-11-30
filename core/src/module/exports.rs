@@ -19,6 +19,9 @@ use super::IType;
 use super::IFunctionArg;
 use wasmer_it::interpreter::wasm;
 
+use futures::future::BoxFuture;
+use futures::FutureExt;
+
 // In current implementation export simply does nothing, because there is no more
 // explicit instruction call-export in this version of wasmer-interface-types,
 // but explicit Exports is still required by wasmer-interface-types::Interpreter.
@@ -42,7 +45,6 @@ impl ITExport {
     }
 }
 
-#[async_trait::async_trait]
 impl wasm::structures::Export for ITExport {
     fn name(&self) -> &str {
         self.name.as_str()
@@ -64,7 +66,10 @@ impl wasm::structures::Export for ITExport {
         &self.outputs
     }
 
-    async fn call_async(&self, arguments: &[IValue]) -> Result<Vec<IValue>, anyhow::Error> {
-        (self.function)(arguments)
+    fn call_async<'args>(
+        &'args self,
+        arguments: &'args [IValue],
+    ) -> BoxFuture<'args, Result<Vec<IValue>, anyhow::Error>> {
+        async move { (self.function)(arguments) }.boxed()
     }
 }

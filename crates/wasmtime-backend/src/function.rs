@@ -32,8 +32,8 @@ use marine_wasm_backend_traits::impl_for_each_function_signature;
 use marine_wasm_backend_traits::replace_with;
 
 use anyhow::anyhow;
-use async_trait::async_trait;
 use futures::future::BoxFuture;
+use futures::FutureExt;
 
 #[derive(Clone)]
 pub struct WasmtimeFunction {
@@ -151,26 +151,24 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
     }
 }
 
-//#[async_trait]
 impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
     fn signature<'c>(&self, store: &mut impl AsContextMut<WasmtimeWasmBackend>) -> FuncSig {
         let ty = self.inner.ty(store.as_context_mut());
         fn_ty_to_sig(&ty)
     }
 
-    fn call<'store>(
-        &self,
-        store: &'store mut impl AsContextMut<WasmtimeWasmBackend>,
-        args: &[WValue],
-    ) -> impl Future<Output = RuntimeResult<Vec<WValue>>> + Send + 'store {
+    fn call<'args>(
+        &'args self,
+        store: &'args mut impl AsContextMut<WasmtimeWasmBackend>,
+        args: &'args [WValue],
+    ) -> BoxFuture<'args, RuntimeResult<Vec<WValue>>> {
         let args = args.iter().map(wvalue_to_val).collect::<Vec<_>>();
 
         let results_count = self.inner.ty(store.as_context_mut()).results().len();
         let mut results = vec![wasmtime::Val::null(); results_count];
         let func = self.inner.clone();
         async move {
-            func
-                .call_async(store.as_context_mut().inner, &args, &mut results)
+            func.call_async(store.as_context_mut().inner, &args, &mut results)
                 .await
                 .map_err(inspect_call_error)?;
 
@@ -179,30 +177,37 @@ impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
                 .map(val_to_wvalue)
                 .collect::<Result<Vec<_>, _>>()
         }
+        .boxed()
     }
 }
 
-//#[async_trait]
 impl AsyncFunction<WasmtimeWasmBackend> for WasmtimeFunction {
-    async fn call_async<CTX>(&self, store: &mut CTX, args: &[WValue]) -> RuntimeResult<Vec<WValue>>
+    fn call_async<'args, CTX>(
+        &'args self,
+        store: &'args mut CTX,
+        args: &'args [WValue],
+    ) -> BoxFuture<'args, RuntimeResult<Vec<WValue>>>
     where
         CTX: AsContextMut<WasmtimeWasmBackend> + Send,
     {
-        let mut context = store.as_context_mut().inner;
+        async move {
+            let mut context = store.as_context_mut().inner;
 
-        let args = args.iter().map(wvalue_to_val).collect::<Vec<_>>();
-        let results_count = self.inner.ty(&mut context).results().len();
-        let mut results = vec![wasmtime::Val::null(); results_count];
+            let args = args.iter().map(wvalue_to_val).collect::<Vec<_>>();
+            let results_count = self.inner.ty(&mut context).results().len();
+            let mut results = vec![wasmtime::Val::null(); results_count];
 
-        self.inner
-            .call_async(&mut context, &args, &mut results)
-            .await
-            .map_err(inspect_call_error)?;
+            self.inner
+                .call_async(&mut context, &args, &mut results)
+                .await
+                .map_err(inspect_call_error)?;
 
-        results
-            .iter()
-            .map(val_to_wvalue)
-            .collect::<Result<Vec<_>, _>>()
+            results
+                .iter()
+                .map(val_to_wvalue)
+                .collect::<Result<Vec<_>, _>>()
+        }
+        .boxed()
     }
 }
 

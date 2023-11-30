@@ -25,6 +25,9 @@ use it_lilo::traits::AllocatableError;
 use it_memory_traits::MemoryView;
 use it_memory_traits::Memory;
 
+use futures::future::BoxFuture;
+use futures::FutureExt;
+
 use std::marker::PhantomData;
 
 pub(crate) struct LoHelper<
@@ -54,7 +57,6 @@ impl<
     }
 }
 
-#[async_trait::async_trait]
 impl<
         's,
         WB: WasmBackend,
@@ -62,15 +64,18 @@ impl<
         M: Memory<MV, DelayedContextLifetime<WB>>,
     > Allocatable<MV, DelayedContextLifetime<WB>> for LoHelper<'s, WB, MV, M>
 {
-    async fn allocate<'ctx1, 'ctx2: 'ctx1>(
-        &mut self,
+    fn allocate<'this, 'ctx1: 'this, 'ctx2: 'ctx1>(
+        &'this mut self,
         store: &'ctx1 mut <WB as WasmBackend>::ContextMut<'ctx2>,
         size: u32,
         type_tag: u32,
-    ) -> Result<(u32, MV), AllocatableError> {
-        let offset = (self.allocate_func)(store, (size as _, type_tag as _))
-            .await
-            .unwrap();
-        Ok((offset as u32, self.memory.view()))
+    ) -> BoxFuture<'this, Result<(u32, MV), AllocatableError>> {
+        async move {
+            let offset = (self.allocate_func)(store, (size as _, type_tag as _))
+                .await
+                .unwrap();
+            Ok((offset as u32, self.memory.view()))
+        }
+        .boxed()
     }
 }

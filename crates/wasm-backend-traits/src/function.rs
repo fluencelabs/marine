@@ -24,8 +24,6 @@ use crate::WValue;
 
 use futures::future::BoxFuture;
 
-//use async_trait::async_trait;
-
 /// A host function ready to be used as an import for instantiating a module.
 /// As it is only a handle to an object in `Store`, cloning is cheap.
 pub trait HostFunction<WB: WasmBackend>: AsyncFunction<WB> + Send + Sync + Clone {
@@ -80,7 +78,6 @@ pub trait HostFunction<WB: WasmBackend>: AsyncFunction<WB> + Send + Sync + Clone
 
 /// A Wasm function handle, it can be either a function from a host or an export from an `Instance`.
 /// As it is only a handle to an object in `Store`, cloning is cheap
-//#[async_trait]
 pub trait ExportFunction<WB: WasmBackend>: Send + Sync + Clone {
     /// Returns the signature of the function.
     /// The signature is constructed each time this function is called, so
@@ -92,16 +89,19 @@ pub trait ExportFunction<WB: WasmBackend>: Send + Sync + Clone {
     ///     If given a store different from the one that stores the function.
     /// # Errors:
     ///     See `RuntimeError` documentation.
-    fn call<'store>(
-        &self,
-        store: &'store mut impl AsContextMut<WB>,
-        args: &[WValue],
-    ) -> impl Future<Output = RuntimeResult<Vec<WValue>>> + Send + 'store;
+    fn call<'args>(
+        &'args self,
+        store: &'args mut impl AsContextMut<WB>,
+        args: &'args [WValue],
+    ) -> BoxFuture<'args, RuntimeResult<Vec<WValue>>>;
 }
 
-//#[async_trait]
 pub trait AsyncFunction<WB: WasmBackend> {
-    async fn call_async<CTX>(&self, store: &mut CTX, args: &[WValue]) -> RuntimeResult<Vec<WValue>>
+    fn call_async<'args, CTX>(
+        &'args self,
+        store: &'args mut CTX,
+        args: &'args [WValue],
+    ) -> BoxFuture<'args, RuntimeResult<Vec<WValue>>>
     where
         CTX: AsContextMut<WB> + Send;
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use std::future::Future;
 use crate::JsInstance;
 use crate::JsWasmBackend;
 use crate::JsImportCallContext;
@@ -33,9 +32,12 @@ use marine_wasm_backend_traits::replace_with;
 use marine_wasm_backend_traits::prelude::*;
 
 use anyhow::anyhow;
+use futures::future::BoxFuture;
+use futures::FutureExt;
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
-use futures::future::BoxFuture;
+
+use std::future::Future;
 
 // Safety: this is safe because its intended to run in single thread
 unsafe impl Send for HostImportFunction {}
@@ -239,7 +241,11 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
 }
 
 impl AsyncFunction<JsWasmBackend> for HostImportFunction {
-    async fn call_async<CTX>(&self, store: &mut CTX, args: &[WValue]) -> RuntimeResult<Vec<WValue>>
+    fn call_async<CTX>(
+        &self,
+        store: &mut CTX,
+        args: &[WValue],
+    ) -> BoxFuture<RuntimeResult<Vec<WValue>>>
     where
         CTX: AsContextMut<JsWasmBackend> + Send,
     {
@@ -331,28 +337,31 @@ fn prepare_js_closure(func: Box<dyn FnMut(&Array) -> Array>) -> js_sys::Function
 
     wrapper.bind1(&JsValue::UNDEFINED, &closure)
 }
-#[async_trait::async_trait]
+
 impl ExportFunction<JsWasmBackend> for WasmExportFunction {
     fn signature(&self, store: &mut impl AsContextMut<JsWasmBackend>) -> FuncSig {
         self.stored_mut(store.as_context_mut()).signature.clone()
     }
 
-    async fn call(
-        &self,
-        store: &mut impl AsContextMut<JsWasmBackend>,
-        args: &[WValue],
-    ) -> RuntimeResult<Vec<WValue>> {
-        store
-            .as_context_mut()
-            .inner
-            .wasm_call_stack
-            .push(self.bound_instance.clone());
+    fn call<'args>(
+        &'args self,
+        store: &'args mut impl AsContextMut<JsWasmBackend>,
+        args: &'args [WValue],
+    ) -> BoxFuture<'args, RuntimeResult<Vec<WValue>>> {
+        async move {
+            store
+                .as_context_mut()
+                .inner
+                .wasm_call_stack
+                .push(self.bound_instance.clone());
 
-        let result = self.call_inner(store, args);
+            let result = self.call_inner(store, args);
 
-        store.as_context_mut().inner.wasm_call_stack.pop();
+            store.as_context_mut().inner.wasm_call_stack.pop();
 
-        result
+            result
+        }
+        .boxed()
     }
 }
 
