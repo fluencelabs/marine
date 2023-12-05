@@ -129,12 +129,12 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         func: F,
     ) -> Self
     where
-        F: for<'c> Fn(&'c [WValue]) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'c>
+        F: for<'c> Fn(&'c [WValue]) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
             + Sync
             + Send
             + 'static,
     {
-        todo!()
+        Self::new_with_caller_async(store, sig, move |_caller, args| func(args))
     }
 
     fn new_typed<Params, Results, Env>(
@@ -168,36 +168,6 @@ impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         let func = self.inner.clone();
         async move {
             func.call_async(store.as_context_mut().inner, &args, &mut results)
-                .await
-                .map_err(inspect_call_error)?;
-
-            results
-                .iter()
-                .map(val_to_wvalue)
-                .collect::<Result<Vec<_>, _>>()
-        }
-        .boxed()
-    }
-}
-
-impl AsyncFunction<WasmtimeWasmBackend> for WasmtimeFunction {
-    fn call_async<'args, CTX>(
-        &'args self,
-        store: &'args mut CTX,
-        args: &'args [WValue],
-    ) -> BoxFuture<'args, RuntimeResult<Vec<WValue>>>
-    where
-        CTX: AsContextMut<WasmtimeWasmBackend> + Send,
-    {
-        async move {
-            let mut context = store.as_context_mut().inner;
-
-            let args = args.iter().map(wvalue_to_val).collect::<Vec<_>>();
-            let results_count = self.inner.ty(&mut context).results().len();
-            let mut results = vec![wasmtime::Val::null(); results_count];
-
-            self.inner
-                .call_async(&mut context, &args, &mut results)
                 .await
                 .map_err(inspect_call_error)?;
 

@@ -1665,7 +1665,6 @@ version = "0.6.0"
 dependencies = [
  "anyhow",
  "async-recursion",
- "async-trait",
  "fluence-it-types",
  "futures",
  "it-memory-traits",
@@ -1935,6 +1934,7 @@ dependencies = [
  "maplit",
  "marine-js-backend",
  "marine-runtime",
+ "marine-wasm-backend-traits",
  "once_cell",
  "serde",
  "serde-wasm-bindgen",
@@ -3991,7 +3991,6 @@ name = "wasmer-interface-types-fl"
 version = "0.27.0"
 dependencies = [
  "anyhow",
- "async-trait",
  "fluence-it-types",
  "futures",
  "it-lilo",

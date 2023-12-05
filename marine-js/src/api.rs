@@ -23,6 +23,7 @@ use marine::generic::MarineModuleConfig;
 use marine::generic::ModuleDescriptor;
 use marine::MarineWASIConfig;
 use marine_js_backend::JsWasmBackend;
+use marine_wasm_backend_traits::WasmBackend;
 
 use serde::Serialize;
 use serde::Deserialize;
@@ -31,7 +32,6 @@ use wasm_bindgen::prelude::*;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::ops::DerefMut;
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
@@ -161,7 +161,9 @@ pub async fn register_module(
 
     marine_logger().enable_service_logging(log_fn, module_names);
 
-    let new_marine = Marine::<JsWasmBackend>::with_modules(modules, marine_config).await?;
+    let backend = JsWasmBackend::new()?;
+
+    let new_marine = Marine::<JsWasmBackend>::with_modules(backend, modules, marine_config).await?;
 
     marine.replace(new_marine);
 

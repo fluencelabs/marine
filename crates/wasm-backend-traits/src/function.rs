@@ -23,11 +23,9 @@ use crate::WValue;
 
 use futures::future::BoxFuture;
 
-use std::future::Future;
-
 /// A host function ready to be used as an import for instantiating a module.
 /// As it is only a handle to an object in `Store`, cloning is cheap.
-pub trait HostFunction<WB: WasmBackend>: AsyncFunction<WB> + Send + Sync + Clone {
+pub trait HostFunction<WB: WasmBackend>: /*AsyncFunction<WB> + */Send + Sync + Clone {
     /// Creates a new function with dynamic signature.
     /// The signature check is performed at runtime.
     fn new<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
@@ -59,7 +57,7 @@ pub trait HostFunction<WB: WasmBackend>: AsyncFunction<WB> + Send + Sync + Clone
     /// Creates a new function with dynamic signature that needs a context.
     fn new_async<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(&'c [WValue]) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'c>
+        F: for<'c> Fn(&'c [WValue]) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
             + Sync
             + Send
             + 'static;
@@ -95,16 +93,6 @@ pub trait ExportFunction<WB: WasmBackend>: Send + Sync + Clone {
         store: &'args mut impl AsContextMut<WB>,
         args: &'args [WValue],
     ) -> BoxFuture<'args, RuntimeResult<Vec<WValue>>>;
-}
-
-pub trait AsyncFunction<WB: WasmBackend> {
-    fn call_async<'args, CTX>(
-        &'args self,
-        store: &'args mut CTX,
-        args: &'args [WValue],
-    ) -> BoxFuture<'args, RuntimeResult<Vec<WValue>>>
-    where
-        CTX: AsContextMut<WB> + Send;
 }
 
 /// A helper trait for creating a function with a static signature.

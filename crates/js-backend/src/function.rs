@@ -37,8 +37,6 @@ use futures::FutureExt;
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
 
-use std::future::Future;
-
 // Safety: this is safe because its intended to run in single thread
 unsafe impl Send for HostImportFunction {}
 unsafe impl Sync for HostImportFunction {}
@@ -220,12 +218,12 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
 
     fn new_async<F>(store: &mut impl AsContextMut<JsWasmBackend>, sig: FuncSig, func: F) -> Self
     where
-        F: for<'c> Fn(&'c [WValue]) -> Box<dyn Future<Output = Vec<WValue>> + Send + 'c>
+        F: for<'c> Fn(&'c [WValue]) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
             + Sync
             + Send
             + 'static,
     {
-        todo!()
+        Self::new_with_caller_async(store, sig, move |_caller, args| func(args))
     }
 
     fn new_typed<Params, Results, Env>(
@@ -237,19 +235,6 @@ impl HostFunction<JsWasmBackend> for HostImportFunction {
 
     fn signature(&self, store: &mut impl AsContextMut<JsWasmBackend>) -> FuncSig {
         self.stored_mut(store.as_context_mut()).signature.clone()
-    }
-}
-
-impl AsyncFunction<JsWasmBackend> for HostImportFunction {
-    fn call_async<CTX>(
-        &self,
-        store: &mut CTX,
-        args: &[WValue],
-    ) -> BoxFuture<RuntimeResult<Vec<WValue>>>
-    where
-        CTX: AsContextMut<JsWasmBackend> + Send,
-    {
-        todo!()
     }
 }
 
