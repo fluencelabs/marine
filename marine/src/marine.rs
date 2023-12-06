@@ -157,9 +157,13 @@ impl<WB: WasmBackend> Marine<WB> {
             *cp = call_parameters;
         }
 
-        self.core
+        let result = self.core
             .call(module_name, func_name, args)
-            .map_err(|e| check_for_oom_and_convert_error(&self.core, e))
+            .map_err(|e| check_for_oom_and_convert_error(&self.core, e))?;
+
+        self.core.clear_allocation_stats();
+
+        Ok(result)
     }
 
     /// Call a specified function of loaded on a startup module by its name.
