@@ -28,9 +28,9 @@ pub trait Store<WB: WasmBackend>: AsContextMut<WB> {
     // TODO: create general/backend-specific core config when new parameters are needed
     fn set_memory_limit(&mut self, memory_limit: u64);
 
-    fn report_memory_allocation_stats(&self) -> Option<MemoryAllocationStats> {
-        None
-    }
+    fn report_memory_allocation_stats(&self) -> Option<MemoryAllocationStats>;
+
+    fn clear_allocation_stats(&mut self);
 }
 
 /// A temporary immutable handle to store
@@ -50,5 +50,4 @@ pub trait AsContextMut<WB: WasmBackend>: AsContext<WB> {
 #[derive(Default, Clone, Debug)]
 pub struct MemoryAllocationStats {
     pub allocation_rejects: u32,
-    pub allocation_pattern: indexmap::IndexMap<usize, u32>,
 }

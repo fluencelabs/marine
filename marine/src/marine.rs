@@ -199,6 +199,8 @@ impl<WB: WasmBackend> Marine<WB> {
             .call(module_name, func_name, &iargs)
             .map_err(|e| check_for_oom_and_convert_error(&self.core, e))?;
 
+        self.core.clear_allocation_stats();
+
         json_to_marine_err!(
             ivalues_to_json(result, &output_types, &record_types),
             module_name.to_string(),

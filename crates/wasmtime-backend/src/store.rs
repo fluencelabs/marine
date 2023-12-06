@@ -67,6 +67,10 @@ impl Store<WasmtimeWasmBackend> for WasmtimeStore {
     fn report_memory_allocation_stats(&self) -> Option<MemoryAllocationStats> {
         Some(self.inner.data().limits.allocation_stats.clone())
     }
+
+    fn clear_allocation_stats(&mut self) {
+        self.inner.data_mut().limits.allocation_stats = MemoryAllocationStats::default();
+    }
 }
 
 impl MemoryLimiter {
@@ -91,12 +95,6 @@ impl ResourceLimiter for MemoryLimiter {
             .current_total_memory
             .checked_add(grow_size)
             .expect("Total memory can never reach 2^64");
-
-        *self
-            .allocation_stats
-            .allocation_pattern
-            .entry(grow_size as usize)
-            .or_insert(0) += 1;
 
         if new_total_memory > self.max_total_memory {
             self.allocation_stats.allocation_rejects += 1;

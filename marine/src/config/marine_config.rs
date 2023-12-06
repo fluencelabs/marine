@@ -188,6 +188,7 @@ use super::TomlMarineNamedModuleConfig;
 use crate::MarineError;
 use crate::MarineResult;
 use crate::config::as_relative_to_base;
+use crate::config::raw_marine_config::MemoryLimit;
 
 use itertools::Itertools;
 
@@ -219,9 +220,14 @@ impl<WB: WasmBackend> TryFrom<TomlMarineConfig> for MarineConfig<WB> {
             .map(|toml_module| ModuleDescriptor::try_from(context.wrapped(toml_module)))
             .collect::<MarineResult<Vec<_>>>()?;
 
+        let memory_limit = match toml_config.total_memory_limit {
+            MemoryLimit::Infinity => None,
+            MemoryLimit::Value(bytesize) => Some(bytesize.as_u64()),
+        };
+
         Ok(MarineConfig {
             modules_dir,
-            memory_limit: toml_config.total_memory_limit.map(|size| size.as_u64()),
+            memory_limit,
             modules_config,
             default_modules_config,
         })

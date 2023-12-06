@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+use marine_wasm_backend_traits::MemoryAllocationStats;
 
 use serde::Serialize;
 use serde::Deserialize;
 
 use std::fmt;
-//use std::ops::Deref;
-use marine_wasm_backend_traits::MemoryAllocationStats;
 
 /// Contains module name and a size of its linear memory in bytes.
 /// Please note that linear memory contains not only heap, but globals, shadow stack and so on.

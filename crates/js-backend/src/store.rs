@@ -114,6 +114,12 @@ impl Store<JsWasmBackend> for JsStore {
     }
 
     fn set_memory_limit(&mut self, _memory_limit: u64) {}
+
+    fn report_memory_allocation_stats(&self) -> Option<MemoryAllocationStats> {
+        None
+    }
+
+    fn clear_allocation_stats(&mut self) {}
 }
 
 impl<'c> Context<JsWasmBackend> for JsContext<'c> {}

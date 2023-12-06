@@ -193,6 +193,10 @@ impl<WB: WasmBackend> MarineCore<WB> {
         MemoryStats::new(records, allocation_stats)
     }
 
+    pub fn clear_allocation_stats(&mut self) {
+        self.store.borrow_mut().clear_allocation_stats()
+    }
+
     fn get_module_interface(module: &MModule<WB>) -> MModuleInterface<'_> {
         let record_types = module.export_record_types();
 

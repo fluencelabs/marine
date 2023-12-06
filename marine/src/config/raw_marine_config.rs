@@ -22,7 +22,6 @@ use serde_derive::Serialize;
 use serde_derive::Deserialize;
 use serde_with::serde_as;
 use serde_with::skip_serializing_none;
-use serde_with::DisplayFromStr;
 
 use std::path::Path;
 use std::path::PathBuf;
@@ -60,13 +59,10 @@ modules_dir = "wasm/artifacts/wasm_modules"
     mapped_dirs = {"tmp" = "/Users/user/tmp"}
  */
 
-#[serde_as]
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlMarineConfig {
     pub modules_dir: Option<PathBuf>,
-    #[serde_as(as = "Option<DisplayFromStr>")]
-    #[serde(default)]
-    pub total_memory_limit: Option<ByteSize>,
+    pub total_memory_limit: MemoryLimit,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub module: Vec<TomlMarineNamedModuleConfig>,
     pub default: Option<TomlMarineModuleConfig>,
@@ -134,6 +130,16 @@ pub struct TomlWASIConfig {
     pub preopened_files: Option<Vec<PathBuf>>,
     pub envs: Option<toml::value::Table>,
     pub mapped_dirs: Option<toml::value::Table>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[serde_as]
+pub enum MemoryLimit {
+    #[default]
+    #[serde(alias = "infinity")]
+    Infinity,
+    #[serde(untagged)]
+    Value(#[serde_as(as = "Option<DisplayFromStr>")] ByteSize),
 }
 
 #[cfg(test)]
