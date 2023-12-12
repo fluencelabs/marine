@@ -79,7 +79,7 @@ pub struct MarineConfig<WB: WasmBackend> {
     pub modules_dir: Option<PathBuf>,
 
     /// Total memory available for the service (in bytes)
-    pub memory_limit: Option<u64>,
+    pub total_memory_limit: Option<u64>,
 
     /// Settings for a module with particular name (not HashMap because the order is matter).
     pub modules_config: Vec<ModuleDescriptor<WB>>,
@@ -220,14 +220,14 @@ impl<WB: WasmBackend> TryFrom<TomlMarineConfig> for MarineConfig<WB> {
             .map(|toml_module| ModuleDescriptor::try_from(context.wrapped(toml_module)))
             .collect::<MarineResult<Vec<_>>>()?;
 
-        let memory_limit = match toml_config.total_memory_limit {
+        let total_memory_limit = match toml_config.total_memory_limit {
             MemoryLimit::Infinity => None,
             MemoryLimit::Value(bytesize) => Some(bytesize.as_u64()),
         };
 
         Ok(MarineConfig {
             modules_dir,
-            memory_limit,
+            total_memory_limit,
             modules_config,
             default_modules_config,
         })

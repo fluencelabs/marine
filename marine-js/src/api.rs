@@ -122,7 +122,7 @@ impl From<ApiServiceConfig> for MarineConfig<JsWasmBackend> {
 
         MarineConfig {
             modules_dir: None,
-            memory_limit: None,
+            total_memory_limit: None,
             modules_config,
             default_modules_config: value.default_modules_config.map(Into::into),
         }

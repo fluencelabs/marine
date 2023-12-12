@@ -64,7 +64,7 @@ impl<WB: WasmBackend> MarineCore<WB> {
     pub fn new(config: MarineCoreConfig) -> MResult<Self> {
         let wasm_backend = WB::new()?;
         let mut store = <WB as WasmBackend>::Store::new(&wasm_backend);
-        store.set_memory_limit(config.memory_limit);
+        store.set_total_memory_limit(config.total_memory_limit);
         Ok(Self {
             modules: HashMap::new(),
             wasm_backend,

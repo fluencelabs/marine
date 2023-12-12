@@ -95,22 +95,22 @@ impl<WB: WasmBackend> MModuleConfig<WB> {
 }
 
 pub struct MarineCoreConfig {
-    pub(crate) memory_limit: u64,
+    pub(crate) total_memory_limit: u64,
 }
 
 impl Default for MarineCoreConfig {
     fn default() -> Self {
         Self {
-            memory_limit: DEFAULT_MEMORY_LIMIT,
+            total_memory_limit: INFINITE_MEMORY_LIMIT,
         }
     }
 }
 
-pub const DEFAULT_MEMORY_LIMIT: u64 = 0xFFFFFFFFFFFFFFFF;
+pub const INFINITE_MEMORY_LIMIT: u64 = u64::MAX;
 
 #[derive(Default, Debug)]
 pub struct MarineCoreConfigBuilder {
-    memory_limit: Option<u64>,
+    total_memory_limit: Option<u64>,
 }
 
 impl MarineCoreConfigBuilder {
@@ -118,14 +118,14 @@ impl MarineCoreConfigBuilder {
         Self::default()
     }
 
-    pub fn memory_limit(mut self, memory_limit: u64) -> Self {
-        self.memory_limit = Some(memory_limit);
+    pub fn total_memory_limit(mut self, total_memory_limit: u64) -> Self {
+        self.total_memory_limit = Some(total_memory_limit);
         self
     }
 
     pub fn build(self) -> MarineCoreConfig {
         MarineCoreConfig {
-            memory_limit: self.memory_limit.unwrap_or(DEFAULT_MEMORY_LIMIT),
+            total_memory_limit: self.total_memory_limit.unwrap_or(INFINITE_MEMORY_LIMIT),
         }
     }
 }

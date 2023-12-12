@@ -113,7 +113,7 @@ impl Store<JsWasmBackend> for JsStore {
         }
     }
 
-    fn set_memory_limit(&mut self, _memory_limit: u64) {}
+    fn set_total_memory_limit(&mut self, _memory_limit: u64) {}
 
     fn report_memory_allocation_stats(&self) -> Option<MemoryAllocationStats> {
         None
