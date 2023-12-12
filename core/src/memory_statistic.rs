@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 use marine_wasm_backend_traits::MemoryAllocationStats;
 
 use serde::Serialize;
@@ -58,9 +59,17 @@ impl<'module_name> ModuleMemoryStat<'module_name> {
 
 impl fmt::Display for MemoryStats<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for record in self.modules.iter() {
-            let memory_size = bytesize::ByteSize::b(record.memory_size as u64);
-            writeln!(f, "{} - {}", record.name, memory_size)?;
+        for module in self.modules.iter() {
+            let memory_size = bytesize::ByteSize::b(module.memory_size as u64);
+            writeln!(f, "{} - {}", module.name, memory_size)?;
+        }
+
+        match &self.allocation_stats {
+            None => writeln!(
+                f,
+                "Allocation rejects - value is not recorded by current wasm backend"
+            )?,
+            Some(stats) => writeln!(f, "Allocation rejects - {}", stats.allocation_rejects)?,
         }
 
         Ok(())

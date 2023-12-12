@@ -46,8 +46,7 @@ pub struct WasmtimeContextMut<'s> {
 
 #[derive(Default)]
 pub struct MemoryLimiter {
-    max_total_memory: u64,
-    current_total_memory: u64,
+    remaining_memory: u64,
     allocation_stats: MemoryAllocationStats,
 }
 
@@ -76,9 +75,22 @@ impl Store<WasmtimeWasmBackend> for WasmtimeStore {
 impl MemoryLimiter {
     pub(crate) fn new(max_total_memory: u64) -> Self {
         Self {
-            current_total_memory: 0,
-            max_total_memory,
+            remaining_memory: max_total_memory,
             allocation_stats: <_>::default(),
+        }
+    }
+
+    pub(crate) fn count_allocation_reject(&mut self) {
+        self.allocation_stats.allocation_rejects += 1;
+    }
+
+    pub(crate) fn try_alloc(&mut self, amount: u64) -> bool {
+        if let Some(remaining_memory) = self.remaining_memory.checked_sub(amount) {
+            self.remaining_memory = remaining_memory;
+            true
+        } else {
+            self.count_allocation_reject();
+            false
         }
     }
 }
@@ -91,27 +103,17 @@ impl ResourceLimiter for MemoryLimiter {
         _maximum: Option<usize>,
     ) -> wasmtime::Result<bool> {
         let grow_size = (desired - current) as u64;
-        let new_total_memory = self
-            .current_total_memory
-            .checked_add(grow_size)
-            .expect("Total memory can never reach 2^64");
-
-        if new_total_memory > self.max_total_memory {
-            self.allocation_stats.allocation_rejects += 1;
-            return Ok(false);
-        }
-
-        self.current_total_memory = new_total_memory;
-        Ok(true)
+        Ok(self.try_alloc(grow_size))
     }
 
     fn table_growing(
         &mut self,
-        _current: u32,
-        _desired: u32,
+        current: u32,
+        desired: u32,
         _maximum: Option<u32>,
     ) -> wasmtime::Result<bool> {
-        Ok(true)
+        let grow_size = (desired - current) as usize * std::mem::size_of::<usize>();
+        Ok(self.try_alloc(grow_size as u64))
     }
 }
 

@@ -157,7 +157,8 @@ impl<WB: WasmBackend> Marine<WB> {
             *cp = call_parameters;
         }
 
-        let result = self.core
+        let result = self
+            .core
             .call(module_name, func_name, args)
             .map_err(|e| check_for_oom_and_convert_error(&self.core, e))?;
 

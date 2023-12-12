@@ -16,7 +16,10 @@
 
 mod utils;
 
-use marine::{CallParameters, IValue, Marine, MarineError};
+use marine::CallParameters;
+use marine::IValue;
+use marine::Marine;
+use marine::MarineError;
 
 use once_cell::sync::Lazy;
 
@@ -69,7 +72,8 @@ pub fn triggered_by_single_module() {
         CallParameters::default(),
     );
 
-    assert_eq!(get_total_memory(&faas), 64 * MB);
+    // a module can allocate 1 page less because of tables memory
+    assert_eq!(get_total_memory(&faas), 64 * MB - WASM_PAGE_SIZE);
     match result {
         Err(MarineError::HighProbabilityOOM {
             allocation_stats, ..
@@ -91,7 +95,8 @@ pub fn not_triggered_near_limit_single_module() {
     fill_start_memory(&mut faas);
 
     let start_memory: usize = get_total_memory(&faas);
-    let to_allocate_pages = (64 * MB - start_memory) / WASM_PAGE_SIZE;
+    // 1 page removed because of tables memory
+    let to_allocate_pages = (64 * MB - start_memory) / WASM_PAGE_SIZE - 1;
 
     let result = faas.call_with_ivalues(
         FACADE_MODULE,
@@ -100,7 +105,8 @@ pub fn not_triggered_near_limit_single_module() {
         CallParameters::default(),
     );
 
-    assert_eq!(get_total_memory(&faas), 64 * MB);
+    let expected_memory = start_memory + to_allocate_pages * WASM_PAGE_SIZE;
+    assert_eq!(get_total_memory(&faas), expected_memory);
     match result {
         Ok(_) => return,
         Err(e) => {
@@ -127,7 +133,8 @@ pub fn triggered_by_two_modules() {
         CallParameters::default(),
     );
 
-    assert_eq!(get_total_memory(&faas), 64 * MB);
+    // the service can allocate 1 page less because of tables memory
+    assert_eq!(get_total_memory(&faas), 64 * MB - WASM_PAGE_SIZE);
     match result {
         Err(MarineError::HighProbabilityOOM {
             allocation_stats, ..
@@ -150,7 +157,8 @@ pub fn not_triggered_near_limit_two_modules() {
 
     let start_memory: usize = get_total_memory(&faas);
 
-    let to_allocate = (64 * MB - start_memory) / 2 / WASM_PAGE_SIZE;
+    // two pages removed because of table memory
+    let to_allocate = (64 * MB - start_memory) / 2 / WASM_PAGE_SIZE - 2;
 
     let result = faas.call_with_ivalues(
         FACADE_MODULE,
@@ -159,7 +167,8 @@ pub fn not_triggered_near_limit_two_modules() {
         CallParameters::default(),
     );
 
-    assert_eq!(get_total_memory(&faas), 64 * MB);
+    let expected_memory = start_memory + to_allocate * WASM_PAGE_SIZE * 2;
+    assert_eq!(get_total_memory(&faas), expected_memory);
     match result {
         Ok(_) => return,
         Err(e) => panic!("Expected success, got error: {:?}", e),
