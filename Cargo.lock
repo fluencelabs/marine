@@ -1867,7 +1867,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "it-lilo",
  "marine-it-parser",
