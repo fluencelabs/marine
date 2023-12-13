@@ -21,6 +21,8 @@ use marine::IValue;
 use marine::Marine;
 use marine::MarineError;
 
+use bytesize::KIB;
+use bytesize::MIB;
 use once_cell::sync::Lazy;
 
 static FAIL_ON_STARTUP_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
@@ -35,9 +37,7 @@ static LIMIT_64_MIB: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
         .expect("toml faas config should be created")
 });
 const FACADE_MODULE: &str = "memory_limiting_pure";
-const KB: usize = 1024;
-const MB: usize = 1024 * KB;
-const WASM_PAGE_SIZE: usize = 64 * KB;
+const WASM_PAGE_SIZE: u64 = 64 * KIB;
 
 #[test]
 pub fn triggered_on_instantiation() {
@@ -62,8 +62,8 @@ pub fn triggered_by_single_module() {
     // make sure there is no free space
     fill_start_memory(&mut faas);
 
-    let start_memory: usize = get_total_memory(&faas);
-    let to_allocate = (64 * MB - start_memory) / WASM_PAGE_SIZE + 1;
+    let start_memory = get_total_memory(&faas);
+    let to_allocate = (64 * MIB - start_memory) / WASM_PAGE_SIZE + 1;
 
     let result = faas.call_with_ivalues(
         FACADE_MODULE,
@@ -73,7 +73,7 @@ pub fn triggered_by_single_module() {
     );
 
     // a module can allocate 1 page less because of tables memory
-    assert_eq!(get_total_memory(&faas), 64 * MB - WASM_PAGE_SIZE);
+    assert_eq!(get_total_memory(&faas), 64 * MIB - WASM_PAGE_SIZE);
     match result {
         Err(MarineError::HighProbabilityOOM {
             allocation_stats, ..
@@ -94,9 +94,9 @@ pub fn not_triggered_near_limit_single_module() {
     // make sure there is no free space
     fill_start_memory(&mut faas);
 
-    let start_memory: usize = get_total_memory(&faas);
+    let start_memory = get_total_memory(&faas);
     // 1 page removed because of tables memory
-    let to_allocate_pages = (64 * MB - start_memory) / WASM_PAGE_SIZE - 1;
+    let to_allocate_pages = (64 * MIB - start_memory) / WASM_PAGE_SIZE - 1;
 
     let result = faas.call_with_ivalues(
         FACADE_MODULE,
@@ -123,8 +123,8 @@ pub fn triggered_by_two_modules() {
     // make sure there is no free space
     fill_start_memory(&mut faas);
 
-    let start_memory: usize = get_total_memory(&faas);
-    let to_allocate = (64 * MB - start_memory) / 2 / WASM_PAGE_SIZE + 1;
+    let start_memory = get_total_memory(&faas);
+    let to_allocate = (64 * MIB - start_memory) / 2 / WASM_PAGE_SIZE + 1;
 
     let result = faas.call_with_ivalues(
         FACADE_MODULE,
@@ -134,7 +134,7 @@ pub fn triggered_by_two_modules() {
     );
 
     // the service can allocate 1 page less because of tables memory
-    assert_eq!(get_total_memory(&faas), 64 * MB - WASM_PAGE_SIZE);
+    assert_eq!(get_total_memory(&faas), 64 * MIB - WASM_PAGE_SIZE);
     match result {
         Err(MarineError::HighProbabilityOOM {
             allocation_stats, ..
@@ -155,10 +155,10 @@ pub fn not_triggered_near_limit_two_modules() {
     // make sure there is no free space
     fill_start_memory(&mut faas);
 
-    let start_memory: usize = get_total_memory(&faas);
+    let start_memory = get_total_memory(&faas);
 
     // two pages removed because of table memory
-    let to_allocate = (64 * MB - start_memory) / 2 / WASM_PAGE_SIZE - 2;
+    let to_allocate = (64 * MIB - start_memory) / 2 / WASM_PAGE_SIZE - 2;
 
     let result = faas.call_with_ivalues(
         FACADE_MODULE,
@@ -184,7 +184,7 @@ pub fn triggered_by_large_allocation_single_module() {
     fill_start_memory(&mut faas);
 
     let start_memory = get_total_memory(&faas);
-    let to_allocate = 128 * MB;
+    let to_allocate = 128 * MIB;
 
     let result = faas.call_with_ivalues(
         FACADE_MODULE,
@@ -206,11 +206,11 @@ pub fn triggered_by_large_allocation_single_module() {
     }
 }
 
-fn get_total_memory(faas: &marine::Marine) -> usize {
+fn get_total_memory(faas: &marine::Marine) -> u64 {
     faas.module_memory_stats()
         .modules
         .iter()
-        .map(|stats| stats.memory_size)
+        .map(|stats| stats.memory_size as u64)
         .sum()
 }
 
