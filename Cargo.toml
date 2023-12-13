@@ -32,6 +32,7 @@ members = [
     "marine",
     "marine/tests/wasm_tests/arguments_passing",
     "marine/tests/wasm_tests/arrays_passing",
+    "marine/tests/wasm_tests/memory_limiting",
     "marine/tests/wasm_tests/records_passing",
     "marine/tests/wasm_tests/wasi",
     "marine-js",

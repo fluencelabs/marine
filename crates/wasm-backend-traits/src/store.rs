@@ -24,6 +24,13 @@ use crate::WasmBackend;
 /// Most of the functions in this crate require a handle to `Store` to work.
 pub trait Store<WB: WasmBackend>: AsContextMut<WB> {
     fn new(backend: &WB) -> Self;
+
+    // TODO: create general/backend-specific core config when new parameters are needed
+    fn set_total_memory_limit(&mut self, total_memory_limit: u64);
+
+    fn report_memory_allocation_stats(&self) -> Option<MemoryAllocationStats>;
+
+    fn clear_allocation_stats(&mut self);
 }
 
 /// A temporary immutable handle to store
@@ -38,4 +45,9 @@ pub trait AsContext<WB: WasmBackend> {
 
 pub trait AsContextMut<WB: WasmBackend>: AsContext<WB> {
     fn as_context_mut(&mut self) -> <WB as WasmBackend>::ContextMut<'_>;
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct MemoryAllocationStats {
+    pub allocation_rejects: u32,
 }

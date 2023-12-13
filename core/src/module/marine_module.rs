@@ -219,12 +219,6 @@ impl<WB: WasmBackend> MModule<WB> {
         memory.size(store)
     }
 
-    /// Returns max Wasm linear memory size that this module could consume in bytes.
-    pub(crate) fn max_memory_size(&self) -> Option<usize> {
-        // TODO: provide limits API to marine wasm backend traits
-        None
-    }
-
     // TODO: change the cloning Callable behaviour after changes of Wasmer API
     pub(super) fn get_callable(
         &self,

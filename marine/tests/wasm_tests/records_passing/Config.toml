@@ -1,12 +1,11 @@
 modules_dir = "./artifacts/"
+total_memory_limit = "10 MiB"
 
 [[module]]
     name = "records_passing_effector"
-    max_heap_size = "10 KiB"
     logger_enabled = true
 
 [[module]]
     name = "records_passing_pure"
     random_field = true
-    max_heap_size = "10 KiB"
     logger_enabled = true

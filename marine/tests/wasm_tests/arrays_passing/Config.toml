@@ -1,11 +1,10 @@
 modules_dir = "./artifacts/"
+total_memory_limit = "10 MiB"
 
 [[module]]
     name = "arrays_passing_effector"
-    max_heap_size = "10 KiB"
     logger_enabled = true
 
 [[module]]
     name = "arrays_passing_pure"
-    max_heap_size = "10 KiB"
     logger_enabled = true

@@ -30,8 +30,11 @@ use marine_wasm_backend_traits::WasmBackend;
 #[cfg(feature = "raw-module-api")]
 use marine_wasm_backend_traits::WasiState;
 
+use marine_core::INFINITE_MEMORY_LIMIT;
+use marine_core::MError;
 use marine_core::generic::MarineCore;
 use marine_core::IFunctionArg;
+use marine_core::MarineCoreConfigBuilder;
 use marine_core::MRecordTypes;
 use marine_utils::SharedString;
 use marine_rs_sdk::CallParameters;
@@ -88,8 +91,11 @@ impl<WB: WasmBackend> Marine<WB> {
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
     {
-        let mut marine = MarineCore::new()?;
         let config = config.try_into()?;
+        let core_config = MarineCoreConfigBuilder::new()
+            .total_memory_limit(config.total_memory_limit.unwrap_or(INFINITE_MEMORY_LIMIT))
+            .build();
+        let mut marine = MarineCore::new(core_config)?;
         let call_parameters = Arc::<Mutex<CallParameters>>::default();
 
         let modules_dir = config.modules_dir;
@@ -113,7 +119,9 @@ impl<WB: WasmBackend> Marine<WB> {
                 call_parameters.clone(),
                 &logger_filter,
             )?;
-            marine.load_module(module.import_name, &module_bytes, marine_module_config)?;
+            marine
+                .load_module(module.import_name, &module_bytes, marine_module_config)
+                .map_err(|e| check_for_oom_and_convert_error(&marine, e))?;
         }
 
         Ok(Self {
@@ -149,9 +157,14 @@ impl<WB: WasmBackend> Marine<WB> {
             *cp = call_parameters;
         }
 
-        self.core
+        let result = self
+            .core
             .call(module_name, func_name, args)
-            .map_err(Into::into)
+            .map_err(|e| check_for_oom_and_convert_error(&self.core, e))?;
+
+        self.core.clear_allocation_stats();
+
+        Ok(result)
     }
 
     /// Call a specified function of loaded on a startup module by its name.
@@ -186,7 +199,12 @@ impl<WB: WasmBackend> Marine<WB> {
             *cp = call_parameters;
         }
 
-        let result = self.core.call(module_name, func_name, &iargs)?;
+        let result = self
+            .core
+            .call(module_name, func_name, &iargs)
+            .map_err(|e| check_for_oom_and_convert_error(&self.core, e))?;
+
+        self.core.clear_allocation_stats();
 
         json_to_marine_err!(
             ivalues_to_json(result, &output_types, &record_types),
@@ -290,7 +308,7 @@ impl<WB: WasmBackend> Marine<WB> {
         )?;
         self.core
             .load_module(name, wasm_bytes, marine_module_config)
-            .map_err(Into::into)
+            .map_err(|e| check_for_oom_and_convert_error(&self.core, e))
     }
 
     pub fn unload_module(&mut self, module_name: impl AsRef<str>) -> MarineResult<()> {
@@ -306,5 +324,29 @@ impl<WB: WasmBackend> Marine<WB> {
         self.core
             .module_wasi_state(module_name)
             .ok_or_else(|| MarineError::NoSuchModule(module_name.to_string()))
+    }
+}
+
+fn check_for_oom_and_convert_error<WB: WasmBackend>(
+    core: &MarineCore<WB>,
+    error: MError,
+) -> MarineError {
+    let allocation_stats = match core.module_memory_stats().allocation_stats {
+        Some(allocation_stats) => allocation_stats,
+        _ => return error.into(),
+    };
+
+    if allocation_stats.allocation_rejects == 0 {
+        return error.into();
+    }
+
+    match error {
+        MError::ITInstructionError(_)
+        | MError::HostImportError(_)
+        | MError::WasmBackendError(_) => MarineError::HighProbabilityOOM {
+            allocation_stats,
+            original_error: error,
+        },
+        _ => error.into(),
     }
 }

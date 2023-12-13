@@ -302,7 +302,7 @@ fn records_return_frees() {
 
     let stats_after_first_call = marine
         .module_memory_stats()
-        .0
+        .modules
         .iter()
         .map(|stat| (stat.name.to_string(), stat.memory_size))
         .collect::<HashMap<String, usize>>();
@@ -317,7 +317,7 @@ fn records_return_frees() {
             )
             .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-        for stat in marine.module_memory_stats().0 {
+        for stat in marine.module_memory_stats().modules {
             let memory_size = stats_after_first_call.get(stat.name).unwrap();
             assert_eq!(*memory_size, stat.memory_size)
         }
@@ -420,7 +420,7 @@ fn records_pass_frees() {
 
     let stats_after_first_call = marine
         .module_memory_stats()
-        .0
+        .modules
         .iter()
         .map(|stat| (stat.name.to_string(), stat.memory_size))
         .collect::<HashMap<String, usize>>();
@@ -435,7 +435,7 @@ fn records_pass_frees() {
             )
             .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
-        for stat in marine.module_memory_stats().0 {
+        for stat in marine.module_memory_stats().modules {
             let memory_size = stats_after_first_call.get(stat.name).unwrap();
             assert_eq!(*memory_size, stat.memory_size)
         }

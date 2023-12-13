@@ -78,6 +78,9 @@ pub struct MarineConfig<WB: WasmBackend> {
     /// Path to a dir where compiled Wasm modules are located.
     pub modules_dir: Option<PathBuf>,
 
+    /// Total memory available for the service (in bytes)
+    pub total_memory_limit: Option<u64>,
+
     /// Settings for a module with particular name (not HashMap because the order is matter).
     pub modules_config: Vec<ModuleDescriptor<WB>>,
 
@@ -88,12 +91,6 @@ pub struct MarineConfig<WB: WasmBackend> {
 /// Various settings that could be used to guide Marine how to load a module in a proper way.
 #[derive(Default)]
 pub struct MarineModuleConfig<WB: WasmBackend> {
-    /// Maximum memory size accessible by a module in Wasm pages (64 Kb).
-    pub mem_pages_count: Option<u32>,
-
-    /// Maximum memory size for heap of Wasm module in bytes, if it set, mem_pages_count ignored.
-    pub max_heap_size: Option<u64>,
-
     /// Defines whether Marine should provide a special host log_utf8_string function for this module.
     pub logger_enabled: bool,
 
@@ -191,6 +188,7 @@ use super::TomlMarineNamedModuleConfig;
 use crate::MarineError;
 use crate::MarineResult;
 use crate::config::as_relative_to_base;
+use crate::config::raw_marine_config::MemoryLimit;
 
 use itertools::Itertools;
 
@@ -222,8 +220,14 @@ impl<WB: WasmBackend> TryFrom<TomlMarineConfig> for MarineConfig<WB> {
             .map(|toml_module| ModuleDescriptor::try_from(context.wrapped(toml_module)))
             .collect::<MarineResult<Vec<_>>>()?;
 
+        let total_memory_limit = match toml_config.total_memory_limit {
+            MemoryLimit::Infinity => None,
+            MemoryLimit::Value(bytesize) => Some(bytesize.as_u64()),
+        };
+
         Ok(MarineConfig {
             modules_dir,
+            total_memory_limit,
             modules_config,
             default_modules_config,
         })
@@ -276,7 +280,6 @@ impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>>
             })
             .collect::<Result<Vec<_>, Self::Error>>()?;
 
-        let max_heap_size = toml_config.max_heap_size.map(|v| v.as_u64());
         let mut host_cli_imports = HashMap::new();
         for (import_name, host_cmd) in mounted_binaries {
             let host_cmd = as_relative_to_base(context.base_path.as_deref(), &host_cmd)?;
@@ -289,8 +292,6 @@ impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>>
         let wasi = toml_config.wasi.map(|w| w.try_into()).transpose()?;
 
         Ok(MarineModuleConfig {
-            mem_pages_count: toml_config.mem_pages_count,
-            max_heap_size,
             logger_enabled: toml_config.logger_enabled.unwrap_or(true),
             host_imports: host_cli_imports,
             wasi,

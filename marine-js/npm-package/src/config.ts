@@ -35,16 +35,6 @@ export interface ModuleDescriptor {
 
 export interface MarineModuleConfig {
     /**
-     * Maximum memory size accessible by a module in Wasm pages (64 Kb).
-     */
-    mem_pages_count?: number;
-
-    /**
-     * Maximum memory size for heap of Wasm module in bytes, if it set, mem_pages_count ignored.
-     */
-    max_heap_size?: number;
-
-    /**
      * Defines whether FaaS should provide a special host log_utf8_string function for this module.
      */
     logger_enabled: boolean;

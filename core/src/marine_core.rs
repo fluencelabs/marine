@@ -15,6 +15,7 @@
  */
 
 use super::generic::*;
+use crate::config::MarineCoreConfig;
 use crate::module::MModule;
 use crate::module::MRecordTypes;
 use crate::{IRecordType, IValue, MemoryStats, MError, MFunctionSignature, ModuleMemoryStat, MResult};
@@ -60,9 +61,10 @@ pub struct MarineCore<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> MarineCore<WB> {
-    pub fn new() -> MResult<Self> {
+    pub fn new(config: MarineCoreConfig) -> MResult<Self> {
         let wasm_backend = WB::new()?;
-        let store = <WB as WasmBackend>::Store::new(&wasm_backend);
+        let mut store = <WB as WasmBackend>::Store::new(&wasm_backend);
+        store.set_total_memory_limit(config.total_memory_limit);
         Ok(Self {
             modules: HashMap::new(),
             wasm_backend,
@@ -184,12 +186,15 @@ impl<WB: WasmBackend> MarineCore<WB> {
                 ModuleMemoryStat::new(
                     module_name,
                     module.memory_size(&mut self.store.borrow_mut().as_context_mut()),
-                    module.max_memory_size(),
                 )
             })
             .collect::<Vec<_>>();
+        let allocation_stats = self.store.borrow_mut().report_memory_allocation_stats();
+        MemoryStats::new(records, allocation_stats)
+    }
 
-        records.into()
+    pub fn clear_allocation_stats(&mut self) {
+        self.store.borrow_mut().clear_allocation_stats()
     }
 
     fn get_module_interface(module: &MModule<WB>) -> MModuleInterface<'_> {

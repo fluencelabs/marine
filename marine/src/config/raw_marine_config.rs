@@ -17,11 +17,11 @@
 use crate::MarineError;
 use crate::MarineResult;
 
+use bytesize::ByteSize;
 use serde_derive::Serialize;
 use serde_derive::Deserialize;
 use serde_with::serde_as;
 use serde_with::skip_serializing_none;
-use serde_with::DisplayFromStr;
 
 use std::path::Path;
 use std::path::PathBuf;
@@ -62,6 +62,7 @@ modules_dir = "wasm/artifacts/wasm_modules"
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlMarineConfig {
     pub modules_dir: Option<PathBuf>,
+    pub total_memory_limit: MemoryLimit,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub module: Vec<TomlMarineNamedModuleConfig>,
     pub default: Option<TomlMarineModuleConfig>,
@@ -115,14 +116,9 @@ pub struct TomlMarineNamedModuleConfig {
     pub config: TomlMarineModuleConfig,
 }
 
-#[serde_as]
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlMarineModuleConfig {
-    pub mem_pages_count: Option<u32>,
-    #[serde_as(as = "Option<DisplayFromStr>")]
-    #[serde(default)]
-    pub max_heap_size: Option<bytesize::ByteSize>,
     pub logger_enabled: Option<bool>,
     pub logging_mask: Option<i32>,
     pub wasi: Option<TomlWASIConfig>,
@@ -136,10 +132,19 @@ pub struct TomlWASIConfig {
     pub mapped_dirs: Option<toml::value::Table>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[serde_as]
+pub enum MemoryLimit {
+    #[default]
+    #[serde(alias = "infinity")]
+    Infinity,
+    #[serde(untagged)]
+    Value(#[serde_as(as = "Option<DisplayFromStr>")] ByteSize),
+}
+
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
-    use bytesize::ByteSize;
     use super::TomlMarineNamedModuleConfig;
     use super::TomlMarineModuleConfig;
     use super::TomlWASIConfig;
@@ -157,8 +162,6 @@ mod tests {
             file_name: Some("file_name".to_string()),
             load_from: <_>::default(),
             config: TomlMarineModuleConfig {
-                mem_pages_count: Some(100),
-                max_heap_size: Some(ByteSize::gib(4)),
                 logger_enabled: Some(false),
                 logging_mask: Some(1),
                 wasi: Some(TomlWASIConfig {

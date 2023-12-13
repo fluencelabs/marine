@@ -36,6 +36,9 @@ mod module;
 mod memory_statistic;
 
 pub use crate::marine_core::MModuleInterface;
+pub use config::MarineCoreConfig;
+pub use config::MarineCoreConfigBuilder;
+pub use config::INFINITE_MEMORY_LIMIT;
 pub use errors::MError;
 pub use host_imports::HostImportError;
 pub use module::IValue;
