@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.0](https://github.com/fluencelabs/marine/compare/marine-wasm-backend-traits-v0.4.0...marine-wasm-backend-traits-v0.5.0) (2023-12-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bumps ([#400](https://github.com/fluencelabs/marine/issues/400))
+* add memory limiting ([#391](https://github.com/fluencelabs/marine/issues/391))
+
+### Features
+
+* add memory limiting ([#391](https://github.com/fluencelabs/marine/issues/391)) ([662a492](https://github.com/fluencelabs/marine/commit/662a49204f98f481007aa4eb030bb8478cc066db))
+
+
+### Bug Fixes
+
+* **versions:** enforce minor version bumps ([#400](https://github.com/fluencelabs/marine/issues/400)) ([597ef4f](https://github.com/fluencelabs/marine/commit/597ef4f80d4be0170e8d575da1181647c284fe6c))
+
 ## [0.4.0](https://github.com/fluencelabs/marine/compare/marine-wasm-backend-traits-v0.3.0...marine-wasm-backend-traits-v0.4.0) (2023-11-07)
 
 

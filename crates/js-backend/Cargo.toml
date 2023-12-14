@@ -1,6 +1,6 @@
 [package]
 name = "marine-js-backend"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 description = "Fluence Marine Wasm backend interface implementation for JS environment"
 authors = ["Fluence Labs"]
