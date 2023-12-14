@@ -23,6 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * marine-wasm-backend-traits bumped from 0.2.0 to 0.2.1
     * marine-wasmtime-backend bumped from 0.2.1 to 0.2.2
 
+## [0.31.0](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.30.0...fluence-app-service-v0.31.0) (2023-12-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bumps ([#400](https://github.com/fluencelabs/marine/issues/400))
+
+### Bug Fixes
+
+* **versions:** enforce minor version bumps ([#400](https://github.com/fluencelabs/marine/issues/400)) ([597ef4f](https://github.com/fluencelabs/marine/commit/597ef4f80d4be0170e8d575da1181647c284fe6c))
+
 ## [0.30.0](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.29.0...fluence-app-service-v0.30.0) (2023-11-07)
 
 

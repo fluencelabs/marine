@@ -4,6 +4,17 @@
   * dependencies
     * marine-it-parser bumped from 0.12.1 to 0.12.2
 
+## [0.13.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.12.0...marine-it-generator-v0.13.0) (2023-12-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bumps ([#400](https://github.com/fluencelabs/marine/issues/400))
+
+### Bug Fixes
+
+* **versions:** enforce minor version bumps ([#400](https://github.com/fluencelabs/marine/issues/400)) ([597ef4f](https://github.com/fluencelabs/marine/commit/597ef4f80d4be0170e8d575da1181647c284fe6c))
+
 ## [0.12.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.11.0...marine-it-generator-v0.12.0) (2023-11-07)
 
 
