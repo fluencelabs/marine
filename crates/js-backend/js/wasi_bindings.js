@@ -1,18 +1,9 @@
 import { WASI } from "@wasmer/wasi"
-import { WasmFs } from "@wasmer/wasmfs"
-import bindingsRaw from '@wasmer/wasi/lib/bindings/browser.js';
-import { defaultImport } from 'default-import';
-
-const bindings = defaultImport(bindingsRaw);
 
 export function create_wasi(env) {
     return new WASI({
         args: [], // TODO: pass args maybe?
-        env: Object.fromEntries(env),
-        bindings: {
-            ...bindings,
-            fs: new WasmFs().fs,
-        },
+        env: Object.fromEntries(env)
     })
 }
 
