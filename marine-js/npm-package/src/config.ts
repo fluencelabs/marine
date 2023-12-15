@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { WASIArgs, WASIEnv } from '@wasmer/wasi';
+import { WasiConfig } from '@wasmer/wasi';
 
 export interface MarineServiceConfig {
     /**
@@ -55,9 +55,9 @@ export interface MarineModuleConfig {
     logging_mask: number;
 }
 
-export type Env = WASIEnv;
+export type Env = NonNullable<WasiConfig['env']>;
 
-export type Args = WASIArgs;
+export type Args = NonNullable<WasiConfig['args']>;
 
 export interface MarineWASIConfig {
     /**
