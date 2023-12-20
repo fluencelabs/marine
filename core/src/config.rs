@@ -95,14 +95,16 @@ impl<WB: WasmBackend> MModuleConfig<WB> {
     }
 }
 
-pub struct MarineCoreConfig {
+pub struct MarineCoreConfig<WB: WasmBackend> {
     pub(crate) total_memory_limit: u64,
+    pub(crate) wasm_backend: WB,
 }
 
-impl Default for MarineCoreConfig {
+impl<WB: WasmBackend> Default for MarineCoreConfig<WB> {
     fn default() -> Self {
         Self {
             total_memory_limit: INFINITE_MEMORY_LIMIT,
+            wasm_backend: <WB as WasmBackend>::new_async().unwrap(),
         }
     }
 }
@@ -110,11 +112,12 @@ impl Default for MarineCoreConfig {
 pub const INFINITE_MEMORY_LIMIT: u64 = u64::MAX;
 
 #[derive(Default, Debug)]
-pub struct MarineCoreConfigBuilder {
+pub struct MarineCoreConfigBuilder<WB: WasmBackend> {
     total_memory_limit: Option<u64>,
+    wasm_backend: Option<WB>,
 }
 
-impl MarineCoreConfigBuilder {
+impl<WB: WasmBackend> MarineCoreConfigBuilder<WB> {
     pub fn new() -> Self {
         Self::default()
     }
@@ -124,9 +127,17 @@ impl MarineCoreConfigBuilder {
         self
     }
 
-    pub fn build(self) -> MarineCoreConfig {
+    pub fn wasm_backend(mut self, wasm_backend: WB) -> Self {
+        self.wasm_backend = Some(wasm_backend);
+        self
+    }
+
+    pub fn build(self) -> MarineCoreConfig<WB> {
         MarineCoreConfig {
             total_memory_limit: self.total_memory_limit.unwrap_or(INFINITE_MEMORY_LIMIT),
+            wasm_backend: self
+                .wasm_backend
+                .unwrap_or(<WB as WasmBackend>::new_async().unwrap()),
         }
     }
 }

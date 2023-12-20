@@ -61,14 +61,14 @@ pub struct MarineCore<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> MarineCore<WB> {
-    pub fn new(config: MarineCoreConfig) -> MResult<Self> {
+    pub fn new(config: MarineCoreConfig<WB>) -> MResult<Self> {
         let mut store = <WB as WasmBackend>::Store::new(&config.wasm_backend);
         store.set_total_memory_limit(config.total_memory_limit);
         Ok(Self {
             modules: HashMap::new(),
             wasm_backend: config.wasm_backend,
             store: RefCell::new(store),
-        }
+        })
     }
 
     /// Invoke a function of a module inside Marine by given function name with given arguments.
@@ -232,9 +232,10 @@ impl<WB: WasmBackend> MarineCore<WB> {
         }
     }
 }
+/*
 
 impl<WB: WasmBackend> Default for MarineCore<WB> {
     fn default() -> Self {
         Self::new(WB::default())
     }
-}
+}*/

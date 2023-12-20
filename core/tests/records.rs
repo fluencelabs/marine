@@ -27,7 +27,8 @@ pub async fn records() {
         .expect("../examples/records/artifacts/records_pure.wasm should presence");
 
     let mut marine_core = MarineCore::new(MarineCoreConfig::default()).unwrap();
-    let load_result = marine_core.load_module("pure", &pure_wasm_bytes, <_>::default())
+    let load_result = marine_core
+        .load_module("pure", &pure_wasm_bytes, <_>::default())
         .await;
     assert!(load_result.is_err());
 

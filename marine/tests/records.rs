@@ -16,6 +16,7 @@
 
 use marine::Marine;
 use marine::IValue;
+use marine_wasmtime_backend::WasmtimeWasmBackend;
 
 use pretty_assertions::assert_eq;
 use serde_json::json;
@@ -34,7 +35,7 @@ pub async fn records() {
         toml::from_slice(&records_config_raw).expect("records config should be well-formed");
     records_config.modules_dir = Some(PathBuf::from("../examples/records/artifacts/"));
 
-    let mut marine = Marine::with_raw_config(records_config)
+    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), records_config)
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -178,9 +179,10 @@ async fn records_passing() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = Marine::with_raw_config(records_passing_config)
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut marine =
+        Marine::with_raw_config(WasmtimeWasmBackend::default(), records_passing_config)
+            .await
+            .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     async fn run_test(marine: &mut Marine, func_name: &str) {
         let result = marine
@@ -222,7 +224,7 @@ async fn records_passing() {
         });
 
         assert_eq!(result, expected_result);
-    };
+    }
 
     run_test(&mut marine, "test_record").await;
     run_test(&mut marine, "test_record_ref").await;
@@ -241,9 +243,10 @@ async fn records_destruction() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = Marine::with_raw_config(records_passing_config)
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut marine =
+        Marine::with_raw_config(WasmtimeWasmBackend::default(), records_passing_config)
+            .await
+            .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let record_array = json!([
             {
@@ -299,9 +302,10 @@ async fn records_return_frees() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = Marine::with_raw_config(records_passing_config)
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut marine =
+        Marine::with_raw_config(WasmtimeWasmBackend::default(), records_passing_config)
+            .await
+            .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let _result = marine
         .call_with_json(
@@ -420,9 +424,10 @@ async fn records_pass_frees() {
         "field18": struct_16kb,
     });
 
-    let mut marine = Marine::with_raw_config(records_passing_config)
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut marine =
+        Marine::with_raw_config(WasmtimeWasmBackend::default(), records_passing_config)
+            .await
+            .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let _result = marine
         .call_with_json(

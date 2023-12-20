@@ -17,6 +17,7 @@
 use marine::Marine;
 use marine::MarineModuleInterface;
 use marine::IValue;
+use marine_wasmtime_backend::WasmtimeWasmBackend;
 
 use pretty_assertions::assert_eq;
 
@@ -34,7 +35,7 @@ pub async fn greeting() {
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
     greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
-    let mut faas = Marine::with_raw_config(greeting_config)
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), greeting_config)
         .await
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
@@ -73,7 +74,7 @@ pub async fn get_interfaces() {
         toml::from_slice(&greeting_config_raw).expect("greeting config should be well-formed");
     greeting_config.modules_dir = Some(PathBuf::from("../examples/greeting/artifacts"));
 
-    let faas = Marine::with_raw_config(greeting_config)
+    let faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), greeting_config)
         .await
         .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 

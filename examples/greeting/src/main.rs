@@ -25,9 +25,3 @@ pub fn main() {}
 pub fn greeting(name: String) -> String {
     format!("Hi, {}", name)
 }
-
-#[marine]
-pub fn greeting_sleep(time_ms: u32, name: String) -> String {
-    std::thread::sleep(std::time::Duration::from_millis(time_ms.into()));
-    format!("Hi, {}", name)
-}

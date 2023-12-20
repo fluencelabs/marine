@@ -26,7 +26,7 @@ static GREETING_WASM_BYTES: Lazy<Vec<u8>> = Lazy::new(|| {
 });
 
 #[tokio::test]
-pub fn greeting_basic() {
+pub async fn greeting_basic() {
     let mut marine_core = MarineCore::new(MarineCoreConfig::default()).unwrap();
     marine_core
         .load_module("greeting", &GREETING_WASM_BYTES, <_>::default())

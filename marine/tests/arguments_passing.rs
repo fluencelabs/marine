@@ -18,6 +18,7 @@ mod utils;
 
 use marine::Marine;
 use marine::IType;
+use marine_wasmtime_backend::WasmtimeWasmBackend;
 
 use pretty_assertions::assert_eq;
 use once_cell::sync::Lazy;
@@ -36,7 +37,7 @@ const MODULE_NAME: &str = "arguments_passing_pure";
 pub async fn get_interfaces() {
     use std::collections::HashSet;
 
-    let faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -345,7 +346,7 @@ pub async fn get_interfaces() {
 
 #[tokio::test]
 pub async fn all_types() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -401,7 +402,7 @@ pub async fn all_types() {
         ]);
         let result4 = call_faas!(faas, MODULE_NAME, func_name, faas_arg);
         assert_eq!(result4, expected_result);
-    };
+    }
 
     run_test(&mut faas, "all_types").await;
     run_test(&mut faas, "all_ref_types").await;
@@ -410,7 +411,7 @@ pub async fn all_types() {
 #[tokio::test]
 pub async fn i32_type() {
     async fn run_test(func_name: &str) {
-        let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+        let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
             .await
             .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -441,7 +442,7 @@ pub async fn i32_type() {
         let value = i32::MIN;
         let result7 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result7, value + 2);
-    };
+    }
 
     run_test("i32_type").await;
     run_test("i32_ref_type").await;
@@ -449,7 +450,7 @@ pub async fn i32_type() {
 
 #[tokio::test]
 pub async fn i64_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -481,7 +482,7 @@ pub async fn i64_type() {
         let value = i64::MIN;
         let result7 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result7, value + 2);
-    };
+    }
 
     run_test(&mut faas, "i64_type").await;
     run_test(&mut faas, "i64_ref_type").await;
@@ -489,7 +490,7 @@ pub async fn i64_type() {
 
 #[tokio::test]
 pub async fn u32_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -510,7 +511,7 @@ pub async fn u32_type() {
 
         let result4 = call_faas!(faas, MODULE_NAME, func_name, json!(1));
         assert_eq!(result4, expected_result);
-    };
+    }
 
     run_test(&mut faas, "u32_type").await;
     run_test(&mut faas, "u32_ref_type").await;
@@ -518,7 +519,7 @@ pub async fn u32_type() {
 
 #[tokio::test]
 pub async fn u64_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -539,7 +540,7 @@ pub async fn u64_type() {
 
         let result4 = call_faas!(faas, MODULE_NAME, func_name, json!(1));
         assert_eq!(result4, expected_result);
-    };
+    }
 
     run_test(&mut faas, "u64_type").await;
     run_test(&mut faas, "u64_ref_type").await;
@@ -547,7 +548,7 @@ pub async fn u64_type() {
 
 #[tokio::test]
 pub async fn f32_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -576,7 +577,7 @@ pub async fn f32_type() {
         let value = f32::MIN;
         let result6 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result6, value + 2.0);
-    };
+    }
 
     run_test(&mut faas, "f32_type").await;
     run_test(&mut faas, "f32_ref_type").await;
@@ -584,7 +585,7 @@ pub async fn f32_type() {
 
 #[tokio::test]
 pub async fn f64_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -613,7 +614,7 @@ pub async fn f64_type() {
         let value = f64::MIN;
         let result6 = call_faas!(faas, MODULE_NAME, func_name, json!(value));
         assert_eq!(result6, value + 2.0);
-    };
+    }
 
     run_test(&mut faas, "f64_type").await;
     run_test(&mut faas, "f64_ref_type").await;
@@ -621,7 +622,7 @@ pub async fn f64_type() {
 
 #[tokio::test]
 pub async fn string_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -642,7 +643,7 @@ pub async fn string_type() {
 
         let result4 = call_faas!(faas, MODULE_NAME, func_name, json!("Fluence"));
         assert_eq!(result4, expected_result);
-    };
+    }
 
     run_test(&mut faas, "string_type").await;
     run_test(&mut faas, "string_ref_type").await;
@@ -652,7 +653,7 @@ pub async fn string_type() {
 pub async fn str_type() {
     const FUNC_NAME: &str = "str_type";
 
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -676,7 +677,7 @@ pub async fn str_type() {
 
 #[tokio::test]
 pub async fn bytearray_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -700,7 +701,7 @@ pub async fn bytearray_type() {
 
         let result5 = call_faas!(faas, MODULE_NAME, func_name, json!([[0x13]]));
         assert_eq!(result5, json!([0x13, 1, 1]));
-    };
+    }
 
     run_test(&mut faas, "bytearray_type").await;
     run_test(&mut faas, "bytearray_ref_type").await;
@@ -708,7 +709,7 @@ pub async fn bytearray_type() {
 
 #[tokio::test]
 pub async fn bool_type() {
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
@@ -729,7 +730,7 @@ pub async fn bool_type() {
 
         let result4 = call_faas!(faas, MODULE_NAME, func_name, json!(false));
         assert_eq!(result4, expected_result);
-    };
+    }
 
     run_test(&mut faas, "bool_type").await;
     run_test(&mut faas, "bool_ref_type").await;
@@ -739,7 +740,7 @@ pub async fn bool_type() {
 pub async fn empty_type() {
     const FUNC_NAME: &str = "empty_type";
 
-    let mut faas = Marine::with_raw_config(ARG_CONFIG.clone())
+    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
         .await
         .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 

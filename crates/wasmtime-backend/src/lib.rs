@@ -40,7 +40,7 @@ use wasmtime_wasi::WasiCtx;
 
 const MB: usize = 1024 * 1024;
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct WasmtimeWasmBackend {
     engine: wasmtime::Engine,
 }
@@ -106,6 +106,12 @@ impl WasmtimeWasmBackend {
             wasmtime::Engine::new(&config).map_err(WasmBackendError::InitializationError)?;
 
         Ok(Self { engine })
+    }
+}
+
+impl Default for WasmtimeWasmBackend {
+    fn default() -> Self {
+        Self::new_async().unwrap()
     }
 }
 
