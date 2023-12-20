@@ -14,6 +14,30 @@
 
 
 
+## [0.9.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.8.0...marine-js-v0.9.0) (2023-12-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bumps ([#400](https://github.com/fluencelabs/marine/issues/400))
+* add memory limiting ([#391](https://github.com/fluencelabs/marine/issues/391))
+
+### Features
+
+* add memory limiting ([#391](https://github.com/fluencelabs/marine/issues/391)) ([662a492](https://github.com/fluencelabs/marine/commit/662a49204f98f481007aa4eb030bb8478cc066db))
+
+
+### Bug Fixes
+
+* **versions:** enforce minor version bumps ([#400](https://github.com/fluencelabs/marine/issues/400)) ([597ef4f](https://github.com/fluencelabs/marine/commit/597ef4f80d4be0170e8d575da1181647c284fe6c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-js-backend bumped from 0.3.0 to 0.3.1
+
 ## [0.8.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.7.4...marine-js-v0.8.0) (2023-11-07)
 
 

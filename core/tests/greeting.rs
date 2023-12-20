@@ -15,6 +15,7 @@
  */
 
 use marine_core::MarineCore;
+use marine_core::MarineCoreConfig;
 use marine_core::IValue;
 
 use once_cell::sync::Lazy;
@@ -25,8 +26,8 @@ static GREETING_WASM_BYTES: Lazy<Vec<u8>> = Lazy::new(|| {
 });
 
 #[tokio::test]
-pub async fn greeting_basic() {
-    let mut marine_core = MarineCore::new().unwrap();
+pub fn greeting_basic() {
+    let mut marine_core = MarineCore::new(MarineCoreConfig::default()).unwrap();
     marine_core
         .load_module("greeting", &GREETING_WASM_BYTES, <_>::default())
         .await
@@ -53,7 +54,7 @@ pub async fn greeting_basic() {
 #[tokio::test]
 // test loading module with the same name twice
 pub async fn non_unique_module_name() {
-    let mut marine_core = MarineCore::new().unwrap();
+    let mut marine_core = MarineCore::new(MarineCoreConfig::default()).unwrap();
     let module_name = String::from("greeting");
     marine_core
         .load_module(&module_name, &GREETING_WASM_BYTES, <_>::default())
@@ -74,7 +75,7 @@ pub async fn non_unique_module_name() {
 #[allow(unused_variables)]
 // test calling Marine with non-exist module and function names
 pub async fn non_exist_module_func() {
-    let mut marine_core = MarineCore::new().unwrap();
+    let mut marine_core = MarineCore::new(MarineCoreConfig::default()).unwrap();
     marine_core
         .load_module("greeting", &GREETING_WASM_BYTES, <_>::default())
         .await

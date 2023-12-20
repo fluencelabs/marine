@@ -150,8 +150,6 @@ impl REPL {
         let start = Instant::now();
         let config = MarineModuleConfig {
             logger_enabled: true,
-            mem_pages_count: Default::default(),
-            max_heap_size: Default::default(),
             host_imports: Default::default(),
             wasi: Default::default(),
             logging_mask: Default::default(),

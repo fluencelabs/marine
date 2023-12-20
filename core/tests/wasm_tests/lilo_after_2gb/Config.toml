@@ -1,6 +1,6 @@
 modules_dir = "./artifacts/"
+total_memory_limit = "3 GiB"
 
 [[module]]
     name = "lilo_after_2gb_pure"
-    max_heap_size = "3 GiB"
     logger_enabled = true

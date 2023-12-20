@@ -1,8 +1,8 @@
 modules_dir = "artifacts/"
+total_memory_limit = "10 MiB"
 
 [[module]]
     name = "sqlite3"
-    max_heap_size = "10 MiB"
     logger_enabled = false
 
     [module.wasi]
@@ -11,7 +11,6 @@ modules_dir = "artifacts/"
 
 [[module]]
     name = "sqlite_test"
-    max_heap_size = "1 MiB"
     logger_enabled = false
 
     [module.wasi]

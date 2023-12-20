@@ -1,6 +1,7 @@
 modules_dir = "artifacts/"
+total_memory_limit = "10 MiB"
 
 [[module]]
     name = "greeting"
-    max_heap_size = "10 KiB"
+
     logger_enabled = false

@@ -19,6 +19,7 @@ use crate::WasmtimeWasmBackend;
 
 use marine_wasm_backend_traits::prelude::*;
 
+use wasmtime::ResourceLimiter;
 use wasmtime::StoreContext;
 use wasmtime::StoreContextMut;
 use wasmtime::AsContext as WasmtimeAsContext;
@@ -43,11 +44,76 @@ pub struct WasmtimeContextMut<'s> {
     pub(crate) inner: wasmtime::StoreContextMut<'s, StoreState>,
 }
 
+#[derive(Default)]
+pub struct MemoryLimiter {
+    remaining_memory: u64,
+    allocation_stats: MemoryAllocationStats,
+}
+
 impl Store<WasmtimeWasmBackend> for WasmtimeStore {
     fn new(backend: &WasmtimeWasmBackend) -> Self {
         let mut store = wasmtime::Store::new(&backend.engine, <_>::default());
         store.epoch_deadline_async_yield_and_update(1);
         Self { inner: store }
+    }
+
+    fn set_total_memory_limit(&mut self, total_memory_limit: u64) {
+        let limits = MemoryLimiter::new(total_memory_limit);
+        self.inner.data_mut().limits = limits;
+        self.inner.limiter(|store_state| &mut store_state.limits);
+    }
+
+    fn report_memory_allocation_stats(&self) -> Option<MemoryAllocationStats> {
+        Some(self.inner.data().limits.allocation_stats.clone())
+    }
+
+    fn clear_allocation_stats(&mut self) {
+        self.inner.data_mut().limits.allocation_stats = MemoryAllocationStats::default();
+    }
+}
+
+impl MemoryLimiter {
+    pub(crate) fn new(max_total_memory: u64) -> Self {
+        Self {
+            remaining_memory: max_total_memory,
+            allocation_stats: <_>::default(),
+        }
+    }
+
+    pub(crate) fn count_allocation_reject(&mut self) {
+        self.allocation_stats.allocation_rejects += 1;
+    }
+
+    pub(crate) fn try_alloc(&mut self, amount: u64) -> bool {
+        if let Some(remaining_memory) = self.remaining_memory.checked_sub(amount) {
+            self.remaining_memory = remaining_memory;
+            true
+        } else {
+            self.count_allocation_reject();
+            false
+        }
+    }
+}
+
+impl ResourceLimiter for MemoryLimiter {
+    fn memory_growing(
+        &mut self,
+        current: usize,
+        desired: usize,
+        _maximum: Option<usize>,
+    ) -> wasmtime::Result<bool> {
+        let grow_size = (desired - current) as u64;
+        Ok(self.try_alloc(grow_size))
+    }
+
+    fn table_growing(
+        &mut self,
+        current: u32,
+        desired: u32,
+        _maximum: Option<u32>,
+    ) -> wasmtime::Result<bool> {
+        let grow_size = (desired - current) as usize * std::mem::size_of::<usize>();
+        Ok(self.try_alloc(grow_size as u64))
     }
 }
 

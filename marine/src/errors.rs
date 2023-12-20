@@ -15,6 +15,7 @@
  */
 
 use marine_core::MError;
+use marine_wasm_backend_traits::MemoryAllocationStats;
 use it_json_serde::ITJsonSeDeError;
 
 use thiserror::Error;
@@ -74,18 +75,19 @@ pub enum MarineError {
     #[error("parsing config error: {0}")]
     ParseConfigError(#[from] toml::de::Error),
 
-    /// Errors related to invalid config.
-    #[error(
-        "max_heap_size = '{max_heap_size_wanted}' can't be bigger than {max_heap_size_allowed}'"
-    )]
-    MaxHeapSizeOverflow {
-        max_heap_size_wanted: u64,
-        max_heap_size_allowed: u64,
-    },
-
     /// Marine errors.
     #[error("engine error: {0}")]
     EngineError(#[from] MError),
+
+    /// When marine returned an error and there was a rejected allocation,
+    /// the most probable cause is OOM. Otherwise this error is the same as EngineError.
+    /// This error is on marine-runtime level,
+    /// because otherwise it is impossible to check allocation stats after a failed instantiation.
+    #[error("Engine error when OOM suspected ({0} failed allocations), original error: {original_error}", .allocation_stats.allocation_rejects)]
+    HighProbabilityOOM {
+        original_error: MError,
+        allocation_stats: MemoryAllocationStats,
+    },
 }
 
 impl From<std::convert::Infallible> for MarineError {

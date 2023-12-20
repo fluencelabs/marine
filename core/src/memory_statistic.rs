@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+use marine_wasm_backend_traits::MemoryAllocationStats;
+
 use serde::Serialize;
 use serde::Deserialize;
 
 use std::fmt;
-use std::ops::Deref;
 
 /// Contains module name and a size of its linear memory in bytes.
 /// Please note that linear memory contains not only heap, but globals, shadow stack and so on.
@@ -28,53 +29,47 @@ use std::ops::Deref;
 pub struct ModuleMemoryStat<'module_name> {
     pub name: &'module_name str,
     pub memory_size: usize,
-    // None if memory maximum wasn't set
-    pub max_memory_size: Option<usize>,
 }
 
-pub struct MemoryStats<'module_name>(pub Vec<ModuleMemoryStat<'module_name>>);
+pub struct MemoryStats<'module_name> {
+    pub modules: Vec<ModuleMemoryStat<'module_name>>,
+    pub allocation_stats: Option<MemoryAllocationStats>,
+}
 
-impl<'module_name> ModuleMemoryStat<'module_name> {
+impl<'module_name> MemoryStats<'module_name> {
     pub fn new(
-        module_name: &'module_name str,
-        memory_size: usize,
-        max_memory_size: Option<usize>,
+        modules: Vec<ModuleMemoryStat<'module_name>>,
+        allocation_stats: Option<MemoryAllocationStats>,
     ) -> Self {
-        ModuleMemoryStat {
-            name: module_name,
-            memory_size,
-            max_memory_size,
+        Self {
+            modules,
+            allocation_stats,
         }
     }
 }
 
-impl<'module_name> From<Vec<ModuleMemoryStat<'module_name>>> for MemoryStats<'module_name> {
-    fn from(records: Vec<ModuleMemoryStat<'module_name>>) -> Self {
-        Self(records)
-    }
-}
-
-impl<'memory_size> Deref for MemoryStats<'memory_size> {
-    type Target = [ModuleMemoryStat<'memory_size>];
-
-    fn deref(&self) -> &Self::Target {
-        self.0.as_slice()
+impl<'module_name> ModuleMemoryStat<'module_name> {
+    pub fn new(module_name: &'module_name str, memory_size: usize) -> Self {
+        ModuleMemoryStat {
+            name: module_name,
+            memory_size,
+        }
     }
 }
 
 impl fmt::Display for MemoryStats<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for record in self.0.iter() {
-            let memory_size = bytesize::ByteSize::b(record.memory_size as u64);
-            match record.max_memory_size {
-                Some(max_memory_size) => {
-                    let max_memory_size = bytesize::ByteSize::b(max_memory_size as u64);
-                    writeln!(f, "{} - {}/{}", record.name, memory_size, max_memory_size)?;
-                }
-                None => {
-                    writeln!(f, "{} - {}", record.name, memory_size)?;
-                }
-            }
+        for module in self.modules.iter() {
+            let memory_size = bytesize::ByteSize::b(module.memory_size as u64);
+            writeln!(f, "{} - {}", module.name, memory_size)?;
+        }
+
+        match &self.allocation_stats {
+            None => writeln!(
+                f,
+                "Allocation rejects - value is not recorded by current wasm backend"
+            )?,
+            Some(stats) => writeln!(f, "Allocation rejects - {}", stats.allocation_rejects)?,
         }
 
         Ok(())
