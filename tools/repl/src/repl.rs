@@ -245,6 +245,12 @@ impl REPL {
             }
         };*/
 
+        let mut output_file = std::fs::OpenOptions::new()
+            .create(true)
+            .write(true)
+            .open(output_file)
+            .map_err(|e| e.to_string()).unwrap();
+
         let result: Result<(), String> = try {
             for request in call_requests {
                 let func_name = request
@@ -274,11 +280,7 @@ impl REPL {
                             Ok(pretty_printed) => Ok(pretty_printed),
                             Err(_) => Err(format!("{:?}", result)),
                         }?;
-                        let mut output_file = std::fs::OpenOptions::new()
-                            .create(true)
-                            .append(true)
-                            .open(output_file)
-                            .map_err(|e| e.to_string())?;
+
 
                         writeln!(&mut output_file, "{}\n\n------------\n", result_string)
                             .map_err(|e| e.to_string())?;
