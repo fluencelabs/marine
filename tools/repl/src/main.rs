@@ -23,6 +23,7 @@
     unreachable_patterns
 )]
 #![warn(rust_2018_idioms)]
+#![feature(try_blocks)]
 
 /// Command-line tool intended to test Fluence App services.
 

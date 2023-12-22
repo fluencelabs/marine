@@ -32,6 +32,7 @@ use serde_json::Value as JValue;
 
 use std::collections::HashMap;
 use std::fs;
+use std::io::Write;
 use std::path::PathBuf;
 use std::time::Instant;
 
@@ -62,6 +63,12 @@ struct CallModuleArguments<'args> {
     show_result_arg: bool,
     args: JValue,
     call_parameters: CallParameters,
+}
+
+struct CallModuleBatchArguments<'args> {
+    module_name: &'args str,
+    args_file: &'args str,
+    output_file: &'args str,
 }
 
 #[allow(clippy::upper_case_acronyms)]
@@ -99,6 +106,7 @@ impl REPL {
             Some("q") | Some("quit") => {
                 return false;
             }
+            Some("call_batch") => self.call_batch(args),
 
             Some("h") | Some("help") | _ => print_help(),
         }
@@ -206,6 +214,85 @@ impl REPL {
             };
 
         println!("{}", result);
+    }
+
+    fn call_batch<'args>(&mut self, args: impl Iterator<Item = &'args str>) {
+        let CallModuleBatchArguments {
+            module_name,
+            args_file,
+            output_file,
+        } = match parse_call_module_batch_arguments(args) {
+            Ok(call_module_batch_arguments) => call_module_batch_arguments,
+            Err(message) => {
+                println!("{}", message);
+                return;
+            }
+        };
+
+        let call_requests: Vec<serde_json::Value> =
+            std::fs::read_to_string(args_file)
+                .map_err(|e| e.to_string())
+                .unwrap()
+                .lines()
+                .map(|line| serde_json::from_str(line).unwrap())
+                .collect();
+/*
+        let call_requests = match call_requests {
+            Ok(req) => req,
+            Err(e) => {
+                println!("Error: {}", e);
+                return;
+            }
+        };*/
+
+        let result: Result<(), String> = try {
+            for request in call_requests {
+                let func_name = request
+                    .as_object()
+                    .unwrap()
+                    .get("function")
+                    .unwrap()
+                    .as_str()
+                    .unwrap();
+                let args = request.as_object().unwrap().get("args").unwrap().clone();
+
+                match self.app_service.call_module(
+                    module_name,
+                    func_name,
+                    args.clone(),
+                    CallParameters::default(),
+                ) {
+                    Ok(result) => {
+                        let result = serde_json::json!(
+                            {
+                                "function_name": func_name,
+                                "args": args,
+                                "result": result,
+                            }
+                        );
+                        let result_string = match serde_json::to_string_pretty(&result) {
+                            Ok(pretty_printed) => Ok(pretty_printed),
+                            Err(_) => Err(format!("{:?}", result)),
+                        }?;
+                        let mut output_file = std::fs::OpenOptions::new()
+                            .create(true)
+                            .append(true)
+                            .open(output_file)
+                            .map_err(|e| e.to_string())?;
+
+                        writeln!(&mut output_file, "{}\n\n------------\n", result_string)
+                            .map_err(|e| e.to_string())?;
+
+                        Ok(())
+                    }
+                    Err(e) => Err(format!("call failed with: {}", e)),
+                }?;
+            }
+
+            ()
+        };
+
+        println!("{:?}", result);
     }
 
     fn show_envs<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
@@ -382,6 +469,22 @@ fn parse_call_module_arguments<'args>(
         show_result_arg,
         args,
         call_parameters,
+    })
+}
+
+fn parse_call_module_batch_arguments<'args>(
+    args: impl Iterator<Item = &'args str>,
+) -> Result<CallModuleBatchArguments<'args>, String> {
+
+    let mut args = args.peekable();
+    next_argument_or_result!(module_name, args, "Module name should be specified");
+    next_argument_or_result!(args_file, args, "call request file name should be specified");
+    next_argument_or_result!(output_file, args, "output file name should be specified");
+
+    Ok(CallModuleBatchArguments {
+        module_name,
+        args_file,
+        output_file,
     })
 }
 
