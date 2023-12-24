@@ -1,7 +1,7 @@
-{ "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "set_json_fields", "args": ["{\"worker_settings\":{\"worker_settings\": \"some_settings\"}}"]}
-{ "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "list_push_string", "args": ["worker_registration_txs","{\"deal_id\":\"0xffa0611a099ab68ad7c3c67b4ca5bbbee7a58b99\",\"tx_hash\":\"0x55bfec4a4400ca0b09e075e2b517041cd78b10021c51726cb73bcba52213fa05\"}"]}
+{ "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "list_push_string", "args": ["worker_registration_txs","worker_registration_txs_data"]}
+{ "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "list_push_string", "args": ["worker_settings", "worker_settings_data"]}
 { "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "list_get_strings", "args": ["worker_registration_txs"]}
-{ "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "list_get_strings", "args": ["worker_registration_txs_statuses"]}
-{ "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "list_push_string", "args": ["worker_registration_txs_statuses","{\"status\":\"ok\",\"tx_info\":{\"deal_id\":\"0xffa0611a099ab68ad7c3c67b4ca5bbbee7a58b99\",\"tx_hash\":\"0x55bfec4a4400ca0b09e075e2b517041cd78b10021c51726cb73bcba52213fa05\"}}"]}
+{ "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "list_get_strings", "args": ["worker_registration_txs_stat"]}
+{ "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "list_push_string", "args": ["worker_registration_txs_stat","{\"tx_info\":{\"deal_id\":\"0xffa0611a099ab68ad7c3c67b4ca5bbbee7a58b99\",\"tx_hash\":\"0x55bfec4a4400ca0b09e075e2b517041cd78b10021c51726cb73bcba52213fa05\"}}"]}
 { "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "list_push_string", "args": ["worker_registration_txs","{\"deal_id\":\"0x880a53a54785df22ba804aee81ce8bd0d45bdedc\",\"tx_hash\":\"0x55bfec4a4400ca0b09e075e2b517041cd78b10021c51726cb73bcba52213fa05\"}"]}
-{ "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "list_get_strings", "args": ["worker_registration_txs_statuses"]}
+{ "service_id": "235ac800-afcc-4dfc-944d-e1674e8adbb9", "function": "list_get_strings", "args": ["worker_registration_txs_stat"]}
