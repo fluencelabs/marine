@@ -3,6 +3,7 @@ name = "fluence-app-service"
 description = "Fluence Application Service"
 version = "0.31.0"
 authors = ["Fluence Labs"]
+repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 edition = "2021"
 

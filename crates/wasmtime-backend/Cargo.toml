@@ -4,6 +4,7 @@ description = "Fluence Marine Wasm backend interface implementation for Wasmtime
 version = "0.5.0"
 edition = "2021"
 authors = ["Fluence Labs"]
+repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 
 [dependencies]

@@ -3,6 +3,7 @@ name = "marine-it-interfaces"
 description = "Fluence Marine interface types helper crate"
 version = "0.9.0"
 authors = ["Fluence Labs"]
+repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 edition = "2021"
 

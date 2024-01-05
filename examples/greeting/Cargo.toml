@@ -3,7 +3,6 @@ name = "wasm-greeting"
 version = "0.1.0"
 authors = ["Fluence Labs"]
 description = "The greeting module for the Fluence network"
-repository = "https://github.com/fluencelabs/marine/tree/master/examples/greeting"
 edition = "2021"
 publish = false
 

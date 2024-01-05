@@ -3,6 +3,7 @@ name = "marine-it-generator"
 description = "Fluence Marine interface types generator"
 version = "0.13.0"
 authors = ["Fluence Labs"]
+repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 edition = "2021"
 

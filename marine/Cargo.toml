@@ -3,6 +3,7 @@ name = "marine-runtime"
 description = "The Fluence Wasm Runtime"
 version = "0.32.0"
 authors = ["Fluence Labs"]
+repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 edition = "2021"
 
