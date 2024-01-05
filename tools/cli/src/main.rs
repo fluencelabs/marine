@@ -112,7 +112,7 @@ fn aqua(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     let service_name = service_name.to_pascal_case();
 
     // this line allows exporting all the stuff from generated aqua module definition
-    println!("module {} declares *\n", service_name);
+    println!("aqua {} declares *\n", service_name);
 
     let mut module_interface = marine_it_parser::module_interface(wasm_path)?;
     for record in module_interface.record_types.iter() {
