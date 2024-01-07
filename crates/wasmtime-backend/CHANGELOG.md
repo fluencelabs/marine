@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.1](https://github.com/fluencelabs/marine/compare/marine-wasmtime-backend-v0.5.0...marine-wasmtime-backend-v0.5.1) (2024-01-07)
+
+
+### Bug Fixes
+
+* **docs:** add correct repository link for every published crate ([#403](https://github.com/fluencelabs/marine/issues/403)) ([ebb0bcb](https://github.com/fluencelabs/marine/commit/ebb0bcb1d15d37e8b5c10096ce42171a87abe0fa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-wasm-backend-traits bumped from 0.5.0 to 0.5.1
+
 ## [0.5.0](https://github.com/fluencelabs/marine/compare/marine-wasmtime-backend-v0.4.0...marine-wasmtime-backend-v0.5.0) (2023-12-14)
 
 

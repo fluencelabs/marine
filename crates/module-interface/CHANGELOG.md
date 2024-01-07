@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.8.1](https://github.com/fluencelabs/marine/compare/marine-module-interface-v0.8.0...marine-module-interface-v0.8.1) (2024-01-07)
+
+
+### Bug Fixes
+
+* **docs:** add correct repository link for every published crate ([#403](https://github.com/fluencelabs/marine/issues/403)) ([ebb0bcb](https://github.com/fluencelabs/marine/commit/ebb0bcb1d15d37e8b5c10096ce42171a87abe0fa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-it-interfaces bumped from 0.9.0 to 0.9.1
+
 ## [0.8.0](https://github.com/fluencelabs/marine/compare/marine-module-interface-v0.7.1...marine-module-interface-v0.8.0) (2023-11-07)
 
 

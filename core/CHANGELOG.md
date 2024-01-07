@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-wasmtime-backend bumped from 0.2.0 to 0.2.1
 
+## [0.26.1](https://github.com/fluencelabs/marine/compare/marine-core-v0.26.0...marine-core-v0.26.1) (2024-01-07)
+
+
+### Bug Fixes
+
+* **docs:** add correct repository link for every published crate ([#403](https://github.com/fluencelabs/marine/issues/403)) ([ebb0bcb](https://github.com/fluencelabs/marine/commit/ebb0bcb1d15d37e8b5c10096ce42171a87abe0fa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-module-info-parser bumped from 0.11.0 to 0.11.1
+    * marine-it-interfaces bumped from 0.9.0 to 0.9.1
+    * marine-it-parser bumped from 0.15.0 to 0.15.1
+    * marine-it-generator bumped from 0.13.0 to 0.13.1
+    * marine-module-interface bumped from 0.8.0 to 0.8.1
+    * marine-utils bumped from 0.5.0 to 0.5.1
+    * marine-min-it-version bumped from 0.3.1 to 0.3.2
+    * marine-wasm-backend-traits bumped from 0.5.0 to 0.5.1
+    * marine-wasmtime-backend bumped from 0.5.0 to 0.5.1
+
 ## [0.26.0](https://github.com/fluencelabs/marine/compare/marine-core-v0.25.0...marine-core-v0.26.0) (2023-12-14)
 
 

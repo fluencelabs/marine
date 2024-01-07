@@ -12,6 +12,27 @@
     * marine-it-parser bumped from 0.12.1 to 0.12.2
     * marine-module-info-parser bumped from 0.6.1 to 0.6.2
 
+## [0.19.1](https://github.com/fluencelabs/marine/compare/marine-v0.19.0...marine-v0.19.1) (2024-01-07)
+
+
+### Features
+
+* **aqua:** Generate `aqua` header instead of `module` ([#404](https://github.com/fluencelabs/marine/issues/404)) ([dd22da0](https://github.com/fluencelabs/marine/commit/dd22da07f80f4a74639244a838b1ca7f2a5bde73))
+
+
+### Bug Fixes
+
+* **docs:** add correct repository link for every published crate ([#403](https://github.com/fluencelabs/marine/issues/403)) ([ebb0bcb](https://github.com/fluencelabs/marine/commit/ebb0bcb1d15d37e8b5c10096ce42171a87abe0fa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-it-generator bumped from 0.13.0 to 0.13.1
+    * marine-it-parser bumped from 0.15.0 to 0.15.1
+    * marine-module-info-parser bumped from 0.11.0 to 0.11.1
+
 ## [0.19.0](https://github.com/fluencelabs/marine/compare/marine-v0.18.0...marine-v0.19.0) (2023-12-14)
 
 
