@@ -3,6 +3,7 @@ name = "it-json-serde"
 description = "Fluence Marine interface-types serde tools"
 version = "0.5.0"
 authors = ["Fluence Labs"]
+repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 edition = "2021"
 

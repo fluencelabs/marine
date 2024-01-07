@@ -3,6 +3,7 @@ name = "marine-it-parser"
 description = "Fluence Marine interface types parser"
 version = "0.15.0"
 authors = ["Fluence Labs"]
+repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 edition = "2021"
 

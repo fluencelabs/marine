@@ -3,6 +3,7 @@ name = "marine-module-info-parser"
 description = "Fluence Marine Wasm module info (manifest and version) parser"
 version = "0.11.0"
 authors = ["Fluence Labs"]
+repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 edition = "2021"
 
