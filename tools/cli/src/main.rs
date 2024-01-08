@@ -73,21 +73,14 @@ pub fn main() -> Result<(), anyhow::Error> {
 
     #[cfg(feature = "check-latest")]
     if let Ok(Some(new_version)) = check_latest::check_max!() {
-        use termion::color;
+        use crossterm::style::Stylize;
 
         println!(
-            "\nNew version is available! {}{} -> {}{}",
-            color::Fg(color::Red),
-            check_latest::crate_version!(),
-            color::Fg(color::Blue),
-            new_version
+            "\nNew version is available! {} -> {}",
+            check_latest::crate_version!().red(),
+            new_version.to_string().blue()
         );
-        println!(
-            "{}To update run: {}cargo install marine{}",
-            color::Fg(color::Reset),
-            color::Fg(color::LightBlack),
-            color::Fg(color::Reset)
-        );
+        println!("To update run: {}", "cargo install marine".yellow(),);
     }
 
     Ok(())
@@ -226,19 +219,23 @@ fn info(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
 
 fn repl(args: &clap::ArgMatches<'_>) -> Result<(), anyhow::Error> {
     use std::process::Command;
-    // use UNIX-specific API for replacing process image
-    use std::os::unix::process::CommandExt;
+    use std::process::Stdio;
+    use std::io::ErrorKind;
 
     let trailing_args: Vec<&str> = args.values_of("optional").unwrap_or_default().collect();
 
     let mut repl = Command::new("mrepl");
-    repl.args(trailing_args);
-    let error = repl.exec();
-    if error.kind() == std::io::ErrorKind::NotFound {
-        println!("mrepl not found, run `cargo +nightly install mrepl` to install it");
-    } else {
-        // this branch should be executed if exec was successful, so just else if fine here
-        println!("error occurred: {:?}", error);
+    repl.stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .args(trailing_args);
+
+    match repl.status() {
+        Err(error) if error.kind() == ErrorKind::NotFound => {
+            println!("mrepl not found, run `cargo +nightly install mrepl` to install it");
+        }
+        Err(error) => println!("error occurred: {:?}", error),
+        Ok(status) => std::process::exit(status.code().unwrap_or(0)),
     }
 
     Ok(())

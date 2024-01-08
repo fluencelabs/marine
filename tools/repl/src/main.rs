@@ -100,7 +100,7 @@ fn main() -> ReplResult<()> {
 }
 
 fn print_welcome_message() {
-    use termion::color;
+    use crossterm::style::Stylize;
 
     println!(
         "Welcome to the Marine REPL (version {})",
@@ -108,29 +108,21 @@ fn print_welcome_message() {
     );
 
     println!(
-        "Minimal supported versions\n  sdk: {}{}\n  {}interface-types: {}{}{}\n",
-        color::Fg(color::LightBlue),
-        fluence_app_service::min_sdk_version(),
-        color::Fg(color::Reset),
-        color::Fg(color::LightBlue),
-        fluence_app_service::min_it_version(),
-        color::Fg(color::Reset),
+        "Minimal supported versions\n  sdk: {}\n  interface-types: {}\n",
+        fluence_app_service::min_sdk_version().to_string().blue(),
+        fluence_app_service::min_it_version().to_string().blue(),
     );
 
     #[cfg(feature = "check-latest")]
     if let Ok(Some(new_version)) = check_latest::check_max!() {
         println!(
-            "New version is available! {}{} -> {}{}",
-            color::Fg(color::Red),
-            check_latest::crate_version!(),
-            color::Fg(color::Blue),
-            new_version
+            "New version is available! {} -> {}",
+            check_latest::crate_version!().red(),
+            new_version.to_string().blue()
         );
         println!(
-            "{}To update run: {}cargo +nightly install mrepl{}\n",
-            color::Fg(color::Reset),
-            color::Fg(color::LightBlack),
-            color::Fg(color::Reset),
+            "To update run: {}\n",
+            "cargo +nightly install mrepl".yellow(),
         );
     }
 }
