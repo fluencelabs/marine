@@ -1,7 +1,7 @@
 [package]
 name = "marine-module-interface"
 description = "Fluence Marine module interface"
-version = "0.8.0"
+version = "0.8.1"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
@@ -12,7 +12,7 @@ name = "marine_module_interface"
 path = "src/lib.rs"
 
 [dependencies]
-marine-it-interfaces = { path = "../it-interfaces", version = "0.9.0" }
+marine-it-interfaces = { path = "../it-interfaces", version = "0.9.1" }
 
 anyhow = "1.0.75"
 walrus = "0.20.1"

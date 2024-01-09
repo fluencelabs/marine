@@ -1,14 +1,14 @@
 [package]
 name = "marine-wasmtime-backend"
 description = "Fluence Marine Wasm backend interface implementation for Wasmtime"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 
 [dependencies]
-marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.5.0" }
+marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.5.1" }
 wasmer-it = { package = "wasmer-interface-types-fl", version = "0.27.0" }
 it-memory-traits = "0.4.0"
 

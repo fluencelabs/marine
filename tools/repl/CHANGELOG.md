@@ -26,6 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * fluence-app-service bumped from 0.25.3 to 0.26.0
     * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
 
+## [0.26.1](https://github.com/fluencelabs/marine/compare/mrepl-v0.26.0...mrepl-v0.26.1) (2024-01-07)
+
+
+### Bug Fixes
+
+* **docs:** add correct repository link for every published crate ([#403](https://github.com/fluencelabs/marine/issues/403)) ([ebb0bcb](https://github.com/fluencelabs/marine/commit/ebb0bcb1d15d37e8b5c10096ce42171a87abe0fa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * fluence-app-service bumped from 0.31.0 to 0.31.1
+    * marine-wasm-backend-traits bumped from 0.5.0 to 0.5.1
+
 ## [0.26.0](https://github.com/fluencelabs/marine/compare/mrepl-v0.25.0...mrepl-v0.26.0) (2023-12-14)
 
 

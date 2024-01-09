@@ -4,6 +4,20 @@
   * dependencies
     * marine-it-parser bumped from 0.12.1 to 0.12.2
 
+## [0.13.1](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.13.0...marine-it-generator-v0.13.1) (2024-01-07)
+
+
+### Bug Fixes
+
+* **docs:** add correct repository link for every published crate ([#403](https://github.com/fluencelabs/marine/issues/403)) ([ebb0bcb](https://github.com/fluencelabs/marine/commit/ebb0bcb1d15d37e8b5c10096ce42171a87abe0fa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-it-parser bumped from 0.15.0 to 0.15.1
+
 ## [0.13.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.12.0...marine-it-generator-v0.13.0) (2023-12-14)
 
 
