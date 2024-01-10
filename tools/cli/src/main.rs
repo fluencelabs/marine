@@ -80,7 +80,7 @@ pub fn main() -> Result<(), anyhow::Error> {
             check_latest::crate_version!().red(),
             new_version.to_string().blue()
         );
-        println!("To update run: {}", "cargo install marine".yellow(),);
+        println!("To update run: {}", "cargo install marine".yellow());
     }
 
     Ok(())
