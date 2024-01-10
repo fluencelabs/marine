@@ -44,7 +44,7 @@ use std::collections::HashSet;
 pub(super) fn init_editor() -> ReplResult<Editor<REPLHelper>> {
     let config = Config::builder()
         .history_ignore_space(true)
-        .completion_type(CompletionType::Fuzzy)
+        .completion_type(CompletionType::Circular) // "Fuzzy" type is only available on unix
         .edit_mode(EditMode::Emacs)
         .build();
 
