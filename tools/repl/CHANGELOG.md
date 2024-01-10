@@ -26,6 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * fluence-app-service bumped from 0.25.3 to 0.26.0
     * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
 
+## [0.26.2](https://github.com/fluencelabs/marine/compare/mrepl-v0.26.1...mrepl-v0.26.2) (2024-01-10)
+
+
+### Features
+
+* **cli, mrepl:** support windows in marine cli and mrepl ([#406](https://github.com/fluencelabs/marine/issues/406)) ([71d1fb1](https://github.com/fluencelabs/marine/commit/71d1fb16ca322f5e227989fe521b3cbc5acbdff3))
+
 ## [0.26.1](https://github.com/fluencelabs/marine/compare/mrepl-v0.26.0...mrepl-v0.26.1) (2024-01-07)
 
 

@@ -12,6 +12,13 @@
     * marine-it-parser bumped from 0.12.1 to 0.12.2
     * marine-module-info-parser bumped from 0.6.1 to 0.6.2
 
+## [0.19.2](https://github.com/fluencelabs/marine/compare/marine-v0.19.1...marine-v0.19.2) (2024-01-10)
+
+
+### Features
+
+* **cli, mrepl:** support windows in marine cli and mrepl ([#406](https://github.com/fluencelabs/marine/issues/406)) ([71d1fb1](https://github.com/fluencelabs/marine/commit/71d1fb16ca322f5e227989fe521b3cbc5acbdff3))
+
 ## [0.19.1](https://github.com/fluencelabs/marine/compare/marine-v0.19.0...marine-v0.19.1) (2024-01-07)
 
 
