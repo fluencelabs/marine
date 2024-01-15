@@ -25,6 +25,8 @@ use marine_wasm_backend_traits::WasiState;
 use marine_wasm_backend_traits::WasmBackend;
 use marine::Marine;
 use marine::MarineModuleConfig;
+use marine::MarineError;
+use marine::MError;
 use marine::IValue;
 
 use serde_json::Value as JValue;
@@ -52,29 +54,10 @@ impl AppService {
         S: Into<String>,
         AppServiceError: From<C::Error>,
     {
-        let mut config: AppServiceConfig = config.try_into()?;
-        let facade_module_name = config
-            .marine_config
-            .modules_config
-            .last()
-            .ok_or_else(|| {
-                AppServiceError::ConfigParseError(String::from(
-                    "config should contain at least one module",
-                ))
-            })?
-            .import_name
-            .clone();
+        let backend = marine::WasmBackend::new_async()
+            .map_err(|e| MarineError::EngineError(MError::WasmBackendError(e)))?;
 
-        let service_id = service_id.into();
-        Self::set_env_and_dirs(&mut config, service_id, envs)?;
-
-        let backend = marine::WasmBackend::new_async().unwrap();
-        let marine = Marine::with_raw_config(backend, config.marine_config).await?;
-
-        Ok(Self {
-            marine,
-            facade_module_name,
-        })
+        Self::new_with_backend(backend, config, service_id, envs).await
     }
 
     pub async fn new_with_backend<C, S>(
