@@ -13,7 +13,7 @@ use marine_wasmtime_backend::WasmtimeWasmBackend;
 
 impl AppServiceFactory<WasmtimeWasmBackend> {
     pub fn new() -> WasmBackendResult<Self> {
-        let backend = WasmtimeWasmBackend::new_async_epoch_based()?;
+        let backend = WasmtimeWasmBackend::new_async()?;
         Ok(Self { backend })
     }
 

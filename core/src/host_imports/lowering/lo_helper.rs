@@ -60,9 +60,9 @@ impl<
         M: Memory<MV, DelayedContextLifetime<WB>>,
     > Allocatable<MV, DelayedContextLifetime<WB>> for LoHelper<WB, MV, M>
 {
-    fn allocate<'this, 'ctx1: 'this, 'ctx2: 'this>(
+    fn allocate<'this, 'store: 'this, 'ctx: 'this>(
         &'this mut self,
-        store: &'ctx1 mut <WB as WasmBackend>::ContextMut<'ctx2>,
+        store: &'store mut <WB as WasmBackend>::ContextMut<'ctx>,
         size: u32,
         type_tag: u32,
     ) -> BoxFuture<'this, Result<(u32, MV), AllocatableError>> {

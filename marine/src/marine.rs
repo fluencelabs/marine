@@ -99,7 +99,7 @@ impl<WB: WasmBackend> Marine<WB> {
         let core_config = MarineCoreConfigBuilder::new()
             .total_memory_limit(config.total_memory_limit.unwrap_or(INFINITE_MEMORY_LIMIT))
             .wasm_backend(backend)
-            .build();
+            .build()?;
         let mut marine = MarineCore::new(core_config)?;
         let call_parameters = Arc::<Mutex<CallParameters>>::default();
 

@@ -58,10 +58,6 @@ impl WasmBackend for JsWasmBackend {
     type MemoryView = JsMemory;
     type Wasi = JsWasi;
 
-    fn new() -> WasmBackendResult<Self> {
-        Ok(Self {})
-    }
-
     fn new_async() -> WasmBackendResult<Self> {
         Ok(Self {})
     }

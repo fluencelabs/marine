@@ -55,7 +55,7 @@ use std::marker::PhantomData;
 /// A core trait for any backend. It serves two purposes:
 /// * handles initialization of the library if needed
 /// * provides access to all public types -- like `mod` but for trait impls.
-pub trait WasmBackend: Clone + Default + Send + Sync + 'static {
+pub trait WasmBackend: Clone + Send + Sync + 'static {
     /// A type that stores all the data, while most of the types are handles to data from `Store`.
     type Store: Store<Self>;
     /// A compiled, but not instantiated module.
@@ -83,11 +83,7 @@ pub trait WasmBackend: Clone + Default + Send + Sync + 'static {
     type Wasi: WasiImplementation<Self>;
 
     /// Creates a new wasm backend with default configuration. In future, a configuration
-    /// may be passed as argument.
-    fn new() -> WasmBackendResult<Self>;
-
-    /// Creates a new wasm backend with default configuration. In future, a configuration
-    /// may be passed as argument.
+    /// may be passed as argument. The only option at the moment is an asynchronous backend.
     fn new_async() -> WasmBackendResult<Self>;
 }
 

@@ -158,7 +158,7 @@ pub async fn register_module(
 
     marine_logger().enable_service_logging(log_fn, module_names);
 
-    let backend = JsWasmBackend::new()?;
+    let backend = JsWasmBackend::new_async()?;
 
     let new_marine = Marine::<JsWasmBackend>::with_modules(backend, modules, marine_config).await?;
 

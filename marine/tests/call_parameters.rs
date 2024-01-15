@@ -17,6 +17,7 @@
 use marine::Marine;
 use marine::IValue;
 use marine_wasmtime_backend::WasmtimeWasmBackend;
+use marine_wasm_backend_traits::WasmBackend;
 
 use pretty_assertions::assert_eq;
 
@@ -35,9 +36,12 @@ pub async fn call_parameters() {
     call_parameters_config.modules_dir =
         Some(PathBuf::from("../examples/call_parameters/artifacts"));
 
-    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), call_parameters_config)
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut faas = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        call_parameters_config,
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let init_peer_id = "init_peer_id";
     let service_id = "service_id";

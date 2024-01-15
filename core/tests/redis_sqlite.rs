@@ -15,7 +15,7 @@
  */
 
 use marine_core::MarineCore;
-use marine_core::MarineCoreConfig;
+use marine_core::MarineCoreConfigBuilder;
 use marine_core::IValue;
 
 const REDIS_DOWNLOAD_URL: &str =
@@ -36,7 +36,7 @@ pub async fn download(url: &str) -> bytes::Bytes {
 async fn redis() {
     let wasm_bytes = download(REDIS_DOWNLOAD_URL).await;
 
-    let mut marine_core = MarineCore::new(MarineCoreConfig::default()).unwrap();
+    let mut marine_core = MarineCore::new(MarineCoreConfigBuilder::new().build().unwrap()).unwrap();
     let module_name = "redis";
     let config = <_>::default();
 
@@ -102,7 +102,7 @@ async fn redis() {
 async fn sqlite() {
     let wasm_bytes = download(SQLITE_DOWNLOAD_URL).await;
 
-    let mut marine_core = MarineCore::new(MarineCoreConfig::default()).unwrap();
+    let mut marine_core = MarineCore::new(MarineCoreConfigBuilder::new().build().unwrap()).unwrap();
     let module_name = "sqlite";
     let config = <_>::default();
 

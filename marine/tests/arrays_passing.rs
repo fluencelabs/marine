@@ -19,6 +19,7 @@ mod utils;
 use marine::Marine;
 use marine::IType;
 use marine_wasmtime_backend::WasmtimeWasmBackend;
+use marine_wasm_backend_traits::WasmBackend;
 
 use once_cell::sync::Lazy;
 use serde_json::json;
@@ -34,9 +35,12 @@ static ARG_CONFIG: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
 pub async fn get_interfaces() {
     use std::collections::HashSet;
 
-    let marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let interface = marine.get_interface();
 
@@ -241,9 +245,12 @@ pub async fn get_interfaces() {
 
 #[tokio::test]
 pub async fn i32_type() {
-    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let expected_result = json!([0, 1, 2, 3, 4, 0, 2]);
 
@@ -284,9 +291,12 @@ pub async fn i32_type() {
 
 #[tokio::test]
 pub async fn i64_type() {
-    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
         .call_with_json("arrays_passing_pure", "i64_type", json!({}), <_>::default())
@@ -325,9 +335,12 @@ pub async fn i64_type() {
 
 #[tokio::test]
 pub async fn u32_type() {
-    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
         .call_with_json("arrays_passing_pure", "u32_type", json!({}), <_>::default())
@@ -355,9 +368,12 @@ pub async fn u32_type() {
 
 #[tokio::test]
 pub async fn u64_type() {
-    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
         .call_with_json("arrays_passing_pure", "u64_type", json!({}), <_>::default())
@@ -385,9 +401,12 @@ pub async fn u64_type() {
 
 #[tokio::test]
 pub async fn f64_type() {
-    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
         .call_with_json("arrays_passing_pure", "f32_type", json!({}), <_>::default())
@@ -415,9 +434,12 @@ pub async fn f64_type() {
 
 #[tokio::test]
 pub async fn string_type() {
-    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
         .call_with_json(
@@ -460,9 +482,12 @@ pub async fn string_type() {
 
 #[tokio::test]
 pub async fn byte_type() {
-    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
         .call_with_json(
@@ -504,9 +529,12 @@ pub async fn byte_type() {
 
 #[tokio::test]
 pub async fn inner_arrays_1_type() {
-    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
         .call_with_json(
@@ -556,9 +584,12 @@ pub async fn inner_arrays_1_type() {
 
 #[tokio::test]
 pub async fn inner_arrays_2_type() {
-    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
         .call_with_json(
@@ -633,9 +664,12 @@ pub async fn inner_arrays_2_type() {
 
 #[tokio::test]
 pub async fn bool_type() {
-    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
         .call_with_json(
@@ -673,9 +707,12 @@ pub async fn bool_type() {
 
 #[tokio::test]
 pub async fn empty_type() {
-    let mut marine = Marine::with_raw_config(WasmtimeWasmBackend::default(), ARG_CONFIG.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        ARG_CONFIG.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let expected_result = json!(["from effector"]);
     let result1 = call_faas!(marine, "arrays_passing_pure", "empty_type", json!({}));

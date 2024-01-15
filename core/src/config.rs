@@ -17,6 +17,7 @@
 use super::IValue;
 use super::IType;
 use crate::HostImportError;
+use crate::MResult;
 
 use marine_wasm_backend_traits::WasiParameters;
 use marine_wasm_backend_traits::WasmBackend;
@@ -100,15 +101,6 @@ pub struct MarineCoreConfig<WB: WasmBackend> {
     pub(crate) wasm_backend: WB,
 }
 
-impl<WB: WasmBackend> Default for MarineCoreConfig<WB> {
-    fn default() -> Self {
-        Self {
-            total_memory_limit: INFINITE_MEMORY_LIMIT,
-            wasm_backend: <WB as WasmBackend>::new_async().unwrap(),
-        }
-    }
-}
-
 pub const INFINITE_MEMORY_LIMIT: u64 = u64::MAX;
 
 #[derive(Default, Debug)]
@@ -119,7 +111,10 @@ pub struct MarineCoreConfigBuilder<WB: WasmBackend> {
 
 impl<WB: WasmBackend> MarineCoreConfigBuilder<WB> {
     pub fn new() -> Self {
-        Self::default()
+        Self {
+            total_memory_limit: None,
+            wasm_backend: None,
+        }
     }
 
     pub fn total_memory_limit(mut self, total_memory_limit: u64) -> Self {
@@ -132,12 +127,14 @@ impl<WB: WasmBackend> MarineCoreConfigBuilder<WB> {
         self
     }
 
-    pub fn build(self) -> MarineCoreConfig<WB> {
-        MarineCoreConfig {
+    pub fn build(self) -> MResult<MarineCoreConfig<WB>> {
+        let config = MarineCoreConfig {
             total_memory_limit: self.total_memory_limit.unwrap_or(INFINITE_MEMORY_LIMIT),
             wasm_backend: self
                 .wasm_backend
-                .unwrap_or(<WB as WasmBackend>::new_async().unwrap()),
-        }
+                .unwrap_or(<WB as WasmBackend>::new_async()?),
+        };
+
+        Ok(config)
     }
 }

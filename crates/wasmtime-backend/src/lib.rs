@@ -40,6 +40,8 @@ use wasmtime_wasi::WasiCtx;
 
 const MB: usize = 1024 * 1024;
 
+/// Default amount of stack space available for executing WebAssembly code.
+pub const DEFAULT_WASM_STACK_SIZE: usize = 2 * MB;
 #[derive(Clone)]
 pub struct WasmtimeWasmBackend {
     engine: wasmtime::Engine,
@@ -59,32 +61,8 @@ impl WasmBackend for WasmtimeWasmBackend {
     type MemoryView = WasmtimeMemory;
     type Wasi = WasmtimeWasi;
 
-    fn new() -> WasmBackendResult<Self> {
-        let mut config = wasmtime::Config::new();
-        config
-            .debug_info(false)
-            .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable)
-            .async_support(true)
-            .max_wasm_stack(2 * MB);
-        let engine =
-            wasmtime::Engine::new(&config).map_err(WasmBackendError::InitializationError)?;
-
-        Ok(Self { engine })
-    }
-
     fn new_async() -> WasmBackendResult<Self> {
-        let mut config = wasmtime::Config::new();
-        config
-            .debug_info(false)
-            .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable)
-            .async_support(true)
-            .epoch_interruption(true)
-            .max_wasm_stack(2 * MB);
-
-        let engine =
-            wasmtime::Engine::new(&config).map_err(WasmBackendError::InitializationError)?;
-
-        Ok(Self { engine })
+        Self::new(WasmtimeConfig::new())
     }
 }
 
@@ -93,25 +71,11 @@ impl WasmtimeWasmBackend {
         self.engine.increment_epoch()
     }
 
-    pub fn new_async_epoch_based() -> WasmBackendResult<Self> {
-        let mut config = wasmtime::Config::new();
-        config
-            .debug_info(false)
-            .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable)
-            .async_support(true)
-            .epoch_interruption(true)
-            .max_wasm_stack(2 * MB);
-
+    pub fn new(config: WasmtimeConfig) -> WasmBackendResult<Self> {
         let engine =
-            wasmtime::Engine::new(&config).map_err(WasmBackendError::InitializationError)?;
+            wasmtime::Engine::new(&config.config).map_err(WasmBackendError::InitializationError)?;
 
         Ok(Self { engine })
-    }
-}
-
-impl Default for WasmtimeWasmBackend {
-    fn default() -> Self {
-        Self::new_async().unwrap()
     }
 }
 
@@ -119,4 +83,83 @@ impl Default for WasmtimeWasmBackend {
 pub struct StoreState {
     wasi: Vec<WasiCtx>, // wasmtime store does not release memory until drop, so do we
     limits: MemoryLimiter,
+}
+
+#[derive(Clone)]
+pub struct WasmtimeConfig {
+    config: wasmtime::Config,
+}
+
+impl Default for WasmtimeConfig {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl WasmtimeConfig {
+    pub fn new() -> Self {
+        let mut config = wasmtime::Config::default();
+        config
+            .async_support(true)
+            .debug_info(true)
+            .max_wasm_stack(DEFAULT_WASM_STACK_SIZE)
+            .epoch_interruption(true)
+            .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable);
+
+        Self { config }
+    }
+
+    /// Constructs wasmtime config directly from wasmtime config.
+    /// It forcefully enables async support, because the backend does not work with sync configs.
+    pub fn from_raw(mut config: wasmtime::Config) -> Self {
+        config.async_support(true);
+        Self { config }
+    }
+
+    /// Configures whether DWARF debug information will be emitted during
+    /// compilation.
+    ///
+    /// By default this option is `true`.
+    pub fn debug_info(&mut self, enable: bool) -> &mut Self {
+        self.config.debug_info(enable);
+        self
+    }
+
+    /// Enables the epoch interruption mechanism. See Wasmtime docs for detailed explanation.
+    ///
+    /// By default this option is `true`.
+    pub fn epoch_interruption(&mut self, enable: bool) -> &mut Self {
+        self.config.epoch_interruption(enable);
+        self
+    }
+
+    /// Configures the maximum amount of stack space available for
+    /// executing WebAssembly code.
+    ///
+    /// By default this option is 2 MiB.
+    pub fn max_wasm_stack(&mut self, size: usize) -> &mut Self {
+        self.config.max_wasm_stack(size);
+        self
+    }
+
+    /// Configures the size of the stacks used for asynchronous execution.
+    ///
+    /// This setting configures the size of the stacks that are allocated for
+    /// asynchronous execution. The value cannot be less than `max_wasm_stack`.
+    ///
+    /// By default this option is 2 MiB.
+    pub fn async_wasm_stack(&mut self, size: usize) -> &mut Self {
+        self.config.async_stack_size(size);
+        self
+    }
+
+    /// Configures whether the errors from the VM should collect the wasm backtrace and parse debug info.
+    ///
+    /// By default this option is `true`.
+    pub fn wasm_backtrace(&mut self, enable: bool) -> &mut Self {
+        self.config
+            .wasm_backtrace(enable)
+            .wasm_backtrace_details(wasmtime::WasmBacktraceDetails::Enable);
+        self
+    }
 }

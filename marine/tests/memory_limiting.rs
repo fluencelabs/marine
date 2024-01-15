@@ -21,6 +21,7 @@ use marine::IValue;
 use marine::Marine;
 use marine::MarineError;
 use marine_wasmtime_backend::WasmtimeWasmBackend;
+use marine_wasm_backend_traits::WasmBackend;
 
 use bytesize::KIB;
 use bytesize::MIB;
@@ -43,7 +44,7 @@ const WASM_PAGE_SIZE: u64 = 64 * KIB;
 #[tokio::test]
 pub async fn triggered_on_instantiation() {
     let faas = Marine::with_raw_config(
-        WasmtimeWasmBackend::default(),
+        WasmtimeWasmBackend::new_async().unwrap(),
         FAIL_ON_STARTUP_CONFIG.clone(),
     )
     .await;
@@ -61,9 +62,12 @@ pub async fn triggered_on_instantiation() {
 }
 #[tokio::test]
 pub async fn triggered_by_single_module() {
-    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), LIMIT_64_MIB.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut faas = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        LIMIT_64_MIB.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     // make sure there is no free space
     fill_start_memory(&mut faas).await;
@@ -96,9 +100,12 @@ pub async fn triggered_by_single_module() {
 
 #[tokio::test]
 pub async fn not_triggered_near_limit_single_module() {
-    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), LIMIT_64_MIB.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut faas = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        LIMIT_64_MIB.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     // make sure there is no free space
     fill_start_memory(&mut faas).await;
@@ -128,9 +135,12 @@ pub async fn not_triggered_near_limit_single_module() {
 
 #[tokio::test]
 pub async fn triggered_by_two_modules() {
-    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), LIMIT_64_MIB.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut faas = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        LIMIT_64_MIB.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     // make sure there is no free space
     fill_start_memory(&mut faas).await;
@@ -163,9 +173,12 @@ pub async fn triggered_by_two_modules() {
 
 #[tokio::test]
 pub async fn not_triggered_near_limit_two_modules() {
-    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), LIMIT_64_MIB.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut faas = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        LIMIT_64_MIB.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     // make sure there is no free space
     fill_start_memory(&mut faas).await;
@@ -194,9 +207,12 @@ pub async fn not_triggered_near_limit_two_modules() {
 
 #[tokio::test]
 pub async fn triggered_by_large_allocation_single_module() {
-    let mut faas = Marine::with_raw_config(WasmtimeWasmBackend::default(), LIMIT_64_MIB.clone())
-        .await
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut faas = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        LIMIT_64_MIB.clone(),
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     // make sure there is no free space
     fill_start_memory(&mut faas).await;

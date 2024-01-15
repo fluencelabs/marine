@@ -68,7 +68,7 @@ impl AppService {
         let service_id = service_id.into();
         Self::set_env_and_dirs(&mut config, service_id, envs)?;
 
-        let backend = marine::WasmBackend::new().unwrap();
+        let backend = marine::WasmBackend::new_async().unwrap();
         let marine = Marine::with_raw_config(backend, config.marine_config).await?;
 
         Ok(Self {

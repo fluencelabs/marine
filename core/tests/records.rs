@@ -15,7 +15,7 @@
  */
 
 use marine_core::MarineCore;
-use marine_core::MarineCoreConfig;
+use marine_core::MarineCoreConfigBuilder;
 use marine_core::IValue;
 
 #[tokio::test]
@@ -26,7 +26,7 @@ pub async fn records() {
     let pure_wasm_bytes = std::fs::read("../examples/records/artifacts/records_pure.wasm")
         .expect("../examples/records/artifacts/records_pure.wasm should presence");
 
-    let mut marine_core = MarineCore::new(MarineCoreConfig::default()).unwrap();
+    let mut marine_core = MarineCore::new(MarineCoreConfigBuilder::new().build().unwrap()).unwrap();
     let load_result = marine_core
         .load_module("pure", &pure_wasm_bytes, <_>::default())
         .await;
