@@ -36,6 +36,7 @@ pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 pub use errors::AppServiceError;
 pub use service::AppService;
 pub use app_service_factory::AppServiceFactory;
+pub use app_service_factory::EpochTicker;
 pub use service_interface::FunctionSignature;
 pub use service_interface::RecordType;
 pub use service_interface::ServiceInterface;

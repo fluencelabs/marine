@@ -25,7 +25,7 @@ use futures::future::BoxFuture;
 
 /// A host function ready to be used as an import for instantiating a module.
 /// As it is only a handle to an object in `Store`, cloning is cheap.
-pub trait HostFunction<WB: WasmBackend>: /*AsyncFunction<WB> + */Send + Sync + Clone {
+pub trait HostFunction<WB: WasmBackend>: Send + Sync + Clone {
     /// Creates a new function with dynamic signature.
     /// The signature check is performed at runtime.
     fn new<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self

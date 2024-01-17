@@ -71,7 +71,6 @@ pub(super) struct REPL {
     app_service: AppService,
     service_working_dir: Option<String>,
     app_service_factory: AppServiceFactory<WasmtimeWasmBackend>,
-    ticker_task_handle: std::thread::JoinHandle<()>,
     timeout: std::time::Duration,
 }
 
@@ -81,7 +80,7 @@ impl REPL {
         working_dir: Option<String>,
         quiet: bool,
     ) -> ReplResult<Self> {
-        let app_service_factory = AppServiceFactory::<WasmtimeWasmBackend>::new()?;
+        let (app_service_factory, ticker) = AppServiceFactory::<WasmtimeWasmBackend>::new()?;
         let app_service = Self::create_app_service(
             &app_service_factory,
             config_file_path,
@@ -90,12 +89,11 @@ impl REPL {
         )
         .await?;
 
-        let handle = Self::spawn_ticker_thread(app_service_factory.clone());
+        Self::spawn_ticker_thread(ticker);
         Ok(Self {
             app_service,
             service_working_dir: working_dir,
             app_service_factory,
-            ticker_task_handle: handle,
             timeout: DEFAULT_TIMEOUT,
         })
     }
@@ -320,17 +318,15 @@ impl REPL {
         Ok(app_service)
     }
 
-    fn spawn_ticker_thread(
-        factory: AppServiceFactory<WasmtimeWasmBackend>,
-    ) -> std::thread::JoinHandle<()> {
+    fn spawn_ticker_thread(ticker: fluence_app_service::EpochTicker) {
         std::thread::spawn(move || {
             let period = std::time::Duration::from_millis(10);
 
             loop {
                 std::thread::sleep(period);
-                factory.increment_epoch();
+                ticker.increment_epoch();
             }
-        })
+        });
     }
 }
 

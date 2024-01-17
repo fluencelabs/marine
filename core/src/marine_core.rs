@@ -232,10 +232,3 @@ impl<WB: WasmBackend> MarineCore<WB> {
         }
     }
 }
-/*
-
-impl<WB: WasmBackend> Default for MarineCore<WB> {
-    fn default() -> Self {
-        Self::new(WB::default())
-    }
-}*/

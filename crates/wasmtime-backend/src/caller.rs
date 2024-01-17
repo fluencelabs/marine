@@ -25,15 +25,6 @@ use marine_wasm_backend_traits::prelude::*;
 use wasmtime::AsContext as WasmtimeAsContext;
 use wasmtime::AsContextMut as WasmtimeAsContextMut;
 
-// these imports are used in the macro `impl_func_getter`, but compiler does not detect it
-#[allow(unused)]
-use futures::future::BoxFuture;
-#[allow(unused)]
-use futures::FutureExt;
-
-#[allow(unused)]
-use std::sync::Arc;
-
 pub struct WasmtimeImportCallContext<'c> {
     pub(crate) inner: wasmtime::Caller<'c, StoreState>,
 }
@@ -74,6 +65,9 @@ macro_rules! impl_func_getter {
                 &mut self,
                 name: &str,
             ) -> Result<TypedFunc<WasmtimeWasmBackend, $args, $rets>, ResolveError> {
+                use futures::FutureExt;
+                use std::sync::Arc;
+
                 fn create_func_getter_closure(
                     f: Arc<wasmtime::TypedFunc<$args, $rets>>,
                 ) -> impl for<'args, 'ctx2> Fn(

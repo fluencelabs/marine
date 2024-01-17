@@ -362,9 +362,8 @@ impl<WB: WasmBackend> MModule<WB> {
                + 'static {
             let import_namespace = std::sync::Arc::new(import_namespace);
             let import_name = std::sync::Arc::new(import_name);
-            //let wit_instance = std::sync::Arc::new(wit_instance);
             let interpreter = std::sync::Arc::new(interpreter);
-            //lifetimify_import_closure(
+
             move |mut ctx: <WB as WasmBackend>::ImportCallContext<'_>,
                   inputs: &[WValue]|
                   -> BoxFuture<'_, anyhow::Result<Vec<WValue>>> {
@@ -420,7 +419,6 @@ impl<WB: WasmBackend> MModule<WB> {
                 }
                 .boxed()
             }
-            //  )
         }
 
         let wit_import_funcs = wit
