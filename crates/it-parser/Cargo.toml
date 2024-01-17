@@ -1,8 +1,9 @@
 [package]
 name = "marine-it-parser"
 description = "Fluence Marine interface types parser"
-version = "0.15.0"
+version = "0.15.1"
 authors = ["Fluence Labs"]
+repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 edition = "2021"
 
@@ -11,9 +12,9 @@ name = "marine_it_parser"
 path = "src/lib.rs"
 
 [dependencies]
-marine-it-interfaces = { path = "../it-interfaces", version = "0.9.0" }
-marine-module-interface = { path = "../module-interface", version = "0.8.0" }
-marine-wasm-backend-traits = { path = "../wasm-backend-traits", version = "0.5.0" }
+marine-it-interfaces = { path = "../it-interfaces", version = "0.9.1" }
+marine-module-interface = { path = "../module-interface", version = "0.8.1" }
+marine-wasm-backend-traits = { path = "../wasm-backend-traits", version = "0.5.1" }
 
 anyhow = "1.0.75"
 walrus = "0.20.1"

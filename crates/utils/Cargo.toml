@@ -1,8 +1,9 @@
 [package]
 name = "marine-utils"
 description = "Fluence Marine utils crate"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["Fluence Labs"]
+repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 edition = "2021"
 

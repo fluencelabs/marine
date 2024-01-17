@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/fluencelabs/marine/compare/marine-min-it-version-v0.3.1...marine-min-it-version-v0.3.2) (2024-01-07)
+
+
+### Bug Fixes
+
+* **docs:** add correct repository link for every published crate ([#403](https://github.com/fluencelabs/marine/issues/403)) ([ebb0bcb](https://github.com/fluencelabs/marine/commit/ebb0bcb1d15d37e8b5c10096ce42171a87abe0fa))
+
 ## [0.3.1](https://github.com/fluencelabs/marine/compare/marine-min-it-version-v0.3.0...marine-min-it-version-v0.3.1) (2023-11-07)
 
 

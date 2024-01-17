@@ -1,9 +1,9 @@
 [package]
 name = "mrepl"
 description = "Fluence Marine REPL intended for testing purposes"
-version = "0.26.0"
+version = "0.26.2"
 authors = ["Fluence Labs"]
-repository = "https://github.com/fluencelabs/marine/tools/repl"
+repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 edition = "2021"
 
@@ -12,9 +12,9 @@ name = "mrepl"
 path = "src/main.rs"
 
 [dependencies]
-fluence-app-service = { path = "../../crates/fluence-app-service", version = "0.31.0", features = ["raw-module-api"] }
+fluence-app-service = { path = "../../crates/fluence-app-service", version = "0.31.1", features = ["raw-module-api"] }
 marine-rs-sdk-main = { version = "0.10.0", default-features = false, features = ["logger"] }
-marine-wasm-backend-traits = {path = "../../crates/wasm-backend-traits", version = "0.5.0" }
+marine-wasm-backend-traits = {path = "../../crates/wasm-backend-traits", version = "0.5.1" }
 marine-wasmtime-backend = { version = "0.5.0", path = "../../crates/wasmtime-backend" }
 
 anyhow = "1.0.75"
@@ -26,12 +26,12 @@ tokio = { version = "1.33.0", features = ["full"] }
 env_logger = "0.10.0"
 check-latest = { version = "1.0.2", optional = true }
 log = "0.4.20"
-rustyline = { version = "10.0.0", features = ["with-fuzzy"] }
+rustyline = { version = "10.0.0" }
 rustyline-derive = "0.7.0"
 rustop = "1.1.2"
 itertools = "0.10.5"
 uuid = { version = "1.4.0", features = ["v4"] }
-termion = "1.5.6"
+crossterm = "0.27.0"
 
 [features]
 check-latest = ["dep:check-latest"]
