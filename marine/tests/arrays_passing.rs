@@ -255,7 +255,7 @@ pub async fn i32_type() {
     let expected_result = json!([0, 1, 2, 3, 4, 0, 2]);
 
     let result1 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "i32_type",
             json!([[]]),
@@ -266,7 +266,7 @@ pub async fn i32_type() {
     assert_eq!(result1, expected_result);
 
     let result2 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "i32_type",
             json!({ "arg": [] }),
@@ -278,7 +278,7 @@ pub async fn i32_type() {
 
     let expected_result = json!([1, 0, 1, 2, 3, 4, 0, 2]);
     let result3 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "i32_type",
             json!([[1]]),
@@ -299,19 +299,19 @@ pub async fn i64_type() {
     .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
-        .call_with_json("arrays_passing_pure", "i64_type", json!({}), <_>::default())
+        .call_with_json_async("arrays_passing_pure", "i64_type", json!({}), <_>::default())
         .await;
     assert!(result1.is_err());
 
     let result2 = marine
-        .call_with_json("arrays_passing_pure", "i64_type", json!([]), <_>::default())
+        .call_with_json_async("arrays_passing_pure", "i64_type", json!([]), <_>::default())
         .await;
     assert!(result2.is_err());
 
     let expected_result = json!([1, 0, 1, 2, 3, 4, 1, 1]);
 
     let result3 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "i64_type",
             json!({ "arg": [1] }),
@@ -322,7 +322,7 @@ pub async fn i64_type() {
     assert_eq!(result3, expected_result);
 
     let result4 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "i64_type",
             json!([[1]]),
@@ -343,12 +343,12 @@ pub async fn u32_type() {
     .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
-        .call_with_json("arrays_passing_pure", "u32_type", json!({}), <_>::default())
+        .call_with_json_async("arrays_passing_pure", "u32_type", json!({}), <_>::default())
         .await;
     assert!(result1.is_err());
 
     let result2 = marine
-        .call_with_json("arrays_passing_pure", "u32_type", json!([]), <_>::default())
+        .call_with_json_async("arrays_passing_pure", "u32_type", json!([]), <_>::default())
         .await;
     assert!(result2.is_err());
 
@@ -376,12 +376,12 @@ pub async fn u64_type() {
     .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
-        .call_with_json("arrays_passing_pure", "u64_type", json!({}), <_>::default())
+        .call_with_json_async("arrays_passing_pure", "u64_type", json!({}), <_>::default())
         .await;
     assert!(result1.is_err());
 
     let result2 = marine
-        .call_with_json("arrays_passing_pure", "u64_type", json!([]), <_>::default())
+        .call_with_json_async("arrays_passing_pure", "u64_type", json!([]), <_>::default())
         .await;
     assert!(result2.is_err());
 
@@ -409,12 +409,12 @@ pub async fn f64_type() {
     .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
-        .call_with_json("arrays_passing_pure", "f32_type", json!({}), <_>::default())
+        .call_with_json_async("arrays_passing_pure", "f32_type", json!({}), <_>::default())
         .await;
     assert!(result1.is_err());
 
     let result2 = marine
-        .call_with_json("arrays_passing_pure", "f32_type", json!([]), <_>::default())
+        .call_with_json_async("arrays_passing_pure", "f32_type", json!([]), <_>::default())
         .await;
     assert!(result2.is_err());
 
@@ -442,7 +442,7 @@ pub async fn string_type() {
     .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "string_type",
             json!({}),
@@ -452,7 +452,7 @@ pub async fn string_type() {
     assert!(result1.is_err());
 
     let result2 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "string_type",
             json!([]),
@@ -490,7 +490,7 @@ pub async fn byte_type() {
     .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "byte_type",
             json!({}),
@@ -500,7 +500,7 @@ pub async fn byte_type() {
     assert!(result1.is_err());
 
     let result2 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "byte_type",
             json!([]),
@@ -537,7 +537,7 @@ pub async fn inner_arrays_1_type() {
     .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "inner_arrays_1",
             json!({}),
@@ -547,7 +547,7 @@ pub async fn inner_arrays_1_type() {
     assert!(result1.is_err());
 
     let result2 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "inner_arrays_1",
             json!([]),
@@ -592,7 +592,7 @@ pub async fn inner_arrays_2_type() {
     .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "inner_arrays_2",
             json!({}),
@@ -602,7 +602,7 @@ pub async fn inner_arrays_2_type() {
     assert!(result1.is_err());
 
     let result2 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "inner_arrays_2",
             json!([]),
@@ -672,7 +672,7 @@ pub async fn bool_type() {
     .unwrap_or_else(|e| panic!("can't create Fluence Marine instance: {}", e));
 
     let result1 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "bool_type",
             json!({}),
@@ -682,7 +682,7 @@ pub async fn bool_type() {
     assert!(result1.is_err());
 
     let result2 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "bool_type",
             json!([]),
@@ -725,7 +725,7 @@ pub async fn empty_type() {
     assert_eq!(result3, expected_result);
 
     let result4 = marine
-        .call_with_json(
+        .call_with_json_async(
             "arrays_passing_pure",
             "empty_type",
             json!([1]),

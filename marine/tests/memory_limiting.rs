@@ -76,7 +76,7 @@ pub async fn triggered_by_single_module() {
     let to_allocate = (64 * MIB - start_memory) / WASM_PAGE_SIZE + 1;
 
     let result = faas
-        .call_with_ivalues(
+        .call_with_ivalues_async(
             FACADE_MODULE,
             "allocate_single_module_64KB_pieces",
             &[IValue::U32(to_allocate as u32)],
@@ -115,7 +115,7 @@ pub async fn not_triggered_near_limit_single_module() {
     let to_allocate_pages = (64 * MIB - start_memory) / WASM_PAGE_SIZE - 1;
 
     let result = faas
-        .call_with_ivalues(
+        .call_with_ivalues_async(
             FACADE_MODULE,
             "allocate_single_module_64KB_pieces",
             &[IValue::U32(to_allocate_pages as u32)],
@@ -149,7 +149,7 @@ pub async fn triggered_by_two_modules() {
     let to_allocate = (64 * MIB - start_memory) / 2 / WASM_PAGE_SIZE + 1;
 
     let result = faas
-        .call_with_ivalues(
+        .call_with_ivalues_async(
             FACADE_MODULE,
             "allocate_two_modules_64KB_pieces",
             &[IValue::U32(to_allocate as u32)],
@@ -189,7 +189,7 @@ pub async fn not_triggered_near_limit_two_modules() {
     let to_allocate = (64 * MIB - start_memory) / 2 / WASM_PAGE_SIZE - 2;
 
     let result = faas
-        .call_with_ivalues(
+        .call_with_ivalues_async(
             FACADE_MODULE,
             "allocate_two_modules_64KB_pieces",
             &[IValue::U32(to_allocate as u32)],
@@ -221,7 +221,7 @@ pub async fn triggered_by_large_allocation_single_module() {
     let to_allocate = 128 * MIB;
 
     let result = faas
-        .call_with_ivalues(
+        .call_with_ivalues_async(
             FACADE_MODULE,
             "allocate_single_module_single_piece",
             &[IValue::S64(to_allocate as i64)],
@@ -254,7 +254,7 @@ async fn fill_start_memory(marine: &mut Marine) {
     let start_memory = get_total_memory(marine);
     let pages_to_allocate = (start_memory / 2) / WASM_PAGE_SIZE;
     let _ = marine
-        .call_with_ivalues(
+        .call_with_ivalues_async(
             FACADE_MODULE,
             "allocate_two_modules_64KB_pieces",
             &[IValue::U32(pages_to_allocate as u32)],

@@ -34,7 +34,7 @@ pub async fn greeting_basic() {
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
     let result1 = marine_core
-        .call(
+        .call_async(
             "greeting",
             "greeting",
             &[IValue::String(String::from("Fluence"))],
@@ -43,7 +43,7 @@ pub async fn greeting_basic() {
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
     let result2 = marine_core
-        .call("greeting", "greeting", &[IValue::String(String::from(""))])
+        .call_async("greeting", "greeting", &[IValue::String(String::from(""))])
         .await
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
@@ -86,7 +86,7 @@ pub async fn non_exist_module_func() {
     let non_exist_name = String::from("_");
 
     let call_result1 = marine_core
-        .call(
+        .call_async(
             non_exist_name.as_str(),
             function_name,
             &[IValue::String(String::from("Fluence"))],
@@ -94,7 +94,7 @@ pub async fn non_exist_module_func() {
         .await;
 
     let call_result2 = marine_core
-        .call(
+        .call_async(
             module_name,
             non_exist_name.as_str(),
             &[IValue::String(String::from("Fluence"))],
@@ -102,7 +102,7 @@ pub async fn non_exist_module_func() {
         .await;
 
     let call_result3 = marine_core
-        .call(
+        .call_async(
             non_exist_name.as_str(),
             non_exist_name.as_str(),
             &[IValue::String(String::from("Fluence"))],

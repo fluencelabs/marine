@@ -154,7 +154,7 @@ impl<WB: WasmBackend> Marine<WB> {
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub async fn call_with_ivalues(
+    pub async fn call_with_ivalues_async(
         &mut self,
         module_name: impl AsRef<str>,
         func_name: impl AsRef<str>,
@@ -169,7 +169,7 @@ impl<WB: WasmBackend> Marine<WB> {
 
         let result = self
             .core
-            .call(module_name, func_name, args)
+            .call_async(module_name, func_name, args)
             .await
             .map_err(|e| check_for_oom_and_convert_error(&self.core, e))?;
 
@@ -179,7 +179,7 @@ impl<WB: WasmBackend> Marine<WB> {
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub async fn call_with_json(
+    pub async fn call_with_json_async(
         &mut self,
         module_name: impl AsRef<str>,
         func_name: impl AsRef<str>,
@@ -212,7 +212,7 @@ impl<WB: WasmBackend> Marine<WB> {
 
         let result = self
             .core
-            .call(module_name, func_name, &iargs)
+            .call_async(module_name, func_name, &iargs)
             .await
             .map_err(|e| check_for_oom_and_convert_error(&self.core, e))?;
 

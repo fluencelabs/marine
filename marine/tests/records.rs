@@ -42,7 +42,7 @@ pub async fn records() {
             .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = marine
-        .call_with_ivalues("records_pure", "invoke", &[], <_>::default())
+        .call_with_ivalues_async("records_pure", "invoke", &[], <_>::default())
         .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
@@ -85,7 +85,7 @@ pub async fn records() {
     );
 
     let result2 = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_effector",
             "mutate_struct",
             json!({
@@ -114,7 +114,7 @@ pub async fn records() {
     assert_eq!(result2, expected_result);
 
     let result3 = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_effector",
             "mutate_struct",
             json!({
@@ -129,7 +129,7 @@ pub async fn records() {
     assert_eq!(result3, expected_result);
 
     let result4 = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_effector",
             "mutate_struct",
             json!([{
@@ -156,7 +156,7 @@ pub async fn records() {
     assert_eq!(result4, expected_result);
 
     let result5 = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_effector",
             "mutate_struct",
             json!([[false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", [1]]]),
@@ -190,7 +190,7 @@ async fn records_passing() {
 
     async fn run_test(marine: &mut Marine, func_name: &str) {
         let result = marine
-            .call_with_json(
+            .call_with_json_async(
                 "records_passing_pure",
                 func_name,
                 json!({
@@ -268,7 +268,7 @@ async fn records_destruction() {
     ]);
 
     let _result = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_passing_pure",
             "pass_droppable_record",
             record_array,
@@ -278,7 +278,7 @@ async fn records_destruction() {
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     let result = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_passing_pure",
             "get_drop_count",
             json!([]),
@@ -316,7 +316,7 @@ async fn records_return_frees() {
     .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let _result = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_passing_pure",
             "return_256kb_struct",
             json!([]),
@@ -334,7 +334,7 @@ async fn records_return_frees() {
 
     for _ in 0..128 {
         let _result = marine
-            .call_with_json(
+            .call_with_json_async(
                 "records_passing_pure",
                 "return_256kb_struct",
                 json!([]),
@@ -440,7 +440,7 @@ async fn records_pass_frees() {
     .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let _result = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_passing_pure",
             "pass_256kb_struct",
             json!([struct_256kb]),
@@ -458,7 +458,7 @@ async fn records_pass_frees() {
 
     for _ in 0..128 {
         let _result = marine
-            .call_with_json(
+            .call_with_json_async(
                 "records_passing_pure",
                 "pass_256kb_struct",
                 json!([struct_256kb.clone()]),

@@ -96,14 +96,14 @@ impl AppService {
     }
 
     /// Call a specified function of loaded module by its name with arguments in json format.
-    pub async fn call(
+    pub async fn call_async(
         &mut self,
         func_name: impl AsRef<str>,
         arguments: JValue,
         call_parameters: crate::CallParameters,
     ) -> Result<JValue> {
         self.marine
-            .call_with_json(
+            .call_with_json_async(
                 &self.facade_module_name,
                 func_name,
                 arguments,
@@ -114,14 +114,14 @@ impl AppService {
     }
 
     /// Call a specified function of loaded module by its name with arguments in IValue format.
-    pub async fn call_with_ivalues(
+    pub async fn call_with_ivalues_async(
         &mut self,
         func_name: impl AsRef<str>,
         arguments: &[IValue],
         call_parameters: crate::CallParameters,
     ) -> Result<Vec<IValue>> {
         self.marine
-            .call_with_ivalues(
+            .call_with_ivalues_async(
                 &self.facade_module_name,
                 func_name,
                 arguments,
@@ -238,7 +238,7 @@ impl AppService {
         call_parameters: crate::CallParameters,
     ) -> Result<JValue> {
         self.marine
-            .call_with_json(module_name, func_name, arguments, call_parameters)
+            .call_with_json_async(module_name, func_name, arguments, call_parameters)
             .await
             .map_err(Into::into)
     }

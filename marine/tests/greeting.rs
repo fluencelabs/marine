@@ -42,7 +42,7 @@ pub async fn greeting() {
             .unwrap_or_else(|e| panic!("can't create Marine instance: {}", e));
 
     let result1 = faas
-        .call_with_ivalues(
+        .call_with_ivalues_async(
             "greeting",
             "greeting",
             &[IValue::String(String::from("Fluence"))],
@@ -52,7 +52,7 @@ pub async fn greeting() {
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
     let result2 = faas
-        .call_with_ivalues(
+        .call_with_ivalues_async(
             "greeting",
             "greeting",
             &[IValue::String(String::from(""))],

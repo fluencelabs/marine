@@ -126,7 +126,7 @@ fn call_wasm_export_func_ret_i32<'ctx1, 'ctx2, const N_ARGS: usize>(
     args: [WValue; N_ARGS],
 ) -> BoxFuture<'ctx1, Result<i32, RuntimeError>> {
     async move {
-        let res = func.clone().call(store, &args).await?;
+        let res = func.clone().call_async(store, &args).await?;
         match res.len() {
             1 => Ok(res[0].to_i32()),
             x => Err(RuntimeError::IncorrectResultsNumber {
@@ -144,7 +144,7 @@ fn call_wasm_export_func_ret_unit<'ctx1, 'ctx2, const N_ARGS: usize>(
     args: [WValue; N_ARGS],
 ) -> BoxFuture<'ctx1, Result<(), RuntimeError>> {
     async move {
-        let res = func.clone().call(store, &args).await?;
+        let res = func.clone().call_async(store, &args).await?;
         match res.len() {
             0 => Ok(()),
             x => Err(RuntimeError::IncorrectResultsNumber {

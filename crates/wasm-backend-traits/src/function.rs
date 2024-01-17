@@ -88,7 +88,7 @@ pub trait ExportFunction<WB: WasmBackend>: Send + Sync + Clone {
     ///     If given a store different from the one that stores the function.
     /// # Errors:
     ///     See `RuntimeError` documentation.
-    fn call<'args>(
+    fn call_async<'args>(
         &'args self,
         store: &'args mut impl AsContextMut<WB>,
         args: &'args [WValue],

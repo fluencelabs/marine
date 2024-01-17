@@ -328,7 +328,7 @@ impl ExportFunction<JsWasmBackend> for WasmExportFunction {
         self.stored_mut(store.as_context_mut()).signature.clone()
     }
 
-    fn call<'args>(
+    fn call_async<'args>(
         &'args self,
         store: &'args mut impl AsContextMut<JsWasmBackend>,
         args: &'args [WValue],

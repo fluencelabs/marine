@@ -156,7 +156,7 @@ impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         fn_ty_to_sig(&ty)
     }
 
-    fn call<'args>(
+    fn call_async<'args>(
         &'args self,
         store: &'args mut impl AsContextMut<WasmtimeWasmBackend>,
         args: &'args [WValue],

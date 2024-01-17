@@ -67,7 +67,7 @@ pub async fn call_parameters() {
     };
 
     let result = faas
-        .call_with_ivalues("call_parameters", "call_parameters", &[], call_parameters)
+        .call_with_ivalues_async("call_parameters", "call_parameters", &[], call_parameters)
         .await
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
 

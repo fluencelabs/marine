@@ -62,7 +62,7 @@ async fn wasi_mapped_dirs() {
     let file_data = std::fs::read("tests/wasm_tests/wasi/some_dir/some_file")
         .expect("file must exist for test to work");
     let result = marine
-        .call_with_json(
+        .call_with_json_async(
             "wasi_effector",
             "read_from_mapped_dir",
             json!([]),

@@ -43,7 +43,7 @@ pub async fn records() {
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
     let result = marine_core
-        .call("records_pure", "invoke", &[])
+        .call_async("records_pure", "invoke", &[])
         .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 

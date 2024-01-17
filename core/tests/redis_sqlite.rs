@@ -46,7 +46,7 @@ async fn redis() {
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
     let result1 = marine_core
-        .call(
+        .call_async(
             module_name,
             "invoke",
             &[IValue::String(String::from("SET A 10"))],
@@ -54,7 +54,7 @@ async fn redis() {
         .await
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
     let result2 = marine_core
-        .call(
+        .call_async(
             module_name,
             "invoke",
             &[IValue::String(String::from("SADD B 20"))],
@@ -62,7 +62,7 @@ async fn redis() {
         .await
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
     let result3 = marine_core
-        .call(
+        .call_async(
             module_name,
             "invoke",
             &[IValue::String(String::from("GET A"))],
@@ -70,7 +70,7 @@ async fn redis() {
         .await
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
     let result4 = marine_core
-        .call(
+        .call_async(
             module_name,
             "invoke",
             &[IValue::String(String::from("SMEMBERS B"))],
@@ -78,7 +78,7 @@ async fn redis() {
         .await
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
     let result5 = marine_core
-        .call(
+        .call_async(
             module_name,
             "invoke",
             &[IValue::String(String::from(
@@ -112,7 +112,7 @@ async fn sqlite() {
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
     let mut result1 = marine_core
-        .call(
+        .call_async(
             module_name,
             "sqlite3_open_v2",
             &[
@@ -135,7 +135,7 @@ async fn sqlite() {
     };
 
     let mut result1 = marine_core
-        .call(
+        .call_async(
             module_name,
             "sqlite3_exec",
             &[
@@ -149,7 +149,7 @@ async fn sqlite() {
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
 
     let mut result2 = marine_core
-        .call(
+        .call_async(
             module_name,
             "sqlite3_exec",
             &[
@@ -165,7 +165,7 @@ async fn sqlite() {
         .unwrap_or_else(|e| panic!("error while Marine invocation: {:?}", e));
 
     let mut result3 = marine_core
-        .call(
+        .call_async(
             module_name,
             "sqlite3_exec",
             &[

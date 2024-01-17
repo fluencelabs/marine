@@ -150,7 +150,7 @@ impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
             match &self.inner {
                 WITFunctionInner::Export { func, .. } => func
                     .as_ref()
-                    .call(
+                    .call_async(
                         store,
                         arguments
                             .iter()
@@ -162,7 +162,7 @@ impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
                     .map_err(|e| anyhow!(e))
                     .map(|results| results.iter().map(wval_to_ival).collect()),
                 WITFunctionInner::Import { callable, .. } => Arc::make_mut(&mut callable.clone())
-                    .call(store, arguments)
+                    .call_async(store, arguments)
                     .await
                     .map_err(|e| anyhow!(e)),
             }

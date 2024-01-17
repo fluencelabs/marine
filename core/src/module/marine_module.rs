@@ -69,7 +69,7 @@ pub(super) struct Callable<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> Callable<WB> {
-    pub async fn call(
+    pub async fn call_async(
         &mut self,
         store: &mut <WB as WasmBackend>::ContextMut<'_>,
         args: &[IValue],
@@ -145,12 +145,12 @@ impl<WB: WasmBackend> MModule<WB> {
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
         if let Ok(initialize_func) = wasm_instance.get_function(store, INITIALIZE_FUNC) {
-            initialize_func.call(store, &[]).await?;
+            initialize_func.call_async(store, &[]).await?;
         }
         // call _start to call module's main function
         #[rustfmt::skip]
         if let Ok(start_func) = wasm_instance.get_function(store, START_FUNC) {
-            start_func.call(store, &[]).await?;
+            start_func.call_async(store, &[]).await?;
         }
 
         Ok(Self {
@@ -158,33 +158,6 @@ impl<WB: WasmBackend> MModule<WB> {
             export_funcs,
             export_record_types,
         })
-    }
-
-    pub(crate) async fn call(
-        &mut self,
-        store: &mut <WB as WasmBackend>::ContextMut<'_>,
-        module_name: &str,
-        function_name: &str,
-        args: &[IValue],
-    ) -> MResult<Vec<IValue>> {
-        log::debug!(
-            "calling {}::{} with args: {:?}",
-            module_name,
-            function_name,
-            args
-        );
-        let func = self.export_funcs.get_mut(function_name).ok_or_else(|| {
-            MError::NoSuchFunction(module_name.to_string(), function_name.to_string())
-        })?;
-        let res = Arc::make_mut(func).call(store, args).await;
-
-        log::debug!(
-            "calling {}::{} with result: {:?}",
-            module_name,
-            function_name,
-            res
-        );
-        res
     }
 
     pub(crate) async fn call_async(
@@ -203,7 +176,8 @@ impl<WB: WasmBackend> MModule<WB> {
         let func = self.export_funcs.get_mut(function_name).ok_or_else(|| {
             MError::NoSuchFunction(module_name.to_string(), function_name.to_string())
         })?;
-        let res = Arc::make_mut(func).call(store, args).await;
+        let res = Arc::make_mut(func).call_async(store, args).await;
+
         log::debug!(
             "calling {}::{} with result: {:?}",
             module_name,
