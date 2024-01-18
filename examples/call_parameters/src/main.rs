@@ -29,11 +29,12 @@ pub fn main() {}
 pub fn call_parameters() -> String {
     let cp = marine_rs_sdk::get_call_parameters();
     format!(
-        "{}\n{}\n{}\n{}\n{}\n{:?}",
+        "init_peer_id: {}, service_id: {}, service_creator_peer_id: {}, host_id: {}, worker_id: {}, particle_id: {}, tetraplets: {:?}",
         cp.init_peer_id,
         cp.service_id,
         cp.service_creator_peer_id,
         cp.host_id,
+        cp.worker_id,
         cp.particle_id,
         cp.tetraplets
     )

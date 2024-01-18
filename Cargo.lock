@@ -230,7 +230,7 @@ dependencies = [
 name = "call_parameters"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.10.0",
+ "marine-rs-sdk 0.10.3",
 ]
 
 [[package]]
