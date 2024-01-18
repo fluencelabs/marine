@@ -13,7 +13,7 @@ path = "src/main.rs"
 
 [dependencies]
 fluence-app-service = { path = "../../crates/fluence-app-service", version = "0.31.1", features = ["raw-module-api"] }
-marine-rs-sdk-main = { version = "0.10.0", default-features = false, features = ["logger"] }
+marine-rs-sdk-main = { version = "0.10.3", default-features = false, features = ["logger"], git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/worker-id-in-call-params" }
 marine-wasm-backend-traits = {path = "../../crates/wasm-backend-traits", version = "0.5.1" }
 
 anyhow = "1.0.75"
