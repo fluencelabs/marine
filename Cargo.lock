@@ -1008,6 +1008,8 @@ dependencies = [
 [[package]]
 name = "fluence-it-types"
 version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "45e8d8d5ed4d1f5d21ee5fcd0f6a7b0feea113d918e7ece4f3dd0f8a0b99caa6"
 dependencies = [
  "it-to-bytes",
  "nom",
@@ -1528,6 +1530,8 @@ dependencies = [
 [[package]]
 name = "it-lilo"
 version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fa7310e6ce8b8b6f11c3d0b5dd5824675fab3cfd335f70bcf9a51198de39cfe"
 dependencies = [
  "anyhow",
  "async-recursion",
@@ -1541,7 +1545,9 @@ dependencies = [
 
 [[package]]
 name = "it-memory-traits"
-version = "0.4.0"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e83089981169d53e2b13df7c8d132b471bf2fc4c85afe427c4a74115695c4612"
 dependencies = [
  "thiserror",
 ]
@@ -1549,6 +1555,8 @@ dependencies = [
 [[package]]
 name = "it-to-bytes"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "729c74bb4236418898a219c6d96f14cba77456dd7c04a2e99e65e9c643709b56"
 
 [[package]]
 name = "itertools"
@@ -3717,6 +3725,8 @@ dependencies = [
 [[package]]
 name = "wasmer-interface-types-fl"
 version = "0.28.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a753426d5a76076aa16a435b5a5f316e3803461f551975d196928bc92e42916"
 dependencies = [
  "anyhow",
  "fluence-it-types",
