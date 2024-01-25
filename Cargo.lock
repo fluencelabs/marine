@@ -1527,7 +1527,7 @@ dependencies = [
 
 [[package]]
 name = "it-lilo"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "anyhow",
  "async-recursion",
@@ -3716,7 +3716,7 @@ dependencies = [
 
 [[package]]
 name = "wasmer-interface-types-fl"
-version = "0.27.0"
+version = "0.28.0"
 dependencies = [
  "anyhow",
  "fluence-it-types",

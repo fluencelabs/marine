@@ -32,7 +32,7 @@ use marine_wasm_backend_traits::prelude::*;
 use marine_it_interfaces::MITInterfaces;
 use marine_it_parser::extract_it_from_module;
 use marine_utils::SharedString;
-use wasmer_it::interpreter::AsyncInterpreter as Interpreter;
+use wasmer_it::interpreter::Interpreter;
 
 use futures::future::BoxFuture;
 use futures::FutureExt;
