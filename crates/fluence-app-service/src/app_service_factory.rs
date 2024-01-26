@@ -19,6 +19,7 @@ use crate::AppServiceConfig;
 
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::WasmBackendResult;
+use marine_wasmtime_backend::WasmtimeConfig;
 use marine_wasmtime_backend::WasmtimeWasmBackend;
 
 use std::collections::HashMap;
@@ -30,24 +31,17 @@ pub struct AppServiceFactory<WB: WasmBackend> {
 
 pub struct EpochTicker(WasmtimeWasmBackend);
 
-impl AppServiceFactory<WasmtimeWasmBackend> {
-    pub fn new() -> WasmBackendResult<(Self, EpochTicker)> {
-        let backend = WasmtimeWasmBackend::new_async()?;
-        Ok(Self::new_with_backend(backend))
-    }
-
-    pub fn new_with_backend(backend: WasmtimeWasmBackend) -> (Self, EpochTicker) {
-        let ticker = EpochTicker(backend.clone());
-        let factory = Self { backend };
-        (factory, ticker)
-    }
-
+// TODO: think about moving factory to Nox
+// TODO: think about adding aquavm create method -- AquaVM can accept either Factory of WasmBackend
+// TODO: understand how is worker isolation working in nox https://github.com/fluencelabs/nox/pull/2026/files -- discused with, Nick this design is fine
+// TODO: check if factory can be used concurrently -- should be
+impl<WB: WasmBackend> AppServiceFactory<WB> {
     pub async fn new_app_service<S>(
         &self,
-        config: AppServiceConfig,
+        config: AppServiceConfig<WB>,
         service_id: S,
         envs: HashMap<String, String>,
-    ) -> crate::Result<AppService>
+    ) -> crate::Result<AppService<WB>>
     where
         S: Into<String>,
     {
@@ -57,14 +51,32 @@ impl AppServiceFactory<WasmtimeWasmBackend> {
     #[cfg(feature = "raw-module-api")]
     pub async fn new_app_service_empty_facade<S>(
         &self,
-        config: AppServiceConfig,
+        config: AppServiceConfig<WB>,
         service_id: S,
         envs: HashMap<String, String>,
-    ) -> crate::Result<AppService>
+    ) -> crate::Result<AppService<WB>>
     where
         S: Into<String>,
     {
         AppService::new_with_empty_facade(self.backend.clone(), config, service_id, envs).await
+    }
+
+    pub fn backend(&self) -> WB {
+        self.backend.clone()
+    }
+}
+
+impl AppServiceFactory<WasmtimeWasmBackend> {
+    /// Creates a new factory
+    pub fn new_with_wasmtime(
+        config: WasmtimeConfig,
+    ) -> WasmBackendResult<(AppServiceFactory<WasmtimeWasmBackend>, EpochTicker)> {
+        let config = config;
+        let backend = WasmtimeWasmBackend::new(config)?;
+
+        let ticker = EpochTicker(backend.clone());
+        let factory = Self { backend };
+        Ok((factory, ticker))
     }
 }
 

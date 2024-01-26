@@ -21,6 +21,7 @@ use print_state::print_fs_state;
 use crate::ReplResult;
 
 use marine_wasmtime_backend::WasmtimeWasmBackend;
+use marine_wasmtime_backend::WasmtimeConfig;
 use fluence_app_service::{AppService, AppServiceFactory};
 use fluence_app_service::CallParameters;
 use fluence_app_service::SecurityTetraplet;
@@ -68,7 +69,7 @@ struct CallModuleArguments<'args> {
 const DEFAULT_TIMEOUT: std::time::Duration = std::time::Duration::from_millis(100);
 #[allow(clippy::upper_case_acronyms)]
 pub(super) struct REPL {
-    app_service: AppService,
+    app_service: AppService<WasmtimeWasmBackend>,
     service_working_dir: Option<String>,
     app_service_factory: AppServiceFactory<WasmtimeWasmBackend>,
     timeout: std::time::Duration,
@@ -80,7 +81,11 @@ impl REPL {
         working_dir: Option<String>,
         quiet: bool,
     ) -> ReplResult<Self> {
-        let (app_service_factory, ticker) = AppServiceFactory::<WasmtimeWasmBackend>::new()?;
+        let mut backend_config = WasmtimeConfig::new();
+        backend_config.epoch_interruption(true);
+
+        let (app_service_factory, ticker) =
+            AppServiceFactory::<WasmtimeWasmBackend>::new_with_wasmtime(backend_config)?;
         let app_service = Self::create_app_service(
             &app_service_factory,
             config_file_path,
@@ -267,7 +272,7 @@ impl REPL {
         config_file_path: Option<S>,
         working_dir: Option<String>,
         quiet: bool,
-    ) -> ReplResult<AppService> {
+    ) -> ReplResult<AppService<WasmtimeWasmBackend>> {
         let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
         let config_file_path: Option<PathBuf> = config_file_path.map(Into::into);
