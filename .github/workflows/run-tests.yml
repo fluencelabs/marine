@@ -62,9 +62,10 @@ jobs:
           cargo install wasm-tools
           rustup show
           wasm-pack --version
-          git diff
+          git status
           ./build.sh
           wasm-tools print marine-js-pkg/marine_js_bg.wasm | grep "(import"
+          wasm-tools print marine-js-pkg/marine_js_bg.wasm | grep "(export"
         working-directory: marine-js
 
       - name: Install marine-js npm dependencies
