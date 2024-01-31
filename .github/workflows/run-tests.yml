@@ -58,14 +58,7 @@ jobs:
         run: cargo install --path tools/cli
 
       - name: Build marine-js wasm
-        run: |
-          cargo install wasm-tools
-          rustup show
-          wasm-pack --version
-          git status
-          ./build.sh
-          wasm-tools print marine-js-pkg/marine_js_bg.wasm | grep "(import"
-          wasm-tools print marine-js-pkg/marine_js_bg.wasm | grep "(export"
+        run: ./build.sh
         working-directory: marine-js
 
       - name: Install marine-js npm dependencies
