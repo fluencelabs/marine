@@ -42,6 +42,7 @@ const MB: usize = 1024 * 1024;
 
 /// Default amount of stack space available for executing WebAssembly code.
 pub const DEFAULT_WASM_STACK_SIZE: usize = 2 * MB;
+
 #[derive(Clone)]
 pub struct WasmtimeWasmBackend {
     engine: wasmtime::Engine,

@@ -37,6 +37,8 @@ pub struct JsImportCallContext {
     pub(crate) caller_instance: JsInstance,
 }
 
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
 unsafe impl Send for JsImportCallContext {}
 unsafe impl Sync for JsImportCallContext {}
 

@@ -17,8 +17,9 @@
 use marine_js_backend::JsWasmBackend;
 use marine::generic::Marine;
 
-use std::cell::RefCell;
 use once_cell::sync::Lazy;
+
+use std::cell::RefCell;
 use std::sync::Mutex;
 
 thread_local!(pub(crate) static MARINE_OLD: RefCell<Option<Marine<JsWasmBackend>>> = RefCell::new(None));

@@ -37,7 +37,8 @@ use futures::FutureExt;
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
 
-// Safety: this is safe because its intended to run in single thread
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
 unsafe impl Send for HostImportFunction {}
 unsafe impl Sync for HostImportFunction {}
 unsafe impl Send for WasmExportFunction {}

@@ -34,6 +34,8 @@ pub struct JsModule {
     module_info: ModuleInfo,
 }
 
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
 unsafe impl Send for JsModule {}
 unsafe impl Sync for JsModule {}
 

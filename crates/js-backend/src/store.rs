@@ -28,6 +28,8 @@ pub struct JsStore {
     pub(crate) inner: Box<JsStoreInner>,
 }
 
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
 unsafe impl Send for JsStore {}
 unsafe impl Sync for JsStore {}
 
@@ -73,6 +75,8 @@ pub struct JsContext<'c> {
     pub(crate) inner: &'c JsStoreInner,
 }
 
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
 unsafe impl<'c> Send for JsContext<'c> {}
 unsafe impl<'c> Sync for JsContext<'c> {}
 
@@ -96,6 +100,8 @@ pub struct JsContextMut<'c> {
     pub(crate) inner: &'c mut JsStoreInner,
 }
 
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
 unsafe impl<'c> Send for JsContextMut<'c> {}
 unsafe impl<'c> Sync for JsContextMut<'c> {}
 

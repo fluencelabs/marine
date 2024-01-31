@@ -19,13 +19,13 @@ use crate::AppServiceError;
 use crate::config::AppServiceConfig;
 
 use marine::TomlMarineConfig;
+use marine_wasm_backend_traits::WasmBackend;
 
 use serde_derive::Serialize;
 use serde_derive::Deserialize;
 
 use std::convert::TryInto;
 use std::path::PathBuf;
-use marine_wasm_backend_traits::WasmBackend;
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlAppServiceConfig {

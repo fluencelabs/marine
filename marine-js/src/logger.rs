@@ -46,7 +46,9 @@ struct ModuleLogMessage {
     message: String,
     service: String,
 }
-// Safety: marine-js is supposed to be in a single-threaded wasm environment.
+
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
 unsafe impl Send for MarineLogger {}
 unsafe impl Sync for MarineLogger {}
 unsafe impl Send for MarineLoggerInner {}
