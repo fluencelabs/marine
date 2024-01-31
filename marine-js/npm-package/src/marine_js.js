@@ -233,28 +233,12 @@ export async function init(module) {
         heap[--stack_pointer] = obj;
         return stack_pointer;
     }
-    function __wbg_adapter_44(arg0, arg1, arg2) {
-        try {
-            const ret = wasm.wasm_bindgen__convert__closures__invoke1_mut_ref__h09e18c7fd0b9a0d3(arg0, arg1, addBorrowedObject(arg2));
-            return takeObject(ret);
-        } finally {
-            heap[stack_pointer++] = undefined;
-        }
-    }
-
-    function __wbg_adapter_47(arg0, arg1, arg2) {
-        wasm.wasm_bindgen__convert__closures__invoke1_mut__h4e03b323c96da859(arg0, arg1, addHeapObject(arg2));
-    }
-
     function handleError(f, args) {
         try {
             return f.apply(this, args);
         } catch (e) {
             wasm.__wbindgen_exn_store(addHeapObject(e));
         }
-    }
-    function __wbg_adapter_94(arg0, arg1, arg2, arg3) {
-        wasm.wasm_bindgen__convert__closures__invoke2_mut__h55dcffe8da6071b7(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
     }
 
     /**
@@ -283,7 +267,6 @@ export async function init(module) {
         const ret = wasm.register_module(addHeapObject(config), addHeapObject(modules), addHeapObject(log_fn));
         return takeObject(ret);
     }
-
     /**
      *  Calls a function from a module.
      *
@@ -341,6 +324,23 @@ export async function init(module) {
             } else {
                 return instance;
             }
+        }
+    }
+
+    function __wbg_adapter_94(arg0, arg1, arg2, arg3) {
+        wasm.wasm_bindgen__convert__closures__invoke2_mut__h55dcffe8da6071b7(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+    }
+
+    function __wbg_adapter_47(arg0, arg1, arg2) {
+        wasm.wasm_bindgen__convert__closures__invoke1_mut__h4e03b323c96da859(arg0, arg1, addHeapObject(arg2));
+    }
+
+    function __wbg_adapter_44(arg0, arg1, arg2) {
+        try {
+            const ret = wasm.wasm_bindgen__convert__closures__invoke1_mut_ref__h09e18c7fd0b9a0d3(arg0, arg1, addBorrowedObject(arg2));
+            return takeObject(ret);
+        } finally {
+            heap[stack_pointer++] = undefined;
         }
     }
 

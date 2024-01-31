@@ -6,7 +6,7 @@ const traverse = require("@babel/traverse").default;
 const sourceFilePath = "../marine-js-pkg/marine_js.js";
 const targetFilePath = "./src/marine_js.js";
 
-const GET_IMPORTTS_FN_NAME = "__wbg_get_imports"
+const GET_IMPORTS_FN_NAME = "__wbg_get_imports"
 
 const WBG_ADAPTER_REGEX = /__wbg_adapter_\d+/;
 
@@ -18,14 +18,14 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
 
   const sourceAst = parser.parse(sourceData, { sourceType: "module" });
   let sourceFunction = null;
-  let wbgAdapterFunc = null;
+  let wbgAdapterFuncs = [];
   let imports = []
   traverse(sourceAst, {
     FunctionDeclaration(path) {
-      if (path.node.id.name === GET_IMPORTTS_FN_NAME) {
+      if (path.node.id.name === GET_IMPORTS_FN_NAME) {
         sourceFunction = path.node;
       } else if (WBG_ADAPTER_REGEX.test(path.node.id.name)) {
-        wbgAdapterFunc = path.node;
+        wbgAdapterFuncs.push(path.node);
       }
     },
     ImportDeclaration(path) {
@@ -34,7 +34,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
   });
 
   if (!sourceFunction) {
-    console.error(`Error: ${GET_IMPORTTS_FN_NAME} function not found in source file`);
+    console.error(`Error: ${GET_IMPORTS_FN_NAME} function not found in source file`);
     process.exit(1);
   }
 
@@ -51,15 +51,15 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
     });
 
     let targetFunctionPath = null;
-    let wbgAdapderPath = null;
+    let wbgAdapderPaths = [];
     let importsPaths = []
 
     recast.visit(targetAst, {
       visitFunctionDeclaration(path) {
-        if (path.node.id.name === GET_IMPORTTS_FN_NAME) {
+        if (path.node.id.name === GET_IMPORTS_FN_NAME) {
           targetFunctionPath = path;
         } else if (WBG_ADAPTER_REGEX.test(path.node.id.name)) {
-          wbgAdapderPath = path;
+          wbgAdapderPaths.push(path);
         }
 
         this.traverse(path);
@@ -71,7 +71,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
     });
 
     if (!targetFunctionPath) {
-      console.error(`Error: ${GET_IMPORTTS_FN_NAME} function not found in target file`);
+      console.error(`Error: ${GET_IMPORTS_FN_NAME} function not found in target file`);
       process.exit(1);
     }
 
@@ -80,12 +80,24 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
       process.exit(1);
     }
 
+    // replace all generated import statements
     for(let importIndex = 0; importIndex < importsPaths.length; importIndex++) {
       importsPaths[importIndex].replace(imports[importIndex])
     }
 
+    // replace __wbg_get_import function
     targetFunctionPath.replace(sourceFunction);
-    wbgAdapderPath.replace(wbgAdapterFunc);
+
+    // remove old __wbg_adapter_* functions
+    for (let path of wbgAdapderPaths) {
+      path.replace()
+    }
+
+    // add new __wbg_adapter_* functions
+    for (let func of wbgAdapterFuncs) {
+      targetFunctionPath.insertBefore(func)
+    }
+
     const output = recast.print(targetAst).code;
 
     fs.writeFile(targetFilePath, output, "utf8", (err) => {
@@ -94,7 +106,7 @@ fs.readFile(sourceFilePath, "utf8", (err, sourceData) => {
         process.exit(1);
       }
 
-      console.log(`Function ${GET_IMPORTTS_FN_NAME} replaced successfully in target file.`);
+      console.log(`Function ${GET_IMPORTS_FN_NAME} replaced successfully in target file.`);
     });
   });
 });
