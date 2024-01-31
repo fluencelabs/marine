@@ -69,7 +69,9 @@ impl<
         async move {
             let offset = (self.allocate_func)(store, (size as _, type_tag as _))
                 .await
-                .unwrap();
+                .map_err(|e| AllocatableError::AllocateCallFailed {
+                    reason: anyhow::anyhow!(e),
+                })?;
             Ok((offset as u32, self.memory.view()))
         }
         .boxed()

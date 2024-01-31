@@ -148,26 +148,12 @@ async fn lower_outputs<WB: WasmBackend>(
             log::error!("host closure failed: {}", e);
 
             // returns 0 to a Wasm module in case of errors
-            //init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
-            //init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
-
-            let set_result_ptr_func: TypedFunc<WB, i32, ()> =
-                match caller.get_func(SET_PTR_FUNC_NAME) {
-                    Ok(func) => func,
-                    Err(_) => return vec![WValue::I32(4)],
-                };
-
-            let set_result_size_func: TypedFunc<WB, i32, ()> =
-                match caller.get_func(SET_SIZE_FUNC_NAME) {
-                    Ok(func) => func,
-                    Err(_) => return vec![WValue::I32(4)],
-                };
+            init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
+            init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
 
             let mut store_ctx = caller.as_context_mut();
-            {
-                set_result_ptr_func(&mut store_ctx, 0).await.unwrap();
-            }
-            set_result_size_func(&mut store_ctx, 0).await.unwrap();
+            call_wasm_func!(set_result_ptr_func, &mut store_ctx, 0);
+            call_wasm_func!(set_result_size_func, &mut store_ctx, 0);
 
             return vec![WValue::I32(0)];
         }
