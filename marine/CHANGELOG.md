@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * marine-core bumped from 0.20.1 to 0.20.2
     * marine-wasmtime-backend bumped from 0.2.0 to 0.2.1
 
+## [0.32.2](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.32.1...marine-runtime-v0.32.2) (2024-02-05)
+
+
+### Bug Fixes
+
+* add/update total_memory_limit field in configs for tests ([#411](https://github.com/fluencelabs/marine/issues/411)) ([bdd109d](https://github.com/fluencelabs/marine/commit/bdd109d8424cb1159039a0c3082fad8450e2f328))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-core bumped from 0.26.1 to 0.26.2
+
 ## [0.32.1](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.32.0...marine-runtime-v0.32.1) (2024-01-07)
 
 
