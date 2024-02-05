@@ -84,7 +84,7 @@ impl REPL {
         let mut backend_config = WasmtimeConfig::new();
         backend_config.epoch_interruption(true);
 
-        let (app_service_factory, ticker) = AppServiceFactory::new_with_wasmtime(backend_config)?;
+        let (app_service_factory, ticker) = AppServiceFactory::new(backend_config)?;
         let app_service = Self::create_app_service(
             &app_service_factory,
             config_file_path,
