@@ -40,6 +40,7 @@ pub fn call_parameters() {
     let init_peer_id = "init_peer_id";
     let service_id = "service_id";
     let service_creator_peer_id = "service_creator_peer_id";
+    let worker_id = "worker_id";
     let host_id = "host_id";
     let particle_id = "particle_id";
 
@@ -56,6 +57,7 @@ pub fn call_parameters() {
         service_id: service_id.to_string(),
         service_creator_peer_id: service_creator_peer_id.to_string(),
         host_id: host_id.to_string(),
+        worker_id: worker_id.to_string(),
         particle_id: particle_id.to_string(),
         tetraplets: tetraplets.clone(),
     };
@@ -67,8 +69,8 @@ pub fn call_parameters() {
     assert_eq!(
         result,
         vec![IValue::String(format!(
-            "{}\n{}\n{}\n{}\n{}\n{:?}",
-            init_peer_id, service_id, service_creator_peer_id, host_id, particle_id, tetraplets
+            "{}\n{}\n{}\n{}\n{}\n{}\n{:?}",
+            init_peer_id, service_id, service_creator_peer_id, host_id, worker_id, particle_id, tetraplets
         ))]
     );
 }
