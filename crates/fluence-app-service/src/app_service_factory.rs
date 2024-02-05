@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use crate::AppService;
-use crate::AppServiceConfig;
+use crate::generic::AppService;
+use crate::generic::AppServiceConfig;
 
 use marine_wasm_backend_traits::WasmBackend;
 use marine_wasm_backend_traits::WasmBackendResult;
@@ -68,7 +68,7 @@ impl<WB: WasmBackend> AppServiceFactory<WB> {
 
 impl AppServiceFactory<WasmtimeWasmBackend> {
     /// Creates a new factory
-    pub fn new_with_wasmtime(
+    pub fn new(
         config: WasmtimeConfig,
     ) -> WasmBackendResult<(AppServiceFactory<WasmtimeWasmBackend>, EpochTicker)> {
         let config = config;

@@ -34,26 +34,18 @@ mod app_service_factory;
 pub(crate) type Result<T> = std::result::Result<T, AppServiceError>;
 
 pub use errors::AppServiceError;
-pub use service::AppService;
-pub use app_service_factory::AppServiceFactory;
-pub use app_service_factory::EpochTicker;
 pub use service_interface::FunctionSignature;
 pub use service_interface::RecordType;
 pub use service_interface::ServiceInterface;
 
-pub use config::AppServiceConfig;
 pub use raw_toml_config::TomlAppServiceConfig;
 
 pub use marine::ConfigContext;
 pub use marine::WithContext;
-pub use marine::MarineConfig;
-pub use marine::MarineModuleConfig;
-pub use marine::MarineWASIConfig;
 pub use marine::TomlMarineConfig;
 pub use marine::TomlMarineModuleConfig;
 pub use marine::TomlMarineNamedModuleConfig;
 pub use marine::TomlWASIConfig;
-pub use marine::ModuleDescriptor;
 
 pub use marine::MarineError;
 
@@ -61,7 +53,6 @@ pub use marine::IValue;
 pub use marine::IRecordType;
 pub use marine::IFunctionArg;
 pub use marine::IType;
-pub use marine::HostImportDescriptor;
 pub use marine::HostImportError;
 pub use marine::to_interface_value;
 pub use marine::from_interface_values;
@@ -74,3 +65,34 @@ pub use marine_min_it_version::min_it_version;
 
 pub use marine::CallParameters;
 pub use marine::SecurityTetraplet;
+
+pub mod generic {
+    pub use crate::service::AppService;
+    pub use crate::app_service_factory::AppServiceFactory;
+    pub use crate::config::AppServiceConfig;
+
+    pub use marine::generic::MarineConfig;
+    pub use marine::generic::MarineModuleConfig;
+    pub use marine::generic::ModuleDescriptor;
+    pub use marine::generic::HostImportDescriptor;
+}
+
+#[cfg(feature = "wasmtime")]
+pub mod wasmtime {
+    pub type WasmBackend = marine_wasmtime_backend::WasmtimeWasmBackend;
+
+    pub use marine_wasmtime_backend::WasmtimeConfig;
+
+    pub type AppService = crate::service::AppService<WasmBackend>;
+    pub type AppServiceFactory = crate::app_service_factory::AppServiceFactory<WasmBackend>;
+    pub type AppServiceConfig = crate::config::AppServiceConfig<WasmBackend>;
+    pub use crate::app_service_factory::EpochTicker;
+
+    pub use marine::MarineConfig;
+    pub use marine::MarineModuleConfig;
+    pub use marine::ModuleDescriptor;
+    pub use marine::HostImportDescriptor;
+}
+
+#[cfg(feature = "wasmtime")]
+pub use wasmtime::*;
