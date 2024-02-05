@@ -8,6 +8,13 @@
   * dependencies
     * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
 
+## [0.11.2](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.11.1...marine-module-info-parser-v0.11.2) (2024-02-05)
+
+
+### Features
+
+* **module-info-parser:** add effects extractor ([#410](https://github.com/fluencelabs/marine/issues/410)) ([9ad73df](https://github.com/fluencelabs/marine/commit/9ad73df554e22cac6e03af59793d553865559b1a))
+
 ## [0.11.1](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.11.0...marine-module-info-parser-v0.11.1) (2024-01-07)
 
 

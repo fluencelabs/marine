@@ -12,6 +12,10 @@
     * marine-it-parser bumped from 0.12.1 to 0.12.2
     * marine-module-info-parser bumped from 0.6.1 to 0.6.2
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-module-info-parser bumped from 0.11.1 to 0.11.2
+
 ## [0.19.2](https://github.com/fluencelabs/marine/compare/marine-v0.19.1...marine-v0.19.2) (2024-01-10)
 
 

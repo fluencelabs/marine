@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-wasmtime-backend bumped from 0.2.0 to 0.2.1
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-module-info-parser bumped from 0.11.1 to 0.11.2
+
 ## [0.26.1](https://github.com/fluencelabs/marine/compare/marine-core-v0.26.0...marine-core-v0.26.1) (2024-01-07)
 
 
