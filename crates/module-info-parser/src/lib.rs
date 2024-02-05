@@ -26,6 +26,7 @@
 
 pub mod manifest;
 pub mod sdk_version;
+pub mod effects;
 mod custom_section_extractor;
 mod errors;
 

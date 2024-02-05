@@ -42,6 +42,14 @@ where
     extract_from_module(&module)
 }
 
+pub fn extract_from_bytes(wasm_module_bytes: &[u8]) -> ModuleInfoResult<ModuleManifest> {
+    let module = ModuleConfig::new()
+        .parse(wasm_module_bytes)
+        .map_err(ModuleInfoError::CorruptedWasmFile)?;
+
+    extract_from_module(&module)
+}
+
 pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<ModuleManifest> {
     let sections = extract_custom_sections_by_name(wasm_module, MANIFEST_SECTION_NAME)?;
     let section = try_as_one_section(&sections, MANIFEST_SECTION_NAME)?;
