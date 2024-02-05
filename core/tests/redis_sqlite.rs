@@ -15,8 +15,10 @@
  */
 
 use marine_core::MarineCore;
-use marine_core::MarineCoreConfigBuilder;
+use marine_core::MarineCoreConfig;
 use marine_core::IValue;
+use marine_wasm_backend_traits::WasmBackend;
+use marine_wasmtime_backend::WasmtimeWasmBackend;
 
 const REDIS_DOWNLOAD_URL: &str =
     "https://github.com/fluencelabs/redis/releases/download/v0.14.0_w/redis.wasm";
@@ -36,7 +38,8 @@ pub async fn download(url: &str) -> bytes::Bytes {
 async fn redis() {
     let wasm_bytes = download(REDIS_DOWNLOAD_URL).await;
 
-    let mut marine_core = MarineCore::new(MarineCoreConfigBuilder::new().build().unwrap()).unwrap();
+    let backend = WasmtimeWasmBackend::new_async().unwrap();
+    let mut marine_core = MarineCore::new(MarineCoreConfig::new(backend, None)).unwrap();
     let module_name = "redis";
     let config = <_>::default();
 
@@ -102,7 +105,8 @@ async fn redis() {
 async fn sqlite() {
     let wasm_bytes = download(SQLITE_DOWNLOAD_URL).await;
 
-    let mut marine_core = MarineCore::new(MarineCoreConfigBuilder::new().build().unwrap()).unwrap();
+    let backend = WasmtimeWasmBackend::new_async().unwrap();
+    let mut marine_core = MarineCore::new(MarineCoreConfig::new(backend, None)).unwrap();
     let module_name = "sqlite";
     let config = <_>::default();
 
