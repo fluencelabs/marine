@@ -118,12 +118,6 @@ impl<WB: WasmBackend> MarineCore<WB> {
             &self.modules,
         )?;
 
-        println!("Module \"{}\" effects:", name);
-        for effect in marine_module_info_parser::effects::extract_from_bytes(wasm_bytes).unwrap() {
-            println!("{:?}", effect);
-        }
-        println!("{}", "-".repeat(20));
-
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {
                 entry.insert(module);
