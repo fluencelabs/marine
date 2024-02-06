@@ -15,8 +15,9 @@ path = "src/lib.rs"
 marine-core = { path = "../core", version = "0.26.1", default-features = false}
 marine-module-interface = { path = "../crates/module-interface", version = "0.8.1" }
 marine-utils = { path = "../crates/utils", version = "0.5.1" }
-marine-rs-sdk-main = { version = "0.10.3", default-features = false, features = ["logger"], git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/worker-id-in-call-params" }
-marine-rs-sdk = { version = "0.10.3", default-features = false, features = ["logger"], git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/worker-id-in-call-params" }
+marine-rs-sdk-main = { version = "0.11.0", default-features = false, features = ["logger"] }
+marine-rs-sdk = { version = "0.11.0", default-features = false, features = ["logger"] }
+old_sdk_call_parameters = { package = "marine-call-parameters", version = "0.10.3" }
 
 it-json-serde = { path = "../crates/it-json-serde", version = "0.5.1" }
 marine-wasm-backend-traits = { path = "../crates/wasm-backend-traits", version = "0.5.1" }

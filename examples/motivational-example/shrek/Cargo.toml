@@ -10,4 +10,4 @@ path = "src/main.rs"
 name = "shrek"
 
 [dependencies]
-marine-rs-sdk = { version = "0.10.0", features = ["logger"] }
+marine-rs-sdk = { version = "0.11.0", features = ["logger"] }

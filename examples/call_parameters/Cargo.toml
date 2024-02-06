@@ -10,4 +10,4 @@ name = "call_parameters"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk = { version = "0.10.3", features = ["logger"], git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/worker-id-in-call-params" }
+marine-rs-sdk = { version = "0.11.0", features = ["logger"] }

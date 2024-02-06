@@ -10,5 +10,5 @@ name = "lilo_after_2gb"
 path = "src/pure.rs"
 
 [dependencies]
-marine-rs-sdk = "0.10.0"
+marine-rs-sdk = "0.11.0"
 safe-transmute = "0.11.0"
