@@ -35,7 +35,8 @@ use wasmer_it::IType;
 
 use std::sync::Arc;
 
-const HOST_NAMESPACE_NAME: &str = "host";
+// Todo: use the one that marine-rs-sdk uses, not default one
+const HOST_NAMESPACE_NAME: &str = "__marine_host_api_v1";
 
 impl ITGenerator for ExternModType {
     fn generate_it<'a>(&'a self, it_resolver: &mut ITResolver<'a>) -> Result<()> {

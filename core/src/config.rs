@@ -24,6 +24,7 @@ use marine_wasm_backend_traits::WasmBackend;
 use std::path::PathBuf;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::sync::Arc;
 
 pub type ErrorHandler =
     Option<Box<dyn Fn(&HostImportError) -> Option<IValue> + Sync + Send + 'static>>;
@@ -35,7 +36,7 @@ pub type HostExportedFunc<WB> = Box<
 >;
 
 pub type RawImportCreator<WB> =
-    Box<dyn FnOnce(<WB as WasmBackend>::ContextMut<'_>) -> <WB as WasmBackend>::HostFunction>;
+    Arc<dyn Fn(<WB as WasmBackend>::ContextMut<'_>) -> <WB as WasmBackend>::HostFunction>;
 
 pub struct HostImportDescriptor<WB: WasmBackend> {
     /// This closure will be invoked for corresponding import.
@@ -54,10 +55,10 @@ pub struct HostImportDescriptor<WB: WasmBackend> {
 
 pub struct MModuleConfig<WB: WasmBackend> {
     /// Import object that will be used in module instantiation process.
-    pub raw_imports: HashMap<String, RawImportCreator<WB>>,
+    pub raw_imports: HashMap<u32, HashMap<String, RawImportCreator<WB>>>,
 
     /// Imports from the host side that will be used in module instantiation process.
-    pub host_imports: HashMap<String, HostImportDescriptor<WB>>,
+    pub host_imports: HashMap<u32, HashMap<String, HostImportDescriptor<WB>>>,
 
     /// WASI parameters: env variables, mapped dirs, preopened files and args
     pub wasi_parameters: WasiParameters,

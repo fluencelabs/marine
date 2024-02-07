@@ -47,7 +47,7 @@ pub fn invoke() -> TestRecord {
 }
 
 #[marine]
-#[link(wasm_import_module = "records_effector")]
+#[module_import("records_effector")]
 extern "C" {
     pub fn mutate_struct(test_record: TestRecord) -> TestRecord;
 }

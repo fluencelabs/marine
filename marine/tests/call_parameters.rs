@@ -70,7 +70,13 @@ pub fn call_parameters() {
         result,
         vec![IValue::String(format!(
             "{}\n{}\n{}\n{}\n{}\n{}\n{:?}",
-            init_peer_id, service_id, service_creator_peer_id, host_id, worker_id, particle_id, tetraplets
+            init_peer_id,
+            service_id,
+            service_creator_peer_id,
+            host_id,
+            worker_id,
+            particle_id,
+            tetraplets
         ))]
     );
 }

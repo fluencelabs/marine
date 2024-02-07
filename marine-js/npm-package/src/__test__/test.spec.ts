@@ -402,6 +402,7 @@ describe('Fluence app service tests', () => {
         const service_id = "service_id";
         const service_creator_peer_id = "service_creator_peer_id";
         const host_id = "host_id";
+        const worker_id = "worker_id";
         const particle_id = "particle_id";
 
         const tetraplet: SecurityTetraplet = {
@@ -418,6 +419,7 @@ describe('Fluence app service tests', () => {
             service_id: service_id,
             service_creator_peer_id: service_creator_peer_id,
             host_id: host_id,
+            worker_id: worker_id,
             particle_id: particle_id,
             tetraplets: tetraplets,
         };

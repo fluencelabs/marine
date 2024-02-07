@@ -47,3 +47,8 @@ lto = true
 debug-assertions = false
 overflow-checks = false
 panic = "abort"
+
+[patch.crates-io]
+marine-rs-sdk = {version = "0.11.0", path = "../marine-rs-sdk"}
+marine-rs-sdk-main = {version = "0.11.0", path = "../marine-rs-sdk/crates/main"}
+marine-macro-impl = {version = "0.11.0", path = "../marine-rs-sdk/crates/marine-macro-impl"}
