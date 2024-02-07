@@ -1704,6 +1704,7 @@ dependencies = [
 [[package]]
 name = "marine-call-parameters"
 version = "0.11.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/api-versions#789e2b8e53c0844ef45e8e30f9e0f6352b83af7a"
 dependencies = [
  "marine-macro 0.11.0",
  "marine-rs-sdk-main 0.11.0",
@@ -1720,7 +1721,6 @@ dependencies = [
  "it-lilo",
  "it-memory-traits",
  "log",
- "marine-call-parameters 0.10.3",
  "marine-it-generator",
  "marine-it-interfaces",
  "marine-it-parser",
@@ -1840,6 +1840,7 @@ dependencies = [
 [[package]]
 name = "marine-macro"
 version = "0.11.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/api-versions#789e2b8e53c0844ef45e8e30f9e0f6352b83af7a"
 dependencies = [
  "marine-macro-impl 0.11.0",
  "marine-rs-sdk-main 0.11.0",
@@ -1874,6 +1875,7 @@ dependencies = [
 [[package]]
 name = "marine-macro-impl"
 version = "0.11.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/api-versions#789e2b8e53c0844ef45e8e30f9e0f6352b83af7a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1935,6 +1937,7 @@ dependencies = [
 [[package]]
 name = "marine-rs-sdk"
 version = "0.11.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/api-versions#789e2b8e53c0844ef45e8e30f9e0f6352b83af7a"
 dependencies = [
  "marine-call-parameters 0.11.0",
  "marine-macro 0.11.0",
@@ -1966,6 +1969,7 @@ dependencies = [
 [[package]]
 name = "marine-rs-sdk-main"
 version = "0.11.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/api-versions#789e2b8e53c0844ef45e8e30f9e0f6352b83af7a"
 dependencies = [
  "log",
  "serde",
@@ -2025,6 +2029,7 @@ dependencies = [
 [[package]]
 name = "marine-timestamp-macro"
 version = "0.11.0"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk?branch=feat/api-versions#789e2b8e53c0844ef45e8e30f9e0f6352b83af7a"
 dependencies = [
  "chrono",
  "quote",

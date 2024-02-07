@@ -17,7 +17,7 @@ marine-module-interface = { path = "../crates/module-interface", version = "0.8.
 marine-utils = { path = "../crates/utils", version = "0.5.1" }
 marine-rs-sdk-main = { version = "0.11.0", default-features = false, features = ["logger"] }
 marine-rs-sdk = { version = "0.11.0", default-features = false, features = ["logger"] }
-old_sdk_call_parameters = { package = "marine-call-parameters", version = "0.10.3" }
+old_sdk_call_parameters = { package = "marine-call-parameters", version = "0.10.3", default-features = false }
 
 it-json-serde = { path = "../crates/it-json-serde", version = "0.5.1" }
 marine-wasm-backend-traits = { path = "../crates/wasm-backend-traits", version = "0.5.1" }
