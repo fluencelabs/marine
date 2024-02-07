@@ -129,12 +129,12 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         self.config.host_imports = host_imports;
         self.config.host_imports.entry(0).or_default().insert(
             String::from("get_call_parameters"),
-            create_call_parameters_import_v1(call_parameters_v1),
+            create_call_parameters_import_v0(call_parameters_v0),
         );
 
         self.config.host_imports.entry(1).or_default().insert(
             String::from("get_call_parameters"),
-            create_call_parameters_import_v0(call_parameters_v0),
+            create_call_parameters_import_v1(call_parameters_v1),
         );
 
         self
