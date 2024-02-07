@@ -42,7 +42,7 @@ const HOST_NAMESPACE_PREFIX: &str = "__marine_host_api_v";
 impl ITGenerator for ExternModType {
     fn generate_it<'a>(&'a self, it_resolver: &mut ITResolver<'a>) -> Result<()> {
         // host imports should be left as is
-        if is_host_import(&self.namespace){
+        if is_host_import(&self.namespace) {
             return Ok(());
         }
 

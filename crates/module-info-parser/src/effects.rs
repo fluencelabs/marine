@@ -22,7 +22,9 @@ use walrus::Module;
 
 use std::path::Path;
 
-const HOST_IMPORT_NAMESPACE: &str = "host";
+const HOST_IMPORT_NAMESPACE_V0: &str = "host";
+
+const HOST_IMPORT_NAMESPACE_PREFIX: &str = "__marine_host_api_v";
 const LOGGER_IMPORT_NAME: &str = "log_utf8_string";
 const CALL_PARAMETERS_IMPORT_NAME: &str = "get_call_parameters";
 
@@ -62,10 +64,17 @@ pub fn extract_from_module(wasm_module: &Module) -> ModuleInfoResult<Vec<WasmEff
 }
 
 fn inspect_import(module: &str, name: &str) -> Option<WasmEffect> {
-    match (module, name) {
-        (HOST_IMPORT_NAMESPACE, LOGGER_IMPORT_NAME) => Some(WasmEffect::Logger),
-        (HOST_IMPORT_NAMESPACE, CALL_PARAMETERS_IMPORT_NAME) => None,
-        (HOST_IMPORT_NAMESPACE, name) => Some(WasmEffect::MountedBinary(name.to_string())),
-        (_, _) => None,
+    if !is_host_import(module) {
+        return None;
     }
+
+    match name {
+        LOGGER_IMPORT_NAME => Some(WasmEffect::Logger),
+        CALL_PARAMETERS_IMPORT_NAME => None,
+        name => Some(WasmEffect::MountedBinary(name.to_string())),
+    }
+}
+
+fn is_host_import(namespace: &str) -> bool {
+    namespace == HOST_IMPORT_NAMESPACE_V0 || namespace.starts_with(HOST_IMPORT_NAMESPACE_PREFIX)
 }
