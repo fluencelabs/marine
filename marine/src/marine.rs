@@ -24,6 +24,7 @@ use crate::MemoryStats;
 use crate::module_loading::load_modules_from_fs;
 use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
+use crate::host_imports::call_parameters_v1_to_v0;
 use crate::json_to_marine_err;
 
 use marine_wasm_backend_traits::WasmBackend;
@@ -46,7 +47,6 @@ use std::convert::TryInto;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
-use crate::host_imports::call_parameters_v1_to_v0;
 
 type MFunctionSignature = (Arc<Vec<IFunctionArg>>, Arc<Vec<IType>>);
 type MModuleInterface = (Arc<Vec<IFunctionArg>>, Arc<Vec<IType>>, Arc<MRecordTypes>);

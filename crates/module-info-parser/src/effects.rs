@@ -23,7 +23,6 @@ use walrus::Module;
 use std::path::Path;
 
 const HOST_IMPORT_NAMESPACE_V0: &str = "host";
-
 const HOST_IMPORT_NAMESPACE_PREFIX: &str = "__marine_host_api_v";
 const LOGGER_IMPORT_NAME: &str = "log_utf8_string";
 const CALL_PARAMETERS_IMPORT_NAME: &str = "get_call_parameters";
