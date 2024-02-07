@@ -18,6 +18,8 @@
   * dependencies
     * marine-js-backend bumped from 0.3.1 to 0.3.2
 
+
+
 ## [0.9.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.8.0...marine-js-v0.9.0) (2023-12-14)
 
 

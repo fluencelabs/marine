@@ -1,7 +1,7 @@
 [package]
 name = "marine-core"
 description = "Core of Marine, the Fluence Wasm Runtime"
-version = "0.26.1"
+version = "0.26.2"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
@@ -12,7 +12,7 @@ name = "marine_core"
 path = "src/lib.rs"
 
 [dependencies]
-marine-module-info-parser = { path = "../crates/module-info-parser", version = "0.11.1" }
+marine-module-info-parser = { path = "../crates/module-info-parser", version = "0.11.2" }
 marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.9.1" }
 marine-it-parser = { path = "../crates/it-parser", version = "0.15.1" }
 marine-it-generator = { path = "../crates/it-generator", version = "0.13.1" }
