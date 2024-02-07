@@ -3,7 +3,7 @@
 # This script builds all tests
 (
   cd lilo_after_2gb || exit;
-  marine build --release;
+  cargo run  --release -p marine -- build --release;
   rm artifacts/* || true;
   mkdir artifacts
 )
