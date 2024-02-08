@@ -26,6 +26,7 @@ use crate::host_imports::create_call_parameters_import_v1;
 
 use marine_core::generic::HostImportDescriptor;
 use marine_core::generic::MModuleConfig;
+use marine_core::HostAPIVersion;
 use marine_wasm_backend_traits::HostFunction;
 use marine_wasm_backend_traits::WasmBackend;
 
@@ -122,20 +123,28 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
 
     fn populate_host_imports(
         mut self,
-        host_imports: HashMap<u32, HashMap<String, HostImportDescriptor<WB>>>,
+        host_imports: HashMap<HostAPIVersion, HashMap<String, HostImportDescriptor<WB>>>,
         call_parameters_v0: Arc<Mutex<old_sdk_call_parameters::CallParameters>>,
         call_parameters_v1: Arc<Mutex<CallParameters>>,
     ) -> Self {
         self.config.host_imports = host_imports;
-        self.config.host_imports.entry(0).or_default().insert(
-            String::from("get_call_parameters"),
-            create_call_parameters_import_v0(call_parameters_v0),
-        );
+        self.config
+            .host_imports
+            .entry(HostAPIVersion::V0)
+            .or_default()
+            .insert(
+                String::from("get_call_parameters"),
+                create_call_parameters_import_v0(call_parameters_v0),
+            );
 
-        self.config.host_imports.entry(1).or_default().insert(
-            String::from("get_call_parameters"),
-            create_call_parameters_import_v1(call_parameters_v1),
-        );
+        self.config
+            .host_imports
+            .entry(HostAPIVersion::V0)
+            .or_default()
+            .insert(
+                String::from("get_call_parameters"),
+                create_call_parameters_import_v1(call_parameters_v1),
+            );
 
         self
     }
@@ -174,13 +183,13 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
 
         self.config
             .raw_imports
-            .entry(0)
+            .entry(HostAPIVersion::V0)
             .or_default()
             .insert("log_utf8_string".to_string(), creator.clone());
 
         self.config
             .raw_imports
-            .entry(1)
+            .entry(HostAPIVersion::V1)
             .or_default()
             .insert("log_utf8_string".to_string(), creator);
 

@@ -101,12 +101,7 @@ fn to_old_sdk_tetraplets(
 ) -> Vec<Vec<old_sdk_call_parameters::SecurityTetraplet>> {
     tetraplets
         .into_iter()
-        .map(|tetraplets| {
-            tetraplets
-                .into_iter()
-                .map(to_old_sdk_tetraplet)
-                .collect()
-        })
+        .map(|tetraplets| tetraplets.into_iter().map(to_old_sdk_tetraplet).collect())
         .collect()
 }
 

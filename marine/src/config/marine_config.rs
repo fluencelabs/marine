@@ -16,6 +16,7 @@
 
 use marine_wasm_backend_traits::WasmBackend;
 use marine_core::generic::HostImportDescriptor;
+use marine_core::HostAPIVersion;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -96,7 +97,7 @@ pub struct MarineModuleConfig<WB: WasmBackend> {
 
     /// Export from host functions that will be accessible on the Wasm side by provided name.
     /// The imports are provided separately for each marine host api version
-    pub host_imports: HashMap<u32, HashMap<String, HostImportDescriptor<WB>>>,
+    pub host_imports: HashMap<HostAPIVersion, HashMap<String, HostImportDescriptor<WB>>>,
 
     /// A WASI config.
     pub wasi: Option<MarineWASIConfig>,
@@ -295,7 +296,10 @@ impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>>
             );
         }
 
-        let host_imports = HashMap::from([(0, host_cli_imports_v0), (1, host_cli_imports_v1)]);
+        let host_imports = HashMap::from([
+            (HostAPIVersion::V0, host_cli_imports_v0),
+            (HostAPIVersion::V1, host_cli_imports_v1),
+        ]);
 
         let wasi = toml_config.wasi.map(|w| w.try_into()).transpose()?;
 

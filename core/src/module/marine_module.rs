@@ -25,6 +25,7 @@ use super::WValue;
 use crate::generic::HostImportDescriptor;
 use crate::MResult;
 use crate::generic::MModuleConfig;
+use crate::config::HostAPIVersion;
 use crate::config::RawImportCreator;
 
 use marine_wasm_backend_traits::prelude::*;
@@ -251,23 +252,21 @@ impl<WB: WasmBackend> MModule<WB> {
     fn add_host_imports(
         store: &mut <WB as WasmBackend>::Store,
         linker: &mut <WB as WasmBackend>::Imports,
-        raw_imports: HashMap<u32, HashMap<String, RawImportCreator<WB>>>,
-        host_imports: HashMap<u32, HashMap<String, HostImportDescriptor<WB>>>,
+        raw_imports: HashMap<HostAPIVersion, HashMap<String, RawImportCreator<WB>>>,
+        host_imports: HashMap<HostAPIVersion, HashMap<String, HostImportDescriptor<WB>>>,
         mit: &MITInterfaces<'_>,
     ) -> MResult<()> {
         use crate::host_imports::create_host_import_func;
         for (version, raw_imports) in raw_imports {
-            let namespace = version_to_host_namespace(version);
             let raw_imports = raw_imports
                 .into_iter()
                 .map(|(name, creator)| (name, creator(store.as_context_mut())))
                 .collect::<Vec<_>>();
 
-            linker.register(store, &namespace, raw_imports)?;
+            linker.register(store, version.namespace(), raw_imports)?;
         }
 
         for (version, host_imports) in host_imports {
-            let namespace = version_to_host_namespace(version);
             let record_types = mit
                 .record_types()
                 .map(|(id, r)| (id, r.clone()))
@@ -283,7 +282,7 @@ impl<WB: WasmBackend> MModule<WB> {
                 })
                 .collect::<Vec<_>>();
 
-            linker.register(store, &namespace, host_imports)?;
+            linker.register(store, version.namespace(), host_imports)?;
         }
 
         Ok(())
@@ -483,13 +482,5 @@ impl<WB: WasmBackend> MModule<WB> {
             .collect::<MResult<ExportFunctions<WB>>>()?;
 
         Ok((export_funcs, module_interface.export_record_types))
-    }
-}
-
-fn version_to_host_namespace(version: u32) -> String {
-    if version == 0 {
-        "host".to_string()
-    } else {
-        format!("__marine_host_api_v{}", version)
     }
 }

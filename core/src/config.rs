@@ -53,12 +53,28 @@ pub struct HostImportDescriptor<WB: WasmBackend> {
     pub error_handler: ErrorHandler,
 }
 
+#[derive(Hash, Ord, PartialOrd, Eq, PartialEq)]
+pub enum HostAPIVersion {
+    V0,
+    V1,
+}
+
+impl HostAPIVersion {
+    pub fn namespace(&self) -> &'static str {
+        // TODO: create a common place for these consts to use in both marine and marine-rs-sdk to use in both marine and marine-rs-sdk
+        match self {
+            Self::V0 => "host",
+            Self::V1 => "__marine_host_api_v1",
+        }
+    }
+}
+
 pub struct MModuleConfig<WB: WasmBackend> {
     /// Import object that will be used in module instantiation process.
-    pub raw_imports: HashMap<u32, HashMap<String, RawImportCreator<WB>>>,
+    pub raw_imports: HashMap<HostAPIVersion, HashMap<String, RawImportCreator<WB>>>,
 
     /// Imports from the host side that will be used in module instantiation process.
-    pub host_imports: HashMap<u32, HashMap<String, HostImportDescriptor<WB>>>,
+    pub host_imports: HashMap<HostAPIVersion, HashMap<String, HostImportDescriptor<WB>>>,
 
     /// WASI parameters: env variables, mapped dirs, preopened files and args
     pub wasi_parameters: WasiParameters,

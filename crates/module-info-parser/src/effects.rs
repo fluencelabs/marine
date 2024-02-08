@@ -22,6 +22,7 @@ use walrus::Module;
 
 use std::path::Path;
 
+// TODO: create a common place for these consts to use in both marine and marine-rs-sdk to use in both marine and marine-rs-sdk
 const HOST_IMPORT_NAMESPACE_V0: &str = "host";
 const HOST_IMPORT_NAMESPACE_PREFIX: &str = "__marine_host_api_v";
 const LOGGER_IMPORT_NAME: &str = "log_utf8_string";

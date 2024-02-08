@@ -35,8 +35,8 @@ use wasmer_it::IType;
 
 use std::sync::Arc;
 
+// TODO: create a common place for these consts to use in both marine and marine-rs-sdk to use in both marine and marine-rs-sdk
 const HOST_NAMESPACE_V0: &str = "host";
-
 const HOST_NAMESPACE_PREFIX: &str = "__marine_host_api_v";
 
 impl ITGenerator for ExternModType {
