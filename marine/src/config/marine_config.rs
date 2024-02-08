@@ -16,6 +16,7 @@
 
 use marine_wasm_backend_traits::WasmBackend;
 use marine_core::generic::HostImportDescriptor;
+use marine_core::HostAPIVersion;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -95,7 +96,8 @@ pub struct MarineModuleConfig<WB: WasmBackend> {
     pub logger_enabled: bool,
 
     /// Export from host functions that will be accessible on the Wasm side by provided name.
-    pub host_imports: HashMap<String, HostImportDescriptor<WB>>,
+    /// The imports are provided separately for each marine host api version
+    pub host_imports: HashMap<HostAPIVersion, HashMap<String, HostImportDescriptor<WB>>>,
 
     /// A WASI config.
     pub wasi: Option<MarineWASIConfig>,
@@ -280,20 +282,30 @@ impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>>
             })
             .collect::<Result<Vec<_>, Self::Error>>()?;
 
-        let mut host_cli_imports = HashMap::new();
+        let mut host_cli_imports_v0 = HashMap::new();
+        let mut host_cli_imports_v1 = HashMap::new();
         for (import_name, host_cmd) in mounted_binaries {
             let host_cmd = as_relative_to_base(context.base_path.as_deref(), &host_cmd)?;
-            host_cli_imports.insert(
+            host_cli_imports_v0.insert(
+                import_name.clone(),
+                crate::host_imports::create_mounted_binary_import(host_cmd.clone()),
+            );
+            host_cli_imports_v1.insert(
                 import_name,
                 crate::host_imports::create_mounted_binary_import(host_cmd),
             );
         }
 
+        let host_imports = HashMap::from([
+            (HostAPIVersion::V0, host_cli_imports_v0),
+            (HostAPIVersion::V1, host_cli_imports_v1),
+        ]);
+
         let wasi = toml_config.wasi.map(|w| w.try_into()).transpose()?;
 
         Ok(MarineModuleConfig {
             logger_enabled: toml_config.logger_enabled.unwrap_or(true),
-            host_imports: host_cli_imports,
+            host_imports,
             wasi,
             logging_mask: toml_config.logging_mask.unwrap_or(i32::max_value()),
         })

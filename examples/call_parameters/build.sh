@@ -1,6 +1,6 @@
 #!/bin/sh
 
-marine build --release;
+cargo run  --release -p marine -- build --release;
 
 rm -f artifacts/* || true;
 mkdir -p artifacts;

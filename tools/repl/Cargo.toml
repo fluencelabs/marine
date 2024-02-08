@@ -13,7 +13,7 @@ path = "src/main.rs"
 
 [dependencies]
 fluence-app-service = { path = "../../crates/fluence-app-service", version = "0.31.2", features = ["raw-module-api"] }
-marine-rs-sdk-main = { version = "0.10.0", default-features = false, features = ["logger"] }
+marine-rs-sdk-main = { version = "0.12.0", default-features = false, features = ["logger"] }
 marine-wasm-backend-traits = {path = "../../crates/wasm-backend-traits", version = "0.5.1" }
 
 anyhow = "1.0.75"

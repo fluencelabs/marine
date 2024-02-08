@@ -32,7 +32,7 @@ mod donkey {
     use super::*;
 
     #[marine]
-    #[link(wasm_import_module = "donkey")]
+    #[module_import("donkey")]
     extern "C" {
         pub fn greeting(name: &str) -> String;
     }

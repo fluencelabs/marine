@@ -30,6 +30,9 @@ export type CallParameters = {
     /// PeerId of the peer who hosts this service.
     host_id: string,
 
+    /// PeerId of the worker who hosts this service.
+    worker_id: string,
+
     /// Id of the particle which execution resulted a call this service.
     particle_id: string,
 
@@ -78,5 +81,6 @@ export const defaultCallParameters: CallParameters = {
     particle_id: "",
     service_creator_peer_id: "",
     service_id: "",
-    tetraplets: []
+    tetraplets: [],
+    worker_id: ""
 }

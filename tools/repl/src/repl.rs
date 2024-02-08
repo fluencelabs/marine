@@ -302,9 +302,13 @@ struct PartialCallParameters {
     #[serde(default)]
     pub service_creator_peer_id: String,
 
-    /// PeerId of the peer who hosts this service.
+    /// PeerId of the peer who hosts worker with this service.
     #[serde(default)]
     pub host_id: String,
+
+    /// PeerId of the worker who hosts this service.
+    #[serde(default)]
+    pub worker_id: String,
 
     /// Id of the particle which execution resulted a call this service.
     #[serde(default)]
@@ -322,6 +326,7 @@ impl From<PartialCallParameters> for CallParameters {
             service_id,
             service_creator_peer_id,
             host_id,
+            worker_id,
             particle_id,
             tetraplets,
         } = partial_call_params;
@@ -331,6 +336,7 @@ impl From<PartialCallParameters> for CallParameters {
             service_id,
             service_creator_peer_id,
             host_id,
+            worker_id,
             particle_id,
             tetraplets,
         }

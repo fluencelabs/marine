@@ -5,7 +5,7 @@ for test in *; do
   if [[ -d $test ]]; then
     echo "Building $test"
     cd $test
-    marine build --release
+    cargo run  --release -p marine -- build --release
     mkdir artifacts -p
     cp ../../../../target/wasm32-wasi/release/$test_*.wasm artifacts/
     cd -

@@ -3,12 +3,12 @@
 # This script builds all subprojects and puts all created Wasm modules in one dir
 (
   cd shrek || exit;
-  marine build --release;
+  cargo run  --release -p marine -- build --release;
 )
 
 (
   cd donkey || exit;
-  marine build --release;
+  cargo run  --release -p marine -- build --release;
 )
 
 rm -f artifacts/* || true

@@ -60,7 +60,7 @@ mod effector {
     use marine_rs_sdk::marine;
 
     #[marine]
-    #[link(wasm_import_module = "memory_limiting_effector")]
+    #[module_import("memory_limiting_effector")]
     extern "C" {
         pub fn allocate_single_module_single_piece(size: i64) -> u32;
 

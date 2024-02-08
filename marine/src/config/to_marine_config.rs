@@ -21,10 +21,12 @@ use crate::config::MarineModuleConfig;
 use crate::host_imports::logger::log_utf8_string_closure;
 use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
-use crate::host_imports::create_call_parameters_import;
+use crate::host_imports::create_call_parameters_import_v0;
+use crate::host_imports::create_call_parameters_import_v1;
 
 use marine_core::generic::HostImportDescriptor;
 use marine_core::generic::MModuleConfig;
+use marine_core::HostAPIVersion;
 use marine_wasm_backend_traits::HostFunction;
 use marine_wasm_backend_traits::WasmBackend;
 
@@ -51,7 +53,8 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         self,
         module_name: String,
         marine_module_config: Option<MarineModuleConfig<WB>>,
-        call_parameters: Arc<Mutex<CallParameters>>,
+        call_parameters_v0: Arc<Mutex<old_sdk_call_parameters::CallParameters>>,
+        call_parameters_v1: Arc<Mutex<CallParameters>>,
         logger_filter: &LoggerFilter<'_>,
     ) -> MarineResult<MModuleConfig<WB>> {
         let marine_module_config = match marine_module_config {
@@ -68,7 +71,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
 
         let config = self
             .populate_logger(logger_enabled, logging_mask, logger_filter, module_name)
-            .populate_host_imports(host_imports, call_parameters)
+            .populate_host_imports(host_imports, call_parameters_v0, call_parameters_v1)
             .populate_wasi(wasi)?
             .into_config();
 
@@ -120,14 +123,28 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
 
     fn populate_host_imports(
         mut self,
-        host_imports: HashMap<String, HostImportDescriptor<WB>>,
-        call_parameters: Arc<Mutex<CallParameters>>, // TODO show mike
+        host_imports: HashMap<HostAPIVersion, HashMap<String, HostImportDescriptor<WB>>>,
+        call_parameters_v0: Arc<Mutex<old_sdk_call_parameters::CallParameters>>,
+        call_parameters_v1: Arc<Mutex<CallParameters>>,
     ) -> Self {
         self.config.host_imports = host_imports;
-        self.config.host_imports.insert(
-            String::from("get_call_parameters"),
-            create_call_parameters_import(call_parameters),
-        );
+        self.config
+            .host_imports
+            .entry(HostAPIVersion::V0)
+            .or_default()
+            .insert(
+                String::from("get_call_parameters"),
+                create_call_parameters_import_v0(call_parameters_v0),
+            );
+
+        self.config
+            .host_imports
+            .entry(HostAPIVersion::V1)
+            .or_default()
+            .insert(
+                String::from("get_call_parameters"),
+                create_call_parameters_import_v1(call_parameters_v1),
+            );
 
         self
     }
@@ -157,16 +174,24 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
                 .insert(WASM_LOG_ENV_NAME.to_string(), log_level_str);
         }
 
-        let creator = move |mut store: <WB as WasmBackend>::ContextMut<'_>| {
+        let creator = Arc::new(move |mut store: <WB as WasmBackend>::ContextMut<'_>| {
             <WB as WasmBackend>::HostFunction::new_typed(
                 &mut store,
-                log_utf8_string_closure::<WB>(logging_mask, module_name),
+                log_utf8_string_closure::<WB>(logging_mask, module_name.clone()),
             )
-        };
+        });
 
         self.config
             .raw_imports
-            .insert("log_utf8_string".to_string(), Box::new(creator));
+            .entry(HostAPIVersion::V0)
+            .or_default()
+            .insert("log_utf8_string".to_string(), creator.clone());
+
+        self.config
+            .raw_imports
+            .entry(HostAPIVersion::V1)
+            .or_default()
+            .insert("log_utf8_string".to_string(), creator);
 
         self
     }
@@ -180,13 +205,15 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
 pub(crate) fn make_marine_config<WB: WasmBackend>(
     module_name: String,
     marine_module_config: Option<MarineModuleConfig<WB>>,
-    call_parameters: Arc<Mutex<marine_rs_sdk::CallParameters>>,
+    call_parameters_v0: Arc<Mutex<old_sdk_call_parameters::CallParameters>>,
+    call_parameters_v1: Arc<Mutex<marine_rs_sdk::CallParameters>>,
     logger_filter: &LoggerFilter<'_>,
 ) -> MarineResult<MModuleConfig<WB>> {
     MModuleConfigBuilder::new().build(
         module_name,
         marine_module_config,
-        call_parameters,
+        call_parameters_v0,
+        call_parameters_v1,
         logger_filter,
     )
 }

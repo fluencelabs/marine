@@ -35,12 +35,14 @@ use wasmer_it::IType;
 
 use std::sync::Arc;
 
-const HOST_NAMESPACE_NAME: &str = "host";
+// TODO: create a common place for these consts to use in both marine and marine-rs-sdk to use in both marine and marine-rs-sdk
+const HOST_NAMESPACE_V0: &str = "host";
+const HOST_NAMESPACE_PREFIX: &str = "__marine_host_api_v";
 
 impl ITGenerator for ExternModType {
     fn generate_it<'a>(&'a self, it_resolver: &mut ITResolver<'a>) -> Result<()> {
         // host imports should be left as is
-        if self.namespace == HOST_NAMESPACE_NAME {
+        if is_host_import(&self.namespace) {
             return Ok(());
         }
 
@@ -230,4 +232,8 @@ pub fn to_raw_output_type(ty: &ParsedType) -> Vec<RustType> {
         | ParsedType::Vector(..)
         | ParsedType::Record(..) => vec![],
     }
+}
+
+fn is_host_import(namespace: &str) -> bool {
+    namespace == HOST_NAMESPACE_V0 || namespace.starts_with(HOST_NAMESPACE_PREFIX)
 }

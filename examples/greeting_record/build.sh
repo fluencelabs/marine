@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This script builds all subprojects and puts all created Wasm modules in one dir
-marine build --release
+cargo run  --release -p marine -- build --release
 
 rm artifacts/* || true
 mkdir -p artifacts

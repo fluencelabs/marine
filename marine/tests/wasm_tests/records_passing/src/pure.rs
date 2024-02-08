@@ -223,7 +223,7 @@ mod effector {
     use super::TestRecord2;
 
     #[marine]
-    #[link(wasm_import_module = "records_passing_effector")]
+    #[module_import("records_passing_effector")]
     extern "C" {
         pub fn pass_droppable_record(
             record: DroppableRecordTreeConainer,
