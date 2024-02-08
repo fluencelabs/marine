@@ -139,7 +139,7 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
 
         self.config
             .host_imports
-            .entry(HostAPIVersion::V0)
+            .entry(HostAPIVersion::V1)
             .or_default()
             .insert(
                 String::from("get_call_parameters"),
