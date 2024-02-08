@@ -10,4 +10,4 @@ name = "test_record"
 path = "src/test_record.rs"
 
 [dependencies]
-marine-rs-sdk = "0.10.0"
+marine-rs-sdk = "0.12.0"

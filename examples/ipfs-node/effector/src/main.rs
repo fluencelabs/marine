@@ -94,7 +94,7 @@ pub fn get_address() -> String {
 }
 
 #[marine]
-#[link(wasm_import_module = "host")]
+#[host_import]
 extern "C" {
     /// Execute provided cmd as a parameters of ipfs cli, return result.
     pub fn ipfs(cmd: Vec<String>) -> MountedBinaryResult;

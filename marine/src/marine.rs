@@ -24,6 +24,7 @@ use crate::MemoryStats;
 use crate::module_loading::load_modules_from_fs;
 use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
+use crate::host_imports::call_parameters_v1_to_v0;
 use crate::json_to_marine_err;
 
 use marine_wasm_backend_traits::WasmBackend;
@@ -59,7 +60,10 @@ pub struct Marine<WB: WasmBackend> {
     core: MarineCore<WB>,
 
     /// Parameters of call accessible by Wasm modules.
-    call_parameters: Arc<Mutex<CallParameters>>,
+    call_parameters_v0: Arc<Mutex<old_sdk_call_parameters::CallParameters>>,
+
+    /// Parameters of call accessible by Wasm modules.
+    call_parameters_v1: Arc<Mutex<CallParameters>>,
 
     /// Cached module interfaces by names.
     module_interfaces_cache: HashMap<String, ModuleInterface>,
@@ -97,7 +101,8 @@ impl<WB: WasmBackend> Marine<WB> {
         let config = config.try_into()?;
         let core_config = MarineCoreConfig::new(backend, config.total_memory_limit);
         let mut marine = MarineCore::new(core_config)?;
-        let call_parameters = Arc::<Mutex<CallParameters>>::default();
+        let call_parameters_v0 = Arc::<Mutex<old_sdk_call_parameters::CallParameters>>::default();
+        let call_parameters_v1 = Arc::<Mutex<CallParameters>>::default();
 
         let modules_dir = config.modules_dir;
 
@@ -117,9 +122,11 @@ impl<WB: WasmBackend> Marine<WB> {
             let marine_module_config = crate::config::make_marine_config(
                 module.import_name.clone(),
                 Some(module.config),
-                call_parameters.clone(),
+                call_parameters_v0.clone(),
+                call_parameters_v1.clone(),
                 &logger_filter,
             )?;
+
             marine
                 .load_module(module.import_name, &module_bytes, marine_module_config)
                 .await
@@ -128,7 +135,8 @@ impl<WB: WasmBackend> Marine<WB> {
 
         Ok(Self {
             core: marine,
-            call_parameters,
+            call_parameters_v0,
+            call_parameters_v1,
             module_interfaces_cache: HashMap::new(),
         })
     }
@@ -157,11 +165,7 @@ impl<WB: WasmBackend> Marine<WB> {
         args: &[IValue],
         call_parameters: marine_rs_sdk::CallParameters,
     ) -> MarineResult<Vec<IValue>> {
-        {
-            // a separate code block to unlock the mutex ASAP and to avoid double locking
-            let mut cp = self.call_parameters.lock();
-            *cp = call_parameters;
-        }
+        self.update_call_parameters(call_parameters);
 
         let result = self
             .core
@@ -200,11 +204,7 @@ impl<WB: WasmBackend> Marine<WB> {
             func_name.to_string()
         )?;
 
-        {
-            // a separate code block to unlock the mutex ASAP and to avoid double locking
-            let mut cp = self.call_parameters.lock();
-            *cp = call_parameters;
-        }
+        self.update_call_parameters(call_parameters);
 
         let result = self
             .core
@@ -285,6 +285,20 @@ impl<WB: WasmBackend> Marine<WB> {
 
         Ok((arg_types, output_types, record_types))
     }
+
+    fn update_call_parameters(&mut self, call_parameters: CallParameters) {
+        {
+            // a separate code block to unlock the mutex ASAP and to avoid double locking
+            let mut cp = self.call_parameters_v1.lock();
+            *cp = call_parameters.clone();
+        }
+
+        {
+            // a separate code block to unlock the mutex ASAP and to avoid double locking
+            let mut cp = self.call_parameters_v0.lock();
+            *cp = call_parameters_v1_to_v0(call_parameters);
+        }
+    }
 }
 
 // This API is intended for testing purposes (mostly in Marine REPL)
@@ -311,7 +325,8 @@ impl<WB: WasmBackend> Marine<WB> {
         let marine_module_config = crate::config::make_marine_config(
             name.clone(),
             config,
-            self.call_parameters.clone(),
+            self.call_parameters_v0.clone(),
+            self.call_parameters_v1.clone(),
             &logger_filter,
         )?;
         self.core

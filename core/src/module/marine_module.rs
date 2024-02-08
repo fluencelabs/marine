@@ -25,6 +25,7 @@ use super::WValue;
 use crate::generic::HostImportDescriptor;
 use crate::MResult;
 use crate::generic::MModuleConfig;
+use crate::config::HostAPIVersion;
 use crate::config::RawImportCreator;
 
 use marine_wasm_backend_traits::prelude::*;
@@ -251,33 +252,38 @@ impl<WB: WasmBackend> MModule<WB> {
     fn add_host_imports(
         store: &mut <WB as WasmBackend>::Store,
         linker: &mut <WB as WasmBackend>::Imports,
-        raw_imports: HashMap<String, RawImportCreator<WB>>,
-        host_imports: HashMap<String, HostImportDescriptor<WB>>,
+        raw_imports: HashMap<HostAPIVersion, HashMap<String, RawImportCreator<WB>>>,
+        host_imports: HashMap<HostAPIVersion, HashMap<String, HostImportDescriptor<WB>>>,
         mit: &MITInterfaces<'_>,
     ) -> MResult<()> {
         use crate::host_imports::create_host_import_func;
+        for (version, raw_imports) in raw_imports {
+            let raw_imports = raw_imports
+                .into_iter()
+                .map(|(name, creator)| (name, creator(store.as_context_mut())))
+                .collect::<Vec<_>>();
 
-        let record_types = mit
-            .record_types()
-            .map(|(id, r)| (id, r.clone()))
-            .collect::<HashMap<_, _>>();
-        let record_types = Arc::new(record_types);
+            linker.register(store, version.namespace(), raw_imports)?;
+        }
 
-        let host_imports = host_imports
-            .into_iter()
-            .map(|(import_name, descriptor)| {
-                let func = create_host_import_func::<WB>(store, descriptor, record_types.clone());
-                (import_name, func)
-            })
-            .collect::<Vec<_>>();
+        for (version, host_imports) in host_imports {
+            let record_types = mit
+                .record_types()
+                .map(|(id, r)| (id, r.clone()))
+                .collect::<HashMap<_, _>>();
+            let record_types = Arc::new(record_types);
 
-        let all_imports = raw_imports
-            .into_iter()
-            .map(|(name, creator)| (name, creator(store.as_context_mut())))
-            .chain(host_imports)
-            .collect::<Vec<_>>();
+            let host_imports = host_imports
+                .into_iter()
+                .map(|(import_name, descriptor)| {
+                    let func =
+                        create_host_import_func::<WB>(store, descriptor, record_types.clone());
+                    (import_name, func)
+                })
+                .collect::<Vec<_>>();
 
-        linker.register(store, "host", all_imports.into_iter())?;
+            linker.register(store, version.namespace(), host_imports)?;
+        }
 
         Ok(())
     }

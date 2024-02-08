@@ -231,7 +231,7 @@ mod effector {
     use marine_rs_sdk::marine;
 
     #[marine]
-    #[link(wasm_import_module = "arguments_passing_effector")]
+    #[module_import("arguments_passing_effector")]
     extern "C" {
         pub fn all_types(
             arg_0: i8,

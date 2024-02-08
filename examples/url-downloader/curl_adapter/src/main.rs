@@ -40,7 +40,7 @@ pub fn download(url: String) -> String {
 
 /// Permissions in `Config.toml` should exist to use host functions.
 #[marine]
-#[link(wasm_import_module = "host")]
+#[host_import]
 extern "C" {
     fn curl(cmd: Vec<String>) -> MountedBinaryResult;
 }

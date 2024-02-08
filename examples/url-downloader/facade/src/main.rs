@@ -39,14 +39,14 @@ pub fn get_n_save(url: String, file_name: String) -> String {
 
 /// Importing `curl` module
 #[marine]
-#[link(wasm_import_module = "curl_adapter")]
+#[module_import("curl_adapter")]
 extern "C" {
     pub fn download(url: String) -> String;
 }
 
 /// Importing `local_storage` module
 #[marine]
-#[link(wasm_import_module = "local_storage")]
+#[module_import("local_storage")]
 extern "C" {
     #[link_name = "get"]
     pub fn file_get(file_name: String) -> Vec<u8>;

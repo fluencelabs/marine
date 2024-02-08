@@ -1,5 +1,5 @@
 modules_dir = "./artifacts/"
-total_memory_limit = "Infinity"
+total_memory_limit = "256 MiB"
 
 [[module]]
     name = "records_passing_effector"
