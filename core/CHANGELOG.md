@@ -12,6 +12,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-module-info-parser bumped from 0.11.1 to 0.11.2
 
+## [0.27.0](https://github.com/fluencelabs/marine/compare/marine-core-v0.26.2...marine-core-v0.27.0) (2024-02-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ABI:** support marine-rs-sdk host api versions, support worker_id in CallParamaters ([#409](https://github.com/fluencelabs/marine/issues/409))
+
+### Features
+
+* **ABI:** support marine-rs-sdk host api versions, support worker_id in CallParamaters ([#409](https://github.com/fluencelabs/marine/issues/409)) ([c948b8b](https://github.com/fluencelabs/marine/commit/c948b8b86674164020c79e900c58c5aff46c5eb7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-module-info-parser bumped from 0.11.2 to 0.12.0
+    * marine-it-generator bumped from 0.13.1 to 0.14.0
+
 ## [0.26.1](https://github.com/fluencelabs/marine/compare/marine-core-v0.26.0...marine-core-v0.26.1) (2024-01-07)
 
 

@@ -8,6 +8,17 @@
   * dependencies
     * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
 
+## [0.12.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.11.2...marine-module-info-parser-v0.12.0) (2024-02-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ABI:** support marine-rs-sdk host api versions, support worker_id in CallParamaters ([#409](https://github.com/fluencelabs/marine/issues/409))
+
+### Features
+
+* **ABI:** support marine-rs-sdk host api versions, support worker_id in CallParamaters ([#409](https://github.com/fluencelabs/marine/issues/409)) ([c948b8b](https://github.com/fluencelabs/marine/commit/c948b8b86674164020c79e900c58c5aff46c5eb7))
+
 ## [0.11.2](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.11.1...marine-module-info-parser-v0.11.2) (2024-02-05)
 
 

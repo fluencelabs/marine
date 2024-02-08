@@ -20,6 +20,17 @@
 
 
 
+## [0.10.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.9.2...marine-js-v0.10.0) (2024-02-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ABI:** support marine-rs-sdk host api versions, support worker_id in CallParamaters ([#409](https://github.com/fluencelabs/marine/issues/409))
+
+### Features
+
+* **ABI:** support marine-rs-sdk host api versions, support worker_id in CallParamaters ([#409](https://github.com/fluencelabs/marine/issues/409)) ([c948b8b](https://github.com/fluencelabs/marine/commit/c948b8b86674164020c79e900c58c5aff46c5eb7))
+
 ## [0.9.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.8.0...marine-js-v0.9.0) (2023-12-14)
 
 
