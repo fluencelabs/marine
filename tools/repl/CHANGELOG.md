@@ -30,6 +30,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * fluence-app-service bumped from 0.31.1 to 0.31.2
 
+## [0.27.0](https://github.com/fluencelabs/marine/compare/mrepl-v0.26.3...mrepl-v0.27.0) (2024-02-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ABI:** support marine-rs-sdk host api versions, support worker_id in CallParamaters ([#409](https://github.com/fluencelabs/marine/issues/409))
+
+### Features
+
+* **ABI:** support marine-rs-sdk host api versions, support worker_id in CallParamaters ([#409](https://github.com/fluencelabs/marine/issues/409)) ([c948b8b](https://github.com/fluencelabs/marine/commit/c948b8b86674164020c79e900c58c5aff46c5eb7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * fluence-app-service bumped from 0.31.2 to 0.31.3
+
 ## [0.26.2](https://github.com/fluencelabs/marine/compare/mrepl-v0.26.1...mrepl-v0.26.2) (2024-01-10)
 
 
