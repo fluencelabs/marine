@@ -47,8 +47,3 @@ lto = true
 debug-assertions = false
 overflow-checks = false
 panic = "abort"
-
-[patch.crates-io]
-marine-rs-sdk = {version = "0.11.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/api-versions"}
-marine-rs-sdk-main = {version = "0.11.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/api-versions"}
-marine-macro-impl = {version = "0.11.0", git = "https://github.com/fluencelabs/marine-rs-sdk", branch = "feat/api-versions"}
