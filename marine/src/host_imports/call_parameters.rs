@@ -104,7 +104,7 @@ fn to_old_sdk_tetraplets(
         .map(|tetraplets| {
             tetraplets
                 .into_iter()
-                .map(|tetraplet| to_old_sdk_tetraplet(tetraplet))
+                .map(to_old_sdk_tetraplet)
                 .collect()
         })
         .collect()

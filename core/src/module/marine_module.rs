@@ -488,8 +488,8 @@ impl<WB: WasmBackend> MModule<WB> {
 
 fn version_to_host_namespace(version: u32) -> String {
     if version == 0 {
-        return "host".to_string();
+        "host".to_string()
     } else {
-        return format!("__marine_host_api_v{}", version);
+        format!("__marine_host_api_v{}", version)
     }
 }
