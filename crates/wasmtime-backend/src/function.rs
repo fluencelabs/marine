@@ -113,7 +113,7 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
                 Box::new(async move {
                     let caller = WasmtimeImportCallContext { inner: caller };
                     let args = process_func_args(args).map_err(|e| anyhow!(e))?;
-                    let results = std::pin::Pin::from(func(caller, &args)).await?;
+                    let results = func(caller, &args).await?;
                     process_func_results(&results, results_out).map_err(|e| anyhow!(e))
                 })
             },
@@ -165,7 +165,7 @@ impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
 
         let results_count = self.inner.ty(store.as_context_mut()).results().len();
         let mut results = vec![wasmtime::Val::null(); results_count];
-        let func = self.inner.clone();
+        let func = self.inner;
         async move {
             func.call_async(store.as_context_mut().inner, &args, &mut results)
                 .await

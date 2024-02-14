@@ -31,10 +31,6 @@ pub struct AppServiceFactory<WB: WasmBackend> {
 
 pub struct EpochTicker(WasmtimeWasmBackend);
 
-// TODO: think about moving factory to Nox
-// TODO: think about adding aquavm create method -- AquaVM can accept either Factory of WasmBackend
-// TODO: understand how is worker isolation working in nox https://github.com/fluencelabs/nox/pull/2026/files -- discused with, Nick this design is fine
-// TODO: check if factory can be used concurrently -- should be
 impl<WB: WasmBackend> AppServiceFactory<WB> {
     pub async fn new_app_service<S>(
         &self,

@@ -63,7 +63,7 @@ impl WasmBackend for WasmtimeWasmBackend {
     type Wasi = WasmtimeWasi;
 
     fn new_async() -> WasmBackendResult<Self> {
-        Self::new(WasmtimeConfig::new())
+        Self::new(WasmtimeConfig::default())
     }
 }
 
@@ -93,12 +93,6 @@ pub struct WasmtimeConfig {
 
 impl Default for WasmtimeConfig {
     fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl WasmtimeConfig {
-    pub fn new() -> Self {
         let mut config = wasmtime::Config::default();
         config
             .async_support(true)
@@ -109,7 +103,9 @@ impl WasmtimeConfig {
 
         Self { config }
     }
+}
 
+impl WasmtimeConfig {
     /// Constructs wasmtime config directly from wasmtime config.
     /// It forcefully enables async support, because the backend does not work with sync configs.
     pub fn from_raw(mut config: wasmtime::Config) -> Self {

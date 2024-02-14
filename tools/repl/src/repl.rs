@@ -81,7 +81,7 @@ impl REPL {
         working_dir: Option<String>,
         quiet: bool,
     ) -> ReplResult<Self> {
-        let mut backend_config = WasmtimeConfig::new();
+        let mut backend_config = WasmtimeConfig::default();
         backend_config.epoch_interruption(true);
 
         let (app_service_factory, ticker) = AppServiceFactory::new(backend_config)?;

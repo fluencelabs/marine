@@ -122,9 +122,9 @@ macro_rules! impl_func_getter {
 
 impl_for_each_function_signature!(impl_func_getter);
 
-fn call_wasm_export_func_ret_i32<'ctx1, 'ctx2, const N_ARGS: usize>(
+fn call_wasm_export_func_ret_i32<'ctx1, const N_ARGS: usize>(
     func: Arc<WasmExportFunction>,
-    store: &'ctx1 mut JsContextMut<'ctx2>,
+    store: &'ctx1 mut JsContextMut<'_>,
     args: [WValue; N_ARGS],
 ) -> BoxFuture<'ctx1, Result<i32, RuntimeError>> {
     async move {
@@ -140,9 +140,9 @@ fn call_wasm_export_func_ret_i32<'ctx1, 'ctx2, const N_ARGS: usize>(
     .boxed()
 }
 
-fn call_wasm_export_func_ret_unit<'ctx1, 'ctx2, const N_ARGS: usize>(
+fn call_wasm_export_func_ret_unit<'ctx1, const N_ARGS: usize>(
     func: Arc<WasmExportFunction>,
-    store: &'ctx1 mut JsContextMut<'ctx2>,
+    store: &'ctx1 mut JsContextMut<'_>,
     args: [WValue; N_ARGS],
 ) -> BoxFuture<'ctx1, Result<(), RuntimeError>> {
     async move {

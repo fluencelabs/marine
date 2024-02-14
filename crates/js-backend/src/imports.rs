@@ -40,7 +40,7 @@ impl JsImports {
         let import_object = self
             .wasi_ctx
             .map(|idx| store.as_context().inner.wasi_contexts[idx].get_imports(module))
-            .unwrap_or_else(js_sys::Object::new);
+            .unwrap_or_default();
 
         for (module_name, namespace) in &self.inner {
             let namespace_obj = js_sys::Object::new();
@@ -82,7 +82,7 @@ impl JsImports {
     }
 
     fn get_namespace(&mut self, module_name: String) -> &mut HashMap<String, HostImportFunction> {
-        self.inner.entry(module_name).or_insert(<_>::default())
+        self.inner.entry(module_name).or_default()
     }
 }
 

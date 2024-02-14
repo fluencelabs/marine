@@ -991,7 +991,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.31.3"
+version = "0.32.0"
 dependencies = [
  "log",
  "maplit",
