@@ -17,8 +17,8 @@ marine-module-interface = { path = "../crates/module-interface", version = "0.8.
 marine-utils = { path = "../crates/utils", version = "0.5.1" }
 marine-rs-sdk-main = { version = "0.12.0", default-features = false, features = ["logger"], git = "https://github.com/fluencelabs/marine-rs-sdk/", branch = "feat/particle-parameters" }
 marine-rs-sdk = { version = "0.12.0", default-features = false, features = ["logger"], git = "https://github.com/fluencelabs/marine-rs-sdk/", branch = "feat/particle-parameters" }
-marine_call_parameters_v0 = { package = "marine-call-parameters", version = "0.10.3", default-features = false }
-marine_call_parameters_v1 = { package = "marine-call-parameters", version = "0.12.0", default-features = false }
+marine_call_parameters_v0 = { package = "marine-call-parameters", version = "=0.10.3", default-features = false }
+marine_call_parameters_v1 = { package = "marine-call-parameters", version = "=0.12.0", default-features = false }
 
 it-json-serde = { path = "../crates/it-json-serde", version = "0.5.1" }
 marine-wasm-backend-traits = { path = "../crates/wasm-backend-traits", version = "0.5.1" }

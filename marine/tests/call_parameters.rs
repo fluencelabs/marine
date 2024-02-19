@@ -15,12 +15,10 @@
  */
 
 use marine::Marine;
-use marine::IValue;
 
 use pretty_assertions::assert_eq;
 use once_cell::sync::Lazy;
 
-use std::path::PathBuf;
 use serde_json::json;
 
 static CONFIG_V0: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
@@ -94,7 +92,6 @@ pub fn call_parameters_v0() {
         "tetraplets": tetraplets,
     });
 
-    let result_str = result.as_str().unwrap();
     let result_json: serde_json::Value = serde_json::from_str(result.as_str().unwrap()).unwrap();
     assert_eq!(expected, result_json,);
 }
@@ -156,7 +153,6 @@ pub fn call_parameters_v1() {
         "tetraplets": tetraplets,
     });
 
-    let result_str = result.as_str().unwrap();
     let result_json: serde_json::Value = serde_json::from_str(result.as_str().unwrap()).unwrap();
     assert_eq!(expected, result_json,);
 }
@@ -210,7 +206,6 @@ pub fn call_parameters_v2() {
 
     let expected = serde_json::to_value(call_parameters).unwrap();
 
-    let result_str = result.as_str().unwrap();
     let result_json: serde_json::Value = serde_json::from_str(result.as_str().unwrap()).unwrap();
     assert_eq!(expected, result_json,);
 }
