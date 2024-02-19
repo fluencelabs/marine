@@ -24,26 +24,19 @@ use std::path::PathBuf;
 use serde_json::json;
 
 static CONFIG_V0: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
-    marine::TomlMarineConfig::load(
-        "./tests/wasm_tests/call_parameters_v0/Config.toml",
-    )
+    marine::TomlMarineConfig::load("./tests/wasm_tests/call_parameters_v0/Config.toml")
         .expect("toml faas config should be created")
 });
 
 static CONFIG_V1: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
-    marine::TomlMarineConfig::load(
-        "./tests/wasm_tests/call_parameters_v1/Config.toml",
-    )
+    marine::TomlMarineConfig::load("./tests/wasm_tests/call_parameters_v1/Config.toml")
         .expect("toml faas config should be created")
 });
 
 static CONFIG_V2: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
-    marine::TomlMarineConfig::load(
-        "./tests/wasm_tests/call_parameters_v2/Config.toml",
-    )
+    marine::TomlMarineConfig::load("./tests/wasm_tests/call_parameters_v2/Config.toml")
         .expect("toml faas config should be created")
 });
-
 
 #[test]
 pub fn call_parameters_v0() {
@@ -84,7 +77,12 @@ pub fn call_parameters_v0() {
     };
 
     let result = faas
-        .call_with_json("call_parameters_v0", "call_parameters",   json!([]), call_parameters)
+        .call_with_json(
+            "call_parameters_v0",
+            "call_parameters",
+            json!([]),
+            call_parameters,
+        )
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
 
     let expected = json!({
@@ -96,14 +94,9 @@ pub fn call_parameters_v0() {
         "tetraplets": tetraplets,
     });
 
-    let result_str =
-        result
-            .as_str().unwrap();
+    let result_str = result.as_str().unwrap();
     let result_json: serde_json::Value = serde_json::from_str(result.as_str().unwrap()).unwrap();
-    assert_eq!(
-        expected,
-        result_json,
-    );
+    assert_eq!(expected, result_json,);
 }
 
 #[test]
@@ -145,7 +138,12 @@ pub fn call_parameters_v1() {
     };
 
     let result = faas
-        .call_with_json("call_parameters_v1", "call_parameters",   json!([]), call_parameters)
+        .call_with_json(
+            "call_parameters_v1",
+            "call_parameters",
+            json!([]),
+            call_parameters,
+        )
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
 
     let expected = json!({
@@ -158,14 +156,9 @@ pub fn call_parameters_v1() {
         "tetraplets": tetraplets,
     });
 
-    let result_str =
-        result
-            .as_str().unwrap();
+    let result_str = result.as_str().unwrap();
     let result_json: serde_json::Value = serde_json::from_str(result.as_str().unwrap()).unwrap();
-    assert_eq!(
-        expected,
-        result_json,
-    );
+    assert_eq!(expected, result_json,);
 }
 
 #[test]
@@ -207,17 +200,17 @@ pub fn call_parameters_v2() {
     };
 
     let result = faas
-        .call_with_json("call_parameters_v2", "call_parameters",   json!([]), call_parameters.clone())
+        .call_with_json(
+            "call_parameters_v2",
+            "call_parameters",
+            json!([]),
+            call_parameters.clone(),
+        )
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
 
     let expected = serde_json::to_value(call_parameters).unwrap();
 
-    let result_str =
-        result
-            .as_str().unwrap();
+    let result_str = result.as_str().unwrap();
     let result_json: serde_json::Value = serde_json::from_str(result.as_str().unwrap()).unwrap();
-    assert_eq!(
-        expected,
-        result_json,
-    );
+    assert_eq!(expected, result_json,);
 }

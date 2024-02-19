@@ -126,7 +126,7 @@ pub(crate) fn call_parameters_v2_to_v1(
         service_creator_peer_id,
         host_id,
         tetraplets,
-        worker_id
+        worker_id,
     } = call_parameters;
 
     marine_call_parameters_v1::CallParameters {

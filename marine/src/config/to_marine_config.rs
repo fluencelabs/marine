@@ -73,7 +73,12 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
 
         let config = self
             .populate_logger(logger_enabled, logging_mask, logger_filter, module_name)
-            .populate_host_imports(host_imports, call_parameters_v0, call_parameters_v1, call_parameters_v2)
+            .populate_host_imports(
+                host_imports,
+                call_parameters_v0,
+                call_parameters_v1,
+                call_parameters_v2,
+            )
             .populate_wasi(wasi)?
             .into_config();
 
