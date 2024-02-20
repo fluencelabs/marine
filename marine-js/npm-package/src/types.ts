@@ -18,8 +18,8 @@ export type JSONValue = string | number | boolean | { [x: string]: JSONValue } |
 export type JSONArray = Array<JSONValue>;
 export type JSONObject = { [x: string]: JSONValue };
 export type CallParameters = {
-    /// Peer id of the AIR script initiator.
-    init_peer_id: string,
+    /// Parameters of the particle that caused this call.
+    particle: ParticleParameters,
 
     /// Id of the current service.
     service_id: string,
@@ -33,11 +33,31 @@ export type CallParameters = {
     /// PeerId of the worker who hosts this service.
     worker_id: string,
 
-    /// Id of the particle which execution resulted a call this service.
-    particle_id: string,
-
     /// Security tetraplets which described origin of the arguments.
     tetraplets: Array<Array<SecurityTetraplet>>,
+}
+
+export type ParticleParameters = {
+    /// Id of the particle which execution resulted a call this service.
+    id: string,
+
+    /// Peer id of the AIR script initiator.
+    init_peer_id: string,
+
+    /// Unix timestamp of the particle start time.
+    timestamp: number,
+
+    /// Time to live for this particle in milliseconds.
+    ttl: number,
+
+    /// AIR script in this particle.
+    script: string,
+
+    /// Signature made by particle initiator -- init_peer_id.
+    signature: Array<number>,
+
+    /// particle.signature signed by host_id -- used for FS access.
+    token: string,
 }
 
 export type SecurityTetraplet = {
@@ -50,9 +70,8 @@ export type SecurityTetraplet = {
     /// Name of a function that returned corresponding value.
     function_name: string,
 
-    /// Value was produced by applying this `json_path` to the output from `call_service`.
-    // TODO: since it's not a json path anymore, it's needed to rename it to lambda
-    json_path: string,
+    /// Value was produced by applying this `lambda` to the output from `call_service`.
+    lambda: string,
 }
 
 export type LogFunction = (message: LogMessage) => void;
@@ -76,9 +95,16 @@ export const logLevelToEnv = (level: LogLevel): { WASM_LOG: LogLevel } => {
 };
 
 export const defaultCallParameters: CallParameters = {
+    particle: {
+        id: "",
+        init_peer_id: "",
+        timestamp: 0,
+        ttl: 0,
+        script: "",
+        signature: [],
+        token: "",
+    },
     host_id: "",
-    init_peer_id: "",
-    particle_id: "",
     service_creator_peer_id: "",
     service_id: "",
     tetraplets: [],

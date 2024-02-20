@@ -7,7 +7,14 @@ import * as url from 'url';
 import downloadRaw from 'download';
 import { MarineService } from '../MarineService.js';
 import { callAvm } from '@fluencelabs/avm';
-import {JSONArray, JSONObject, CallParameters, SecurityTetraplet, defaultCallParameters} from '../types.js';
+import {
+    JSONArray,
+    JSONObject,
+    CallParameters,
+    SecurityTetraplet,
+    defaultCallParameters,
+    ParticleParameters
+} from '../types.js';
 import {MarineServiceConfig, Env, Args, ModuleDescriptor} from '../config.js';
 import exp = require("constants");
 
@@ -405,9 +412,19 @@ describe('Fluence app service tests', () => {
         const worker_id = "worker_id";
         const particle_id = "particle_id";
 
+        const particleParameters: ParticleParameters = {
+            id: particle_id,
+            init_peer_id: init_peer_id_2,
+            timestamp: 42,
+            ttl: 84,
+            script: "(null)",
+            signature: [43,44,45,46],
+            token: "token",
+        }
+
         const tetraplet: SecurityTetraplet = {
                 function_name: "some_func_name",
-                json_path: "some_json_path",
+                lambda: "some_lambda",
                 peer_pk: "peer_pk",
                 service_id: "service_id"
         }
@@ -415,26 +432,16 @@ describe('Fluence app service tests', () => {
         const tetraplets = [[tetraplet]]
 
         const call_parameters: CallParameters = {
-            init_peer_id: init_peer_id_2,
+            particle: particleParameters,
             service_id: service_id,
             service_creator_peer_id: service_creator_peer_id,
             host_id: host_id,
             worker_id: worker_id,
-            particle_id: particle_id,
             tetraplets: tetraplets,
         };
 
-        const expected_result =
-            "init_peer_id\n" +
-            "service_id\n" +
-            "service_creator_peer_id\n" +
-            "host_id\n" +
-            "worker_id\n" +
-            "particle_id\n" +
-            "[[SecurityTetraplet { peer_pk: \"peer_pk\", service_id: \"service_id\", function_name: \"some_func_name\", json_path: \"some_json_path\" }]]";
-
         const result1 = marineService.call("call_parameters", [], call_parameters);
-        expect(result1).toStrictEqual(expected_result)
+        expect(result1).toStrictEqual(call_parameters)
 
     });
 });

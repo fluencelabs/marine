@@ -64,6 +64,7 @@ pub use marine_core::ne_vec;
 pub use marine_module_interface::interface::itype_text_view;
 
 pub use marine_rs_sdk::CallParameters;
+pub use marine_rs_sdk::ParticleParameters;
 pub use marine_rs_sdk::SecurityTetraplet;
 
 pub mod generic {
