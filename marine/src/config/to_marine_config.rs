@@ -208,6 +208,12 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             .raw_imports
             .entry(HostAPIVersion::V1)
             .or_default()
+            .insert("log_utf8_string".to_string(), creator.clone());
+
+        self.config
+            .raw_imports
+            .entry(HostAPIVersion::V2)
+            .or_default()
             .insert("log_utf8_string".to_string(), creator);
 
         self

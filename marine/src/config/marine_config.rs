@@ -284,6 +284,7 @@ impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>>
 
         let mut host_cli_imports_v0 = HashMap::new();
         let mut host_cli_imports_v1 = HashMap::new();
+        let mut host_cli_imports_v2 = HashMap::new();
         for (import_name, host_cmd) in mounted_binaries {
             let host_cmd = as_relative_to_base(context.base_path.as_deref(), &host_cmd)?;
             host_cli_imports_v0.insert(
@@ -291,6 +292,10 @@ impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>>
                 crate::host_imports::create_mounted_binary_import(host_cmd.clone()),
             );
             host_cli_imports_v1.insert(
+                import_name.clone(),
+                crate::host_imports::create_mounted_binary_import(host_cmd.clone()),
+            );
+            host_cli_imports_v2.insert(
                 import_name,
                 crate::host_imports::create_mounted_binary_import(host_cmd),
             );
@@ -299,6 +304,7 @@ impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>>
         let host_imports = HashMap::from([
             (HostAPIVersion::V0, host_cli_imports_v0),
             (HostAPIVersion::V1, host_cli_imports_v1),
+            (HostAPIVersion::V2, host_cli_imports_v2),
         ]);
 
         let wasi = toml_config.wasi.map(|w| w.try_into()).transpose()?;
