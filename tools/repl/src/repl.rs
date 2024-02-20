@@ -320,7 +320,6 @@ struct PartialParticleParameters {
     pub token: String,
 }
 
-
 #[derive(Clone, PartialEq, Default, Eq, Debug, Deserialize)]
 struct PartialCallParameters {
     /// Peer id of the AIR script initiator.
