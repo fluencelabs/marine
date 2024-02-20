@@ -102,7 +102,7 @@ checksum = "a2e1373abdaa212b704512ec2bd8b26bd0b7d5c3f70117411a5d9a451383c859"
 name = "arguments-passing-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
  "safe-transmute",
 ]
 
@@ -110,7 +110,7 @@ dependencies = [
 name = "arrays-passing-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
  "safe-transmute",
 ]
 
@@ -254,7 +254,8 @@ dependencies = [
 name = "call_parameters"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
+ "serde_json",
 ]
 
 [[package]]
@@ -697,7 +698,7 @@ name = "curl_adapter"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
 ]
 
 [[package]]
@@ -848,7 +849,7 @@ dependencies = [
 name = "donkey"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
 ]
 
 [[package]]
@@ -937,7 +938,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "log",
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
 ]
 
 [[package]]
@@ -1488,7 +1489,7 @@ name = "ipfs-effector"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
 ]
 
 [[package]]
@@ -1496,7 +1497,7 @@ name = "ipfs-pure"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
 ]
 
 [[package]]
@@ -1631,7 +1632,7 @@ checksum = "89d92a4743f9a61002fae18374ed11e7973f530cb3a3255fb354818118b2203c"
 name = "lilo-after-2gb-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
  "safe-transmute",
 ]
 
@@ -1652,7 +1653,7 @@ name = "local_storage"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
  "wasm-tracing-allocator",
 ]
 
@@ -1783,7 +1784,7 @@ version = "0.14.0"
 dependencies = [
  "it-lilo",
  "marine-it-parser",
- "marine-macro-impl 0.12.0",
+ "marine-macro-impl 0.13.0",
  "once_cell",
  "serde",
  "serde_json",
@@ -1960,7 +1961,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "derivative",
- "marine-rs-sdk-main 0.12.0",
+ "marine-rs-sdk-main 0.13.0",
  "marine-wasm-backend-traits",
  "semver",
  "serde",
@@ -2222,7 +2223,7 @@ dependencies = [
 name = "memory-limiting-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
  "safe-transmute",
 ]
 
@@ -2271,7 +2272,7 @@ dependencies = [
  "fluence-app-service",
  "itertools",
  "log",
- "marine-rs-sdk-main 0.12.0",
+ "marine-rs-sdk-main 0.13.0",
  "marine-wasm-backend-traits",
  "rustop",
  "rustyline",
@@ -2602,7 +2603,7 @@ dependencies = [
 name = "record-effector"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
  "test-record",
 ]
 
@@ -2610,7 +2611,7 @@ dependencies = [
 name = "record-pure"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
  "test-record",
 ]
 
@@ -2618,7 +2619,7 @@ dependencies = [
 name = "records-passing-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
  "safe-transmute",
 ]
 
@@ -3055,7 +3056,7 @@ dependencies = [
 name = "shrek"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
 ]
 
 [[package]]
@@ -3247,7 +3248,7 @@ dependencies = [
 name = "test-record"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
 ]
 
 [[package]]
@@ -3683,7 +3684,7 @@ dependencies = [
 name = "wasi-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
  "safe-transmute",
 ]
 
@@ -3794,14 +3795,14 @@ dependencies = [
 name = "wasm-failing"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
 ]
 
 [[package]]
 name = "wasm-greeting"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
 ]
 
 [[package]]
@@ -3809,14 +3810,14 @@ name = "wasm-greeting-record"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
 ]
 
 [[package]]
 name = "wasm-sqlite-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0",
+ "marine-rs-sdk 0.13.0",
  "marine-sqlite-connector",
 ]
 
