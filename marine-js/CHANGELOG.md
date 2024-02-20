@@ -20,6 +20,17 @@
 
 
 
+## [0.11.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.10.0...marine-js-v0.11.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417))
+
+### Features
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417)) ([220c028](https://github.com/fluencelabs/marine/commit/220c02804567ef1c00ac8e02e08d4bbadd97bfd3))
+
 ## [0.10.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.9.2...marine-js-v0.10.0) (2024-02-08)
 
 
