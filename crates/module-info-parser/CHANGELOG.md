@@ -8,6 +8,17 @@
   * dependencies
     * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
 
+## [0.13.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.12.0...marine-module-info-parser-v0.13.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417))
+
+### Features
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417)) ([220c028](https://github.com/fluencelabs/marine/commit/220c02804567ef1c00ac8e02e08d4bbadd97bfd3))
+
 ## [0.12.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.11.2...marine-module-info-parser-v0.12.0) (2024-02-08)
 
 

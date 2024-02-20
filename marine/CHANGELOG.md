@@ -13,6 +13,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * marine-core bumped from 0.20.1 to 0.20.2
     * marine-wasmtime-backend bumped from 0.2.0 to 0.2.1
 
+## [0.34.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.33.0...marine-runtime-v0.34.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417))
+
+### Features
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417)) ([220c028](https://github.com/fluencelabs/marine/commit/220c02804567ef1c00ac8e02e08d4bbadd97bfd3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-core bumped from 0.27.0 to 0.28.0
+
 ## [0.33.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.32.2...marine-runtime-v0.33.0) (2024-02-08)
 
 

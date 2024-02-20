@@ -1005,7 +1005,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.32.0"
+version = "0.33.0"
 dependencies = [
  "log",
  "maplit",
@@ -1690,7 +1690,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.19.4"
+version = "0.19.5"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -1750,7 +1750,7 @@ dependencies = [
 
 [[package]]
 name = "marine-core"
-version = "0.27.0"
+version = "0.28.0"
 dependencies = [
  "anyhow",
  "bytes",
@@ -1780,7 +1780,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "it-lilo",
  "marine-it-parser",
@@ -1820,7 +1820,7 @@ dependencies = [
 
 [[package]]
 name = "marine-js"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "js-sys",
  "log",
@@ -1956,7 +1956,7 @@ dependencies = [
 
 [[package]]
 name = "marine-module-info-parser"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2077,7 +2077,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.33.0"
+version = "0.34.0"
 dependencies = [
  "bytesize",
  "env_logger",
@@ -2262,7 +2262,7 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.27.0"
+version = "0.28.0"
 dependencies = [
  "anyhow",
  "check-latest",

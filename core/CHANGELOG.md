@@ -12,6 +12,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-module-info-parser bumped from 0.11.1 to 0.11.2
 
+## [0.28.0](https://github.com/fluencelabs/marine/compare/marine-core-v0.27.0...marine-core-v0.28.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417))
+
+### Features
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417)) ([220c028](https://github.com/fluencelabs/marine/commit/220c02804567ef1c00ac8e02e08d4bbadd97bfd3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-module-info-parser bumped from 0.12.0 to 0.13.0
+    * marine-it-generator bumped from 0.14.0 to 0.15.0
+
 ## [0.27.0](https://github.com/fluencelabs/marine/compare/marine-core-v0.26.2...marine-core-v0.27.0) (2024-02-08)
 
 
