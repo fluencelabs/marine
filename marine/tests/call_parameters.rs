@@ -50,7 +50,7 @@ pub fn call_parameters_v0() {
 
     let tetraplet = marine_rs_sdk::SecurityTetraplet {
         function_name: "some_func_name".to_string(),
-        json_path: "some_json_path".to_string(),
+        lambda: "some_lambda".to_string(),
         ..Default::default()
     };
 
@@ -89,7 +89,12 @@ pub fn call_parameters_v0() {
         "service_creator_peer_id": service_creator_peer_id,
         "host_id": host_id,
         "particle_id": particle.id,
-        "tetraplets": tetraplets,
+        "tetraplets": [[{
+            "peer_pk": "",
+            "service_id": "",
+            "function_name": "some_func_name",
+            "json_path": "some_lambda",
+        }]],
     });
 
     let result_json: serde_json::Value = serde_json::from_str(result.as_str().unwrap()).unwrap();
@@ -110,7 +115,7 @@ pub fn call_parameters_v1() {
 
     let tetraplet = marine_rs_sdk::SecurityTetraplet {
         function_name: "some_func_name".to_string(),
-        json_path: "some_json_path".to_string(),
+        lambda: "some_lambda".to_string(),
         ..Default::default()
     };
 
@@ -150,7 +155,12 @@ pub fn call_parameters_v1() {
         "host_id": host_id,
         "worker_id": worker_id,
         "particle_id": particle.id,
-        "tetraplets": tetraplets,
+        "tetraplets": [[{
+            "peer_pk": "",
+            "service_id": "",
+            "function_name": "some_func_name",
+            "json_path": "some_lambda",
+        }]],
     });
 
     let result_json: serde_json::Value = serde_json::from_str(result.as_str().unwrap()).unwrap();
@@ -171,7 +181,7 @@ pub fn call_parameters_v2() {
 
     let tetraplet = marine_rs_sdk::SecurityTetraplet {
         function_name: "some_func_name".to_string(),
-        json_path: "some_json_path".to_string(),
+        lambda: "some_lambda".to_string(),
         ..Default::default()
     };
 

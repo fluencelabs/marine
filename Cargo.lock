@@ -246,7 +246,7 @@ dependencies = [
 name = "call-parameters-v2-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters)",
+ "marine-rs-sdk 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
  "serde_json",
 ]
 
@@ -1739,10 +1739,10 @@ dependencies = [
 [[package]]
 name = "marine-call-parameters"
 version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters#847f284bb2101fa01afb9c7200ac433e6f088ef7"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
 dependencies = [
- "marine-macro 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters)",
- "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters)",
+ "marine-macro 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
+ "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
  "serde",
 ]
 
@@ -1885,10 +1885,10 @@ dependencies = [
 [[package]]
 name = "marine-macro"
 version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters#847f284bb2101fa01afb9c7200ac433e6f088ef7"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
 dependencies = [
- "marine-macro-impl 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters)",
- "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters)",
+ "marine-macro-impl 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
+ "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
 ]
 
 [[package]]
@@ -1933,7 +1933,7 @@ dependencies = [
 [[package]]
 name = "marine-macro-impl"
 version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters#847f284bb2101fa01afb9c7200ac433e6f088ef7"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2021,12 +2021,12 @@ dependencies = [
 [[package]]
 name = "marine-rs-sdk"
 version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters#847f284bb2101fa01afb9c7200ac433e6f088ef7"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
 dependencies = [
- "marine-call-parameters 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters)",
- "marine-macro 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters)",
- "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters)",
- "marine-timestamp-macro 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters)",
+ "marine-call-parameters 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
+ "marine-macro 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
+ "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
+ "marine-timestamp-macro 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
  "serde",
 ]
 
@@ -2063,7 +2063,7 @@ dependencies = [
 [[package]]
 name = "marine-rs-sdk-main"
 version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters#847f284bb2101fa01afb9c7200ac433e6f088ef7"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
 dependencies = [
  "log",
  "serde",
@@ -2083,8 +2083,8 @@ dependencies = [
  "marine-call-parameters 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "marine-core",
  "marine-module-interface",
- "marine-rs-sdk 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters)",
- "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters)",
+ "marine-rs-sdk 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
+ "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
  "marine-utils",
  "marine-wasm-backend-traits",
  "marine-wasmtime-backend",
@@ -2144,7 +2144,7 @@ dependencies = [
 [[package]]
 name = "marine-timestamp-macro"
 version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=feat/particle-parameters#847f284bb2101fa01afb9c7200ac433e6f088ef7"
+source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
 dependencies = [
  "chrono",
  "quote",

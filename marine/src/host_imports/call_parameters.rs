@@ -156,14 +156,14 @@ fn to_v0_sdk_tetraplet(
         peer_pk,
         service_id,
         function_name,
-        json_path,
+        lambda,
     } = tetraplet;
 
     marine_call_parameters_v0::SecurityTetraplet {
         peer_pk,
         service_id,
         function_name,
-        json_path,
+        json_path: lambda,
     }
 }
 
@@ -183,13 +183,13 @@ fn to_v1_sdk_tetraplet(
         peer_pk,
         service_id,
         function_name,
-        json_path,
+        lambda,
     } = tetraplet;
 
     marine_call_parameters_v1::SecurityTetraplet {
         peer_pk,
         service_id,
         function_name,
-        json_path,
+        json_path: lambda,
     }
 }
