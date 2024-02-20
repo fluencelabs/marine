@@ -102,7 +102,7 @@ checksum = "a2e1373abdaa212b704512ec2bd8b26bd0b7d5c3f70117411a5d9a451383c859"
 name = "arguments-passing-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
  "safe-transmute",
 ]
 
@@ -110,7 +110,7 @@ dependencies = [
 name = "arrays-passing-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
  "safe-transmute",
 ]
 
@@ -238,7 +238,7 @@ dependencies = [
 name = "call-parameters-v1-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
  "serde_json",
 ]
 
@@ -246,7 +246,7 @@ dependencies = [
 name = "call-parameters-v2-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
+ "marine-rs-sdk 0.13.0",
  "serde_json",
 ]
 
@@ -254,7 +254,7 @@ dependencies = [
 name = "call_parameters"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
 ]
 
 [[package]]
@@ -697,7 +697,7 @@ name = "curl_adapter"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
 ]
 
 [[package]]
@@ -848,7 +848,7 @@ dependencies = [
 name = "donkey"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
 ]
 
 [[package]]
@@ -937,7 +937,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "log",
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
 ]
 
 [[package]]
@@ -1488,7 +1488,7 @@ name = "ipfs-effector"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
 ]
 
 [[package]]
@@ -1496,7 +1496,7 @@ name = "ipfs-pure"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
 ]
 
 [[package]]
@@ -1631,7 +1631,7 @@ checksum = "89d92a4743f9a61002fae18374ed11e7973f530cb3a3255fb354818118b2203c"
 name = "lilo-after-2gb-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
  "safe-transmute",
 ]
 
@@ -1652,7 +1652,7 @@ name = "local_storage"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
  "wasm-tracing-allocator",
 ]
 
@@ -1731,18 +1731,19 @@ version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f47b1186bad0b2a5e9218e3f6fbe0612ef6b17c58c58537d77bd08044596ea95"
 dependencies = [
- "marine-macro 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "marine-rs-sdk-main 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-macro 0.12.0",
+ "marine-rs-sdk-main 0.12.0",
  "serde",
 ]
 
 [[package]]
 name = "marine-call-parameters"
-version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d16852b36a3cfc8fa044955380901e78109db0035dc93eea4f666d8f3979072"
 dependencies = [
- "marine-macro 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
- "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
+ "marine-macro 0.13.0",
+ "marine-rs-sdk-main 0.13.0",
  "serde",
 ]
 
@@ -1782,7 +1783,7 @@ version = "0.14.0"
 dependencies = [
  "it-lilo",
  "marine-it-parser",
- "marine-macro-impl 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-macro-impl 0.12.0",
  "once_cell",
  "serde",
  "serde_json",
@@ -1878,17 +1879,18 @@ version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "727b1a5449eb1676837c5fc22a8c31dc9980dcef4de938f26f2eaf7c2c54331b"
 dependencies = [
- "marine-macro-impl 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "marine-rs-sdk-main 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-macro-impl 0.12.0",
+ "marine-rs-sdk-main 0.12.0",
 ]
 
 [[package]]
 name = "marine-macro"
-version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cec2cd19fedf559833d0f1e6a33cbcc5cf0efa338bb0975346ff12538a3cdde4"
 dependencies = [
- "marine-macro-impl 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
- "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
+ "marine-macro-impl 0.13.0",
+ "marine-rs-sdk-main 0.13.0",
 ]
 
 [[package]]
@@ -1932,8 +1934,9 @@ dependencies = [
 
 [[package]]
 name = "marine-macro-impl"
-version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e09acb3ada67e69a301b6d7b52a915a36176c5eedb312647de7d5b6cf17f51e4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1957,7 +1960,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "derivative",
- "marine-rs-sdk-main 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk-main 0.12.0",
  "marine-wasm-backend-traits",
  "semver",
  "serde",
@@ -2011,22 +2014,23 @@ version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7662e4c6c08f7cd1b63cd6ff8e473e3239a9d3dd10fb46bec357cb8331423268"
 dependencies = [
- "marine-call-parameters 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "marine-macro 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "marine-rs-sdk-main 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "marine-timestamp-macro 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-call-parameters 0.12.0",
+ "marine-macro 0.12.0",
+ "marine-rs-sdk-main 0.12.0",
+ "marine-timestamp-macro 0.12.0",
  "serde",
 ]
 
 [[package]]
 name = "marine-rs-sdk"
-version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6f33834365d1e6dd041e821a758000f32bed5b960edb09f9d8c61e340dd82e29"
 dependencies = [
- "marine-call-parameters 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
- "marine-macro 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
- "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
- "marine-timestamp-macro 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
+ "marine-call-parameters 0.13.0",
+ "marine-macro 0.13.0",
+ "marine-rs-sdk-main 0.13.0",
+ "marine-timestamp-macro 0.13.0",
  "serde",
 ]
 
@@ -2062,8 +2066,9 @@ dependencies = [
 
 [[package]]
 name = "marine-rs-sdk-main"
-version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58b487a1a1b288ba06c832942eadb43384cd99c9754c1454e1e061dd9866be92"
 dependencies = [
  "log",
  "serde",
@@ -2080,11 +2085,11 @@ dependencies = [
  "itertools",
  "log",
  "marine-call-parameters 0.10.3",
- "marine-call-parameters 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-call-parameters 0.12.0",
  "marine-core",
  "marine-module-interface",
- "marine-rs-sdk 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
- "marine-rs-sdk-main 0.12.0 (git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master)",
+ "marine-rs-sdk 0.13.0",
+ "marine-rs-sdk-main 0.13.0",
  "marine-utils",
  "marine-wasm-backend-traits",
  "marine-wasmtime-backend",
@@ -2143,8 +2148,9 @@ dependencies = [
 
 [[package]]
 name = "marine-timestamp-macro"
-version = "0.12.0"
-source = "git+https://github.com/fluencelabs/marine-rs-sdk/?branch=master#4a9e72e64c5d18b14ae12311845bcf716f5532d5"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a5086357724dc2a65e7abe39c85d58b9971198f8678ebc642a69aae1bbc7ae0"
 dependencies = [
  "chrono",
  "quote",
@@ -2216,7 +2222,7 @@ dependencies = [
 name = "memory-limiting-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
  "safe-transmute",
 ]
 
@@ -2265,7 +2271,7 @@ dependencies = [
  "fluence-app-service",
  "itertools",
  "log",
- "marine-rs-sdk-main 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk-main 0.12.0",
  "marine-wasm-backend-traits",
  "rustop",
  "rustyline",
@@ -2596,7 +2602,7 @@ dependencies = [
 name = "record-effector"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
  "test-record",
 ]
 
@@ -2604,7 +2610,7 @@ dependencies = [
 name = "record-pure"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
  "test-record",
 ]
 
@@ -2612,7 +2618,7 @@ dependencies = [
 name = "records-passing-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
  "safe-transmute",
 ]
 
@@ -3049,7 +3055,7 @@ dependencies = [
 name = "shrek"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
 ]
 
 [[package]]
@@ -3241,7 +3247,7 @@ dependencies = [
 name = "test-record"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
 ]
 
 [[package]]
@@ -3677,7 +3683,7 @@ dependencies = [
 name = "wasi-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
  "safe-transmute",
 ]
 
@@ -3788,14 +3794,14 @@ dependencies = [
 name = "wasm-failing"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
 ]
 
 [[package]]
 name = "wasm-greeting"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
 ]
 
 [[package]]
@@ -3803,14 +3809,14 @@ name = "wasm-greeting-record"
 version = "0.1.0"
 dependencies = [
  "log",
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
 ]
 
 [[package]]
 name = "wasm-sqlite-test"
 version = "0.1.0"
 dependencies = [
- "marine-rs-sdk 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "marine-rs-sdk 0.12.0",
  "marine-sqlite-connector",
 ]
 
