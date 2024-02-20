@@ -70,4 +70,5 @@ pub use marine_min_it_version::min_sdk_version;
 pub use marine_min_it_version::min_it_version;
 
 pub use marine::CallParameters;
+pub use marine::ParticleParameters;
 pub use marine::SecurityTetraplet;

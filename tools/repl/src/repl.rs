@@ -22,6 +22,7 @@ use crate::ReplResult;
 
 use fluence_app_service::AppService;
 use fluence_app_service::CallParameters;
+use fluence_app_service::ParticleParameters;
 use fluence_app_service::SecurityTetraplet;
 use fluence_app_service::MarineModuleConfig;
 use fluence_app_service::TomlAppServiceConfig;
@@ -289,10 +290,42 @@ impl REPL {
 }
 
 #[derive(Clone, PartialEq, Default, Eq, Debug, Deserialize)]
-struct PartialCallParameters {
+struct PartialParticleParameters {
+    /// Id of the particle which execution resulted a call this service.
+    #[serde(default)]
+    pub id: String,
+
     /// Peer id of the AIR script initiator.
     #[serde(default)]
     pub init_peer_id: String,
+
+    /// Unix timestamp of the particle start time.
+    #[serde(default)]
+    pub timestamp: u64,
+
+    /// Time to live for this particle in milliseconds.
+    #[serde(default)]
+    pub ttl: u32,
+
+    /// AIR script in this particle.
+    #[serde(default)]
+    pub script: String,
+
+    /// Signature made by particle initiator -- init_peer_id.
+    #[serde(default)]
+    pub signature: Vec<u8>,
+
+    /// particle.signature signed by host_id -- used for FS access.
+    #[serde(default)]
+    pub token: String,
+}
+
+
+#[derive(Clone, PartialEq, Default, Eq, Debug, Deserialize)]
+struct PartialCallParameters {
+    /// Peer id of the AIR script initiator.
+    #[serde(default)]
+    pub particle: PartialParticleParameters,
 
     /// Id of the current service.
     #[serde(default)]
@@ -310,10 +343,6 @@ struct PartialCallParameters {
     #[serde(default)]
     pub worker_id: String,
 
-    /// Id of the particle which execution resulted a call this service.
-    #[serde(default)]
-    pub particle_id: String,
-
     /// Security tetraplets which described origin of the arguments.
     #[serde(default)]
     pub tetraplets: Vec<Vec<SecurityTetraplet>>,
@@ -322,22 +351,28 @@ struct PartialCallParameters {
 impl From<PartialCallParameters> for CallParameters {
     fn from(partial_call_params: PartialCallParameters) -> Self {
         let PartialCallParameters {
-            init_peer_id,
+            particle,
             service_id,
             service_creator_peer_id,
             host_id,
             worker_id,
-            particle_id,
             tetraplets,
         } = partial_call_params;
 
         Self {
-            init_peer_id,
+            particle: ParticleParameters {
+                id: particle.id,
+                init_peer_id: particle.init_peer_id,
+                timestamp: particle.timestamp,
+                ttl: particle.ttl,
+                script: particle.script,
+                signature: particle.signature,
+                token: particle.token,
+            },
             service_id,
             service_creator_peer_id,
             host_id,
             worker_id,
-            particle_id,
             tetraplets,
         }
     }

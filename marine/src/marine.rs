@@ -331,6 +331,7 @@ impl<WB: WasmBackend> Marine<WB> {
             config,
             self.call_parameters_v0.clone(),
             self.call_parameters_v1.clone(),
+            self.call_parameters_v2.clone(),
             &logger_filter,
         )?;
         self.core
