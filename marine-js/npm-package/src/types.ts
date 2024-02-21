@@ -70,8 +70,8 @@ export type SecurityTetraplet = {
     /// Name of a function that returned corresponding value.
     function_name: string,
 
-    /// Value was produced by applying this `lambda` to the output from `call_service`.
-    lambda: string,
+    /// Value was produced by applying this `lens` to the output from `call_service`.
+    lens: string,
 }
 
 export type LogFunction = (message: LogMessage) => void;

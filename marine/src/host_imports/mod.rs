@@ -18,9 +18,8 @@ pub(crate) mod logger;
 mod call_parameters;
 mod mounted_binaries;
 
-pub(crate) use call_parameters::create_call_parameters_import_v0;
-pub(crate) use call_parameters::create_call_parameters_import_v1;
-pub(crate) use call_parameters::create_call_parameters_import_v2;
-pub(crate) use call_parameters::call_parameters_v2_to_v0;
-pub(crate) use call_parameters::call_parameters_v2_to_v1;
+pub(crate) use call_parameters::create_call_parameters_import;
+pub(crate) use call_parameters::call_parameters_v3_to_v0;
+pub(crate) use call_parameters::call_parameters_v3_to_v1;
+pub(crate) use call_parameters::call_parameters_v3_to_v2;
 pub(crate) use mounted_binaries::create_mounted_binary_import;

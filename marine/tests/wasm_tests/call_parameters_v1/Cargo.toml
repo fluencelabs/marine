@@ -10,5 +10,5 @@ name = "call_parameters_v1"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk = "0.12.0" # do not update, host API v1 test
+marine-rs-sdk = "=0.12.0" # do not update, host API v1 test
 serde_json = "1.0.111"
