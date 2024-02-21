@@ -1,5 +1,5 @@
 {
-  "crates/fluence-app-service": "0.33.1",
+  "crates/fluence-app-service": "0.34.0",
   "crates/it-generator": "0.16.0",
   "crates/it-interfaces": "0.9.1",
   "crates/it-json-serde": "0.5.1",
