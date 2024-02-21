@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-runtime bumped from 0.32.2 to 0.33.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-runtime bumped from 0.34.0 to 0.35.0
+
 ## [0.33.0](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.32.0...fluence-app-service-v0.33.0) (2024-02-20)
 
 
