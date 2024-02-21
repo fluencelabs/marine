@@ -58,6 +58,7 @@ pub enum HostAPIVersion {
     V0,
     V1,
     V2,
+    V3,
 }
 
 impl HostAPIVersion {
@@ -67,6 +68,7 @@ impl HostAPIVersion {
             Self::V0 => "host",
             Self::V1 => "__marine_host_api_v1",
             Self::V2 => "__marine_host_api_v2",
+            Self::V3 => "__marine_host_api_v3",
         }
     }
 }

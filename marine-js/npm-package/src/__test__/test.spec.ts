@@ -424,7 +424,7 @@ describe('Fluence app service tests', () => {
 
         const tetraplet: SecurityTetraplet = {
                 function_name: "some_func_name",
-                lambda: "some_lambda",
+                lens: "some_lens",
                 peer_pk: "peer_pk",
                 service_id: "service_id"
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Fluence Labs Limited
+ * Copyright 2024 Fluence Labs Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-pub(crate) mod logger;
-mod call_parameters;
-mod mounted_binaries;
+use marine_rs_sdk::marine;
 
-pub(crate) use call_parameters::create_call_parameters_import;
-pub(crate) use call_parameters::call_parameters_v3_to_v0;
-pub(crate) use call_parameters::call_parameters_v3_to_v1;
-pub(crate) use call_parameters::call_parameters_v3_to_v2;
-pub(crate) use mounted_binaries::create_mounted_binary_import;
+pub fn main() {}
+
+#[marine]
+pub fn call_parameters() -> String {
+    let cp = marine_rs_sdk::get_call_parameters();
+    serde_json::to_string(&cp).unwrap()
+}

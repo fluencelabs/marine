@@ -24,8 +24,9 @@ use crate::MemoryStats;
 use crate::module_loading::load_modules_from_fs;
 use crate::host_imports::logger::LoggerFilter;
 use crate::host_imports::logger::WASM_LOG_ENV_NAME;
-use crate::host_imports::call_parameters_v2_to_v0;
-use crate::host_imports::call_parameters_v2_to_v1;
+use crate::host_imports::call_parameters_v3_to_v0;
+use crate::host_imports::call_parameters_v3_to_v1;
+use crate::host_imports::call_parameters_v3_to_v2;
 use crate::json_to_marine_err;
 
 use marine_wasm_backend_traits::WasmBackend;
@@ -66,8 +67,10 @@ pub struct Marine<WB: WasmBackend> {
 
     call_parameters_v1: Arc<Mutex<marine_call_parameters_v1::CallParameters>>,
 
+    call_parameters_v2: Arc<Mutex<marine_call_parameters_v2::CallParameters>>,
+
     /// Parameters of call accessible by Wasm modules.
-    call_parameters_v2: Arc<Mutex<CallParameters>>,
+    call_parameters_v3: Arc<Mutex<CallParameters>>,
 
     /// Cached module interfaces by names.
     module_interfaces_cache: HashMap<String, ModuleInterface>,
@@ -105,7 +108,8 @@ impl<WB: WasmBackend> Marine<WB> {
         let mut marine = MarineCore::new(core_config)?;
         let call_parameters_v0 = Arc::<Mutex<marine_call_parameters_v0::CallParameters>>::default();
         let call_parameters_v1 = Arc::<Mutex<marine_call_parameters_v1::CallParameters>>::default();
-        let call_parameters_v2 = Arc::<Mutex<CallParameters>>::default();
+        let call_parameters_v2 = Arc::<Mutex<marine_call_parameters_v2::CallParameters>>::default();
+        let call_parameters_v3 = Arc::<Mutex<CallParameters>>::default();
 
         let modules_dir = config.modules_dir;
 
@@ -128,6 +132,7 @@ impl<WB: WasmBackend> Marine<WB> {
                 call_parameters_v0.clone(),
                 call_parameters_v1.clone(),
                 call_parameters_v2.clone(),
+                call_parameters_v3.clone(),
                 &logger_filter,
             )?;
 
@@ -141,6 +146,7 @@ impl<WB: WasmBackend> Marine<WB> {
             call_parameters_v0,
             call_parameters_v1,
             call_parameters_v2,
+            call_parameters_v3,
             module_interfaces_cache: HashMap::new(),
         })
     }
@@ -287,20 +293,26 @@ impl<WB: WasmBackend> Marine<WB> {
     fn update_call_parameters(&mut self, call_parameters: CallParameters) {
         {
             // a separate code block to unlock the mutex ASAP and to avoid double locking
-            let mut cp = self.call_parameters_v2.lock();
-            *cp = call_parameters.clone();
-        }
-
-        {
-            // a separate code block to unlock the mutex ASAP and to avoid double locking
             let mut cp = self.call_parameters_v0.lock();
-            *cp = call_parameters_v2_to_v0(call_parameters.clone());
+            *cp = call_parameters_v3_to_v0(call_parameters.clone());
         }
 
         {
             // a separate code block to unlock the mutex ASAP and to avoid double locking
             let mut cp = self.call_parameters_v1.lock();
-            *cp = call_parameters_v2_to_v1(call_parameters);
+            *cp = call_parameters_v3_to_v1(call_parameters.clone());
+        }
+
+        {
+            // a separate code block to unlock the mutex ASAP and to avoid double locking
+            let mut cp = self.call_parameters_v2.lock();
+            *cp = call_parameters_v3_to_v2(call_parameters.clone());
+        }
+
+        {
+            // a separate code block to unlock the mutex ASAP and to avoid double locking
+            let mut cp = self.call_parameters_v3.lock();
+            *cp = call_parameters;
         }
     }
 }
@@ -332,6 +344,7 @@ impl<WB: WasmBackend> Marine<WB> {
             self.call_parameters_v0.clone(),
             self.call_parameters_v1.clone(),
             self.call_parameters_v2.clone(),
+            self.call_parameters_v3.clone(),
             &logger_filter,
         )?;
         self.core
