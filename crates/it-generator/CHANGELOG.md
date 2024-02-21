@@ -4,6 +4,17 @@
   * dependencies
     * marine-it-parser bumped from 0.12.1 to 0.12.2
 
+## [0.16.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.15.0...marine-it-generator-v0.16.0) (2024-02-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* support marine-rs-sdk 0.14
+
+### Features
+
+* support marine-rs-sdk 0.14 ([b20a27f](https://github.com/fluencelabs/marine/commit/b20a27f8b64733f3300afc8e4b5409337dc860aa))
+
 ## [0.15.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.14.0...marine-it-generator-v0.15.0) (2024-02-20)
 
 

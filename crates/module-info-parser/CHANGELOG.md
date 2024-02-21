@@ -8,6 +8,17 @@
   * dependencies
     * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
 
+## [0.14.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.13.0...marine-module-info-parser-v0.14.0) (2024-02-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* support marine-rs-sdk 0.14
+
+### Features
+
+* support marine-rs-sdk 0.14 ([b20a27f](https://github.com/fluencelabs/marine/commit/b20a27f8b64733f3300afc8e4b5409337dc860aa))
+
 ## [0.13.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.12.0...marine-module-info-parser-v0.13.0) (2024-02-20)
 
 
