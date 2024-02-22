@@ -4,6 +4,10 @@
   * dependencies
     * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-wasm-backend-traits bumped from 0.5.1 to 0.6.0
+
 ## [0.15.1](https://github.com/fluencelabs/marine/compare/marine-it-parser-v0.15.0...marine-it-parser-v0.15.1) (2024-01-07)
 
 

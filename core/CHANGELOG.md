@@ -12,6 +12,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-module-info-parser bumped from 0.11.1 to 0.11.2
 
+## [0.30.0](https://github.com/fluencelabs/marine/compare/marine-core-v0.29.0...marine-core-v0.30.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421))
+
+### Features
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421)) ([f54ca71](https://github.com/fluencelabs/marine/commit/f54ca715a362b51ca269c3882a0337b8d4390c3d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-module-info-parser bumped from 0.14.0 to 0.14.1
+    * marine-it-parser bumped from 0.15.1 to 0.15.2
+    * marine-it-generator bumped from 0.16.0 to 0.16.1
+    * marine-wasm-backend-traits bumped from 0.5.1 to 0.6.0
+    * marine-wasmtime-backend bumped from 0.5.1 to 0.6.0
+
 ## [0.29.0](https://github.com/fluencelabs/marine/compare/marine-core-v0.28.0...marine-core-v0.29.0) (2024-02-21)
 
 

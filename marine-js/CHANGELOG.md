@@ -20,6 +20,24 @@
 
 
 
+## [0.13.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.12.0...marine-js-v0.13.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421))
+
+### Features
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421)) ([f54ca71](https://github.com/fluencelabs/marine/commit/f54ca715a362b51ca269c3882a0337b8d4390c3d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-js-backend bumped from 0.3.2 to 0.3.3
+
 ## [0.12.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.11.0...marine-js-v0.12.0) (2024-02-21)
 
 
