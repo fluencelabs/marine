@@ -28,7 +28,6 @@ use anyhow::anyhow;
 use std::path::Path;
 use std::path::PathBuf;
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 pub struct WasmtimeWasi {}
 
@@ -41,7 +40,6 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         let WasiParameters {
             args,
             envs,
-            preopened_files,
             mapped_dirs,
         } = parameters;
 
@@ -50,8 +48,6 @@ impl WasiImplementation<WasmtimeWasmBackend> for WasmtimeWasi {
         let wasi_ctx_builder = populate_args(wasi_ctx_builder, args)?;
         // process and add environment variables to wasi context
         let wasi_ctx_builder = populate_envs(wasi_ctx_builder, envs)?;
-        // add preopened files to wasi context, do not create dirs
-        let wasi_ctx_builder = populate_preopens(wasi_ctx_builder, preopened_files)?;
         // add mapped directories to wasi context, do not create dirs
         let wasi_ctx_builder = populate_mapped_dirs(wasi_ctx_builder, mapped_dirs)?;
         // give access to runner's stdout and stderr, but not stdin
@@ -106,22 +102,6 @@ fn populate_args(
         .map_err(|_| WasiError::TooLargeArgsArray)?;
 
     Ok(builder)
-}
-
-fn populate_preopens(
-    builder: WasiCtxBuilder,
-    preopened_files: HashSet<PathBuf>,
-) -> Result<WasiCtxBuilder, WasiError> {
-    preopened_files
-        .iter()
-        .try_fold(builder, |mut builder, host_path| -> Result<_, WasiError> {
-            let guest_dir = wasmtime_wasi::Dir::open_ambient_dir(host_path, ambient_authority())?;
-            builder
-                .preopened_dir(guest_dir, host_path)
-                .map_err(|e| WasiError::EngineWasiError(anyhow!(e)))?;
-
-            Ok(builder)
-        })
 }
 
 fn populate_mapped_dirs(

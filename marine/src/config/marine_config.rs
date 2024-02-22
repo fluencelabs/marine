@@ -19,7 +19,6 @@ use marine_core::generic::HostImportDescriptor;
 use marine_core::HostAPIVersion;
 
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -112,30 +111,13 @@ impl<WB: WasmBackend> MarineModuleConfig<WB> {
             w @ None => {
                 *w = Some(MarineWASIConfig {
                     envs: new_envs,
-                    preopened_files: HashSet::new(),
                     mapped_dirs: HashMap::new(),
                 })
             }
         };
     }
 
-    pub fn extend_wasi_files(&mut self, new_mapped_dirs: HashMap<String, PathBuf>) {
-        match &mut self.wasi {
-            Some(MarineWASIConfig { mapped_dirs, .. }) => {
-                mapped_dirs.extend(new_mapped_dirs);
-            }
-            w @ None => {
-                *w = Some(MarineWASIConfig {
-                    envs: HashMap::new(),
-                    mapped_dirs: new_mapped_dirs,
-                    preopened_files: HashSet::new(),
-                })
-            }
-        };
-    }
-
     pub fn root_wasi_files_at(&mut self, root: &Path) {
-        // TODO: make all the security rules for paths configurable from outside
         match &mut self.wasi {
             Some(MarineWASIConfig { mapped_dirs, .. }) => {
                 mapped_dirs.values_mut().for_each(|path| {
@@ -151,10 +133,6 @@ impl<WB: WasmBackend> MarineModuleConfig<WB> {
 pub struct MarineWASIConfig {
     /// A list of environment variables available for this module.
     pub envs: HashMap<String, String>,
-
-    /// A list of files available for this module.
-    /// A loaded module could have access only to files from this list.
-    pub preopened_files: HashSet<PathBuf>,
 
     /// Mapping from a usually short to full file name.
     pub mapped_dirs: HashMap<String, PathBuf>,
@@ -320,19 +298,12 @@ impl TryFrom<TomlWASIConfig> for MarineWASIConfig {
             .map(to_string)
             .collect::<Result<HashMap<_, _>, _>>()?;
 
-        let preopened_files = toml_config.preopened_files.unwrap_or_default();
-        let preopened_files = preopened_files.into_iter().collect::<HashSet<_>>();
-
         let mapped_dirs = toml_config.mapped_dirs.unwrap_or_default();
         let mapped_dirs = mapped_dirs
             .into_iter()
             .map(to_path)
             .collect::<Result<HashMap<_, _>, _>>()?;
 
-        Ok(MarineWASIConfig {
-            envs,
-            preopened_files,
-            mapped_dirs,
-        })
+        Ok(MarineWASIConfig { envs, mapped_dirs })
     }
 }

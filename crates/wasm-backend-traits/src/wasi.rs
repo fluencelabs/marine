@@ -19,13 +19,12 @@ use crate::WasmBackend;
 
 use std::path::PathBuf;
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 /// A type that provides WASI functionality to the given Wasm backend.
 pub trait WasiImplementation<WB: WasmBackend> {
     /// Configures WASI state and adds WASI functions to the `imports` object.
     /// # Errors:
-    ///     Returns an error if failed to open a preopen directory/file.
+    ///     Returns an error if failed to open a open a directory/file.
     fn register_in_linker(
         store: &mut <WB as WasmBackend>::ContextMut<'_>,
         linker: &mut <WB as WasmBackend>::Imports,
@@ -43,7 +42,6 @@ pub trait WasiImplementation<WB: WasmBackend> {
 pub struct WasiParameters {
     pub args: Vec<String>,
     pub envs: HashMap<String, String>,
-    pub preopened_files: HashSet<PathBuf>,
     pub mapped_dirs: HashMap<String, PathBuf>,
 }
 
