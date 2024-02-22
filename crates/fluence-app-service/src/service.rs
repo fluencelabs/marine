@@ -160,10 +160,9 @@ impl AppService {
 
         for module in &mut config.marine_config.modules_config {
             module.config.extend_wasi_envs(envs.clone());
-            if config.preprocess_wasi_paths {
-                // Moves app preopened files and mapped dirs to the &working dir, keeping old aliases.
-                module.config.root_wasi_files_at(working_dir);
-            }
+            // Moves relative paths in mapped dirs to the &working dir, keeping old aliases.
+            module.config.root_wasi_files_at(working_dir);
+
             // Adds /tmp and /local to wasi.
             // It is important to do it after rooting preopens at working dir, because /tmp and /local are in a separate temporary dir
             module.config.extend_wasi_files(mapped_dirs.clone());
