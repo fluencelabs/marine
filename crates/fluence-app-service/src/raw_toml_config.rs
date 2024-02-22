@@ -54,7 +54,7 @@ impl TryInto<AppServiceConfig> for TomlAppServiceConfig {
         let service_working_dir = match self.service_working_dir {
             Some(service_base_dir) => PathBuf::from(service_base_dir),
             // use current dir for service base dir if it isn't defined
-            None => std::env::current_dir(),
+            None => std::env::current_dir()?,
         };
 
         let service_tmp_dir = match self.service_base_dir {
