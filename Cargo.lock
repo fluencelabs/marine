@@ -1799,7 +1799,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.16.1"
+version = "0.17.0"
 dependencies = [
  "it-lilo",
  "marine-it-parser",
@@ -1822,7 +1822,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-parser"
-version = "0.15.2"
+version = "0.16.0"
 dependencies = [
  "anyhow",
  "itertools",
@@ -1998,7 +1998,7 @@ dependencies = [
 
 [[package]]
 name = "marine-module-info-parser"
-version = "0.14.1"
+version = "0.15.0"
 dependencies = [
  "anyhow",
  "chrono",

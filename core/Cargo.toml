@@ -12,10 +12,10 @@ name = "marine_core"
 path = "src/lib.rs"
 
 [dependencies]
-marine-module-info-parser = { path = "../crates/module-info-parser", version = "0.14.1" }
+marine-module-info-parser = { path = "../crates/module-info-parser", version = "0.15.0" }
 marine-it-interfaces = { path = "../crates/it-interfaces", version = "0.9.1" }
-marine-it-parser = { path = "../crates/it-parser", version = "0.15.2" }
-marine-it-generator = { path = "../crates/it-generator", version = "0.16.1" }
+marine-it-parser = { path = "../crates/it-parser", version = "0.16.0" }
+marine-it-generator = { path = "../crates/it-generator", version = "0.17.0" }
 marine-module-interface = { path = "../crates/module-interface", version = "0.8.1" }
 marine-utils = { path = "../crates/utils", version = "0.5.1" }
 marine-min-it-version =  { path = "../crates/min-it-version", version = "0.3.2" }
