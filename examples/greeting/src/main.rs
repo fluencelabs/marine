@@ -17,10 +17,6 @@
 use marine_rs_sdk::marine;
 use marine_rs_sdk::module_manifest;
 
-use std::fs;
-use std::env;
-use std::path::PathBuf;
-
 module_manifest!();
 
 pub fn main() {}
@@ -28,41 +24,4 @@ pub fn main() {}
 #[marine]
 pub fn greeting(name: String) -> String {
     format!("Hi, {}", name)
-}
-
-#[marine]
-pub fn ls_current() -> String {
-    match traverse_current() {
-        Ok(_) => "Success".to_string(),
-        Err(e) => format!("Error: {}", e),
-    }
-}
-
-#[marine]
-pub fn ls(dir: String) -> String {
-    match traverse_any(dir.into()) {
-        Ok(_) => "Success".to_string(),
-        Err(e) => format!("Error: {}", e),
-    }
-}
-
-fn traverse_current() -> std::io::Result<()> {
-    let current_dir = env::current_dir()?;
-    traverse_any(current_dir)
-}
-
-fn traverse_any(path: PathBuf) -> std::io::Result<()> {
-    for entry in fs::read_dir(path)? {
-        let entry = entry?;
-        let path = entry.path();
-
-        let metadata = fs::metadata(&path)?;
-        println!(
-            "{}, is_readonly: {}",
-            path.display(),
-            metadata.permissions().readonly()
-        )
-    }
-
-    Ok(())
 }
