@@ -30,6 +30,7 @@ use std::path::PathBuf;
 pub struct TomlAppServiceConfig {
     pub service_working_dir: Option<String>,
     pub service_base_dir: Option<String>,
+    pub preprocess_wasi_paths: Option<bool>,
 
     #[serde(flatten)]
     pub toml_marine_config: TomlMarineConfig,
@@ -65,6 +66,7 @@ impl TryInto<AppServiceConfig> for TomlAppServiceConfig {
         Ok(AppServiceConfig {
             service_working_dir,
             service_base_dir: service_tmp_dir,
+            preprocess_wasi_paths: self.preprocess_wasi_paths.unwrap_or(true),
             marine_config,
         })
     }

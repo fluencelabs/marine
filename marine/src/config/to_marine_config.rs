@@ -16,7 +16,6 @@
 
 use crate::MarineWASIConfig;
 use crate::MarineResult;
-use crate::MarineError;
 use crate::config::MarineModuleConfig;
 use crate::host_imports::logger::log_utf8_string_closure;
 use crate::host_imports::logger::LoggerFilter;
@@ -35,7 +34,6 @@ use parking_lot::Mutex;
 use serde::Serialize;
 
 use std::collections::HashMap;
-use std::collections::hash_map::Entry;
 use std::sync::Arc;
 
 struct MModuleConfigBuilder<WB: WasmBackend> {
@@ -95,25 +93,6 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
         self.config.wasi_parameters.envs = wasi.envs;
 
         self.config.wasi_parameters.mapped_dirs = wasi.mapped_dirs;
-
-        // Preopened files and mapped dirs are treated in the same way by the wasm backends.
-        // The only difference is that for preopened files the alias and the value are the same,
-        // while for mapped dirs user defines the alias. To avoid having same alias pointing to different files,
-        // preopened files are moved directly to the mapped dirs.
-        for path in wasi.preopened_files {
-            let alias = path.to_string_lossy();
-            match self.config.wasi_parameters.mapped_dirs.entry(alias.to_string()) {
-                Entry::Occupied(entry) => {
-                    return Err(MarineError::InvalidConfig(format!(
-                        "WASI preopened files conflict with WASI mapped dirs: preopen {} is also mapped to: {}. Remove one of the entries to fix this error.", entry.key(), entry.get().display())
-                    ))
-                },
-
-                Entry::Vacant(entry) => {
-                    entry.insert(path);
-                }
-            }
-        }
 
         // create environment variables for all mapped directories
         let mapped_dirs = self

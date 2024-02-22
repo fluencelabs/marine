@@ -25,5 +25,8 @@ pub struct AppServiceConfig {
     pub service_working_dir: PathBuf,
     /// Location for /tmp and /local dirs.
     pub service_base_dir: PathBuf,
+    /// If true, all host paths in `wasi.mapped_dirs` treated as relative to `self.service_working_dir`,
+    /// if false, all host paths in `wasi.mapped_dirs` are used as-is.
+    pub preprocess_wasi_paths: bool,
     pub marine_config: MarineConfig,
 }
