@@ -42,7 +42,6 @@ modules_dir = "wasm/artifacts/wasm_modules"
 
     [module.wasi]
     envs = { "IPFS_ADDR" = "/dns4/relay02.fluence.dev/tcp/15001" }
-    preopened_files = ["/Users/user/tmp"]
     mapped_dirs = {"tmp" = "/Users/user/tmp"}
 
 [default]
@@ -55,7 +54,6 @@ modules_dir = "wasm/artifacts/wasm_modules"
 
     [default.wasi]
     envs = []
-    preopened_files = ["/Users/user/tmp"]
     mapped_dirs = {"tmp" = "/Users/user/tmp"}
  */
 
@@ -127,7 +125,6 @@ pub struct TomlMarineModuleConfig {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlWASIConfig {
-    pub preopened_files: Option<Vec<PathBuf>>,
     pub envs: Option<toml::value::Table>,
     pub mapped_dirs: Option<toml::value::Table>,
 }
@@ -144,7 +141,6 @@ pub enum MemoryLimit {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
     use super::TomlMarineNamedModuleConfig;
     use super::TomlMarineModuleConfig;
     use super::TomlWASIConfig;
@@ -165,7 +161,6 @@ mod tests {
                 logger_enabled: Some(false),
                 logging_mask: Some(1),
                 wasi: Some(TomlWASIConfig {
-                    preopened_files: Some(vec![PathBuf::from("a")]),
                     envs: None,
                     mapped_dirs: None,
                 }),

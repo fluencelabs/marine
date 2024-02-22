@@ -27,7 +27,6 @@ use marine::MarineModuleConfig;
 use marine::IValue;
 
 use serde_json::Value as JValue;
-use maplit::hashmap;
 
 use std::convert::TryInto;
 use std::collections::HashMap;
@@ -35,8 +34,6 @@ use std::path::Path;
 use std::io::ErrorKind;
 
 const SERVICE_ID_ENV_NAME: &str = "service_id";
-const SERVICE_LOCAL_DIR_NAME: &str = "local";
-const SERVICE_TMP_DIR_NAME: &str = "tmp";
 
 pub struct AppService {
     marine: Marine,
@@ -125,48 +122,21 @@ impl AppService {
     }
 
     /// Prepare service before starting by:
-    ///  1. creating a directory structure in the following form:
-    ///     - service_tmp_dir/service_id/SERVICE_LOCAL_DIR_NAME
-    ///     - service_tmp_dir/service_id/SERVICE_TMP_DIR_NAME
-    ///  2. rooting all mapped and preopened directories at service_working_dir
+    ///  1. rooting all mapped directories at service_working_dir, keeping absolute paths as-is
     ///  2. adding service_id to environment variables
-    ///  3. moving all the user defined mapped dirs and preopened files to service_base_dir/service_id/
     fn set_env_and_dirs(
         config: &mut AppServiceConfig,
         service_id: String,
         mut envs: HashMap<String, String>,
     ) -> Result<()> {
         let working_dir = &config.service_working_dir;
-        let root_tmp_dir = &config.service_base_dir.join(&service_id);
-
-        let service_local_dir = root_tmp_dir.join(SERVICE_LOCAL_DIR_NAME);
-        let service_tmp_dir = root_tmp_dir.join(SERVICE_TMP_DIR_NAME);
-
-        create(working_dir)?;
-        create(root_tmp_dir)?;
-        create(&service_tmp_dir)?;
-        create(&service_local_dir)?;
-
-        // Special directories that are mapped to service_tmp_dir.
-        // Override user-defined ones.
-        let mapped_dirs = hashmap! {
-            format!("{SERVICE_LOCAL_DIR_NAME}") => service_local_dir.clone(),
-            format!("{SERVICE_TMP_DIR_NAME}") => service_tmp_dir.clone(),
-            format!("/{SERVICE_LOCAL_DIR_NAME}") => service_local_dir,
-            format!("/{SERVICE_TMP_DIR_NAME}") => service_tmp_dir,
-        };
 
         envs.insert(SERVICE_ID_ENV_NAME.to_string(), service_id);
 
         for module in &mut config.marine_config.modules_config {
             module.config.extend_wasi_envs(envs.clone());
-            // Moves app preopened files and mapped dirs to the &working dir, keeping old aliases.
+            // Moves relative paths in mapped dirs to the &working dir, keeping old aliases.
             module.config.root_wasi_files_at(working_dir);
-            // Adds /tmp and /local to wasi.
-            // It is important to do it after rooting preopens at working dir, because /tmp and /local are in a separate temporary dir
-            module
-                .config
-                .extend_wasi_files(<_>::default(), mapped_dirs.clone());
 
             // Create all mapped directories if they do not exist
             // Needed to provide ability to run the same services both in mrepl and rust-peer
@@ -253,10 +223,6 @@ impl AppService {
 fn create_wasi_dirs(config: &MarineModuleConfig) -> Result<()> {
     if let Some(wasi_config) = &config.wasi {
         for dir in wasi_config.mapped_dirs.values() {
-            create(dir)?;
-        }
-
-        for dir in wasi_config.preopened_files.iter() {
             create(dir)?;
         }
     }

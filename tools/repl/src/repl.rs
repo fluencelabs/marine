@@ -242,7 +242,6 @@ impl REPL {
         working_dir: Option<String>,
         quiet: bool,
     ) -> ReplResult<AppService> {
-        let tmp_path: String = std::env::temp_dir().to_string_lossy().into();
         let service_id = uuid::Uuid::new_v4().to_string();
         let config_file_path: Option<PathBuf> = config_file_path.map(Into::into);
         let working_dir = working_dir.unwrap_or_else(|| ".".to_string());
@@ -267,7 +266,6 @@ impl REPL {
             })?
             .unwrap_or_default();
 
-        config.service_base_dir = Some(tmp_path);
         config.service_working_dir = Some(working_dir);
 
         config.toml_marine_config.base_path = config_file_path
