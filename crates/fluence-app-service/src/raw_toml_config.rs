@@ -53,8 +53,8 @@ impl TryInto<AppServiceConfig> for TomlAppServiceConfig {
         let marine_config = self.toml_marine_config.try_into()?;
         let service_working_dir = match self.service_working_dir {
             Some(service_base_dir) => PathBuf::from(service_base_dir),
-            // use tmp dir for service base dir if it isn't defined
-            None => std::env::temp_dir(),
+            // use current dir for service base dir if it isn't defined
+            None => std::env::current_dir(),
         };
 
         let service_tmp_dir = match self.service_base_dir {
