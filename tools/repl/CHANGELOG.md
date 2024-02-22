@@ -30,6 +30,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * fluence-app-service bumped from 0.31.1 to 0.31.2
 
+## [0.30.0](https://github.com/fluencelabs/marine/compare/mrepl-v0.29.0...mrepl-v0.30.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421))
+
+### Features
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421)) ([f54ca71](https://github.com/fluencelabs/marine/commit/f54ca715a362b51ca269c3882a0337b8d4390c3d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * fluence-app-service bumped from 0.34.0 to 0.35.0
+    * marine-wasm-backend-traits bumped from 0.5.1 to 0.6.0
+
 ## [0.29.0](https://github.com/fluencelabs/marine/compare/mrepl-v0.28.0...mrepl-v0.29.0) (2024-02-21)
 
 
