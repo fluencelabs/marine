@@ -21,12 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * **host imports:** add mounted binaries for __marine_host_api_v3 ([#424](https://github.com/fluencelabs/marine/issues/424)) ([2ab2011](https://github.com/fluencelabs/marine/commit/2ab2011610775bda047663c624e434d966744ff0))
 
 
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * marine-core bumped from 0.30.0 to 0.30.1
-
 ## [0.36.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.35.0...marine-runtime-v0.36.0) (2024-02-22)
 
 

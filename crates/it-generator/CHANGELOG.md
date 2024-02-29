@@ -8,46 +8,6 @@
   * dependencies
     * marine-it-parser bumped from 0.15.1 to 0.15.2
 
-## [0.18.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.17.0...marine-it-generator-v0.18.0) (2024-02-29)
-
-
-### ⚠ BREAKING CHANGES
-
-* support marine-rs-sdk 0.14
-* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417))
-* **ABI:** support marine-rs-sdk host api versions, support worker_id in CallParamaters ([#409](https://github.com/fluencelabs/marine/issues/409))
-* **versions:** enforce minor version bumps ([#400](https://github.com/fluencelabs/marine/issues/400))
-* **versions:** enforce minor version bumps ([#397](https://github.com/fluencelabs/marine/issues/397))
-* propagate errors from linked modules ([#388](https://github.com/fluencelabs/marine/issues/388))
-* update versions to comply with semver ([#357](https://github.com/fluencelabs/marine/issues/357))
-* decouple wasmer from Marine, replace it with generic backend interface ([#219](https://github.com/fluencelabs/marine/issues/219))
-
-### Features
-
-* **ABI:** support marine-rs-sdk host api versions, support worker_id in CallParamaters ([#409](https://github.com/fluencelabs/marine/issues/409)) ([c948b8b](https://github.com/fluencelabs/marine/commit/c948b8b86674164020c79e900c58c5aff46c5eb7))
-* decouple wasmer from Marine, replace it with generic backend interface ([#219](https://github.com/fluencelabs/marine/issues/219)) ([d3a773d](https://github.com/fluencelabs/marine/commit/d3a773df4f7ec80ab8146f68922802a4b9a450d0))
-* **deps:** update rust crate serde_json to 1.0.107 ([0c1d378](https://github.com/fluencelabs/marine/commit/0c1d3780b04da3a63d7a59469f91bc056f3a56e7))
-* **deps:** update rust crate thiserror to 1.0.50 ([0b88b23](https://github.com/fluencelabs/marine/commit/0b88b236015320972315b1bd7ae07f5277d6acbd))
-* propagate errors from linked modules ([#388](https://github.com/fluencelabs/marine/issues/388)) ([a94494b](https://github.com/fluencelabs/marine/commit/a94494b042e32e284790d4ddc650e3086f6ab600))
-* support marine-rs-sdk 0.14 ([b20a27f](https://github.com/fluencelabs/marine/commit/b20a27f8b64733f3300afc8e4b5409337dc860aa))
-* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417)) ([220c028](https://github.com/fluencelabs/marine/commit/220c02804567ef1c00ac8e02e08d4bbadd97bfd3))
-
-
-### Bug Fixes
-
-* **docs:** add correct repository link for every published crate ([#403](https://github.com/fluencelabs/marine/issues/403)) ([ebb0bcb](https://github.com/fluencelabs/marine/commit/ebb0bcb1d15d37e8b5c10096ce42171a87abe0fa))
-* **release-please:** Get rid of workspace.dependencies ([#316](https://github.com/fluencelabs/marine/issues/316)) ([71835e6](https://github.com/fluencelabs/marine/commit/71835e6762515a83cde1cc944d60352a4c1221f5))
-* update versions to comply with semver ([#357](https://github.com/fluencelabs/marine/issues/357)) ([71e138d](https://github.com/fluencelabs/marine/commit/71e138dce31c2896bcd7b0657c3122c4b7f6402b))
-* **versions:** enforce minor version bumps ([#397](https://github.com/fluencelabs/marine/issues/397)) ([8c217c7](https://github.com/fluencelabs/marine/commit/8c217c7c3d367f6dcb6abeea0b54de88dbd17be5))
-* **versions:** enforce minor version bumps ([#400](https://github.com/fluencelabs/marine/issues/400)) ([597ef4f](https://github.com/fluencelabs/marine/commit/597ef4f80d4be0170e8d575da1181647c284fe6c))
-
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * marine-it-parser bumped from 0.16.0 to 0.17.0
-
 ## [0.16.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.15.0...marine-it-generator-v0.16.0) (2024-02-21)
 
 
