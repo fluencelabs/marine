@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-module-info-parser bumped from 0.11.1 to 0.11.2
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-module-info-parser bumped from 0.15.0 to 0.16.0
+    * marine-it-parser bumped from 0.16.0 to 0.17.0
+    * marine-it-generator bumped from 0.17.0 to 0.18.0
+
 ## [0.30.0](https://github.com/fluencelabs/marine/compare/marine-core-v0.29.0...marine-core-v0.30.0) (2024-02-22)
 
 
