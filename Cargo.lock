@@ -1698,7 +1698,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.19.8"
+version = "0.19.7"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -1769,7 +1769,7 @@ dependencies = [
 
 [[package]]
 name = "marine-core"
-version = "0.30.1"
+version = "0.30.0"
 dependencies = [
  "anyhow",
  "bytes",
@@ -1799,7 +1799,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.18.0"
+version = "0.17.0"
 dependencies = [
  "it-lilo",
  "marine-it-parser",
@@ -1822,7 +1822,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-parser"
-version = "0.17.0"
+version = "0.16.0"
 dependencies = [
  "anyhow",
  "itertools",
@@ -1998,7 +1998,7 @@ dependencies = [
 
 [[package]]
 name = "marine-module-info-parser"
-version = "0.16.0"
+version = "0.15.0"
 dependencies = [
  "anyhow",
  "chrono",
