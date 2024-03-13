@@ -163,7 +163,6 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
                 None => String::from("off"),
             };
 
-            println!("Inserting {}={}", WASM_LOG_ENV_NAME, log_level_str);
             // overwrite possibly installed log variable in config
             self.config
                 .wasi_parameters
