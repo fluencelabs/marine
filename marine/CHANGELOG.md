@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * marine-core bumped from 0.20.1 to 0.20.2
     * marine-wasmtime-backend bumped from 0.2.0 to 0.2.1
 
+## [0.36.2](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.36.1...marine-runtime-v0.36.2) (2024-03-27)
+
+
+### Features
+
+* **deps:** reexport types from toml crate, so users don't have to depend on it ([#427](https://github.com/fluencelabs/marine/issues/427)) ([ee39ce0](https://github.com/fluencelabs/marine/commit/ee39ce07bcab85f92d1978e00e244e19577a6b01))
+
 ## [0.36.1](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.36.0...marine-runtime-v0.36.1) (2024-02-29)
 
 

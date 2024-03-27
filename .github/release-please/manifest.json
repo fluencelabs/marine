@@ -1,5 +1,5 @@
 {
-  "crates/fluence-app-service": "0.35.1",
+  "crates/fluence-app-service": "0.35.2",
   "crates/it-generator": "0.17.0",
   "crates/it-interfaces": "0.9.1",
   "crates/it-json-serde": "0.5.1",
@@ -11,9 +11,9 @@
   "crates/wasm-backend-traits": "0.6.0",
   "crates/wasmtime-backend": "0.6.0",
   "core": "0.30.0",
-  "marine": "0.36.1",
+  "marine": "0.36.2",
   "tools/cli": "0.19.7",
-  "tools/repl": "0.30.1",
-  "marine-js": "0.13.1",
+  "tools/repl": "0.30.2",
+  "marine-js": "0.13.2",
   "crates/js-backend": "0.3.3"
 }
