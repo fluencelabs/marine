@@ -93,6 +93,7 @@ pub mod wasmtime {
 
     pub use marine::MarineConfig;
     pub use marine::MarineModuleConfig;
+    pub use marine::MarineWASIConfig;
     pub use marine::ModuleDescriptor;
     pub use marine::HostImportDescriptor;
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use marine_wasm_backend_traits::WasmBackendError;
 use marine::MarineError;
 
 use std::io::Error as IOError;
@@ -30,6 +31,9 @@ pub enum AppServiceError {
 
     /// Marine errors.
     MarineError(MarineError),
+
+    // Wasm backend errors
+    WasmBackendError(WasmBackendError),
 
     /// Directory creation failed
     CreateDir { err: IOError, path: PathBuf },
@@ -50,6 +54,7 @@ impl std::fmt::Display for AppServiceError {
                 write!(f, "Failed to create dir {:?}: {:?}", path, err)
             }
             AppServiceError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
+            AppServiceError::WasmBackendError(err) => { write!(f, "{}", err) }
         }
     }
 }

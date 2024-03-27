@@ -16,9 +16,9 @@
 
 use crate::generic::AppService;
 use crate::generic::AppServiceConfig;
+use crate::AppServiceError;
 
 use marine_wasm_backend_traits::WasmBackend;
-use marine_wasm_backend_traits::WasmBackendResult;
 use marine_wasmtime_backend::WasmtimeConfig;
 use marine_wasmtime_backend::WasmtimeWasmBackend;
 
@@ -29,6 +29,7 @@ pub struct AppServiceFactory<WB: WasmBackend> {
     backend: WB,
 }
 
+#[derive(Clone)]
 pub struct EpochTicker(WasmtimeWasmBackend);
 
 impl<WB: WasmBackend> AppServiceFactory<WB> {
@@ -66,9 +67,10 @@ impl AppServiceFactory<WasmtimeWasmBackend> {
     /// Creates a new factory
     pub fn new(
         config: WasmtimeConfig,
-    ) -> WasmBackendResult<(AppServiceFactory<WasmtimeWasmBackend>, EpochTicker)> {
+    ) -> Result<(AppServiceFactory<WasmtimeWasmBackend>, EpochTicker), AppServiceError> {
         let config = config;
-        let backend = WasmtimeWasmBackend::new(config)?;
+        let backend = WasmtimeWasmBackend::new(config)
+            .map_err(AppServiceError::WasmBackendError)?;
 
         let ticker = EpochTicker(backend.clone());
         let factory = Self { backend };

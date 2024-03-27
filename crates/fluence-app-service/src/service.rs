@@ -43,7 +43,7 @@ pub struct AppService<WB: WasmBackend> {
     facade_module_name: String,
 }
 
-impl<WB: WasmBackend> AppService<WB> {
+impl<WB: WasmBackend> AppService<WB>{
     /// Create Service with given modules and service id.
     pub async fn new<C, S>(config: C, service_id: S, envs: HashMap<String, String>) -> Result<Self>
     where
