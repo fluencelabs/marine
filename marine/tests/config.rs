@@ -86,8 +86,8 @@ async fn wasi_mapped_dirs() {
     }
 }
 
-#[test]
-fn mapping_from_absolute_path_in_wasi_allowed() {
+#[tokio::test]
+async fn mapping_from_absolute_path_in_wasi_allowed() {
     let config_path = "tests/wasm_tests/wasi/MapFromAbsolutePath.toml";
     let raw_config = TomlMarineConfig::load(config_path).expect("Config must be loaded");
     let _result = Marine::with_raw_config(WasmtimeWasmBackend::new_async().unwrap(), raw_config)
