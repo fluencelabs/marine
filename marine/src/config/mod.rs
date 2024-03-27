@@ -31,5 +31,9 @@ pub use raw_marine_config::TomlWASIConfig;
 pub use raw_marine_config::TomlMarineConfig;
 pub use raw_marine_config::TomlMarineModuleConfig;
 
+// reexport toml types, so users don't have to directly depend on the same version of toml crate
+pub use toml::Value as TomlValue;
+pub use toml::value::Table as TomlValueTable;
+
 pub(crate) use to_marine_config::make_marine_config;
 pub(crate) use path_utils::as_relative_to_base;

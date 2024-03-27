@@ -43,6 +43,8 @@ pub use config::TomlMarineConfig;
 pub use config::TomlMarineModuleConfig;
 pub use config::TomlMarineNamedModuleConfig;
 pub use config::TomlWASIConfig;
+pub use config::TomlValue;
+pub use config::TomlValueTable;
 
 pub use errors::MarineError;
 
