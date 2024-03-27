@@ -45,6 +45,8 @@ pub use marine::WithContext;
 pub use marine::TomlMarineConfig;
 pub use marine::TomlMarineModuleConfig;
 pub use marine::TomlMarineNamedModuleConfig;
+pub use marine::TomlValue;
+pub use marine::TomlValueTable;
 pub use marine::TomlWASIConfig;
 
 pub use marine::MarineError;
@@ -64,6 +66,7 @@ pub use marine_min_it_version::min_sdk_version;
 pub use marine_min_it_version::min_it_version;
 
 pub use marine::CallParameters;
+pub use marine::ParticleParameters;
 pub use marine::SecurityTetraplet;
 
 pub mod generic {

@@ -1,0 +1,6 @@
+modules_dir = "./artifacts/"
+total_memory_limit = "10 MiB"
+
+[[module]]
+    name = "call_parameters_v2"
+

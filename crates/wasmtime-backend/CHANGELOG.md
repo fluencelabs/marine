@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.6.0](https://github.com/fluencelabs/marine/compare/marine-wasmtime-backend-v0.5.1...marine-wasmtime-backend-v0.6.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421))
+
+### Features
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421)) ([f54ca71](https://github.com/fluencelabs/marine/commit/f54ca715a362b51ca269c3882a0337b8d4390c3d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-wasm-backend-traits bumped from 0.5.1 to 0.6.0
+
 ## [0.5.1](https://github.com/fluencelabs/marine/compare/marine-wasmtime-backend-v0.5.0...marine-wasmtime-backend-v0.5.1) (2024-01-07)
 
 

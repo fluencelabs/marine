@@ -38,7 +38,6 @@ use std::path::PathBuf;
 pub struct ApiWasiConfig {
     pub envs: HashMap<String, String>,
     pub mapped_dirs: Option<HashMap<String, String>>,
-    pub preopened_files: Option<HashSet<String>>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -62,16 +61,6 @@ pub struct ApiServiceConfig {
 
 impl From<ApiWasiConfig> for MarineWASIConfig {
     fn from(value: ApiWasiConfig) -> Self {
-        let preopened_files = value
-            .preopened_files
-            .map(|preopened_files| {
-                preopened_files
-                    .into_iter()
-                    .map(Into::into)
-                    .collect::<HashSet<PathBuf>>()
-            })
-            .unwrap_or_default();
-
         let mapped_dirs = value
             .mapped_dirs
             .map(|mapped_dirs| {
@@ -84,7 +73,6 @@ impl From<ApiWasiConfig> for MarineWASIConfig {
 
         Self {
             envs: value.envs,
-            preopened_files,
             mapped_dirs,
         }
     }

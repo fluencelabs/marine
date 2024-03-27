@@ -30,7 +30,6 @@ use std::path::PathBuf;
 #[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct TomlAppServiceConfig {
     pub service_working_dir: Option<String>,
-    pub service_base_dir: Option<String>,
 
     #[serde(flatten)]
     pub toml_marine_config: TomlMarineConfig,
@@ -53,19 +52,13 @@ impl<WB: WasmBackend> TryInto<AppServiceConfig<WB>> for TomlAppServiceConfig {
     fn try_into(self) -> Result<AppServiceConfig<WB>> {
         let marine_config = self.toml_marine_config.try_into()?;
         let service_working_dir = match self.service_working_dir {
-            Some(service_base_dir) => PathBuf::from(service_base_dir),
-            // use tmp dir for service base dir if it isn't defined
-            None => std::env::temp_dir(),
-        };
-
-        let service_tmp_dir = match self.service_base_dir {
-            Some(tmp_dir) => PathBuf::from(tmp_dir),
-            None => service_working_dir.clone(),
+            Some(service_working_dir) => PathBuf::from(service_working_dir),
+            // use current dir for service base dir if it isn't defined
+            None => std::env::current_dir()?,
         };
 
         Ok(AppServiceConfig {
             service_working_dir,
-            service_base_dir: service_tmp_dir,
             marine_config,
         })
     }

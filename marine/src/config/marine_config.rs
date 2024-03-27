@@ -19,8 +19,6 @@ use marine_core::generic::HostImportDescriptor;
 use marine_core::HostAPIVersion;
 
 use std::collections::HashMap;
-use std::collections::HashSet;
-use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -124,57 +122,18 @@ impl<WB: WasmBackend> MarineModuleConfig<WB> {
             w @ None => {
                 *w = Some(MarineWASIConfig {
                     envs: new_envs,
-                    preopened_files: HashSet::new(),
                     mapped_dirs: HashMap::new(),
                 })
             }
         };
     }
 
-    pub fn extend_wasi_files(
-        &mut self,
-        new_preopened_files: HashSet<PathBuf>,
-        new_mapped_dirs: HashMap<String, PathBuf>,
-    ) {
-        match &mut self.wasi {
-            Some(MarineWASIConfig {
-                preopened_files,
-                mapped_dirs,
-                ..
-            }) => {
-                preopened_files.extend(new_preopened_files);
-                mapped_dirs.extend(new_mapped_dirs);
-            }
-            w @ None => {
-                *w = Some(MarineWASIConfig {
-                    envs: HashMap::new(),
-                    preopened_files: new_preopened_files,
-                    mapped_dirs: new_mapped_dirs,
-                })
-            }
-        };
-    }
-
     pub fn root_wasi_files_at(&mut self, root: &Path) {
-        // TODO: make all the security rules for paths configurable from outside
         match &mut self.wasi {
-            Some(MarineWASIConfig {
-                preopened_files,
-                mapped_dirs,
-                ..
-            }) => {
+            Some(MarineWASIConfig { mapped_dirs, .. }) => {
                 mapped_dirs.values_mut().for_each(|path| {
                     *path = root.join(&path);
                 });
-
-                let mapped_preopens = preopened_files.iter().map(|path| {
-                    let new_path = root.join(path);
-                    (path.to_string_lossy().into(), new_path)
-                });
-
-                mapped_dirs.extend(mapped_preopens);
-
-                preopened_files.clear();
             }
             None => {}
         }
@@ -185,10 +144,6 @@ impl<WB: WasmBackend> MarineModuleConfig<WB> {
 pub struct MarineWASIConfig {
     /// A list of environment variables available for this module.
     pub envs: HashMap<String, String>,
-
-    /// A list of files available for this module.
-    /// A loaded module could have access only to files from this list.
-    pub preopened_files: HashSet<PathBuf>,
 
     /// Mapping from a usually short to full file name.
     pub mapped_dirs: HashMap<String, PathBuf>,
@@ -202,8 +157,6 @@ use crate::MarineError;
 use crate::MarineResult;
 use crate::config::as_relative_to_base;
 use crate::config::raw_marine_config::MemoryLimit;
-
-use itertools::Itertools;
 
 use std::convert::TryFrom;
 use std::convert::TryInto;
@@ -293,24 +246,21 @@ impl<'c, WB: WasmBackend> TryFrom<WithContext<'c, TomlMarineModuleConfig>>
             })
             .collect::<Result<Vec<_>, Self::Error>>()?;
 
-        let mut host_cli_imports_v0 = HashMap::new();
-        let mut host_cli_imports_v1 = HashMap::new();
+        let mut host_imports = HashMap::from([
+            (HostAPIVersion::V0, HashMap::new()),
+            (HostAPIVersion::V1, HashMap::new()),
+            (HostAPIVersion::V2, HashMap::new()),
+            (HostAPIVersion::V3, HashMap::new()),
+        ]);
         for (import_name, host_cmd) in mounted_binaries {
             let host_cmd = as_relative_to_base(context.base_path.as_deref(), &host_cmd)?;
-            host_cli_imports_v0.insert(
-                import_name.clone(),
-                crate::host_imports::create_mounted_binary_import(host_cmd.clone()),
-            );
-            host_cli_imports_v1.insert(
-                import_name,
-                crate::host_imports::create_mounted_binary_import(host_cmd),
-            );
+            for (_, host_cli_imports) in &mut host_imports {
+                host_cli_imports.insert(
+                    import_name.clone(),
+                    crate::host_imports::create_mounted_binary_import(host_cmd.clone()),
+                );
+            }
         }
-
-        let host_imports = HashMap::from([
-            (HostAPIVersion::V0, host_cli_imports_v0),
-            (HostAPIVersion::V1, host_cli_imports_v1),
-        ]);
 
         let wasi = toml_config.wasi.map(|w| w.try_into()).transpose()?;
 
@@ -335,33 +285,12 @@ impl TryFrom<TomlWASIConfig> for MarineWASIConfig {
             Ok((elem.0, to))
         };
 
-        // Makes sure that no user-defined paths can be safely placed in an isolated directory
-        // TODO: make all the security rules for paths configurable from outside
-        let check_path = |path: PathBuf| -> Result<PathBuf, Self::Error> {
-            if path.is_absolute() {
-                return Err(MarineError::InvalidConfig(format!(
-                    "Absolute paths are not supported in WASI section: {}",
-                    path.display()
-                )));
-            }
-
-            if path.components().contains(&Component::ParentDir) {
-                return Err(MarineError::InvalidConfig(format!(
-                    "Paths containing \"..\" are not supported in WASI section: {}",
-                    path.display()
-                )));
-            }
-
-            Ok(path)
-        };
-
         let to_path = |elem: (String, toml::Value)| -> Result<(String, PathBuf), Self::Error> {
             let to = elem
                 .1
                 .try_into::<PathBuf>()
                 .map_err(MarineError::ParseConfigError)?;
 
-            let to = check_path(to)?;
             Ok((elem.0, to))
         };
 
@@ -371,22 +300,12 @@ impl TryFrom<TomlWASIConfig> for MarineWASIConfig {
             .map(to_string)
             .collect::<Result<HashMap<_, _>, _>>()?;
 
-        let preopened_files = toml_config.preopened_files.unwrap_or_default();
-        let preopened_files = preopened_files
-            .into_iter()
-            .map(check_path)
-            .collect::<Result<HashSet<_>, _>>()?;
-
         let mapped_dirs = toml_config.mapped_dirs.unwrap_or_default();
         let mapped_dirs = mapped_dirs
             .into_iter()
             .map(to_path)
             .collect::<Result<HashMap<_, _>, _>>()?;
 
-        Ok(MarineWASIConfig {
-            envs,
-            preopened_files,
-            mapped_dirs,
-        })
+        Ok(MarineWASIConfig { envs, mapped_dirs })
     }
 }

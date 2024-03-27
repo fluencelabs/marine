@@ -1,6 +1,6 @@
 [package]
 name = "marine-js-backend"
-version = "0.3.2"
+version = "0.3.3"
 edition = "2021"
 description = "Fluence Marine Wasm backend interface implementation for JS environment"
 authors = ["Fluence Labs"]
@@ -8,7 +8,7 @@ repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 
 [dependencies]
-marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.5.1" }
+marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.6.0" }
 it-memory-traits = "0.5.0"
 
 wasm-bindgen = "0.2.84"

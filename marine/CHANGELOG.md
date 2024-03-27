@@ -13,6 +13,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * marine-core bumped from 0.20.1 to 0.20.2
     * marine-wasmtime-backend bumped from 0.2.0 to 0.2.1
 
+## [0.36.2](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.36.1...marine-runtime-v0.36.2) (2024-03-27)
+
+
+### Features
+
+* **deps:** reexport types from toml crate, so users don't have to depend on it ([#427](https://github.com/fluencelabs/marine/issues/427)) ([ee39ce0](https://github.com/fluencelabs/marine/commit/ee39ce07bcab85f92d1978e00e244e19577a6b01))
+
+## [0.36.1](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.36.0...marine-runtime-v0.36.1) (2024-02-29)
+
+
+### Bug Fixes
+
+* **host imports:** add mounted binaries for __marine_host_api_v3 ([#424](https://github.com/fluencelabs/marine/issues/424)) ([2ab2011](https://github.com/fluencelabs/marine/commit/2ab2011610775bda047663c624e434d966744ff0))
+
+
+## [0.36.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.35.0...marine-runtime-v0.36.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421))
+
+### Features
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421)) ([f54ca71](https://github.com/fluencelabs/marine/commit/f54ca715a362b51ca269c3882a0337b8d4390c3d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-core bumped from 0.29.0 to 0.30.0
+    * marine-wasm-backend-traits bumped from 0.5.1 to 0.6.0
+    * marine-wasmtime-backend bumped from 0.5.1 to 0.6.0
+
+## [0.35.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.34.0...marine-runtime-v0.35.0) (2024-02-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* support marine-rs-sdk 0.14
+
+### Features
+
+* support marine-rs-sdk 0.14 ([b20a27f](https://github.com/fluencelabs/marine/commit/b20a27f8b64733f3300afc8e4b5409337dc860aa))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-core bumped from 0.28.0 to 0.29.0
+
+## [0.34.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.33.0...marine-runtime-v0.34.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417))
+
+### Features
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417)) ([220c028](https://github.com/fluencelabs/marine/commit/220c02804567ef1c00ac8e02e08d4bbadd97bfd3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-core bumped from 0.27.0 to 0.28.0
+
 ## [0.33.0](https://github.com/fluencelabs/marine/compare/marine-runtime-v0.32.2...marine-runtime-v0.33.0) (2024-02-08)
 
 

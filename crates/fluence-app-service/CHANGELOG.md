@@ -31,6 +31,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-runtime bumped from 0.32.2 to 0.33.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-runtime bumped from 0.34.0 to 0.35.0
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-runtime bumped from 0.36.0 to 0.36.1
+
+## [0.35.2](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.35.1...fluence-app-service-v0.35.2) (2024-03-27)
+
+
+### Features
+
+* **deps:** reexport types from toml crate, so users don't have to depend on it ([#427](https://github.com/fluencelabs/marine/issues/427)) ([ee39ce0](https://github.com/fluencelabs/marine/commit/ee39ce07bcab85f92d1978e00e244e19577a6b01))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-runtime bumped from 0.36.1 to 0.36.2
+
+## [0.35.0](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.34.0...fluence-app-service-v0.35.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421))
+
+### Features
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421)) ([f54ca71](https://github.com/fluencelabs/marine/commit/f54ca715a362b51ca269c3882a0337b8d4390c3d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-runtime bumped from 0.35.0 to 0.36.0
+    * marine-wasm-backend-traits bumped from 0.5.1 to 0.6.0
+    * marine-wasmtime-backend bumped from 0.5.1 to 0.6.0
+
+## [0.33.0](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.32.0...fluence-app-service-v0.33.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417))
+
+### Features
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417)) ([220c028](https://github.com/fluencelabs/marine/commit/220c02804567ef1c00ac8e02e08d4bbadd97bfd3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-runtime bumped from 0.33.0 to 0.34.0
+
 ## [0.31.1](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.31.0...fluence-app-service-v0.31.1) (2024-01-07)
 
 

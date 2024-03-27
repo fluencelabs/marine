@@ -8,6 +8,32 @@
   * dependencies
     * marine-wasm-backend-traits bumped from 0.2.1 to 0.3.0
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-wasm-backend-traits bumped from 0.5.1 to 0.6.0
+
+## [0.14.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.13.0...marine-module-info-parser-v0.14.0) (2024-02-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* support marine-rs-sdk 0.14
+
+### Features
+
+* support marine-rs-sdk 0.14 ([b20a27f](https://github.com/fluencelabs/marine/commit/b20a27f8b64733f3300afc8e4b5409337dc860aa))
+
+## [0.13.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.12.0...marine-module-info-parser-v0.13.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417))
+
+### Features
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417)) ([220c028](https://github.com/fluencelabs/marine/commit/220c02804567ef1c00ac8e02e08d4bbadd97bfd3))
+
 ## [0.12.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.11.2...marine-module-info-parser-v0.12.0) (2024-02-08)
 
 

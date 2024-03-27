@@ -43,6 +43,8 @@ pub use config::TomlMarineConfig;
 pub use config::TomlMarineModuleConfig;
 pub use config::TomlMarineNamedModuleConfig;
 pub use config::TomlWASIConfig;
+pub use config::TomlValue;
+pub use config::TomlValueTable;
 
 pub use errors::MarineError;
 
@@ -65,6 +67,7 @@ pub use marine_core::ne_vec;
 pub use marine_module_interface::interface::itype_text_view;
 
 pub use marine_rs_sdk::CallParameters;
+pub use marine_rs_sdk::ParticleParameters;
 pub use marine_rs_sdk::SecurityTetraplet;
 
 pub mod generic {

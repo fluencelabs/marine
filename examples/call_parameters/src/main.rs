@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use marine_rs_sdk::CallParameters;
 #[cfg(target_arch = "wasm32")]
 use marine_rs_sdk::marine;
 #[cfg(target_arch = "wasm32")]
@@ -26,16 +27,6 @@ pub fn main() {}
 
 #[marine]
 #[cfg(target_arch = "wasm32")]
-pub fn call_parameters() -> String {
-    let cp = marine_rs_sdk::get_call_parameters();
-    format!(
-        "{}\n{}\n{}\n{}\n{}\n{}\n{:?}",
-        cp.init_peer_id,
-        cp.service_id,
-        cp.service_creator_peer_id,
-        cp.host_id,
-        cp.worker_id,
-        cp.particle_id,
-        cp.tetraplets
-    )
+pub fn call_parameters() -> CallParameters {
+    marine_rs_sdk::get_call_parameters()
 }

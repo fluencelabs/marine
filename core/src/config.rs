@@ -23,7 +23,6 @@ use marine_wasm_backend_traits::WasmBackend;
 
 use std::path::PathBuf;
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::sync::Arc;
 
 pub type ErrorHandler =
@@ -57,6 +56,8 @@ pub struct HostImportDescriptor<WB: WasmBackend> {
 pub enum HostAPIVersion {
     V0,
     V1,
+    V2,
+    V3,
 }
 
 impl HostAPIVersion {
@@ -65,6 +66,8 @@ impl HostAPIVersion {
         match self {
             Self::V0 => "host",
             Self::V1 => "__marine_host_api_v1",
+            Self::V2 => "__marine_host_api_v2",
+            Self::V3 => "__marine_host_api_v3",
         }
     }
 }
@@ -76,7 +79,7 @@ pub struct MModuleConfig<WB: WasmBackend> {
     /// Imports from the host side that will be used in module instantiation process.
     pub host_imports: HashMap<HostAPIVersion, HashMap<String, HostImportDescriptor<WB>>>,
 
-    /// WASI parameters: env variables, mapped dirs, preopened files and args
+    /// WASI parameters: env variables, mapped dirs, and args
     pub wasi_parameters: WasiParameters,
 }
 
@@ -97,11 +100,6 @@ impl<WB: WasmBackend> Default for MModuleConfig<WB> {
 impl<WB: WasmBackend> MModuleConfig<WB> {
     pub fn with_wasi_envs(mut self, envs: HashMap<String, String>) -> Self {
         self.wasi_parameters.envs = envs;
-        self
-    }
-
-    pub fn with_wasi_preopened_files(mut self, preopened_files: HashSet<PathBuf>) -> Self {
-        self.wasi_parameters.preopened_files = preopened_files;
         self
     }
 

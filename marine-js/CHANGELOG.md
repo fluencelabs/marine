@@ -20,6 +20,50 @@
 
 
 
+
+
+
+
+## [0.13.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.12.0...marine-js-v0.13.0) (2024-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421))
+
+### Features
+
+* rework wasi mapped dirs handing, relax restrictions ([#421](https://github.com/fluencelabs/marine/issues/421)) ([f54ca71](https://github.com/fluencelabs/marine/commit/f54ca715a362b51ca269c3882a0337b8d4390c3d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-js-backend bumped from 0.3.2 to 0.3.3
+
+## [0.12.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.11.0...marine-js-v0.12.0) (2024-02-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* support marine-rs-sdk 0.14
+
+### Features
+
+* support marine-rs-sdk 0.14 ([b20a27f](https://github.com/fluencelabs/marine/commit/b20a27f8b64733f3300afc8e4b5409337dc860aa))
+
+## [0.11.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.10.0...marine-js-v0.11.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417))
+
+### Features
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417)) ([220c028](https://github.com/fluencelabs/marine/commit/220c02804567ef1c00ac8e02e08d4bbadd97bfd3))
+
 ## [0.10.0](https://github.com/fluencelabs/marine/compare/marine-js-v0.9.2...marine-js-v0.10.0) (2024-02-08)
 
 

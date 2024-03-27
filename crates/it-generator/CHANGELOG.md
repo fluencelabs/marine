@@ -4,6 +4,32 @@
   * dependencies
     * marine-it-parser bumped from 0.12.1 to 0.12.2
 
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-it-parser bumped from 0.15.1 to 0.15.2
+
+## [0.16.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.15.0...marine-it-generator-v0.16.0) (2024-02-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* support marine-rs-sdk 0.14
+
+### Features
+
+* support marine-rs-sdk 0.14 ([b20a27f](https://github.com/fluencelabs/marine/commit/b20a27f8b64733f3300afc8e4b5409337dc860aa))
+
+## [0.15.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.14.0...marine-it-generator-v0.15.0) (2024-02-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417))
+
+### Features
+
+* support particle parameters in CallParameters (__marine_host_api_v2) ([#417](https://github.com/fluencelabs/marine/issues/417)) ([220c028](https://github.com/fluencelabs/marine/commit/220c02804567ef1c00ac8e02e08d4bbadd97bfd3))
+
 ## [0.14.0](https://github.com/fluencelabs/marine/compare/marine-it-generator-v0.13.1...marine-it-generator-v0.14.0) (2024-02-08)
 
 
