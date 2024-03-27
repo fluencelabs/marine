@@ -90,9 +90,15 @@ impl<WB: WasmBackend> MModuleConfigBuilder<WB> {
             None => return Ok(self),
         };
 
-        self.config.wasi_parameters.envs = wasi.envs;
+        self.config
+            .wasi_parameters
+            .envs
+            .extend(wasi.envs.into_iter());
 
-        self.config.wasi_parameters.mapped_dirs = wasi.mapped_dirs;
+        self.config
+            .wasi_parameters
+            .mapped_dirs
+            .extend(wasi.mapped_dirs.into_iter());
 
         // create environment variables for all mapped directories
         let mapped_dirs = self
