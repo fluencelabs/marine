@@ -39,6 +39,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-runtime bumped from 0.36.0 to 0.36.1
 
+## [0.35.2](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.35.1...fluence-app-service-v0.35.2) (2024-03-27)
+
+
+### Features
+
+* **deps:** reexport types from toml crate, so users don't have to depend on it ([#427](https://github.com/fluencelabs/marine/issues/427)) ([ee39ce0](https://github.com/fluencelabs/marine/commit/ee39ce07bcab85f92d1978e00e244e19577a6b01))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * marine-runtime bumped from 0.36.1 to 0.36.2
+
 ## [0.35.0](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.34.0...fluence-app-service-v0.35.0) (2024-02-22)
 
 
