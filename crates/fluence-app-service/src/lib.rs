@@ -50,6 +50,7 @@ pub use marine::TomlValueTable;
 pub use marine::TomlWASIConfig;
 
 pub use marine::MarineError;
+pub use marine::MError;
 
 pub use marine::IValue;
 pub use marine::IRecordType;
