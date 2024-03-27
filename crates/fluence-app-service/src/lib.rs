@@ -49,6 +49,8 @@ pub use marine::MarineWASIConfig;
 pub use marine::TomlMarineConfig;
 pub use marine::TomlMarineModuleConfig;
 pub use marine::TomlMarineNamedModuleConfig;
+pub use marine::TomlValue;
+pub use marine::TomlValueTable;
 pub use marine::TomlWASIConfig;
 pub use marine::ModuleDescriptor;
 
