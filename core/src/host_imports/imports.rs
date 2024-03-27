@@ -35,6 +35,9 @@ use it_lilo::lifter::ILifter;
 use it_lilo::lowerer::ILowerer;
 use it_memory_traits::Memory as ITMemory;
 
+use futures::future::BoxFuture;
+use futures::FutureExt;
+
 use std::sync::Arc;
 
 pub(crate) fn create_host_import_func<WB: WasmBackend>(
@@ -46,36 +49,28 @@ pub(crate) fn create_host_import_func<WB: WasmBackend>(
     let raw_output =
         itypes_output_to_wtypes(&output_type_to_types(descriptor.output_type.as_ref()));
 
-    let func = move |call_context: <WB as WasmBackend>::ImportCallContext<'_>,
-                     inputs: &[WValue]|
-          -> anyhow::Result<Vec<WValue>> {
-        Ok(call_host_import(
-            call_context,
-            inputs,
-            &descriptor,
-            record_types.clone(),
-        ))
-    };
+    let descriptor = Arc::new(descriptor);
+    let func = create_host_import_closure(descriptor, record_types);
 
-    <WB as WasmBackend>::HostFunction::new_with_caller(
+    <WB as WasmBackend>::HostFunction::new_with_caller_async(
         &mut store.as_context_mut(),
         FuncSig::new(raw_args, raw_output),
         func,
     )
 }
 
-fn call_host_import<WB: WasmBackend>(
-    mut caller: <WB as WasmBackend>::ImportCallContext<'_>,
-    inputs: &[WValue],
-    descriptor: &HostImportDescriptor<WB>,
+async fn call_host_import<'args, WB: WasmBackend>(
+    mut caller: <WB as WasmBackend>::ImportCallContext<'args>,
+    inputs: &'args [WValue],
+    descriptor: Arc<HostImportDescriptor<WB>>,
     record_types: Arc<MRecordTypes>,
-) -> Vec<WValue> {
+) -> anyhow::Result<Vec<WValue>> {
     let HostImportDescriptor {
         host_exported_func,
         argument_types,
         error_handler,
         ..
-    } = descriptor;
+    } = descriptor.as_ref();
 
     let memory = caller
         .memory(STANDARD_MEMORY_INDEX)
@@ -98,7 +93,7 @@ fn call_host_import<WB: WasmBackend>(
         }
     };
 
-    lower_outputs::<WB>(&mut caller, memory, output)
+    Ok(lower_outputs::<WB>(caller, memory, output).await)
 }
 
 fn lift_inputs<WB: WasmBackend>(
@@ -119,8 +114,8 @@ fn lift_inputs<WB: WasmBackend>(
     )
 }
 
-fn lower_outputs<WB: WasmBackend>(
-    caller: &mut <WB as WasmBackend>::ImportCallContext<'_>,
+async fn lower_outputs<WB: WasmBackend>(
+    mut caller: <WB as WasmBackend>::ImportCallContext<'_>,
     memory: <WB as WasmBackend>::Memory,
     output: Option<IValue>,
 ) -> Vec<WValue> {
@@ -136,13 +131,16 @@ fn lower_outputs<WB: WasmBackend>(
     let is_record = matches!(&output, Some(IValue::Record(_)));
 
     let memory_view = memory.view();
-    let mut lo_helper = LoHelper::new(&mut allocate_func, memory);
-    let lowering_result =
+    let mut lo_helper = LoHelper::new(allocate_func.clone(), memory);
+    let lowerer =
         ILowerer::<'_, _, _, DelayedContextLifetime<WB>>::new(memory_view, &mut lo_helper)
-            .map_err(HostImportError::LowererError)
-            .and_then(|mut lowerer| {
-                ivalue_to_wvalues(&mut caller.as_context_mut(), &mut lowerer, output)
-            });
+            .map_err(HostImportError::LowererError);
+    let lowering_result = match lowerer {
+        Ok(mut lowerer) => {
+            ivalue_to_wvalues(&mut caller.as_context_mut(), &mut lowerer, output).await
+        }
+        Err(e) => Err(e),
+    };
 
     let wvalues = match lowering_result {
         Ok(wvalues) => wvalues,
@@ -153,8 +151,10 @@ fn lower_outputs<WB: WasmBackend>(
             init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
             init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
 
-            call_wasm_func!(set_result_ptr_func, &mut caller.as_context_mut(), 0);
-            call_wasm_func!(set_result_size_func, &mut caller.as_context_mut(), 0);
+            let mut store_ctx = caller.as_context_mut();
+            call_wasm_func!(set_result_ptr_func, &mut store_ctx, 0);
+            call_wasm_func!(set_result_size_func, &mut store_ctx, 0);
+
             return vec![WValue::I32(0)];
         }
     };
@@ -167,14 +167,15 @@ fn lower_outputs<WB: WasmBackend>(
             init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 4);
             init_wasm_func!(set_result_size_func, caller, i32, (), SET_SIZE_FUNC_NAME, 4);
 
+            let mut store_ctx = caller.as_context_mut();
             call_wasm_func!(
                 set_result_ptr_func,
-                &mut caller.as_context_mut(),
+                &mut store_ctx,
                 wvalues[0].to_u128() as _
             );
             call_wasm_func!(
                 set_result_size_func,
-                &mut caller.as_context_mut(),
+                &mut store_ctx,
                 wvalues[1].to_u128() as _
             );
             vec![]
@@ -184,9 +185,10 @@ fn lower_outputs<WB: WasmBackend>(
         1 if is_record => {
             init_wasm_func!(set_result_ptr_func, caller, i32, (), SET_PTR_FUNC_NAME, 3);
 
+            let mut store_ctx = caller.as_context_mut();
             call_wasm_func!(
                 set_result_ptr_func,
-                &mut caller.as_context_mut(),
+                &mut store_ctx,
                 wvalues[0].to_u128() as _
             );
 
@@ -217,4 +219,24 @@ fn default_error_handler(err: &HostImportError) -> Option<crate::IValue> {
         "an error is occurred while lifting values to interface values: {}",
         err
     )
+}
+
+fn create_host_import_closure<WB: WasmBackend>(
+    descriptor: Arc<HostImportDescriptor<WB>>,
+    record_types: Arc<MRecordTypes>,
+) -> impl for<'args> Fn(
+    <WB as WasmBackend>::ImportCallContext<'args>,
+    &'args [WValue],
+) -> BoxFuture<'args, anyhow::Result<Vec<WValue>>>
+       + Send
+       + Sync {
+    move |call_context, inputs| {
+        call_host_import(
+            call_context,
+            inputs,
+            descriptor.clone(),
+            record_types.clone(),
+        )
+        .boxed()
+    }
 }

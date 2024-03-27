@@ -36,7 +36,8 @@ impl JsMemory {
     }
 }
 
-// this is safe because its intended to run in single thread
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
 unsafe impl Send for JsMemory {}
 unsafe impl Sync for JsMemory {}
 

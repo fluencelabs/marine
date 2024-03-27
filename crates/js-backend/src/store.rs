@@ -28,6 +28,11 @@ pub struct JsStore {
     pub(crate) inner: Box<JsStoreInner>,
 }
 
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
+unsafe impl Send for JsStore {}
+unsafe impl Sync for JsStore {}
+
 #[derive(Default)]
 pub(crate) struct JsStoreInner {
     pub(crate) wasi_contexts: TiVec<WasiContextHandle, WasiContext>,
@@ -70,6 +75,11 @@ pub struct JsContext<'c> {
     pub(crate) inner: &'c JsStoreInner,
 }
 
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
+unsafe impl<'c> Send for JsContext<'c> {}
+unsafe impl<'c> Sync for JsContext<'c> {}
+
 impl<'c> JsContext<'c> {
     pub(crate) fn new(inner: &'c JsStoreInner) -> Self {
         Self { inner }
@@ -89,6 +99,11 @@ impl<'c> JsContext<'c> {
 pub struct JsContextMut<'c> {
     pub(crate) inner: &'c mut JsStoreInner,
 }
+
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
+unsafe impl<'c> Send for JsContextMut<'c> {}
+unsafe impl<'c> Sync for JsContextMut<'c> {}
 
 impl JsContextMut<'_> {
     pub(crate) fn from_raw_ptr(store_inner: *mut JsStoreInner) -> Self {

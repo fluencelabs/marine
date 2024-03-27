@@ -47,7 +47,7 @@ export class MarineService {
     async init(): Promise<void> {
         const controlModuleInstance = await init(this.controlModule);
 
-        controlModuleInstance.register_module(this.serviceConfig, this.modules, this.logFunction);
+        await controlModuleInstance.register_module(this.serviceConfig, this.modules, this.logFunction);
         this._controlModuleInstance = controlModuleInstance;
     }
 
@@ -55,7 +55,7 @@ export class MarineService {
         this._controlModuleInstance = 'not-set';
     }
 
-    call(functionName: string, args: JSONArray | JSONObject, callParams: CallParameters): JSONValue {
+    async call(functionName: string, args: JSONArray | JSONObject, callParams: CallParameters): Promise<JSONValue> {
         if (this._controlModuleInstance === 'not-set') {
             throw new Error('Not initialized');
         }
@@ -67,7 +67,7 @@ export class MarineService {
         // facade module is the last module of the service
         const facade_name = this.serviceConfig.modules_config[this.serviceConfig.modules_config.length - 1].import_name;
         const argsString = JSON.stringify(args);
-        const rawRes = this._controlModuleInstance.call_module(facade_name, functionName, argsString, callParams);
+        const rawRes = await this._controlModuleInstance.call_module(facade_name, functionName, argsString, callParams);
         return JSON.parse(rawRes);
     }
 }

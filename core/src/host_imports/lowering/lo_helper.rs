@@ -15,7 +15,6 @@
  */
 
 use super::AllocateFunc;
-use crate::call_wasm_func;
 
 use marine_wasm_backend_traits::DelayedContextLifetime;
 use marine_wasm_backend_traits::WasmBackend;
@@ -25,27 +24,28 @@ use it_lilo::traits::AllocatableError;
 use it_memory_traits::MemoryView;
 use it_memory_traits::Memory;
 
+use futures::future::BoxFuture;
+use futures::FutureExt;
+
 use std::marker::PhantomData;
 
 pub(crate) struct LoHelper<
-    'c,
     WB: WasmBackend,
     MV: MemoryView<DelayedContextLifetime<WB>>,
     M: Memory<MV, DelayedContextLifetime<WB>>,
 > {
-    allocate_func: &'c mut AllocateFunc<WB>,
+    allocate_func: AllocateFunc<WB>,
     memory: M,
     _memory_view_phantom: PhantomData<MV>,
 }
 
 impl<
-        'c,
         WB: WasmBackend,
         MV: MemoryView<DelayedContextLifetime<WB>>,
         M: Memory<MV, DelayedContextLifetime<WB>>,
-    > LoHelper<'c, WB, MV, M>
+    > LoHelper<WB, MV, M>
 {
-    pub(crate) fn new(allocate_func: &'c mut AllocateFunc<WB>, memory: M) -> Self {
+    pub(crate) fn new(allocate_func: AllocateFunc<WB>, memory: M) -> Self {
         Self {
             allocate_func,
             memory,
@@ -55,19 +55,25 @@ impl<
 }
 
 impl<
-        's,
         WB: WasmBackend,
         MV: MemoryView<DelayedContextLifetime<WB>>,
         M: Memory<MV, DelayedContextLifetime<WB>>,
-    > Allocatable<MV, DelayedContextLifetime<WB>> for LoHelper<'s, WB, MV, M>
+    > Allocatable<MV, DelayedContextLifetime<WB>> for LoHelper<WB, MV, M>
 {
-    fn allocate(
-        &mut self,
-        store: &mut <WB as WasmBackend>::ContextMut<'_>,
+    fn allocate<'this, 'store: 'this, 'ctx: 'this>(
+        &'this mut self,
+        store: &'store mut <WB as WasmBackend>::ContextMut<'ctx>,
         size: u32,
         type_tag: u32,
-    ) -> Result<(u32, MV), AllocatableError> {
-        let offset = call_wasm_func!(self.allocate_func, store, size as _, type_tag as _);
-        Ok((offset as u32, self.memory.view()))
+    ) -> BoxFuture<'this, Result<(u32, MV), AllocatableError>> {
+        async move {
+            let offset = (self.allocate_func)(store, (size as _, type_tag as _))
+                .await
+                .map_err(|e| AllocatableError::AllocateCallFailed {
+                    reason: anyhow::anyhow!(e),
+                })?;
+            Ok((offset as u32, self.memory.view()))
+        }
+        .boxed()
     }
 }

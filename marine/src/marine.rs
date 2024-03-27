@@ -33,11 +33,10 @@ use marine_wasm_backend_traits::WasmBackend;
 #[cfg(feature = "raw-module-api")]
 use marine_wasm_backend_traits::WasiState;
 
-use marine_core::INFINITE_MEMORY_LIMIT;
 use marine_core::MError;
 use marine_core::generic::MarineCore;
 use marine_core::IFunctionArg;
-use marine_core::MarineCoreConfigBuilder;
+use marine_core::MarineCoreConfig;
 use marine_core::MRecordTypes;
 use marine_utils::SharedString;
 use marine_rs_sdk::CallParameters;
@@ -78,7 +77,7 @@ pub struct Marine<WB: WasmBackend> {
 
 impl<WB: WasmBackend> Marine<WB> {
     /// Creates Marine from config deserialized from TOML.
-    pub fn with_raw_config<C>(config: C) -> MarineResult<Self>
+    pub async fn with_raw_config<C>(backend: WB, config: C) -> MarineResult<Self>
     where
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
@@ -92,19 +91,21 @@ impl<WB: WasmBackend> Marine<WB> {
             })
             .collect::<MarineResult<HashMap<String, PathBuf>>>()?;
 
-        Self::with_module_names::<MarineConfig<WB>>(&modules, config)
+        Self::with_module_names::<MarineConfig<WB>>(backend, &modules, config).await
     }
 
     /// Creates Marine with given modules.
-    pub fn with_modules<C>(mut modules: HashMap<String, Vec<u8>>, config: C) -> MarineResult<Self>
+    pub async fn with_modules<C>(
+        backend: WB,
+        mut modules: HashMap<String, Vec<u8>>,
+        config: C,
+    ) -> MarineResult<Self>
     where
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
     {
         let config = config.try_into()?;
-        let core_config = MarineCoreConfigBuilder::new()
-            .total_memory_limit(config.total_memory_limit.unwrap_or(INFINITE_MEMORY_LIMIT))
-            .build();
+        let core_config = MarineCoreConfig::new(backend, config.total_memory_limit);
         let mut marine = MarineCore::new(core_config)?;
         let call_parameters_v0 = Arc::<Mutex<marine_call_parameters_v0::CallParameters>>::default();
         let call_parameters_v1 = Arc::<Mutex<marine_call_parameters_v1::CallParameters>>::default();
@@ -138,6 +139,7 @@ impl<WB: WasmBackend> Marine<WB> {
 
             marine
                 .load_module(module.import_name, &module_bytes, marine_module_config)
+                .await
                 .map_err(|e| check_for_oom_and_convert_error(&marine, e))?;
         }
 
@@ -152,7 +154,11 @@ impl<WB: WasmBackend> Marine<WB> {
     }
 
     /// Searches for modules in `config.modules_dir`, loads only those in the `names` set
-    pub fn with_module_names<C>(names: &HashMap<String, PathBuf>, config: C) -> MarineResult<Self>
+    pub async fn with_module_names<C>(
+        backend: WB,
+        names: &HashMap<String, PathBuf>,
+        config: C,
+    ) -> MarineResult<Self>
     where
         C: TryInto<MarineConfig<WB>>,
         MarineError: From<C::Error>,
@@ -160,11 +166,11 @@ impl<WB: WasmBackend> Marine<WB> {
         let config = config.try_into()?;
         let modules = load_modules_from_fs(names)?;
 
-        Self::with_modules::<MarineConfig<WB>>(modules, config)
+        Self::with_modules::<MarineConfig<WB>>(backend, modules, config).await
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub fn call_with_ivalues(
+    pub async fn call_with_ivalues_async(
         &mut self,
         module_name: impl AsRef<str>,
         func_name: impl AsRef<str>,
@@ -175,7 +181,8 @@ impl<WB: WasmBackend> Marine<WB> {
 
         let result = self
             .core
-            .call(module_name, func_name, args)
+            .call_async(module_name, func_name, args)
+            .await
             .map_err(|e| check_for_oom_and_convert_error(&self.core, e))?;
 
         self.core.clear_allocation_stats();
@@ -184,7 +191,7 @@ impl<WB: WasmBackend> Marine<WB> {
     }
 
     /// Call a specified function of loaded on a startup module by its name.
-    pub fn call_with_json(
+    pub async fn call_with_json_async(
         &mut self,
         module_name: impl AsRef<str>,
         func_name: impl AsRef<str>,
@@ -213,7 +220,8 @@ impl<WB: WasmBackend> Marine<WB> {
 
         let result = self
             .core
-            .call(module_name, func_name, &iargs)
+            .call_async(module_name, func_name, &iargs)
+            .await
             .map_err(|e| check_for_oom_and_convert_error(&self.core, e))?;
 
         self.core.clear_allocation_stats();
@@ -320,7 +328,7 @@ impl<WB: WasmBackend> Marine<WB> {
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
 impl<WB: WasmBackend> Marine<WB> {
-    pub fn load_module<C, S>(
+    pub async fn load_module<C, S>(
         &mut self,
         name: S,
         wasm_bytes: &[u8],
@@ -349,6 +357,7 @@ impl<WB: WasmBackend> Marine<WB> {
         )?;
         self.core
             .load_module(name, wasm_bytes, marine_module_config)
+            .await
             .map_err(|e| check_for_oom_and_convert_error(&self.core, e))
     }
 

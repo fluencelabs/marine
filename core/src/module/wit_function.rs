@@ -29,6 +29,8 @@ use marine_wasm_backend_traits::ExportFunction;
 use wasmer_it::interpreter::wasm;
 
 use anyhow::anyhow;
+use futures::future::BoxFuture;
+use futures::FutureExt;
 
 use std::sync::Arc;
 
@@ -137,29 +139,34 @@ impl<WB: WasmBackend> wasm::structures::LocalImport<DelayedContextLifetime<WB>>
         &self.outputs
     }
 
-    fn call(
-        &self,
-        store: &mut <WB as WasmBackend>::ContextMut<'_>,
-        arguments: &[IValue],
-    ) -> std::result::Result<Vec<IValue>, anyhow::Error> {
-        use super::type_converters::wval_to_ival;
-        use super::type_converters::ival_to_wval;
-        match &self.inner {
-            WITFunctionInner::Export { func, .. } => func
-                .as_ref()
-                .call(
-                    store,
-                    arguments
-                        .iter()
-                        .map(ival_to_wval)
-                        .collect::<Vec<WValue>>()
-                        .as_slice(),
-                )
-                .map_err(|e| anyhow!(e))
-                .map(|results| results.iter().map(wval_to_ival).collect()),
-            WITFunctionInner::Import { callable, .. } => Arc::make_mut(&mut callable.clone())
-                .call(store, arguments)
-                .map_err(|e| anyhow!(e)),
+    fn call_async<'args>(
+        &'args self,
+        store: &'args mut <WB as WasmBackend>::ContextMut<'_>,
+        arguments: &'args [IValue],
+    ) -> BoxFuture<'args, anyhow::Result<Vec<IValue>>> {
+        async move {
+            use super::type_converters::wval_to_ival;
+            use super::type_converters::ival_to_wval;
+            match &self.inner {
+                WITFunctionInner::Export { func, .. } => func
+                    .as_ref()
+                    .call_async(
+                        store,
+                        arguments
+                            .iter()
+                            .map(ival_to_wval)
+                            .collect::<Vec<WValue>>()
+                            .as_slice(),
+                    )
+                    .await
+                    .map_err(|e| anyhow!(e))
+                    .map(|results| results.iter().map(wval_to_ival).collect()),
+                WITFunctionInner::Import { callable, .. } => Arc::make_mut(&mut callable.clone())
+                    .call_async(store, arguments)
+                    .await
+                    .map_err(|e| anyhow!(e)),
+            }
         }
+        .boxed()
     }
 }

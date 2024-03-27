@@ -35,6 +35,9 @@ use marine_it_parser::extract_it_from_module;
 use marine_utils::SharedString;
 use wasmer_it::interpreter::Interpreter;
 
+use futures::future::BoxFuture;
+use futures::FutureExt;
+
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::mem::MaybeUninit;
@@ -67,7 +70,7 @@ pub(super) struct Callable<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> Callable<WB> {
-    pub fn call(
+    pub async fn call_async(
         &mut self,
         store: &mut <WB as WasmBackend>::ContextMut<'_>,
         args: &[IValue],
@@ -77,7 +80,8 @@ impl<WB: WasmBackend> Callable<WB> {
         let result = self
             .it_module_func
             .interpreter
-            .run(args, Arc::make_mut(&mut self.it_instance), store)?
+            .run(args, Arc::make_mut(&mut self.it_instance), store)
+            .await?
             .as_slice()
             .to_owned();
         Ok(result)
@@ -97,7 +101,7 @@ pub(crate) struct MModule<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> MModule<WB> {
-    pub(crate) fn new(
+    pub(crate) async fn new(
         name: &str,
         store: &mut <WB as WasmBackend>::Store,
         wasm_bytes: &[u8],
@@ -126,7 +130,7 @@ impl<WB: WasmBackend> MModule<WB> {
         Self::add_wasi_imports(store, &mut linker, wasi_parameters)?;
         Self::add_host_imports(store, &mut linker, raw_imports, host_imports, &mit)?;
 
-        let wasm_instance = wasm_module.instantiate(store, &linker)?;
+        let wasm_instance = wasm_module.instantiate(store, &linker).await?;
         let it_instance = unsafe {
             // TODO: check if this MaybeUninit/Arc tricks are still needed
             // get_mut_unchecked here is safe because currently only this modules have reference to
@@ -142,12 +146,12 @@ impl<WB: WasmBackend> MModule<WB> {
         // call _initialize to populate the WASI state of the module
         #[rustfmt::skip]
         if let Ok(initialize_func) = wasm_instance.get_function(store, INITIALIZE_FUNC) {
-            initialize_func.call(store, &[])?;
+            initialize_func.call_async(store, &[]).await?;
         }
         // call _start to call module's main function
         #[rustfmt::skip]
         if let Ok(start_func) = wasm_instance.get_function(store, START_FUNC) {
-            start_func.call(store, &[])?;
+            start_func.call_async(store, &[]).await?;
         }
 
         Ok(Self {
@@ -157,7 +161,7 @@ impl<WB: WasmBackend> MModule<WB> {
         })
     }
 
-    pub(crate) fn call(
+    pub(crate) async fn call_async(
         &mut self,
         store: &mut <WB as WasmBackend>::ContextMut<'_>,
         module_name: &str,
@@ -170,15 +174,11 @@ impl<WB: WasmBackend> MModule<WB> {
             function_name,
             args
         );
-        let res = self.export_funcs.get_mut(function_name).map_or_else(
-            || {
-                Err(MError::NoSuchFunction(
-                    module_name.to_string(),
-                    function_name.to_string(),
-                ))
-            },
-            |func| Arc::make_mut(func).call(store, args),
-        );
+        let func = self.export_funcs.get_mut(function_name).ok_or_else(|| {
+            MError::NoSuchFunction(module_name.to_string(), function_name.to_string())
+        })?;
+        let res = Arc::make_mut(func).call_async(store, args).await;
+
         log::debug!(
             "calling {}::{} with result: {:?}",
             module_name,
@@ -307,8 +307,8 @@ impl<WB: WasmBackend> MModule<WB> {
         where
             F: for<'c> Fn(
                     <WB as WasmBackend>::ImportCallContext<'c>,
-                    &[WValue],
-                ) -> anyhow::Result<Vec<WValue>>
+                    &'c [WValue],
+                ) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
                 + Sync
                 + Send
                 + 'static,
@@ -320,7 +320,7 @@ impl<WB: WasmBackend> MModule<WB> {
 
             let inputs = inputs.map(itype_to_wtype).collect::<Vec<_>>();
             let outputs = outputs.map(itype_to_wtype).collect::<Vec<_>>();
-            <WB as WasmBackend>::HostFunction::new_with_caller(
+            <WB as WasmBackend>::HostFunction::new_with_caller_async(
                 &mut store.as_context_mut(),
                 FuncSig::new(inputs, outputs),
                 raw_import,
@@ -335,55 +335,69 @@ impl<WB: WasmBackend> MModule<WB> {
             import_name: String,
         ) -> impl for<'c> Fn(
             <WB as WasmBackend>::ImportCallContext<'c>,
-            &[WValue],
-        ) -> anyhow::Result<Vec<WValue>>
+            &'c [WValue],
+        ) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
                + Sync
                + Send
                + 'static {
+            let import_namespace = std::sync::Arc::new(import_namespace);
+            let import_name = std::sync::Arc::new(import_name);
+            let interpreter = std::sync::Arc::new(interpreter);
+
             move |mut ctx: <WB as WasmBackend>::ImportCallContext<'_>,
                   inputs: &[WValue]|
-                  -> anyhow::Result<Vec<WValue>> {
-                use wasmer_it::interpreter::stack::Stackable;
+                  -> BoxFuture<'_, anyhow::Result<Vec<WValue>>> {
+                let import_namespace = import_namespace.clone();
+                let import_name = import_name.clone();
+                let wit_instance = wit_instance.clone();
+                let interpreter = interpreter.clone();
+                async move {
+                    let mut ctx = ctx.as_context_mut();
 
-                use super::type_converters::wval_to_ival;
-                use super::type_converters::ival_to_wval;
+                    use wasmer_it::interpreter::stack::Stackable;
 
-                log::trace!(
-                    "raw import for {}.{} called with {:?}\n",
-                    import_namespace,
-                    import_name,
-                    inputs
-                );
+                    use super::type_converters::wval_to_ival;
+                    use super::type_converters::ival_to_wval;
 
-                // copy here because otherwise wit_instance will be consumed by the closure
-                let wit_instance_callable = wit_instance.clone();
-                let wit_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
-                let outputs = unsafe {
-                    // error here will be propagated by the special error instruction
-                    interpreter
-                        .run(
-                            &wit_inputs,
-                            Arc::make_mut(&mut wit_instance_callable.assume_init()),
-                            &mut ctx.as_context_mut(),
-                        )
-                        .map_err(|e| {
-                            log::error!("interpreter got error {e}");
-                            anyhow::anyhow!(e)
-                        })?
-                };
+                    log::trace!(
+                        "raw import for {}.{} called with {:?}\n",
+                        import_namespace,
+                        import_name,
+                        inputs
+                    );
 
-                log::trace!(
-                    "\nraw import for {}.{} finished",
-                    import_namespace,
-                    import_name
-                );
+                    // copy here because otherwise wit_instance will be consumed by the closure
+                    let wit_instance_callable = wit_instance.clone();
+                    let wit_inputs = inputs.iter().map(wval_to_ival).collect::<Vec<_>>();
+                    let outputs = unsafe {
+                        // error here will be propagated by the special error instruction
+                        interpreter
+                            .run(
+                                &wit_inputs,
+                                Arc::make_mut(&mut wit_instance_callable.assume_init()),
+                                &mut ctx.as_context_mut(),
+                            )
+                            .await
+                            .map_err(|e| {
+                                log::error!("interpreter got error {e}");
+                                anyhow::anyhow!(e)
+                            })?
+                    };
 
-                // TODO: optimize by prevent copying stack values
-                Ok(outputs
-                    .as_slice()
-                    .iter()
-                    .map(ival_to_wval)
-                    .collect::<Vec<_>>())
+                    log::trace!(
+                        "\nraw import for {}.{} finished",
+                        import_namespace,
+                        import_name
+                    );
+
+                    // TODO: optimize by prevent copying stack values
+                    Ok(outputs
+                        .as_slice()
+                        .iter()
+                        .map(ival_to_wval)
+                        .collect::<Vec<_>>())
+                }
+                .boxed()
             }
         }
 

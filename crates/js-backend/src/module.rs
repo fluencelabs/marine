@@ -23,6 +23,8 @@ use crate::module_info::ModuleInfo;
 use marine_wasm_backend_traits::prelude::*;
 
 use anyhow::anyhow;
+use futures::future::BoxFuture;
+use futures::FutureExt;
 use js_sys::WebAssembly;
 use js_sys::Uint8Array;
 use wasm_bindgen::JsValue;
@@ -31,6 +33,11 @@ pub struct JsModule {
     inner: WebAssembly::Module,
     module_info: ModuleInfo,
 }
+
+/// Safety: js-backend is expected to run in single-threaded environment,
+/// so it is safe to assume that every type is Send + Sync
+unsafe impl Send for JsModule {}
+unsafe impl Sync for JsModule {}
 
 impl Module<JsWasmBackend> for JsModule {
     fn new(_store: &mut JsStore, wasm: &[u8]) -> ModuleCreationResult<Self> {
@@ -64,23 +71,28 @@ impl Module<JsWasmBackend> for JsModule {
         }
     }
 
-    fn instantiate(
-        &self,
-        store: &mut JsStore,
-        imports: &JsImports,
-    ) -> InstantiationResult<<JsWasmBackend as WasmBackend>::Instance> {
-        let imports_object = imports.build_import_object(store.as_context(), &self.inner);
-        let instance = WebAssembly::Instance::new(&self.inner, &imports_object)
-            .map_err(|e| InstantiationError::Other(anyhow!("failed to instantiate: {:?}", e)))?;
+    fn instantiate<'args>(
+        &'args self,
+        store: &'args mut JsStore,
+        imports: &'args JsImports,
+    ) -> BoxFuture<'args, InstantiationResult<<JsWasmBackend as WasmBackend>::Instance>> {
+        async move {
+            let imports_object = imports.build_import_object(store.as_context(), &self.inner);
+            let instance =
+                WebAssembly::Instance::new(&self.inner, &imports_object).map_err(|e| {
+                    InstantiationError::Other(anyhow!("failed to instantiate: {:?}", e))
+                })?;
 
-        // adds memory to @wasmer/wasi object
-        imports.bind_to_instance(store.as_context(), &instance);
+            // adds memory to @wasmer/wasi object
+            imports.bind_to_instance(store.as_context(), &instance);
 
-        let stored_instance = JsInstance::new(
-            &mut store.as_context_mut(),
-            instance,
-            self.module_info.clone(),
-        );
-        Ok(stored_instance)
+            let stored_instance = JsInstance::new(
+                &mut store.as_context_mut(),
+                instance,
+                self.module_info.clone(),
+            );
+            Ok(stored_instance)
+        }
+        .boxed()
     }
 }

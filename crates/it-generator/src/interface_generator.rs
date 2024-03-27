@@ -20,7 +20,6 @@ use crate::instructions_generator::ITGenerator;
 use crate::instructions_generator::ITResolver;
 use crate::Result;
 
-pub use marine_macro_impl::SDKAst;
 use wasmer_it::ast::Interfaces;
 use wasmer_it::IRecordType;
 use wasmer_it::IType;

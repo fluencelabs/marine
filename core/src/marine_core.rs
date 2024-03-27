@@ -61,19 +61,18 @@ pub struct MarineCore<WB: WasmBackend> {
 }
 
 impl<WB: WasmBackend> MarineCore<WB> {
-    pub fn new(config: MarineCoreConfig) -> MResult<Self> {
-        let wasm_backend = WB::new()?;
-        let mut store = <WB as WasmBackend>::Store::new(&wasm_backend);
+    pub fn new(config: MarineCoreConfig<WB>) -> MResult<Self> {
+        let mut store = <WB as WasmBackend>::Store::new(&config.wasm_backend);
         store.set_total_memory_limit(config.total_memory_limit);
         Ok(Self {
             modules: HashMap::new(),
-            wasm_backend,
+            wasm_backend: config.wasm_backend,
             store: RefCell::new(store),
         })
     }
 
     /// Invoke a function of a module inside Marine by given function name with given arguments.
-    pub fn call(
+    pub async fn call_async(
         &mut self,
         module_name: impl AsRef<str>,
         func_name: impl AsRef<str>,
@@ -81,30 +80,32 @@ impl<WB: WasmBackend> MarineCore<WB> {
     ) -> MResult<Vec<IValue>> {
         let module_name = module_name.as_ref();
         let store = &mut self.store;
-        self.modules.get_mut(module_name).map_or_else(
-            || Err(MError::NoSuchModule(module_name.to_string())),
-            |module| {
-                module.call(
-                    &mut store.get_mut().as_context_mut(),
-                    module_name,
-                    func_name.as_ref(),
-                    arguments,
-                )
-            },
-        )
+        let module = self
+            .modules
+            .get_mut(module_name)
+            .ok_or_else(|| MError::NoSuchModule(module_name.to_string()))?;
+
+        module
+            .call_async(
+                &mut store.get_mut().as_context_mut(),
+                module_name,
+                func_name.as_ref(),
+                arguments,
+            )
+            .await
     }
 
     /// Load a new module inside Marine.
-    pub fn load_module(
+    pub async fn load_module(
         &mut self,
         name: impl Into<String>,
         wasm_bytes: &[u8],
         config: MModuleConfig<WB>,
     ) -> MResult<()> {
-        self.load_module_(name.into(), wasm_bytes, config)
+        self.load_module_(name.into(), wasm_bytes, config).await
     }
 
-    fn load_module_(
+    async fn load_module_(
         &mut self,
         name: String,
         wasm_bytes: &[u8],
@@ -116,7 +117,8 @@ impl<WB: WasmBackend> MarineCore<WB> {
             wasm_bytes,
             config,
             &self.modules,
-        )?;
+        )
+        .await?;
 
         match self.modules.entry(name) {
             Entry::Vacant(entry) => {

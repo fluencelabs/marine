@@ -20,8 +20,7 @@ mod lowering;
 mod imports;
 mod utils;
 
-use marine_wasm_backend_traits::RuntimeResult;
-use marine_wasm_backend_traits::WasmBackend;
+use marine_wasm_backend_traits::TypedFunc;
 
 pub use errors::HostImportError;
 pub(crate) use imports::create_host_import_func;
@@ -30,10 +29,7 @@ use marine_wasm_backend_traits::WValue;
 use marine_wasm_backend_traits::WType;
 
 type HostImportResult<T> = std::result::Result<T, HostImportError>;
-type WasmModuleFunc<WB, Args, Rets> = Box<
-    dyn FnMut(&mut <WB as WasmBackend>::ContextMut<'_>, Args) -> RuntimeResult<Rets> + Sync + Send,
->;
-type AllocateFunc<WB> = WasmModuleFunc<WB, (i32, i32), i32>;
+type AllocateFunc<WB> = TypedFunc<WB, (i32, i32), i32>;
 
 const ALLOCATE_FUNC_NAME: &str = "allocate";
 const SET_PTR_FUNC_NAME: &str = "set_result_ptr";

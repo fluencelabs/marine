@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-use crate::WasmtimeContextMut;
 use crate::WasmtimeWasmBackend;
 use crate::WasmtimeImportCallContext;
+use crate::WasmtimeContextMut;
 use crate::val_to_wvalue;
 use crate::StoreState;
 use crate::sig_to_fn_ty;
@@ -29,6 +29,10 @@ use marine_wasm_backend_traits::impl_for_each_function_signature;
 use marine_wasm_backend_traits::replace_with;
 
 use anyhow::anyhow;
+use futures::future::BoxFuture;
+use futures::FutureExt;
+
+use std::future::Future;
 
 #[derive(Clone)]
 pub struct WasmtimeFunction {
@@ -84,6 +88,55 @@ impl HostFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         WasmtimeFunction { inner: func }
     }
 
+    fn new_with_caller_async<F>(
+        store: &mut impl AsContextMut<WasmtimeWasmBackend>,
+        sig: FuncSig,
+        func: F,
+    ) -> Self
+    where
+        F: for<'c> Fn(
+                <WasmtimeWasmBackend as WasmBackend>::ImportCallContext<'c>,
+                &'c [WValue],
+            ) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
+            + Sync
+            + Send
+            + 'static,
+    {
+        let ty = sig_to_fn_ty(&sig);
+        let user_func = std::sync::Arc::new(func);
+        let func = lifetimify_wrapped_closure(
+            move |caller: wasmtime::Caller<StoreState>,
+                  args: &[wasmtime::Val],
+                  results_out: &mut [wasmtime::Val]|
+                  -> Box<dyn Future<Output = Result<(), anyhow::Error>> + Send> {
+                let func = user_func.clone();
+                Box::new(async move {
+                    let caller = WasmtimeImportCallContext { inner: caller };
+                    let args = process_func_args(args).map_err(|e| anyhow!(e))?;
+                    let results = func(caller, &args).await?;
+                    process_func_results(&results, results_out).map_err(|e| anyhow!(e))
+                })
+            },
+        );
+
+        let func = wasmtime::Func::new_async(store.as_context_mut().inner, ty, func);
+        WasmtimeFunction { inner: func }
+    }
+
+    fn new_async<F>(
+        store: &mut impl AsContextMut<WasmtimeWasmBackend>,
+        sig: FuncSig,
+        func: F,
+    ) -> Self
+    where
+        F: for<'c> Fn(&'c [WValue]) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
+            + Sync
+            + Send
+            + 'static,
+    {
+        Self::new_with_caller_async(store, sig, move |_caller, args| func(args))
+    }
+
     fn new_typed<Params, Results, Env>(
         store: &mut impl marine_wasm_backend_traits::AsContextMut<WasmtimeWasmBackend>,
         func: impl IntoFunc<WasmtimeWasmBackend, Params, Results, Env>,
@@ -103,24 +156,27 @@ impl ExportFunction<WasmtimeWasmBackend> for WasmtimeFunction {
         fn_ty_to_sig(&ty)
     }
 
-    fn call<'c>(
-        &self,
-        store: &mut impl AsContextMut<WasmtimeWasmBackend>,
-        args: &[WValue],
-    ) -> RuntimeResult<Vec<WValue>> {
+    fn call_async<'args>(
+        &'args self,
+        store: &'args mut impl AsContextMut<WasmtimeWasmBackend>,
+        args: &'args [WValue],
+    ) -> BoxFuture<'args, RuntimeResult<Vec<WValue>>> {
         let args = args.iter().map(wvalue_to_val).collect::<Vec<_>>();
 
         let results_count = self.inner.ty(store.as_context_mut()).results().len();
         let mut results = vec![wasmtime::Val::null(); results_count];
+        let func = self.inner;
+        async move {
+            func.call_async(store.as_context_mut().inner, &args, &mut results)
+                .await
+                .map_err(inspect_call_error)?;
 
-        self.inner
-            .call(store.as_context_mut().inner, &args, &mut results)
-            .map_err(inspect_call_error)?;
-
-        results
-            .iter()
-            .map(val_to_wvalue)
-            .collect::<Result<Vec<_>, _>>()
+            results
+                .iter()
+                .map(val_to_wvalue)
+                .collect::<Result<Vec<_>, _>>()
+        }
+        .boxed()
     }
 }
 
@@ -186,4 +242,18 @@ fn process_func_results(
     }
 
     Ok(())
+}
+
+fn lifetimify_wrapped_closure<F>(func: F) -> F
+where
+    for<'c> F: Fn(
+            wasmtime::Caller<'c, StoreState>,
+            &'c [wasmtime::Val],
+            &'c mut [wasmtime::Val],
+        ) -> Box<dyn Future<Output = Result<(), anyhow::Error>> + Send + 'c>
+        + Send
+        + Sync
+        + 'static,
+{
+    func
 }

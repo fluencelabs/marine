@@ -15,6 +15,8 @@
  */
 
 use marine::Marine;
+use marine_wasmtime_backend::WasmtimeWasmBackend;
+use marine_wasm_backend_traits::WasmBackend;
 
 use pretty_assertions::assert_eq;
 use once_cell::sync::Lazy;
@@ -41,10 +43,12 @@ static CONFIG_V3: Lazy<marine::TomlMarineConfig> = Lazy::new(|| {
         .expect("toml faas config should be created")
 });
 
-#[test]
-pub fn call_parameters_v0() {
-    let mut faas = Marine::with_raw_config(CONFIG_V0.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+#[tokio::test]
+pub async fn call_parameters_v0() {
+    let mut faas =
+        Marine::with_raw_config(WasmtimeWasmBackend::new_async().unwrap(), CONFIG_V0.clone())
+            .await
+            .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let init_peer_id = "init_peer_id";
     let service_id = "service_id";
@@ -80,12 +84,13 @@ pub fn call_parameters_v0() {
     };
 
     let result = faas
-        .call_with_json(
+        .call_with_json_async(
             "call_parameters_v0",
             "call_parameters",
             json!([]),
             call_parameters,
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
 
     let expected = json!({
@@ -106,10 +111,12 @@ pub fn call_parameters_v0() {
     assert_eq!(expected, result_json,);
 }
 
-#[test]
-pub fn call_parameters_v1() {
-    let mut faas = Marine::with_raw_config(CONFIG_V1.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+#[tokio::test]
+pub async fn call_parameters_v1() {
+    let mut faas =
+        Marine::with_raw_config(WasmtimeWasmBackend::new_async().unwrap(), CONFIG_V1.clone())
+            .await
+            .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let init_peer_id = "init_peer_id";
     let service_id = "service_id";
@@ -145,12 +152,13 @@ pub fn call_parameters_v1() {
     };
 
     let result = faas
-        .call_with_json(
+        .call_with_json_async(
             "call_parameters_v1",
             "call_parameters",
             json!([]),
             call_parameters,
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
 
     let expected = json!({
@@ -172,10 +180,12 @@ pub fn call_parameters_v1() {
     assert_eq!(expected, result_json,);
 }
 
-#[test]
-pub fn call_parameters_v2() {
-    let mut faas = Marine::with_raw_config(CONFIG_V2.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+#[tokio::test]
+pub async fn call_parameters_v2() {
+    let mut faas =
+        Marine::with_raw_config(WasmtimeWasmBackend::new_async().unwrap(), CONFIG_V2.clone())
+            .await
+            .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let init_peer_id = "init_peer_id";
     let service_id = "service_id";
@@ -211,12 +221,13 @@ pub fn call_parameters_v2() {
     };
 
     let result = faas
-        .call_with_json(
+        .call_with_json_async(
             "call_parameters_v2",
             "call_parameters",
             json!([]),
             call_parameters,
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
 
     let expected = json!({
@@ -237,10 +248,12 @@ pub fn call_parameters_v2() {
     assert_eq!(expected, result_json,);
 }
 
-#[test]
-pub fn call_parameters_v3() {
-    let mut faas = Marine::with_raw_config(CONFIG_V3.clone())
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+#[tokio::test]
+pub async fn call_parameters_v3() {
+    let mut faas =
+        Marine::with_raw_config(WasmtimeWasmBackend::new_async().unwrap(), CONFIG_V3.clone())
+            .await
+            .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let init_peer_id = "init_peer_id";
     let service_id = "service_id";
@@ -276,12 +289,13 @@ pub fn call_parameters_v3() {
     };
 
     let result = faas
-        .call_with_json(
+        .call_with_json_async(
             "call_parameters_v3",
             "call_parameters",
             json!([]),
             call_parameters.clone(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke call_parameters: {:?}", e));
 
     let expected = serde_json::to_value(call_parameters).unwrap();
