@@ -36,7 +36,10 @@ pub enum AppServiceError {
     WasmBackendError(WasmBackendError),
 
     /// Directory creation failed
-    CreateDir { err: IOError, path: PathBuf },
+    CreateDir {
+        err: IOError,
+        path: PathBuf,
+    },
 
     /// Errors related to malformed config.
     ConfigParseError(String),
@@ -54,7 +57,9 @@ impl std::fmt::Display for AppServiceError {
                 write!(f, "Failed to create dir {:?}: {:?}", path, err)
             }
             AppServiceError::ConfigParseError(err_msg) => write!(f, "{}", err_msg),
-            AppServiceError::WasmBackendError(err) => { write!(f, "{}", err) }
+            AppServiceError::WasmBackendError(err) => {
+                write!(f, "{}", err)
+            }
         }
     }
 }

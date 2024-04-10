@@ -69,8 +69,8 @@ impl AppServiceFactory<WasmtimeWasmBackend> {
         config: WasmtimeConfig,
     ) -> Result<(AppServiceFactory<WasmtimeWasmBackend>, EpochTicker), AppServiceError> {
         let config = config;
-        let backend = WasmtimeWasmBackend::new(config)
-            .map_err(AppServiceError::WasmBackendError)?;
+        let backend =
+            WasmtimeWasmBackend::new(config).map_err(AppServiceError::WasmBackendError)?;
 
         let ticker = EpochTicker(backend.clone());
         let factory = Self { backend };
