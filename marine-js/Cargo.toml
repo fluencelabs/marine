@@ -1,6 +1,6 @@
 [package]
 name = "marine-js"
-version = "0.13.2"
+version = "0.14.0"
 edition = "2021"
 description = "Web version of the marine runtime"
 publish = false
@@ -10,9 +10,9 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-marine-js-backend = {path = "../crates/js-backend", version = "0.3.3" }
+marine-js-backend = {path = "../crates/js-backend", version = "0.4.0" }
 marine-runtime = {path = "../marine",  default-features = false}
-marine-wasm-backend-traits = {path = "../crates/wasm-backend-traits", version = "0.6.0"}
+marine-wasm-backend-traits = {path = "../crates/wasm-backend-traits", version = "0.7.0" }
 
 wasm-bindgen = "0.2.86"
 once_cell = "1.18.0"

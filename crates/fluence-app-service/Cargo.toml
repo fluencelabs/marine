@@ -1,17 +1,17 @@
 [package]
 name = "fluence-app-service"
 description = "Fluence Application Service"
-version = "0.35.2"
+version = "0.36.0"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine"
 license = "Apache-2.0"
 edition = "2021"
 
 [dependencies]
-marine-runtime = { path = "../../marine", version = "0.36.2" }
+marine-runtime = { path = "../../marine", version = "0.37.0" }
 marine-min-it-version = { path = "../../crates/min-it-version", version = "0.3.2" }
-marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.6.0" }
-marine-wasmtime-backend = { path = "../wasmtime-backend", version = "0.6.0", optional = true }
+marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.7.0" }
+marine-wasmtime-backend = { path = "../wasmtime-backend", version = "0.7.0", optional = true }
 
 maplit = "1.0.2"
 log = "0.4.20"
