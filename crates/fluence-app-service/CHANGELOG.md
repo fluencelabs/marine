@@ -39,6 +39,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-runtime bumped from 0.36.0 to 0.36.1
 
+## [0.36.0](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.35.2...fluence-app-service-v0.36.0) (2024-04-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bumps ([#430](https://github.com/fluencelabs/marine/issues/430))
+* move to async execution ([#396](https://github.com/fluencelabs/marine/issues/396))
+
+### Features
+
+* move to async execution ([#396](https://github.com/fluencelabs/marine/issues/396)) ([13cf85b](https://github.com/fluencelabs/marine/commit/13cf85ba369f000c01d040897b366e1087560053))
+
+
+### Bug Fixes
+
+* **versions:** enforce minor version bumps ([#430](https://github.com/fluencelabs/marine/issues/430)) ([be8293b](https://github.com/fluencelabs/marine/commit/be8293bc06b0e1d28ed19403f6f3af5266aa4de5))
+
 ## [0.35.2](https://github.com/fluencelabs/marine/compare/fluence-app-service-v0.35.1...fluence-app-service-v0.35.2) (2024-03-27)
 
 
