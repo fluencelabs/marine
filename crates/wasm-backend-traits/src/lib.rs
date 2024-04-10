@@ -46,8 +46,6 @@ pub mod prelude {
 
 pub use prelude::*;
 
-pub use macros::*;
-
 use it_memory_traits::MemoryView;
 
 use std::marker::PhantomData;
