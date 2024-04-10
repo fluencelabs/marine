@@ -1024,7 +1024,7 @@ dependencies = [
 
 [[package]]
 name = "fluence-app-service"
-version = "0.35.2"
+version = "0.36.0"
 dependencies = [
  "log",
  "maplit",
@@ -1551,7 +1551,7 @@ dependencies = [
 
 [[package]]
 name = "it-json-serde"
-version = "0.5.1"
+version = "0.6.0"
 dependencies = [
  "serde",
  "serde_derive",
@@ -1724,7 +1724,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.19.7"
+version = "0.19.8"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -1795,7 +1795,7 @@ dependencies = [
 
 [[package]]
 name = "marine-core"
-version = "0.30.0"
+version = "0.31.0"
 dependencies = [
  "anyhow",
  "bytes",
@@ -1826,7 +1826,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-generator"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "it-lilo",
  "marine-it-parser",
@@ -1841,7 +1841,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-interfaces"
-version = "0.9.1"
+version = "0.10.0"
 dependencies = [
  "multimap",
  "wasmer-interface-types-fl",
@@ -1849,7 +1849,7 @@ dependencies = [
 
 [[package]]
 name = "marine-it-parser"
-version = "0.16.0"
+version = "0.17.0"
 dependencies = [
  "anyhow",
  "itertools",
@@ -1866,7 +1866,7 @@ dependencies = [
 
 [[package]]
 name = "marine-js"
-version = "0.13.2"
+version = "0.14.0"
 dependencies = [
  "js-sys",
  "log",
@@ -1886,7 +1886,7 @@ dependencies = [
 
 [[package]]
 name = "marine-js-backend"
-version = "0.3.3"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "derive_more",
@@ -2030,7 +2030,7 @@ dependencies = [
 
 [[package]]
 name = "marine-module-info-parser"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2045,7 +2045,7 @@ dependencies = [
 
 [[package]]
 name = "marine-module-interface"
-version = "0.8.1"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "itertools",
@@ -2174,7 +2174,7 @@ dependencies = [
 
 [[package]]
 name = "marine-runtime"
-version = "0.36.2"
+version = "0.37.0"
 dependencies = [
  "bytesize",
  "env_logger",
@@ -2272,7 +2272,7 @@ version = "0.5.1"
 
 [[package]]
 name = "marine-wasm-backend-traits"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "anyhow",
  "futures",
@@ -2286,7 +2286,7 @@ dependencies = [
 
 [[package]]
 name = "marine-wasmtime-backend"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "anyhow",
  "futures",
@@ -2373,7 +2373,7 @@ dependencies = [
 
 [[package]]
 name = "mrepl"
-version = "0.30.2"
+version = "0.31.0"
 dependencies = [
  "anyhow",
  "check-latest",
