@@ -22,7 +22,7 @@ use it_lilo::lowerer::*;
 use it_lilo::traits::Allocatable;
 use it_memory_traits::MemoryView;
 
-pub(crate) fn ivalue_to_wvalues<
+pub(crate) async fn ivalue_to_wvalues<
     A: Allocatable<MV, Store>,
     MV: MemoryView<Store>,
     Store: it_memory_traits::Store,
@@ -46,21 +46,21 @@ pub(crate) fn ivalue_to_wvalues<
         Some(IValue::F32(v)) => vec![WValue::F32(v)],
         Some(IValue::F64(v)) => vec![WValue::F64(v)],
         Some(IValue::String(str)) => {
-            let offset = lowerer.writer.write_bytes(store, str.as_bytes())?;
+            let offset = lowerer.writer.write_bytes(store, str.as_bytes()).await?;
 
             vec![WValue::I32(offset as _), WValue::I32(str.len() as _)]
         }
         Some(IValue::ByteArray(array)) => {
-            let offset = lowerer.writer.write_bytes(store, &array)?;
+            let offset = lowerer.writer.write_bytes(store, &array).await?;
 
             vec![WValue::I32(offset as _), WValue::I32(array.len() as _)]
         }
         Some(IValue::Array(values)) => {
-            let LoweredArray { offset, size } = array_lower_memory(store, lowerer, values)?;
+            let LoweredArray { offset, size } = array_lower_memory(store, lowerer, values).await?;
             vec![WValue::I32(offset as _), WValue::I32(size as _)]
         }
         Some(IValue::Record(values)) => {
-            let offset = record_lower_memory(store, lowerer, values)?;
+            let offset = record_lower_memory(store, lowerer, values).await?;
             vec![WValue::I32(offset as i32)]
         }
         None => vec![],

@@ -52,9 +52,9 @@ pub struct MemoryLimiter {
 
 impl Store<WasmtimeWasmBackend> for WasmtimeStore {
     fn new(backend: &WasmtimeWasmBackend) -> Self {
-        Self {
-            inner: wasmtime::Store::new(&backend.engine, <_>::default()),
-        }
+        let mut store = wasmtime::Store::new(&backend.engine, <_>::default());
+        store.epoch_deadline_async_yield_and_update(1);
+        Self { inner: store }
     }
 
     fn set_total_memory_limit(&mut self, total_memory_limit: u64) {

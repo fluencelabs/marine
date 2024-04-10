@@ -16,6 +16,8 @@
 
 use marine::Marine;
 use marine::IValue;
+use marine_wasmtime_backend::WasmtimeWasmBackend;
+use marine_wasm_backend_traits::WasmBackend;
 
 use pretty_assertions::assert_eq;
 use serde_json::json;
@@ -23,8 +25,8 @@ use serde_json::json;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-#[test]
-pub fn records() {
+#[tokio::test]
+pub async fn records() {
     let records_config_path = "../examples/records/Config.toml";
 
     let records_config_raw = std::fs::read(records_config_path)
@@ -34,11 +36,14 @@ pub fn records() {
         toml::from_slice(&records_config_raw).expect("records config should be well-formed");
     records_config.modules_dir = Some(PathBuf::from("../examples/records/artifacts/"));
 
-    let mut marine = Marine::with_raw_config(records_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut marine =
+        Marine::with_raw_config(WasmtimeWasmBackend::new_async().unwrap(), records_config)
+            .await
+            .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let result1 = marine
-        .call_with_ivalues("records_pure", "invoke", &[], <_>::default())
+        .call_with_ivalues_async("records_pure", "invoke", &[], <_>::default())
+        .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     let expected_result = json!({
@@ -80,7 +85,7 @@ pub fn records() {
     );
 
     let result2 = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_effector",
             "mutate_struct",
             json!({
@@ -103,12 +108,13 @@ pub fn records() {
             }),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     assert_eq!(result2, expected_result);
 
     let result3 = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_effector",
             "mutate_struct",
             json!({
@@ -117,12 +123,13 @@ pub fn records() {
             }),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     assert_eq!(result3, expected_result);
 
     let result4 = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_effector",
             "mutate_struct",
             json!([{
@@ -143,24 +150,26 @@ pub fn records() {
             ]),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     assert_eq!(result4, expected_result);
 
     let result5 = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_effector",
             "mutate_struct",
             json!([[false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", [1]]]),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     assert_eq!(result5, expected_result);
 }
 
-#[test]
-fn records_passing() {
+#[tokio::test]
+async fn records_passing() {
     let inner_records_config_raw = std::fs::read("./tests/wasm_tests/records_passing/Config.toml")
         .expect("./tests/wasm_tests/records_passing/Config.toml should presence");
 
@@ -172,12 +181,16 @@ fn records_passing() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = Marine::with_raw_config(records_passing_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        records_passing_config,
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
-    let mut test = |func_name: &str| {
+    async fn run_test(marine: &mut Marine, func_name: &str) {
         let result = marine
-            .call_with_json(
+            .call_with_json_async(
                 "records_passing_pure",
                 func_name,
                 json!({
@@ -197,6 +210,7 @@ fn records_passing() {
                 }),
                 <_>::default(),
             )
+            .await
             .unwrap_or_else(|e| panic!("can't invoke inner_records_pure: {:?}", e));
 
         let expected_result = json!({
@@ -214,14 +228,14 @@ fn records_passing() {
         });
 
         assert_eq!(result, expected_result);
-    };
+    }
 
-    test("test_record");
-    test("test_record_ref");
+    run_test(&mut marine, "test_record").await;
+    run_test(&mut marine, "test_record_ref").await;
 }
 
-#[test]
-fn records_destruction() {
+#[tokio::test]
+async fn records_destruction() {
     let inner_records_config_raw = std::fs::read("./tests/wasm_tests/records_passing/Config.toml")
         .expect("./tests/wasm_tests/records_passing/Config.toml should presence");
 
@@ -233,8 +247,12 @@ fn records_destruction() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = Marine::with_raw_config(records_passing_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        records_passing_config,
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let record_array = json!([
             {
@@ -250,21 +268,23 @@ fn records_destruction() {
     ]);
 
     let _result = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_passing_pure",
             "pass_droppable_record",
             record_array,
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     let result = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_passing_pure",
             "get_drop_count",
             json!([]),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     // host -> pure -> effector -> pure -> host
@@ -275,8 +295,8 @@ fn records_destruction() {
     assert_eq!(result, json!([16, 8]));
 }
 
-#[test]
-fn records_return_frees() {
+#[tokio::test]
+async fn records_return_frees() {
     let inner_records_config_raw = std::fs::read("./tests/wasm_tests/records_passing/Config.toml")
         .expect("./tests/wasm_tests/records_passing/Config.toml should presence");
 
@@ -288,16 +308,21 @@ fn records_return_frees() {
         "./tests/wasm_tests/records_passing/artifacts",
     ));
 
-    let mut marine = Marine::with_raw_config(records_passing_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        records_passing_config,
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let _result = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_passing_pure",
             "return_256kb_struct",
             json!([]),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     let stats_after_first_call = marine
@@ -309,12 +334,13 @@ fn records_return_frees() {
 
     for _ in 0..128 {
         let _result = marine
-            .call_with_json(
+            .call_with_json_async(
                 "records_passing_pure",
                 "return_256kb_struct",
                 json!([]),
                 <_>::default(),
             )
+            .await
             .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
         for stat in marine.module_memory_stats().modules {
@@ -324,8 +350,8 @@ fn records_return_frees() {
     }
 }
 
-#[test]
-fn records_pass_frees() {
+#[tokio::test]
+async fn records_pass_frees() {
     let records_passing_config =
         marine::TomlMarineConfig::load("./tests/wasm_tests/records_passing/Config.toml")
             .expect("argument passing test config should be well-formed");
@@ -406,16 +432,21 @@ fn records_pass_frees() {
         "field18": struct_16kb,
     });
 
-    let mut marine = Marine::with_raw_config(records_passing_config)
-        .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
+    let mut marine = Marine::with_raw_config(
+        WasmtimeWasmBackend::new_async().unwrap(),
+        records_passing_config,
+    )
+    .await
+    .unwrap_or_else(|e| panic!("can't create Fluence FaaS instance: {}", e));
 
     let _result = marine
-        .call_with_json(
+        .call_with_json_async(
             "records_passing_pure",
             "pass_256kb_struct",
             json!([struct_256kb]),
             <_>::default(),
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
     let stats_after_first_call = marine
@@ -427,12 +458,13 @@ fn records_pass_frees() {
 
     for _ in 0..128 {
         let _result = marine
-            .call_with_json(
+            .call_with_json_async(
                 "records_passing_pure",
                 "pass_256kb_struct",
                 json!([struct_256kb.clone()]),
                 <_>::default(),
             )
+            .await
             .unwrap_or_else(|e| panic!("can't invoke pure: {:?}", e));
 
         for stat in marine.module_memory_stats().modules {

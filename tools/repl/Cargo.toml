@@ -15,11 +15,13 @@ path = "src/main.rs"
 fluence-app-service = { path = "../../crates/fluence-app-service", version = "0.35.2", features = ["raw-module-api"] }
 marine-rs-sdk-main = { version = "0.14.0", default-features = false, features = ["logger"] }
 marine-wasm-backend-traits = {path = "../../crates/wasm-backend-traits", version = "0.6.0" }
+marine-wasmtime-backend = { version = "0.6.0", path = "../../crates/wasmtime-backend" }
 
 anyhow = "1.0.75"
 clap = "2.34.0"
 serde = "1.0.147"
 serde_json = "1.0.107"
+tokio = { version = "1.33.0", features = ["rt", "macros"] }
 
 env_logger = "0.10.0"
 check-latest = { version = "1.0.2", optional = true }

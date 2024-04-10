@@ -64,15 +64,39 @@ macro_rules! impl_func_getter {
             fn get_func(
                 &mut self,
                 name: &str,
-            ) -> Result<
-                Box<
-                    dyn FnMut(&mut WasmtimeContextMut<'_>, $args) -> Result<$rets, RuntimeError>
-                        + Sync
-                        + Send
-                        + 'static,
-                >,
-                ResolveError,
-            > {
+            ) -> Result<TypedFunc<WasmtimeWasmBackend, $args, $rets>, ResolveError> {
+                use futures::FutureExt;
+                use std::sync::Arc;
+
+                fn create_func_getter_closure(
+                    f: Arc<wasmtime::TypedFunc<$args, $rets>>,
+                ) -> impl for<'args, 'ctx2> Fn(
+                    &'args mut WasmtimeContextMut<'ctx2>,
+                    $args,
+                ) -> TypedFuncFuture<'args, $rets>
+                       + 'static {
+                    move |store: &mut WasmtimeContextMut<'_>,
+                          args: $args|
+                          -> TypedFuncFuture<'_, $rets> {
+                        let f = f.clone();
+                        call_typed_func(store, args, f).boxed()
+                    }
+                }
+
+                async fn call_typed_func<'args, 'ctx2>(
+                    store: &'args mut WasmtimeContextMut<'ctx2>,
+                    args: $args,
+                    f: Arc<wasmtime::TypedFunc<$args, $rets>>,
+                ) -> RuntimeResult<$rets> {
+                    f.call_async(&mut store.inner, args).await.map_err(|e| {
+                        if let Some(_) = e.downcast_ref::<wasmtime::Trap>() {
+                            RuntimeError::Trap(e)
+                        } else {
+                            RuntimeError::Other(e)
+                        }
+                    })
+                }
+
                 let export = self
                     .inner
                     .get_export(name)
@@ -83,18 +107,10 @@ macro_rules! impl_func_getter {
                         let f = f
                             .typed(&mut self.inner)
                             .map_err(|e| ResolveError::Other(e))?;
+                        let f = Arc::new(f);
+                        let closure = create_func_getter_closure(f);
 
-                        let closure = move |store: &mut WasmtimeContextMut<'_>, args| {
-                            f.call(&mut store.inner, args).map_err(|e| {
-                                if let Some(_) = e.downcast_ref::<wasmtime::Trap>() {
-                                    RuntimeError::Trap(e)
-                                } else {
-                                    RuntimeError::Other(e)
-                                }
-                            })
-                        };
-
-                        Ok(Box::new(closure))
+                        Ok(Arc::new(closure))
                     }
                     wasmtime::Extern::Memory(_) => Err(ResolveError::ExportTypeMismatch {
                         expected: "function",

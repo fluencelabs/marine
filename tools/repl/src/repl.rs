@@ -20,7 +20,9 @@ use print_state::print_envs;
 use print_state::print_fs_state;
 use crate::ReplResult;
 
+use fluence_app_service::WasmtimeConfig;
 use fluence_app_service::AppService;
+use fluence_app_service::AppServiceFactory;
 use fluence_app_service::CallParameters;
 use fluence_app_service::ParticleParameters;
 use fluence_app_service::SecurityTetraplet;
@@ -65,34 +67,51 @@ struct CallModuleArguments<'args> {
     call_parameters: CallParameters,
 }
 
+const DEFAULT_TIMEOUT: std::time::Duration = std::time::Duration::from_millis(100);
 #[allow(clippy::upper_case_acronyms)]
 pub(super) struct REPL {
     app_service: AppService,
     service_working_dir: Option<String>,
+    app_service_factory: AppServiceFactory,
+    timeout: std::time::Duration,
 }
 
 impl REPL {
-    pub fn new<S: Into<PathBuf>>(
+    pub async fn new<S: Into<PathBuf>>(
         config_file_path: Option<S>,
         working_dir: Option<String>,
         quiet: bool,
     ) -> ReplResult<Self> {
-        let app_service = Self::create_app_service(config_file_path, working_dir.clone(), quiet)?;
+        let mut backend_config = WasmtimeConfig::default();
+        backend_config.epoch_interruption(true);
+
+        let (app_service_factory, ticker) = AppServiceFactory::new(backend_config)?;
+        let app_service = Self::create_app_service(
+            &app_service_factory,
+            config_file_path,
+            working_dir.clone(),
+            quiet,
+        )
+        .await?;
+
+        Self::spawn_ticker_thread(ticker);
         Ok(Self {
             app_service,
             service_working_dir: working_dir,
+            app_service_factory,
+            timeout: DEFAULT_TIMEOUT,
         })
     }
 
     /// Returns true, it should be the last executed command.
-    pub fn execute<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) -> bool {
+    pub async fn execute<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) -> bool {
         // Explicit statements on "h"/"help" options is more convenient, as we have such commands.
         #[allow(clippy::wildcard_in_or_patterns)]
         match args.next() {
-            Some("n") | Some("new") => self.new_service(args),
-            Some("l") | Some("load") => self.load_module(args),
+            Some("n") | Some("new") => self.new_service(args).await,
+            Some("l") | Some("load") => self.load_module(args).await,
             Some("u") | Some("unload") => self.unload_module(args),
-            Some("c") | Some("call") => self.call_module(args),
+            Some("c") | Some("call") => self.call_module(args).await,
             Some("e") | Some("envs") => self.show_envs(args),
             Some("f") | Some("fs") => self.show_fs(args),
             Some("i") | Some("interface") => self.show_interface(),
@@ -107,14 +126,21 @@ impl REPL {
         true
     }
 
-    fn new_service<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
-        match Self::create_app_service(args.next(), self.service_working_dir.clone(), false) {
+    async fn new_service<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
+        match Self::create_app_service(
+            &self.app_service_factory,
+            args.next(),
+            self.service_working_dir.clone(),
+            false,
+        )
+        .await
+        {
             Ok(service) => self.app_service = service,
             Err(e) => println!("failed to create a new application service: {}", e),
         };
     }
 
-    fn load_module<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
+    async fn load_module<'args>(&mut self, mut args: impl Iterator<Item = &'args str>) {
         next_argument!(module_name, args, "Module name should be specified");
         next_argument!(module_path, args, "Module path should be specified");
 
@@ -131,11 +157,15 @@ impl REPL {
             wasi: Default::default(),
             logging_mask: Default::default(),
         };
-        let result_msg = match self.app_service.load_module::<MarineModuleConfig, String>(
-            module_name.into(),
-            &wasm_bytes.unwrap(),
-            Some(config),
-        ) {
+        let result_msg = match self
+            .app_service
+            .load_module::<MarineModuleConfig, String>(
+                module_name.into(),
+                &wasm_bytes.unwrap(),
+                Some(config),
+            )
+            .await
+        {
             Ok(_) => {
                 let elapsed_time = start.elapsed();
                 format!(
@@ -165,7 +195,7 @@ impl REPL {
         println!("{}", result_msg);
     }
 
-    fn call_module<'args>(&mut self, args: impl Iterator<Item = &'args str>) {
+    async fn call_module<'args>(&mut self, args: impl Iterator<Item = &'args str>) {
         let CallModuleArguments {
             module_name,
             func_name,
@@ -181,30 +211,30 @@ impl REPL {
         };
 
         let start = Instant::now();
-        let result =
-            match self
-                .app_service
-                .call_module(module_name, func_name, args, call_parameters)
-            {
-                Ok(result) if show_result_arg => {
-                    let elapsed_time = start.elapsed();
+        let call_future =
+            self.app_service
+                .call_module(module_name, func_name, args, call_parameters);
+        let result = match tokio::time::timeout(self.timeout, call_future).await {
+            Ok(Ok(result)) if show_result_arg => {
+                let elapsed_time = start.elapsed();
 
-                    let result_string = match serde_json::to_string_pretty(&result) {
-                        Ok(pretty_printed) => pretty_printed,
-                        Err(_) => format!("{:?}", result),
-                    };
+                let result_string = match serde_json::to_string_pretty(&result) {
+                    Ok(pretty_printed) => pretty_printed,
+                    Err(_) => format!("{:?}", result),
+                };
 
-                    format!(
-                        "result: {}\n elapsed time: {:?}",
-                        result_string, elapsed_time
-                    )
-                }
-                Ok(_) => {
-                    let elapsed_time = start.elapsed();
-                    format!("call succeeded, elapsed time: {:?}", elapsed_time)
-                }
-                Err(e) => format!("call failed with: {}", e),
-            };
+                format!(
+                    "result: {}\n elapsed time: {:?}",
+                    result_string, elapsed_time
+                )
+            }
+            Ok(Ok(_)) => {
+                let elapsed_time = start.elapsed();
+                format!("call succeeded, elapsed time: {:?}", elapsed_time)
+            }
+            Ok(Err(e)) => format!("call failed with: {}", e),
+            Err(elapsed) => format!("call interrupted: {} ({:#?})", elapsed, self.timeout),
+        };
 
         println!("{}", result);
     }
@@ -237,7 +267,8 @@ impl REPL {
         print!("Loaded modules heap sizes:\n{}", statistic);
     }
 
-    fn create_app_service<S: Into<PathBuf>>(
+    async fn create_app_service<S: Into<PathBuf>>(
+        app_service_factory: &AppServiceFactory,
         config_file_path: Option<S>,
         working_dir: Option<String>,
         quiet: bool,
@@ -272,7 +303,11 @@ impl REPL {
             .and_then(|path| path.parent().map(PathBuf::from))
             .unwrap_or_default();
 
-        let app_service = AppService::new_with_empty_facade(config, &service_id, HashMap::new())?;
+        let config = config.try_into()?;
+
+        let app_service = app_service_factory
+            .new_app_service_empty_facade(config, &service_id, HashMap::new())
+            .await?;
 
         let duration = start.elapsed();
 
@@ -284,6 +319,17 @@ impl REPL {
         }
 
         Ok(app_service)
+    }
+
+    fn spawn_ticker_thread(ticker: fluence_app_service::EpochTicker) {
+        std::thread::spawn(move || {
+            let period = std::time::Duration::from_millis(10);
+
+            loop {
+                std::thread::sleep(period);
+                ticker.increment_epoch();
+            }
+        });
     }
 }
 

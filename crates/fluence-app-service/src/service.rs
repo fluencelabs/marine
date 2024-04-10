@@ -22,8 +22,11 @@ use super::AppServiceError;
 
 #[cfg(feature = "raw-module-api")]
 use marine_wasm_backend_traits::WasiState;
-use marine::Marine;
-use marine::MarineModuleConfig;
+use marine_wasm_backend_traits::WasmBackend;
+use marine::generic::Marine;
+use marine::generic::MarineModuleConfig;
+use marine::MarineError;
+use marine::MError;
 use marine::IValue;
 
 use serde_json::Value as JValue;
@@ -35,20 +38,37 @@ use std::io::ErrorKind;
 
 const SERVICE_ID_ENV_NAME: &str = "service_id";
 
-pub struct AppService {
-    marine: Marine,
+pub struct AppService<WB: WasmBackend> {
+    marine: marine::generic::Marine<WB>,
     facade_module_name: String,
 }
 
-impl AppService {
+impl<WB: WasmBackend> AppService<WB> {
     /// Create Service with given modules and service id.
-    pub fn new<C, S>(config: C, service_id: S, envs: HashMap<String, String>) -> Result<Self>
+    pub async fn new<C, S>(config: C, service_id: S, envs: HashMap<String, String>) -> Result<Self>
     where
-        C: TryInto<AppServiceConfig>,
+        C: TryInto<AppServiceConfig<WB>>,
         S: Into<String>,
         AppServiceError: From<C::Error>,
     {
-        let mut config: AppServiceConfig = config.try_into()?;
+        let backend = <WB as WasmBackend>::new_async()
+            .map_err(|e| MarineError::EngineError(MError::WasmBackendError(e)))?;
+
+        Self::new_with_backend(backend, config, service_id, envs).await
+    }
+
+    pub async fn new_with_backend<C, S>(
+        backend: WB,
+        config: C,
+        service_id: S,
+        envs: HashMap<String, String>,
+    ) -> Result<Self>
+    where
+        C: TryInto<AppServiceConfig<WB>>,
+        S: Into<String>,
+        AppServiceError: From<C::Error>,
+    {
+        let mut config: AppServiceConfig<WB> = config.try_into()?;
         let facade_module_name = config
             .marine_config
             .modules_config
@@ -64,7 +84,7 @@ impl AppService {
         let service_id = service_id.into();
         Self::set_env_and_dirs(&mut config, service_id, envs)?;
 
-        let marine = Marine::with_raw_config(config.marine_config)?;
+        let marine = Marine::with_raw_config(backend, config.marine_config).await?;
 
         Ok(Self {
             marine,
@@ -73,36 +93,38 @@ impl AppService {
     }
 
     /// Call a specified function of loaded module by its name with arguments in json format.
-    pub fn call(
+    pub async fn call_async(
         &mut self,
         func_name: impl AsRef<str>,
         arguments: JValue,
         call_parameters: crate::CallParameters,
     ) -> Result<JValue> {
         self.marine
-            .call_with_json(
+            .call_with_json_async(
                 &self.facade_module_name,
                 func_name,
                 arguments,
                 call_parameters,
             )
+            .await
             .map_err(Into::into)
     }
 
     /// Call a specified function of loaded module by its name with arguments in IValue format.
-    pub fn call_with_ivalues(
+    pub async fn call_with_ivalues_async(
         &mut self,
         func_name: impl AsRef<str>,
         arguments: &[IValue],
         call_parameters: crate::CallParameters,
     ) -> Result<Vec<IValue>> {
         self.marine
-            .call_with_ivalues(
+            .call_with_ivalues_async(
                 &self.facade_module_name,
                 func_name,
                 arguments,
                 call_parameters,
             )
+            .await
             .map_err(Into::into)
     }
 
@@ -125,7 +147,7 @@ impl AppService {
     ///  1. rooting all mapped directories at service_working_dir, keeping absolute paths as-is
     ///  2. adding service_id to environment variables
     fn set_env_and_dirs(
-        config: &mut AppServiceConfig,
+        config: &mut AppServiceConfig<WB>,
         service_id: String,
         mut envs: HashMap<String, String>,
     ) -> Result<()> {
@@ -154,22 +176,23 @@ impl AppService {
 
 // This API is intended for testing purposes (mostly in Marine REPL)
 #[cfg(feature = "raw-module-api")]
-impl AppService {
-    pub fn new_with_empty_facade<C, S>(
+impl<WB: WasmBackend> AppService<WB> {
+    pub async fn new_with_empty_facade<C, S>(
+        backend: WB,
         config: C,
         service_id: S,
         envs: HashMap<String, String>,
     ) -> Result<Self>
     where
         S: Into<String>,
-        C: TryInto<AppServiceConfig>,
+        C: TryInto<AppServiceConfig<WB>>,
         AppServiceError: From<C::Error>,
     {
-        let mut config: AppServiceConfig = config.try_into()?;
+        let mut config: AppServiceConfig<WB> = config.try_into()?;
         let service_id = service_id.into();
         Self::set_env_and_dirs(&mut config, service_id, envs)?;
 
-        let marine = Marine::with_raw_config(config.marine_config)?;
+        let marine = Marine::with_raw_config(backend, config.marine_config).await?;
 
         Ok(Self {
             marine,
@@ -177,7 +200,7 @@ impl AppService {
         })
     }
 
-    pub fn call_module(
+    pub async fn call_module(
         &mut self,
         module_name: impl AsRef<str>,
         func_name: impl AsRef<str>,
@@ -185,18 +208,25 @@ impl AppService {
         call_parameters: crate::CallParameters,
     ) -> Result<JValue> {
         self.marine
-            .call_with_json(module_name, func_name, arguments, call_parameters)
+            .call_with_json_async(module_name, func_name, arguments, call_parameters)
+            .await
             .map_err(Into::into)
     }
 
-    pub fn load_module<C, S>(&mut self, name: S, wasm_bytes: &[u8], config: Option<C>) -> Result<()>
+    pub async fn load_module<C, S>(
+        &mut self,
+        name: S,
+        wasm_bytes: &[u8],
+        config: Option<C>,
+    ) -> Result<()>
     where
         S: Into<String>,
-        C: TryInto<marine::MarineModuleConfig>,
+        C: TryInto<marine::generic::MarineModuleConfig<WB>>,
         marine::MarineError: From<C::Error>,
     {
         self.marine
             .load_module(name, wasm_bytes, config)
+            .await
             .map_err(Into::into)
     }
 
@@ -220,7 +250,7 @@ impl AppService {
     }
 }
 
-fn create_wasi_dirs(config: &MarineModuleConfig) -> Result<()> {
+fn create_wasi_dirs<WB: WasmBackend>(config: &MarineModuleConfig<WB>) -> Result<()> {
     if let Some(wasi_config) = &config.wasi {
         for dir in wasi_config.mapped_dirs.values() {
             create(dir)?;

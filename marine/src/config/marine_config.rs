@@ -72,7 +72,6 @@ impl<WB: WasmBackend> ModuleDescriptor<WB> {
 }
 
 /// Describes the behaviour of the Marine component.
-#[derive(Default)]
 pub struct MarineConfig<WB: WasmBackend> {
     /// Path to a dir where compiled Wasm modules are located.
     pub modules_dir: Option<PathBuf>,
@@ -85,6 +84,18 @@ pub struct MarineConfig<WB: WasmBackend> {
 
     /// Settings for a module that name's not been found in modules_config.
     pub default_modules_config: Option<MarineModuleConfig<WB>>,
+}
+
+// Manual implementation because #[derive(Default)] does not allow direct usage of non-Default wasm backend.
+impl<WB: WasmBackend> Default for MarineConfig<WB> {
+    fn default() -> Self {
+        Self {
+            modules_dir: <_>::default(),
+            total_memory_limit: <_>::default(),
+            modules_config: <_>::default(),
+            default_modules_config: <_>::default(),
+        }
+    }
 }
 
 /// Various settings that could be used to guide Marine how to load a module in a proper way.

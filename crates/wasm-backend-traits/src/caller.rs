@@ -29,6 +29,7 @@ pub trait ImportCallContext<WB: WasmBackend>:
     + FuncGetter<WB, (), i32>
     + FuncGetter<WB, (), ()>
     + AsContextMut<WB>
+    + Sync
 {
     /// Gets the `Memory` from the caller instance.
     /// Returns `None` if function was called directly from host.

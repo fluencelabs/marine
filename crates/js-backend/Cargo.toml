@@ -9,9 +9,10 @@ license = "Apache-2.0"
 
 [dependencies]
 marine-wasm-backend-traits = {path = "../wasm-backend-traits", version = "0.6.0" }
-it-memory-traits = "0.4.0"
+it-memory-traits = "0.5.0"
 
 wasm-bindgen = "0.2.84"
+wasm-bindgen-futures = "0.4.38"
 serde-wasm-bindgen = "0.5.0"
 js-sys = "0.3.61"
 web-sys = { version = "0.3.61", features = ["console"] }
@@ -22,3 +23,4 @@ log = "0.4.20"
 typed-index-collections = "3.1.0"
 derive_more = "0.99.17"
 wasmparser = "0.110.0"
+futures = "0.3.29"

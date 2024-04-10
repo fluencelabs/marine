@@ -34,8 +34,9 @@ pub type HostExportedFunc<WB> = Box<
         + 'static,
 >;
 
-pub type RawImportCreator<WB> =
-    Arc<dyn Fn(<WB as WasmBackend>::ContextMut<'_>) -> <WB as WasmBackend>::HostFunction>;
+pub type RawImportCreator<WB> = Arc<
+    dyn Fn(<WB as WasmBackend>::ContextMut<'_>) -> <WB as WasmBackend>::HostFunction + Send + Sync,
+>;
 
 pub struct HostImportDescriptor<WB: WasmBackend> {
     /// This closure will be invoked for corresponding import.
@@ -109,38 +110,18 @@ impl<WB: WasmBackend> MModuleConfig<WB> {
     }
 }
 
-pub struct MarineCoreConfig {
+pub struct MarineCoreConfig<WB: WasmBackend> {
     pub(crate) total_memory_limit: u64,
-}
-
-impl Default for MarineCoreConfig {
-    fn default() -> Self {
-        Self {
-            total_memory_limit: INFINITE_MEMORY_LIMIT,
-        }
-    }
+    pub(crate) wasm_backend: WB,
 }
 
 pub const INFINITE_MEMORY_LIMIT: u64 = u64::MAX;
 
-#[derive(Default, Debug)]
-pub struct MarineCoreConfigBuilder {
-    total_memory_limit: Option<u64>,
-}
-
-impl MarineCoreConfigBuilder {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn total_memory_limit(mut self, total_memory_limit: u64) -> Self {
-        self.total_memory_limit = Some(total_memory_limit);
-        self
-    }
-
-    pub fn build(self) -> MarineCoreConfig {
-        MarineCoreConfig {
-            total_memory_limit: self.total_memory_limit.unwrap_or(INFINITE_MEMORY_LIMIT),
+impl<WB: WasmBackend> MarineCoreConfig<WB> {
+    pub fn new(wasm_backend: WB, total_memory_limit: Option<u64>) -> Self {
+        Self {
+            total_memory_limit: total_memory_limit.unwrap_or(INFINITE_MEMORY_LIMIT),
+            wasm_backend,
         }
     }
 }

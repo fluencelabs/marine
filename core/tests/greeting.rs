@@ -17,6 +17,8 @@
 use marine_core::MarineCore;
 use marine_core::MarineCoreConfig;
 use marine_core::IValue;
+use marine_wasm_backend_traits::WasmBackend;
+use marine_wasmtime_backend::WasmtimeWasmBackend;
 
 use once_cell::sync::Lazy;
 
@@ -25,39 +27,47 @@ static GREETING_WASM_BYTES: Lazy<Vec<u8>> = Lazy::new(|| {
         .expect("../examples/greeting/artifacts/greeting.wasm should presence")
 });
 
-#[test]
-pub fn greeting_basic() {
-    let mut marine_core = MarineCore::new(MarineCoreConfig::default()).unwrap();
+#[tokio::test]
+pub async fn greeting_basic() {
+    let backend = WasmtimeWasmBackend::new_async().unwrap();
+    let mut marine_core = MarineCore::new(MarineCoreConfig::new(backend, None)).unwrap();
     marine_core
         .load_module("greeting", &GREETING_WASM_BYTES, <_>::default())
+        .await
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
     let result1 = marine_core
-        .call(
+        .call_async(
             "greeting",
             "greeting",
             &[IValue::String(String::from("Fluence"))],
         )
+        .await
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
     let result2 = marine_core
-        .call("greeting", "greeting", &[IValue::String(String::from(""))])
+        .call_async("greeting", "greeting", &[IValue::String(String::from(""))])
+        .await
         .unwrap_or_else(|e| panic!("can't invoke greeting: {:?}", e));
 
     assert_eq!(result1, vec![IValue::String(String::from("Hi, Fluence"))]);
     assert_eq!(result2, vec![IValue::String(String::from("Hi, "))]);
 }
 
-#[test]
+#[tokio::test]
 // test loading module with the same name twice
-pub fn non_unique_module_name() {
-    let mut marine_core = MarineCore::new(MarineCoreConfig::default()).unwrap();
+pub async fn non_unique_module_name() {
+    let backend = WasmtimeWasmBackend::new_async().unwrap();
+    let mut marine_core = MarineCore::new(MarineCoreConfig::new(backend, None)).unwrap();
     let module_name = String::from("greeting");
     marine_core
         .load_module(&module_name, &GREETING_WASM_BYTES, <_>::default())
+        .await
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
-    let load_result = marine_core.load_module(&module_name, &GREETING_WASM_BYTES, <_>::default());
+    let load_result = marine_core
+        .load_module(&module_name, &GREETING_WASM_BYTES, <_>::default())
+        .await;
     assert!(load_result.is_err());
     assert!(std::matches!(
         load_result.err().unwrap(),
@@ -65,36 +75,44 @@ pub fn non_unique_module_name() {
     ));
 }
 
-#[test]
+#[tokio::test]
 #[allow(unused_variables)]
 // test calling Marine with non-exist module and function names
-pub fn non_exist_module_func() {
-    let mut marine_core = MarineCore::new(MarineCoreConfig::default()).unwrap();
+pub async fn non_exist_module_func() {
+    let backend = WasmtimeWasmBackend::new_async().unwrap();
+    let mut marine_core = MarineCore::new(MarineCoreConfig::new(backend, None)).unwrap();
     marine_core
         .load_module("greeting", &GREETING_WASM_BYTES, <_>::default())
+        .await
         .unwrap_or_else(|e| panic!("can't load a module into Marine: {:?}", e));
 
     let module_name = "greeting";
     let function_name = "greeting";
     let non_exist_name = String::from("_");
 
-    let call_result1 = marine_core.call(
-        non_exist_name.as_str(),
-        function_name,
-        &[IValue::String(String::from("Fluence"))],
-    );
+    let call_result1 = marine_core
+        .call_async(
+            non_exist_name.as_str(),
+            function_name,
+            &[IValue::String(String::from("Fluence"))],
+        )
+        .await;
 
-    let call_result2 = marine_core.call(
-        module_name,
-        non_exist_name.as_str(),
-        &[IValue::String(String::from("Fluence"))],
-    );
+    let call_result2 = marine_core
+        .call_async(
+            module_name,
+            non_exist_name.as_str(),
+            &[IValue::String(String::from("Fluence"))],
+        )
+        .await;
 
-    let call_result3 = marine_core.call(
-        non_exist_name.as_str(),
-        non_exist_name.as_str(),
-        &[IValue::String(String::from("Fluence"))],
-    );
+    let call_result3 = marine_core
+        .call_async(
+            non_exist_name.as_str(),
+            non_exist_name.as_str(),
+            &[IValue::String(String::from("Fluence"))],
+        )
+        .await;
 
     assert!(call_result1.is_err());
     assert!(matches!(

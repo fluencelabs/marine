@@ -23,6 +23,7 @@ use marine::generic::MarineModuleConfig;
 use marine::generic::ModuleDescriptor;
 use marine::MarineWASIConfig;
 use marine_js_backend::JsWasmBackend;
+use marine_wasm_backend_traits::WasmBackend;
 
 use serde::Serialize;
 use serde::Deserialize;
@@ -31,7 +32,6 @@ use wasm_bindgen::prelude::*;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::ops::DerefMut;
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize)]
@@ -129,11 +129,15 @@ impl From<ApiServiceConfig> for MarineConfig<JsWasmBackend> {
 /// Nothing. An error is signaled via exception.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn register_module(
+pub async fn register_module(
     config: JsValue,
     modules: js_sys::Object,
     log_fn: js_sys::Function,
 ) -> Result<(), JsError> {
+    let mut marine = MARINE
+        .lock()
+        .map_err(|e| JsError::new(&format!("MARINE.lock() failed in register_module: {:?}", e)))?;
+
     let mut config: ApiServiceConfig = serde_wasm_bindgen::from_value(config)?;
     let modules = extract_modules(modules)?;
 
@@ -142,8 +146,11 @@ pub fn register_module(
 
     marine_logger().enable_service_logging(log_fn, module_names);
 
-    let new_marine = Marine::<JsWasmBackend>::with_modules(modules, marine_config)?;
-    MARINE.with(|marine| marine.replace(Some(new_marine)));
+    let backend = JsWasmBackend::new_async()?;
+
+    let new_marine = Marine::<JsWasmBackend>::with_modules(backend, modules, marine_config).await?;
+
+    marine.replace(new_marine);
 
     Ok(())
 }
@@ -181,7 +188,7 @@ fn extract_modules(modules: js_sys::Object) -> Result<HashMap<String, Vec<u8>>, 
 /// JSON array of values. An error is signaled via exception.
 #[allow(unused)] // needed because clippy marks this function as unused
 #[wasm_bindgen]
-pub fn call_module(
+pub async fn call_module(
     module_name: &str,
     function_name: &str,
     args: &str,
@@ -189,17 +196,18 @@ pub fn call_module(
 ) -> Result<String, JsError> {
     let call_parameters = serde_wasm_bindgen::from_value(call_parameters)?;
 
-    MARINE.with(|marine| {
-        let args: JValue = serde_json::from_str(args)?;
-        marine
-            .borrow_mut()
-            .deref_mut()
-            .as_mut()
-            .ok_or_else(|| JsError::new("marine is not initialized"))
-            .and_then(|mut marine| {
-                let result =
-                    marine.call_with_json(module_name, function_name, args, call_parameters)?;
-                serde_json::ser::to_string(&result).map_err(|e| JsError::new(&e.to_string()))
-            })
-    })
+    let mut marine = MARINE
+        .lock()
+        .map_err(|e| JsError::new(&format!("MARINE.lock() failed in call_module: {:?}", e)))?;
+
+    let args: JValue = serde_json::from_str(args)?;
+
+    let marine = marine
+        .as_mut()
+        .ok_or_else(|| JsError::new("marine is not initialized"))?;
+
+    let result = marine
+        .call_with_json_async(module_name, function_name, args, call_parameters)
+        .await?;
+    serde_json::ser::to_string(&result).map_err(|e| JsError::new(&e.to_string()))
 }

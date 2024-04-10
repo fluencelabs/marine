@@ -21,6 +21,8 @@ use crate::RuntimeResult;
 use crate::WasmBackend;
 use crate::WValue;
 
+use futures::future::BoxFuture;
+
 /// A host function ready to be used as an import for instantiating a module.
 /// As it is only a handle to an object in `Store`, cloning is cheap.
 pub trait HostFunction<WB: WasmBackend>: Send + Sync + Clone {
@@ -37,6 +39,25 @@ pub trait HostFunction<WB: WasmBackend>: Send + Sync + Clone {
                 <WB as WasmBackend>::ImportCallContext<'c>,
                 &[WValue],
             ) -> anyhow::Result<Vec<WValue>>
+            + Sync
+            + Send
+            + 'static;
+
+    /// Creates a new function with dynamic signature that needs a context.
+    fn new_with_caller_async<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
+    where
+        F: for<'c> Fn(
+                <WB as WasmBackend>::ImportCallContext<'c>,
+                &'c [WValue],
+            ) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
+            + Sync
+            + Send
+            + 'static;
+
+    /// Creates a new function with dynamic signature that needs a context.
+    fn new_async<F>(store: &mut impl AsContextMut<WB>, sig: FuncSig, func: F) -> Self
+    where
+        F: for<'c> Fn(&'c [WValue]) -> BoxFuture<'c, anyhow::Result<Vec<WValue>>>
             + Sync
             + Send
             + 'static;
@@ -67,11 +88,11 @@ pub trait ExportFunction<WB: WasmBackend>: Send + Sync + Clone {
     ///     If given a store different from the one that stores the function.
     /// # Errors:
     ///     See `RuntimeError` documentation.
-    fn call(
-        &self,
-        store: &mut impl AsContextMut<WB>,
-        args: &[WValue],
-    ) -> RuntimeResult<Vec<WValue>>;
+    fn call_async<'args>(
+        &'args self,
+        store: &'args mut impl AsContextMut<WB>,
+        args: &'args [WValue],
+    ) -> BoxFuture<'args, RuntimeResult<Vec<WValue>>>;
 }
 
 /// A helper trait for creating a function with a static signature.

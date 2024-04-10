@@ -19,6 +19,7 @@ use crate::AppServiceError;
 use crate::config::AppServiceConfig;
 
 use marine::TomlMarineConfig;
+use marine_wasm_backend_traits::WasmBackend;
 
 use serde_derive::Serialize;
 use serde_derive::Deserialize;
@@ -45,10 +46,10 @@ impl TomlAppServiceConfig {
     }
 }
 
-impl TryInto<AppServiceConfig> for TomlAppServiceConfig {
+impl<WB: WasmBackend> TryInto<AppServiceConfig<WB>> for TomlAppServiceConfig {
     type Error = AppServiceError;
 
-    fn try_into(self) -> Result<AppServiceConfig> {
+    fn try_into(self) -> Result<AppServiceConfig<WB>> {
         let marine_config = self.toml_marine_config.try_into()?;
         let service_working_dir = match self.service_working_dir {
             Some(service_working_dir) => PathBuf::from(service_working_dir),

@@ -54,6 +54,7 @@ pub use marine_core::IRecordType;
 pub use marine_core::IFunctionArg;
 pub use marine_core::IType;
 pub use marine_core::MModuleInterface as MarineModuleInterface;
+pub use marine_core::MError;
 pub use marine_core::MFunctionSignature as MarineFunctionSignature;
 pub use marine_core::MemoryStats;
 pub use marine_core::ModuleMemoryStat;

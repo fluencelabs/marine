@@ -41,7 +41,8 @@ const HISTORY_FILE_PATH: &str = ".repl_history";
 
 pub(crate) type ReplResult<T> = std::result::Result<T, anyhow::Error>;
 
-fn main() -> ReplResult<()> {
+#[tokio::main(flavor = "multi_thread", worker_threads = 2)]
+async fn main() -> ReplResult<()> {
     init_logger();
 
     let (args, _) = rustop::opts! {
@@ -60,7 +61,7 @@ fn main() -> ReplResult<()> {
         print_welcome_message();
     }
 
-    let mut repl = REPL::new(args.config_file_path, args.working_dir, args.quiet)?;
+    let mut repl = REPL::new(args.config_file_path, args.working_dir, args.quiet).await?;
 
     let mut count = 1;
     loop {
@@ -72,7 +73,7 @@ fn main() -> ReplResult<()> {
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
-                if !repl.execute(line.split_whitespace()) {
+                if !repl.execute(line.split_whitespace()).await {
                     break;
                 }
             }
