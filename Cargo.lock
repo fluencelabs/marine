@@ -1724,7 +1724,7 @@ checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "marine"
-version = "0.19.8"
+version = "0.20.0"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -1886,7 +1886,7 @@ dependencies = [
 
 [[package]]
 name = "marine-js-backend"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "anyhow",
  "derive_more",

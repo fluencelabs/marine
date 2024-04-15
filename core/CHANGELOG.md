@@ -12,6 +12,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * dependencies
     * marine-module-info-parser bumped from 0.11.1 to 0.11.2
 
+## [0.31.0](https://github.com/fluencelabs/marine/compare/marine-core-v0.30.0...marine-core-v0.31.0) (2024-04-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bumps ([#430](https://github.com/fluencelabs/marine/issues/430))
+* move to async execution ([#396](https://github.com/fluencelabs/marine/issues/396))
+
+### Features
+
+* move to async execution ([#396](https://github.com/fluencelabs/marine/issues/396)) ([13cf85b](https://github.com/fluencelabs/marine/commit/13cf85ba369f000c01d040897b366e1087560053))
+
+
+### Bug Fixes
+
+* **versions:** enforce minor version bumps ([#430](https://github.com/fluencelabs/marine/issues/430)) ([be8293b](https://github.com/fluencelabs/marine/commit/be8293bc06b0e1d28ed19403f6f3af5266aa4de5))
+
 ## [0.30.0](https://github.com/fluencelabs/marine/compare/marine-core-v0.29.0...marine-core-v0.30.0) (2024-02-22)
 
 

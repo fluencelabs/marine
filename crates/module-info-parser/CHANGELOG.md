@@ -12,6 +12,17 @@
   * dependencies
     * marine-wasm-backend-traits bumped from 0.5.1 to 0.6.0
 
+## [0.16.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.15.0...marine-module-info-parser-v0.16.0) (2024-04-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **versions:** enforce minor version bumps ([#430](https://github.com/fluencelabs/marine/issues/430))
+
+### Bug Fixes
+
+* **versions:** enforce minor version bumps ([#430](https://github.com/fluencelabs/marine/issues/430)) ([be8293b](https://github.com/fluencelabs/marine/commit/be8293bc06b0e1d28ed19403f6f3af5266aa4de5))
+
 ## [0.14.0](https://github.com/fluencelabs/marine/compare/marine-module-info-parser-v0.13.0...marine-module-info-parser-v0.14.0) (2024-02-21)
 
 
