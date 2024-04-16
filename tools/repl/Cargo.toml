@@ -20,7 +20,7 @@ marine-wasmtime-backend = { version = "0.7.0", path = "../../crates/wasmtime-bac
 anyhow = "1.0.75"
 clap = "2.34.0"
 serde = "1.0.147"
-serde_json = "1.0.107"
+serde_json = "1.0.116"
 tokio = { version = "1.33.0", features = ["rt", "macros"] }
 
 env_logger = "0.10.0"
