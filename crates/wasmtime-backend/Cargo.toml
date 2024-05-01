@@ -14,7 +14,7 @@ it-memory-traits = "0.5.0"
 
 # all default features except async
 wasmtime = {version = "13.0.0", default-features = false, features = ["cache", "wat", "jitdump", "parallel-compilation", "cranelift", "pooling-allocator", "vtune"]}
-wasmtime-wasi = "13.0.0"
+wasmtime-wasi = "13.0.1"
 multimap = "0.8.3"
 paste = "1.0.14"
 anyhow = "1.0.75"
