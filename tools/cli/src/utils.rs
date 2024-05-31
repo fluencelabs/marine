@@ -35,7 +35,7 @@ fn run_command<T: Into<Stdio>>(
 ) -> Result<String, anyhow::Error> {
     let process = command.stdout(stdout_config).spawn().map_err(|e| {
         anyhow::anyhow!(
-            r#"Cannot run "{}": {}"#,
+            r#"cannot run "{}": {}"#,
             command.get_program().to_string_lossy(),
             e
         )
