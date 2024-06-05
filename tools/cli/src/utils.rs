@@ -15,6 +15,7 @@
  */
 
 use std::fmt::Formatter;
+use std::io::ErrorKind;
 use std::process::Command;
 use std::process::Stdio;
 
@@ -33,18 +34,15 @@ fn run_command<T: Into<Stdio>>(
     mut command: Command,
     stdout_config: T,
 ) -> Result<String, anyhow::Error> {
-    let process = command.stdout(stdout_config).spawn().map_err(|e| {
-        anyhow::anyhow!(
-            r#"cannot run "{}": {}"#,
-            command.get_program().to_string_lossy(),
-            e
-        )
-    })?;
+    let process = command
+        .stdout(stdout_config)
+        .spawn()
+        .map_err(|e| process_command_run_error(e, &command))?;
 
     let output = process.wait_with_output()?;
     if !output.status.success() {
         anyhow::bail!(
-            r#"command "{}" exited with {}"#,
+            r#"command `{}` exited with {}"#,
             PrintCommand(&command),
             output.status
         )
@@ -64,5 +62,20 @@ impl<'c> std::fmt::Display for PrintCommand<'c> {
         }
 
         Ok(())
+    }
+}
+
+fn process_command_run_error(e: std::io::Error, command: &Command) -> anyhow::Error {
+    if e.kind() == ErrorKind::NotFound {
+        anyhow::anyhow!(
+            r#"cannot run `{}`: executable not found in $PATH"#,
+            command.get_program().to_string_lossy(),
+        )
+    } else {
+        anyhow::anyhow!(
+            r#"cannot run `{}`: {}"#,
+            command.get_program().to_string_lossy(),
+            e
+        )
     }
 }
