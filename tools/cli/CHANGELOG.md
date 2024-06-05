@@ -37,6 +37,13 @@
     * marine-it-parser bumped from 0.15.1 to 0.15.2
     * marine-module-info-parser bumped from 0.14.0 to 0.14.1
 
+## [0.20.1](https://github.com/fluencelabs/marine/compare/marine-v0.20.0...marine-v0.20.1) (2024-06-05)
+
+
+### Features
+
+* **cli:** improve error reporting when cannot run cargo ([#434](https://github.com/fluencelabs/marine/issues/434)) ([0bb178a](https://github.com/fluencelabs/marine/commit/0bb178a1a4726bed2502721e26f8d3076d17150c))
+
 ## [0.20.0](https://github.com/fluencelabs/marine/compare/marine-v0.19.7...marine-v0.20.0) (2024-04-10)
 
 

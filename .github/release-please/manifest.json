@@ -12,7 +12,7 @@
   "crates/wasmtime-backend": "0.7.0",
   "core": "0.31.0",
   "marine": "0.37.0",
-  "tools/cli": "0.20.0",
+  "tools/cli": "0.20.1",
   "tools/repl": "0.31.0",
   "marine-js": "0.14.0",
   "crates/js-backend": "0.4.1"
