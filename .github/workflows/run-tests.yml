@@ -44,7 +44,7 @@ jobs:
           save-if: ${{ github.event_name == 'push' }}
 
       - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.3
+        uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: Setup node
         uses: actions/setup-node@v3

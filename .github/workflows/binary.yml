@@ -41,7 +41,7 @@ jobs:
           save-if: false
 
       - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.3
+        uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: Build ${{ inputs.binary }}
         run: cargo build -p ${{ inputs.binary }} --release
@@ -94,7 +94,7 @@ jobs:
           save-if: false
 
       - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.3
+        uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: Build ${{ inputs.binary }}
         run: cargo build -p ${{ inputs.binary }} --release
