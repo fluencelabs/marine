@@ -4,7 +4,7 @@ description = "Fluence Marine command line tool"
 version = "0.20.1"
 authors = ["Fluence Labs"]
 repository = "https://github.com/fluencelabs/marine"
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 edition = "2021"
 
 [[bin]]
