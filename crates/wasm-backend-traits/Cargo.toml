@@ -2,9 +2,9 @@
 name = "marine-wasm-backend-traits"
 description = "Fluence Marine generic Wasm backend interface"
 version = "0.7.0"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO, Clouldless Labs"]
 repository = "https://github.com/fluencelabs/marine"
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 edition = "2021"
 
 [dependencies]

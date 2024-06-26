@@ -2,9 +2,9 @@
 name = "it-json-serde"
 description = "Fluence Marine interface-types serde tools"
 version = "0.6.0"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO, Clouldless Labs"]
 repository = "https://github.com/fluencelabs/marine"
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 edition = "2021"
 
 [lib]
