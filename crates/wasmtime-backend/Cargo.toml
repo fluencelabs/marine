@@ -3,7 +3,7 @@ name = "marine-wasmtime-backend"
 description = "Fluence Marine Wasm backend interface implementation for Wasmtime"
 version = "0.7.0"
 edition = "2021"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO, Clouldless Labs"]
 repository = "https://github.com/fluencelabs/marine"
 license = "AGPL-3.0-only"
 

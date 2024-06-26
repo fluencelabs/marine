@@ -2,7 +2,7 @@
 name = "marine-min-it-version"
 version = "0.3.2"
 description = "Fluence Marine interface types minimum supported version checker"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO, Clouldless Labs"]
 repository = "https://github.com/fluencelabs/marine"
 license = "AGPL-3.0-only"
 edition = "2021"

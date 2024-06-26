@@ -1,7 +1,7 @@
 [package]
 name = "facade"
 version = "0.1.0"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO, Clouldless Labs"]
 edition = "2021"
 publish = false
 

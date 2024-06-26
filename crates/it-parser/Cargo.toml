@@ -2,7 +2,7 @@
 name = "marine-it-parser"
 description = "Fluence Marine interface types parser"
 version = "0.17.0"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO, Clouldless Labs"]
 repository = "https://github.com/fluencelabs/marine"
 license = "AGPL-3.0-only"
 edition = "2021"

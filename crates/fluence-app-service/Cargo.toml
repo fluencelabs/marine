@@ -2,7 +2,7 @@
 name = "fluence-app-service"
 description = "Fluence Application Service"
 version = "0.36.0"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO, Clouldless Labs"]
 repository = "https://github.com/fluencelabs/marine"
 license = "AGPL-3.0-only"
 edition = "2021"

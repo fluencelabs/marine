@@ -46,7 +46,7 @@
   },
   "type": "module",
   "repository": "https://github.com/fluencelabs/marine",
-  "author": "Fluence Labs",
+  "author": "Fluence DAO, Clouldless Labs",
   "license": "AGPL-3.0-only",
   "files": [
     "dist/*",

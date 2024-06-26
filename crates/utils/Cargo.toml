@@ -2,7 +2,7 @@
 name = "marine-utils"
 description = "Fluence Marine utils crate"
 version = "0.5.1"
-authors = ["Fluence Labs"]
+authors = ["Fluence DAO, Clouldless Labs"]
 repository = "https://github.com/fluencelabs/marine"
 license = "AGPL-3.0-only"
 edition = "2021"
