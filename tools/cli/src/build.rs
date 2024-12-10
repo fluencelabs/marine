@@ -42,7 +42,7 @@ pub(crate) fn build(trailing_args: Vec<&str>) -> CLIResult<()> {
     env_logger::init();
 
     let mut cargo = Command::new("cargo");
-    cargo.arg("build").arg("--target").arg("wasm32-wasi");
+    cargo.arg("build").arg("--target").arg("wasm32-wasip1");
     cargo.arg("--message-format").arg("json-render-diagnostics");
     cargo.args(trailing_args.iter());
 

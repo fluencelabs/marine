@@ -14,5 +14,5 @@
 rm artifacts/* || true
 mkdir -p artifacts
 
-cp ../../target/wasm32-wasi/release/ipfs_effector.wasm artifacts/
-cp ../../target/wasm32-wasi/release/ipfs_pure.wasm artifacts/
+cp ../../target/wasm32-wasip1/release/ipfs_effector.wasm artifacts/
+cp ../../target/wasm32-wasip1/release/ipfs_pure.wasm artifacts/

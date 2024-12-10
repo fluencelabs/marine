@@ -19,6 +19,7 @@
 rm -f artifacts/* || true
 mkdir -p artifacts
 
-cp ../../target/wasm32-wasi/release/local_storage.wasm artifacts/
-cp ../../target/wasm32-wasi/release/curl_adapter.wasm artifacts/
-cp ../../target/wasm32-wasi/release/facade.wasm artifacts/
+export MARINE_TARGET=wasm32-wasip1
+cp ../../target/$MARINE_TARGET/release/local_storage.wasm artifacts/
+cp ../../target/$MARINE_TARGET/release/curl_adapter.wasm artifacts/
+cp ../../target/$MARINE_TARGET/release/facade.wasm artifacts/

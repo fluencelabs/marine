@@ -6,4 +6,4 @@ cargo run  --release -p marine -- build --release
 rm artifacts/* || true
 mkdir -p artifacts
 
-cp ../../target/wasm32-wasi/release/failing.wasm artifacts/
+cp ../../target/wasm32-wasip1/release/failing.wasm artifacts/

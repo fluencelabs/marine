@@ -14,5 +14,5 @@
 rm -f artifacts/* || true
 mkdir -p artifacts
 
-cp ../../target/wasm32-wasi/release/shrek.wasm artifacts/
-cp ../../target/wasm32-wasi/release/donkey.wasm artifacts/
+cp ../../target/wasm32-wasip1/release/shrek.wasm artifacts/
+cp ../../target/wasm32-wasip1/release/donkey.wasm artifacts/

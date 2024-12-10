@@ -14,5 +14,6 @@
 rm artifacts/* || true
 mkdir -p artifacts
 
-cp ../../target/wasm32-wasi/release/records_effector.wasm artifacts/
-cp ../../target/wasm32-wasi/release/records_pure.wasm artifacts/
+export MARINE_PROJECT=wasm32-wasip1
+cp ../../target/$MARINE_TARGET/release/records_effector.wasm artifacts/
+cp ../../target/$MARINE_TARGET/release/records_pure.wasm artifacts/
